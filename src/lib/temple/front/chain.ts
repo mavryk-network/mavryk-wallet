@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { Subscription, TezosToolkit } from '@taquito/taquito';
+import { Subscription, TezosToolkit } from '@mavrykdynamics/taquito';
 import constate from 'constate';
 import { useSWRConfig } from 'swr';
 

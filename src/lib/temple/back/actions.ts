@@ -1,6 +1,6 @@
-import { DerivationType } from '@taquito/ledger-signer';
-import { TezosOperationError } from '@taquito/taquito';
-import { char2Bytes } from '@taquito/utils';
+import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { char2Bytes } from '@mavrykdynamics/taquito-utils';
 import {
   TempleDAppMessageType,
   TempleDAppErrorType,

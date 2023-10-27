@@ -175,7 +175,7 @@ export const ManagedKTForm: FC = () => {
               <Balance assetSlug="tez" address={filledAccount.address}>
                 {bal => (
                   <span className="text-xs leading-none">
-                    <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꜩ</span>
+                    <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
                   </span>
                 )}
               </Balance>

@@ -1,8 +1,8 @@
 {
   "extends": "../tsconfig.json",
 
-  "files": [ "../webpack.config.ts", "./plugins.d.ts" ],
-  "include": [ "./" ],
+  "files": ["../webpack.config.ts", "./plugins.d.ts"],
+  "include": ["./"],
 
   "compilerOptions": {
     "baseUrl": "../",

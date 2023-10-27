@@ -18,6 +18,7 @@ import { useSafeState } from 'lib/ui/hooks';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 
 import { ReceiveSelectors } from './Receive.selectors';
+import { PageTitle } from '../../atoms/PageTitle';
 
 const ADDRESS_FIELD_VIEWS = [
   {

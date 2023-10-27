@@ -631,7 +631,7 @@
     "message": "Failed to get baker's address. Please, check your internet connection and try again."
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Basenet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -1515,7 +1515,7 @@
     "message": "Click on Account you want to send funds to."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Your tez(main asset) balance is zero. ꜩ funds are required for the fee."
+    "message": "Your tez(main asset) balance is zero. ꝳ funds are required for the fee."
   },
   "unableToSendTransactionAction": {
     "message": "Unable to send transaction to provided Recipient."

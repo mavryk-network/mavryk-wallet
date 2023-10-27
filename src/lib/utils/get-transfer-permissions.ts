@@ -1,4 +1,4 @@
-import { TezosToolkit, TransferParams } from '@taquito/taquito';
+import { TezosToolkit, TransferParams } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
 
 import { ZERO } from 'lib/utils/numbers';
@@ -27,8 +27,8 @@ export const getTransferPermissions = async (
 
   const assetContract = await tezos.wallet.at(tokenToSpend.contract);
   if (tokenToSpend.standard === 'fa12') {
-    const reset = assetContract.methods.approve(spender, ZERO).toTransferParams({ mutez: true });
-    const spend = assetContract.methods.approve(spender, amountAtomic).toTransferParams({ mutez: true });
+    const reset = assetContract.methods.approve(spender, ZERO).toTransferParams({ mumav: true });
+    const spend = assetContract.methods.approve(spender, amountAtomic).toTransferParams({ mumav: true });
     permissions.approve.push(reset);
     permissions.approve.push(spend);
   } else {
@@ -42,7 +42,7 @@ export const getTransferPermissions = async (
           }
         }
       ])
-      .toTransferParams({ mutez: true });
+      .toTransferParams({ mumav: true });
     const reset = assetContract.methods
       .update_operators([
         {
@@ -53,7 +53,7 @@ export const getTransferPermissions = async (
           }
         }
       ])
-      .toTransferParams({ mutez: true });
+      .toTransferParams({ mumav: true });
 
     permissions.approve.push(spend);
     permissions.revoke.push(reset);

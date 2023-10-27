@@ -11,6 +11,7 @@ const getLastMonday = (date = new Date()) => {
 };
 
 export const NETWORK_IDS = new Map<string, string>([
+  [TempleChainId.Basenet, 'basenet'],
   [TempleChainId.Mainnet, 'mainnet'],
   [TempleChainId.Ghostnet, 'ghostnet'],
   [TempleChainId.Mumbai, 'mumbainet'],
@@ -42,9 +43,9 @@ export const NETWORKS: TempleNetwork[] = [
   {
     id: 'mainnet',
     nameI18nKey: 'tezosMainnet',
-    description: 'Tezos mainnet',
+    description: 'Mavryk basenet',
     type: 'main',
-    rpcBaseURL: 'https://prod.tcinfra.net/rpc/mainnet',
+    rpcBaseURL: 'https://basenet-baking-node.mavryk.network',
     color: '#83b300',
     disabled: false
   },
@@ -133,4 +134,89 @@ export const NETWORKS: TempleNetwork[] = [
     disabled: false,
     hidden: true
   }
+  // {
+  //   id: 'mainnet',
+  //   nameI18nKey: 'tezosMainnet',
+  //   description: 'Tezos mainnet',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://prod.tcinfra.net/rpc/mainnet',
+  //   color: '#83b300',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'smartpy-mainnet',
+  //   name: 'SmartPy Mainnet',
+  //   description: 'SmartPy Mainnet',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://mainnet.smartpy.io',
+  //   color: '#34D399',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'tezie-mainnet',
+  //   name: 'ECAD Labs Mainnet',
+  //   description: 'Highly available Tezos Mainnet nodes operated by ECAD Labs',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://mainnet.api.tez.ie',
+  //   color: '#047857',
+  //   disabled: false
+  // },
+  // ...DCP_NETWORKS,
+  // {
+  //   id: 'ghostnet',
+  //   name: 'Ghostnet Testnet',
+  //   description: 'Ghostnet testnet',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://rpc.ghostnet.teztnets.xyz',
+  //   color: '#131380',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'monday',
+  //   name: 'MondayNet Testnet',
+  //   description: `MondayNet ${getLastMonday()}`,
+  //   type: 'test',
+  //   rpcBaseURL: `https://rpc.mondaynet-${getLastMonday()}.teztnets.xyz/`,
+  //   color: '#FBBF24',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'daily',
+  //   name: 'DailyNet Testnet',
+  //   description: 'DailyNet',
+  //   type: 'test',
+  //   rpcBaseURL: `https://rpc.dailynet-${formatDateToRPCFormat(new Date())}.teztnets.xyz/`,
+  //   color: '#FBBF24',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'sandbox',
+  //   name: 'localhost:8732',
+  //   description: 'Local Sandbox',
+  //   type: 'test',
+  //   rpcBaseURL: 'http://localhost:8732',
+  //   color: '#e9e1cc',
+  //   disabled: false
+  // },
+  // // Hidden
+  // {
+  //   id: 'smartpy-ithacanet',
+  //   name: 'Ithacanet Testnet Smartpy',
+  //   description: 'Ithacanet testnet',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://ithacanet.smartpy.io',
+  //   color: '#FBBF24',
+  //   disabled: false,
+  //   hidden: true
+  // },
+  // {
+  //   id: 'tzbeta-rpczero',
+  //   name: 'Edo Testnet @rpczero.tzbeta.net',
+  //   description: 'Highly available Edo Testnet nodes operated by Blockscale',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://rpczero.tzbeta.net',
+  //   color: '#FBBF24',
+  //   disabled: false,
+  //   hidden: true
+  // }
 ];

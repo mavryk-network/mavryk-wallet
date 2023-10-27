@@ -21,7 +21,7 @@ const SendErrorAlert = memo<Props>(({ type, error }) => {
       title={(() => {
         switch (true) {
           case error instanceof ZeroTEZBalanceError:
-            return `${t('notEnoughCurrencyFunds', 'ꜩ')} 😶`;
+            return `${t('notEnoughCurrencyFunds', 'ꝳ')} 😶`;
 
           case error instanceof NotEnoughFundsError:
             return `${t('notEnoughFunds')} 😶`;

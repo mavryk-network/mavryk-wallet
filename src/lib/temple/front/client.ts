@@ -11,8 +11,8 @@ import {
   WalletIncreasePaidStorageParams,
   WalletTransferParams,
   Signer
-} from '@taquito/taquito';
-import { buf2hex } from '@taquito/utils';
+} from '@mavrykdynamics/taquito';
+import { buf2hex } from '@mavrykdynamics/taquito-utils';
 import constate from 'constate';
 import { nanoid } from 'nanoid';
 import toBuffer from 'typedarray-to-buffer';
@@ -485,7 +485,7 @@ function formatOpParams(op: any) {
     case 'origination':
       return {
         ...op,
-        mutez: true // The balance was already converted from Tez (ꜩ) to Mutez (uꜩ)
+        mutez: true // The balance was already converted from Tez (ꝳ) to Mutez (uꝳ)
       };
     case 'transaction':
       const { destination, amount, parameters, ...txRest } = op;

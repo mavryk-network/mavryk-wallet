@@ -206,7 +206,7 @@ export function formatOpParams(op: any) {
       ...txRest,
       to: to ?? destination,
       amount: +amount,
-      mutez: true,
+      mumav: true,
       parameter: parameter ?? parameters,
       fee,
       gasLimit: gas_limit,
@@ -216,7 +216,7 @@ export function formatOpParams(op: any) {
 
   if (op.kind === 'origination') {
     return {
-      mutez: true,
+      mumav: true,
       ...rest
     };
   }

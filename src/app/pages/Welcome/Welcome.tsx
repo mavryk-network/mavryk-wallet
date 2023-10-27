@@ -12,6 +12,7 @@ import { TID, T } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
 import { WelcomeSelectors } from './Welcome.selectors';
+import { useABTestingLoading } from '../../hooks/use-ab-testing-loading';
 
 interface TSign extends TestIDProps {
   key: string;

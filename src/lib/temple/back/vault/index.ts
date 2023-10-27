@@ -1,8 +1,8 @@
-import { HttpResponseError } from '@taquito/http-utils';
-import { DerivationType } from '@taquito/ledger-signer';
-import { localForger } from '@taquito/local-forging';
-import { CompositeForger, RpcForger, Signer, TezosOperationError, TezosToolkit } from '@taquito/taquito';
-import * as TaquitoUtils from '@taquito/utils';
+import { CompositeForger, RpcForger, Signer, TezosOperationError, TezosToolkit } from '@mavrykdynamics/taquito';
+import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
+import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 

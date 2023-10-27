@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 
-import { RpcClientInterface } from '@taquito/rpc';
-import { TezosToolkit } from '@taquito/taquito';
-import { Tzip16Module } from '@taquito/tzip16';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
+import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
 import constate from 'constate';
 
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';

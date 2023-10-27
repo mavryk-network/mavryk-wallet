@@ -496,7 +496,7 @@
     "message": "Yeniden dene"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Basenet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -1238,7 +1238,7 @@
     "message": "Fon göndermek istediğiniz Hesaba tıklayın."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Tez (ana varlık) bakiyeniz sıfır. Ücret için ꜩ fonları gereklidir."
+    "message": "Tez (ana varlık) bakiyeniz sıfır. Ücret için ꝳ fonları gereklidir."
   },
   "unableToSendTransactionAction": {
     "message": "İşlem sağlanan Alıcıya gönderilemiyor."

@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
 import { catchError, from, map, Observable, of } from 'rxjs';
 import { contracts, AssetDefinition, createEngine, Storage, StorageKey, StorageKeyReturnType } from 'youves-sdk';

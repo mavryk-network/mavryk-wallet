@@ -10,14 +10,14 @@ import React, {
   useState
 } from 'react';
 
-import { ManagerKeyResponse } from '@taquito/rpc';
+import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
 import {
   DEFAULT_FEE,
   TransferParams,
   Estimate,
   TransactionWalletOperation,
   TransactionOperation
-} from '@taquito/taquito';
+} from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';

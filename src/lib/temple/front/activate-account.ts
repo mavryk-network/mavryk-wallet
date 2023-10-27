@@ -1,4 +1,4 @@
-import type { Operation, TezosToolkit } from '@taquito/taquito';
+import type { Operation, TezosToolkit } from '@mavrykdynamics/taquito';
 
 type ActivationResult =
   | {

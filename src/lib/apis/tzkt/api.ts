@@ -20,6 +20,7 @@ import {
 import { calcTzktAccountSpendableTezBalance } from './utils';
 
 const TZKT_API_BASE_URLS = {
+  [TempleChainId.Basenet]: 'https://api.mavryk.network/v1',
   [TempleChainId.Mainnet]: 'https://api.tzkt.io/v1',
   [TempleChainId.Mumbai]: 'https://api.mumbainet.tzkt.io/v1',
   [TempleChainId.Nairobi]: 'https://api.nairobinet.tzkt.io/v1',

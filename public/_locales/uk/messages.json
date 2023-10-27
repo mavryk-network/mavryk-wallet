@@ -495,7 +495,7 @@
     "message": "Спробуй ще раз"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Basenet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -1189,7 +1189,7 @@
     "message": "Клацніть на аккаунт, на який ти бажаєш надіслати кошти."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Твої tez(головний актив) баланс дорівнює нулю. ꜩ кошти необхідні для сплати комісій в блокчейні."
+    "message": "Твої tez(головний актив) баланс дорівнює нулю. ꝳ кошти необхідні для сплати комісій в блокчейні."
   },
   "unableToSendTransactionAction": {
     "message": "Неможливо надіслати транзакцію наданому Одержувачу."

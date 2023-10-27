@@ -1,5 +1,5 @@
-import type { DerivationType } from '@taquito/ledger-signer';
-import type { Estimate } from '@taquito/taquito';
+import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import type { Estimate } from '@mavrykdynamics/taquito';
 import type { TempleDAppMetadata, TempleDAppNetwork } from '@temple-wallet/dapp/dist/types';
 
 import type { TID } from 'lib/i18n/types';
@@ -37,6 +37,7 @@ export interface TempleState {
 }
 
 export enum TempleChainId {
+  Basenet = 'NetXQoDqhdKNM9x',
   Mainnet = 'NetXdQprcVkpaWU',
   Ghostnet = 'NetXnHfVqm9iesp',
   Monday = 'NetXaqtQ8b5nihx',

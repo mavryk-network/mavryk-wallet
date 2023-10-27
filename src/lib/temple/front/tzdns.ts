@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import { DomainNameValidationResult, isTezosDomainsSupportedNetwork } from '@tezos-domains/core';
 import { TaquitoTezosDomainsClient } from '@tezos-domains/taquito-client';
 

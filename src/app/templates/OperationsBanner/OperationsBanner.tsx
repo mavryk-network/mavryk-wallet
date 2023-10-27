@@ -179,7 +179,7 @@ function formatOpParams(opParams: any) {
 }
 
 function formatTransferParams(tParams: any) {
-  const { to, mutez, parameter, ...rest } = tParams;
+  const { to, mumav, parameter, ...rest } = tParams;
   const newTParams = to ? { destination: to, ...rest } : rest;
   if (parameter) {
     newTParams.parameters = parameter;

@@ -496,7 +496,7 @@
     "message": "Erneut versuchen"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Basenet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -1238,7 +1238,7 @@
     "message": "Klicken Sie auf das Konto, an das Sie Geld senden möchten."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Ihr tez-Saldo (Hauptvermögenswert) ist Null. ꜩ-Gelder werden für die Gebühr benötigt."
+    "message": "Ihr tez-Saldo (Hauptvermögenswert) ist Null. ꝳ-Gelder werden für die Gebühr benötigt."
   },
   "unableToSendTransactionAction": {
     "message": "Die Transaktion kann nicht an den angegebenen Empfänger gesendet werden."

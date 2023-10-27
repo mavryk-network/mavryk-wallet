@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
-import { localForger } from '@taquito/local-forging';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
@@ -66,7 +66,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 
   const chainId = useChainIdValue(networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Mainnet;
+  const mainnet = chainId === TempleChainId.Basenet;
 
   const allAccounts = useRelevantAccounts();
   const account = useMemo(

@@ -9,6 +9,8 @@ import { ImportFromKeystoreFile } from './import/ImportFromKeystoreFile/ImportFr
 import { ImportFromSeedPhrase } from './import/ImportSeedPhrase/ImportFromSeedPhrase';
 import { LockedWalletExists } from './LockedWalletExists';
 import { SetWalletPassword } from './setWalletPassword/SetWalletPassword';
+import { useTempleClient } from '../../../lib/temple/front';
+import ImportTabSwitcher from '../../atoms/ImportTabSwitcher';
 
 interface ImportWalletProps {
   tabSlug?: string;

@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-export const transferImplicit = (key: string, mutez: BigNumber) => {
+export const transferImplicit = (key: string, mumav: BigNumber) => {
   return [
     { prim: 'DROP' },
     { prim: 'NIL', args: [{ prim: 'operation' }] },
@@ -11,7 +11,7 @@ export const transferImplicit = (key: string, mutez: BigNumber) => {
     { prim: 'IMPLICIT_ACCOUNT' },
     {
       prim: 'PUSH',
-      args: [{ prim: 'mutez' }, { int: mutez.toFixed() }]
+      args: [{ prim: 'mumav' }, { int: mumav.toFixed() }]
     },
     { prim: 'UNIT' },
     { prim: 'TRANSFER_TOKENS' },
@@ -19,7 +19,7 @@ export const transferImplicit = (key: string, mutez: BigNumber) => {
   ];
 };
 
-export const transferToContract = (key: string, mutez: BigNumber) => {
+export const transferToContract = (key: string, mumav: BigNumber) => {
   return [
     { prim: 'DROP' },
     { prim: 'NIL', args: [{ prim: 'operation' }] },
@@ -36,7 +36,7 @@ export const transferToContract = (key: string, mutez: BigNumber) => {
     ],
     {
       prim: 'PUSH',
-      args: [{ prim: 'mutez' }, { int: `${mutez.toFixed()}` }]
+      args: [{ prim: 'mumav' }, { int: `${mumav.toFixed()}` }]
     },
     { prim: 'UNIT' },
     { prim: 'TRANSFER_TOKENS' },

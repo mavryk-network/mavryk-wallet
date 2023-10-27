@@ -1,9 +1,9 @@
-import { localForger } from '@taquito/local-forging';
-import { valueDecoder } from '@taquito/local-forging/dist/lib/michelson/codec';
-import { Uint8ArrayConsumer } from '@taquito/local-forging/dist/lib/uint8array-consumer';
-import { emitMicheline } from '@taquito/michel-codec';
-import { RpcClient } from '@taquito/rpc';
-import { TezosOperationError } from '@taquito/taquito';
+import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
+import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
+import { emitMicheline } from '@mavrykdynamics/taquito-michel-codec';
+import { RpcClient } from '@mavrykdynamics/taquito-rpc';
 import {
   TempleDAppMessageType,
   TempleDAppErrorType,

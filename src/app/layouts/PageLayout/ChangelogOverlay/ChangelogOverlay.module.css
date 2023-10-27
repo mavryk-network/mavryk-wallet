@@ -14,7 +14,7 @@ Not supports in Firefox and IE */
 
 /* scrollbar itself */
 .overlay_scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,.1);
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 5px;
 }

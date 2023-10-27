@@ -75,7 +75,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
   const allAccounts = useRelevantAccounts(false);
   const AccountOptionContent = useMemo(() => AccountOptionContentHOC(payload.networkRpc), [payload.networkRpc]);
   const chainId = useChainIdValue(payload.networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Mainnet;
+  const mainnet = chainId === TempleChainId.Basenet;
 
   return payload.type === 'connect' ? (
     <div className="w-full flex flex-col">

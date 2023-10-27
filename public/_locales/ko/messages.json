@@ -478,7 +478,7 @@
     "message": "다시 시도하기"
   },
   "tezosMainnet": {
-    "message": "테조스 메인넷(Tezos Mainnet)",
+    "message": "테조스 메인넷(Mavryk Basenet)",
     "description": "Mainnet = main network"
   },
   "templeWalletOptions": {

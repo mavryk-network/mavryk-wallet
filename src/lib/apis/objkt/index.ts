@@ -3,7 +3,7 @@
  * Explore: https://public-api-v3-20221206.objkt.com/explore
  */
 
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import { chunk } from 'lodash';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 

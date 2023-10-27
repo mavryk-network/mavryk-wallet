@@ -1,5 +1,5 @@
-import { HttpResponseError } from '@taquito/http-utils';
-import { TezosToolkit, WalletContract, Contract, ChainIds } from '@taquito/taquito';
+import { TezosToolkit, WalletContract, Contract, ChainIds } from '@mavrykdynamics/taquito';
+import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import retry from 'async-retry';
 
 import { getMessage } from 'lib/i18n';

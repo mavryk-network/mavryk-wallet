@@ -22,7 +22,7 @@ inputs:
   TEMPLE_WALLET_DEXES_API_URL:
     required: true
   TEMPLE_FIREBASE_CONFIG:
-      required: true
+    required: true
   TEMPLE_FIREBASE_MESSAGING_VAPID_KEY:
       required: true
   TEMPLE_WALLET_ROUTE3_AUTH_TOKEN:

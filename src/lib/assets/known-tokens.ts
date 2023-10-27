@@ -13,6 +13,7 @@ export const TempleToken: FA2Token = {
 export const TEMPLE_TOKEN_SLUG = toTokenSlug(TempleToken.contract, TempleToken.id);
 
 export namespace KNOWN_TOKENS_SLUGS {
+  export const MVK = toTokenSlug('KT1PWx2mnDueood7fEmfbBDKx1D9BAnnXitn', 0); //TODO: update with basenet MVK token Address
   export const TZBTC = toTokenSlug('KT1PWx2mnDueood7fEmfbBDKx1D9BAnnXitn', 0);
   export const KUSD = toTokenSlug('KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV', 0);
   export const UUSD = toTokenSlug('KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW', 0);

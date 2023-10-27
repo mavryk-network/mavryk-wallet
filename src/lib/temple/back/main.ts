@@ -15,6 +15,7 @@ import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
 import { store, toFront } from './store';
+import { ContentScriptType } from '../../constants';
 
 const frontStore = store.map(toFront);
 

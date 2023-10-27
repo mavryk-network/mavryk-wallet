@@ -7,12 +7,14 @@
   ],
   "plugins": ["import", "prettier", "no-type-assertion"],
   "parser": "@typescript-eslint/parser",
-  "overrides": [{
-    "files": ["*.ts", "*.tsx"],
-    "parserOptions": {
-      "project": ["./tsconfig.json", "./e2e/tsconfig.json", "./webpack/tsconfig.json"]
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parserOptions": {
+        "project": ["./tsconfig.json", "./e2e/tsconfig.json", "./webpack/tsconfig.json"]
+      }
     }
-  }],
+  ],
   "settings": {
     "import/resolver": {
       "typescript": {

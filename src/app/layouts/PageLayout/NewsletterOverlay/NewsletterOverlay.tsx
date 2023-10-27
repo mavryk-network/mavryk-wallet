@@ -22,6 +22,7 @@ import { useLocation } from 'lib/woozie';
 
 import NewsletterImage from './NewsletterImage.png';
 import { NewsletterOverlaySelectors } from './NewsletterOverlay.selectors';
+import { setTestID } from '../../../../lib/analytics';
 
 interface FormValues {
   email: string;

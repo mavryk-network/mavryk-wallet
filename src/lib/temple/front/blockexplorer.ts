@@ -25,6 +25,14 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
     name: 'TzKT',
     baseUrls: new Map([
       [
+        TempleChainId.Basenet,
+        {
+          account: 'https://tzkt.io',
+          transaction: 'https://tzkt.io',
+          api: 'https://api.mavryk.network'
+        }
+      ],
+      [
         TempleChainId.Mainnet,
         {
           account: 'https://tzkt.io',

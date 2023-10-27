@@ -496,7 +496,7 @@
     "message": "Tente novamente"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Basenet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -1238,7 +1238,7 @@
     "message": "Clique na Conta para a qual pretende enviar fundos."
   },
   "mainAssetBalanceIsZero": {
-    "message": "O seu saldo tez(ativo principal) é zero. São necessários fundos ꜩ para a taxa."
+    "message": "O seu saldo tez(ativo principal) é zero. São necessários fundos ꝳ para a taxa."
   },
   "unableToSendTransactionAction": {
     "message": "Impossível enviar a transação para o Destinatário fornecido."

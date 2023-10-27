@@ -1,6 +1,6 @@
 import React, { FC, memo, ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
-import { DEFAULT_FEE, DelegateParams, TransactionOperation, WalletOperation } from '@taquito/taquito';
+import { DEFAULT_FEE, DelegateParams, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
@@ -406,7 +406,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   formState
 }) => {
   const testGroupName = useUserTestingGroupNameSelector();
-  const assetSymbol = 'ꜩ';
+  const assetSymbol = 'ꝳ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
 
   const bakerTestMessage = useMemo(() => {

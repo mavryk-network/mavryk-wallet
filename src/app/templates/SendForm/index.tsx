@@ -1,6 +1,6 @@
 import React, { memo, Suspense, useCallback, useMemo, useState } from 'react';
 
-import type { WalletOperation } from '@taquito/taquito';
+import type { WalletOperation } from '@mavrykdynamics/taquito';
 import { isEqual } from 'lodash';
 
 import AssetSelect from 'app/templates/AssetSelect';

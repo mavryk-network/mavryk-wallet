@@ -1,4 +1,4 @@
-import type { TezosToolkit } from '@taquito/taquito';
+import type { TezosToolkit } from '@mavrykdynamics/taquito';
 
 import { BLOCK_DURATION } from 'lib/fixed-times';
 

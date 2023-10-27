@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import { map } from 'rxjs';
 

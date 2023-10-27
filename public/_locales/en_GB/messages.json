@@ -883,7 +883,7 @@
     "message": "Address of a registered baker."
   },
   "bakerInputPlaceholder": {
-    "message": "e.g. tz1a9w1S7hN5s..."
+    "message": "e.g. mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "Minimal delegation amount"
@@ -1155,10 +1155,10 @@
     "message": "Address or Tezos domain of the account or smart contract."
   },
   "recipientInputPlaceholder": {
-    "message": "e.g. tz1a9w1S7hN5s..."
+    "message": "e.g. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "e.g. alice.tez or tz1a9w1S7hN5s...",
+    "message": "e.g. alice.tez or mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {

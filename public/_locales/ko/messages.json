@@ -848,7 +848,7 @@
     "message": "등록한 베이커의 주소입니다."
   },
   "bakerInputPlaceholder": {
-    "message": "예 tz1a9w1S7hN5s..."
+    "message": "예 mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "최소 위임 계정"
@@ -1111,10 +1111,10 @@
     "message": "계정의 테조스 도메인 혹은 스마트 계약의 주소입니다."
   },
   "recipientInputPlaceholder": {
-    "message": "예) tz1a9w1S7hN5s..."
+    "message": "예) mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "예) alice.tez or tz1a9w1S7hN5s...",
+    "message": "예) alice.tez or mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {

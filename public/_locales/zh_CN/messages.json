@@ -852,7 +852,7 @@
     "message": "已注册面包店的地址。"
   },
   "bakerInputPlaceholder": {
-    "message": "例如：tz1a9w1S7hN5s..."
+    "message": "例如：mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "最小委托额"
@@ -1115,10 +1115,10 @@
     "message": "帐户或智能合约的地址或Tezos域名。"
   },
   "recipientInputPlaceholder": {
-    "message": "例如：tz1a9w1S7hN5s..."
+    "message": "例如：mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "例如：alice.tez或tz1a9w1S7hN5s…",
+    "message": "例如：alice.tez或mv1V4h45W3p4e…",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {

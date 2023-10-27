@@ -3,13 +3,13 @@ const TEZ_TRANSFER_OPERATIONS = {
   contents: [
     {
       kind: 'transaction',
-      source: 'tz3Qth49881bX2dymtRREEKkFnuKzvhBjr6o',
+      source: 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr',
       fee: '444',
       counter: '23381',
       gas_limit: '1527',
       storage_limit: '0',
       amount: '99000000',
-      destination: 'tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9'
+      destination: 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX'
     }
   ]
 };

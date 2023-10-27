@@ -30,9 +30,9 @@ const PUBLIC_KEYS = {
 };
 
 const PUBLIC_KEY_HASHES = {
-  ed: ['tz1gohAk1nxzdKTt76iXeynpZESwTEMnjRq8', 'tz1eHobSuftCie5ykch7Bc5eNxscxKeq1PpF'],
-  sp: ['tz2WanjrRiuHat2ZaQrbsq13rm4E5qmqnBwA'],
-  p2: ['tz3RMrbWr9g3tb4oM48LUF91EGK4mrBMS5ja']
+  ed: ['mv1VBAULLAGMCbF7FRHNtoUqiFJv1csUwqmE', 'mv19ts6JJsthFneCdesiZxGu2fU1AwxvqQCx'],
+  sp: ['mv2iHs2Z3Nupd2dDrpSsSyBCHZYhuAyf9GuU'],
+  p2: ['mv3DjKu7AWyQTrr2VNhBi4q2PHB3LEdJbTwU']
 };
 
 describe('Ledger Signer tests', () => {

@@ -41,7 +41,7 @@ const DERIVATION_PATHS = [
 const DERIVATION_TYPES = [
   {
     type: DerivationType.ED25519,
-    name: 'ED25519 (tz1...)'
+    name: 'ED25519 (mv1...)'
   },
   {
     type: DerivationType.BIP32_ED25519,
@@ -49,11 +49,11 @@ const DERIVATION_TYPES = [
   },
   {
     type: DerivationType.SECP256K1,
-    name: 'SECP256K1 (tz2...)'
+    name: 'SECP256K1 (mv2...)'
   },
   {
     type: DerivationType.P256,
-    name: 'P256 (tz3...)'
+    name: 'P256 (mv3...)'
   }
 ];
 

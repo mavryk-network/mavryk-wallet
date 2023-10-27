@@ -83,7 +83,7 @@ describe('Vault tests', () => {
     );
     accounts = await vault.createHDAccount(accountName);
     expect(accounts.length).toBe(3);
-    expect(accounts[2].publicKeyHash).toBe('tz1VhWfNN1qUY5rNBUMiwmnTUzpTS31s1fZD');
+    expect(accounts[2].publicKeyHash).toBe('mv1J4yxxgP8q7MdbKnvaBbUUe1gRzRaMrPY7');
   });
 
   it('editAccountName test', async () => {
@@ -109,7 +109,7 @@ describe('Vault tests', () => {
     expect(settings?.contacts).toBe(contractsMock);
   });
 
-  it('sign tz1 64 bytes test', async () => {
+  it('sign mv1 64 bytes test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount(
@@ -122,7 +122,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz1 32 bytes test', async () => {
+  it('sign mv1 32 bytes test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount('edsk4TjJWEszkHKono7XMnepVqwi37FrpbVt1KCsifJeAGimxheShG');
@@ -133,7 +133,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz2 test', async () => {
+  it('sign mv2 test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount('spsk2rBDDeUqakQ42nBHDGQTtP3GErb6AahHPwF9bhca3Q5KA5HESE');
@@ -144,7 +144,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz2 with bytes producing public key that needs padding test', async () => {
+  it('sign mv2 with bytes producing public key that needs padding test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount('spsk33kCcKpgrvXRQJB2GVGxAMxrSEmwKXLh2KR4ztLcbaCnQq3FFs');
@@ -155,7 +155,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz3 test', async () => {
+  it('sign mv3 test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount('p2sk2obfVMEuPUnadAConLWk7Tf4Dt3n4svSgJwrgpamRqJXvaYcg1');
@@ -166,7 +166,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz3 encrypted test', async () => {
+  it('sign mv3 encrypted test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount(
@@ -180,7 +180,7 @@ describe('Vault tests', () => {
     );
   });
 
-  it('sign tz3 encrypted with bytes producing signature that needs padding test', async () => {
+  it('sign mv3 encrypted with bytes producing signature that needs padding test', async () => {
     await Vault.spawn(password, mnemonic);
     const vault = await Vault.setup(password);
     const accounts = await vault.importAccount('p2sk2ke47zhFz3znRZj39TW5KKS9VgfU1Hax7KeErgnShNe9oQFQUP');
@@ -233,7 +233,7 @@ describe('Vault tests', () => {
       ].join(' ')
     );
     expect(accounts[1].type).toBe(TempleAccountType.Imported);
-    expect(accounts[1].publicKeyHash).toBe('tz1ZfrERcALBwmAqwonRXYVQBDT9BjNjBHJu');
+    expect(accounts[1].publicKeyHash).toBe('mv1N3KY1vXdYX2x568MGmNBRLEK7k7uc2zEM');
   });
 
   it('importManagedKTAccount test', async () => {

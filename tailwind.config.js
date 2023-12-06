@@ -26,11 +26,13 @@ module.exports = {
 
         black: '#000',
         white: '#fff',
+        divider: '#333333',
 
         gray: {
           10: '#f4f4f4',
           20: '#aeaeb2',
-          30: '#aeaaae',
+          30: '#AAA',
+          40: '#666',
           100: '#f7fafc',
           200: '#edf2f7',
           300: '#e2e8f0',
@@ -41,8 +43,9 @@ module.exports = {
           700: '#4a5568',
           800: '#2d3748',
           850: '#212e36',
-          900: '#1a202c',
-          910: '#1b262c'
+          900: '#202020',
+          910: '#171717',
+          920: '#010101'
         },
         red: {
           100: '#fff5f5',
@@ -51,7 +54,7 @@ module.exports = {
           400: '#fc8181',
           500: '#f56565',
           600: '#e53e3e',
-          700: '#c53030',
+          700: '#DB0505',
           800: '#9b2c2c',
           900: '#742a2a'
         },
@@ -61,9 +64,9 @@ module.exports = {
           100: '#fffaf0',
           200: '#feebc8',
           300: '#fbd38d',
-          400: '#f6ad55',
+          400: '#E68226',
           500: '#ed8936',
-          600: '#dd6b20',
+          600: '#F86412',
           700: '#c05621',
           800: '#9c4221',
           900: '#7b341e'
@@ -88,7 +91,8 @@ module.exports = {
           600: '#38a169',
           700: '#2f855a',
           800: '#276749',
-          900: '#22543d'
+          900: '#22543d',
+          910: '#00B71D'
         },
         teal: {
           100: '#e6fffa',
@@ -105,7 +109,7 @@ module.exports = {
           50: '#e8f1fd',
           100: '#ebf8ff',
           150: '#E5F2FF',
-          200: '#bee3f8',
+          200: '#B9EEFE',
           300: '#90cdf4',
           400: '#63b3ed',
           500: '#4299e1',
@@ -124,7 +128,7 @@ module.exports = {
           400: '#7f9cf5',
           500: '#667eea',
           600: '#5a67d8',
-          700: '#4c51bf',
+          700: '#5F58FF',
           800: '#434190',
           900: '#3c366b'
         },
@@ -156,9 +160,22 @@ module.exports = {
        * Brand colors
        */
       const brandColors = {
-        'primary-white': '#fcfaf7',
+        'primary-white': '#F4F4F4',
+        'secondary-white': baseColors.gray[30],
+        'accent-blue': baseColors.indigo[700],
+        'primary-link': baseColors.teal[200],
+        'primary-card': baseColors.gray[900],
+        'secondary-card': baseColors.gray[910],
+        'primary-bg': baseColors.gray[920],
+        'primary-divider': baseColors.divider,
+        'primary-success': baseColors.green[910],
+        'primary-error': baseColors.red[700],
+        'primary-border': 'rgba(255, 255, 255, 0.25)',
+        'accent-orange': baseColors.orange[600],
+        'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
+        'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
+        // --
         'primary-orange': baseColors.orange[500],
-        'accent-orange': baseColors.orange[20],
         'primary-orange-light': baseColors.orange[300],
         'primary-orange-dark': baseColors.orange[700],
         'primary-orange-lighter': baseColors.orange[100],
@@ -650,7 +667,7 @@ module.exports = {
       inset: {
         '2px': '2px',
         '1/2': '50%',
-        18: '4.5rem',
+        18: '4.5rem'
       },
       space: (theme, { negative }) => ({
         ...theme('spacing'),

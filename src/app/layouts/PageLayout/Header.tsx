@@ -22,7 +22,7 @@ const Header: FC = () => {
   const { ready } = useTempleClient();
 
   return (
-    <header className={classNames('bg-primary-orange', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
+    <header className={classNames('bg-primary-card', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
       <ContentContainer className="py-4">
         <div className={classNames(appEnv.fullPage && 'px-4')}>
           <div className="flex items-stretch">

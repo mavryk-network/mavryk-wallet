@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "Temple - Tezos Wallet"
+    "message": "Mavryk Wallet"
   },
   "showIncomingTransactions": {
     "message": "Show Incoming Transactions"
@@ -141,7 +141,7 @@
     "message": "Check now"
   },
   "theLendingProtocol": {
-    "message": "The lending protocol on Tezos."
+    "message": "The lending protocol on Mavryk."
   },
   "alreadyLaunched": {
     "message": "Already Launched!"
@@ -899,7 +899,7 @@
     "message": "Use this section to view meta info about Temple Wallet."
   },
   "unlockWallet": {
-    "message": "Unlock the Wallet"
+    "message": "Unlock the Wallet to continue"
   },
   "toContinue": {
     "message": "to continue"
@@ -2007,7 +2007,7 @@
     "message": "Contract not originated"
   },
   "welcomeTo": {
-    "message": "Welcome to"
+    "message": "Shalom to"
   },
   "domain": {
     "message": "Domain"

@@ -1,12 +1,12 @@
 {
   "appName": {
-    "message": "Temple - Tezos Wallet"
+    "message": "Mavryk Wallet"
   },
   "showIncomingTransactions": {
     "message": "Show Incoming Transactions"
   },
   "appDesc": {
-    "message": "🔐💰Cryptocurrency wallet for Tezos blockchain as Web Extension for your Browser."
+    "message": "🔐💰Cryptocurrency wallet for Mavryk blockchain as Web Extension for your Browser."
   },
   "createAccount": {
     "message": "Create or Restore account"
@@ -249,10 +249,10 @@
     "description": "CoinSwitch = https://coinswitch.co/"
   },
   "tezosFaucet": {
-    "message": "Tezos Faucet"
+    "message": "Mavryk Faucet"
   },
   "tezosFaucetAlpha": {
-    "message": "Tezos Faucet (Alpha)"
+    "message": "Mavryk Faucet (Alpha)"
   },
   "depositToWallet": {
     "message": "Deposit to your wallet"
@@ -500,7 +500,7 @@
     "message": "Try again"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "templeWalletOptions": {
@@ -699,8 +699,8 @@
     "message": "In this section you can enable ability to interact with decentralized applications that support Temple Wallet."
   },
   "networksDescription": {
-    "message": "In this section you can add or delete custom Tezos networks.",
-    "description": "Tezos = blockchain name (https://tezos.com/)"
+    "message": "In this section you can add or delete custom Mavryk networks.",
+    "description": "Mavryk = blockchain name (https://mavryk.org/)"
   },
   "activateAccount": {
     "message": "Activate Account"
@@ -721,7 +721,7 @@
     "message": "Use this section to view meta info about Temple Wallet."
   },
   "unlockWallet": {
-    "message": "Unlock the Wallet"
+    "message": "Unlock the Wallet to continue"
   },
   "toContinue": {
     "message": "to continue"
@@ -1137,7 +1137,7 @@
     }
   },
   "tokensRecepientInputDescriptionWithDomain": {
-    "message": "Address or Tezos domain to send $assetSymbol$ funds to.",
+    "message": "Address or Mavryk domain to send $assetSymbol$ funds to.",
     "placeholders": {
       "assetSymbol": {
         "content": "$1"
@@ -1145,10 +1145,10 @@
     }
   },
   "addressInputDescription": {
-    "message": "Address of Tezos account or smart contract."
+    "message": "Address of Mavryk account or smart contract."
   },
   "addressInputDescriptionWithDomain": {
-    "message": "Address or Tezos domain of the account or smart contract."
+    "message": "Address or Mavryk domain of the account or smart contract."
   },
   "recipientInputPlaceholder": {
     "message": "e.g. tz1a9w1S7hN5s..."
@@ -1645,7 +1645,7 @@
     "message": "Contract not originated"
   },
   "welcomeTo": {
-    "message": "Welcome to"
+    "message": "Shalom to"
   },
   "domain": {
     "message": "Domain"

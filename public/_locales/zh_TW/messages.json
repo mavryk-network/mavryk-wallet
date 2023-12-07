@@ -1,12 +1,12 @@
 {
   "appName": {
-    "message": "Temple - Tezos 錢包"
+    "message": "Mavryk Wallet"
   },
   "showIncomingTransactions": {
     "message": "顯示新進交易"
   },
   "appDesc": {
-    "message": "🔐💰這是 Tezos 區塊鏈加密貨幣錢包，是一項瀏覽器網頁擴充功能。 "
+    "message": "🔐💰這是 Mavryk 區塊鏈加密貨幣錢包，是一項瀏覽器網頁擴充功能。 "
   },
   "importAccount": {
     "message": "匯入帳戶"

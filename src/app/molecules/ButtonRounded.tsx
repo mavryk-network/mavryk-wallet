@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as LoadingSvg } from 'app/misc/mavryk/loading.svg';
+import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import { AnalyticsEventCategory, setTestID, TestIDProps, useAnalytics } from 'lib/analytics';
 
 export type ButtonRoundedSizeType = 'small' | 'big';

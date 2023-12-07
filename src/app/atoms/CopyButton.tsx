@@ -69,16 +69,14 @@ const CopyButton: FC<CopyButtonProps> = ({
     () =>
       type === 'button'
         ? classNames(
-            'font-tnum leading-none select-none',
+            'font-tnum leading-none select-none text-blue-200',
             'transition ease-in-out duration-300',
             rounded === 'base' ? 'rounded' : 'rounded-sm',
-            small ? 'text-xs p-1' : 'text-sm py-1 px-2',
-            BG_SHADES[bgShade],
-            TEXT_SHADES[textShade],
+            small ? 'text-xs' : 'text-sm',
             className
           )
         : classNames('hover:underline', className),
-    [type, className, rounded, small, bgShade, textShade]
+    [type, className, rounded, small]
   );
 
   return (

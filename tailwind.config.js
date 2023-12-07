@@ -359,7 +359,8 @@ module.exports = {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
       gray: '#AEAEB2',
-      orange: '#ED8936'
+      orange: '#ED8936',
+      cyan: '#B9EEFE'
     },
     strokeWidth: {
       0: '0',
@@ -598,6 +599,14 @@ module.exports = {
         xxs: '0.6875rem',
         '2xs': '0.8125rem',
         ulg: '1.0625rem',
+        sm: [
+          '0.875rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.28px',
+            fontWeight: '400'
+          }
+        ],
         'base-plus': [
           '1rem',
           {

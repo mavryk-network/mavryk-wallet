@@ -48,7 +48,7 @@ interface TotalVolumeBannerProps {
 const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
   <div className="bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto">
     <BalanceInfo />
-    <div className="flex justify-between w-full">
+    <div className="flex justify-between items-center w-full">
       <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
       <ButtonRounded>Delegate</ButtonRounded>
     </div>

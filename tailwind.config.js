@@ -11,7 +11,7 @@ module.exports = {
   separator: ':',
   theme: {
     screens: {
-      sm: '640px',
+      sm: '675px',
       md: '768px',
       lg: '1024px',
       xl: '1280px'
@@ -175,6 +175,7 @@ module.exports = {
         'accent-orange': baseColors.orange[600],
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
+        'primary-black': '#000000',
         // --
         'primary-orange': baseColors.orange[500],
         'primary-orange-light': baseColors.orange[300],
@@ -242,7 +243,7 @@ module.exports = {
       xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-      outline: '0 0 0 3px rgba(237, 137, 54, 0.5)',
+      outline: '0 0 0 3px rgba(95, 88, 255, 0.5)',
       none: 'none'
     },
     container: {},
@@ -636,7 +637,8 @@ module.exports = {
         31.25: '7.8125rem',
         35: '8.75rem',
         60.5: '15.125rem',
-        63: '15.75rem'
+        63: '15.75rem',
+        max: '100%'
       },
       height: theme => theme('spacing'),
       minHeight: theme => theme('height'),

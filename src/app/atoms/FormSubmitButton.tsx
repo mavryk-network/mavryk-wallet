@@ -5,7 +5,8 @@ import classNames from 'clsx';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { setAnotherSelector } from 'lib/analytics';
 
-import { ButtonProps, Button } from './Button';
+import { ButtonProps } from './Button';
+import { ButtonRounded } from "../molecules/ButtonRounded";
 
 interface FormSubmitButtonProps extends ButtonProps {
   keepChildrenWhenLoading?: boolean;
@@ -26,10 +27,10 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
 }) => {
   const classNameMemo = classNames(
     'relative flex items-center justify-center h-12 gap-x-2',
-    'text-primary-orange-lighter font-semibold rounded border-2',
-    'transition duration-200 ease-in-out',
+    'text-primary-white font-semibold rounded-full border-2',
+    'transition duration-200 ease-in-out w-max',
     small ? 'px-6 py-2 text-sm' : 'px-8 py-2.5 text-base',
-    disabled ? 'bg-gray-400 border-gray-400' : 'bg-primary-orange border-primary-orange',
+    disabled ? 'bg-gray-400 border-gray-400' : 'bg-accent-blue border-accent-blue',
     loading || disabled
       ? 'opacity-75 pointer-events-none'
       : 'opacity-90 hover:opacity-100 focus:opacity-100 shadow-sm hover:shadow focus:shadow',
@@ -39,10 +40,10 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
   const otherProps = useMemo(() => (loading ? setAnotherSelector('loading', '') : null), [loading]);
 
   return (
-    <Button className={classNameMemo} disabled={disabled} {...rest} {...otherProps}>
+    <ButtonRounded className={classNameMemo} disabled={disabled} {...rest} {...otherProps}>
       {loading && <Spinner theme="white" className={small ? 'w-8' : 'w-12'} />}
 
       {loading ? keepChildrenWhenLoading && children : children}
-    </Button>
+    </ButtonRounded>
   );
 };

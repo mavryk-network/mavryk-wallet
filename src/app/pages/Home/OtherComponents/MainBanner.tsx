@@ -24,6 +24,7 @@ import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
 import useTippy from 'lib/ui/useTippy';
 
 import { HomeSelectors } from '../Home.selectors';
+import styles from './MainBanner.module.css';
 import { TokenPageSelectors } from './TokenPage.selectors';
 
 interface Props {
@@ -46,7 +47,12 @@ interface TotalVolumeBannerProps {
 }
 
 const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
-  <div className="bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto">
+  <div
+    className={classNames(
+      styles.banner,
+      'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto mb-4'
+    )}
+  >
     <BalanceInfo />
     <div className="flex justify-between items-center w-full">
       <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />

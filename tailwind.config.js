@@ -171,8 +171,10 @@ module.exports = {
         'primary-divider': baseColors.divider,
         'primary-success': baseColors.green[910],
         'primary-error': baseColors.red[700],
-        'primary-border': 'rgba(255, 255, 255, 0.25)',
         'accent-orange': baseColors.orange[600],
+        // with opacity
+        'primary-card-op': 'rgba(0, 0, 0, 0.50)',
+        'primary-border': 'rgba(255, 255, 255, 0.25)',
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
         // --
@@ -208,7 +210,7 @@ module.exports = {
     },
     borderColor: theme => ({
       ...theme('colors'),
-      DEFAULT: theme('colors.gray.300', 'currentColor')
+      DEFAULT: theme('colors["primary-border"]', 'currentColor')
     }),
     borderOpacity: theme => theme('opacity'),
     borderRadius: {
@@ -358,7 +360,8 @@ module.exports = {
     stroke: {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
-      gray: '#AEAEB2',
+      'accent-blue': '#5F58FF',
+      gray: '#AAA',
       orange: '#ED8936',
       cyan: '#B9EEFE'
     },
@@ -627,6 +630,7 @@ module.exports = {
         ]
       },
       spacing: {
+        10: '0.625rem',
         13: '3.25rem',
         15: '3.75rem',
         18: '4.5rem',

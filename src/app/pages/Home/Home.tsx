@@ -4,13 +4,13 @@ import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
 import { Props as TippyProps } from 'tippy.js';
 
-import { Anchor } from 'app/atoms';
+import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
-import { ReactComponent as ReceiveIcon } from 'app/icons/receive.svg';
-import { ReactComponent as SendIcon } from 'app/icons/send-alt.svg';
-import { ReactComponent as SwapIcon } from 'app/icons/swap.svg';
-import { ReactComponent as WithdrawIcon } from 'app/icons/withdraw.svg';
+import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
+import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
+import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
+import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
@@ -27,6 +27,7 @@ import { useIsEnabledAdsBannerSelector } from '../../store/settings/selectors';
 import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress.hook';
 import Onboarding from '../Onboarding/Onboarding';
 import { ContentSection } from './ContentSection';
+import styles from './Home.module.css';
 import { HomeSelectors } from './Home.selectors';
 import EditableTitle from './OtherComponents/EditableTitle';
 import MainBanner from './OtherComponents/MainBanner';
@@ -105,7 +106,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
         </div>
       )}
 
-      <div className="flex flex-col items-center mb-6">
+      <div className={classNames(styles.wrapper, 'flex flex-col items-center pb-6')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
         <div className="flex justify-between mx-auto w-full max-w-sm">
@@ -153,6 +154,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
         </div>
       </div>
 
+      <Divider ignoreParent />
       <ContentSection assetSlug={assetSlug} />
     </PageLayout>
   ) : (
@@ -193,12 +195,12 @@ const ActionButton: FC<ActionButtonProps> = ({
         <>
           <div
             className={classNames(
-              disabled ? 'bg-gray-10' : 'bg-orange-10',
+              disabled ? 'bg-gray-10' : 'bg-primary-card-op',
               'rounded mb-2 flex items-center text-white',
-              'p-2 h-10'
+              'border  p-10 h-full'
             )}
           >
-            <Icon className={classNames('w-6 h-auto', disabled ? 'stroke-gray' : 'stroke-accent-orange')} />
+            <Icon className={classNames('w-6 h-auto', disabled ? 'stroke-gray' : 'stroke-accent-blue')} />
           </div>
           <span className={classNames('text-center text-xxs', disabled ? 'text-gray-20' : 'text-gray-910')}>
             {label}

@@ -68,7 +68,7 @@ const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, 
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-white rounded-md shadow-lg', className)}
+        className={classNames('bg-primary-bg rounded-md shadow-lg', className)}
         style={{ minHeight: '20rem', ...style }}
         {...rest}
       >
@@ -76,7 +76,7 @@ const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, 
       </div>
     </ContentContainer>
   ) : (
-    <ContentContainer padding={false} className={classNames('bg-white', className)} style={style} {...rest}>
+    <ContentContainer padding={false} className={classNames('bg-primary-bg', className)} style={style} {...rest}>
       {children}
     </ContentContainer>
   );

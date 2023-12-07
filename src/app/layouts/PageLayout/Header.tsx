@@ -23,17 +23,9 @@ const Header: FC = () => {
 
   return (
     <header className={classNames('bg-primary-card', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
-      <ContentContainer className="py-4">
+      <ContentContainer className="py-3">
         <div className={classNames(appEnv.fullPage && 'px-4')}>
-          <div className="flex items-stretch">
-            <Link to="/" className="flex-shrink-0 pr-4" testID={HeaderSelectors.templeLogoIcon}>
-              <div className="flex items-center">
-                <Logo hasTitle={appEnv.fullPage} white />
-              </div>
-            </Link>
-
-            {ready && <Control />}
-          </div>
+          <div className="flex items-stretch">{ready && <Control />}</div>
         </div>
       </ContentContainer>
     </header>
@@ -47,16 +39,6 @@ const Control: FC = () => {
 
   return (
     <>
-      <div className="flex-1 flex flex-col items-end">
-        <div className="max-w-full overflow-x-hidden">
-          <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
-        </div>
-
-        <div className="flex-1" />
-
-        <NetworkSelect />
-      </div>
-
       <Popper
         placement="left-start"
         strategy="fixed"
@@ -67,7 +49,7 @@ const Control: FC = () => {
           <Button
             ref={ref}
             className={classNames(
-              'ml-2 flex-shrink-0 flex p-px',
+              'flex-shrink-0 flex p-px',
               'rounded-md border border-white border-opacity-25',
               'bg-white bg-opacity-10 cursor-pointer',
               'transition ease-in-out duration-200',
@@ -82,6 +64,14 @@ const Control: FC = () => {
           </Button>
         )}
       </Popper>
+      <div className="ml-2 flex-1 flex flex-col items-start">
+        <div className="max-w-full overflow-x-hidden">
+          <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
+        </div>
+
+        <div className="flex-1" />
+        <NetworkSelect />
+      </div>
     </>
   );
 };

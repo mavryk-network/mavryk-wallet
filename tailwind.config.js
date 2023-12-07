@@ -163,6 +163,7 @@ module.exports = {
         'primary-white': '#F4F4F4',
         'secondary-white': baseColors.gray[30],
         'accent-blue': baseColors.indigo[700],
+        'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
         'secondary-card': baseColors.gray[910],
@@ -218,6 +219,7 @@ module.exports = {
       lg: '0.5rem',
       xl: '0.625rem',
       '2xl': '0.75rem',
+      '2xl-plus': '1rem',
       full: '9999px',
       circle: '50%'
     },
@@ -596,7 +598,24 @@ module.exports = {
         xxs: '0.6875rem',
         '2xs': '0.8125rem',
         ulg: '1.0625rem',
-        '2xl-plus': '1.75rem'
+        'base-plus': [
+          '1rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.32px',
+            fontWeight: '400'
+          }
+        ],
+        '2xl-plus': '1.75rem',
+
+        '3xl-plus': [
+          '2rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.64px',
+            fontWeight: '400'
+          }
+        ]
       },
       spacing: {
         13: '3.25rem',

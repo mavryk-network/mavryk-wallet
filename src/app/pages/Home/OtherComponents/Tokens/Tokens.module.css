@@ -10,7 +10,7 @@
 }
 
 .apyTag:hover {
-  background-color: #68ADE7;
+  background-color: #68ade7;
 }
 
 .tokenInfoWidth {
@@ -23,5 +23,9 @@
   font-weight: 500;
   font-size: 0.875rem;
   line-height: 16px;
-  color: #1b262c;
+  color: #f4f4f4;
+}
+
+.listItem:not(:last-of-type) {
+  border-bottom: 1px solid #333;
 }

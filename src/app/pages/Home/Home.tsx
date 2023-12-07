@@ -106,7 +106,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
         </div>
       )}
 
-      <div className={classNames(styles.wrapper, 'flex flex-col items-center pb-6')}>
+      <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
         <div className="flex justify-between mx-auto w-full max-w-sm">
@@ -154,7 +154,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
         </div>
       </div>
 
-      <Divider ignoreParent />
+      <Divider ignoreParent className="mb-4" />
       <ContentSection assetSlug={assetSlug} />
     </PageLayout>
   ) : (

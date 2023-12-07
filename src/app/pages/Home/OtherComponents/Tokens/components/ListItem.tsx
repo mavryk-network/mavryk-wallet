@@ -31,8 +31,9 @@ export const ListItem = memo<Props>(
       () =>
         classNames(
           'relative block w-full overflow-hidden flex items-center px-4 py-3 rounded',
-          'hover:bg-gray-200 text-gray-700 transition ease-in-out duration-200 focus:outline-none',
-          active && 'focus:bg-gray-200'
+          'hover:bg-primary-card transition ease-in-out duration-200 focus:outline-none',
+          active && 'focus:bg-gray-200',
+          styles.listItem
         ),
       [active]
     );
@@ -50,7 +51,7 @@ export const ListItem = memo<Props>(
         testIDProperties={{ key: assetSlug }}
         {...setAnotherSelector('name', assetName)}
       >
-        <AssetIcon assetSlug={assetSlug} size={40} className="mr-2 flex-shrink-0" />
+        <AssetIcon assetSlug={assetSlug} size={44} className="mr-2 flex-shrink-0" />
 
         <div className={classNames('w-full', styles.tokenInfoWidth)}>
           <div className="flex justify-between w-full mb-1">
@@ -65,7 +66,7 @@ export const ListItem = memo<Props>(
             />
           </div>
           <div className="flex justify-between w-full mb-1">
-            <div className="text-xs font-normal text-gray-700 truncate flex-1">{assetName}</div>
+            <div className="text-sm font-normal text-secondary-white truncate flex-1">{assetName}</div>
             <FiatBalance
               assetSlug={assetSlug}
               value={balance}

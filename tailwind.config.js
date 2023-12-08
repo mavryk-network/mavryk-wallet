@@ -600,6 +600,14 @@ module.exports = {
       fontSize: {
         xxxs: '0.625rem',
         xxs: '0.6875rem',
+        xs: [
+          '0.75rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.24px',
+            fontWeight: '400'
+          }
+        ],
         '2xs': '0.8125rem',
         ulg: '1.0625rem',
         sm: [

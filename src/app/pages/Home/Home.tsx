@@ -109,7 +109,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
-        <div className="flex justify-between mx-auto w-full max-w-sm">
+        <div className="flex justify-between mx-auto w-full max-w-sm pb-4">
           <ActionButton
             label={<T id="receive" />}
             Icon={ReceiveIcon}
@@ -202,9 +202,7 @@ const ActionButton: FC<ActionButtonProps> = ({
           >
             <Icon className={classNames('w-6 h-auto', disabled ? 'stroke-gray' : 'stroke-accent-blue')} />
           </div>
-          <span className={classNames('text-center text-xxs', disabled ? 'text-gray-20' : 'text-gray-910')}>
-            {label}
-          </span>
+          <span className={classNames('text-center text-xs', disabled ? 'text-gray30' : 'text-white')}>{label}</span>
         </>
       )
     }),

@@ -119,6 +119,9 @@
   "accounts": {
     "message": "Accounts"
   },
+  "selectAccount": {
+    "message": "Select an account"
+  },
   "lock": {
     "message": "Lock"
   },

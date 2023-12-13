@@ -8,12 +8,14 @@ import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
+import { T } from 'lib/i18n';
 import { useTempleClient, useAccount } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
 import AccountDropdown from './Header/AccountDropdown';
+import AccountPopup from './Header/AccountPopup';
 import NetworkSelect from './Header/NetworkSelect';
 
 const Header: FC = () => {
@@ -37,18 +39,20 @@ const Control: FC = () => {
   const account = useAccount();
 
   // new
-  const [show, setShow] = useState(false);
+  const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
   const close = useCallback(() => {
-    setShow(false);
+    setShowAccountsPopup(false);
   }, []);
+
   const open = useCallback(() => {
-    setShow(true);
+    setShowAccountsPopup(true);
   }, []);
 
   return (
     <>
-      <Popper
+      {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
+      {/* <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -59,8 +63,8 @@ const Control: FC = () => {
             ref={ref}
             className={classNames(
               'flex-shrink-0 flex p-px',
-              'rounded-md border border-white border-opacity-25',
-              'bg-white bg-opacity-10 cursor-pointer',
+              'rounded-full',
+              'bg-primary-bg bg-opacity-10 cursor-pointer',
               'transition ease-in-out duration-200',
               opened
                 ? 'shadow-md opacity-100'
@@ -72,11 +76,20 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper>
+      </Popper> */}
 
-      <button onClick={open} className="text-white">
-        TEMPO
-      </button>
+      <Button
+        className={classNames(
+          'flex-shrink-0 flex',
+          'rounded-full overflow-hidden',
+          'bg-primary-bg bg-opacity-10 cursor-pointer',
+          'transition ease-in-out duration-200'
+        )}
+        testID={HeaderSelectors.accountIcon}
+        onClick={open}
+      >
+        <Identicon type="bottts" hash={account.publicKeyHash} size={24} />
+      </Button>
 
       <div className="ml-2 flex-1 flex flex-col items-start">
         <div className="max-w-full overflow-x-hidden">
@@ -84,20 +97,11 @@ const Control: FC = () => {
         </div>
 
         <div className="flex-1" />
-        <NetworkSelect />
+        {/* <NetworkSelect /> */}
       </div>
-      {/* <PopupModalWithTitle isOpen={show} onRequestClose={close} title="Test">
-        <div className="flex flex-col text-white">
-          <div>content</div>
-          <div>content</div>
-          <div>content</div>
-          <div>content</div>
-          <div>content</div>
-          <div>content</div>
-          <div>content</div>
-          <div className="text-black">content</div>
-        </div>
-      </PopupModalWithTitle> */}
+      <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
+        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
+      </PopupModalWithTitle>
     </>
   );
 };

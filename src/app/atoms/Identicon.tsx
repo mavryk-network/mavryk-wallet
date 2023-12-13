@@ -68,7 +68,6 @@ const Identicon: FC<IdenticonProps> = ({ type = 'jdenticon', hash, size = 100, c
         width: size,
         height: size,
         maxWidth: size,
-        borderRadius: Math.round(size / 10),
         ...style
       }}
       {...rest}

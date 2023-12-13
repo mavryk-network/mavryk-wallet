@@ -75,16 +75,10 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         />
       )}
 
-      <div
-        className={classNames(
-          'overflow-y-auto rounded border border-gray-700 shadow-inner',
-          isShowSearch && 'border-t-0 rounded-t-none'
-        )}
-        style={{ maxHeight: isShowSearch ? '12rem' : '14.25rem' }}
-      >
+      <div className={classNames('overflow-y-auto shadow-inner', isShowSearch && 'border-t-0 rounded-t-none')}>
         <div className="flex flex-col">
           {filteredAccounts.length === 0 ? (
-            <p className="text-center text-white text-sm p-10">
+            <p className="text-center text-white text-base">
               <T id="noResults" />
             </p>
           ) : (

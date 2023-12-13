@@ -38,11 +38,14 @@ module.exports = {
           300: '#e2e8f0',
           350: '#d8e0e8',
           400: '#cbd5e0',
+
           500: '#a0aec0',
           600: '#718096',
           700: '#4a5568',
+          710: '#323232',
           800: '#2d3748',
           850: '#212e36',
+          890: '#292929',
           900: '#202020',
           910: '#171717',
           920: '#010101'
@@ -166,12 +169,15 @@ module.exports = {
         'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
+        'primary-card-hover': baseColors.gray[890],
         'secondary-card': baseColors.gray[910],
         'primary-bg': baseColors.gray[920],
         'primary-divider': baseColors.divider,
         'primary-success': baseColors.green[910],
         'primary-error': baseColors.red[700],
         'accent-orange': baseColors.orange[600],
+
+        'list-item-selected': baseColors.gray[710],
         // with opacity
         'primary-card-op': 'rgba(0, 0, 0, 0.50)',
         'primary-border': 'rgba(255, 255, 255, 0.25)',
@@ -615,6 +621,14 @@ module.exports = {
           {
             lineHeight: 'normal',
             letterSpacing: '-0.28px',
+            fontWeight: '400'
+          }
+        ],
+        base: [
+          '1rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: 'normal',
             fontWeight: '400'
           }
         ],

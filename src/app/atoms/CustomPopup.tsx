@@ -11,7 +11,7 @@ const CustomPopup: FC<CustomPopupProps> = props => {
   return (
     <Modal
       {...restProps}
-      className={classNames('bg-primary-card rounded z-30 shadow-2xl px-4 pt-6 pb-8', className)}
+      className={classNames('bg-primary-card rounded z-30 shadow-2xl pt-6 pb-8', className)}
       appElement={document.getElementById('root')!}
       closeTimeoutMS={200}
       overlayClassName={classNames(

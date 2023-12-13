@@ -27,12 +27,10 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
   const classNameMemo = useMemo(
     () =>
       classNames(
-        'block w-full p-2 flex items-center',
-        'text-white text-shadow-black overflow-hidden',
+        'block w-full px-4 py-3 flex items-center',
+        'text-white overflow-hidden',
         'transition ease-in-out duration-200',
-        selected && 'shadow',
-        selected ? 'bg-gray-700 bg-opacity-40' : 'hover:bg-white hover:bg-opacity-5',
-        !selected && 'opacity-65 hover:opacity-100'
+        selected ? 'bg-list-item-selected' : 'hover:bg-primary-card-hover'
       ),
     [selected]
   );
@@ -45,32 +43,37 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       testID={AccountDropdownSelectors.accountItemButton}
       testIDProperties={{ accountTypeEnum: type }}
     >
-      <Identicon type="bottts" hash={publicKeyHash} size={46} className="flex-shrink-0 shadow-xs-white" />
+      <Identicon
+        type="bottts"
+        hash={publicKeyHash}
+        size={24}
+        className="flex-shrink-0 shadow-xs-white rounded-full overflow-hidden"
+      />
 
-      <div style={{ marginLeft: '10px' }} className="flex flex-col items-start">
-        <Name className="text-sm font-medium">{name}</Name>
+      <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
+        <Name className="text-base">{name}</Name>
 
         <div
-          className="text-xs text-gray-500"
+          className="text-xs text-blue-200 mt-1"
           {...setTestID(AccountDropdownSelectors.accountAddressValue)}
           {...setAnotherSelector('hash', publicKeyHash)}
         >
           <HashShortView hash={publicKeyHash} />
         </div>
+      </div>
+      <div className="flex flex-col flex-wrap items-end justify-end ml-auto">
+        <Balance address={publicKeyHash}>
+          {bal => (
+            <span className="text-base leading-tight flex items-baseline">
+              <Money smallFractionFont={false} tooltip={false}>
+                {bal}
+              </Money>
 
-        <div className="flex flex-wrap items-end">
-          <Balance address={publicKeyHash}>
-            {bal => (
-              <span className="text-xs leading-tight flex items-baseline text-gray-500">
-                <Money smallFractionFont={false} tooltip={false}>
-                  {bal}
-                </Money>
-
-                <span className="ml-1">{gasTokenName.toUpperCase()}</span>
-              </span>
-            )}
-          </Balance>
-
+              <span className="ml-1">{gasTokenName.toUpperCase()}</span>
+            </span>
+          )}
+        </Balance>
+        <div className="mt-1">
           <AccountTypeBadge account={account} darkTheme />
         </div>
       </div>

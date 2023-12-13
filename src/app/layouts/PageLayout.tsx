@@ -169,10 +169,10 @@ const Toolbar: FC<ToolbarProps> = ({
     <div
       ref={updateRootRef}
       className={classNames(
-        'sticky z-20 flex items-center py-2 px-4',
+        'sticky z-20 flex items-center py-4 px-4',
         fullPage && !sticked && 'rounded-t',
         sticked ? 'shadow' : 'shadow-sm',
-        'bg-gray-100 overflow-hidden transition ease-in-out duration-300'
+        'bg-primary-card overflow-hidden transition ease-in-out duration-300'
       )}
       style={{
         // The top value needs to be -1px or the element will never intersect
@@ -190,7 +190,7 @@ const Toolbar: FC<ToolbarProps> = ({
             className={classNames(
               'rounded px-2 py-1',
               'flex items-center',
-              'text-gray-600 text-shadow-black',
+              'text-white text-shadow-black',
               'text-sm font-semibold leading-none',
               'hover:bg-black hover:bg-opacity-5',
               'transition duration-300 ease-in-out',
@@ -200,13 +200,13 @@ const Toolbar: FC<ToolbarProps> = ({
             testID={PageLayoutSelectors.backButton}
           >
             <ChevronLeftIcon className="-ml-2 h-5 w-auto stroke-current stroke-2" />
-            <T id="back" />
+            {/* <T id="back" /> */}
           </Button>
         )}
       </div>
 
       {pageTitle && (
-        <h2 className="px-1 flex items-center text-ulg text-gray-700 font-normal overflow-hidden">{pageTitle}</h2>
+        <h2 className="px-1 flex items-center text-ulg text-white font-normal overflow-hidden">{pageTitle}</h2>
       )}
 
       <div className="flex-1" />

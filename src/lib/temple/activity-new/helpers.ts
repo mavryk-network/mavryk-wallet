@@ -52,7 +52,7 @@ export function buildMoneyDiffs(activity: Activity) {
 
   for (const oper of activity.operations) {
     if (oper.type !== 'transaction' || isZero(oper.amountSigned)) continue;
-    const assetSlug = oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenId);
+    const assetSlug = oper.contractAddress == null ? 'mav' : toTokenSlug(oper.contractAddress, oper.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }

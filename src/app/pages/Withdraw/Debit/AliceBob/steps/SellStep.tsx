@@ -59,7 +59,7 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
     try {
       const transferParams = await toTransferParams(
         tezos,
-        'tez',
+        'mav',
         TEZOS_METADATA,
         publicKeyHash,
         payCryptoAddress,
@@ -113,14 +113,14 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
         <p className="text-gray-600 text-xs">
           <T id="youSell" />
         </p>
-        <p className="text-sm font-medium text-gray-910">{fromAmount} TEZ</p>
+        <p className="text-sm font-medium text-gray-910">{fromAmount} MAV</p>
       </div>
 
       <div className="flex justify-between items-baseline mt-2">
         <p className="text-gray-600 text-xs">
           <T id="exchangeRate" />:
         </p>
-        <p className="text-xs text-gray-600">1 TEZ ≈ {exchangeRate} UAH</p>
+        <p className="text-xs text-gray-600">1 MAV ≈ {exchangeRate} UAH</p>
       </div>
 
       <div className="flex justify-between items-baseline mt-2">

@@ -80,7 +80,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const expensesData = useMemo(() => {
     return rawExpensesData.map(({ expenses, ...restProps }) => ({
       expenses: expenses.map(({ tokenAddress, tokenId, ...restProps }) => ({
-        assetSlug: tokenAddress ? toTokenSlug(tokenAddress, tokenId) : 'tez',
+        assetSlug: tokenAddress ? toTokenSlug(tokenAddress, tokenId) : 'mav',
         ...restProps
       })),
       ...restProps

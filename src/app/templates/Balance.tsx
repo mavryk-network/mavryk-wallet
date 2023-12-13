@@ -13,7 +13,7 @@ interface Props {
   networkRpc?: string;
 }
 
-const Balance: FC<Props> = ({ address, children, assetSlug = 'tez', networkRpc }) => {
+const Balance: FC<Props> = ({ address, children, assetSlug = 'mav', networkRpc }) => {
   const { value: balance } = useBalance(assetSlug, address, networkRpc);
   const exist = balance !== undefined;
 

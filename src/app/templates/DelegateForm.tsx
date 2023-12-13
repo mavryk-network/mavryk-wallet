@@ -297,7 +297,7 @@ const DelegateForm = memo<Props>(({ balance }) => {
                       </span>
                     </span>
 
-                    <InFiat assetSlug="tez" volume={balance}>
+                    <InFiat assetSlug="mav" volume={balance}>
                       {({ balance, symbol }) => (
                         <div className="mt-1 text-sm text-gray-500 flex items-baseline">
                           {balance}

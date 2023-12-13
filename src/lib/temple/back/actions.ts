@@ -517,11 +517,16 @@ export async function processBeacon(
 const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: string): Promise<Beacon.Response> => {
   try {
     try {
+      console.log('req', req);
+      console.log('resBase', resBase);
+      console.log('origin', origin);
       return await formatTempleReq(getTempleReq(req), req, resBase, origin);
     } catch (err: any) {
       if (err instanceof TezosOperationError) {
         throw err;
       }
+
+      console.log('err', err);
 
       // Map Temple DApp error to Beacon error
       const beaconErrorType = (() => {

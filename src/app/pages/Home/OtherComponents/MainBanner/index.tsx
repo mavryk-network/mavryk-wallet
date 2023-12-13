@@ -35,7 +35,7 @@ interface Props {
 
 const MainBanner: FC<Props> = ({ assetSlug, accountPkh }) => {
   return assetSlug ? (
-    <AssetBanner assetSlug={assetSlug ?? 'tez'} accountPkh={accountPkh} />
+    <AssetBanner assetSlug={assetSlug ?? 'mav'} accountPkh={accountPkh} />
   ) : (
     <TotalVolumeBanner accountPkh={accountPkh} />
   );

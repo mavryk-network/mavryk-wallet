@@ -8,14 +8,14 @@ export const EXOLIX_PRIVICY_LINK = 'https://exolix.com/privacy';
 
 export const outputTokensList: OutputCurrencyInterface[] = [
   {
-    code: 'XTZ',
-    name: 'Tezos',
+    code: 'MVRK',
+    name: 'Mavryk',
     icon: 'https://exolix.com/icons/coins/XTZ.png',
     network: {
-      code: 'XTZ',
-      fullName: 'Tezos'
+      code: 'MVRK',
+      fullName: 'Mavryk'
     },
-    slug: 'tez'
+    slug: 'mav'
   },
   {
     code: 'USDT',

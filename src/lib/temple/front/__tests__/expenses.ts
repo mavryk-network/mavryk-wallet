@@ -8,7 +8,7 @@ import { tryParseExpenses } from '../expenses';
 const ACCOUNT = 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr';
 
 describe('Expenses', () => {
-  it('tryParseExpenses tez transfer', async () => {
+  it('tryParseExpenses mav transfer', async () => {
     const expenses = tryParseExpenses(TEZ_TRANSFER_OPERATIONS, ACCOUNT);
 
     expect(expenses).toStrictEqual([

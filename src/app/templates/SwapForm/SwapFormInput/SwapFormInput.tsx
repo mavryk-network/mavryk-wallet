@@ -51,8 +51,8 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
   const { trackChange } = useFormAnalytics('SwapForm');
 
   const { assetSlug, amount } = value;
-  const isTezosSlug = assetSlug === 'tez';
-  const assetSlugWithFallback = assetSlug ?? 'tez';
+  const isTezosSlug = assetSlug === 'mav';
+  const assetSlugWithFallback = assetSlug ?? 'mav';
 
   const assetMetadataWithFallback = useAssetMetadata(assetSlugWithFallback)!;
   const assetMetadata = useMemo(

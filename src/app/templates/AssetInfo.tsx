@@ -40,7 +40,7 @@ const AssetInfo: FC<AssetInfoProps> = ({ assetSlug }) => {
           id="contract-address"
           label={<T id="contract" />}
           labelDescription={<T id="addressOfTokenContract" substitutions={[getAssetSymbol(metadata)]} />}
-          value={isTezAsset(asset) ? 'TEZ' : asset.contract}
+          value={isTezAsset(asset) ? 'MAV' : asset.contract}
           size={36}
           style={{
             resize: 'none'

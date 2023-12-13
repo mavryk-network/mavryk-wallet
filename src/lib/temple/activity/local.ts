@@ -66,4 +66,4 @@ export async function addLocalOperation(chainId: string, hash: string, localGrou
   });
 }
 
-const addTezIfPositive = (x: string, assetSet: Set<string>) => isPositiveNumber(x) && assetSet.add('tez');
+const addTezIfPositive = (x: string, assetSet: Set<string>) => isPositiveNumber(x) && assetSet.add('mav');

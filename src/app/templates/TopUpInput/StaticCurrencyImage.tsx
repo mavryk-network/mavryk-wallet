@@ -19,7 +19,7 @@ export const StaticCurrencyImage: FC<Props> = ({ currencyCode, isFiat, imageSrc,
 
   const conditionalStyle = useMemo(() => ({ display: isFailed ? 'none' : undefined }), [isFailed]);
 
-  const isTez = currencyCode === 'TEZ' || currencyCode === 'XTZ';
+  const isTez = currencyCode === 'MAV' || currencyCode === 'MVRK';
 
   const src = isTez ? TOKENS_ICONS_SRC.TEZ : imageSrc;
 

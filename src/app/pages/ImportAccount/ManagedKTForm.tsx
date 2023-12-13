@@ -172,7 +172,7 @@ export const ManagedKTForm: FC = () => {
               <div className="ml-1 mr-px font-normal">
                 <T id="contract" />
               </div>{' '}
-              <Balance assetSlug="tez" address={filledAccount.address}>
+              <Balance assetSlug="mav" address={filledAccount.address}>
                 {bal => (
                   <span className="text-xs leading-none">
                     <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
@@ -271,10 +271,10 @@ const ContractOptionContent: FC<ContractOptionRenderProps> = props => {
           })()}
         </div>
 
-        <Balance assetSlug="tez" address={item.address}>
+        <Balance assetSlug="mav" address={item.address}>
           {bal => (
             <div className="ml-2 text-xs leading-none text-gray-600">
-              <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>tez</span>
+              <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>mav</span>
             </div>
           )}
         </Balance>

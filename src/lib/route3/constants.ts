@@ -5,7 +5,7 @@ import { getPercentageRatio } from './utils/get-percentage-ratio';
 
 export const ROUTE3_CONTRACT = 'KT1R7WEtNNim3YgkxPt8wPMczjH3eyhbJMtz';
 export const LIQUIDITY_BAKING_PROXY_CONTRACT = 'KT1WLWMMm9MywjCqnA8wBAYy9QhUE1LzfZ4j';
-export const BURN_ADDREESS = 'tz1burnburnburnburnburnburnburjAYjjX';
+export const BURN_ADDREESS = 'mv2burnburnburnburnburnburnbur7hzNeg';
 export const ROUTING_FEE_ADDRESS = 'tz1UbRzhYjQKTtWYvGUWcRtVT4fN3NESDVYT';
 
 const ROUTING_FEE_PERCENT = 0.35;

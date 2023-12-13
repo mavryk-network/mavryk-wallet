@@ -16,7 +16,7 @@ export const usePageRouterAnalytics = (pathname: string, search: string, isConte
     }
 
     if (pageRoutesWithToken.some(route => pathname.startsWith(route))) {
-      const [, route = '', tokenSlug = 'tez'] = pathname.split('/');
+      const [, route = '', tokenSlug = 'mav'] = pathname.split('/');
       const [tokenAddress, tokenId] = fromAssetSlug(tokenSlug);
 
       return void pageEvent(`/${route}`, search, {
@@ -28,7 +28,7 @@ export const usePageRouterAnalytics = (pathname: string, search: string, isConte
     if (pageRoutesWithQueryParams.some(route => pathname.startsWith(route))) {
       const usp = new URLSearchParams(search);
 
-      const inputAssetSlug = usp.get('from') || 'tez';
+      const inputAssetSlug = usp.get('from') || 'mav';
       const outputAssetSlug = usp.get('to');
 
       return void pageEvent(pathname, search, { inputAssetSlug, outputAssetSlug });

@@ -86,7 +86,7 @@ const Control: FC = () => {
         <div className="flex-1" />
         <NetworkSelect />
       </div>
-      <PopupModalWithTitle isOpen={show} onRequestClose={close} title="Test">
+      {/* <PopupModalWithTitle isOpen={show} onRequestClose={close} title="Test">
         <div className="flex flex-col text-white">
           <div>content</div>
           <div>content</div>
@@ -97,7 +97,7 @@ const Control: FC = () => {
           <div>content</div>
           <div className="text-black">content</div>
         </div>
-      </PopupModalWithTitle>
+      </PopupModalWithTitle> */}
     </>
   );
 };

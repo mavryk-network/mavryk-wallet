@@ -122,6 +122,9 @@
   "selectAccount": {
     "message": "Select an account"
   },
+  "addRestoreAccount": {
+    "message": "Add or Restore Account"
+  },
   "lock": {
     "message": "Lock"
   },

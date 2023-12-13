@@ -2,6 +2,7 @@ import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 
 import classNames from 'clsx';
 
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh, useGasToken } from 'lib/temple/front';
@@ -94,6 +95,12 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
             ))
           )}
         </div>
+      </div>
+
+      <div className="w-full flex justify-center">
+        <ButtonRounded size="big" fill={false} className="mx-auto mt-4">
+          <T id="addRestoreAccount" />
+        </ButtonRounded>
       </div>
     </div>
   );

@@ -84,6 +84,7 @@ const CreateAccount: FC = () => {
           <T id="createAccount" />
         </>
       }
+      isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto mt-6">
         <form onSubmit={handleSubmit(onSubmit)}>

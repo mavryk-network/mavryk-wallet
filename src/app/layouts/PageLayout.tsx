@@ -26,18 +26,23 @@ import { OnRampOverlay } from './PageLayout/OnRampOverlay/OnRampOverlay';
 
 interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentContainerStyle?: React.CSSProperties;
+  isTopbarVisible?: boolean;
 }
 
-const PageLayout: FC<PageLayoutProps> = ({ children, contentContainerStyle, ...toolbarProps }) => {
+const PageLayout: FC<PageLayoutProps> = ({
+  children,
+  contentContainerStyle,
+  isTopbarVisible = true,
+  ...toolbarProps
+}) => {
   const { fullPage } = useAppEnv();
 
   return (
     <>
-      <DocBg bgClassName="bg-primary-orange" />
+      <DocBg bgClassName="bg-primary-bg" />
 
       <div className={classNames(fullPage && 'pb-20', 'relative')}>
-        <Header />
-
+        {isTopbarVisible && <Header />}
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 

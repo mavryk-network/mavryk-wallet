@@ -1,16 +1,15 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import classNames from 'clsx';
 
 import { Button } from 'app/atoms/Button';
 import Identicon from 'app/atoms/Identicon';
-import Logo from 'app/atoms/Logo';
 import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
+import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useTempleClient, useAccount } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
-import { Link } from 'lib/woozie';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
@@ -36,6 +35,16 @@ export default Header;
 
 const Control: FC = () => {
   const account = useAccount();
+
+  // new
+  const [show, setShow] = useState(false);
+
+  const close = useCallback(() => {
+    setShow(false);
+  }, []);
+  const open = useCallback(() => {
+    setShow(true);
+  }, []);
 
   return (
     <>
@@ -64,6 +73,11 @@ const Control: FC = () => {
           </Button>
         )}
       </Popper>
+
+      <button onClick={open} className="text-white">
+        TEMPO
+      </button>
+
       <div className="ml-2 flex-1 flex flex-col items-start">
         <div className="max-w-full overflow-x-hidden">
           <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
@@ -72,6 +86,18 @@ const Control: FC = () => {
         <div className="flex-1" />
         <NetworkSelect />
       </div>
+      <PopupModalWithTitle isOpen={show} onRequestClose={close} title="Test">
+        <div className="flex flex-col text-white">
+          <div>content</div>
+          <div>content</div>
+          <div>content</div>
+          <div>content</div>
+          <div>content</div>
+          <div>content</div>
+          <div>content</div>
+          <div className="text-black">content</div>
+        </div>
+      </PopupModalWithTitle>
     </>
   );
 };

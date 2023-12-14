@@ -134,6 +134,9 @@
   "networks": {
     "message": "Networks"
   },
+  "here": {
+    "message": "here"
+  },
   "back": {
     "message": "Back"
   },

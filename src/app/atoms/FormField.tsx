@@ -144,14 +144,14 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 
     const handleSecretBannerClick = () => void spareRef.current?.focus();
     const handleCleanClick = useCallback(() => void onClean?.(), [onClean]);
-    
+
     return (
       <div
         className={classNames('w-full flex flex-col', containerClassName)}
         style={containerStyle}
         {...setTestID(testIDs?.inputSection)}
       >
-        {label !== "Password" && (
+        {label !== 'Password' && (
           <FieldLabel label={label} warning={labelWarning} description={labelDescription} className="mb-4" id={id} />
         )}
 
@@ -201,7 +201,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 );
 
 export const FORM_FIELD_CLASS_NAME = classNames(
-  'appearance-none w-full border rounded-md bg-primary-black',
+  'appearance-none w-full border rounded-md bg-primary-bg',
   'focus:border-accent-blue focus:bg-primary-black focus:outline-none focus:shadow-outline',
   'transition ease-in-out duration-200',
   'text-primary-white text-lg leading-tight placeholder-secondary-white'

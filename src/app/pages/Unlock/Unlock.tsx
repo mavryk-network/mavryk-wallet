@@ -15,10 +15,10 @@ import { delay } from 'lib/utils';
 import { Link } from 'lib/woozie';
 
 import { ABTestGroup } from '../../../lib/apis/temple';
+import PageWithImageBg from '../../layouts/PageWithImageBg';
 import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import { UnlockSelectors } from './Unlock.selectors';
-import PageWithImageBg from "../../layouts/PageWithImageBg";
 
 interface UnlockProps {
   canImportNew?: boolean;
@@ -115,10 +115,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   }, [timelock, lockLevel, setTimeLock]);
 
   return (
-    <PageWithImageBg
-      title={<T id="unlockWallet" />}
-      label={"unlockWallet"}
-    >
+    <PageWithImageBg title={<T id="unlockWallet" />} label={'unlockWallet'}>
       {isDisabled && (
         <Alert
           type="error"

@@ -45,11 +45,13 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   [
     '/import-wallet/:tabSlug?',
     (p, ctx) => {
+      console.log(p, 'p');
+      console.log(ctx, 'ctx');
       switch (true) {
-        case ctx.ready:
+        case ctx.ready && ctx.locked:
           return Woozie.SKIP;
 
-        case !ctx.fullPage:
+        case !ctx.fullPage && ctx.locked:
           return <OpenInFullPage />;
 
         default:

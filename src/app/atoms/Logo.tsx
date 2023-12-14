@@ -18,7 +18,7 @@ const Logo = memo<LogoProps>(({ hasTitle, white, style = {}, ...rest }) => {
 
   return (
     <Component
-      title="Temple - Tezos Wallet"
+      title="Mavryk Wallet"
       style={{
         height: 40,
         width: 'auto',

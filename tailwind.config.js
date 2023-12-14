@@ -663,7 +663,8 @@ module.exports = {
         35: '8.75rem',
         60.5: '15.125rem',
         63: '15.75rem',
-        500: '31.25rem'
+        500: '31.25rem',
+        max: '100%'
       },
       height: theme => theme('spacing'),
       minHeight: theme => theme('height'),

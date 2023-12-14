@@ -5,7 +5,6 @@ import { OnSubmit, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
-import SimplePageLayout from 'app/layouts/SimplePageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { USER_ACTION_TIMEOUT } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
@@ -19,6 +18,7 @@ import { ABTestGroup } from '../../../lib/apis/temple';
 import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import { UnlockSelectors } from './Unlock.selectors';
+import PageWithImageBg from "../../layouts/PageWithImageBg";
 
 interface UnlockProps {
   canImportNew?: boolean;
@@ -115,16 +115,9 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   }, [timelock, lockLevel, setTimeLock]);
 
   return (
-    <SimplePageLayout
-      title={
-        <>
-          <T id="unlockWallet" />
-          <br />
-          <span style={{ fontSize: '0.9em' }}>
-            <T id="toContinue" />
-          </span>
-        </>
-      }
+    <PageWithImageBg
+      title={<T id="unlockWallet" />}
+      label={"unlockWallet"}
     >
       {isDisabled && (
         <Alert
@@ -134,7 +127,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
           className="mt-6"
         />
       )}
-      <form ref={formRef} className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+      <form ref={formRef} className="w-full max-w-sm mx-auto my-5" onSubmit={handleSubmit(onSubmit)}>
         <FormField
           ref={register({ required: t('required') })}
           label={t('password')}
@@ -142,7 +135,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
           id="unlock-password"
           type="password"
           name="password"
-          placeholder="********"
+          placeholder="Password"
           errorCaption={errors.password && errors.password.message}
           containerClassName="mb-4"
           autoFocus
@@ -156,14 +149,14 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         {canImportNew && (
           <div className="my-6">
-            <h3 className="text-sm font-light text-gray-600">
+            <h3 className="text-sm font-light text-primary-white">
               <T id="importNewAccountTitle" />
             </h3>
 
             <Link
               to="/import-wallet"
               className={classNames(
-                'text-primary-orange',
+                'text-accent-blue',
                 'text-sm font-semibold',
                 'transition duration-200 ease-in-out',
                 'opacity-75 hover:opacity-100 focus:opacity-100',
@@ -176,7 +169,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
           </div>
         )}
       </form>
-    </SimplePageLayout>
+    </PageWithImageBg>
   );
 };
 

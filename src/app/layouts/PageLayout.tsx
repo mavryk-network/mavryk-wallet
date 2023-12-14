@@ -46,7 +46,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="p-4" style={contentContainerStyle}>
+          <div className="px-4 pt-4 pb-8" style={contentContainerStyle}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>
@@ -73,7 +73,7 @@ const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, 
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-primary-bg rounded-md shadow-lg', className)}
+        className={classNames('bg-primary-bg rounded-md shadow-lg h-full', className)}
         style={{ minHeight: '20rem', ...style }}
         {...rest}
       >
@@ -204,7 +204,9 @@ const Toolbar: FC<ToolbarProps> = ({
       </div>
 
       {pageTitle && (
-        <h2 className="px-1 flex items-center text-ulg text-white font-normal overflow-hidden">{pageTitle}</h2>
+        <h2 className="px-1 flex items-center text-xl leading-5 tracking-tight text-white font-normal overflow-hidden">
+          {pageTitle}
+        </h2>
       )}
 
       <div className="flex-1" />

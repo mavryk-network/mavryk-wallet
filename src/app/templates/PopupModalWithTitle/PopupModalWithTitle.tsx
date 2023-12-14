@@ -29,7 +29,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
       <>
         <div className={classNames('w-full max-h-500', styles.container)}>
           <CloseIcon className="w-6 h-auto absolute top-4 right-4 cursor-pointer" onClick={restProps.onRequestClose} />
-          {title && <div className="text-white mb-6 w-full text-center text-xl px-4">{title}</div>}
+          {title && <div className="text-white mb-4 w-full text-center text-xl px-4">{title}</div>}
           {children}
         </div>
       </>

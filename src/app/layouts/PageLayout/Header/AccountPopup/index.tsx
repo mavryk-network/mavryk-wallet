@@ -72,23 +72,28 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
           value={searchValue}
           className={classNames(
             'py-2 pl-8 pr-4',
-            'bg-transparent',
-            'border border-white border-opacity-10',
+            'bg-secondary-card',
             'focus:outline-none',
             'transition ease-in-out duration-200',
-            'rounded-md rounded-b-none',
-            'text-white text-sm leading-tight'
+            'text-white text-sm leading-tight',
+            'placeholder-primary-white placeholder-opacity-50 rounded-lg'
           )}
           placeholder={t('searchByName')}
           searchIconClassName="h-5 w-auto"
-          searchIconWrapperClassName="px-2 text-white opacity-75"
+          searchIconWrapperClassName="px-2 text-white opacity-50"
           cleanButtonStyle={{ backgroundColor: 'transparent' }}
           cleanButtonIconStyle={{ stroke: 'white' }}
+          containerClassName={'mb-4 px-4'}
           onValueChange={setSearchValue}
         />
       )}
 
-      <div className={classNames('overflow-y-auto shadow-inner', isShowSearch && 'border-t-0 rounded-t-none')}>
+      <div
+        className={classNames(
+          'overflow-y-auto shadow-inner max-h-80 no-scrollbar',
+          isShowSearch && 'border-t-0 rounded-t-none h-80'
+        )}
+      >
         <div className="flex flex-col">
           {filteredAccounts.length === 0 ? (
             <p className="text-center text-white text-base">

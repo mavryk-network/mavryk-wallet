@@ -131,6 +131,7 @@ const Toolbar: FC<ToolbarProps> = ({
   const isBackButtonAvailable = canBack || canStepBack;
 
   const handleBack = () => {
+    console.log('here');
     if (canBack) {
       return goBack();
     }
@@ -188,19 +189,16 @@ const Toolbar: FC<ToolbarProps> = ({
         {isBackButtonAvailable && (
           <Button
             className={classNames(
-              'rounded px-2 py-1',
+              'text-white rounded',
               'flex items-center',
-              'text-white text-shadow-black',
-              'text-sm font-semibold leading-none',
-              'hover:bg-black hover:bg-opacity-5',
+              'hover:bg-list-item-selected',
               'transition duration-300 ease-in-out',
               'opacity-90 hover:opacity-100'
             )}
             onClick={step ? onStepBack : handleBack}
             testID={PageLayoutSelectors.backButton}
           >
-            <ChevronLeftIcon className="-ml-2 h-5 w-auto stroke-current stroke-2" />
-            {/* <T id="back" /> */}
+            <ChevronLeftIcon className="h-6 w-auto stroke-current stroke-2" />
           </Button>
         )}
       </div>

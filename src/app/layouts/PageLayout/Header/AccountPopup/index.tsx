@@ -2,12 +2,14 @@ import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 
 import classNames from 'clsx';
 
+import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh, useGasToken } from 'lib/temple/front';
 import { HistoryAction, navigate } from 'lib/woozie';
 
+import { AccountDropdownSelectors } from '../selectors';
 import { AccountItem } from './AccountItem';
 
 type AccountPopupProps = {
@@ -52,6 +54,16 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
     if (searchValue) setAttractSelectedAccount(false);
     else if (opened === false) setAttractSelectedAccount(true);
   }, [opened, searchValue]);
+
+  const action = useMemo(
+    () => ({
+      key: 'create-account',
+      linkTo: '/create-account',
+      testID: AccountDropdownSelectors.createOrRestoreAccountButton,
+      onClick: () => setOpened(false)
+    }),
+    [setOpened]
+  );
 
   return (
     <div className="my-2">
@@ -98,9 +110,11 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
       </div>
 
       <div className="w-full flex justify-center">
-        <ButtonRounded size="big" fill={false} className="mx-auto mt-4">
-          <T id="addRestoreAccount" />
-        </ButtonRounded>
+        <ButtonLink {...action}>
+          <ButtonRounded size="big" fill={false} className="mx-auto mt-4">
+            <T id="addRestoreAccount" />
+          </ButtonRounded>
+        </ButtonLink>
       </div>
     </div>
   );

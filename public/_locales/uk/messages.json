@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "Temple - Tezos Wallet"
+    "message": "Mavryk Wallet"
   },
   "showIncomingTransactions": {
     "message": "Показати вхідні транзакції"
@@ -249,10 +249,10 @@
     "description": "CoinSwitch = https://coinswitch.co/"
   },
   "tezosFaucet": {
-    "message": "Tezos Faucet"
+    "message": "Mavryk Faucet"
   },
   "tezosFaucetAlpha": {
-    "message": "Tezos Faucet (Alpha)"
+    "message": "Mavryk Faucet (Alpha)"
   },
   "depositToWallet": {
     "message": "Поповнити гаманаць"
@@ -495,17 +495,17 @@
     "message": "Спробуй ще раз"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "templeWalletOptions": {
-    "message": "Temple Wallet | Налаштування"
+    "message": "Mavryk Wallet | Налаштування"
   },
   "resetExtension": {
     "message": "Скинути екстеншн"
   },
   "resetExtensionConfirmation": {
-    "message": "Ти впевнений що бажаєш скинути the Temple Wallet?\nЯк результат - буде видалена вся твоя інформація і доступ до грошей також буде скинуто."
+    "message": "Ти впевнений що бажаєш скинути the Mavryk Wallet?\nЯк результат - буде видалена вся твоя інформація і доступ до грошей також буде скинуто."
   },
   "failedToResetExtension": {
     "message": "Не вдалося скинути розширення: $errorMessage$",
@@ -691,8 +691,8 @@
     "message": "У цьому розділі ви можете включити можливість взаємодії з децентралізованими додатками, які підтримують Temple Wallet."
   },
   "networksDescription": {
-    "message": "У цій секції ти можеш додати або видалити кастомні Tezos мережі",
-    "description": "Tezos = blockchain name (https://tezos.com/)"
+    "message": "У цій секції ти можеш додати або видалити кастомні Mavryk мережі",
+    "description": "Mavryk = blockchain name (https://mavryk.org/)"
   },
   "activateAccount": {
     "message": "Активуйте аккаунт"
@@ -1135,7 +1135,7 @@
     }
   },
   "tokensRecepientInputDescriptionWithDomain": {
-    "message": "Адреса або Tezos домен щоб відправити $assetSymbol$ кошти до.",
+    "message": "Адреса або Mavryk домен щоб відправити $assetSymbol$ кошти до.",
     "placeholders": {
       "assetSymbol": {
         "content": "$1"
@@ -1143,10 +1143,10 @@
     }
   },
   "addressInputDescription": {
-    "message": "Адреса Tezos аккаунту or смарт контракту."
+    "message": "Адреса Mavryk аккаунту or смарт контракту."
   },
   "addressInputDescriptionWithDomain": {
-    "message": "Адреса або Tezos домен аккаунту або смарт контракту."
+    "message": "Адреса або Mavryk домен аккаунту або смарт контракту."
   },
   "recipientInputPlaceholder": {
     "message": "e.g. tz1a9w1S7hN5s..."

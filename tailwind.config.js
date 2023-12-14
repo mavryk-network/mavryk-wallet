@@ -11,7 +11,7 @@ module.exports = {
   separator: ':',
   theme: {
     screens: {
-      sm: '640px',
+      sm: '675px',
       md: '768px',
       lg: '1024px',
       xl: '1280px'
@@ -163,6 +163,7 @@ module.exports = {
         'primary-white': '#F4F4F4',
         'secondary-white': baseColors.gray[30],
         'accent-blue': baseColors.indigo[700],
+        'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
         'secondary-card': baseColors.gray[910],
@@ -174,6 +175,7 @@ module.exports = {
         'accent-orange': baseColors.orange[600],
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
+        'primary-black': '#000000',
         // --
         'primary-orange': baseColors.orange[500],
         'primary-orange-light': baseColors.orange[300],
@@ -218,6 +220,7 @@ module.exports = {
       lg: '0.5rem',
       xl: '0.625rem',
       '2xl': '0.75rem',
+      '2xl-plus': '1rem',
       full: '9999px',
       circle: '50%'
     },
@@ -240,7 +243,7 @@ module.exports = {
       xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-      outline: '0 0 0 3px rgba(237, 137, 54, 0.5)',
+      outline: '0 0 0 3px rgba(95, 88, 255, 0.5)',
       none: 'none'
     },
     container: {},
@@ -357,7 +360,8 @@ module.exports = {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
       gray: '#AEAEB2',
-      orange: '#ED8936'
+      orange: '#ED8936',
+      cyan: '#B9EEFE'
     },
     strokeWidth: {
       0: '0',
@@ -596,7 +600,32 @@ module.exports = {
         xxs: '0.6875rem',
         '2xs': '0.8125rem',
         ulg: '1.0625rem',
-        '2xl-plus': '1.75rem'
+        sm: [
+          '0.875rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.28px',
+            fontWeight: '400'
+          }
+        ],
+        'base-plus': [
+          '1rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.32px',
+            fontWeight: '400'
+          }
+        ],
+        '2xl-plus': '1.75rem',
+
+        '3xl-plus': [
+          '2rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.64px',
+            fontWeight: '400'
+          }
+        ]
       },
       spacing: {
         13: '3.25rem',
@@ -608,7 +637,8 @@ module.exports = {
         31.25: '7.8125rem',
         35: '8.75rem',
         60.5: '15.125rem',
-        63: '15.75rem'
+        63: '15.75rem',
+        max: '100%'
       },
       height: theme => theme('spacing'),
       minHeight: theme => theme('height'),

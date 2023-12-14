@@ -41,7 +41,7 @@ export const AdvertisingOverlay: FC = () => {
         <Anchor
           className="flex items-center justify-center m-auto"
           style={{
-            width: popup ? 360 : 600,
+            width: popup ? 375 : 600,
             height: popup ? 600 : 700,
             borderRadius: popup ? 0 : 4,
             backgroundColor: '#E5F2FF'

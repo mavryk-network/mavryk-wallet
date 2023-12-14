@@ -144,14 +144,14 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 
     const handleSecretBannerClick = () => void spareRef.current?.focus();
     const handleCleanClick = useCallback(() => void onClean?.(), [onClean]);
-
+    
     return (
       <div
         className={classNames('w-full flex flex-col', containerClassName)}
         style={containerStyle}
         {...setTestID(testIDs?.inputSection)}
       >
-        {label && (
+        {label !== "Password" && (
           <FieldLabel label={label} warning={labelWarning} description={labelDescription} className="mb-4" id={id} />
         )}
 
@@ -168,7 +168,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
                 extraInnerWrapper === 'unset' ? false : Boolean(extraInner),
                 smallPaddings
               ),
-              errorCaption ? 'border-red-500' : 'border-gray-300',
+              errorCaption ? 'border-red-500' : 'border-gray-40',
               className
             )}
             id={id}
@@ -201,10 +201,10 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 );
 
 export const FORM_FIELD_CLASS_NAME = classNames(
-  'appearance-none w-full border-2 rounded-md bg-gray-100',
-  'focus:border-primary-orange focus:bg-transparent focus:outline-none focus:shadow-outline',
+  'appearance-none w-full border rounded-md bg-primary-black',
+  'focus:border-accent-blue focus:bg-primary-black focus:outline-none focus:shadow-outline',
   'transition ease-in-out duration-200',
-  'text-gray-700 text-lg leading-tight placeholder-alphagray'
+  'text-primary-white text-lg leading-tight placeholder-secondary-white'
 );
 
 interface ExtraInnerProps {
@@ -221,7 +221,7 @@ const ExtraInner: React.FC<ExtraInnerProps> = ({ useDefaultWrapper, innerCompone
           'opacity-50 pointer-events-none overflow-hidden'
         )}
       >
-        <span className="mx-4 text-lg font-light text-gray-900">{innerComponent}</span>
+        <span className="mx-4 text-base font-light text-gray-900">{innerComponent}</span>
       </div>
     );
   return <>{innerComponent}</>;

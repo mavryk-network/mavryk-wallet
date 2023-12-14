@@ -86,7 +86,7 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
   };
 };
 
-const AUTHOR_URL = 'https://madfish.solutions';
+const AUTHOR_URL = 'https://mavryk.org';
 
 const PERMISSIONS = ['storage', 'unlimitedStorage', 'clipboardWrite', 'activeTab'];
 
@@ -103,8 +103,8 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
   return {
     version: packageJSON.version,
 
-    name: 'Temple - Tezos Wallet',
-    short_name: 'Temple - Tezos Wallet',
+    name: 'Mavryk Wallet',
+    short_name: 'Mavryk Wallet',
 
     icons: {
       '16': 'misc/icon-16.png',
@@ -167,7 +167,7 @@ const buildBrowserAction = (vendor: string) => {
   const withVendors = makeWithVendors(vendor);
 
   return {
-    default_title: 'Temple - Tezos Wallet',
+    default_title: 'Mavryk Wallet',
     ...withVendors('chrome', 'firefox', 'opera')({ default_popup: 'popup.html' }),
     default_icon: {
       '16': 'misc/icon-16.png',

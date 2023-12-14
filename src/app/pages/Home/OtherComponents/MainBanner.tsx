@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 
 import { Button } from 'app/atoms';
 import Money from 'app/atoms/Money';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { toggleBalanceModeAction } from 'app/store/settings/actions';
 import { useBalanceModeSelector } from 'app/store/settings/selectors';
 import { BalanceMode } from 'app/store/settings/state';
@@ -45,9 +46,12 @@ interface TotalVolumeBannerProps {
 }
 
 const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
-  <div className="flex items-start justify-between w-full max-w-sm mx-auto mb-4">
+  <div className="bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto">
     <BalanceInfo />
-    <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
+    <div className="flex justify-between items-center w-full">
+      <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
+      <ButtonRounded>Delegate</ButtonRounded>
+    </div>
   </div>
 );
 
@@ -87,41 +91,7 @@ const BalanceInfo: FC = () => {
 
   return (
     <div className="flex flex-col justify-between items-start">
-      <div className="flex items-center">
-        {isMainNetwork && (
-          <Button
-            ref={buttonRef}
-            style={{ height: '22px', width: '22px' }}
-            className={classNames(
-              'mr-1',
-              'p-1',
-              'bg-gray-100',
-              'rounded-sm shadow-xs',
-              'text-base font-medium',
-              'hover:text-gray-600 text-gray-500 leading-none select-none',
-              'transition ease-in-out duration-300',
-              'inline-flex items-center justify-center'
-            )}
-            onClick={handleTvlModeToggle}
-            testID={HomeSelectors.fiatTezSwitchButton}
-            testIDProperties={{ toValue: nextBalanceMode }}
-          >
-            {isFiatMode ? fiatSymbol : <TezosLogoIcon />}
-          </Button>
-        )}
-
-        <div className="text-sm font-medium text-gray-700" {...setTestID(HomeSelectors.fiatTezSwitchText)}>
-          {shouldShowFiatBanner ? (
-            <T id="totalEquityValue" />
-          ) : (
-            <>
-              {gasTokenName} <T id="balance" />
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center text-2xl">
+      <div className="flex items-center text-3xl-plus">
         {shouldShowFiatBanner ? (
           <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
         ) : (

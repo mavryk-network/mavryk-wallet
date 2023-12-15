@@ -47,11 +47,13 @@ export const SuccessScreen = () => {
           {/* content */}
           <section aria-label="success-message ">
             <div className="text-xl leading-5 text-center mb-2">
-              <T id={state.subHeader} />
+              <T id={state.subHeader} />!
             </div>
-            <div className="text-sm text-center mb-2">
-              <T id={state.subHeader} />
-            </div>
+            {state.description && (
+              <div className="text-sm text-center mb-2">
+                <T id={state.description} />
+              </div>
+            )}
           </section>
           <ButtonLink linkTo="/" testID={SuccessScreenSelectors.buttonSuccess}>
             <ButtonRounded size="big" fill>

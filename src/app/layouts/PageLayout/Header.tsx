@@ -51,15 +51,6 @@ const Control: FC = () => {
     setShowAccountsPopup(true);
   }, []);
 
-  // TODO remove test logic
-  const handleScreenClick = useCallback(() => {
-    navigate<SuccessStateType>('/success', undefined, {
-      pageTitle: 'account',
-      subHeader: 'accountActivated',
-      btnText: 'accountName'
-    });
-  }, []);
-
   return (
     <>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
@@ -109,9 +100,6 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
-        <button className="text-white text-2xl" onClick={handleScreenClick}>
-          Open Success Screen
-        </button>
       </div>
       <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />

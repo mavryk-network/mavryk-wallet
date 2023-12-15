@@ -3089,5 +3089,8 @@
   },
   "goToMain": {
     "message": "Go to Main"
+  },
+  "createAccountSuccess": {
+    "message": "Your new account was successfully added"
   }
 }

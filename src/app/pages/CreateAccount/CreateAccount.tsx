@@ -13,6 +13,7 @@ import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { Link, navigate } from 'lib/woozie';
 
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import { CreateAccountSelectors } from './CreateAccount.selectors';
 
 type FormData = {
@@ -43,9 +44,11 @@ const CreateAccount: FC = () => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current < accLength) {
       setAccountPkh(allAccounts[accLength - 1].publicKeyHash);
-      navigate('/success', undefined, {
+      navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'createAccount',
-        description: 'Your new account was successfully added'
+        btnText: 'goToMain',
+        description: 'createAccountSuccess',
+        subHeader: 'success'
       });
     }
     prevAccLengthRef.current = accLength;

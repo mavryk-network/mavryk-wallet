@@ -149,14 +149,14 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       <div className="flex justify-between mb-6">
         <h1
           className={classNames(
-            'font-inter flex self-center text-gray-910',
-            isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
+            'font-inter flex self-center text-white text-base-plus'
+            // isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
           )}
         >
           <T id="seedPhrase" />
         </h1>
 
-        <div className="relative w-64 h-10" style={{ width: popup ? 220 : undefined }}>
+        <div className={classNames('relative', popup ? 'w-40 h-12' : 'w-64 h-10')}>
           <SeedLengthSelect
             options={numberOfWordsOptions}
             currentOption={draftSeed.length.toString()}
@@ -182,7 +182,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         <div className="text-xs font-medium text-red-600 text-center whitespace-pre-line mb-6">{labelWarning}</div>
       )}
 
-      <div className="w-full text-center pb-2 mb-6 text-gray-700 border-b-2" style={{ borderBottomWidth: 1 }}>
+      <div className="w-full text-center pb-2 mb-4 text-secondary-white border-b-2" style={{ borderBottomWidth: 1 }}>
         <p>{t('seedPhraseTip')}</p>
       </div>
 

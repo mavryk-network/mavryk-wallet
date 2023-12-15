@@ -2,7 +2,8 @@ import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as SelectArrowDownIcon } from 'app/icons/select-arrow-down.svg';
+import { useAppEnv } from 'app/env';
+import { ReactComponent as SelectArrowDownIcon } from 'app/icons/chevron-down.svg';
 import { ImportAccountSelectors } from 'app/pages/ImportAccount/selectors';
 import { setTestID } from 'lib/analytics';
 import { t } from 'lib/i18n';
@@ -19,6 +20,7 @@ interface SeedLengthSelectProps {
 export const SeedLengthSelect: FC<SeedLengthSelectProps> = ({ options, currentOption, defaultOption, onChange }) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption ?? '');
   const [isOpen, setIsOpen] = useState(false);
+  const { fullPage } = useAppEnv();
 
   const selectRef = useRef<HTMLDivElement>(null);
 
@@ -53,14 +55,23 @@ export const SeedLengthSelect: FC<SeedLengthSelectProps> = ({ options, currentOp
   return (
     <div
       ref={selectRef}
-      className={classNames('absolute right-0 z-10 text-gray-700 border-2 rounded-md bg-white cursor-pointer')}
+      className={classNames(
+        'absolute right-0 z-10 text-white border border-primary-border rounded-md bg-primary-bg cursor-pointer'
+      )}
     >
-      <div className={classNames('flex flex-row justify-around p-2')} onClick={() => setIsOpen(!isOpen)}>
+      <div
+        className={classNames('flex flex-row gap-x-3 justify-around px-4 py-3.5 text-white')}
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <span style={{ fontSize: 13 }} {...setTestID(ImportAccountSelectors.mnemonicDropDownButton)}>
-          {t('seedInputNumberOfWords', [`${selectedOption}`])}{' '}
+          {fullPage ? t('seedInputNumberOfWords', [`${selectedOption}`]) : t('words', [`${selectedOption}`])}{' '}
         </span>
         <SelectArrowDownIcon
-          className={classNames('ml-1 transition ease-in-out duration-75', isOpen && 'transform rotate-180')}
+          className={classNames(
+            'stroke-white stroke-2',
+            'opacity-1 w-5 h-5 transition ease-in-out duration-75',
+            isOpen && 'transform rotate-180'
+          )}
         />
       </div>
       <ul className={classNames(!isOpen && 'hidden')}>

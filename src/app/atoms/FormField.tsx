@@ -168,7 +168,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
                 extraInnerWrapper === 'unset' ? false : Boolean(extraInner),
                 smallPaddings
               ),
-              errorCaption ? 'border-red-500' : 'border-gray-40',
+              errorCaption ? 'border-primary-error' : 'border-primary-border',
               className
             )}
             id={id}
@@ -202,7 +202,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 
 export const FORM_FIELD_CLASS_NAME = classNames(
   'appearance-none w-full border rounded-md bg-primary-bg',
-  'focus:border-accent-blue focus:bg-primary-black focus:outline-none focus:shadow-outline',
+  'focus:border-accent-blue focus:bg-primary-black focus:outline-none',
   'transition ease-in-out duration-200',
   'text-primary-white text-lg leading-tight placeholder-secondary-white'
 );

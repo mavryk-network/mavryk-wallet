@@ -3092,5 +3092,13 @@
   },
   "createAccountSuccess": {
     "message": "Your new account was successfully added"
+  },
+  "words": {
+    "message": "$count$ words",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   }
 }

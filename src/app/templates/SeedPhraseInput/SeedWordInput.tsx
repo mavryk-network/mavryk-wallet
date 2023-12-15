@@ -214,11 +214,10 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
         fieldWrapperBottomMargin={false}
         testID={testID}
         errorCaption={errorCaption}
-        style={{ backgroundColor: 'white' }}
         onKeyDown={handleInputKeyDown}
       />
       {showAutoComplete && autoCompleteVariants && autoCompleteVariants.length > 0 && (
-        <div className="w-full rounded-md bg-gray-100 text-gray-700 text-lg leading-tight absolute left-0 z-50 px-2 pb-2 top-18 shadow-lg flex flex-col">
+        <div className="w-full rounded-md bg-primary-bg text-gray-700 text-lg leading-tight absolute left-0 z-50 px-2 pb-2 top-18 shadow-lg flex flex-col">
           {autoCompleteVariants.map((variant, index) => (
             <button
               key={variant}

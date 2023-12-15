@@ -24,9 +24,9 @@ export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onCli
       value={option}
       onClick={handleClick}
       className={classNames(
-        selectedOption === option ? 'bg-gray-200' : 'hover:bg-gray-100',
+        selectedOption === option ? 'bg-primary-card-hover' : 'hover:bg-primary-card-hover',
         'py-2',
-        'text-gray-800',
+        'text-white',
         'flex justify-start px-3 m-2 rounded-md',
         'text-lg'
       )}

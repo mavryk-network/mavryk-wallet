@@ -267,7 +267,8 @@ module.exports = {
     divideOpacity: theme => theme('borderOpacity'),
     divideWidth: theme => theme('borderWidth'),
     fill: {
-      current: 'currentColor'
+      current: 'currentColor',
+      'accent-blue': '#5F58FF'
     },
     flex: {
       1: '1 1 0%',
@@ -367,6 +368,7 @@ module.exports = {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
       'accent-blue': '#5F58FF',
+      white: '#f4f4f4',
       gray: '#AAA',
       orange: '#ED8936',
       cyan: '#B9EEFE'

@@ -1,4 +1,14 @@
-import React, { ComponentProps, FC, ReactNode, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  ComponentProps,
+  FC,
+  ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import classNames from 'clsx';
 
@@ -37,6 +47,11 @@ const PageLayout: FC<PageLayoutProps> = ({
 }) => {
   const { fullPage } = useAppEnv();
 
+  const style = useMemo(
+    () => (!isTopbarVisible ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle),
+    [contentContainerStyle, isTopbarVisible]
+  );
+
   return (
     <>
       <DocBg bgClassName="bg-primary-bg" />
@@ -46,7 +61,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="px-4 pt-4 pb-8" style={contentContainerStyle}>
+          <div className="px-4 pt-4 pb-8" style={style}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>

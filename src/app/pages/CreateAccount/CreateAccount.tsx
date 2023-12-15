@@ -87,8 +87,6 @@ const CreateAccount: FC = () => {
           <T id="createAccount" />
         </>
       }
-      // 56px is the height of the topbar with title
-      contentContainerStyle={{ height: 'calc(100vh - 56px)' }}
       isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start">

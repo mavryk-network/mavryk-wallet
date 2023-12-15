@@ -5,7 +5,7 @@ import { Link } from 'lib/woozie';
 export interface ActionButtonProps {
   linkTo: string;
   state?: any;
-  onClick: () => void;
+  onClick?: () => void;
   testID: string;
   children: React.ReactNode;
 }

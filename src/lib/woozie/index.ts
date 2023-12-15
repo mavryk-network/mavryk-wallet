@@ -12,16 +12,16 @@ export { Provider } from './Provider';
 export { Link } from './Link';
 export { Redirect } from './Redirect';
 
-export function navigate(to: To, action?: HistoryAction.Push | HistoryAction.Replace) {
+export function navigate<G = any>(to: To, action?: HistoryAction.Push | HistoryAction.Replace, state?: G) {
   const lctn = createLocationState();
   const lctnUpdates = createLocationUpdates(to, lctn);
 
-  const { pathname, search, hash, state } = lctnUpdates;
+  const { pathname, search, hash, state: internalState } = lctnUpdates;
   const url = createUrl(pathname, search, hash);
 
   if (!action) {
     action = url === createUrl(lctn.pathname, lctn.search, lctn.hash) ? HistoryAction.Replace : HistoryAction.Push;
   }
-
-  changeState(action, state, url);
+  const mergedState = internalState ? { ...internalState, ...state } : state;
+  changeState(action, mergedState, url);
 }

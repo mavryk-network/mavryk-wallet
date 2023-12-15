@@ -23,6 +23,7 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const CreateAccount: FC = () => {
   const { createAccount } = useTempleClient();
+
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('CreateAccount');
@@ -42,7 +43,10 @@ const CreateAccount: FC = () => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current < accLength) {
       setAccountPkh(allAccounts[accLength - 1].publicKeyHash);
-      navigate('/');
+      navigate('/success', undefined, {
+        pageTitle: 'createAccount',
+        description: 'Your new account was successfully added'
+      });
     }
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);

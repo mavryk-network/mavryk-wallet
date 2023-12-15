@@ -7,16 +7,18 @@ import Identicon from 'app/atoms/Identicon';
 import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
+import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useTempleClient, useAccount } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
+import { navigate } from 'lib/woozie';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
 import AccountDropdown from './Header/AccountDropdown';
 import AccountPopup from './Header/AccountPopup';
-import NetworkSelect from './Header/NetworkSelect';
+// import NetworkSelect from './Header/NetworkSelect';
 
 const Header: FC = () => {
   const appEnv = useAppEnv();
@@ -47,6 +49,15 @@ const Control: FC = () => {
 
   const open = useCallback(() => {
     setShowAccountsPopup(true);
+  }, []);
+
+  // TODO remove test logic
+  const handleScreenClick = useCallback(() => {
+    navigate<SuccessStateType>('/success', undefined, {
+      pageTitle: 'account',
+      subHeader: 'accountActivated',
+      btnText: 'accountName'
+    });
   }, []);
 
   return (
@@ -98,6 +109,9 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
+        <button className="text-white text-2xl" onClick={handleScreenClick}>
+          Open Success Screen
+        </button>
       </div>
       <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />

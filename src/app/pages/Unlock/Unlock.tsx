@@ -115,10 +115,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   }, [timelock, lockLevel, setTimeLock]);
 
   return (
-    <PageWithImageBg
-      title={<T id="unlockWallet" />}
-      label={"unlockWallet"}
-    >
+    <PageWithImageBg title={<T id="unlockWallet" />} label={'unlockWallet'}>
       {isDisabled && (
         <Alert
           type="error"
@@ -130,7 +127,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
       <form ref={formRef} className="w-full max-w-sm mx-auto my-5" onSubmit={handleSubmit(onSubmit)}>
         <FormField
           ref={register({ required: t('required') })}
-          label={t('password')}
+          label={''}
           labelDescription={t('unlockPasswordInputDescription')}
           id="unlock-password"
           type="password"

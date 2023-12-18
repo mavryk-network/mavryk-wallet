@@ -2,11 +2,10 @@ import React, { FC, useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import Spinner from 'app/atoms/Spinner/Spinner';
 import { setAnotherSelector } from 'lib/analytics';
 
+import { ButtonRounded } from '../molecules/ButtonRounded';
 import { ButtonProps } from './Button';
-import { ButtonRounded } from "../molecules/ButtonRounded";
 
 interface FormSubmitButtonProps extends ButtonProps {
   keepChildrenWhenLoading?: boolean;
@@ -40,9 +39,7 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
   const otherProps = useMemo(() => (loading ? setAnotherSelector('loading', '') : null), [loading]);
 
   return (
-    <ButtonRounded className={classNameMemo} disabled={disabled} {...rest} {...otherProps}>
-      {loading && <Spinner theme="white" className={small ? 'w-8' : 'w-12'} />}
-
+    <ButtonRounded className={classNameMemo} disabled={disabled} isLoading={loading} {...rest} {...otherProps}>
       {loading ? keepChildrenWhenLoading && children : children}
     </ButtonRounded>
   );

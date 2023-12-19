@@ -17,8 +17,8 @@ import { Link } from 'lib/woozie';
 import { ABTestGroup } from '../../../lib/apis/temple';
 import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
+import PageWithImageBg from '../../templates/PageWithImageBg';
 import { UnlockSelectors } from './Unlock.selectors';
-import PageWithImageBg from "../../layouts/PageWithImageBg";
 
 interface UnlockProps {
   canImportNew?: boolean;

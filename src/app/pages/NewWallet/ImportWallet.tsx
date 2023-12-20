@@ -41,7 +41,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
 
   return (
     <PageLayout
-      pageTitle={t('importWallet')}
+      pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
       isTopbarVisible={fullPage}
       contentContainerStyle={{ padding: fullPage ? 0 : 16 }}
     >

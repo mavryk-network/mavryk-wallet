@@ -68,16 +68,16 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           'flex justify-center items-center flex-shrink-0',
           'text-white border overflow-hidden',
           'transition ease-in-out duration-200 disable-outline-for-click',
-          localChecked ? 'bg-primary-orange' : 'bg-black-40',
+          // localChecked ? 'bg-primary-orange' : 'bg-black-40',
           localFocused && 'shadow-outline',
           (() => {
             switch (true) {
               case localChecked:
-                return 'border-primary-orange-dark';
+                return 'border-accent-blue';
               case localFocused:
-                return 'border-primary-orange';
+                return 'border-eccent-blue';
               case errored:
-                return 'border-red-400';
+                return 'border-primary-error';
               default:
                 return 'border-gray-400';
             }
@@ -101,7 +101,10 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         />
 
         <OkIcon
-          className={clsx('h-4/6 w-4/6 stroke-2 stroke-current pointer-events-none', localChecked ? 'block' : 'hidden')}
+          className={clsx(
+            'h-4/6 w-4/6 stroke-2 stroke-accent-blue pointer-events-none',
+            localChecked ? 'block' : 'hidden'
+          )}
         />
       </div>
     );

@@ -3093,6 +3093,9 @@
   "createAccountSuccess": {
     "message": "Your new account was successfully added"
   },
+  "restoreAccountSuccess": {
+    "message": "Your account was successfully restored"
+  },
   "words": {
     "message": "$count$ words",
     "placeholders": {
@@ -3100,5 +3103,8 @@
         "content": "$1"
       }
     }
+  },
+  "restoreAccount": {
+    "message": "Restore Account"
   }
 }

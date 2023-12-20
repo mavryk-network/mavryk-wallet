@@ -144,6 +144,8 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
     return result;
   }, []);
 
+  const hasError = Boolean(seedError) || Boolean(wordSpellingErrorsCount) || pasteFailed;
+
   return (
     <div>
       <div className="flex justify-between mb-6">
@@ -186,7 +188,13 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         <p>{t('seedPhraseTip')}</p>
       </div>
 
-      <div className={classNames('grid', isFirstAccount ? 'grid-cols-3 gap-4' : 'grid-cols-2 gap-2')}>
+      <div
+        className={classNames(
+          'grid',
+          hasError ? 'mb-0' : 'mb-8',
+          isFirstAccount ? 'grid-cols-3 gap-4' : 'grid-cols-2 gap-2'
+        )}
+      >
         {[...Array(numberOfWords).keys()].map(index => {
           const key = `import-seed-word-${index}`;
 
@@ -215,24 +223,26 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         })}
       </div>
 
-      <div
-        className="h-12 mt-4 mb-6 text-xs text-red-700"
-        {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
-      >
-        {submitted && seedError && <div>{seedError}</div>}
+      {hasError && (
+        <div
+          className="h-12 mt-4 mb-6 text-xs text-red-700"
+          {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
+        >
+          {submitted && seedError && <div>{seedError}</div>}
 
-        {wordSpellingErrorsCount > 0 && (
-          <div>
-            <T id="mnemonicWordsError" />
-          </div>
-        )}
+          {wordSpellingErrorsCount > 0 && (
+            <div>
+              <T id="mnemonicWordsError" />
+            </div>
+          )}
 
-        {pasteFailed && (
-          <div>
-            <T id="seedPasteFailedTooManyWords" />
-          </div>
-        )}
-      </div>
+          {pasteFailed && (
+            <div>
+              <T id="seedPasteFailedTooManyWords" />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -12,6 +12,8 @@ import {
   specialCharacterRegx,
   uppercaseLowercaseMixtureRegx
 } from 'app/defaults';
+import { useAppEnv } from 'app/env';
+import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import {
@@ -56,6 +58,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   keystorePassword
 }) => {
   const { registerWallet } = useTempleClient();
+  const { popup } = useAppEnv();
   const { trackEvent } = useAnalytics();
 
   const dispatch = useDispatch();
@@ -154,7 +157,17 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         if (shouldEnableWebsiteAnalytics) {
           trackEvent('AnalyticsAndAdsEnabled', AnalyticsEventCategory.General, { accountPkh }, data.analytics);
         }
-        navigate('/loading');
+
+        if (popup) {
+          navigate<SuccessStateType>('/success', undefined, {
+            pageTitle: 'restoreAccount',
+            btnText: 'goToMain',
+            description: 'restoreAccountSuccess',
+            subHeader: 'success'
+          });
+        } else {
+          navigate('/loading');
+        }
         !ownMnemonic && dispatch(setOnRampPossibilityAction(true));
         dispatch(shouldShowNewsletterModalAction(true));
       } catch (err: any) {
@@ -181,7 +194,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
   return (
     <form
-      className={classNames('w-full max-w-sm mx-auto my-8', ownMnemonic && 'pb-20')}
+      className={classNames('w-full max-w-sm mx-auto my-8', ownMnemonic && 'pb-8')}
       onSubmit={handleSubmit(onSubmit)}
     >
       {ownMnemonic && isImportFromKeystoreFile && (
@@ -202,7 +215,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             testID={setWalletPasswordSelectors.useFilePasswordCheckBox}
           />
           {shouldUseKeystorePassword && isKeystorePasswordWeak && (
-            <div className="text-xs text-red-500">
+            <div className="text-xs text-primary-error">
               <T id="weakKeystorePassword" />
             </div>
           )}
@@ -335,7 +348,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             ]}
           />
         }
-        containerClassName="mb-8"
+        containerClassName="mb-4"
       />
 
       <FormSubmitButton

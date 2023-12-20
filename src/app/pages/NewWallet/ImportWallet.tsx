@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { TID, t } from 'lib/i18n';
 
@@ -30,6 +31,7 @@ const importWalletOptions: {
 
 export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' }) => {
   const { locked } = useTempleClient();
+  const { fullPage } = useAppEnv();
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [keystorePassword, setKeystorePassword] = useState('');
@@ -38,8 +40,17 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
   const isImportFromSeedPhrase = tabSlug === 'seed-phrase';
 
   return (
-    <PageLayout pageTitle={t('importWallet')} contentContainerStyle={{ padding: 0 }}>
-      <ImportTabSwitcher tabs={importWalletOptions} activeTabSlug={tabSlug} urlPrefix="/import-wallet" />
+    <PageLayout
+      pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
+      isTopbarVisible={fullPage}
+      contentContainerStyle={{ padding: fullPage ? 0 : 16 }}
+    >
+      <ImportTabSwitcher
+        tabs={importWalletOptions}
+        activeTabSlug={tabSlug}
+        urlPrefix="/import-wallet"
+        fullPage={fullPage}
+      />
       <LockedWalletExists locked={locked} />
       {isImportFromSeedPhrase ? (
         isSeedEntered ? (

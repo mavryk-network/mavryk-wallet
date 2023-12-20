@@ -11,7 +11,7 @@ module.exports = {
   separator: ':',
   theme: {
     screens: {
-      sm: '675px',
+      sm: '640px',
       md: '768px',
       lg: '1024px',
       xl: '1280px'
@@ -38,11 +38,14 @@ module.exports = {
           300: '#e2e8f0',
           350: '#d8e0e8',
           400: '#cbd5e0',
+
           500: '#a0aec0',
           600: '#718096',
           700: '#4a5568',
+          710: '#323232',
           800: '#2d3748',
           850: '#212e36',
+          890: '#292929',
           900: '#202020',
           910: '#171717',
           920: '#010101'
@@ -166,16 +169,20 @@ module.exports = {
         'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
+        'primary-card-hover': baseColors.gray[890],
         'secondary-card': baseColors.gray[910],
         'primary-bg': baseColors.gray[920],
         'primary-divider': baseColors.divider,
         'primary-success': baseColors.green[910],
         'primary-error': baseColors.red[700],
-        'primary-border': 'rgba(255, 255, 255, 0.25)',
         'accent-orange': baseColors.orange[600],
+
+        'list-item-selected': baseColors.gray[710],
+        // with opacity
+        'primary-card-op': 'rgba(0, 0, 0, 0.50)',
+        'primary-border': 'rgba(255, 255, 255, 0.25)',
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
-        'primary-black': '#000000',
         // --
         'primary-orange': baseColors.orange[500],
         'primary-orange-light': baseColors.orange[300],
@@ -209,7 +216,7 @@ module.exports = {
     },
     borderColor: theme => ({
       ...theme('colors'),
-      DEFAULT: theme('colors.gray.300', 'currentColor')
+      DEFAULT: theme('colors["primary-border"]', 'currentColor')
     }),
     borderOpacity: theme => theme('opacity'),
     borderRadius: {
@@ -243,7 +250,7 @@ module.exports = {
       xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-      outline: '0 0 0 3px rgba(95, 88, 255, 0.5)',
+      outline: '0 0 0 3px rgba(237, 137, 54, 0.5)',
       none: 'none'
     },
     container: {},
@@ -260,7 +267,8 @@ module.exports = {
     divideOpacity: theme => theme('borderOpacity'),
     divideWidth: theme => theme('borderWidth'),
     fill: {
-      current: 'currentColor'
+      current: 'currentColor',
+      'accent-blue': '#5F58FF'
     },
     flex: {
       1: '1 1 0%',
@@ -359,7 +367,9 @@ module.exports = {
     stroke: {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
-      gray: '#AEAEB2',
+      'accent-blue': '#5F58FF',
+      white: '#f4f4f4',
+      gray: '#AAA',
       orange: '#ED8936',
       cyan: '#B9EEFE'
     },
@@ -598,6 +608,14 @@ module.exports = {
       fontSize: {
         xxxs: '0.625rem',
         xxs: '0.6875rem',
+        xs: [
+          '0.75rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: '-0.24px',
+            fontWeight: '400'
+          }
+        ],
         '2xs': '0.8125rem',
         ulg: '1.0625rem',
         sm: [
@@ -605,6 +623,14 @@ module.exports = {
           {
             lineHeight: 'normal',
             letterSpacing: '-0.28px',
+            fontWeight: '400'
+          }
+        ],
+        base: [
+          '1rem',
+          {
+            lineHeight: 'normal',
+            letterSpacing: 'normal',
             fontWeight: '400'
           }
         ],
@@ -628,6 +654,7 @@ module.exports = {
         ]
       },
       spacing: {
+        10: '0.625rem',
         13: '3.25rem',
         15: '3.75rem',
         18: '4.5rem',
@@ -638,6 +665,7 @@ module.exports = {
         35: '8.75rem',
         60.5: '15.125rem',
         63: '15.75rem',
+        500: '31.25rem',
         max: '100%'
       },
       height: theme => theme('spacing'),

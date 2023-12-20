@@ -9,7 +9,7 @@
     "message": "🔐💰Cryptocurrency wallet for Tezos blockchain as Web Extension for your Browser."
   },
   "createAccount": {
-    "message": "Create or Restore account"
+    "message": "Add account"
   },
   "importAccount": {
     "message": "Import account"
@@ -119,6 +119,12 @@
   "accounts": {
     "message": "Accounts"
   },
+  "selectAccount": {
+    "message": "Select an account"
+  },
+  "addRestoreAccount": {
+    "message": "Add or Restore Account"
+  },
   "lock": {
     "message": "Lock"
   },
@@ -127,6 +133,9 @@
   },
   "networks": {
     "message": "Networks"
+  },
+  "here": {
+    "message": "here"
   },
   "back": {
     "message": "Back"
@@ -3077,5 +3086,25 @@
   },
   "viewAdsDescription": {
     "message": "I agree to share data(wallet address, IP) and get cashback at Temple Keys for viewing ads"
+  },
+  "goToMain": {
+    "message": "Go to Main"
+  },
+  "createAccountSuccess": {
+    "message": "Your new account was successfully added"
+  },
+  "restoreAccountSuccess": {
+    "message": "Your account was successfully restored"
+  },
+  "words": {
+    "message": "$count$ words",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "restoreAccount": {
+    "message": "Restore Account"
   }
 }

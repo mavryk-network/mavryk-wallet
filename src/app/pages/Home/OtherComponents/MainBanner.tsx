@@ -1,13 +1,13 @@
-import React, { memo, FC, useMemo } from 'react';
+import React, { memo, FC } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
+// import { useDispatch } from 'react-redux';
 
-import { Button } from 'app/atoms';
+// import { Button } from 'app/atoms';
 import Money from 'app/atoms/Money';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { toggleBalanceModeAction } from 'app/store/settings/actions';
+// import { toggleBalanceModeAction } from 'app/store/settings/actions';
 import { useBalanceModeSelector } from 'app/store/settings/selectors';
 import { BalanceMode } from 'app/store/settings/state';
 import AddressChip from 'app/templates/AddressChip';
@@ -16,14 +16,15 @@ import Balance from 'app/templates/Balance';
 import InFiat from 'app/templates/InFiat';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { useFiatCurrency } from 'lib/fiat-currency';
-import { t, T } from 'lib/i18n';
-import { TezosLogoIcon } from 'lib/icons';
+// import { t } from 'lib/i18n';
+// import { TezosLogoIcon } from 'lib/icons';
 import { getAssetName, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { useGasToken, useNetwork } from 'lib/temple/front';
 import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
-import useTippy from 'lib/ui/useTippy';
+// import useTippy from 'lib/ui/useTippy';
 
 import { HomeSelectors } from '../Home.selectors';
+import styles from './MainBanner.module.css';
 import { TokenPageSelectors } from './TokenPage.selectors';
 
 interface Props {
@@ -46,7 +47,12 @@ interface TotalVolumeBannerProps {
 }
 
 const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
-  <div className="bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto">
+  <div
+    className={classNames(
+      styles.banner,
+      'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto mb-4'
+    )}
+  >
     <BalanceInfo />
     <div className="flex justify-between items-center w-full">
       <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
@@ -56,7 +62,7 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
 );
 
 const BalanceInfo: FC = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const network = useNetwork();
   const { totalBalanceInFiat, totalBalanceInGasToken } = useTotalBalance();
   const balanceMode = useBalanceModeSelector();
@@ -69,21 +75,21 @@ const BalanceInfo: FC = () => {
     metadata: { name: gasTokenName, symbol: gasTokenSymbol }
   } = useGasToken();
 
-  const tippyProps = useMemo(
-    () => ({
-      trigger: 'mouseenter',
-      hideOnClick: false,
-      content: t('showInGasOrFiat', [fiatName, gasTokenSymbol]),
-      animation: 'shift-away-subtle'
-    }),
-    []
-  );
+  // const tippyProps = useMemo(
+  //   () => ({
+  //     trigger: 'mouseenter',
+  //     hideOnClick: false,
+  //     content: t('showInGasOrFiat', [fiatName, gasTokenSymbol]),
+  //     animation: 'shift-away-subtle'
+  //   }),
+  //   []
+  // );
 
-  const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
+  // const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
 
-  const nextBalanceMode = balanceMode === BalanceMode.Fiat ? BalanceMode.Gas : BalanceMode.Fiat;
+  // const nextBalanceMode = balanceMode === BalanceMode.Fiat ? BalanceMode.Gas : BalanceMode.Fiat;
 
-  const handleTvlModeToggle = () => dispatch(toggleBalanceModeAction(nextBalanceMode));
+  // const handleTvlModeToggle = () => dispatch(toggleBalanceModeAction(nextBalanceMode));
 
   const isMainNetwork = network.type === 'main';
   const isFiatMode = balanceMode === BalanceMode.Fiat;

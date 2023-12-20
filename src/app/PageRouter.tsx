@@ -30,6 +30,7 @@ import { Notifications, NotificationsItem } from 'lib/notifications';
 import { useTempleClient } from 'lib/temple/front';
 import * as Woozie from 'lib/woozie';
 
+import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
 
 interface RouteContext {
@@ -45,11 +46,13 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   [
     '/import-wallet/:tabSlug?',
     (p, ctx) => {
+      console.log(p, 'p');
+      console.log(ctx, 'ctx');
       switch (true) {
-        case ctx.ready:
+        case ctx.ready && ctx.locked:
           return Woozie.SKIP;
 
-        case !ctx.fullPage:
+        case !ctx.fullPage && ctx.locked:
           return <OpenInFullPage />;
 
         default:
@@ -96,6 +99,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
   ['/notifications', onlyReady(() => <Notifications />)],
   ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
+  ['/success', onlyReady(() => <SuccessScreen />)],
   ['*', () => <Woozie.Redirect to="/" />]
 ]);
 

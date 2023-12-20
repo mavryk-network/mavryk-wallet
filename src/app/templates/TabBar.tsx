@@ -6,6 +6,8 @@ import { TestIDProps } from 'lib/analytics';
 import { T, TID } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
+import styles from './TabBar.module.css';
+
 interface Props {
   activeTabName: string;
   tabs: TabInterface[];
@@ -37,12 +39,10 @@ const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, withOutline
     to={lctn => ({ ...lctn, search: `?tab=${name}` })}
     replace
     className={clsx(
-      'flex1 w-full text-center cursor-pointer py-2 border-t-3',
-      'text-gray-500 text-xs font-medium truncate',
+      'flex1 w-full text-center cursor-pointer pb-2',
+      'text-base-plus truncate',
       'transition ease-in-out duration-300',
-      active
-        ? 'border-primary-orange text-primary-orange'
-        : clsx('hover:text-primary-orange', withOutline ? 'border-gray-100' : 'border-transparent')
+      active ? clsx('text-white', styles.tab) : 'text-secondary-white'
     )}
     testID={testID}
     testIDProperties={testIDProperties}

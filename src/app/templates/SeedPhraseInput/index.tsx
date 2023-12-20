@@ -144,19 +144,21 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
     return result;
   }, []);
 
+  const hasError = Boolean(seedError) || Boolean(wordSpellingErrorsCount) || pasteFailed;
+
   return (
     <div>
       <div className="flex justify-between mb-6">
         <h1
           className={classNames(
-            'font-inter flex self-center text-gray-910',
-            isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
+            'font-inter flex self-center text-white text-base-plus'
+            // isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
           )}
         >
           <T id="seedPhrase" />
         </h1>
 
-        <div className="relative w-64 h-10" style={{ width: popup ? 220 : undefined }}>
+        <div className={classNames('relative', popup ? 'w-40 h-12' : 'w-64 h-10')}>
           <SeedLengthSelect
             options={numberOfWordsOptions}
             currentOption={draftSeed.length.toString()}
@@ -182,11 +184,17 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         <div className="text-xs font-medium text-red-600 text-center whitespace-pre-line mb-6">{labelWarning}</div>
       )}
 
-      <div className="w-full text-center pb-2 mb-6 text-gray-700 border-b-2" style={{ borderBottomWidth: 1 }}>
+      <div className="w-full text-center pb-2 mb-4 text-secondary-white border-b-2" style={{ borderBottomWidth: 1 }}>
         <p>{t('seedPhraseTip')}</p>
       </div>
 
-      <div className={classNames('grid', isFirstAccount ? 'grid-cols-3 gap-4' : 'grid-cols-2 gap-2')}>
+      <div
+        className={classNames(
+          'grid',
+          hasError ? 'mb-0' : 'mb-8',
+          isFirstAccount ? 'grid-cols-3 gap-4' : 'grid-cols-2 gap-2'
+        )}
+      >
         {[...Array(numberOfWords).keys()].map(index => {
           const key = `import-seed-word-${index}`;
 
@@ -215,24 +223,26 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         })}
       </div>
 
-      <div
-        className="h-12 mt-4 mb-6 text-xs text-red-700"
-        {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
-      >
-        {submitted && seedError && <div>{seedError}</div>}
+      {hasError && (
+        <div
+          className="h-12 mt-4 mb-6 text-xs text-red-700"
+          {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
+        >
+          {submitted && seedError && <div>{seedError}</div>}
 
-        {wordSpellingErrorsCount > 0 && (
-          <div>
-            <T id="mnemonicWordsError" />
-          </div>
-        )}
+          {wordSpellingErrorsCount > 0 && (
+            <div>
+              <T id="mnemonicWordsError" />
+            </div>
+          )}
 
-        {pasteFailed && (
-          <div>
-            <T id="seedPasteFailedTooManyWords" />
-          </div>
-        )}
-      </div>
+          {pasteFailed && (
+            <div>
+              <T id="seedPasteFailedTooManyWords" />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

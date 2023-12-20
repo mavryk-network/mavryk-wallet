@@ -12,7 +12,7 @@ export type ButtonRoundedProps = React.PropsWithRef<
 > & { size?: ButtonRoundedSizeType; isLoading?: boolean; fill?: boolean } & TestIDProps;
 
 const btnSmall = 'px-4 py-2 text-base-plus text-primary-white rounded-2xl-plus';
-const btnBig = 'px-11 py-[14px] text-base-plus text-primary-white rounded-full';
+const btnBig = 'px-11 py-3.5 text-base-plus text-primary-white rounded-full';
 
 export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedProps>(
   (
@@ -48,7 +48,9 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           size === 'small' && btnSmall,
           size === 'big' && btnBig,
           disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed',
-          fill ? 'bg-accent-blue hover:bg-accent-blue-hover' : 'bg-transparent',
+          fill
+            ? 'bg-accent-blue hover:bg-accent-blue-hover'
+            : 'bg-transparent  border-2 border-solid border-accent-blue',
           isLoading && ' flex justify-center w-24 align-middle',
           className
         )}

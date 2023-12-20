@@ -7,16 +7,16 @@ import { t } from 'lib/i18n';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 import useTippy from 'lib/ui/useTippy';
 
-const TEXT_SHADES = {
-  500: 'text-gray-500',
-  600: 'text-gray-600',
-  700: 'text-gray-700'
-};
+// const TEXT_SHADES = {
+//   500: 'text-gray-500',
+//   600: 'text-gray-600',
+//   700: 'text-gray-700'
+// };
 
-const BG_SHADES = {
-  100: 'bg-gray-100 hover:bg-gray-200',
-  200: 'bg-gray-200 hover:bg-gray-300'
-};
+// const BG_SHADES = {
+//   100: 'bg-gray-100 hover:bg-gray-200',
+//   200: 'bg-gray-200 hover:bg-gray-300'
+// };
 
 export type CopyButtonProps = HTMLAttributes<HTMLButtonElement> &
   TestIDProps & {

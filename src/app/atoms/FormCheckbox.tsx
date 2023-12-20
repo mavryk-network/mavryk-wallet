@@ -43,9 +43,8 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
       <div className={classNames('flex flex-col', containerClassName)}>
         <label
           className={classNames(
-            'flex items-center mb-2 p-4',
-            'bg-gray-100 border-2 border-gray-300',
-            'rounded-md overflow-hidden cursor-pointer',
+            'flex items-center mb-2 p-2',
+            'rounded-md overflow-hidden cursor-pointer bg-primary-bg',
             labelClassName
           )}
           {...setTestID(testID)}
@@ -54,14 +53,16 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
 
           {label && (
             <div className="ml-4 leading-tight flex flex-col">
-              <span className="text-sm font-semibold text-gray-700">{label}</span>
+              <span className="text-sm font-semibold text-white">{label}</span>
 
-              {labelDescription && <span className="mt-1 text-xs font-light text-gray-600">{labelDescription}</span>}
+              {labelDescription && (
+                <span className="mt-1 text-xs font-light text-secondary-white">{labelDescription}</span>
+              )}
             </div>
           )}
         </label>
 
-        {errorCaption && <div className="text-xs text-red-500">{errorCaption}</div>}
+        {errorCaption && <div className="text-xs text-primary-error">{errorCaption}</div>}
       </div>
     );
   }

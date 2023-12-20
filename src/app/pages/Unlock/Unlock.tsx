@@ -15,6 +15,7 @@ import { delay } from 'lib/utils';
 import { Link } from 'lib/woozie';
 
 import { ABTestGroup } from '../../../lib/apis/temple';
+import PageWithImageBg from '../../layouts/PageWithImageBg';
 import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import PageWithImageBg from '../../templates/PageWithImageBg';

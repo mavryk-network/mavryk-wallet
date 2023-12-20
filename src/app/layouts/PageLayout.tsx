@@ -1,4 +1,14 @@
-import React, { ComponentProps, FC, ReactNode, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  ComponentProps,
+  FC,
+  ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import classNames from 'clsx';
 
@@ -26,22 +36,32 @@ import { OnRampOverlay } from './PageLayout/OnRampOverlay/OnRampOverlay';
 
 interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentContainerStyle?: React.CSSProperties;
+  isTopbarVisible?: boolean;
 }
 
-const PageLayout: FC<PageLayoutProps> = ({ children, contentContainerStyle, ...toolbarProps }) => {
+const PageLayout: FC<PageLayoutProps> = ({
+  children,
+  contentContainerStyle,
+  isTopbarVisible = true,
+  ...toolbarProps
+}) => {
   const { fullPage } = useAppEnv();
+
+  const style = useMemo(
+    () => (!isTopbarVisible ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle),
+    [contentContainerStyle, isTopbarVisible]
+  );
 
   return (
     <>
-      <DocBg bgClassName="bg-primary-orange" />
+      <DocBg bgClassName="bg-primary-bg" />
 
       <div className={classNames(fullPage && 'pb-20', 'relative')}>
-        <Header />
-
+        {isTopbarVisible && <Header />}
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="p-4" style={contentContainerStyle}>
+          <div className="px-4 pt-4 pb-8" style={style}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>
@@ -68,7 +88,7 @@ const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, 
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-white rounded-md shadow-lg', className)}
+        className={classNames('bg-primary-bg rounded-md shadow-lg h-full', className)}
         style={{ minHeight: '20rem', ...style }}
         {...rest}
       >
@@ -76,7 +96,7 @@ const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, 
       </div>
     </ContentContainer>
   ) : (
-    <ContentContainer padding={false} className={classNames('bg-white', className)} style={style} {...rest}>
+    <ContentContainer padding={false} className={classNames('bg-primary-bg', className)} style={style} {...rest}>
       {children}
     </ContentContainer>
   );
@@ -126,6 +146,7 @@ const Toolbar: FC<ToolbarProps> = ({
   const isBackButtonAvailable = canBack || canStepBack;
 
   const handleBack = () => {
+    console.log('here');
     if (canBack) {
       return goBack();
     }
@@ -164,10 +185,10 @@ const Toolbar: FC<ToolbarProps> = ({
     <div
       ref={updateRootRef}
       className={classNames(
-        'sticky z-20 flex items-center py-2 px-4',
+        'sticky z-20 flex items-center py-4 px-4',
         fullPage && !sticked && 'rounded-t',
         sticked ? 'shadow' : 'shadow-sm',
-        'bg-gray-100 overflow-hidden transition ease-in-out duration-300'
+        'bg-primary-card overflow-hidden transition ease-in-out duration-300'
       )}
       style={{
         // The top value needs to be -1px or the element will never intersect
@@ -183,25 +204,24 @@ const Toolbar: FC<ToolbarProps> = ({
         {isBackButtonAvailable && (
           <Button
             className={classNames(
-              'rounded px-2 py-1',
+              'text-white rounded',
               'flex items-center',
-              'text-gray-600 text-shadow-black',
-              'text-sm font-semibold leading-none',
-              'hover:bg-black hover:bg-opacity-5',
+              'hover:bg-list-item-selected',
               'transition duration-300 ease-in-out',
               'opacity-90 hover:opacity-100'
             )}
             onClick={step ? onStepBack : handleBack}
             testID={PageLayoutSelectors.backButton}
           >
-            <ChevronLeftIcon className="-ml-2 h-5 w-auto stroke-current stroke-2" />
-            <T id="back" />
+            <ChevronLeftIcon className="h-6 w-auto stroke-current stroke-2" />
           </Button>
         )}
       </div>
 
       {pageTitle && (
-        <h2 className="px-1 flex items-center text-ulg text-gray-700 font-normal overflow-hidden">{pageTitle}</h2>
+        <h2 className="px-1 flex items-center text-xl leading-5 tracking-tight text-white font-normal overflow-hidden">
+          {pageTitle}
+        </h2>
       )}
 
       <div className="flex-1" />

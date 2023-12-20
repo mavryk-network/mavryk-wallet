@@ -9,12 +9,13 @@ import { To, createLocationUpdates, useLocation } from './location';
 interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, TestIDProps {
   to: To;
   replace?: boolean;
+  state?: any;
 }
 
-export const Link: FC<LinkProps> = ({ to, replace, ...rest }) => {
+export const Link: FC<LinkProps> = ({ to, replace, state = {}, ...rest }) => {
   const lctn = useLocation();
 
-  const { pathname, search, hash, state } = useMemo(() => createLocationUpdates(to, lctn), [to, lctn]);
+  const { pathname, search, hash, state: internalState } = useMemo(() => createLocationUpdates(to, lctn), [to, lctn]);
 
   const url = useMemo(() => createUrl(pathname, search, hash), [pathname, search, hash]);
 
@@ -23,8 +24,8 @@ export const Link: FC<LinkProps> = ({ to, replace, ...rest }) => {
   const handleNavigate = useCallback(() => {
     const action =
       replace || url === createUrl(lctn.pathname, lctn.search, lctn.hash) ? HistoryAction.Replace : HistoryAction.Push;
-    changeState(action, state, url);
-  }, [replace, state, url, lctn]);
+    changeState(action, { ...internalState, ...state }, url);
+  }, [replace, url, lctn.pathname, lctn.search, lctn.hash, internalState, state]);
 
   return <LinkAnchor {...rest} href={href} onNavigate={handleNavigate} />;
 };

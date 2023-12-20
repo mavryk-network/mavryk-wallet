@@ -1,0 +1,20 @@
+.bgImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.bgImageWrapper::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--img-src);
+  background-color: #010101;
+
+  background-repeat: no-repeat;
+  background-size: cover;
+}

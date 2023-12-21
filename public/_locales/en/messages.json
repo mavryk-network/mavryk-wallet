@@ -1327,12 +1327,10 @@
   "filePassword": {
     "message": "File Password"
   },
-  "filePasswordInputDescription": {
-    "message": "Please enter a password for keystore file"
+  "filePasswordInputPlaceholder": {
+    "message": "Enter file password"
   },
-  "fileInputPrompt": {
-    "message": "Choose a file or drag it here"
-  },
+
   "useKeystorePassword": {
     "message": "Use File Password as Extension password"
   },
@@ -3106,5 +3104,17 @@
   },
   "restoreAccount": {
     "message": "Restore Account"
+  },
+  "fileInputPromptPart1": {
+    "message": "Drag and drop or "
+  },
+  "fileInputPromptPart2": {
+    "message": "Choose file"
+  },
+  "fileInputPromptPart3": {
+    "message": " to upload"
+  },
+  "uploadFile": {
+    "message": "Upload file"
   }
 }

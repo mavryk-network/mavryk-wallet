@@ -5,7 +5,7 @@ import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
 import { ReactComponent as TrashbinIcon } from 'app/icons/bin.svg';
-import { ReactComponent as PaperclipIcon } from 'app/icons/paperclip.svg';
+import { ReactComponent as FileIcon } from 'app/icons/file.svg';
 import { T, t } from 'lib/i18n';
 import { decryptKukaiSeedPhrase } from 'lib/temple/front';
 import { AlertFn, useAlert } from 'lib/ui';
@@ -56,17 +56,14 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8 pb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full h-full max-w-sm mx-auto my-4 pb-8 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
       <label className="mb-4 leading-tight flex flex-col">
-        <span className="text-base font-semibold text-gray-700">
-          <T id="file" />
-        </span>
-        <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-          <T id="keystoreFileFieldDescription" />
+        <span className="text-base-plus font-semibold text-white">
+          <T id="uploadFile" />
         </span>
       </label>
 
-      <div className="w-full mb-10">
+      <div className="w-full mb-4">
         <Controller
           control={control}
           name="keystoreFile"
@@ -85,17 +82,16 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
           required: t('required')
         })}
         label={t('filePassword')}
-        labelDescription={t('filePasswordInputDescription')}
+        placeholder={t('filePasswordInputPlaceholder')}
         id="keystore-password"
         type="password"
         name="keystorePassword"
-        placeholder="********"
         errorCaption={errors.keystorePassword?.message}
         testID={ImportFromKeystoreFileSelectors.filePasswordInput}
       />
       <FormSubmitButton
         loading={submitting}
-        className="w-full my-10 mx-auto"
+        className="w-full mt-auto mx-auto"
         testID={ImportFromKeystoreFileSelectors.nextButton}
       >
         <T id="next" />
@@ -111,35 +107,42 @@ type KeystoreFileInputProps = Pick<FileInputProps, 'value' | 'onChange' | 'name'
 const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clearKeystoreFileInput, onChange }) => {
   const keystoreFile = value?.item?.(0);
 
+  const restoreFileInputText = () => (
+    <span>
+      {t('fileInputPromptPart1')}
+      <span className="text-accent-blue">{t('fileInputPromptPart2')}</span>
+      {t('fileInputPromptPart3')}
+    </span>
+  );
+
   return (
     <FileInput name={name} multiple={false} accept=".tez" onChange={onChange} value={value}>
       <div
         className={classNames(
-          'w-full px-4 py-10 flex flex-col items-center',
-          'border-2 border-dashed border-gray-400 rounded-md',
-          'focus:border-primary-orange',
+          'w-full px-8 pt-6 pb-8 flex flex-col items-center',
+          'border-2 border-dashed border-secondary-white rounded-md',
+          'focus:border-accent-blue',
           'transition ease-in-out duration-200',
-          'text-gray-400 text-lg leading-tight',
-          'placeholder-alphagray'
+          'text-white text-base-plus leading-tight',
+          'placeholder-secondary-white'
         )}
       >
-        <div className="flex flex-row justify-center items-center mb-10">
-          <span className="text-lg leading-tight text-gray-600" style={{ wordBreak: 'break-word' }}>
-            {keystoreFile?.name ?? t('fileInputPrompt')}
+        {keystoreFile ? (
+          <TrashbinIcon
+            className="ml-2 w-8 h-auto text-primary-error stroke-current z-10 cursor-pointer"
+            style={{ minWidth: '1.5rem' }}
+            onClick={clearKeystoreFileInput}
+          />
+        ) : (
+          <FileIcon className="w-8 h-auto mb-4" />
+        )}
+
+        <div className="flex flex-row justify-center items-center mb-2">
+          <span className="text-base-plus leading-tight text-white text-center" style={{ wordBreak: 'break-word' }}>
+            {keystoreFile?.name ?? restoreFileInputText()}
           </span>
-          {keystoreFile ? (
-            <TrashbinIcon
-              className="ml-2 w-6 h-auto text-red-700 stroke-current z-10 cursor-pointer"
-              style={{ minWidth: '1.5rem' }}
-              onClick={clearKeystoreFileInput}
-            />
-          ) : (
-            <PaperclipIcon className="ml-2 w-6 h-auto text-gray-600 stroke-current" />
-          )}
         </div>
-        <div className="w-40 py-3 rounded bg-blue-600 shadow-sm text-center font-semibold text-sm text-white">
-          {t('selectFile')}
-        </div>
+        <span className="text-xs font-light text-secondary-white max-w-9/10">(*.tez)</span>
       </div>
     </FileInput>
   );

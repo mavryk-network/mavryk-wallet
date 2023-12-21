@@ -181,7 +181,9 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       </div>
 
       {labelWarning && (
-        <div className="text-xs font-medium text-red-600 text-center whitespace-pre-line mb-6">{labelWarning}</div>
+        <div className="text-xs font-medium text-primary-error text-center whitespace-pre-line mb-6">
+          {labelWarning}
+        </div>
       )}
 
       <div className="w-full text-center pb-2 mb-4 text-secondary-white border-b-2" style={{ borderBottomWidth: 1 }}>
@@ -192,7 +194,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         className={classNames(
           'grid',
           hasError ? 'mb-0' : 'mb-8',
-          isFirstAccount ? 'grid-cols-3 gap-4' : 'grid-cols-2 gap-2'
+          isFirstAccount ? 'grid-cols-2 gap-4' : 'grid-cols-2 gap-2'
         )}
       >
         {[...Array(numberOfWords).keys()].map(index => {

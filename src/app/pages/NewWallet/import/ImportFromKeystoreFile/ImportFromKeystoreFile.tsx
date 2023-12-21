@@ -34,7 +34,7 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   });
   const submitting = formState.isSubmitting;
 
-  const clearKeystoreFileInput = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+  const clearKeystoreFileInput = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     event.stopPropagation();
     setValue('keystoreFile', undefined);
     triggerValidation('keystoreFile');
@@ -105,7 +105,7 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
 };
 
 type KeystoreFileInputProps = Pick<FileInputProps, 'value' | 'onChange' | 'name'> & {
-  clearKeystoreFileInput: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
+  clearKeystoreFileInput: (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
 };
 
 const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clearKeystoreFileInput, onChange }) => {

@@ -7,6 +7,7 @@ import debounce from 'debounce-promise';
 
 import { FormField, FormFieldElement } from 'app/atoms/FormField';
 import type { TestIDProperty } from 'lib/analytics';
+import { t } from 'lib/i18n';
 
 export interface SeedWordInputProps extends TestIDProperty {
   id: number;
@@ -194,8 +195,8 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
 
   return (
     <div className="flex flex-col relative">
-      <label htmlFor={id.toString()} className="self-center text-gray-500">
-        <p style={{ fontSize: 14 }}>{`#${id + 1}`}</p>
+      <label htmlFor={id.toString()} className="self-left text-base-plus text-white mb-2">
+        <p>{t('word', [`${id + 1}`])}</p>
       </label>
 
       <FormField

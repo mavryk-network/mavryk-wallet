@@ -3,7 +3,7 @@ import React, { FC } from 'react';
 import classNames from 'clsx';
 import Modal from 'react-modal';
 
-import './CustomPopup.css';
+import './customPopup.css';
 
 export type CustomPopupProps = Modal.Props & React.PropsWithChildren;
 

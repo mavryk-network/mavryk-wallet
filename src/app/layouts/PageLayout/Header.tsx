@@ -18,6 +18,8 @@ import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
 import AccountDropdown from './Header/AccountDropdown';
 import AccountPopup from './Header/AccountPopup';
+import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
+import { DAppsPopup } from './Header/DAapsPopup/DAppsPopup';
 // import NetworkSelect from './Header/NetworkSelect';
 
 const Header: FC = () => {
@@ -42,13 +44,22 @@ const Control: FC = () => {
 
   // new
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
+  const [showDAppsPopup, setShowDAppsPopup] = useState(false);
 
   const close = useCallback(() => {
     setShowAccountsPopup(false);
   }, []);
 
+  const closeDappsPopup = useCallback(() => {
+    setShowDAppsPopup(false);
+  }, []);
+
   const open = useCallback(() => {
     setShowAccountsPopup(true);
+  }, []);
+
+  const showDAppsPopupHandler = useCallback(() => {
+    setShowDAppsPopup(true);
   }, []);
 
   return (
@@ -100,9 +111,15 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
+        <DAapsDropdownButton onClick={showDAppsPopupHandler} />
       </div>
+
+      {/* popups */}
       <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
+      </PopupModalWithTitle>
+      <PopupModalWithTitle isOpen={showDAppsPopup} onRequestClose={closeDappsPopup} title={<T id="selectAccount" />}>
+        <DAppsPopup opened={showDAppsPopup} setOpened={setShowDAppsPopup} />
       </PopupModalWithTitle>
     </>
   );

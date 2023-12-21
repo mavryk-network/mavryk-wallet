@@ -4,7 +4,7 @@ import classNames from 'clsx';
 import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form';
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
-import { ReactComponent as TrashbinIcon } from 'app/icons/bin.svg';
+import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as FileIcon } from 'app/icons/file.svg';
 import { T, t } from 'lib/i18n';
 import { decryptKukaiSeedPhrase } from 'lib/temple/front';
@@ -56,7 +56,11 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   );
 
   return (
-    <form className="w-full h-full max-w-sm mx-auto my-4 pb-8 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="w-full max-w-sm mx-auto my-4 pb-8 flex flex-col"
+      style={{ height: 'calc(100% - 46px)' }}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <label className="mb-4 leading-tight flex flex-col">
         <span className="text-base-plus font-semibold text-white">
           <T id="uploadFile" />
@@ -119,30 +123,34 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
     <FileInput name={name} multiple={false} accept=".tez" onChange={onChange} value={value}>
       <div
         className={classNames(
-          'w-full px-8 pt-6 pb-8 flex flex-col items-center',
-          'border-2 border-dashed border-secondary-white rounded-md',
+          'w-full bg-primary-card',
+          keystoreFile ? 'p-4 flex items-center' : 'px-8 pt-6 pb-8 flex flex-col items-center',
+          keystoreFile ? 'border-none rounded-md' : 'border-2 border-dashed border-divider rounded-md',
           'focus:border-accent-blue',
           'transition ease-in-out duration-200',
           'text-white text-base-plus leading-tight',
           'placeholder-secondary-white'
         )}
       >
-        {keystoreFile ? (
-          <TrashbinIcon
-            className="ml-2 w-8 h-auto text-primary-error stroke-current z-10 cursor-pointer"
-            style={{ minWidth: '1.5rem' }}
-            onClick={clearKeystoreFileInput}
-          />
-        ) : (
-          <FileIcon className="w-8 h-auto mb-4" />
-        )}
+        <span className={classNames(keystoreFile && 'p-1 bg-gray-710 rounded mr-2')}>
+          <FileIcon className={classNames(keystoreFile ? 'w-4 h-auto' : 'w-8 h-auto mb-4')} />
+        </span>
 
-        <div className="flex flex-row justify-center items-center mb-2">
+        <div className={classNames('flex flex-row justify-center items-center', !keystoreFile && 'mb-2')}>
           <span className="text-base-plus leading-tight text-white text-center" style={{ wordBreak: 'break-word' }}>
             {keystoreFile?.name ?? restoreFileInputText()}
           </span>
         </div>
-        <span className="text-xs font-light text-secondary-white max-w-9/10">(*.tez)</span>
+        {keystoreFile ? (
+          <span
+            className="border-full ml-auto z-30 cursor-pointer bg-gray-710 rounded-full"
+            onClick={clearKeystoreFileInput}
+          >
+            <CloseIcon className="w-4 h-auto stroke-white" />
+          </span>
+        ) : (
+          <span className="text-xs font-light text-secondary-white max-w-9/10">(*.tez)</span>
+        )}
       </div>
     </FileInput>
   );

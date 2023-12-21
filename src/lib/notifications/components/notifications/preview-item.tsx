@@ -71,7 +71,7 @@ export const NotificationPreviewItem: FC<Props> = ({ notification }) => {
           </p>
 
           <div className="flex row items-center">
-            <p className="mr-1 font-medium font-inter text-xs text-primary-orange">Details</p>
+            <p className="mr-1 font-medium font-aeonik text-xs text-primary-orange">Details</p>
             <ArrowRightIcon width={16} height={16} />
           </div>
         </div>

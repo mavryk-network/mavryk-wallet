@@ -307,7 +307,7 @@ module.exports = {
 
       return {
         ...baseFontFamily,
-        inter: ["'Inter'", ...baseFontFamily.sans]
+        aeonik: ["'Aeonik'", ...baseFontFamily.sans]
       };
     })(),
     fontWeight: {

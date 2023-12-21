@@ -1,5 +1,5 @@
 .title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Aeonik', sans-serif;
   font-weight: 400;
   font-size: 17px;
   text-align: center;
@@ -7,7 +7,7 @@
   color: #4a5568;
 }
 .description {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Aeonik', sans-serif;
   font-weight: 400;
   font-size: 12px;
   text-align: center;
@@ -21,11 +21,11 @@
   color: #718096;
 }
 .exchangeTitle {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Aeonik', sans-serif;
   font-size: 12px;
 }
 .exchangeData {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Aeonik', sans-serif;
   font-size: 12px;
 }
 .privacyAndPolicy {

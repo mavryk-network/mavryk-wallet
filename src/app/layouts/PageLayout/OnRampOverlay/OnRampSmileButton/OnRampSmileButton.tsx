@@ -44,7 +44,7 @@ export const OnRampSmileButton: FC<OnRumpSmileButtonProps> = ({
     >
       <SmileIcon className="w-7 h-auto" />
       <p
-        className={classNames('font-inter font-semibold text-orange-500 mt-1', titleClassName)}
+        className={classNames('font-aeonik font-semibold text-orange-500 mt-1', titleClassName)}
         style={{ fontSize: '1.188rem' }}
       >
         {amount}$

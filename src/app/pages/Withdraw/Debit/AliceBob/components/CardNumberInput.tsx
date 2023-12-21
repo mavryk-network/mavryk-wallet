@@ -25,13 +25,13 @@ export const CardNumberInput: FC<Props> = ({ value, error, isFocused, onBlur, on
         'text-gray-910 transition ease-in-out duration-200',
         'w-full border rounded-md',
         'p-4 leading-tight placeholder-alphagray',
-        'font-inter font-normal text-sm'
+        'font-aeonik font-normal text-sm'
       )}
       onBlur={onBlur}
       onFocus={onFocus}
       onChange={onChange}
     />
-    {isDefined(error) && <p className="font-inter font-normal text-xs text-red-700 mt-1 text-left">{error}</p>}
+    {isDefined(error) && <p className="font-aeonik font-normal text-xs text-red-700 mt-1 text-left">{error}</p>}
   </>
 );
 

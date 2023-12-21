@@ -103,7 +103,7 @@ export const InitialStep: FC<Omit<StepProps, 'orderInfo'>> = ({ isApiError, setO
         <T id="sellDetailsDescription" />
       </p>
 
-      <div className="mx-auto mt-10 text-center font-inter font-normal text-gray-700">
+      <div className="mx-auto mt-10 text-center font-aeonik font-normal text-gray-700">
         <TopUpInput
           amountInputDisabled={isCurrenciesLoading}
           amount={inputAmount}
@@ -147,7 +147,7 @@ export const InitialStep: FC<Omit<StepProps, 'orderInfo'>> = ({ isApiError, setO
           <span className="text-xl text-gray-900">
             <T id="toCard" />
           </span>
-          <span className={classNames('inline-flex items-center font-inter text-xs font-normal text-orange-500')}>
+          <span className={classNames('inline-flex items-center font-aeonik text-xs font-normal text-orange-500')}>
             <AlertIcon className="mr-1 stroke-current" />
             <T id="onlyForCountryBankingCards" substitutions={[outputCurrency.name.split(' ')[0]]} />
           </span>

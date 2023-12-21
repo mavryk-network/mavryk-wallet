@@ -151,7 +151,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       <div className="flex justify-between mb-6">
         <h1
           className={classNames(
-            'font-inter flex self-center text-white text-base-plus'
+            'font-aeonik flex self-center text-white text-base-plus'
             // isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
           )}
         >

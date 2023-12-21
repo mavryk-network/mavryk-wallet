@@ -5,7 +5,7 @@ import { NotificationInterface } from '../../interfaces/notification.interface';
 type Props = Pick<NotificationInterface, 'content'>;
 
 export const NotificationsItemContent: FC<Props> = ({ content }) => (
-  <p className="font-inter text-gray-900 font-normal whitespace-pre-wrap mb-3" style={{ fontSize: 14 }}>
+  <p className="font-aeonik text-gray-900 font-normal whitespace-pre-wrap mb-3" style={{ fontSize: 14 }}>
     {content.map((contentItem, index) => {
       if (typeof contentItem === 'string') {
         return contentItem;

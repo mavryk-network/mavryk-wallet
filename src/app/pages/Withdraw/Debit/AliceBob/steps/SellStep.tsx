@@ -85,7 +85,7 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
 
   return (
     <>
-      <div className="font-inter text-gray-700 text-center">
+      <div className="font-aeonik text-gray-700 text-center">
         <p style={{ fontSize: 19 }} className="mt-6 mb-2">
           <T id={'transactionId'} />
         </p>
@@ -155,7 +155,7 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
 
       <p
         onClick={cancelButtonHandler}
-        className="font inter font-medium text-red-700 text-sm mt-4 inline-block cursor-pointer inline-block w-auto"
+        className="font-aeonik font-medium text-red-700 text-sm mt-4 inline-block cursor-pointer inline-block w-auto"
         {...setTestID(WithdrawSelectors.aliceBobCancelButton)}
       >
         <T id="cancel" />

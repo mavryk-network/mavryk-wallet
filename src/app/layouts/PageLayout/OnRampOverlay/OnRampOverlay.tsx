@@ -58,7 +58,7 @@ export const OnRampOverlay: FC = () => {
           <Button
             className={classNames(
               'w-24 h-9 uppercase bg-blue-500',
-              'font-inter text-white',
+              'font-aeonik text-white',
               'text-sm font-medium rounded',
               'flex flex-row justify-center items-center self-end',
               'hover:opacity-90 relative'
@@ -70,11 +70,11 @@ export const OnRampOverlay: FC = () => {
             <T id="close" />
             <CloseIcon className="ml-2 h-4 w-auto stroke-current stroke-2" />
           </Button>
-          <h1 className="font-inter font-normal text-gray-910 mt-25" style={{ fontSize: '1.438rem' }}>
+          <h1 className="font-aeonik font-normal text-gray-910 mt-25" style={{ fontSize: '1.438rem' }}>
             <T id="jumpInTezos" />
           </h1>
           <p
-            className={classNames('font-inter font-normal text-gray-700 mt-4', !popup && 'px-10')}
+            className={classNames('font-aeonik font-normal text-gray-700 mt-4', !popup && 'px-10')}
             style={{ fontSize: '1.063rem' }}
           >
             <T
@@ -115,7 +115,7 @@ export const OnRampOverlay: FC = () => {
             href={getWertLink(publicKeyHash)}
             className={classNames(
               'w-32',
-              'mt-4 font-inter text-gray-600',
+              'mt-4 font-aeonik text-gray-600',
               'text-sm font-medium rounded',
               'flex flex-row justify-center items-center self-center',
               'hover:bg-gray-100 cursor-pointer'
@@ -129,7 +129,7 @@ export const OnRampOverlay: FC = () => {
           </Anchor>
           <p
             className={classNames(
-              'font-inter font-normal mt-auto px-5 text-xs text-gray-600',
+              'font-aeonik font-normal mt-auto px-5 text-xs text-gray-600',
               popup ? 'mt-29' : 'pt-29'
             )}
           >

@@ -38,7 +38,7 @@ export const OrderStatusStep: FC<StepProps> = ({ orderInfo, setStep, setOrderInf
 
   return (
     <>
-      <div className="font-inter text-gray-700 text-center">
+      <div className="font-aeonik text-gray-700 text-center">
         <p
           style={{ fontSize: 19 }}
           className={classNames('mt-6 mb-2', status === AliceBobOrderStatus.COMPLETED && 'text-green-500')}

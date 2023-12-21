@@ -109,7 +109,7 @@ export const NewsletterOverlay: FC = () => {
             <Button
               className={classNames(
                 'absolute w-24 h-9 uppercase bg-blue-500',
-                'font-inter text-white',
+                'font-aeonik text-white',
                 'text-sm font-medium rounded',
                 'flex flex-row justify-center items-center self-end',
                 'hover:opacity-90',
@@ -128,7 +128,7 @@ export const NewsletterOverlay: FC = () => {
               alt="Newsletter"
             />
             <div className="flex flex-col w-full max-w-sm mx-auto">
-              <h1 className="mb-1 font-inter text-base text-gray-910 text-left">{t('subscribeToNewsletter')}</h1>
+              <h1 className="mb-1 font-aeonik text-base text-gray-910 text-left">{t('subscribeToNewsletter')}</h1>
               <span className="mb-1 text-xs text-left text-gray-600">{t('keepLatestNews')}</span>
               <div className="w-full mb-4">
                 <input

@@ -46,11 +46,11 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
           alt="Notification"
           className="w-full items-center rounded-md overflow-hidden bg-orange-10 mb-6"
         />
-        <p className="font-inter text-gray-900 font-semibold mb-4" style={{ fontSize: 19 }}>
+        <p className="font-aeonik text-gray-900 font-semibold mb-4" style={{ fontSize: 19 }}>
           {notification.title}
         </p>
         <NotificationsItemContent content={notification.content} />
-        <div className="font-inter mt-4" style={{ fontSize: 10 }}>
+        <div className="font-aeonik mt-4" style={{ fontSize: 10 }}>
           <p className="text-gray-500 font-normal">{formatDateOutput(notification.createdAt)}</p>
           {isDefined(notification.sourceUrl) && (
             <>
@@ -74,7 +74,7 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
             'bg-primary-orange border-primary-orange',
             'flex justify-center items-center',
             'text-primary-orange-lighter',
-            'font-inter font-semibold',
+            'font-aeonik font-semibold',
             'transition duration-200 ease-in-out',
             'opacity-90 hover:opacity-100 focus:opacity-100',
             'shadow-sm hover:shadow focus:shadow'

@@ -16,7 +16,7 @@ export const DonationBanner: FC = () => (
   >
     <div className="flex flex-row justify-center px-2 items-center">
       <div className="flex flex-col">
-        <span className="font-inter font-semibold text-sm text-blue-650">
+        <span className="font-aeonik font-semibold text-sm text-blue-650">
           <T id={'support'} />
         </span>
       </div>

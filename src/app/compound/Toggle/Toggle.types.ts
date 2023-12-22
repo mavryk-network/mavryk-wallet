@@ -1,7 +1,5 @@
-import { ReactNode } from 'react';
-
 export type Child = {
-  children: ReactNode;
+  children: JSX.Element;
 };
 
 export type ToggleContextType = {

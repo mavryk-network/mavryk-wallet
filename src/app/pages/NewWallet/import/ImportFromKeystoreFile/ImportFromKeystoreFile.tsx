@@ -11,6 +11,7 @@ import { T, t } from 'lib/i18n';
 import { decryptKukaiSeedPhrase } from 'lib/temple/front';
 import { AlertFn, useAlert } from 'lib/ui';
 
+import { ImportPartialFormCheckboxes } from '../importPartialFormCheckboxes/ImportPartialFormCheckboxes';
 import { useCreareOrRestorePassword } from '../useCreareOrRestorePassword';
 import { ImportFromKeystoreFileSelectors } from './ImportFromKeystoreFile.selectors';
 
@@ -36,7 +37,11 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   keystorePassword,
   isSeedEntered = false
 }) => {
-  const {} = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
+  const {
+    register: secondaryRegister,
+    control: secondaryControl,
+    errors: secondaryErrors
+  } = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
 
   const customAlert = useAlert();
   const { setValue, control, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
@@ -104,17 +109,28 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
           testID={ImportFromKeystoreFileSelectors.filePasswordInput}
         />
         {isSeedEntered && (
-          <div className=" w-full flex justify-between items-center mb-1 mt-2">
-            <div className="text-base-plus text-white">
-              <T id="useSamePassword" />
+          <>
+            <div className=" w-full flex justify-between items-center mb-2 mt-2">
+              <div className="text-base-plus text-white">
+                <T id="useSamePassword" />
+              </div>
+              <ToggleButton />
             </div>
-            <ToggleButton />
-          </div>
+            <>
+              <ToggleOn>
+                <ImportPartialFormCheckboxes
+                  control={secondaryControl}
+                  errors={secondaryErrors}
+                  register={secondaryRegister}
+                />
+              </ToggleOn>
+            </>
+          </>
         )}
 
         <FormSubmitButton
           loading={submitting}
-          className="w-full mt-auto mx-auto"
+          className="w-full mt-8 mx-auto"
           testID={ImportFromKeystoreFileSelectors.nextButton}
         >
           <T id="next" />

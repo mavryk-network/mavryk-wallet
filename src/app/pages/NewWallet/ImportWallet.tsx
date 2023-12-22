@@ -40,12 +40,9 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
   const isImportFromSeedPhrase = tabSlug === 'seed-phrase';
 
   return (
-    <PageLayout
-      pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
-      isTopbarVisible={fullPage}
-      contentContainerStyle={{ padding: fullPage ? 0 : 16 }}
-    >
-      {!isSeedEntered && (
+    <PageLayout pageTitle={fullPage ? t('importWallet') : t('restoreAccount')} isTopbarVisible={fullPage}>
+      {/* TODO based on toggle */}
+      {(!isSeedEntered || (isSeedEntered && !isImportFromSeedPhrase)) && (
         <ImportTabSwitcher
           tabs={importWalletOptions}
           activeTabSlug={tabSlug}
@@ -65,13 +62,17 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
             setIsSeedEntered={setIsSeedEntered}
           />
         )
-      ) : isSeedEntered ? (
+      ) : // TODO based on toggle
+      isSeedEntered && isImportFromSeedPhrase ? (
         <SetWalletPassword ownMnemonic seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
       ) : (
         <ImportFromKeystoreFile
           setSeedPhrase={setSeedPhrase}
           setKeystorePassword={setKeystorePassword}
           setIsSeedEntered={setIsSeedEntered}
+          isSeedEntered={isSeedEntered}
+          seedPhrase={seedPhrase}
+          keystorePassword={keystorePassword}
         />
       )}
     </PageLayout>

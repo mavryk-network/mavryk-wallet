@@ -11,6 +11,7 @@ import { T, t } from 'lib/i18n';
 import { decryptKukaiSeedPhrase } from 'lib/temple/front';
 import { AlertFn, useAlert } from 'lib/ui';
 
+import { useCreareOrRestorePassword } from '../useCreareOrRestorePassword';
 import { ImportFromKeystoreFileSelectors } from './ImportFromKeystoreFile.selectors';
 
 interface FormData {
@@ -22,13 +23,21 @@ interface ImportFromKeystoreFileProps {
   setSeedPhrase: (seed: string) => void;
   setKeystorePassword: (password: string) => void;
   setIsSeedEntered: (value: boolean) => void;
+  seedPhrase: string;
+  keystorePassword: string;
+  isSeedEntered?: boolean;
 }
 
 export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   setSeedPhrase,
   setKeystorePassword,
-  setIsSeedEntered
+  setIsSeedEntered,
+  seedPhrase,
+  keystorePassword,
+  isSeedEntered = false
 }) => {
+  const {} = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
+
   const customAlert = useAlert();
   const { setValue, control, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     mode: 'onChange'
@@ -59,8 +68,7 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   return (
     <Toggle>
       <form
-        className="w-full max-w-sm mx-auto my-4 pb-8 flex flex-col"
-        style={{ height: 'calc(100% - 46px)' }}
+        className="w-full h-full max-w-sm mx-auto my-4 pb-8 flex flex-col no-scrollbar"
         onSubmit={handleSubmit(onSubmit)}
       >
         <label className="mb-4 leading-tight flex flex-col">
@@ -83,13 +91,6 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
           <ErrorKeystoreComponent errors={errors} />
         </div>
 
-        <div>
-          <div className="text-base-plus text-white">
-            <T id="useSamePassword" />
-            <ToggleButton />
-          </div>
-        </div>
-
         <FormField
           ref={register({
             required: t('required')
@@ -102,6 +103,15 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
           errorCaption={errors.keystorePassword?.message}
           testID={ImportFromKeystoreFileSelectors.filePasswordInput}
         />
+        {isSeedEntered && (
+          <div className=" w-full flex justify-between items-center mb-1 mt-2">
+            <div className="text-base-plus text-white">
+              <T id="useSamePassword" />
+            </div>
+            <ToggleButton />
+          </div>
+        )}
+
         <FormSubmitButton
           loading={submitting}
           className="w-full mt-auto mx-auto"

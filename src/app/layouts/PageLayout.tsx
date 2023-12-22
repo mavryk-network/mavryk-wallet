@@ -48,7 +48,7 @@ const PageLayout: FC<PageLayoutProps> = ({
   const { fullPage } = useAppEnv();
 
   const style = useMemo(
-    () => (!isTopbarVisible ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle),
+    () => (!isTopbarVisible ? { height: 544, ...contentContainerStyle } : contentContainerStyle),
     [contentContainerStyle, isTopbarVisible]
   );
 

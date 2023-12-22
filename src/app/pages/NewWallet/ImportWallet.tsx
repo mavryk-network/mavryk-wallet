@@ -45,12 +45,15 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
       isTopbarVisible={fullPage}
       contentContainerStyle={{ padding: fullPage ? 0 : 16 }}
     >
-      <ImportTabSwitcher
-        tabs={importWalletOptions}
-        activeTabSlug={tabSlug}
-        urlPrefix="/import-wallet"
-        fullPage={fullPage}
-      />
+      {!isSeedEntered && (
+        <ImportTabSwitcher
+          tabs={importWalletOptions}
+          activeTabSlug={tabSlug}
+          urlPrefix="/import-wallet"
+          fullPage={fullPage}
+        />
+      )}
+
       <LockedWalletExists locked={locked} />
       {isImportFromSeedPhrase ? (
         isSeedEntered ? (

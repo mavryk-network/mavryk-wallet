@@ -277,7 +277,7 @@
     }
   },
   "acceptTermsInputDescription": {
-    "message": "I have read and agree to\nthe $termsOfUsageLink$ and $privacyPolicyLink$",
+    "message": "I have read and agree to $termsOfUsageLink$ and\n $privacyPolicyLink$",
     "placeholders": {
       "termsOfUsageLink": {
         "content": "$1"
@@ -1313,7 +1313,7 @@
     "message": "Accept terms"
   },
   "termsOfUsage": {
-    "message": "Terms of Usage"
+    "message": "Terms of Use"
   },
   "file": {
     "message": "File"

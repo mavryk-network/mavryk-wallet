@@ -193,10 +193,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   );
 
   return (
-    <form
-      className={classNames('w-full max-w-sm mx-auto my-8', ownMnemonic && 'pb-8')}
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <form className={classNames('w-full max-w-sm mx-auto h-full flex flex-col')} onSubmit={handleSubmit(onSubmit)}>
       {ownMnemonic && isImportFromKeystoreFile && (
         <div className="w-full mb-6 mt-8">
           <Controller
@@ -267,7 +264,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             name="repeatPassword"
             placeholder="********"
             errorCaption={errors.repeatPassword?.message}
-            containerClassName="my-6"
+            containerClassName="mt-6 mb-1"
             testID={setWalletPasswordSelectors.repeatPasswordField}
           />
         </>
@@ -277,8 +274,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         control={control}
         name="analytics"
         as={FormCheckbox}
-        label={t('analytics')}
-        labelDescription={
+        label={
           <T
             id="analyticsInputDescription"
             substitutions={[
@@ -286,14 +282,13 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
                 href="https://templewallet.com/analytics-collecting"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline text-secondary"
+                className="underline text-secondary text-accent-blue"
               >
                 <T id="analyticsCollecting" key="analyticsLink" />
               </a>
             ]}
           />
         }
-        containerClassName="mb-4"
         testID={setWalletPasswordSelectors.analyticsCheckBox}
       />
 
@@ -301,9 +296,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         control={control}
         name="viewAds"
         as={FormCheckbox}
-        label={t('viewAds')}
-        labelDescription={<T id="viewAdsDescription" />}
-        containerClassName="mb-4"
+        label={<T id="viewAdsDescription" />}
         testID={setWalletPasswordSelectors.viewAdsCheckBox}
       />
 
@@ -312,8 +305,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         name="skipOnboarding"
         as={p => <FormCheckbox {...p} testID={setWalletPasswordSelectors.skipOnboardingCheckbox} />}
         label={t('skipOnboarding')}
-        labelDescription={t('advancedUser')}
-        containerClassName="mb-4"
         testID={setWalletPasswordSelectors.skipOnboardingCheckbox}
       />
 
@@ -323,9 +314,8 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         })}
         errorCaption={errors.termsAccepted?.message}
         name="termsAccepted"
-        label={t('acceptTerms')}
         testID={setWalletPasswordSelectors.acceptTermsCheckbox}
-        labelDescription={
+        label={
           <T
             id="acceptTermsInputDescription"
             substitutions={[
@@ -333,7 +323,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
                 href="https://templewallet.com/terms"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline text-secondary"
+                className="underline text-secondary text-accent-blue"
               >
                 <T id="termsOfUsage" key="termsLink" />
               </a>,
@@ -341,19 +331,19 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
                 href="https://templewallet.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline text-secondary"
+                className="underline text-secondary text-accent-blue"
               >
                 <T id="privacyPolicy" key="privacyPolicyLink" />
               </a>
             ]}
           />
         }
-        containerClassName="mb-4"
+        containerClassName="flex-grow"
       />
 
       <FormSubmitButton
         loading={submitting}
-        className="w-full"
+        className="w-full mt-8"
         testID={ownMnemonic ? setWalletPasswordSelectors.importButton : setWalletPasswordSelectors.createButton}
       >
         <T id={ownMnemonic ? 'import' : 'create'} />

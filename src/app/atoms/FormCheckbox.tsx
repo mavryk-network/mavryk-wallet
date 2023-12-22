@@ -43,7 +43,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
       <div className={classNames('flex flex-col', containerClassName)}>
         <label
           className={classNames(
-            'flex items-center mb-2 p-2',
+            'flex items-center py-2',
             'rounded-md overflow-hidden cursor-pointer bg-primary-bg',
             labelClassName
           )}
@@ -52,7 +52,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
           <Checkbox ref={ref} errored={Boolean(errorCaption)} onChange={handleChange} {...rest} />
 
           {label && (
-            <div className="ml-4 leading-tight flex flex-col">
+            <div className="ml-2 flex flex-col">
               <span className="text-sm font-semibold text-white">{label}</span>
 
               {labelDescription && (

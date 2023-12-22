@@ -92,7 +92,7 @@ const CreateAccount: FC = () => {
       }
       isTopbarVisible={false}
     >
-      <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start">
+      <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
         <div className="text-sm text-secondary-white mb-4">
           This is to create a new account using the private key of your current wallet. If you want to restore an
           account, please go{' '}

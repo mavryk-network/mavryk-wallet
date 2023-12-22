@@ -73,7 +73,8 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   return (
     <Toggle>
       <form
-        className="w-full h-full max-w-sm mx-auto my-4 pb-8 flex flex-col no-scrollbar"
+        className="w-full h-auto max-w-sm mx-auto pt-4 pb-8 flex flex-col no-scrollbar"
+        style={{ height: 'calc(100% - 48px)' }}
         onSubmit={handleSubmit(onSubmit)}
       >
         <label className="mb-4 leading-tight flex flex-col">
@@ -107,6 +108,7 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
           name="keystorePassword"
           errorCaption={errors.keystorePassword?.message}
           testID={ImportFromKeystoreFileSelectors.filePasswordInput}
+          containerClassName="flex-grow"
         />
         {isSeedEntered && (
           <>

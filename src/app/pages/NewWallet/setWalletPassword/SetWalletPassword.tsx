@@ -43,7 +43,10 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
   return (
-    <form className={classNames('w-full h-full max-w-sm mx-auto flex flex-col pb-8')} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={classNames('w-full h-full max-w-sm mx-auto flex flex-col pb-8 no-scrollbar')}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {ownMnemonic && isImportFromKeystoreFile && (
         <div className="w-full mb-6 mt-8">
           <Controller

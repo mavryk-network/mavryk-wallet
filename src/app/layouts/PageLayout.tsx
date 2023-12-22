@@ -48,7 +48,7 @@ const PageLayout: FC<PageLayoutProps> = ({
   const { fullPage } = useAppEnv();
 
   const style = useMemo(
-    () => (!isTopbarVisible ? { height: 544, ...contentContainerStyle } : contentContainerStyle),
+    () => (!isTopbarVisible ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle),
     [contentContainerStyle, isTopbarVisible]
   );
 
@@ -61,7 +61,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="px-4 pt-4 pb-8" style={style}>
+          <div className="px-4 pt-4 no-scrollbar" style={style}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>

@@ -4,6 +4,7 @@ import classNames from 'clsx';
 import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form';
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
+import { ToggleButton, Toggle, ToggleOn } from 'app/compound/Toggle';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as FileIcon } from 'app/icons/file.svg';
 import { T, t } from 'lib/i18n';
@@ -56,51 +57,60 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   );
 
   return (
-    <form
-      className="w-full max-w-sm mx-auto my-4 pb-8 flex flex-col"
-      style={{ height: 'calc(100% - 46px)' }}
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <label className="mb-4 leading-tight flex flex-col">
-        <span className="text-base-plus font-semibold text-white">
-          <T id="uploadFile" />
-        </span>
-      </label>
-
-      <div className="w-full mb-4">
-        <Controller
-          control={control}
-          name="keystoreFile"
-          as={KeystoreFileInput}
-          rules={{
-            required: t('required'),
-            validate: validateKeystoreFile
-          }}
-          clearKeystoreFileInput={clearKeystoreFileInput}
-        />
-        <ErrorKeystoreComponent errors={errors} />
-      </div>
-
-      <FormField
-        ref={register({
-          required: t('required')
-        })}
-        label={t('filePassword')}
-        placeholder={t('filePasswordInputPlaceholder')}
-        id="keystore-password"
-        type="password"
-        name="keystorePassword"
-        errorCaption={errors.keystorePassword?.message}
-        testID={ImportFromKeystoreFileSelectors.filePasswordInput}
-      />
-      <FormSubmitButton
-        loading={submitting}
-        className="w-full mt-auto mx-auto"
-        testID={ImportFromKeystoreFileSelectors.nextButton}
+    <Toggle>
+      <form
+        className="w-full max-w-sm mx-auto my-4 pb-8 flex flex-col"
+        style={{ height: 'calc(100% - 46px)' }}
+        onSubmit={handleSubmit(onSubmit)}
       >
-        <T id="next" />
-      </FormSubmitButton>
-    </form>
+        <label className="mb-4 leading-tight flex flex-col">
+          <span className="text-base-plus font-semibold text-white">
+            <T id="uploadFile" />
+          </span>
+        </label>
+
+        <div className="w-full mb-4">
+          <Controller
+            control={control}
+            name="keystoreFile"
+            as={KeystoreFileInput}
+            rules={{
+              required: t('required'),
+              validate: validateKeystoreFile
+            }}
+            clearKeystoreFileInput={clearKeystoreFileInput}
+          />
+          <ErrorKeystoreComponent errors={errors} />
+        </div>
+
+        <div>
+          <div className="text-base-plus text-white">
+            <T id="useSamePassword" />
+            <ToggleButton />
+          </div>
+        </div>
+
+        <FormField
+          ref={register({
+            required: t('required')
+          })}
+          label={t('filePassword')}
+          placeholder={t('filePasswordInputPlaceholder')}
+          id="keystore-password"
+          type="password"
+          name="keystorePassword"
+          errorCaption={errors.keystorePassword?.message}
+          testID={ImportFromKeystoreFileSelectors.filePasswordInput}
+        />
+        <FormSubmitButton
+          loading={submitting}
+          className="w-full mt-auto mx-auto"
+          testID={ImportFromKeystoreFileSelectors.nextButton}
+        >
+          <T id="next" />
+        </FormSubmitButton>
+      </form>
+    </Toggle>
   );
 };
 

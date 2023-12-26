@@ -3125,5 +3125,8 @@
   },
   "connectedSitesDesc": {
     "message": "This account is connected to these sites. They can view your account address. "
+  },
+  "disconnect": {
+    "message": "Disconnect"
   }
 }

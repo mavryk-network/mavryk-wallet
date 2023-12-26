@@ -146,7 +146,6 @@ const Toolbar: FC<ToolbarProps> = ({
   const isBackButtonAvailable = canBack || canStepBack;
 
   const handleBack = () => {
-    console.log('here');
     if (canBack) {
       return goBack();
     }

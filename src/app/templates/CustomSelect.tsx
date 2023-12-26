@@ -49,16 +49,9 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
     OptionContent
   } = props;
 
-  const borderStyle = light ? 'border' : 'border-2 bg-gray-100';
-
   return items.length > 0 ? (
     <div
-      className={classNames(
-        'relative rounded-md overflow-y-auto',
-        borderStyle,
-        'flex flex-col text-gray-700 text-sm leading-tight',
-        className
-      )}
+      className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm leading-tight', className)}
       id={id}
       style={{ maxHeight }}
     >
@@ -128,8 +121,7 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
     <ItemComponent
       type="button"
       className={classNames(
-        'w-full flex-shrink-0 overflow-hidden',
-        !last && 'border-b border-gray-200',
+        'w-full flex-shrink-0 overflow-hidden flex items-center',
         (() => {
           switch (true) {
             case active:
@@ -142,7 +134,7 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
               return '';
           }
         })(),
-        'flex items-center text-gray-700 transition ease-in-out duration-200',
+        'flex items-center text-white transition ease-in-out duration-200',
         'focus:outline-none opacity-90 hover:opacity-100'
       )}
       style={{ padding }}

@@ -42,9 +42,10 @@ type DropdownHeaderProps = {
   header: string | ReactNode;
   subHeader: string | ReactNode;
   className?: string;
+  disabled?: boolean;
 };
 
-export function DropdownHeader({ header, subHeader, className }: DropdownHeaderProps) {
+export function DropdownHeader({ header, subHeader, className, disabled = false }: DropdownHeaderProps) {
   const { show, toggle } = useToggle();
 
   return (
@@ -57,9 +58,10 @@ export function DropdownHeader({ header, subHeader, className }: DropdownHeaderP
       <ArrowIcon
         className={classNames(
           'w-8 h-auto stroke-white stroke-2 transition ease-in-out duration-200 cursor-pointer',
-          show && 'transform rotate-180'
+          show && 'transform rotate-180',
+          disabled && 'pointer-events-none opacity-5'
         )}
-        onClick={toggle}
+        onClick={disabled ? undefined : toggle}
       />
     </section>
   );

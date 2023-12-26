@@ -68,11 +68,13 @@ const BalanceInfo: FC = () => {
   const balanceMode = useBalanceModeSelector();
 
   const {
-    selectedFiatCurrency: { name: fiatName, symbol: fiatSymbol }
+    // selectedFiatCurrency: { name: fiatName, symbol: fiatSymbol }
+    selectedFiatCurrency: { symbol: fiatSymbol }
   } = useFiatCurrency();
 
   const {
-    metadata: { name: gasTokenName, symbol: gasTokenSymbol }
+    // metadata: { name: gasTokenName, symbol: gasTokenSymbol }
+    metadata: { symbol: gasTokenSymbol }
   } = useGasToken();
 
   // const tippyProps = useMemo(

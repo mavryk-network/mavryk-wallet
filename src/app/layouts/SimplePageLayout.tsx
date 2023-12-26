@@ -9,7 +9,7 @@ import ContentContainer from 'app/layouts/ContentContainer';
 
 interface SimplePageLayoutProps extends PropsWithChildren {
   title: ReactNode;
-  label?:string;
+  label?: string;
 }
 
 const SimplePageLayout: FC<SimplePageLayoutProps> = ({ title, children, label }) => {
@@ -19,7 +19,9 @@ const SimplePageLayout: FC<SimplePageLayoutProps> = ({ title, children, label })
     <>
       {!appEnv.fullPage && !label && <DocBg bgClassName="bg-primary-white" />}
       {!appEnv.fullPage && label === 'unlockWallet' && <DocBg bgClassName="bg-cover" />}
-      <ContentContainer className={classNames('min-h-screen', 'flex flex-col', !appEnv.fullPage && !label && 'bg-primary-white')}>
+      <ContentContainer
+        className={classNames('min-h-screen', 'flex flex-col', !appEnv.fullPage && !label && 'bg-primary-white')}
+      >
         <div className={classNames('mt-12 mb-10', 'flex flex-col items-center justify-center')}>
           <div className="flex items-center">
             <Logo hasTitle />

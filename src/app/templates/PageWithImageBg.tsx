@@ -7,23 +7,26 @@ import Logo from 'app/atoms/Logo';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 
-const unlockBg = "misc/UnlockBg.png"
+const unlockBg = 'misc/UnlockBg.png';
 
 interface PageWithImageBgLayoutProps extends PropsWithChildren {
   title: ReactNode;
-  label?:string;
+  label?: string;
 }
 
 const PageWithImageBg: FC<PageWithImageBgLayoutProps> = ({ title, children, label }) => {
   const appEnv = useAppEnv();
 
-  let bagImageSrc = unlockBg
+  const bagImageSrc = unlockBg;
   // Add switch for other BGS
 
   return (
     <>
       {!appEnv.fullPage && label === 'unlockWallet' && <DocBg bgClassName="bg-cover" />}
-      <ContentContainer className={classNames('min-h-screen', 'flex flex-col justify-center', !appEnv.fullPage && !label && 'bg-cover')} style={{backgroundImage: `url(${bagImageSrc})`}}>
+      <ContentContainer
+        className={classNames('min-h-screen', 'flex flex-col justify-center', !appEnv.fullPage && !label && 'bg-cover')}
+        style={{ backgroundImage: `url(${bagImageSrc})` }}
+      >
         <div className={classNames('flex flex-col items-center justify-center')}>
           <div className="flex items-center">
             <Logo />

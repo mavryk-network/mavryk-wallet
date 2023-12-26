@@ -34,7 +34,7 @@ interface TabButtonProps extends TestIDProps {
   withOutline?: boolean;
 }
 
-const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, withOutline, testID, testIDProperties }) => (
+const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, testID, testIDProperties }) => (
   <Link
     to={lctn => ({ ...lctn, search: `?tab=${name}` })}
     replace

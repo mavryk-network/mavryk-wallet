@@ -690,7 +690,7 @@
     "message": "Gas fee must be positive"
   },
   "accountName": {
-    "message": "Account name"
+    "message": "Account Name"
   },
   "accountNameInputDescription": {
     "message": "What will be the name of the new account?"

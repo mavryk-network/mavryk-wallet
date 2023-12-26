@@ -7,12 +7,12 @@ import Identicon from 'app/atoms/Identicon';
 import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
-import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
+// import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useTempleClient, useAccount } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
-import { navigate } from 'lib/woozie';
+// import { navigate } from 'lib/woozie';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';

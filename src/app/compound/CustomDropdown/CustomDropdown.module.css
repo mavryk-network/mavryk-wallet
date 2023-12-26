@@ -1,0 +1,29 @@
+.showDropdown {
+  animation: reveal ease-in-out 0.2s;
+}
+
+.hideDropdown {
+  animation: hide ease-in-out 0.2s;
+}
+
+@keyframes reveal {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 600px;
+    opacity: 1;
+  }
+}
+
+@keyframes hide {
+  from {
+    max-height: 600px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}

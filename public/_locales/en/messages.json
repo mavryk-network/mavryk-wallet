@@ -3119,5 +3119,11 @@
   },
   "useSamePassword": {
     "message": "Use File Password as Extension Password"
+  },
+  "connectedSites": {
+    "message": "Connected sites"
+  },
+  "connectedSitesDesc": {
+    "message": "This account is connected to these sites. They can view your account address. "
   }
 }

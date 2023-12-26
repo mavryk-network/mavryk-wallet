@@ -118,7 +118,7 @@ const Control: FC = () => {
       <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
       </PopupModalWithTitle>
-      <PopupModalWithTitle isOpen={showDAppsPopup} onRequestClose={closeDappsPopup} title={<T id="selectAccount" />}>
+      <PopupModalWithTitle isOpen={showDAppsPopup} onRequestClose={closeDappsPopup} title={<T id="connectedSites" />}>
         <DAppsPopup opened={showDAppsPopup} setOpened={setShowDAppsPopup} />
       </PopupModalWithTitle>
     </>

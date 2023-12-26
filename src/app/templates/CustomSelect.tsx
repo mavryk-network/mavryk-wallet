@@ -49,6 +49,8 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
     OptionContent
   } = props;
 
+  console.log(items);
+
   return items.length > 0 ? (
     <div
       className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm leading-tight', className)}
@@ -62,7 +64,8 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
           <CustomSelectItem
             key={itemId}
             actions={actions}
-            active={itemId === activeItemId}
+            // active={itemId === activeItemId}
+            active
             last={index === items.length - 1}
             itemId={itemId as K}
             index={index}
@@ -122,18 +125,6 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
       type="button"
       className={classNames(
         'w-full flex-shrink-0 overflow-hidden flex items-center',
-        (() => {
-          switch (true) {
-            case active:
-              return light ? 'bg-gray-200' : 'bg-gray-300';
-
-            case hoverable:
-              return light ? 'hover:bg-gray-100 focus:bg-gray-100' : 'hover:bg-gray-200 focus:bg-gray-200';
-
-            default:
-              return '';
-          }
-        })(),
         'flex items-center text-white transition ease-in-out duration-200',
         'focus:outline-none opacity-90 hover:opacity-100'
       )}
@@ -145,18 +136,10 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
 
       <div className={classNames('w-full flex flex-col items-start', OptionIcon && 'ml-2')}>
         <OptionContent actions={actions} item={item} index={index} />
+        {active && <div className="text-sm text-primary-success">Active</div>}
       </div>
 
       <div className="flex-1" />
-
-      {active && (
-        <OkIcon
-          className="w-auto h-5 mx-2 stroke-2 flex-none"
-          style={{
-            stroke: '#777'
-          }}
-        />
-      )}
     </ItemComponent>
   );
 };

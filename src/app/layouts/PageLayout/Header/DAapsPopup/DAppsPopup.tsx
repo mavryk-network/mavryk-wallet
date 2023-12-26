@@ -149,11 +149,11 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
       //   valueClassName: (typeof network === 'string' || network.name) && 'capitalize',
       //   Component: Name
       // },
-      {
-        key: 'pkhLabel',
-        value: <HashChip hash={pkh} type="link" small />,
-        Component: 'span'
-      }
+      // {
+      //   key: 'pkhLabel',
+      //   value: <HashChip hash={pkh} type="link" small />,
+      //   Component: 'span'
+      // }
     ],
     [origin, network, pkh]
   );
@@ -161,9 +161,11 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
   return (
     <div className="flex flex-1 w-full">
       <div className="flex flex-col justify-between flex-1">
-        <Name className="mb-1 text-base font-medium leading-tight text-left text-white" style={{ maxWidth: '14rem' }}>
-          {appMeta.name}
-        </Name>
+        <a href={origin} target="_blank" rel="noreferrer">
+          <Name className="text-base font-medium leading-tight text-left text-white" style={{ maxWidth: '14rem' }}>
+            {appMeta.name}
+          </Name>
+        </a>
 
         {dAppAttributes.map(({ key, value, valueClassName, Component }) => (
           <div className="text-xs font-light leading-tight text-white" key={key}>

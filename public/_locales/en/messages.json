@@ -3143,10 +3143,10 @@
       }
     }
   },
+  "addNetworkSuccessMsg": {
+    "message": "Network was successfully added"
+  },
   "baseUrlPlaceholder": {
     "message": "Enter base URL"
-  },
-  "addNetworkSuccess": {
-    "message:": "Network was successfully added"
   }
 }

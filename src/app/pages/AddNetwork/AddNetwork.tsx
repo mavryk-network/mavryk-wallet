@@ -83,7 +83,7 @@ export const AddNetworkScreen: FC = () => {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addNetwork',
           btnText: 'goToMain',
-          description: 'addNetworkSuccess',
+          description: 'addNetworkSuccessMsg',
           subHeader: 'success'
         });
       } catch (err: any) {

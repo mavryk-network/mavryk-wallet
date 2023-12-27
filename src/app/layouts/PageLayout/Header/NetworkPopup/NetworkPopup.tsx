@@ -92,7 +92,8 @@ interface NetworkListItemProps {
 }
 
 const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick }) => {
-  const { id, name, color, disabled, nameI18nKey } = network;
+  const { name, color, nameI18nKey } = network;
+  // const { id, name, color, disabled, nameI18nKey } = network;
 
   return (
     <div className="flex items-center justify-between py-3">

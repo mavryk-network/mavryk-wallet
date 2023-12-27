@@ -76,7 +76,7 @@ const Control: FC = () => {
   return (
     <>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      {/* <Popper
+      <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -100,7 +100,7 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper> */}
+      </Popper>
 
       <Button
         className={classNames(

@@ -27,5 +27,5 @@ export const ButtonLink: React.FC<ActionButtonProps> = ({ children, state, linkT
     state
   };
 
-  return <Link {...baseProps} to={linkTo} />;
+  return <Link className="w-full" {...baseProps} to={linkTo} />;
 };

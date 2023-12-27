@@ -114,9 +114,9 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         </div>
       </div>
 
-      <div className="w-full flex justify-center">
+      <div className="w-full flex justify-cente px-4">
         <ButtonLink {...action}>
-          <ButtonRounded size="big" fill={false} className="mx-auto mt-4">
+          <ButtonRounded size="big" fill={false} className="w-full mt-4">
             <T id="addRestoreAccount" />
           </ButtonRounded>
         </ButtonLink>

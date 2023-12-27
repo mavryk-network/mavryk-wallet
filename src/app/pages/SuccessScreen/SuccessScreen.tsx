@@ -55,11 +55,13 @@ export const SuccessScreen = () => {
               </div>
             )}
           </section>
-          <ButtonLink linkTo="/" testID={SuccessScreenSelectors.buttonSuccess}>
-            <ButtonRounded size="big" fill>
-              <T id={state.btnText} />
-            </ButtonRounded>
-          </ButtonLink>
+          <div>
+            <ButtonLink linkTo="/" testID={SuccessScreenSelectors.buttonSuccess}>
+              <ButtonRounded size="big" fill>
+                <T id={state.btnText} />
+              </ButtonRounded>
+            </ButtonLink>
+          </div>
         </div>
       </BgImageLayout>
     </PageLayout>

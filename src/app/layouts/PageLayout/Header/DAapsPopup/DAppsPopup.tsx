@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import { Name } from 'app/atoms';
 import { Dropdown, DropdownHeader, DropdownOpened } from 'app/compound/CustomDropdown';
+import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
@@ -31,13 +32,14 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
   const allAccounts = useRelevantAccounts();
 
   // NOTE  connected - all, active - if current acc === connected site acc
-  const { data, mutate } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
-    suspense: true,
-    shouldRetryOnError: false,
+  const { data, mutate, isLoading } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
+    suspense: false,
+    shouldRetryOnError: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });
-  const dAppSessions = data!;
+
+  const dAppSessions = data! ?? {};
 
   const [activeUrl, setActiveUrl] = useState<string | undefined>('');
 
@@ -63,6 +65,13 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
   useEffect(() => {
     getActiveTabUrl(u => setActiveUrl(u));
   }, []);
+
+  if (isLoading)
+    return (
+      <div className="animate-spin flex justify-center items-center p-8">
+        <LoadingSvg style={{ width: 24, height: 24 }} />
+      </div>
+    );
 
   return (
     <section className="px-4">

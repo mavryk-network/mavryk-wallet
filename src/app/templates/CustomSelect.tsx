@@ -2,8 +2,6 @@ import React, { ComponentType, CSSProperties, useCallback } from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as OkIcon } from 'app/icons/ok.svg';
-
 type Actions<K extends string | number> = { [key: string]: (id: K) => void };
 
 export type OptionRenderProps<T, K extends string | number = string | number, A extends Actions<K> = {}> = {
@@ -49,8 +47,6 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
     OptionContent
   } = props;
 
-  console.log(items);
-
   return items.length > 0 ? (
     <div
       className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm leading-tight', className)}
@@ -64,8 +60,7 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
           <CustomSelectItem
             key={itemId}
             actions={actions}
-            // active={itemId === activeItemId}
-            active
+            active={itemId === activeItemId}
             last={index === items.length - 1}
             itemId={itemId as K}
             index={index}

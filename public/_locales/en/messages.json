@@ -3128,5 +3128,16 @@
   },
   "disconnect": {
     "message": "Disconnect"
+  },
+  "activeSites": {
+    "message": "Active Sites"
+  },
+  "connectedAcc": {
+    "message": "$name$ is connected to this site.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

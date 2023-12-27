@@ -1,17 +1,17 @@
-import React, { ComponentProps, FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 
-import { Name, FormCheckbox, HashChip } from 'app/atoms';
+import { Name } from 'app/atoms';
 import { Dropdown, DropdownHeader, DropdownOpened } from 'app/compound/CustomDropdown';
-import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
-import { useTempleClient, useStorage } from 'lib/temple/front';
-import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
-import { useConfirm } from 'lib/ui/dialog';
+import { useRelevantAccounts, useTempleClient } from 'lib/temple/front';
+import { TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
+
+import { areUrlsContainSameHost, getActiveTabUrl } from './utils/activeTab';
 
 type DAppsPopupProps = {
   opened: boolean;
@@ -28,7 +28,7 @@ const getDAppKey = (entry: DAppEntry) => entry[0];
 // export const DAppsPopup: FC<DAppsPopupProps> = ({ opened, setOpened }) => {
 export const DAppsPopup: FC<DAppsPopupProps> = () => {
   const { getAllDAppSessions, removeDAppSession } = useTempleClient();
-  // const confirm = useConfirm();
+  const allAccounts = useRelevantAccounts();
 
   // NOTE  connected - all, active - if current acc === connected site acc
   const { data, mutate } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
@@ -38,26 +38,8 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
     revalidateOnReconnect: false
   });
   const dAppSessions = data!;
-  console.log(dAppSessions, 'dAppSessions');
-  console.log(window.location, 'location');
 
-  const [dAppEnabled, setDAppEnabled] = useStorage(TempleSharedStorageKey.DAppEnabled, true);
-
-  const changingRef = useRef(false);
-  const [error, setError] = useState<any>(null);
-
-  const handleChange = useCallback(
-    async (checked: boolean) => {
-      if (changingRef.current) return;
-      changingRef.current = true;
-      setError(null);
-
-      setDAppEnabled(checked).catch((err: any) => setError(err));
-
-      changingRef.current = false;
-    },
-    [setError, setDAppEnabled]
-  );
+  const [activeUrl, setActiveUrl] = useState<string | undefined>('');
 
   const handleRemoveClick = useCallback(
     async (origin: string) => {
@@ -68,8 +50,42 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
   );
 
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
+
+  const activeDAppEntry = useMemo(
+    () => dAppEntries.find(entry => areUrlsContainSameHost(entry[0], activeUrl)),
+    [activeUrl, dAppEntries]
+  );
+
+  function getAccName(activeDAppEntry: [string, TempleDAppSession]) {
+    return allAccounts.find(acc => acc.publicKeyHash === activeDAppEntry[1].pkh)?.name ?? t('unknownAccount');
+  }
+
+  useEffect(() => {
+    getActiveTabUrl(u => setActiveUrl(u));
+  }, []);
+
   return (
-    <section className="my-2 px-4 pb-8">
+    <section className="px-4">
+      {activeDAppEntry && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <div className="text-base-plus text-white">
+              <T id="activeSites" />
+            </div>
+            <div className="text-sm text-secondary-white">{t('connectedAcc', getAccName(activeDAppEntry))}</div>
+          </div>
+          <CustomSelect
+            actions={{ remove: handleRemoveClick }}
+            getItemId={getDAppKey}
+            items={[activeDAppEntry]}
+            OptionIcon={DAppIcon}
+            OptionContent={DAppDescription}
+            hoverable={false}
+            padding={'0.75rem 0'}
+            activeItemId={activeDAppEntry[0]}
+          />
+        </div>
+      )}
       <Divider />
       <Dropdown>
         <>
@@ -81,7 +97,6 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
           <DropdownOpened>
             <CustomSelect
               actions={{ remove: handleRemoveClick }}
-              className="mb-6"
               getItemId={getDAppKey}
               items={dAppEntries}
               OptionIcon={DAppIcon}

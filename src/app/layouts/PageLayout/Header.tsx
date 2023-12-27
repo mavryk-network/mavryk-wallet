@@ -20,7 +20,9 @@ import AccountDropdown from './Header/AccountDropdown';
 import AccountPopup from './Header/AccountPopup';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup } from './Header/DAapsPopup/DAppsPopup';
-// import NetworkSelect from './Header/NetworkSelect';
+import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
+import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
+import NetworkSelect from './Header/NetworkSelect';
 
 const Header: FC = () => {
   const appEnv = useAppEnv();
@@ -45,6 +47,7 @@ const Control: FC = () => {
   // new
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
+  const [showNetworkPopup, setShowNetworkPopup] = useState(false);
 
   const close = useCallback(() => {
     setShowAccountsPopup(false);
@@ -52,6 +55,10 @@ const Control: FC = () => {
 
   const closeDappsPopup = useCallback(() => {
     setShowDAppsPopup(false);
+  }, []);
+
+  const closeNetworkPopup = useCallback(() => {
+    setShowNetworkPopup(false);
   }, []);
 
   const open = useCallback(() => {
@@ -62,10 +69,14 @@ const Control: FC = () => {
     setShowDAppsPopup(true);
   }, []);
 
+  const showNetworkPopupHandler = useCallback(() => {
+    setShowNetworkPopup(true);
+  }, []);
+
   return (
     <>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      <Popper
+      {/* <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -89,11 +100,11 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper>
+      </Popper> */}
 
       <Button
         className={classNames(
-          'flex-shrink-0 flex',
+          'flex-shrink-0 flex self-start',
           'rounded-full overflow-hidden',
           'bg-primary-bg bg-opacity-10 cursor-pointer',
           'transition ease-in-out duration-200'
@@ -104,22 +115,35 @@ const Control: FC = () => {
         <Identicon type="bottts" hash={account.publicKeyHash} size={24} />
       </Button>
 
-      <div className="ml-2 flex-1 flex flex-col items-start">
+      <div className="ml-2 flex-1 flex items-start">
         <div className="max-w-full overflow-x-hidden">
           <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
         </div>
 
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
-        <DAapsDropdownButton onClick={showDAppsPopupHandler} />
+        <div className="flex item gap-2">
+          <NetworkButton enabled={showNetworkPopup} onClick={showNetworkPopupHandler} />
+          <DAapsDropdownButton onClick={showDAppsPopupHandler} />
+        </div>
       </div>
 
-      {/* popups */}
+      {/* ________popups ________ */}
+      {/* accounts */}
       <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
       </PopupModalWithTitle>
+      {/* connected dapps */}
       <PopupModalWithTitle isOpen={showDAppsPopup} onRequestClose={closeDappsPopup} title={<T id="connectedSites" />}>
         <DAppsPopup opened={showDAppsPopup} setOpened={setShowDAppsPopup} />
+      </PopupModalWithTitle>
+      {/* networks */}
+      <PopupModalWithTitle
+        isOpen={showNetworkPopup}
+        onRequestClose={closeNetworkPopup}
+        title={<T id="networkSelect" />}
+      >
+        <NetworkPopup opened={showNetworkPopup} setOpened={setShowNetworkPopup} />
       </PopupModalWithTitle>
     </>
   );

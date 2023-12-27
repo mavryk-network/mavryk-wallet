@@ -1,18 +1,18 @@
-import React, { ReactNode, createContext, useCallback, useMemo } from 'react';
+import React, { ReactNode, createContext, useCallback, useEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
 
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 
 import styles from './CustomDropdown.module.css';
-import { Child, CustomDropdownContextType } from './CustomDropdown.types';
+import { Child, CustomDropdownContextType, DropDownProps } from './CustomDropdown.types';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const CusromDropdownContext = createContext<CustomDropdownContextType>(undefined!);
 CusromDropdownContext.displayName = 'CusromDropdownContext';
 
-export function Dropdown({ children }: Child) {
-  const [show, setShow] = React.useState(false);
+export function Dropdown({ children, initialShowState = false }: DropDownProps) {
+  const [show, setShow] = React.useState(initialShowState);
   const toggle = useCallback(() => setShow(!show), [show]);
 
   const memoizedState = useMemo(() => ({ show, toggle }), [show, toggle]);

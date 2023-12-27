@@ -26,7 +26,6 @@ type DAppActions = {
 
 const getDAppKey = (entry: DAppEntry) => entry[0];
 
-// export const DAppsPopup: FC<DAppsPopupProps> = ({ opened, setOpened }) => {
 export const DAppsPopup: FC<DAppsPopupProps> = () => {
   const { getAllDAppSessions, removeDAppSession } = useTempleClient();
   const allAccounts = useRelevantAccounts();
@@ -96,7 +95,7 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
         </div>
       )}
       <Divider />
-      <Dropdown>
+      <Dropdown initialShowState={true}>
         <>
           <DropdownHeader
             header={t('connectedSites')}

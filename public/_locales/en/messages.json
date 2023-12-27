@@ -3132,6 +3132,9 @@
   "activeSites": {
     "message": "Active Sites"
   },
+  "networkSelect": {
+    "message": "Select a Network"
+  },
   "connectedAcc": {
     "message": "$name$ is connected to this site.",
     "placeholders": {

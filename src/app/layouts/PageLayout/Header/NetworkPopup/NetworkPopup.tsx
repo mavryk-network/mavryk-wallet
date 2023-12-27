@@ -1,7 +1,4 @@
-import React, { FC, HTMLAttributes, useCallback, useMemo } from 'react';
-
-import classNames from 'clsx';
-import { ids } from 'webpack';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { RadioButton } from 'app/atoms/RadioButton';
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
@@ -12,8 +9,7 @@ import {
   useAllNetworks,
   useChainId,
   useNetwork,
-  useSetNetworkId,
-  useTempleClient
+  useSetNetworkId
 } from 'lib/temple/front';
 import { loadChainId } from 'lib/temple/helpers';
 import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
@@ -102,7 +98,7 @@ const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick 
         <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
         <span className="text-base-plus text-white">{(nameI18nKey && <T id={nameI18nKey} />) || name}</span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} onChange={onClick} />
+      <RadioButton id={id} checked={selected} disabled={disabled} onChange={onClick} label="test" />
     </div>
   );
 };

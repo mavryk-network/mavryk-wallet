@@ -55,9 +55,9 @@ export const SuccessScreen = () => {
               </div>
             )}
           </section>
-          <div>
+          <div className="w-full">
             <ButtonLink linkTo="/" testID={SuccessScreenSelectors.buttonSuccess}>
-              <ButtonRounded size="big" fill>
+              <ButtonRounded size="big" fill className="w-full">
                 <T id={state.btnText} />
               </ButtonRounded>
             </ButtonLink>

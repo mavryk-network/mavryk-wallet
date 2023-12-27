@@ -10,7 +10,7 @@ import ContentContainer from 'app/layouts/ContentContainer';
 // import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useTempleClient, useAccount } from 'lib/temple/front';
+import { useTempleClient, useAccount, useNetwork } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
 // import { navigate } from 'lib/woozie';
 
@@ -22,7 +22,6 @@ import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
-import NetworkSelect from './Header/NetworkSelect';
 
 const Header: FC = () => {
   const appEnv = useAppEnv();
@@ -43,6 +42,7 @@ export default Header;
 
 const Control: FC = () => {
   const account = useAccount();
+  const currentNetwork = useNetwork();
 
   // new
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
@@ -123,18 +123,28 @@ const Control: FC = () => {
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
         <div className="flex item gap-2">
-          <NetworkButton enabled={showNetworkPopup} onClick={showNetworkPopupHandler} />
+          <NetworkButton enabled={Boolean(currentNetwork)} onClick={showNetworkPopupHandler} />
           <DAapsDropdownButton onClick={showDAppsPopupHandler} />
         </div>
       </div>
 
       {/* ________popups ________ */}
       {/* accounts */}
-      <PopupModalWithTitle isOpen={showAccountsPopup} onRequestClose={close} title={<T id="selectAccount" />}>
+      <PopupModalWithTitle
+        isOpen={showAccountsPopup}
+        onRequestClose={close}
+        title={<T id="selectAccount" />}
+        portalClassName="accounts-popup"
+      >
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
       </PopupModalWithTitle>
       {/* connected dapps */}
-      <PopupModalWithTitle isOpen={showDAppsPopup} onRequestClose={closeDappsPopup} title={<T id="connectedSites" />}>
+      <PopupModalWithTitle
+        isOpen={showDAppsPopup}
+        onRequestClose={closeDappsPopup}
+        title={<T id="connectedSites" />}
+        portalClassName="daaps-popup"
+      >
         <DAppsPopup opened={showDAppsPopup} setOpened={setShowDAppsPopup} />
       </PopupModalWithTitle>
       {/* networks */}
@@ -142,6 +152,7 @@ const Control: FC = () => {
         isOpen={showNetworkPopup}
         onRequestClose={closeNetworkPopup}
         title={<T id="networkSelect" />}
+        portalClassName="network-popup"
       >
         <NetworkPopup opened={showNetworkPopup} setOpened={setShowNetworkPopup} />
       </PopupModalWithTitle>

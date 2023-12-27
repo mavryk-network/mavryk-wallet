@@ -8,9 +8,14 @@ import { useDidUpdate } from 'lib/ui/hooks';
 
 export function useStorage<T = any>(key: string): [T | null | undefined, (val: SetStateAction<T>) => Promise<void>];
 export function useStorage<T = any>(key: string, fallback: T): [T, (val: SetStateAction<T>) => Promise<void>];
-export function useStorage<T = any>(key: string, fallback?: T) {
+export function useStorage<T = any>(
+  key: string,
+  fallback: T,
+  lazy: boolean
+): [T, (val: SetStateAction<T>) => Promise<void>];
+export function useStorage<T = any>(key: string, fallback?: T, lazy = true) {
   const { data, mutate } = useRetryableSWR<T | null, unknown, string>(key, fetchFromStorage, {
-    suspense: true,
+    suspense: lazy,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });

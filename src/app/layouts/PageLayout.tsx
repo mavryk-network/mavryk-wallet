@@ -61,7 +61,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="px-4 pt-4 no-scrollbar" style={style}>
+          <div className="px-4 pt-4 no-scrollbar overflow-x-hidden" style={style}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>

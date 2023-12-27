@@ -1536,7 +1536,7 @@
     "message": "Are you sure you want to delete this network?"
   },
   "networkNamePlaceholder": {
-    "message": "My custom network"
+    "message": "Enter network name"
   },
   "mustBeValidURL": {
     "message": "Must be a valid URL"
@@ -3142,5 +3142,11 @@
         "content": "$1"
       }
     }
+  },
+  "baseUrlPlaceholder": {
+    "message": "Enter base URL"
+  },
+  "addNetworkSuccess": {
+    "message:": "Network was successfully added"
   }
 }

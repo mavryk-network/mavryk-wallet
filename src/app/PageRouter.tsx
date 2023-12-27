@@ -30,6 +30,7 @@ import { Notifications, NotificationsItem } from 'lib/notifications';
 import { useTempleClient } from 'lib/temple/front';
 import * as Woozie from 'lib/woozie';
 
+import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
 
@@ -91,6 +92,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/collectible/:assetSlug?', onlyReady(({ assetSlug }) => <CollectiblePage assetSlug={assetSlug!} />)],
   ['/add-asset', onlyReady(onlyInFullPage(() => <AddAsset />))],
   ['/settings/:tabSlug?', onlyReady(({ tabSlug }) => <Settings tabSlug={tabSlug} />)],
+  ['/add-network', onlyReady(() => <AddNetworkScreen />)],
   ['/buy', onlyReady(onlyInFullPage(() => <Buy />))],
   ['/buy/crypto/exolix', onlyReady(onlyInFullPage(() => <Exolix />))],
   ['/buy/debit', onlyReady(onlyInFullPage(() => <BuyWithCreditCard />))],

@@ -2,6 +2,8 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { RadioButton } from 'app/atoms/RadioButton';
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
+import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
 import {
   BLOCK_EXPLORERS,
@@ -13,6 +15,8 @@ import {
 } from 'lib/temple/front';
 import { loadChainId } from 'lib/temple/helpers';
 import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
+
+import { NetworkSelectors } from './NetworkPoopup.selectors';
 
 type NetworkPopupProps = {
   opened: boolean;
@@ -57,6 +61,16 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
     [setNetworkId, setExplorerId, chainId]
   );
 
+  const action = useMemo(
+    () => ({
+      key: 'add-network',
+      linkTo: '/add-network',
+      testID: NetworkSelectors.networksButton,
+      onClick: () => setOpened(false)
+    }),
+    [setOpened]
+  );
+
   if (!chainId)
     return (
       <div className="animate-spin flex justify-center items-center p-8">
@@ -65,21 +79,30 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
     );
 
   return (
-    <div className="px-4">
-      {filteredNetworks.map(network => {
-        const { id, rpcBaseURL } = network;
-        const selected = id === currentNetwork.id;
+    <>
+      <div className="px-4 flex flex-col">
+        <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 380 }}>
+          {filteredNetworks.map(network => {
+            const { id, rpcBaseURL } = network;
+            const selected = id === currentNetwork.id;
 
-        return (
-          <NetworkListItem
-            key={id}
-            network={network}
-            selected={selected}
-            onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
-          />
-        );
-      })}
-    </div>
+            return (
+              <NetworkListItem
+                key={id}
+                network={network}
+                selected={selected}
+                onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
+              />
+            );
+          })}
+        </div>
+        <ButtonLink {...action}>
+          <ButtonRounded size="big" fill={false} className="w-full mt-6">
+            <T id="addNetwork" />
+          </ButtonRounded>
+        </ButtonLink>
+      </div>
+    </>
   );
 };
 
@@ -98,7 +121,7 @@ const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick 
         <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
         <span className="text-base-plus text-white">{(nameI18nKey && <T id={nameI18nKey} />) || name}</span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} onChange={onClick} label="test" />
+      <RadioButton id={id} checked={selected} disabled={disabled} onChange={onClick} />
     </div>
   );
 };

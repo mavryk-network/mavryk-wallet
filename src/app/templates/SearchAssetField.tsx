@@ -10,11 +10,11 @@ type SearchAssetFieldProps = SearchFieldProps;
 const SearchAssetField: FC<SearchAssetFieldProps> = ({ className, ...rest }) => (
   <SearchField
     className={clsx(
-      'py-2 pl-8 pr-4 bg-gray-100',
-      'rounded-lg border border-bgheader outline-none border-gray-300',
+      'py-2 pl-8 pr-2 bg-primary-card',
+      'rounded-lg outline-none',
       'transition ease-in-out duration-200',
-      'text-gray-500 text-sm leading-tight',
-      'placeholder-gray-500 focus:text-gray-700',
+      'text-white text-sm leading-tight',
+      'placeholder-secondary-white focus:text-white',
       className
     )}
     placeholder={t('searchAssets')}

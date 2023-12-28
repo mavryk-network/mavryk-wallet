@@ -3,7 +3,7 @@ import React, { FC, InputHTMLAttributes, useCallback } from 'react';
 import classNames from 'clsx';
 
 import CleanButton from 'app/atoms/CleanButton';
-import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
+import { ReactComponent as SearchIcon } from 'app/icons/Search.svg';
 import { setTestID, TestIDProps } from 'lib/analytics';
 
 export interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement>, TestIDProps {
@@ -61,7 +61,7 @@ const SearchField: FC<SearchFieldProps> = ({
             searchIconWrapperClassName
           )}
         >
-          <SearchIcon className={classNames('stroke-current', searchIconClassName)} />
+          <SearchIcon className={classNames('stroke-1', searchIconClassName)} />
         </div>
 
         {Boolean(value) && (

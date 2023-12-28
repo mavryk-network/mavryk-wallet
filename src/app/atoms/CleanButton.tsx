@@ -2,7 +2,7 @@ import React, { FC, HTMLAttributes, useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
+import { ReactComponent as CloseIcon } from 'app/icons/Cross.svg';
 import { t } from 'lib/i18n';
 import useTippy from 'lib/ui/useTippy';
 
@@ -36,11 +36,11 @@ const CleanButton: FC<CleanButtonProps> = ({
       type="button"
       className={classNames(
         'absolute',
-        'border rounded-full shadow-sm hover:shadow',
-        'bg-white',
+        'rounded-full',
+        'bg-gray-910',
         'p-px',
         'flex items-center',
-        'text-xs text-gray-700',
+        'text-xs text-white',
         'transition ease-in-out duration-200',
         className
       )}
@@ -48,7 +48,7 @@ const CleanButton: FC<CleanButtonProps> = ({
       tabIndex={-1}
       {...rest}
     >
-      <CloseIcon className="w-auto h-4 stroke-current" style={iconStyle} />
+      <CloseIcon className="w-auto h-4 stroke-1" style={iconStyle} />
     </button>
   );
 };

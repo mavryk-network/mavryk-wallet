@@ -82,7 +82,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
           searchIconClassName="h-5 w-auto"
           searchIconWrapperClassName="px-2 text-white opacity-50"
           cleanButtonStyle={{ backgroundColor: 'transparent' }}
-          cleanButtonIconStyle={{ stroke: 'white' }}
           containerClassName={'mb-4 px-4'}
           onValueChange={setSearchValue}
         />

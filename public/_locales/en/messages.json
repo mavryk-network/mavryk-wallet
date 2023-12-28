@@ -3148,5 +3148,17 @@
   },
   "baseUrlPlaceholder": {
     "message": "Enter base URL"
+  },
+  "highToLow": {
+    "message": "Value: High to Low"
+  },
+  "lowToHigh": {
+    "message": "Value: Low to High"
+  },
+  "byName": {
+    "message": "Name"
+  },
+  "hideZeroBalances": {
+    "message": "Hide Zero Balances"
   }
 }

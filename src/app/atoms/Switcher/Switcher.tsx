@@ -18,6 +18,7 @@ export const Switcher: FC<SwitcherProps> = ({ on = false, onClick, className, ..
         id="toggleSwitch"
         checked={on}
         onClick={onClick}
+        readOnly
       />
       <label className={styles['toggle-switch-label']} htmlFor="toggleSwitch">
         <span className={styles['toggle-switch-inner']} />

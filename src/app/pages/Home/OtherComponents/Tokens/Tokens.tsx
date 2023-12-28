@@ -5,27 +5,25 @@ import { BigNumber } from 'bignumber.js';
 import clsx from 'clsx';
 import { isEqual } from 'lodash';
 
-import { SyncSpinner, Divider, Checkbox } from 'app/atoms';
-import DropdownWrapper from 'app/atoms/DropdownWrapper';
+import { SyncSpinner } from 'app/atoms';
 import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
-import { ReactComponent as EditingIcon } from 'app/icons/editing.svg';
 import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
-import { ButtonForManageDropdown } from 'app/templates/ManageDropdown';
 import SearchAssetField from 'app/templates/SearchAssetField';
+import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
 import { TEMPLE_TOKEN_SLUG, TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
+import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { T, t } from 'lib/i18n';
 import { useAccount, useChainId, useDisplayedFungibleTokens } from 'lib/temple/front';
 import { useSyncTokens } from 'lib/temple/front/sync-tokens';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 import { useLocalStorage } from 'lib/ui/local-storage';
-import Popper, { PopperRenderProps } from 'lib/ui/Popper';
-import { Link, navigate } from 'lib/woozie';
+import { navigate } from 'lib/woozie';
 
 import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
@@ -34,7 +32,6 @@ import { ListItem } from './components/ListItem';
 import { toExploreAssetLink } from './utils';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
-const svgIconClassName = 'w-4 h-4 stroke-current fill-current text-gray-600';
 
 export const TokensTab: FC = () => {
   const chainId = useChainId(true)!;
@@ -47,6 +44,7 @@ export const TokensTab: FC = () => {
   const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, publicKeyHash);
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);
+  const [sortOption, setSortOption] = useState<null | SortOptions>(null);
 
   const toggleHideZeroBalances = useCallback(
     () => void setIsZeroBalancesHidden(val => !val),
@@ -66,6 +64,35 @@ export const TokensTab: FC = () => {
     leadingAssets
   );
 
+  const sortedSlugs = useSortededAssetsSlugs(sortOption, filteredAssets, balances);
+
+  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
+    () => [
+      {
+        id: SortOptions.HIGH_TO_LOW,
+        selected: sortOption === SortOptions.HIGH_TO_LOW,
+        onClick: () => {
+          console.log(sortOption, 'temp');
+          setSortOption(prev => (prev === SortOptions.HIGH_TO_LOW ? null : SortOptions.HIGH_TO_LOW));
+        },
+        nameI18nKey: 'highToLow'
+      },
+      {
+        id: SortOptions.LOW_TO_HIGH,
+        selected: sortOption === SortOptions.LOW_TO_HIGH,
+        onClick: () => setSortOption(prev => (prev === SortOptions.LOW_TO_HIGH ? null : SortOptions.LOW_TO_HIGH)),
+        nameI18nKey: 'lowToHigh'
+      },
+      {
+        id: SortOptions.BY_NAME,
+        selected: sortOption === SortOptions.BY_NAME,
+        onClick: () => setSortOption(prev => (prev === SortOptions.BY_NAME ? null : SortOptions.BY_NAME)),
+        nameI18nKey: 'byName'
+      }
+    ],
+    [sortOption]
+  );
+
   const isEnabledAdsBanner = useIsEnabledAdsBannerSelector();
 
   const [searchFocused, setSearchFocused] = useState(false);
@@ -73,11 +100,11 @@ export const TokensTab: FC = () => {
   const searchValueExist = useMemo(() => Boolean(searchValue), [searchValue]);
 
   const activeAssetSlug = useMemo(() => {
-    return searchFocused && searchValueExist && filteredAssets[activeIndex] ? filteredAssets[activeIndex] : null;
-  }, [filteredAssets, searchFocused, searchValueExist, activeIndex]);
+    return searchFocused && searchValueExist && sortedSlugs[activeIndex] ? sortedSlugs[activeIndex] : null;
+  }, [sortedSlugs, searchFocused, searchValueExist, activeIndex]);
 
   const tokensView = useMemo<Array<JSX.Element>>(() => {
-    const tokensJsx = filteredAssets.map(assetSlug => (
+    const tokensJsx = sortedSlugs.map(assetSlug => (
       <ListItem
         key={assetSlug}
         assetSlug={assetSlug}
@@ -86,22 +113,22 @@ export const TokensTab: FC = () => {
       />
     ));
 
-    if (filteredAssets.length < 5) {
+    if (sortedSlugs.length < 5) {
       tokensJsx.push(<PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
     } else {
       tokensJsx.splice(1, 0, <PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
     }
 
     return tokensJsx;
-  }, [filteredAssets, activeAssetSlug, balances]);
+  }, [sortedSlugs, activeAssetSlug, balances]);
 
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 
   useEffect(() => {
-    if (activeIndex !== 0 && activeIndex >= filteredAssets.length) {
+    if (activeIndex !== 0 && activeIndex >= sortedSlugs.length) {
       setActiveIndex(0);
     }
-  }, [activeIndex, filteredAssets.length]);
+  }, [activeIndex, sortedSlugs.length]);
 
   const handleSearchFieldFocus = useCallback(() => void setSearchFocused(true), [setSearchFocused]);
   const handleSearchFieldBlur = useCallback(() => void setSearchFocused(false), [setSearchFocused]);
@@ -142,34 +169,20 @@ export const TokensTab: FC = () => {
             testID={AssetsSelectors.searchAssetsInputTokens}
           />
 
-          {/* <Popper
-            placement="bottom-end"
-            strategy="fixed"
-            popup={props => (
-              <ManageButtonDropdown
-                {...props}
-                isZeroBalancesHidden={isZeroBalancesHidden}
-                toggleHideZeroBalances={toggleHideZeroBalances}
-              />
-            )}
-          >
-            {({ ref, opened, toggleOpened }) => (
-              <ButtonForManageDropdown
-                ref={ref}
-                opened={opened}
-                tooltip={t('manageAssetsList')}
-                onClick={toggleOpened}
-                testID={AssetsSelectors.manageButton}
-                testIDProperties={{ listOf: 'Tokens' }}
-              />
-            )}
-          </Popper> */}
+          <SortPopup>
+            <SortButton />
+            <SortPopupContent
+              items={memoizedSortAssetsOptions}
+              on={isZeroBalancesHidden}
+              toggle={toggleHideZeroBalances}
+            />
+          </SortPopup>
         </div>
       </div>
 
       {isEnabledAdsBanner && <AcceptAdsBanner />}
 
-      {filteredAssets.length === 0 ? (
+      {sortedSlugs.length === 0 ? (
         <div className="mt-20 mb-8 flex flex-col items-center justify-center text-white">
           <p className="mb-2 flex items-center justify-center text-white text-base-plus">
             <span {...setTestID(HomeSelectors.emptyStateText)}>
@@ -185,52 +198,5 @@ export const TokensTab: FC = () => {
 
       {isSyncing && <SyncSpinner className="mt-4" />}
     </div>
-  );
-};
-
-interface ManageButtonDropdownProps extends PopperRenderProps {
-  isZeroBalancesHidden: boolean;
-  toggleHideZeroBalances: EmptyFn;
-}
-
-const ManageButtonDropdown: FC<ManageButtonDropdownProps> = ({
-  opened,
-  isZeroBalancesHidden,
-  toggleHideZeroBalances
-}) => {
-  const buttonClassName = 'flex items-center px-3 py-2.5 rounded hover:bg-gray-200 cursor-pointer';
-
-  return (
-    <DropdownWrapper
-      opened={opened}
-      className="origin-top-right p-2 flex flex-col min-w-40"
-      style={{ border: 'unset', marginTop: '0.25rem' }}
-    >
-      <Link
-        to={`/manage-assets`}
-        className={buttonClassName}
-        testID={AssetsSelectors.dropdownManageButton}
-        testIDProperties={{ listOf: 'Tokens' }}
-      >
-        <EditingIcon className={svgIconClassName} />
-        <span className="text-sm text-gray-600 ml-2 leading-5">
-          <T id="manage" />
-        </span>
-      </Link>
-
-      <Divider className="my-2" />
-
-      <label className={buttonClassName}>
-        <Checkbox
-          overrideClassNames="h-4 w-4 rounded"
-          checked={isZeroBalancesHidden}
-          onChange={toggleHideZeroBalances}
-          testID={AssetsSelectors.dropdownHideZeroBalancesCheckbox}
-        />
-        <span className="text-sm text-gray-600 ml-2 leading-5">
-          <T id="hideZeroBalance" />
-        </span>
-      </label>
-    </DropdownWrapper>
   );
 };

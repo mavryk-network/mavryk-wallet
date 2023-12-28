@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, ChangeEvent } from 'react';
+import React, { FC, ReactNode, MouseEvent } from 'react';
 
 import classNames from 'clsx';
 
@@ -8,13 +8,23 @@ export type RadioButtonProps = {
   id: string;
   name?: string;
   value?: string | number | readonly string[];
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onClick?: (e: MouseEvent<HTMLInputElement>) => void;
   checked: boolean;
   label?: string | ReactNode;
   disabled?: boolean;
+  shouldUseChangeHandler?: boolean;
 };
 
-export const RadioButton: FC<RadioButtonProps> = ({ id, name, value, onChange, checked, label, disabled }) => {
+export const RadioButton: FC<RadioButtonProps> = ({
+  id,
+  name,
+  value,
+  onClick,
+  checked,
+  label,
+  disabled,
+  shouldUseChangeHandler = false
+}) => {
   return (
     <label htmlFor={id} className={classNames(styles.radioLabel, disabled && styles.disabled)}>
       <input
@@ -23,8 +33,9 @@ export const RadioButton: FC<RadioButtonProps> = ({ id, name, value, onChange, c
         name={name}
         id={id}
         value={value}
-        onChange={onChange}
+        onClick={shouldUseChangeHandler && checked ? undefined : onClick}
         checked={checked}
+        readOnly
       />
       <span className={styles.customRadio} />
       {label && label}

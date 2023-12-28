@@ -4,7 +4,7 @@ import classNames from 'clsx';
 
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import SearchField from 'app/templates/SearchField';
+import SearchField from 'app/templates/SearchField/SearchField';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh, useGasToken } from 'lib/temple/front';
 import { HistoryAction, navigate } from 'lib/woozie';

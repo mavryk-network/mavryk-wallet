@@ -2,13 +2,13 @@ import React, { FC } from 'react';
 
 import clsx from 'clsx';
 
-import SearchField, { SearchFieldProps } from 'app/templates/SearchField';
+import { SearchFieldExplorer, SearchFieldProps } from 'app/templates/SearchField/SearchField';
 import { t } from 'lib/i18n';
 
 type SearchAssetFieldProps = SearchFieldProps;
 
 const SearchAssetField: FC<SearchAssetFieldProps> = ({ className, ...rest }) => (
-  <SearchField
+  <SearchFieldExplorer
     className={clsx(
       'py-2 pl-8 pr-2 bg-primary-card',
       'rounded-lg outline-none',

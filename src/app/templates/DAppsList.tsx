@@ -6,7 +6,7 @@ import { Anchor } from 'app/atoms/Anchor';
 import { openInFullPage, useAppEnv } from 'app/env';
 import { DAppIcon } from 'app/templates/DAppsList/DAppIcon';
 import DAppItem from 'app/templates/DAppsList/DAppItem';
-import SearchField from 'app/templates/SearchField';
+import SearchField from 'app/templates/SearchField/SearchField';
 import { DappEnum, getDApps } from 'lib/apis/temple';
 import { TID, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';

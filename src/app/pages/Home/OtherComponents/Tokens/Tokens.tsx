@@ -12,7 +12,6 @@ import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { ReactComponent as EditingIcon } from 'app/icons/editing.svg';
-import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
 import { ButtonForManageDropdown } from 'app/templates/ManageDropdown';
 import SearchAssetField from 'app/templates/SearchAssetField';
@@ -143,7 +142,7 @@ export const TokensTab: FC = () => {
             testID={AssetsSelectors.searchAssetsInputTokens}
           />
 
-          <Popper
+          {/* <Popper
             placement="bottom-end"
             strategy="fixed"
             popup={props => (
@@ -164,35 +163,22 @@ export const TokensTab: FC = () => {
                 testIDProperties={{ listOf: 'Tokens' }}
               />
             )}
-          </Popper>
+          </Popper> */}
         </div>
       </div>
 
       {isEnabledAdsBanner && <AcceptAdsBanner />}
 
       {filteredAssets.length === 0 ? (
-        <div className="my-8 flex flex-col items-center justify-center text-gray-500">
-          <p className="mb-2 flex items-center justify-center text-gray-600 text-base font-light">
-            {searchValueExist && <SearchIcon className="w-5 h-auto mr-1 stroke-current" />}
-
+        <div className="mt-20 mb-8 flex flex-col items-center justify-center text-white">
+          <p className="mb-2 flex items-center justify-center text-white text-base-plus">
             <span {...setTestID(HomeSelectors.emptyStateText)}>
               <T id="noAssetsFound" />
             </span>
           </p>
-
-          <p className="text-center text-xs font-light">
-            <T
-              id="ifYouDontSeeYourAsset"
-              substitutions={[
-                <b>
-                  <T id="manage" />
-                </b>
-              ]}
-            />
-          </p>
         </div>
       ) : (
-        <div className="flex flex-col w-full overflow-hidden rounded-md text-gray-700 text-sm leading-tight">
+        <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-sm leading-tight">
           {tokensView}
         </div>
       )}

@@ -2,8 +2,8 @@ import React, { FC } from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as DisabledNetworkIcon } from 'app/icons/network-disabled.svg';
-import { ReactComponent as EnabledNetworkIcon } from 'app/icons/network-enabled.svg';
+import { ReactComponent as EnabledNetworkIcon } from 'app/icons/connect-green.svg';
+import { ReactComponent as DisabledNetworkIcon } from 'app/icons/connect-grey.svg';
 
 export type NetworkButtonProps = {
   enabled: boolean;

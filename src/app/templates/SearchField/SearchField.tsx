@@ -4,7 +4,7 @@ import classNames from 'clsx';
 
 import CleanButton from 'app/atoms/CleanButton';
 import { useInitialOffAnimation } from 'app/hooks/use-initial-off-animation';
-import { ReactComponent as SearchIcon } from 'app/icons/Search.svg';
+import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { setTestID, TestIDProps } from 'lib/analytics';
 
 import styles from './SearchField.module.css';

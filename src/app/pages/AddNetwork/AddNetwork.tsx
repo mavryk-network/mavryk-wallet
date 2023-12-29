@@ -6,9 +6,10 @@ import { FormField, FormSubmitButton } from 'app/atoms';
 import { URL_PATTERN } from 'app/defaults';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
-import { useSettings, useTempleClient } from 'lib/temple/front';
+import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
 import { loadChainId } from 'lib/temple/helpers';
 import { NETWORK_IDS } from 'lib/temple/networks';
+import { TempleChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -26,6 +27,8 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 export const AddNetworkScreen: FC = () => {
   const { updateSettings, defaultNetworks } = useTempleClient();
   const { customNetworks = [] } = useSettings();
+  const { setExplorerId } = useBlockExplorer();
+  const setNetworkId = useSetNetworkId();
 
   const {
     register,
@@ -34,9 +37,15 @@ export const AddNetworkScreen: FC = () => {
     formState,
     clearError,
     setError,
-    errors
+    errors,
+    watch
   } = useForm<NetworkFormData>();
   const submitting = formState.isSubmitting;
+
+  const name = watch('name');
+  const rpcBaseURL = watch('rpcBaseURL');
+
+  const allowSubmission = (name?.length > 0 && rpcBaseURL?.length > 0) ?? false;
 
   const rpcURLIsUnique = useCallback(
     (url: string) =>
@@ -49,9 +58,18 @@ export const AddNetworkScreen: FC = () => {
       if (submitting) return;
       clearError();
 
-      let chainId;
+      let chainId: string = '';
       try {
-        chainId = await loadChainId(rpcBaseURL);
+        chainId = (await loadChainId(rpcBaseURL)) as string;
+
+        if (chainId) {
+          const currentBlockExplorerId =
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId as TempleChainId))?.id ?? 'tzkt';
+
+          setExplorerId(currentBlockExplorerId);
+        } else {
+          setExplorerId('tzkt');
+        }
       } catch (err: any) {
         console.error(err);
 
@@ -64,6 +82,7 @@ export const AddNetworkScreen: FC = () => {
 
       try {
         const networkId = NETWORK_IDS.get(chainId) ?? rpcBaseURL;
+
         await updateSettings({
           customNetworks: [
             ...customNetworks,
@@ -78,6 +97,10 @@ export const AddNetworkScreen: FC = () => {
             }
           ]
         });
+
+        await delay();
+
+        setNetworkId(rpcBaseURL);
         resetForm();
 
         navigate<SuccessStateType>('/success', undefined, {
@@ -94,7 +117,7 @@ export const AddNetworkScreen: FC = () => {
         setError('rpcBaseURL', SUBMIT_ERROR_TYPE, err.message);
       }
     },
-    [clearError, customNetworks, resetForm, submitting, setError, updateSettings]
+    [submitting, clearError, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]
   );
 
   return (
@@ -151,7 +174,7 @@ export const AddNetworkScreen: FC = () => {
           className="mt-auto mb-8"
           loading={submitting}
           testID={CustomNetworkSettingsSelectors.addNetworkButton}
-          disabled={!formState.touched.name || !formState.touched.rpcBaseURL}
+          disabled={!allowSubmission}
         >
           <T id="addNetwork" />
         </FormSubmitButton>

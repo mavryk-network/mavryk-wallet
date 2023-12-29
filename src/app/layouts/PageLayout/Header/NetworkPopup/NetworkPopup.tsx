@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { RadioButton } from 'app/atoms/RadioButton';
-import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
@@ -28,7 +27,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
   const currentNetwork = useNetwork();
   const setNetworkId = useSetNetworkId();
 
-  const chainId = useChainId(true);
+  const chainId = useChainId(true)!;
   const { setExplorerId } = useBlockExplorer();
 
   const filteredNetworks = useMemo(() => allNetworks.filter(n => !n.hidden), [allNetworks]);
@@ -38,7 +37,6 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
       setOpened(false);
 
       if (selected) return;
-
       try {
         const currentChainId = await loadChainId(rpcUrl);
 
@@ -70,13 +68,6 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
     }),
     [setOpened]
   );
-
-  if (!chainId)
-    return (
-      <div className="animate-spin flex justify-center items-center p-8">
-        <LoadingSvg style={{ width: 24, height: 24 }} />
-      </div>
-    );
 
   return (
     <>

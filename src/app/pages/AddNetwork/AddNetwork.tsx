@@ -151,6 +151,7 @@ export const AddNetworkScreen: FC = () => {
           className="mt-auto mb-8"
           loading={submitting}
           testID={CustomNetworkSettingsSelectors.addNetworkButton}
+          disabled={!formState.touched.name || !formState.touched.rpcBaseURL}
         >
           <T id="addNetwork" />
         </FormSubmitButton>

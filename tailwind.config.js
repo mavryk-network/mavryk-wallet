@@ -30,6 +30,7 @@ module.exports = {
 
         gray: {
           10: '#f4f4f4',
+          15: '#E6E6E6',
           20: '#aeaeb2',
           30: '#AAA',
           40: '#666',

@@ -47,11 +47,11 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           'transition ease-in-out duration-100',
           size === 'small' && btnSmall,
           size === 'big' && btnBig,
-          disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed',
-          fill
+          fill && !disabled
             ? 'bg-accent-blue hover:bg-accent-blue-hover'
             : 'bg-transparent  border-2 border-solid border-accent-blue',
           isLoading && ' flex justify-center w-24 align-middle',
+          disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed border-none text-gray-15',
           className
         )}
         {...props}

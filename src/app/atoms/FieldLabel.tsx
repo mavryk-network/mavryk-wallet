@@ -12,7 +12,7 @@ interface Props {
 
 export const FieldLabel: React.FC<Props> = ({ label, className, description, warning, id }) => (
   <label className={clsx(className, 'leading-tight flex flex-col')} htmlFor={id}>
-    <span className="text-base font-semibold text-primary-white">{label}</span>
+    <span className="text-base font-normal text-primary-white">{label}</span>
 
     {description && <span className="mt-1 text-xs font-light text-secondary-white max-w-9/10">{description}</span>}
 

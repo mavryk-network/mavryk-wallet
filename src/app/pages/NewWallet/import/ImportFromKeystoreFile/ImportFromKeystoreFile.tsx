@@ -40,14 +40,17 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
   const {
     register: secondaryRegister,
     control: secondaryControl,
-    errors: secondaryErrors
+    errors: secondaryErrors,
+    onSubmit: secondarySubmit,
+    handleSubmit: secondaryHandleSubmit,
+    submitting: secondarySubmitting
   } = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
 
   const customAlert = useAlert();
   const { setValue, control, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     mode: 'onChange'
   });
-  const submitting = formState.isSubmitting;
+  const submitting = formState.isSubmitting || secondarySubmitting;
 
   const clearKeystoreFileInput = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     event.stopPropagation();
@@ -70,12 +73,14 @@ export const ImportFromKeystoreFile: FC<ImportFromKeystoreFileProps> = ({
     [setSeedPhrase, setKeystorePassword, setIsSeedEntered, submitting, customAlert]
   );
 
+  const handleFinalSubmit = isSeedEntered ? secondaryHandleSubmit(secondarySubmit) : handleSubmit(onSubmit);
+
   return (
     <Toggle>
       <form
         className="w-full h-auto max-w-sm mx-auto pt-4 pb-8 flex flex-col no-scrollbar"
         style={{ height: 'calc(100% - 48px)' }}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleFinalSubmit}
       >
         <label className="mb-4 leading-tight flex flex-col">
           <span className="text-base-plus font-semibold text-white">

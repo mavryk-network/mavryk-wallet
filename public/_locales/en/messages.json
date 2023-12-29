@@ -3160,5 +3160,8 @@
   },
   "hideZeroBalances": {
     "message": "Hide Zero Balances"
+  },
+  "networkMustBeUnique": {
+    "message": "This network already exists in your added networks. Please add a different network."
   }
 }

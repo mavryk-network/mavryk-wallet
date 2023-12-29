@@ -188,7 +188,9 @@ const CustomNetworksSettings: FC = () => {
           id="rpc-base-url"
           name="rpcBaseURL"
           placeholder="http://localhost:8545"
-          errorCaption={errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('mustBeUnique') : '')}
+          errorCaption={
+            errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('networkMustBeUnique') : '')
+          }
           containerClassName="mb-4"
           testIDs={{
             input: CustomNetworkSettingsSelectors.RPCbaseURLinput,

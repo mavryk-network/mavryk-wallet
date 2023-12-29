@@ -110,6 +110,7 @@ export const AddNetworkScreen: FC = () => {
           subHeader: 'success'
         });
       } catch (err: any) {
+        debugger;
         console.error(err);
 
         await delay();
@@ -162,7 +163,9 @@ export const AddNetworkScreen: FC = () => {
           id="rpc-base-url"
           name="rpcBaseURL"
           placeholder={t('baseUrlPlaceholder')}
-          errorCaption={errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('mustBeUnique') : '')}
+          errorCaption={
+            errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('networkMustBeUnique') : '')
+          }
           containerClassName="mb-2shrink-1"
           testIDs={{
             input: CustomNetworkSettingsSelectors.RPCbaseURLinput,

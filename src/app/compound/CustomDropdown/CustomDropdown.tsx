@@ -49,7 +49,10 @@ export function DropdownHeader({ header, subHeader, className, disabled = false 
   const { show, toggle } = useToggle();
 
   return (
-    <section className={classNames('w-full flex items-start gap-4 stroke-2', show && 'pb-4', className)}>
+    <section
+      className={classNames('w-full flex items-start gap-4 stroke-2 cursor-pointer', show && 'pb-4', className)}
+      onClick={disabled ? undefined : toggle}
+    >
       <div className="flex flex-col gap-1">
         <div className="text-white text-base-plus">{header}</div>
         <div className="text-sm text-secondary-white text-left">{subHeader}</div>
@@ -61,7 +64,6 @@ export function DropdownHeader({ header, subHeader, className, disabled = false 
           show && 'transform rotate-180',
           disabled && 'pointer-events-none opacity-5'
         )}
-        onClick={disabled ? undefined : toggle}
       />
     </section>
   );

@@ -121,11 +121,11 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
 };
 
 const Divider = () => {
-  return <div className="w-full border-t border-divider my-4" />;
+  return <div className="w-full border-t border-divider my-3" />;
 };
 
 const DAppIcon: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = props => (
-  <DAppLogo className="flex-none mr-1 my-1 rounded-full overflow-hidden" origin={props.item[0]} size={24} />
+  <DAppLogo className="flex-none mr-1 rounded-full overflow-hidden" origin={props.item[0]} size={24} />
 );
 
 const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = props => {

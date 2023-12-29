@@ -122,7 +122,7 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         {/* <NetworkSelect /> */}
-        <div className="flex item gap-2">
+        <div className="flex item gap-2 items-center">
           <NetworkButton enabled={Boolean(currentNetwork)} onClick={showNetworkPopupHandler} />
           <DAapsDropdownButton onClick={showDAppsPopupHandler} />
         </div>

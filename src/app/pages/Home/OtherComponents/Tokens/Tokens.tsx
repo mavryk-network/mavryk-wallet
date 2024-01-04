@@ -44,7 +44,7 @@ export const TokensTab: FC = () => {
   const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, publicKeyHash);
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);
-  const [sortOption, setSortOption] = useState<null | SortOptions>(null);
+  const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 
   const toggleHideZeroBalances = useCallback(
     () => void setIsZeroBalancesHidden(val => !val),

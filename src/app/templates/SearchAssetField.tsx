@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, memo } from 'react';
 
 import clsx from 'clsx';
 
@@ -12,7 +12,7 @@ import { t } from 'lib/i18n';
 
 type SearchAssetFieldProps = SearchFieldProps;
 
-const SearchAssetField: FC<SearchAssetFieldProps> = ({ className, ...rest }) => (
+const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, ...rest }) => (
   <SearchExplorer>
     <>
       <SearchExplorerOpened
@@ -32,6 +32,6 @@ const SearchAssetField: FC<SearchAssetFieldProps> = ({ className, ...rest }) => 
       <SearchExplorerClosed />
     </>
   </SearchExplorer>
-);
+));
 
 export default SearchAssetField;

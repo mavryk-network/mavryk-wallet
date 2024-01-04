@@ -25,6 +25,7 @@ import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
 import { useTempleClient } from 'lib/temple/front';
 import { PasswordValidation } from 'lib/ui/PasswordStrengthIndicator';
+import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { useOnboardingProgress } from '../../Onboarding/hooks/useOnboardingProgress.hook';
@@ -32,7 +33,6 @@ import { useOnboardingProgress } from '../../Onboarding/hooks/useOnboardingProgr
 const MIN_PASSWORD_LENGTH = 8;
 
 export interface FormData extends TestIDProps {
-  shouldUseKeystorePassword?: boolean;
   password?: string;
   repeatPassword?: string;
   termsAccepted: boolean;
@@ -79,13 +79,13 @@ export const useCreareOrRestorePassword = (
 
   const { control, watch, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     defaultValues: {
-      shouldUseKeystorePassword: !isKeystorePasswordWeak,
       analytics: true,
       viewAds: true,
       skipOnboarding: false
     },
     mode: 'onChange'
   });
+
   const submitting = formState.isSubmitting;
 
   const shouldUseKeystorePassword = watch('shouldUseKeystorePassword');
@@ -125,11 +125,7 @@ export const useCreareOrRestorePassword = (
       if (submitting) return;
       if (shouldUseKeystorePassword && isKeystorePasswordWeak) return;
 
-      const password = ownMnemonic
-        ? data.shouldUseKeystorePassword
-          ? keystorePassword
-          : data.password
-        : data.password;
+      const password = ownMnemonic ? (isImportFromKeystoreFile ? keystorePassword : data.password) : data.password;
       try {
         const shouldEnableAnalytics = Boolean(data.analytics);
         setAdsViewEnabled(data.viewAds);
@@ -138,7 +134,6 @@ export const useCreareOrRestorePassword = (
         await putToStorage(WEBSITES_ANALYTICS_ENABLED, shouldEnableWebsiteAnalytics);
 
         setOnboardingCompleted(data.skipOnboarding!);
-
         const accountPkh = await registerWallet(password!, formatMnemonic(seedPhrase));
         trackEvent(
           data.skipOnboarding ? 'OnboardingSkipped' : 'OnboardingNotSkipped',
@@ -151,6 +146,8 @@ export const useCreareOrRestorePassword = (
         }
 
         if (popup) {
+          await delay();
+
           navigate<SuccessStateType>('/success', undefined, {
             pageTitle: 'restoreAccount',
             btnText: 'goToMain',
@@ -173,6 +170,7 @@ export const useCreareOrRestorePassword = (
       shouldUseKeystorePassword,
       isKeystorePasswordWeak,
       ownMnemonic,
+      isImportFromKeystoreFile,
       keystorePassword,
       setAdsViewEnabled,
       setAnalyticsEnabled,
@@ -180,6 +178,7 @@ export const useCreareOrRestorePassword = (
       registerWallet,
       seedPhrase,
       trackEvent,
+      popup,
       dispatch
     ]
   );

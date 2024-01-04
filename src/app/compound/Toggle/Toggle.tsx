@@ -12,8 +12,6 @@ export function Toggle({ children }: Child) {
   const [on, setOn] = React.useState(false);
   const toggle = useCallback(() => setOn(!on), [on]);
 
-  console.log(on);
-
   const memoizedState = useMemo(() => ({ on, toggle }), [on, toggle]);
 
   return <ToggleContext.Provider value={memoizedState}>{children}</ToggleContext.Provider>;

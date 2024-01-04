@@ -36,12 +36,12 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
   const [seedPhrase, setSeedPhrase] = useState('');
   const [keystorePassword, setKeystorePassword] = useState('');
   const [isSeedEntered, setIsSeedEntered] = useState(false);
+  const [isFromKeystoreFileWithUpdatedPassword, setIsFromKeystoreFileWithUpdatedPassword] = useState(false);
 
   const isImportFromSeedPhrase = tabSlug === 'seed-phrase';
 
   return (
     <PageLayout pageTitle={fullPage ? t('importWallet') : t('restoreAccount')} isTopbarVisible={fullPage}>
-      {/* TODO based on toggle */}
       {(!isSeedEntered || (isSeedEntered && !isImportFromSeedPhrase)) && (
         <ImportTabSwitcher
           tabs={importWalletOptions}
@@ -62,8 +62,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
             setIsSeedEntered={setIsSeedEntered}
           />
         )
-      ) : // TODO based on toggle
-      isSeedEntered && isImportFromSeedPhrase ? (
+      ) : isSeedEntered && isFromKeystoreFileWithUpdatedPassword ? (
         <SetWalletPassword ownMnemonic seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
       ) : (
         <ImportFromKeystoreFile
@@ -73,6 +72,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
           isSeedEntered={isSeedEntered}
           seedPhrase={seedPhrase}
           keystorePassword={keystorePassword}
+          setIsFromKeystoreFileWithUpdatedPassword={setIsFromKeystoreFileWithUpdatedPassword}
         />
       )}
     </PageLayout>

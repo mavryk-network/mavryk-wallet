@@ -42,14 +42,12 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
 
   return (
     <PageLayout pageTitle={fullPage ? t('importWallet') : t('restoreAccount')} isTopbarVisible={fullPage}>
-      {(!isSeedEntered || (isSeedEntered && !isImportFromSeedPhrase)) && (
-        <ImportTabSwitcher
-          tabs={importWalletOptions}
-          activeTabSlug={tabSlug}
-          urlPrefix="/import-wallet"
-          fullPage={fullPage}
-        />
-      )}
+      <ImportTabSwitcher
+        tabs={importWalletOptions}
+        activeTabSlug={tabSlug}
+        urlPrefix="/import-wallet"
+        fullPage={fullPage}
+      />
 
       <LockedWalletExists locked={locked} />
       {isImportFromSeedPhrase ? (
@@ -73,6 +71,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
           seedPhrase={seedPhrase}
           keystorePassword={keystorePassword}
           setIsFromKeystoreFileWithUpdatedPassword={setIsFromKeystoreFileWithUpdatedPassword}
+          isFromKeystoreFileWithUpdatedPassword={isFromKeystoreFileWithUpdatedPassword}
         />
       )}
     </PageLayout>

@@ -27,6 +27,7 @@ interface ImportFromKeystoreFileProps {
   seedPhrase: string;
   keystorePassword: string;
   isSeedEntered?: boolean;
+  isFromKeystoreFileWithUpdatedPassword: boolean;
   setIsFromKeystoreFileWithUpdatedPassword: (value: boolean) => void;
 }
 
@@ -37,6 +38,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
   setIsFromKeystoreFileWithUpdatedPassword,
   seedPhrase,
   keystorePassword,
+  isFromKeystoreFileWithUpdatedPassword,
   isSeedEntered = false
 }) => {
   const { on } = useToggle();
@@ -125,7 +127,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
         errorCaption={errors.keystorePassword?.message}
         testID={ImportFromKeystoreFileSelectors.filePasswordInput}
       />
-      {isSeedEntered && (
+      {isSeedEntered && !isFromKeystoreFileWithUpdatedPassword && (
         <>
           <div className=" w-full flex justify-between items-center mb-2 mt-2">
             <div className="text-base-plus text-white">

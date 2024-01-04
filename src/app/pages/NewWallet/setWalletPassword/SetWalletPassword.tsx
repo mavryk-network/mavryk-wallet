@@ -44,34 +44,9 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
   return (
     <form
-      className={classNames('w-full h-full max-w-sm mx-auto flex flex-col pb-8 no-scrollbar')}
+      className={classNames('w-full h-full max-w-sm mx-auto flex flex-col pt-4 pb-8 no-scrollbar')}
       onSubmit={handleSubmit(onSubmit)}
     >
-      {ownMnemonic && isImportFromKeystoreFile && (
-        <div className="w-full mb-6 mt-8">
-          <Controller
-            control={control}
-            name="shouldUseKeystorePassword"
-            as={FormCheckbox}
-            label={t('useKeystorePassword')}
-            onClick={() =>
-              setPasswordValidation({
-                minChar: false,
-                cases: false,
-                number: false,
-                specialChar: false
-              })
-            }
-            testID={setWalletPasswordSelectors.useFilePasswordCheckBox}
-          />
-          {shouldUseKeystorePassword && isKeystorePasswordWeak && (
-            <div className="text-xs text-primary-error">
-              <T id="weakKeystorePassword" />
-            </div>
-          )}
-        </div>
-      )}
-
       {(!shouldUseKeystorePassword || !isImportFromKeystoreFile) && (
         <>
           <FormField

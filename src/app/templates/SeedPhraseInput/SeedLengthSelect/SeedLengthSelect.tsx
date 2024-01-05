@@ -60,16 +60,21 @@ export const SeedLengthSelect: FC<SeedLengthSelectProps> = ({ options, currentOp
       )}
     >
       <div
-        className={classNames('flex flex-row gap-x-3 justify-around px-4 py-3.5 text-white')}
+        style={{ minWidth: 126 }}
+        className={classNames('flex flex-row gap-x-3 justify-around items-center px-4 py-3.5 text-white')}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span style={{ fontSize: 13 }} {...setTestID(ImportAccountSelectors.mnemonicDropDownButton)}>
+        <span
+          style={{ height: '19px' }}
+          {...setTestID(ImportAccountSelectors.mnemonicDropDownButton)}
+          className="text-base-plus"
+        >
           {fullPage ? t('seedInputNumberOfWords', [`${selectedOption}`]) : t('words', [`${selectedOption}`])}{' '}
         </span>
         <SelectArrowDownIcon
           className={classNames(
             'stroke-white stroke-2',
-            'opacity-1 w-5 h-5 transition ease-in-out duration-75',
+            'opacity-1 w-4 h-4 transition ease-in-out duration-75',
             isOpen && 'transform rotate-180'
           )}
         />

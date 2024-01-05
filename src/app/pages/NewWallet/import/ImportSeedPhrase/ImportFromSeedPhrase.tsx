@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { defaultNumberOfWords } from 'app/pages/ImportAccount/constants';
-import { SeedPhraseInput } from 'app/templates/SeedPhraseInput';
+import { SeedPhraseInput, isSeedPhraseFilled } from 'app/templates/SeedPhraseInput';
 import { T, t } from 'lib/i18n';
 
 import { ImportFromSeedPhraseSelectors } from './ImportFromSeedPhrase.selectors';
@@ -35,6 +35,8 @@ export const ImportFromSeedPhrase: FC<ImportFromSeedPhraseProps> = ({
     }
   }, [seedPhrase, seedError, setIsSeedEntered, numberOfWords]);
 
+  const btnDisabled = !isSeedPhraseFilled(seedPhrase);
+
   return (
     <form
       className={classNames('w-full mx-auto ', fullPage ? 'my-8 px-12 pb-8' : 'mt-4 pb-8')}
@@ -52,7 +54,11 @@ export const ImportFromSeedPhrase: FC<ImportFromSeedPhraseProps> = ({
         setNumberOfWords={setNumberOfWords}
       />
 
-      <FormSubmitButton className="w-96 mx-auto" testID={ImportFromSeedPhraseSelectors.nextButton}>
+      <FormSubmitButton
+        className="w-96 mx-auto"
+        testID={ImportFromSeedPhraseSelectors.nextButton}
+        disabled={btnDisabled}
+      >
         <T id="next" />
       </FormSubmitButton>
     </form>

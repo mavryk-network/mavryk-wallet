@@ -204,7 +204,7 @@ export const FORM_FIELD_CLASS_NAME = classNames(
   'appearance-none w-full border rounded-md bg-primary-bg',
   'focus:border-accent-blue focus:bg-primary-black focus:outline-none',
   'transition ease-in-out duration-200',
-  'text-white text-base-plus leading-tight placeholder-secondary-white'
+  'text-white text-base-plus placeholder-secondary-white'
 );
 
 interface ExtraInnerProps {

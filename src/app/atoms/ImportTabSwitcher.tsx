@@ -37,9 +37,9 @@ const ImportTabSwitcher: React.FC<ImportTabSwitcherProps> = ({
                 className={classNames(
                   'text-center cursor-pointer border-b-2',
                   fullPage ? 'pb-1 pt-2 px-4' : ' pb-2 pt-4 px-4',
-                  'text-secondary-white truncate',
+                  'text-white truncate',
                   'transition ease-in-out duration-300',
-                  active ? 'border-accent-blue text-primary-white' : 'border-transparent hover:text-secondary-white'
+                  active ? 'border-accent-blue text-white' : 'border-transparent text-secondary-white hover:text-white'
                 )}
               >
                 <T id={i18nKey} />

@@ -96,7 +96,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
       onSubmit={handleFinalSubmit}
     >
       <label className="mb-4 leading-tight flex flex-col">
-        <span className="text-base-plus font-semibold text-white">
+        <span className="text-base-plus text-white">
           <T id="uploadFile" />
         </span>
       </label>

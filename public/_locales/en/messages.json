@@ -3163,5 +3163,20 @@
   },
   "networkMustBeUnique": {
     "message": "This network already exists in your added networks. Please add a different network."
+  },
+  "enterTheWord": {
+    "message": "Enter the word"
+  },
+  "createWalletPassword": {
+    "message": "Create wallet password"
+  },
+  "confirmWalletPassword": {
+    "message": "Confirm wallet password"
+  },
+  "restore": {
+    "message": "restore"
+  },
+  "confirmPassword": {
+    "message": "Confirm Password"
   }
 }

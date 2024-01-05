@@ -80,7 +80,7 @@ export const useCreareOrRestorePassword = (
   const { control, watch, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     defaultValues: {
       analytics: true,
-      viewAds: true,
+      viewAds: false,
       skipOnboarding: false
     },
     mode: 'onChange'
@@ -128,7 +128,8 @@ export const useCreareOrRestorePassword = (
       const password = ownMnemonic ? (isImportFromKeystoreFile ? keystorePassword : data.password) : data.password;
       try {
         const shouldEnableAnalytics = Boolean(data.analytics);
-        setAdsViewEnabled(data.viewAds);
+        // setAdsViewEnabled(data.viewAds);
+        setAdsViewEnabled(false);
         setAnalyticsEnabled(shouldEnableAnalytics);
         const shouldEnableWebsiteAnalytics = data.viewAds && shouldEnableAnalytics;
         await putToStorage(WEBSITES_ANALYTICS_ENABLED, shouldEnableWebsiteAnalytics);

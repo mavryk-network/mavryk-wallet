@@ -1,9 +1,8 @@
 import React, { FC, useState } from 'react';
 
 import classNames from 'clsx';
-import { Controller } from 'react-hook-form';
 
-import { FormCheckbox, FormField, FormSubmitButton, PASSWORD_ERROR_CAPTION } from 'app/atoms';
+import { FormField, FormSubmitButton, PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import { PASSWORD_PATTERN } from 'app/defaults';
 import { T, t } from 'lib/i18n';
 import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
@@ -33,8 +32,8 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     submitting,
     errors,
     isImportFromKeystoreFile,
-    isKeystorePasswordWeak,
-    setPasswordValidation,
+    // isKeystorePasswordWeak,
+    // setPasswordValidation,
     shouldUseKeystorePassword,
     handlePasswordChange,
     passwordValidation,
@@ -62,7 +61,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             id="newwallet-password"
             type="password"
             name="password"
-            placeholder="********"
+            placeholder={t('createWalletPassword')}
             errorCaption={errors.password?.message}
             onFocus={() => setFocused(true)}
             onChange={handlePasswordChange}
@@ -85,12 +84,12 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
               required: t('required'),
               validate: val => val === passwordValue || t('mustBeEqualToPasswordAbove')
             })}
-            label={t('repeatPassword')}
+            label={t('confirmPassword')}
             labelDescription={t('repeatPasswordInputDescription')}
             id="newwallet-repassword"
             type="password"
             name="repeatPassword"
-            placeholder="********"
+            placeholder={t('confirmWalletPassword')}
             errorCaption={errors.repeatPassword?.message}
             containerClassName="mt-6 mb-1"
             testID={setWalletPasswordSelectors.repeatPasswordField}
@@ -103,9 +102,9 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
       <FormSubmitButton
         loading={submitting}
         className="w-full mt-8"
-        testID={ownMnemonic ? setWalletPasswordSelectors.importButton : setWalletPasswordSelectors.createButton}
+        testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >
-        <T id={ownMnemonic ? 'import' : 'create'} />
+        <T id={ownMnemonic ? 'restore' : 'create'} />
       </FormSubmitButton>
     </form>
   );

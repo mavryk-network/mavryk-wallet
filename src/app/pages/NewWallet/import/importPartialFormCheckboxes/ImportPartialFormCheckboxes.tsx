@@ -19,6 +19,13 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
     <>
       <Controller
         control={control}
+        name="skipOnboarding"
+        as={p => <FormCheckbox {...p} testID={setWalletPasswordSelectors.skipOnboardingCheckbox} />}
+        label={t('skipOnboarding')}
+        testID={setWalletPasswordSelectors.skipOnboardingCheckbox}
+      />
+      <Controller
+        control={control}
         name="analytics"
         as={FormCheckbox}
         label={
@@ -39,21 +46,13 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
         testID={setWalletPasswordSelectors.analyticsCheckBox}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="viewAds"
         as={FormCheckbox}
         label={<T id="viewAdsDescription" />}
         testID={setWalletPasswordSelectors.viewAdsCheckBox}
-      />
-
-      <Controller
-        control={control}
-        name="skipOnboarding"
-        as={p => <FormCheckbox {...p} testID={setWalletPasswordSelectors.skipOnboardingCheckbox} />}
-        label={t('skipOnboarding')}
-        testID={setWalletPasswordSelectors.skipOnboardingCheckbox}
-      />
+      /> */}
 
       <FormCheckbox
         ref={register({

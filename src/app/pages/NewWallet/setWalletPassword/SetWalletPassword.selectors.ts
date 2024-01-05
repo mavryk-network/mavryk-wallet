@@ -4,7 +4,7 @@ export enum setWalletPasswordSelectors {
   analyticsCheckBox = 'Register Form/Analytics Check Box',
   skipOnboardingCheckbox = 'Register Form/Skip Onboarding Checkbox',
   acceptTermsCheckbox = 'Register Form/Accept Terms Checkbox',
-  importButton = 'Register Form/Import Button',
+  restoreButton = 'Register Form/Restore Button',
   createButton = 'Register Form/Create Button',
   useFilePasswordCheckBox = 'Register Form/Use File Password Check Box',
   viewAdsCheckBox = 'Register Form/View Ads Check Box'

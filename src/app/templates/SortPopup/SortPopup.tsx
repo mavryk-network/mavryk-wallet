@@ -71,7 +71,7 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle 
         <div className="px-4">
           <SortDivider />
           <div className="flex justify-between items-center">
-            <span className="text-base-plus text-white">
+            <span className="text-sm tracking-normal text-white">
               <T id="hideZeroBalances" />
             </span>
             <Switcher on={on} onClick={toggle} />
@@ -109,5 +109,5 @@ export const SortButton = () => {
 };
 
 const SortDivider = () => {
-  return <div className="w-full h-0 border-b border-gray-40 mt-4 mb-6" />;
+  return <div className="w-full h-0 border-b border-divider mt-4 mb-6" />;
 };

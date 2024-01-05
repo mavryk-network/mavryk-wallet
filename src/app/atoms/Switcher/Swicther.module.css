@@ -16,7 +16,7 @@
   display: block;
   overflow: hidden;
   cursor: pointer;
-  border: 0 solid #bbb;
+  border: 0 solid #666;
   border-radius: 20px;
   margin: 0;
 }
@@ -62,7 +62,7 @@
   content: '';
   text-transform: uppercase;
   padding-right: 10px;
-  background-color: #bbb;
+  background-color: #666;
   color: #f4f4f4;
   text-align: right;
 }
@@ -76,7 +76,7 @@
   top: 2px;
   bottom: 0;
   right: 21.5px;
-  border: 0 solid #bbb;
+  border: 0 solid #666;
   border-radius: 20px;
   transition: all 0.3s ease-in 0s;
 }

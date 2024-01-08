@@ -7,12 +7,10 @@ import Identicon from 'app/atoms/Identicon';
 import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
-// import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useTempleClient, useAccount, useNetwork } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
-// import { navigate } from 'lib/woozie';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
@@ -31,7 +29,7 @@ const Header: FC = () => {
     <header className={classNames('bg-primary-card', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
       <ContentContainer className="py-3">
         <div className={classNames(appEnv.fullPage && 'px-4')}>
-          <div className="flex items-stretch">{ready && <Control />}</div>
+          <div className="flex items-center">{ready && <Control />}</div>
         </div>
       </ContentContainer>
     </header>
@@ -76,7 +74,7 @@ const Control: FC = () => {
   return (
     <>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      <Popper
+      {/* <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -100,11 +98,11 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper>
+      </Popper> */}
 
       <Button
         className={classNames(
-          'flex-shrink-0 flex self-start',
+          'flex-shrink-0 flex self-center',
           'rounded-full overflow-hidden',
           'bg-primary-bg bg-opacity-10 cursor-pointer',
           'transition ease-in-out duration-200'
@@ -121,7 +119,6 @@ const Control: FC = () => {
         </div>
 
         <div className="flex-1" />
-        {/* <NetworkSelect /> */}
         <div className="flex item gap-2 items-center">
           <NetworkButton enabled={Boolean(currentNetwork)} onClick={showNetworkPopupHandler} />
           <DAapsDropdownButton onClick={showDAppsPopupHandler} />

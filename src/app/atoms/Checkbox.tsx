@@ -79,7 +79,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               case errored:
                 return 'border-primary-error';
               default:
-                return 'border-gray-400';
+                return 'border-divider';
             }
           })(),
           overrideClassNames || 'h-6 w-6 rounded-md'

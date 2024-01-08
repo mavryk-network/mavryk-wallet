@@ -92,6 +92,8 @@ export const useCreareOrRestorePassword = (
 
   const passwordValue = watch('password');
 
+  const termsAccepted = watch('termsAccepted');
+
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
@@ -198,6 +200,7 @@ export const useCreareOrRestorePassword = (
     setPasswordValidation,
     passwordValue,
     handlePasswordChange,
-    onSubmit
+    onSubmit,
+    disabled: !termsAccepted
   };
 };

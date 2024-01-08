@@ -53,7 +53,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
   } = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
 
   const customAlert = useAlert();
-  const { setValue, control, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
+  const { setValue, control, register, watch, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     mode: 'onChange'
   });
   const submitting = formState.isSubmitting || secondarySubmitting;
@@ -63,6 +63,11 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     setValue('keystoreFile', undefined);
     triggerValidation('keystoreFile');
   };
+
+  const watchedKeystoreFile = watch('keystoreFile');
+  const watchedKeystorePassword = watch('keystorePassword');
+
+  const isNextButtonDisabled = watchedKeystorePassword?.trim().length === 0 || !watchedKeystoreFile?.item(0);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -151,6 +156,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
 
       <FormSubmitButton
         loading={submitting}
+        disabled={isNextButtonDisabled}
         className="w-full mt-8 mx-auto"
         testID={ImportFromKeystoreFileSelectors.nextButton}
       >
@@ -241,4 +247,4 @@ interface ErrorKeystoreComponentProps {
 }
 
 const ErrorKeystoreComponent: React.FC<ErrorKeystoreComponentProps> = ({ errors }) =>
-  errors.keystoreFile ? <div className="text-xs text-red-500 mt-1">{errors.keystoreFile.message}</div> : null;
+  errors.keystoreFile ? <div className="text-xs text-primary-error mt-1">{errors.keystoreFile.message}</div> : null;

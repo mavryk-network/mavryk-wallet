@@ -1421,7 +1421,7 @@
     "message": "The elliptical curve that the account will use."
   },
   "seedPhrase": {
-    "message": "Seed phrase"
+    "message": "Seed Phrase"
   },
   "pathForHDAccounts": {
     "message": "for HD acccounts. This is the thing you use to recover all your accounts from your seed phrase.",

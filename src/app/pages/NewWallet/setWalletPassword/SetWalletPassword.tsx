@@ -32,13 +32,12 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     submitting,
     errors,
     isImportFromKeystoreFile,
-    // isKeystorePasswordWeak,
-    // setPasswordValidation,
     shouldUseKeystorePassword,
     handlePasswordChange,
     passwordValidation,
     isPasswordError,
-    passwordValue
+    passwordValue,
+    disabled
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
   return (
@@ -101,6 +100,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
       <FormSubmitButton
         loading={submitting}
+        disabled={disabled}
         className="w-full mt-8"
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >

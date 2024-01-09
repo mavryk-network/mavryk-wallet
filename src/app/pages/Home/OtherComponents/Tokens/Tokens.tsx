@@ -29,6 +29,7 @@ import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
 import { AcceptAdsBanner } from './AcceptAdsBanner';
 import { ListItem } from './components/ListItem';
+import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
@@ -157,9 +158,9 @@ export const TokensTab: FC = () => {
   }, [activeAssetSlug, setActiveIndex]);
 
   return (
-    <div className="w-full max-w-sm mx-auto">
-      <div className={clsx('mt-3', popup && 'mx-4')}>
-        <div className="mb-3 w-full flex items-strech">
+    <div className="w-full max-w-sm mx-auto relative">
+      <div className={clsx('mt-3 w-full', popup && 'mx-4')}>
+        <div className={clsx('w-full flex justify-end', styles.searchWrapper)}>
           <SearchAssetField
             value={searchValue}
             onValueChange={setSearchValue}
@@ -183,7 +184,7 @@ export const TokensTab: FC = () => {
       {isEnabledAdsBanner && <AcceptAdsBanner />}
 
       {sortedSlugs.length === 0 ? (
-        <div className="mt-20 mb-8 flex flex-col items-center justify-center text-white">
+        <div className="pt-20 pb-8 flex flex-col items-center justify-center text-white">
           <p className="mb-2 flex items-center justify-center text-white text-base-plus">
             <span {...setTestID(HomeSelectors.emptyStateText)}>
               <T id="noAssetsFound" />

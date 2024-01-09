@@ -29,3 +29,12 @@
 .listItem:not(:last-of-type) {
   border-bottom: 1px solid #333;
 }
+
+.searchWrapper {
+  position: absolute;
+  width: 100%;
+  right: 1px;
+  padding-inline: 16px 12px;
+  top: -45px;
+  /* z-index: 2; */
+}

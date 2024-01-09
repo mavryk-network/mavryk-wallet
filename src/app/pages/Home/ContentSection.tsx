@@ -113,7 +113,10 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
 
   return (
     <div className={clsx('-mx-4 shadow-top-light', fullPage && 'rounded-t-md', className)}>
-      <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
+      {/* TODO change to RWA the last teb when working on this task */}
+      <div style={{ maxWidth: 268 }}>
+        <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
+      </div>
 
       <SuspenseContainer whileMessage={whileMessageI18nKey ? t(whileMessageI18nKey) : 'displaying tab'}>
         {Component && <Component />}

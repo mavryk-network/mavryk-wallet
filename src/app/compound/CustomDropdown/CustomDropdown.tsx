@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useCallback, useEffect, useMemo } from 'react';
+import React, { ReactNode, createContext, useCallback, useMemo } from 'react';
 
 import classNames from 'clsx';
 

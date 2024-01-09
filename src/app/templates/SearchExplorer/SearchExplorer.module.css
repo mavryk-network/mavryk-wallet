@@ -1,6 +1,7 @@
 .explorerSearch {
   width: 100%;
   animation: revealSearch ease-in-out 200ms;
+  transition: all ease-in-out 200ms;
 }
 
 .explorerHideSearch {
@@ -8,6 +9,7 @@
   border-radius: 8px;
   padding: 4px;
   animation: hideSearch ease-in-out 200ms;
+  transition: all ease-in-out 200ms;
 }
 
 @keyframes revealSearch {

@@ -181,7 +181,7 @@ export const TokensTab: FC = () => {
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>
-              <div className={clsx('flex justify-end', styles.searchWrapper)}>
+              <div className={clsx('flex justify-end items-center', styles.searchWrapper)}>
                 <SearchExplorerIconBtn />
 
                 <SortPopup>

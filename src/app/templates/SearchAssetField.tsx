@@ -14,7 +14,7 @@ const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, ...rest }
       'rounded-lg outline-none',
       'transition ease-in-out duration-200',
       'text-white text-sm leading-tight',
-      'placeholder-secondary-white focus:text-white',
+      'focus:text-white',
       className
     )}
     placeholder={t('searchAssets')}

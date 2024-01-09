@@ -51,7 +51,7 @@ const SearchField: FC<SearchFieldProps> = ({
       <div className="relative flex items-stretch">
         <input
           type="text"
-          className={classNames('appearance-none w-full', className)}
+          className={classNames('appearance-none w-full placeholder-white placeholder-opacity-50', className)}
           value={value}
           spellCheck={false}
           autoComplete="off"

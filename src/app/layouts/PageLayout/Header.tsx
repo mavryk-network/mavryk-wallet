@@ -20,6 +20,7 @@ import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
+import { SettingButton, SettingsPopup } from './Header/SettingsPopup';
 
 const Header: FC = () => {
   const appEnv = useAppEnv();
@@ -42,39 +43,20 @@ const Control: FC = () => {
   const account = useAccount();
   const currentNetwork = useNetwork();
 
-  // new
+  // popup states
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
   const [showNetworkPopup, setShowNetworkPopup] = useState(false);
+  const [showSettingsPopup, setShowSettingsPopup] = useState(false);
 
-  const close = useCallback(() => {
-    setShowAccountsPopup(false);
-  }, []);
-
-  const closeDappsPopup = useCallback(() => {
-    setShowDAppsPopup(false);
-  }, []);
-
-  const closeNetworkPopup = useCallback(() => {
-    setShowNetworkPopup(false);
-  }, []);
-
-  const open = useCallback(() => {
-    setShowAccountsPopup(true);
-  }, []);
-
-  const showDAppsPopupHandler = useCallback(() => {
-    setShowDAppsPopup(true);
-  }, []);
-
-  const showNetworkPopupHandler = useCallback(() => {
-    setShowNetworkPopup(true);
+  const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {
+    popupFunction(popupValue);
   }, []);
 
   return (
     <>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      {/* <Popper
+      <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -98,7 +80,7 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper> */}
+      </Popper>
 
       <Button
         className={classNames(
@@ -108,7 +90,7 @@ const Control: FC = () => {
           'transition ease-in-out duration-200'
         )}
         testID={HeaderSelectors.accountIcon}
-        onClick={open}
+        onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}
       >
         <Identicon type="bottts" hash={account.publicKeyHash} size={24} />
       </Button>
@@ -120,8 +102,12 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         <div className="flex item gap-2 items-center">
-          <NetworkButton enabled={Boolean(currentNetwork)} onClick={showNetworkPopupHandler} />
-          <DAapsDropdownButton onClick={showDAppsPopupHandler} />
+          <NetworkButton
+            enabled={Boolean(currentNetwork)}
+            onClick={handlePopupToggle.bind(null, setShowNetworkPopup, true)}
+          />
+          <DAapsDropdownButton onClick={handlePopupToggle.bind(null, setShowDAppsPopup, true)} />
+          <SettingButton onClick={handlePopupToggle.bind(null, setShowSettingsPopup, true)} />
         </div>
       </div>
 
@@ -129,7 +115,7 @@ const Control: FC = () => {
       {/* accounts */}
       <PopupModalWithTitle
         isOpen={showAccountsPopup}
-        onRequestClose={close}
+        onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
         title={<T id="selectAccount" />}
         portalClassName="accounts-popup"
       >
@@ -138,7 +124,7 @@ const Control: FC = () => {
       {/* connected dapps */}
       <PopupModalWithTitle
         isOpen={showDAppsPopup}
-        onRequestClose={closeDappsPopup}
+        onRequestClose={handlePopupToggle.bind(null, setShowDAppsPopup, false)}
         title={<T id="connectedSites" />}
         portalClassName="daaps-popup"
       >
@@ -147,11 +133,19 @@ const Control: FC = () => {
       {/* networks */}
       <PopupModalWithTitle
         isOpen={showNetworkPopup}
-        onRequestClose={closeNetworkPopup}
+        onRequestClose={handlePopupToggle.bind(null, setShowNetworkPopup, false)}
         title={<T id="networkSelect" />}
         portalClassName="network-popup"
       >
         <NetworkPopup opened={showNetworkPopup} setOpened={setShowNetworkPopup} />
+      </PopupModalWithTitle>
+
+      <PopupModalWithTitle
+        isOpen={showSettingsPopup}
+        onRequestClose={handlePopupToggle.bind(null, setShowSettingsPopup, false)}
+        portalClassName="settings-popup"
+      >
+        <SettingsPopup setOpened={setShowSettingsPopup} />
       </PopupModalWithTitle>
     </>
   );

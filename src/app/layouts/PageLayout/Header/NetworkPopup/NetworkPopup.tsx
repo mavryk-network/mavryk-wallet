@@ -22,7 +22,7 @@ type NetworkPopupProps = {
   setOpened: (v: boolean) => void;
 };
 
-export const NetworkPopup: FC<NetworkPopupProps> = ({ opened, setOpened }) => {
+export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   const allNetworks = useAllNetworks();
   const currentNetwork = useNetwork();
   const setNetworkId = useSetNetworkId();

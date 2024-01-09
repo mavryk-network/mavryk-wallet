@@ -11,7 +11,13 @@ import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
-import SearchAssetField from 'app/templates/SearchAssetField';
+import {
+  SearchExplorerClosed,
+  SearchExplorerOpened,
+  SearchExplorer,
+  SearchExplorerIconBtn,
+  SearchExplorerFinder
+} from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
@@ -160,25 +166,36 @@ export const TokensTab: FC = () => {
   return (
     <div className="w-full max-w-sm mx-auto relative">
       <div className={clsx('mt-3 w-full', popup && 'mx-4')}>
-        <div className={clsx('w-full flex justify-end', styles.searchWrapper)}>
-          <SearchAssetField
-            value={searchValue}
-            onValueChange={setSearchValue}
-            onFocus={handleSearchFieldFocus}
-            onBlur={handleSearchFieldBlur}
-            containerClassName="mr-2"
-            testID={AssetsSelectors.searchAssetsInputTokens}
-          />
+        <SearchExplorer>
+          <>
+            <SearchExplorerOpened>
+              <div className={clsx('w-full flex justify-end', styles.searchWrapper)}>
+                <SearchExplorerFinder
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  onFocus={handleSearchFieldFocus}
+                  onBlur={handleSearchFieldBlur}
+                  containerClassName="mr-2"
+                  testID={AssetsSelectors.searchAssetsInputTokens}
+                />
+              </div>
+            </SearchExplorerOpened>
+            <SearchExplorerClosed>
+              <div className={clsx('flex justify-end', styles.searchWrapper)}>
+                <SearchExplorerIconBtn />
 
-          <SortPopup>
-            <SortButton />
-            <SortPopupContent
-              items={memoizedSortAssetsOptions}
-              on={isZeroBalancesHidden}
-              toggle={toggleHideZeroBalances}
-            />
-          </SortPopup>
-        </div>
+                <SortPopup>
+                  <SortButton />
+                  <SortPopupContent
+                    items={memoizedSortAssetsOptions}
+                    on={isZeroBalancesHidden}
+                    toggle={toggleHideZeroBalances}
+                  />
+                </SortPopup>
+              </div>
+            </SearchExplorerClosed>
+          </>
+        </SearchExplorer>
       </div>
 
       {isEnabledAdsBanner && <AcceptAdsBanner />}

@@ -1,13 +1,10 @@
-import React, { FC, InputHTMLAttributes, useCallback, createContext, useState, useMemo, useContext } from 'react';
+import React, { FC, InputHTMLAttributes, useCallback } from 'react';
 
 import classNames from 'clsx';
 
 import CleanButton from 'app/atoms/CleanButton';
-import { useInitialOffAnimation } from 'app/hooks/use-initial-off-animation';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { setTestID, TestIDProps } from 'lib/analytics';
-
-import styles from './SearchField.module.css';
 
 export interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement>, TestIDProps {
   bottomOffset?: string;
@@ -84,73 +81,6 @@ const SearchField: FC<SearchFieldProps> = ({
       </div>
     </div>
   );
-};
-
-// Serach explorer logic ----
-export type SearchExplorerProps = {
-  isExplored?: boolean;
-  children: JSX.Element;
-};
-
-export type SearchExplorerContextType = {
-  explored: boolean;
-  toggleExplorer: () => void;
-};
-
-export const searchExplorerContext = createContext<SearchExplorerContextType>(undefined!);
-
-export const SearchExplorer: FC<SearchExplorerProps> = ({ isExplored = false, children }) => {
-  const [explored, setExplored] = useState(isExplored);
-
-  const toggleExplorer = useCallback(() => {
-    setExplored(!explored);
-  }, [explored]);
-
-  const memoizedSerachExplorerContextValue = useMemo(
-    () => ({
-      explored,
-      toggleExplorer
-    }),
-    [explored, toggleExplorer]
-  );
-
-  return (
-    <searchExplorerContext.Provider value={memoizedSerachExplorerContextValue}>
-      {children}
-    </searchExplorerContext.Provider>
-  );
-};
-
-const useSearchExplorer = () => {
-  const ctx = useContext(searchExplorerContext);
-
-  if (!ctx) {
-    throw new Error('useSearchExplorer must be used within <SerachExplorer /> provider');
-  }
-
-  return ctx;
-};
-
-export const SearchExplorerOpened: FC<SearchFieldProps> = props => {
-  const { toggleExplorer, explored } = useSearchExplorer();
-  const memoizedStyles = useInitialOffAnimation();
-
-  return explored ? (
-    <div className={classNames('w-full', styles.explorerSearch)} style={memoizedStyles}>
-      <SearchField {...props} cleanButtonCb={toggleExplorer} searchIconCb={toggleExplorer} />
-    </div>
-  ) : null;
-};
-
-export const SearchExplorerClosed: FC = () => {
-  const { toggleExplorer, explored } = useSearchExplorer();
-  const memoizedStyles = useInitialOffAnimation();
-
-  return !explored ? (
-    <div onClick={toggleExplorer} className={styles.explorerHideSearch} style={memoizedStyles}>
-      <SearchIcon className={classNames('w-6 h-auto stroke-secondary-whit cursor-pointer')} />
-    </div>
-  ) : null;
 };
 
 export default SearchField;

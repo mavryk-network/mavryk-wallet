@@ -2,14 +2,12 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { openInFullPage, useAppEnv } from 'app/env';
 import { ReactComponent as BlocksSvgIcon } from 'app/icons/blocks.svg';
-import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { ReactComponent as ExitSvgIcon } from 'app/icons/exit.svg';
 import { ReactComponent as ExtendSvgIcon } from 'app/icons/extend.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
-import { T, TID } from 'lib/i18n';
-import { Link } from 'lib/woozie';
+import { ListItemWithnavigate, ListItemWithnavigateprops } from 'app/molecules/ListItemWithNavigate';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -27,10 +25,10 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     }
   }, [appEnv.popup, closePopup]);
 
-  const settingsListData: SettingsListitemProps[] = useMemo(
+  const settingsListData: ListItemWithnavigateprops[] = useMemo(
     () => [
       {
-        accountDetails: 'accountDetails',
+        key: 'accountDetails',
         linkTo: null,
         Icon: BlocksSvgIcon,
         i18nKey: 'accountDetails',
@@ -77,36 +75,8 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   return (
     <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
-        <SettingsListitem {...item} />
+        <ListItemWithnavigate {...item} />
       ))}
     </div>
   );
-};
-
-type SettingsListitemProps = {
-  Icon: ImportedSVGComponent;
-  linkTo: string | null;
-  i18nKey: TID;
-  onClick: () => void;
-};
-
-const SettingsListitem: FC<SettingsListitemProps> = ({ Icon, i18nKey, onClick, linkTo }) => {
-  const baseProps = {
-    className:
-      'py-4 px-4 flex items-center justify-between border-b border-divider cursor-pointer hover:bg-primary-card-hover',
-    onClick,
-    children: (
-      <>
-        <div className="flex items-center">
-          <Icon className="w-6 h-6 fill-white mr-2" />
-          <span className="text-base-plus">
-            <T id={i18nKey} />
-          </span>
-        </div>
-        <ChevronRightIcon className="w-4 h-4 fill-white" />
-      </>
-    )
-  };
-
-  return linkTo ? <Link {...baseProps} to={linkTo} /> : <div {...baseProps} />;
 };

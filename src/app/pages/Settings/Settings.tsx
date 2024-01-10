@@ -2,18 +2,24 @@ import React, { FC, useMemo } from 'react';
 
 import classNames from 'clsx';
 
+import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
+import { ReactComponent as ConnectLedgericon } from 'app/icons/connect-clip.svg';
 import { ReactComponent as ContactBookIcon } from 'app/icons/contact-book.svg';
 import { ReactComponent as ExtensionIcon } from 'app/icons/extension.svg';
 import { ReactComponent as HelpIcon } from 'app/icons/help.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import { ReactComponent as MinusIcon } from 'app/icons/minus.svg';
 import { ReactComponent as OkIcon } from 'app/icons/ok.svg';
+import { ReactComponent as RoundedInfoIcon } from 'app/icons/rounded-info.svg';
+import { ReactComponent as RoundedMinusIcon } from 'app/icons/rounded-minus.svg';
+import { ReactComponent as RoundedPlusIcon } from 'app/icons/rounded-plus.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SignalAltIcon } from 'app/icons/signal-alt.svg';
 import { ReactComponent as StickerIcon } from 'app/icons/sticker.svg';
 import { ReactComponent as SyncIcon } from 'app/icons/sync.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { ListItemWithnavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
 import AddressBook from 'app/templates/AddressBook/AddressBook';
@@ -27,6 +33,7 @@ import SyncSettings from 'app/templates/Synchronization/SyncSettings';
 import { TID, T } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
+import ConnectLedger from '../ConnectLedger/ConnectLedger';
 import { SettingsSelectors } from './Settings.selectors';
 
 type SettingsProps = {
@@ -45,6 +52,101 @@ interface Tab {
   descriptionI18nKey: TID;
   testID?: SettingsSelectors;
 }
+
+type Tab2 = ListItemWithnavigateprops & {
+  Component: React.FC;
+  testID?: SettingsSelectors;
+};
+
+const TABS2: Tab2[] = [
+  {
+    linkTo: 'settings/general-settings/',
+    Icon: SettingsIcon,
+    i18nKey: 'settings',
+    Component: GeneralSettings,
+    onClick: () => {},
+    testID: SettingsSelectors.generalButton
+  },
+  {
+    linkTo: 'settings/address-book/',
+    i18nKey: 'addressBook',
+    Icon: AddressBookIcon,
+    Component: AddressBook,
+    onClick: () => {},
+    testID: SettingsSelectors.addressBookButton
+  },
+  {
+    linkTo: 'settings/dapps/',
+    i18nKey: 'authorizedDApps',
+    Icon: AppsIcon,
+    Component: DAppSettings,
+    onClick: () => {},
+    testID: SettingsSelectors.dAppsButton
+  },
+  {
+    linkTo: 'settings/synchronization/',
+    i18nKey: 'synchronization',
+    Icon: SyncIcon,
+    Component: SyncSettings,
+    onClick: () => {},
+    testID: SettingsSelectors.synchronizationButton
+  },
+  {
+    linkTo: 'settings/connect-ledger/',
+    i18nKey: 'connectLedger',
+    Icon: ConnectLedgericon,
+    Component: ConnectLedger,
+    onClick: () => {},
+    testID: SettingsSelectors.connectLedger
+  },
+  {
+    linkTo: 'settings/reveal-private-key',
+    i18nKey: 'revealPrivateKey',
+    Icon: KeyIcon,
+    Component: RevealPrivateKey,
+    onClick: () => {},
+    testID: SettingsSelectors.revealPrivateKeyButton
+  },
+  {
+    linkTo: 'settings/reveal-seed-phrase/',
+    i18nKey: 'revealSeedPhrase',
+    Icon: StickerIcon,
+    Component: RevealSeedPhrase,
+    onClick: () => {},
+    testID: SettingsSelectors.revealSeedPhraseButton
+  },
+  {
+    linkTo: 'settings/activate-account/',
+    i18nKey: 'activateAccount',
+    Icon: RoundedPlusIcon,
+    Component: ActivateAccount,
+    onClick: () => {},
+    testID: SettingsSelectors.activateAccountButton
+  },
+  {
+    linkTo: 'settings/remove-account/',
+    i18nKey: 'removeAccount',
+    Icon: RoundedMinusIcon,
+    Component: RemoveAccount,
+    onClick: () => {},
+    testID: SettingsSelectors.removeAccountButton
+  },
+  {
+    linkTo: 'settings/about/',
+    i18nKey: 'about',
+    Icon: RoundedInfoIcon,
+    Component: About,
+    onClick: () => {},
+    testID: SettingsSelectors.aboutButton
+  },
+  {
+    linkTo: 'settings/help-and-community/',
+    i18nKey: 'helpAndCommunity',
+    Icon: HelpIcon,
+    Component: HelpAndCommunity,
+    onClick: () => {}
+  }
+];
 
 const TABS: Tab[] = [
   {
@@ -158,6 +260,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
           <T id="settings" />
         </>
       }
+      isTopbarVisible={false}
     >
       <div className="py-4">
         {activeTab && (

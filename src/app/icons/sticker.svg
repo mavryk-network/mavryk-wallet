@@ -1,1 +1,7 @@
-<svg role="img" xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 24 24" aria-labelledby="stickerIconTitle" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"> <title id="stickerIconTitle">Sticker</title> <path d="M21,3 L21,11 C21,16.5228475 16.5228475,21 11,21 L3,21 L3,3 L21,3 Z"/> <path d="M9,21 C11.6666667,21 13,19.6666667 13,17 C13,17 13,15.6666667 13,13 L17,13 C19.6666667,13 21,11.6666667 21,9"/> </svg>
+<svg viewBox="0 0 24 24" fill="none"
+  xmlns="http://www.w3.org/2000/svg">
+  <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="1.4" stroke="#F4F4F4" stroke-width="1.2"/>
+  <path d="M6 15H10" stroke="#F4F4F4" stroke-linecap="round"/>
+  <path d="M6 12H14" stroke="#F4F4F4" stroke-linecap="round"/>
+  <path d="M6 9H18" stroke="#F4F4F4" stroke-linecap="round"/>
+</svg>

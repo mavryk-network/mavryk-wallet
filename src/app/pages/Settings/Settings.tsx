@@ -154,7 +154,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
         </>
       }
       isTopbarVisible={false}
-      removePaddings
+      removePaddings={!activeTab}
     >
       <div className="mb-8">
         {activeTab && (
@@ -181,7 +181,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
               })()}
             </h1>
 
-            <hr className="mb-8" />
+            {/* <hr className="mb-8" /> */}
           </>
         )}
 

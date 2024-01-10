@@ -75,7 +75,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     [closePopup, handleMaximiseViewClick]
   );
   return (
-    <div className="text-white mt-4 flex flex-col">
+    <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
         <SettingsListitem {...item} />
       ))}
@@ -103,7 +103,7 @@ const SettingsListitem: FC<SettingsListitemProps> = ({ Icon, i18nKey, onClick, l
             <T id={i18nKey} />
           </span>
         </div>
-        <ChevronRightIcon className="w-4 h-4" />
+        <ChevronRightIcon className="w-4 h-4 fill-white" />
       </>
     )
   };

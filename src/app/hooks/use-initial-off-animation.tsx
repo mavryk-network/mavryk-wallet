@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
- * turn off animation on initial load
+ * turn off animation on initial render
  */
 export const useInitialOffAnimation = () => {
-  const animationRef = useRef<string | null>('none');
+  const allowAnimationRef = useRef(false);
 
   useEffect(() => {
+    if (allowAnimationRef.current) allowAnimationRef.current = false;
+
     const timeout = setTimeout(() => {
-      animationRef.current = null;
+      allowAnimationRef.current = true;
     }, 500);
 
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, []);
+  });
 
-  const memoizedStyles = useMemo(() => (animationRef.current ? { animation: 'none' } : {}), [animationRef.current]);
-
-  return memoizedStyles;
+  return allowAnimationRef;
 };

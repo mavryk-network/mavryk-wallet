@@ -12,9 +12,17 @@ export type ListItemWithnavigateprops = {
   i18nKey: TID;
   onClick: () => void;
   className?: string;
+  fillIcon?: boolean;
 };
 
-export const ListItemWithnavigate: FC<ListItemWithnavigateprops> = ({ Icon, i18nKey, onClick, linkTo, className }) => {
+export const ListItemWithnavigate: FC<ListItemWithnavigateprops> = ({
+  Icon,
+  i18nKey,
+  onClick,
+  linkTo,
+  className,
+  fillIcon = true
+}) => {
   const baseProps = {
     className: classNames(
       'py-4 px-4 flex items-center justify-between border-b border-divider cursor-pointer hover:bg-primary-card-hover',
@@ -24,8 +32,8 @@ export const ListItemWithnavigate: FC<ListItemWithnavigateprops> = ({ Icon, i18n
     children: (
       <>
         <div className="flex items-center">
-          <Icon className="w-6 h-6 fill-white mr-2" />
-          <span className="text-base-plus">
+          <Icon className={classNames('w-6 h-6 mr-2', fillIcon && 'fill-white')} />
+          <span className="text-base-plus text-white">
             <T id={i18nKey} />
           </span>
         </div>

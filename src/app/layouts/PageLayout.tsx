@@ -37,12 +37,14 @@ import { OnRampOverlay } from './PageLayout/OnRampOverlay/OnRampOverlay';
 interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentContainerStyle?: React.CSSProperties;
   isTopbarVisible?: boolean;
+  removePaddings?: boolean;
 }
 
 const PageLayout: FC<PageLayoutProps> = ({
   children,
   contentContainerStyle,
   isTopbarVisible = true,
+  removePaddings = false,
   ...toolbarProps
 }) => {
   const { fullPage } = useAppEnv();
@@ -61,7 +63,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className="px-4 pt-4 no-scrollbar overflow-x-hidden" style={style}>
+          <div className={classNames('no-scrollbar overflow-x-hidden', !removePaddings && 'px-4 pt-4')} style={style}>
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>

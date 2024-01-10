@@ -92,7 +92,7 @@ export const useCreareOrRestorePassword = (
 
   const passwordValue = watch('password');
 
-  const termsAccepted = watch('termsAccepted');
+  const isTermsAccepted: boolean = control.getValues()?.termsAccepted;
 
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
@@ -130,8 +130,7 @@ export const useCreareOrRestorePassword = (
       const password = ownMnemonic ? (isImportFromKeystoreFile ? keystorePassword : data.password) : data.password;
       try {
         const shouldEnableAnalytics = Boolean(data.analytics);
-        // setAdsViewEnabled(data.viewAds);
-        setAdsViewEnabled(false);
+        setAdsViewEnabled(data.viewAds);
         setAnalyticsEnabled(shouldEnableAnalytics);
         const shouldEnableWebsiteAnalytics = data.viewAds && shouldEnableAnalytics;
         await putToStorage(WEBSITES_ANALYTICS_ENABLED, shouldEnableWebsiteAnalytics);
@@ -201,6 +200,6 @@ export const useCreareOrRestorePassword = (
     passwordValue,
     handlePasswordChange,
     onSubmit,
-    disabled: !termsAccepted
+    disabled: !isTermsAccepted
   };
 };

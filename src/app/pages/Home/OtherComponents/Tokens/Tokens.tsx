@@ -79,21 +79,20 @@ export const TokensTab: FC = () => {
         id: SortOptions.HIGH_TO_LOW,
         selected: sortOption === SortOptions.HIGH_TO_LOW,
         onClick: () => {
-          console.log(sortOption, 'temp');
-          setSortOption(prev => (prev === SortOptions.HIGH_TO_LOW ? null : SortOptions.HIGH_TO_LOW));
+          setSortOption(SortOptions.HIGH_TO_LOW);
         },
         nameI18nKey: 'highToLow'
       },
       {
         id: SortOptions.LOW_TO_HIGH,
         selected: sortOption === SortOptions.LOW_TO_HIGH,
-        onClick: () => setSortOption(prev => (prev === SortOptions.LOW_TO_HIGH ? null : SortOptions.LOW_TO_HIGH)),
+        onClick: () => setSortOption(SortOptions.LOW_TO_HIGH),
         nameI18nKey: 'lowToHigh'
       },
       {
         id: SortOptions.BY_NAME,
         selected: sortOption === SortOptions.BY_NAME,
-        onClick: () => setSortOption(prev => (prev === SortOptions.BY_NAME ? null : SortOptions.BY_NAME)),
+        onClick: () => setSortOption(SortOptions.BY_NAME),
         nameI18nKey: 'byName'
       }
     ],
@@ -127,7 +126,7 @@ export const TokensTab: FC = () => {
     }
 
     return tokensJsx;
-  }, [sortedSlugs, activeAssetSlug, balances]);
+  }, [sortedSlugs, activeAssetSlug, balances, sortOption]);
 
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 

@@ -30,7 +30,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
         <div className={classNames('w-full max-h-500 overflow-hidden', styles.container)}>
           <CloseIcon className="w-6 h-auto absolute top-4 right-4 cursor-pointer" onClick={restProps.onRequestClose} />
           {title && <div className="text-white mb-4 w-full text-center text-xl px-4 bg-primary-card">{title}</div>}
-          <div className=" h-full no-scrollbar">{children}</div>
+          <div className="h-full no-scrollbar">{children}</div>
         </div>
       </>
     </CustomPopup>

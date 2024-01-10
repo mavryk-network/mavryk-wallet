@@ -145,7 +145,7 @@ const Control: FC = () => {
         onRequestClose={handlePopupToggle.bind(null, setShowSettingsPopup, false)}
         portalClassName="settings-popup"
       >
-        <SettingsPopup setOpened={setShowSettingsPopup} />
+        <SettingsPopup closePopup={handlePopupToggle.bind(null, setShowSettingsPopup, false)} />
       </PopupModalWithTitle>
     </>
   );

@@ -3178,5 +3178,14 @@
   },
   "seedPhrase": {
     "message": "Seed Phrase"
+  },
+  "accountDetails": {
+    "message": "Account details"
+  },
+  "expandView": {
+    "message": "Expand view"
+  },
+  "logout": {
+    "message": "Log out"
   }
 }

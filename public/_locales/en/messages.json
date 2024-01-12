@@ -1648,7 +1648,7 @@
     "message": "Current language"
   },
   "fiatCurrency": {
-    "message": "Default Currency"
+    "message": "Currency conversion"
   },
   "generalSettings": {
     "message": "General"

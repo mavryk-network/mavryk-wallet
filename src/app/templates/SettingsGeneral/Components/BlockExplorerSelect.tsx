@@ -71,15 +71,15 @@ const BlockExplorerSelect = () => {
 export default BlockExplorerSelect;
 
 const BlockExplorerTitle: FC = () => (
-  <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-gray-700">
+  <h2 className="leading-tight flex flex-col mb-3">
+    <span className="text-base-plus text-white">
       <T id="blockExplorer" />
     </span>
   </h2>
 );
 
 const BlockExplorerIcon: FC<Pick<BlockExplorer, 'id' | 'name'>> = ({ id, name }) => (
-  <Flag alt={name} className="ml-2 mr-3" src={browser.runtime.getURL(`/misc/explorer-logos/${id}.ico`)} />
+  <Flag alt={name} className="mr-2" src={browser.runtime.getURL(`/misc/explorer-logos/${id}.ico`)} />
 );
 
 const BlockExplorerFieldContent: FC<BlockExplorer> = ({ id, name }) => {
@@ -87,7 +87,7 @@ const BlockExplorerFieldContent: FC<BlockExplorer> = ({ id, name }) => {
     <div className="flex items-center">
       <BlockExplorerIcon id={id} name={name} />
 
-      <span className="text-xl text-gray-700">{name}</span>
+      <span className="text-base-plus text-white">{name}</span>
     </div>
   );
 };
@@ -101,16 +101,14 @@ const BlockExplorerOptionContent: FC<BlockExplorerOptionContentProps> = ({ optio
   return (
     <div
       className={classNames(
-        'w-full flex items-center py-1.5 px-2 rounded',
-        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+        'w-full flex items-center py-3 px-2 rounded',
+        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card',
+        isSelected ? 'text-white' : 'text-secondary-white'
       )}
     >
       <BlockExplorerIcon id={option.id} name={option.name} />
 
-      <div
-        className="w-full text-left text-lg text-gray-700"
-        {...setTestID(SettingsGeneralSelectors.blockExplorerItem)}
-      >
+      <div className="w-full text-left text-base-plus" {...setTestID(SettingsGeneralSelectors.blockExplorerItem)}>
         {option.name}
       </div>
     </div>

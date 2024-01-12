@@ -76,8 +76,8 @@ const FiatCurrencySelect: FC = () => {
 export default FiatCurrencySelect;
 
 const FiatCurrencyTitle: FC = () => (
-  <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-white">
+  <h2 className="leading-tight flex flex-col mb-3">
+    <span className="text-base-plus text-white">
       <T id="fiatCurrency" />
     </span>
   </h2>
@@ -88,21 +88,24 @@ interface FiatCurrencyOptionContentProps {
   isSelected?: boolean;
 }
 
-const FiatCurrencyIcon: FC<FiatCurrencyOptionContentProps> = ({ option: { symbol } }) => (
-  <div
-    className="w-6 flex justify-center items-center ml-2 mr-3 text-xl text-gray-700 font-normal"
-    style={{ height: '1.3125rem' }}
-  >
-    {symbol}
-  </div>
-);
+const FiatCurrencyIcon: FC<FiatCurrencyOptionContentProps> = ({ option: { symbol } }) => {
+  return (
+    <div
+      className="w-auto flex justify-center items-center text-base-plus text-current"
+      style={{ height: '1.3125rem' }}
+    >
+      {symbol}
+    </div>
+  );
+};
 
 const FiatCurrencyFieldContent: FC<FiatCurrencyOptionContentProps> = ({ option }) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center text-white text-base-plus">
+      <span>{option.name} (</span>
       <FiatCurrencyIcon option={option} />
-
-      <span className="text-base-plus text-gray-700">{option.name}</span>
+      <span>) - </span>
+      <span>{option.fullname}</span>
     </div>
   );
 };
@@ -111,13 +114,17 @@ const FiatCurrencyOptionContent: FC<FiatCurrencyOptionContentProps> = ({ option,
   return (
     <div
       className={classNames(
-        'w-full flex items-center py-1.5 px-2 rounded',
-        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card'
+        'w-full flex items-center py-3 px-2 rounded hover:text-white',
+        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card',
+        isSelected ? 'text-white' : 'text-secondary-white'
       )}
     >
       <FiatCurrencyIcon option={option} />
 
-      <div className="w-full text-left text-lg text-gray-700" {...setTestID(SettingsGeneralSelectors.currencyItem)}>
+      <div
+        className={classNames('w-full text-left text-base-plus ml-2')}
+        {...setTestID(SettingsGeneralSelectors.currencyItem)}
+      >
         {option.name} ({option.fullname})
       </div>
     </div>

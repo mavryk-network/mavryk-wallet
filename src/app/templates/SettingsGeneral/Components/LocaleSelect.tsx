@@ -178,7 +178,7 @@ const LocaleOptionContent: FC<LocaleOptionContentProps> = ({ option, isSelected 
   return (
     <div
       className={classNames(
-        'flex items-center py-1.5 px-2 rounded hover:text-white',
+        'flex items-center py-3 px-2 rounded hover:text-white',
         isSelected ? 'bg-primary-card' : 'hover:bg-primary-card ',
         isSelected ? 'text-white' : 'text-secondary-white',
         option.disabled && 'opacity-25 cursor-default'

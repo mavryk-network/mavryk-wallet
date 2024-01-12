@@ -77,7 +77,7 @@ export default FiatCurrencySelect;
 
 const FiatCurrencyTitle: FC = () => (
   <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-gray-700">
+    <span className="text-base font-semibold text-white">
       <T id="fiatCurrency" />
     </span>
   </h2>
@@ -102,7 +102,7 @@ const FiatCurrencyFieldContent: FC<FiatCurrencyOptionContentProps> = ({ option }
     <div className="flex items-center">
       <FiatCurrencyIcon option={option} />
 
-      <span className="text-xl text-gray-700">{option.name}</span>
+      <span className="text-base-plus text-gray-700">{option.name}</span>
     </div>
   );
 };
@@ -112,7 +112,7 @@ const FiatCurrencyOptionContent: FC<FiatCurrencyOptionContentProps> = ({ option,
     <div
       className={classNames(
         'w-full flex items-center py-1.5 px-2 rounded',
-        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card'
       )}
     >
       <FiatCurrencyIcon option={option} />

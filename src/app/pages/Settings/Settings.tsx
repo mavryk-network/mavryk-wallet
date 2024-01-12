@@ -45,7 +45,7 @@ const TABS: Tab[] = [
   {
     linkTo: 'general-settings',
     Icon: SettingsIcon,
-    i18nKey: 'settings',
+    i18nKey: 'general',
     Component: GeneralSettings,
     onClick: () => {},
     testID: SettingsSelectors.generalButton,
@@ -145,12 +145,13 @@ const TABS: Tab[] = [
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {
   const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
 
+  const tId = activeTab?.i18nKey ?? 'settings';
+
   return (
     <PageLayout
       pageTitle={
         <>
-          <SettingsIcon className="mr-1 h-4 w-auto stroke-current" />
-          <T id="settings" />
+          <T id={tId} />
         </>
       }
       isTopbarVisible={false}
@@ -159,7 +160,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
       <div className="mb-8">
         {activeTab && (
           <>
-            <h1
+            {/* <h1
               className={classNames(
                 'mb-2',
                 'flex items-center justify-center',
@@ -179,7 +180,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
                   </T>
                 );
               })()}
-            </h1>
+            </h1> */}
 
             {/* <hr className="mb-8" /> */}
           </>

@@ -63,11 +63,11 @@ export const DropdownSelect = <T extends unknown>({
           {opened ? (
             <SelectSearch {...searchProps} className={dropdownButtonClassName} />
           ) : (
-            <div className="box-border w-full flex items-center justify-between border rounded-md border-gray-300 overflow-hidden max-h-18">
+            <div className="box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18">
               <button
                 className={classNames(
                   'flex gap-2 items-center max-h-18',
-                  isInputDefined ? 'border-r border-gray-300' : 'w-full justify-between',
+                  isInputDefined ? 'border-r border-gray-50' : 'w-full justify-between',
                   dropdownButtonClassName
                 )}
                 onClick={() => {
@@ -76,7 +76,7 @@ export const DropdownSelect = <T extends unknown>({
                 }}
               >
                 {DropdownFaceContent}
-                <ChevronDownIcon className="text-gray-600 stroke-current stroke-2 h-4 w-4" />
+                <ChevronDownIcon className="text-secondary-white stroke-current stroke-2 h-4 w-4" />
               </button>
               {Input}
             </div>
@@ -122,16 +122,16 @@ const SelectOptions = <Type extends unknown>({
       className="origin-top overflow-x-hidden overflow-y-auto"
       style={{
         maxHeight: '15.125rem',
-        backgroundColor: 'white',
-        borderColor: '#e2e8f0'
+        backgroundColor: '#010101',
+        borderColor: '#44494A'
       }}
     >
       {(options.length === 0 || isLoading) && (
-        <div className="my-8 flex flex-col items-center justify-center text-gray-500">
+        <div className="my-8 flex flex-col items-center justify-center text-white">
           {isLoading ? (
             <Spinner className="w-12" theme="primary" />
           ) : (
-            <p className="flex items-center justify-center text-gray-600 text-base font-light">
+            <p className="flex items-center justify-center text-white text-base font-light">
               <span>{noItemsText}</span>
             </p>
           )}
@@ -172,12 +172,12 @@ const SelectSearch: FC<SelectSearchProps> = ({
   return (
     <div
       className={classNames(
-        'w-full flex items-center transition ease-in-out duration-200 w-full border rounded-md border-orange-500 bg-gray-100 max-h-18',
+        'w-full flex items-center transition ease-in-out duration-200 border rounded-md max-h-18',
         className
       )}
     >
       <div className="items-center mr-3">
-        <SearchIcon className={classNames('w-6 h-auto text-gray-500 stroke-current stroke-2')} />
+        <SearchIcon className={classNames('w-4 h-auto text-secondary-white stroke-current')} />
       </div>
 
       <div className="text-lg flex flex-1 items-stretch">
@@ -185,7 +185,7 @@ const SelectSearch: FC<SelectSearchProps> = ({
           <input
             autoFocus
             value={searchValue}
-            className="w-full bg-transparent text-xl text-gray-700 placeholder-gray-500"
+            className="w-full bg-transparent text-base-plus text-white placeholder-secondary-white"
             placeholder={t('swapTokenSearchInputPlaceholder')}
             onChange={onSearchChange}
             {...setTestID(testId)}
@@ -193,7 +193,7 @@ const SelectSearch: FC<SelectSearchProps> = ({
         </div>
 
         {showTokenIdInput && (
-          <div className="w-24 flex items-stretch border-l border-gray-300">
+          <div className="w-24 flex items-stretch border border-gray-50">
             <AssetField
               autoFocus
               value={tokenIdValue}
@@ -203,7 +203,7 @@ const SelectSearch: FC<SelectSearchProps> = ({
               style={{ borderRadius: 0 }}
               containerStyle={{ flexDirection: 'row' }}
               containerClassName="items-stretch"
-              className="text-lg border-none bg-opacity-0 focus:shadow-none"
+              className="text-base-plus border-none bg-opacity-0 focus:shadow-none"
               onChange={onTokenIdChange}
             />
           </div>

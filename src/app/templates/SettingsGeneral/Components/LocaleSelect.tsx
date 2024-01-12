@@ -152,7 +152,7 @@ export default LocaleSelect;
 
 const LocaleTitle: FC = () => (
   <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-gray-700">
+    <span className="text-base font-semibold text-white">
       <T id="languageAndCountry" />
     </span>
   </h2>
@@ -171,7 +171,7 @@ const LocaleFieldContent = (option: LocaleOption) => (
   <div className="flex items-center">
     <LocaleIcon option={option} />
 
-    <span className="text-xl text-gray-700">{option.label}</span>
+    <span className="text-base-plus text-white">{option.label}</span>
   </div>
 );
 
@@ -179,20 +179,21 @@ const LocaleOptionContent: FC<LocaleOptionContentProps> = ({ option, isSelected 
   return (
     <div
       className={classNames(
-        'flex items-center py-1.5 px-2 rounded',
-        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100',
+        'flex items-center py-1.5 px-2 rounded hover:text-white',
+        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card ',
+        isSelected ? 'text-white' : 'text-secondary-white',
         option.disabled && 'opacity-25 cursor-default'
       )}
       {...setTestID(SettingsGeneralSelectors.languageitem)}
     >
       <LocaleIcon option={option} />
 
-      <div className="relative text-left w-full text-lg text-gray-700">
+      <div className={classNames('relative text-left w-full text-base-plus')}>
         {option.label}
 
         {option.disabled && (
           <div className="absolute top-0 bottom-0 right-0 flex items-center">
-            <div className="mr-2 px-1 bg-orange-500 rounded-sm shadow-md text-white text-xs font-semibold uppercase">
+            <div className="mr-2 px-1 bg-accent-blue rounded-sm shadow-md text-white text-xs font-semibold uppercase">
               <T id="soon" />
             </div>
           </div>

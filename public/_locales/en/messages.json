@@ -3187,5 +3187,8 @@
   },
   "logout": {
     "message": "Log out"
+  },
+  "general": {
+    "message": "General"
   }
 }

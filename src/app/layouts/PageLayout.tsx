@@ -220,7 +220,7 @@ const Toolbar: FC<ToolbarProps> = ({
       </div>
 
       {pageTitle && (
-        <h2 className="px-1 flex items-center text-xl leading-5 tracking-tight text-white font-normal overflow-hidden">
+        <h2 className="px-1 flex items-center text-xl tracking-tight text-white font-normal overflow-hidden">
           {pageTitle}
         </h2>
       )}

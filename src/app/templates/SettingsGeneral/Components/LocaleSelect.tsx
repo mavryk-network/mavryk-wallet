@@ -130,7 +130,7 @@ const LocaleSelect: FC = () => {
           dropdownTestId: SettingsGeneralSelectors.languageDropDown
         }}
         optionsListClassName="p-2"
-        dropdownButtonClassName="p-3"
+        dropdownButtonClassName="px-4 py-14px"
         DropdownFaceContent={<LocaleFieldContent {...value} />}
         optionsProps={{
           options,
@@ -151,8 +151,8 @@ const LocaleSelect: FC = () => {
 export default LocaleSelect;
 
 const LocaleTitle: FC = () => (
-  <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-white">
+  <h2 className="leading-tight flex flex-col mb-3">
+    <span className="text-base-plus text-white">
       <T id="languageAndCountry" />
     </span>
   </h2>
@@ -169,9 +169,8 @@ const LocaleIcon: FC<LocaleOptionContentProps> = ({ option: { flagName, code } }
 
 const LocaleFieldContent = (option: LocaleOption) => (
   <div className="flex items-center">
-    <LocaleIcon option={option} />
-
     <span className="text-base-plus text-white">{option.label}</span>
+    <LocaleIcon option={option} />
   </div>
 );
 

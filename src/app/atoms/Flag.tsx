@@ -21,7 +21,7 @@ const Flag: FC<FlagProps> = props => {
   }
 
   return (
-    <div className={classNames('w-6 flex justify-center items-center', className)} style={{ height: '1.3125rem' }}>
+    <div className={classNames('w-5 flex justify-center items-center', className)} style={{ height: '1.2rem' }}>
       {src ? (
         <>
           <img alt={alt} className={classNames({ hidden: error })} src={src} onError={handleError} />

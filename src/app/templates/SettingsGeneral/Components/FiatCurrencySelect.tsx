@@ -55,7 +55,7 @@ const FiatCurrencySelect: FC = () => {
           dropdownTestId: SettingsGeneralSelectors.currenctyDropDown
         }}
         optionsListClassName="p-2"
-        dropdownButtonClassName="p-3"
+        dropdownButtonClassName="px-4 py-14px"
         DropdownFaceContent={<FiatCurrencyFieldContent option={value} />}
         optionsProps={{
           options,

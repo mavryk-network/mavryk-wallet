@@ -1645,7 +1645,7 @@
     "message": "Upload"
   },
   "languageAndCountry": {
-    "message": "Language"
+    "message": "Current language"
   },
   "fiatCurrency": {
     "message": "Default Currency"

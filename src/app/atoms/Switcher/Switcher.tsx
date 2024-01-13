@@ -1,29 +1,53 @@
-import React, { FC, HTMLAttributes } from 'react';
+import React, { FC, HTMLAttributes, forwardRef, useCallback, useEffect, useId, useState } from 'react';
 
 import classNames from 'clsx';
+
+import { checkedHandler } from 'lib/ui/inputHandlers';
 
 import styles from './Swicther.module.css';
 
 export type SwitcherProps = {
-  on: boolean;
-} & HTMLAttributes<HTMLDivElement>;
+  on?: boolean;
+  onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  testId?: string;
+} & Omit<HTMLAttributes<HTMLInputElement>, 'onChange'>;
 
-export const Switcher: FC<SwitcherProps> = ({ on = false, onClick, className, ...rest }) => {
-  return (
-    <div className={classNames(styles['toggle-switch'], className)} {...rest}>
-      <input
-        type="checkbox"
-        className={styles['toggle-switch-checkbox']}
-        name="toggleSwitch"
-        id="toggleSwitch"
-        checked={on}
-        onClick={onClick}
-        readOnly
-      />
-      <label className={styles['toggle-switch-label']} htmlFor="toggleSwitch">
-        <span className={styles['toggle-switch-inner']} />
-        <span className={styles['toggle-switch-switch']} />
-      </label>
-    </div>
-  );
-};
+export const Switcher = forwardRef<HTMLInputElement, SwitcherProps>(
+  ({ on = false, onClick, onChange, ...rest }, ref) => {
+    const [localChecked, setLocalChecked] = useState(() => on ?? false);
+    const id = useId();
+
+    useEffect(() => {
+      setLocalChecked(prevChecked => on ?? prevChecked);
+    }, [setLocalChecked, on]);
+
+    const handleChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { checked: toChecked } = event.target;
+        checkedHandler(event, onChange && (() => onChange(toChecked, event)), setLocalChecked);
+      },
+      [onChange, setLocalChecked]
+    );
+
+    return (
+      <div className={classNames(styles['toggle-switch'])}>
+        <input
+          ref={ref}
+          type="checkbox"
+          className={styles['toggle-switch-checkbox']}
+          name="toggleSwitch"
+          id={id}
+          checked={localChecked}
+          onClick={onClick}
+          onChange={handleChange}
+          readOnly
+          {...rest}
+        />
+        <label className={styles['toggle-switch-label']} htmlFor={id}>
+          <span className={styles['toggle-switch-inner']} />
+          <span className={styles['toggle-switch-switch']} />
+        </label>
+      </div>
+    );
+  }
+);

@@ -8,8 +8,8 @@ import { Child, ToggleContextType } from './Toggle.types';
 const ToggleContext = createContext<ToggleContextType>(undefined!);
 ToggleContext.displayName = 'ToggleContext';
 
-export function Toggle({ children }: Child) {
-  const [on, setOn] = React.useState(false);
+export function Toggle({ children, active = false }: Child & { active?: boolean }) {
+  const [on, setOn] = React.useState(active);
   const toggle = useCallback(() => setOn(!on), [on]);
 
   const memoizedState = useMemo(() => ({ on, toggle }), [on, toggle]);

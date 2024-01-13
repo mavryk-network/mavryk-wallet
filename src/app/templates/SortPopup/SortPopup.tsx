@@ -75,6 +75,10 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle 
               <T id="hideZeroBalances" />
             </span>
             <Switcher on={on} onClick={toggle} />
+            <div id="12343">
+              <Switcher />
+            </div>
+            <Switcher />
           </div>
         </div>
       )}

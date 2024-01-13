@@ -110,7 +110,6 @@ export const AddNetworkScreen: FC = () => {
           subHeader: 'success'
         });
       } catch (err: any) {
-        debugger;
         console.error(err);
 
         await delay();

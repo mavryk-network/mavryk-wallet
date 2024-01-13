@@ -19,16 +19,24 @@ export const useAnalytics = () => {
       category: AnalyticsEventCategory = AnalyticsEventCategory.General,
       properties?: object,
       isAnalyticsEnabled = analyticsEnabled
-    ) =>
-      isAnalyticsEnabled &&
-      sendTrackEvent(userId, rpc, event, category, { ...properties, abTestingCategory: testGroupName }),
+    ) => {
+      return;
+      // return (
+      //   isAnalyticsEnabled &&
+      //   sendTrackEvent(userId, rpc, event, category, { ...properties, abTestingCategory: testGroupName })
+      // );
+    },
     [analyticsEnabled, userId, rpc, testGroupName]
   );
 
   const pageEvent = useCallback(
-    (path: string, search: string, additionalProperties = {}) =>
-      analyticsEnabled &&
-      sendPageEvent(userId, rpc, path, search, { ...additionalProperties, abTestingCategory: testGroupName }),
+    (path: string, search: string, additionalProperties = {}) => {
+      return;
+      // return (
+      //   analyticsEnabled &&
+      //   sendPageEvent(userId, rpc, path, search, { ...additionalProperties, abTestingCategory: testGroupName })
+      // );
+    },
     [analyticsEnabled, userId, rpc, testGroupName]
   );
 

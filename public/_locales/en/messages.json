@@ -1810,17 +1810,18 @@
       }
     }
   },
-  "popupSettings": {
-    "message": "Popup mode"
+
+  "fullScreenSettings": {
+    "message": "Fullscreen mode"
   },
-  "popupSettingsDescription": {
-    "message": "Here you can configure the popup which appears on plugin's icon click in extensions panel."
+  "fullScreenSettingsDescription": {
+    "message": "Wallet appears as a new browser tab rather than web browser popup"
   },
   "analyticsSettings": {
     "message": "Anonymous Analytics"
   },
   "analyticsSettingsDescription": {
-    "message": "Here you can configure sending of anonymous analytics that helps us to improve the product."
+    "message": "Allow sending of anonymous analytics that helps Mavryk improve the products"
   },
   "managedContract": {
     "message": "Managed Contract"
@@ -2610,10 +2611,10 @@
     "message": "Are you sure you want to delete this token?"
   },
   "lockUpSettings": {
-    "message": "Extension lock-up"
+    "message": "Auto Log Out"
   },
   "lockUpSettingsDescription": {
-    "message": "The extension will be automatically blocked after 5 minutes of inactivity."
+    "message": "The wallet will automatically require the password after 5 minutes of inactivity"
   },
   "partnersPromoSettings": {
     "message": "Advertising"
@@ -2621,8 +2622,8 @@
   "cashBack": {
     "message": "cash back"
   },
-  "partnersPromoDescriptionP1": {
-    "message": "Here you can configure displaying of ads in Temple wallet. Remember, you get"
+  "partnersPromoDescription": {
+    "message": "Allow displaying of ads in Mavryk Wallet"
   },
   "partnersPromoDescriptionP2": {
     "message": "at Temple Keys for viewing ads"
@@ -2997,7 +2998,7 @@
     "message": "Notifications"
   },
   "notificationsSettingsDescription": {
-    "message": "Configure the notifications you want to receive. (Platform updates and emergency notifications can’t be disabled)"
+    "message": "Allow notifications for Mavryk Wallet"
   },
   "notificationsNotFound": {
     "message": "Notifications not found"

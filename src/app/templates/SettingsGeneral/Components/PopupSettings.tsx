@@ -25,9 +25,9 @@ const PopupSettings: FC<{}> = () => {
 
   return (
     <EnablingSetting
-      titleI18nKey="popupSettings"
-      descriptionI18nKey="popupSettingsDescription"
-      enabled={popupEnabled}
+      titleI18nKey="fullScreenSettings"
+      descriptionI18nKey="fullScreenSettingsDescription"
+      enabled={!popupEnabled}
       onChange={handlePopupModeChange}
       errorCaption={error?.message}
       testID={SettingsGeneralSelectors.popUpCheckBox}

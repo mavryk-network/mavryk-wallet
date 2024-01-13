@@ -11,7 +11,7 @@ interface Props {
 
 export const InputContainer: FC<Props> = ({ className, header, children, footer }) => {
   return (
-    <div className={classNames(className, 'w-full flex flex-col gap-1')}>
+    <div className={classNames(className, 'w-full flex flex-col')}>
       {header && <div>{header}</div>}
       <div>{children}</div>
       {footer && <div>{footer}</div>}

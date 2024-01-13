@@ -49,7 +49,7 @@ const FiatCurrencySelect: FC = () => {
   );
 
   return (
-    <InputContainer className="mb-8" header={<FiatCurrencyTitle />}>
+    <InputContainer className="mb-4" header={<FiatCurrencyTitle />}>
       <DropdownSelect
         testIds={{
           dropdownTestId: SettingsGeneralSelectors.currenctyDropDown

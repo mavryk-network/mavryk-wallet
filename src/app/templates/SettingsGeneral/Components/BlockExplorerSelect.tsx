@@ -42,7 +42,7 @@ const BlockExplorerSelect = () => {
   );
 
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       <InputContainer header={<BlockExplorerTitle />}>
         <DropdownSelect
           testIds={{

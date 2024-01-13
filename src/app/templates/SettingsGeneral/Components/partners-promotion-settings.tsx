@@ -2,7 +2,7 @@ import React, { ChangeEvent, FC } from 'react';
 
 import { useDispatch } from 'react-redux';
 
-import { FormCheckbox } from 'app/atoms';
+import { Switcher } from 'app/atoms/Switcher';
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { T, t } from 'lib/i18n';
@@ -10,7 +10,6 @@ import { useConfirm } from 'lib/ui/dialog';
 
 import { setAdsBannerVisibilityAction } from '../../../store/settings/actions';
 import { useIsEnabledAdsBannerSelector } from '../../../store/settings/selectors';
-import { SettingsGeneralSelectors } from '../selectors';
 
 export const PartnersPromotionSettings: FC = () => {
   const dispatch = useDispatch();
@@ -56,33 +55,21 @@ export const PartnersPromotionSettings: FC = () => {
   };
 
   return (
-    <>
+    <div className="flex items-start justify-between gap-4 w-full">
       <label className="mb-4 leading-tight flex flex-col" htmlFor="shouldShowPartnersPromo">
-        <span className="text-base font-semibold text-gray-700">
+        <span className="text-base-plus text-white">
           <T id="partnersPromoSettings" />
         </span>
 
-        <span className="mt-1 text-xs font-light text-gray-600" style={{ maxWidth: '90%' }}>
+        <span className="mt-1 text-xs text-secondary-white">
           <span>
-            <T id="partnersPromoDescriptionP1" />
-          </span>
-          <span className="mx-1 font-semibold">
-            <T id="cashBack" />
-          </span>
-          <span>
-            <T id="partnersPromoDescriptionP2" />
+            <T id="partnersPromoDescription" />
           </span>
         </span>
       </label>
-
-      <FormCheckbox
-        checked={shouldShowPartnersPromo}
-        onChange={togglePartnersPromotion}
-        name="shouldShowPartnersPromo"
-        label={t(shouldShowPartnersPromo ? 'enabled' : 'disabled')}
-        containerClassName="mb-4"
-        testID={SettingsGeneralSelectors.partnersPromotion}
-      />
-    </>
+      <div className="w-12">
+        <Switcher on={shouldShowPartnersPromo} onChange={togglePartnersPromotion} />
+      </div>
+    </div>
   );
 };

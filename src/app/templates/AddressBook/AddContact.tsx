@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { t, T } from 'lib/i18n';
 import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
@@ -38,9 +39,23 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     formState,
     clearError,
     setError,
-    errors
+    errors,
+    watch
   } = useForm<ContactFormData>();
   const submitting = formState.isSubmitting;
+  const name = watch('name') ?? '';
+  const address = watch('address') ?? '';
+
+  const isSubmitDisabled = !name.length || !address.length;
+
+  const onCancelSubmit = useCallback(() => {
+    if (submitting) return;
+
+    clearError();
+    resetForm();
+
+    navigate('/settings/address-book');
+  }, [clearError, resetForm, submitting]);
 
   const onAddContactSubmit = useCallback(
     async ({ address, name }: ContactFormData) => {
@@ -138,10 +153,18 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
           }}
         />
       </div>
-
-      <FormSubmitButton loading={submitting} testID={AddressBookSelectors.addContactButton}>
-        <T id="addContact" />
-      </FormSubmitButton>
+      <div className="grid grid-cols-2 gap-3">
+        <ButtonRounded size="big" fill={false} onClick={onCancelSubmit} disabled={submitting}>
+          <T id="cancel" />
+        </ButtonRounded>
+        <FormSubmitButton
+          disabled={isSubmitDisabled}
+          loading={submitting}
+          testID={AddressBookSelectors.addContactButton}
+        >
+          <T id="add" />
+        </FormSubmitButton>
+      </div>
     </form>
   );
 };

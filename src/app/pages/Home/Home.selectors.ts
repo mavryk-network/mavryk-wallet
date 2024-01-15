@@ -16,5 +16,6 @@ export enum HomeSelectors {
   delegateButton = 'Home/Delegate Button',
   addressModeSwitchButton = 'Home/Address Mode Switch Button',
   accountNameText = 'Home/Account Name Text',
-  emptyStateText = 'Home/Empty State Text'
+  emptyStateText = 'Home/Empty State Text',
+  historyTab = 'Home/History Tab'
 }

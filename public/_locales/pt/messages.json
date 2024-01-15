@@ -1423,6 +1423,9 @@
   "activity": {
     "message": "Atividade"
   },
+  "history": {
+    "message": "Atividade"
+  },
   "manage": {
     "message": "Gerir"
   },

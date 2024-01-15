@@ -9,6 +9,7 @@ import ErrorBoundary from 'app/ErrorBoundary';
 import { ToolbarElement } from 'app/layouts/PageLayout';
 import { ActivityComponent } from 'app/templates/activity/Activity';
 import AssetInfo from 'app/templates/AssetInfo';
+import { HistoryComponent } from 'app/templates/History/History';
 import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { isTezAsset } from 'lib/assets';
 import { t, TID } from 'lib/i18n';
@@ -23,7 +24,7 @@ type Props = {
   className?: string;
 };
 
-type TabName = 'tokens' | 'collectibles' | 'activity' | 'delegation' | 'info';
+type TabName = 'tokens' | 'collectibles' | 'activity' | 'delegation' | 'info' | 'history';
 
 interface TabData {
   name: TabName;
@@ -71,6 +72,13 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
           Component: ActivityComponent,
           testID: HomeSelectors.activityTab,
           whileMessageI18nKey: 'operationHistoryWhileMessage'
+        },
+        {
+          name: 'history',
+          titleI18nKey: 'history',
+          Component: HistoryComponent,
+          testID: HomeSelectors.historyTab,
+          whileMessageI18nKey: 'operationHistoryWhileMessage'
         }
       ];
     }
@@ -80,6 +88,13 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
       titleI18nKey: 'activity',
       Component: () => <ActivityComponent assetSlug={assetSlug} />,
       testID: HomeSelectors.activityTab
+    };
+
+    const history: TabData = {
+      name: 'history',
+      titleI18nKey: 'history',
+      Component: () => <ActivityComponent assetSlug={assetSlug} />,
+      testID: HomeSelectors.historyTab
     };
 
     if (isTezAsset(assetSlug)) {
@@ -97,6 +112,7 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
 
     return [
       activity,
+      history,
       {
         name: 'info',
         titleI18nKey: 'info',

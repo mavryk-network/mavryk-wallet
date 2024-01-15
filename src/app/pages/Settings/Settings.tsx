@@ -1,7 +1,5 @@
 import React, { FC, useMemo } from 'react';
 
-import classNames from 'clsx';
-
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
 import { ReactComponent as ConnectLedgericon } from 'app/icons/connect-clip.svg';

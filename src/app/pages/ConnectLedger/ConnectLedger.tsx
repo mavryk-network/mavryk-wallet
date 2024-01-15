@@ -17,6 +17,7 @@ import { DerivationType, TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
+import BlockExplorerSelect from './components/DerivationTypeField';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
 type FormData = {
@@ -147,116 +148,109 @@ const ConnectLedger: FC = () => {
   );
 
   return (
-    <PageLayout
-      pageTitle={
-        <>
-          <LinkIcon className="w-auto h-4 mr-1 stroke-current" />
-          <T id="connectLedger" />
-        </>
-      }
-    >
-      <div className="relative w-full">
-        <div className="w-full max-w-sm mx-auto mt-6 mb-8">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
+    <div className="relative w-full">
+      <div className="w-full max-w-sm mx-auto mt-6 mb-8">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
 
+          <FormField
+            ref={register({
+              pattern: {
+                value: /^.{0,16}$/,
+                message: t('ledgerNameConstraint')
+              }
+            })}
+            label={t('accountName')}
+            labelDescription={t('ledgerNameInputDescription')}
+            id="create-ledger-name"
+            type="text"
+            name="name"
+            placeholder={defaultName}
+            errorCaption={errors.name?.message}
+            containerClassName="mb-4"
+            testID={ConnectLedgerSelectors.accountNameInput}
+          />
+
+          <div className="mb-4 flex flex-col">
+            <h2 className="mb-4 leading-tight flex flex-col">
+              <span className="text-base font-semibold text-gray-700">
+                <T id="derivationType" />{' '}
+                <span className="text-sm font-light text-gray-600">
+                  <T id="optionalComment" />
+                </span>
+              </span>
+
+              <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
+                <T id="derivationTypeFieldDescription" />
+              </span>
+            </h2>
+            <Controller as={TypeSelect} control={control} name="derivationType" options={DERIVATION_TYPES} />
+          </div>
+
+          <BlockExplorerSelect />
+
+          <div className="mb-4 flex flex-col">
+            <h2 className="mb-4 leading-tight flex flex-col">
+              <span className="text-base font-semibold text-gray-700">
+                <T id="derivationPath" />{' '}
+                <span className="text-sm font-light text-gray-600">
+                  <T id="optionalComment" />
+                </span>
+              </span>
+
+              <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
+                <T id="defaultDerivationPathLabel" substitutions={[<b>44'/1729'/0'/0'</b>]} />
+                <br />
+                <T id="clickOnCustomDerivationPath" />
+              </span>
+            </h2>
+            <TypeSelect options={DERIVATION_PATHS} value={derivationPathType} onChange={setDerivationPathType} />
+          </div>
+
+          {derivationPathType === 'another' && (
             <FormField
               ref={register({
-                pattern: {
-                  value: /^.{0,16}$/,
-                  message: t('ledgerNameConstraint')
-                }
+                min: { value: 1, message: t('positiveIntMessage') },
+                required: t('required')
               })}
-              label={t('accountName')}
-              labelDescription={t('ledgerNameInputDescription')}
-              id="create-ledger-name"
-              type="text"
-              name="name"
-              placeholder={defaultName}
-              errorCaption={errors.name?.message}
-              containerClassName="mb-4"
-              testID={ConnectLedgerSelectors.accountNameInput}
+              min={0}
+              type="number"
+              name="accountNumber"
+              id="importacc-acc-number"
+              label={t('accountNumber')}
+              placeholder="1"
+              errorCaption={errors.accountNumber?.message}
             />
+          )}
 
-            <div className="mb-4 flex flex-col">
-              <h2 className="mb-4 leading-tight flex flex-col">
-                <span className="text-base font-semibold text-gray-700">
-                  <T id="derivationType" />{' '}
-                  <span className="text-sm font-light text-gray-600">
-                    <T id="optionalComment" />
-                  </span>
-                </span>
+          {derivationPathType === 'custom' && (
+            <FormField
+              ref={register({
+                required: t('required'),
+                validate: validateDerivationPath
+              })}
+              name="customDerivationPath"
+              id="importacc-cdp"
+              label={t('customDerivationPath')}
+              placeholder={t('derivationPathExample2')}
+              errorCaption={errors.customDerivationPath?.message}
+              containerClassName="mb-6"
+              testID={ConnectLedgerSelectors.customDerivationPathInput}
+            />
+          )}
 
-                <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-                  <T id="derivationTypeFieldDescription" />
-                </span>
-              </h2>
-              <Controller as={TypeSelect} control={control} name="derivationType" options={DERIVATION_TYPES} />
-            </div>
-
-            <div className="mb-4 flex flex-col">
-              <h2 className="mb-4 leading-tight flex flex-col">
-                <span className="text-base font-semibold text-gray-700">
-                  <T id="derivationPath" />{' '}
-                  <span className="text-sm font-light text-gray-600">
-                    <T id="optionalComment" />
-                  </span>
-                </span>
-
-                <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-                  <T id="defaultDerivationPathLabel" substitutions={[<b>44'/1729'/0'/0'</b>]} />
-                  <br />
-                  <T id="clickOnCustomDerivationPath" />
-                </span>
-              </h2>
-              <TypeSelect options={DERIVATION_PATHS} value={derivationPathType} onChange={setDerivationPathType} />
-            </div>
-
-            {derivationPathType === 'another' && (
-              <FormField
-                ref={register({
-                  min: { value: 1, message: t('positiveIntMessage') },
-                  required: t('required')
-                })}
-                min={0}
-                type="number"
-                name="accountNumber"
-                id="importacc-acc-number"
-                label={t('accountNumber')}
-                placeholder="1"
-                errorCaption={errors.accountNumber?.message}
-              />
-            )}
-
-            {derivationPathType === 'custom' && (
-              <FormField
-                ref={register({
-                  required: t('required'),
-                  validate: validateDerivationPath
-                })}
-                name="customDerivationPath"
-                id="importacc-cdp"
-                label={t('customDerivationPath')}
-                placeholder={t('derivationPathExample2')}
-                errorCaption={errors.customDerivationPath?.message}
-                containerClassName="mb-6"
-                testID={ConnectLedgerSelectors.customDerivationPathInput}
-              />
-            )}
-
-            <FormSubmitButton
-              loading={submitting}
-              className="mt-8"
-              testID={ConnectLedgerSelectors.addLedgerAccountButton}
-            >
-              <T id="addLedgerAccount" />
-            </FormSubmitButton>
-          </form>
-        </div>
-
-        <ConfirmLedgerOverlay displayed={submitting} />
+          <FormSubmitButton
+            loading={submitting}
+            className="mt-8"
+            testID={ConnectLedgerSelectors.addLedgerAccountButton}
+          >
+            <T id="addLedgerAccount" />
+          </FormSubmitButton>
+        </form>
       </div>
-    </PageLayout>
+
+      <ConfirmLedgerOverlay displayed={submitting} />
+    </div>
   );
 };
 

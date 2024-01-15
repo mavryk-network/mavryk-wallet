@@ -118,6 +118,7 @@ type ToolbarProps = {
   adShow?: boolean;
   skip?: boolean;
   attention?: boolean;
+  RightSidedComponent?: JSX.Element | null;
 };
 
 export let ToolbarElement: HTMLDivElement | null = null;
@@ -128,6 +129,7 @@ const Toolbar: FC<ToolbarProps> = ({
   step,
   setStep,
   adShow = false,
+  RightSidedComponent = null,
   skip,
   attention
 }) => {
@@ -226,6 +228,7 @@ const Toolbar: FC<ToolbarProps> = ({
       )}
 
       <div className="flex-1" />
+      {RightSidedComponent && RightSidedComponent}
 
       {attention && (
         <div className="flex items-center content-end absolute right-0">

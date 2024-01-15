@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
@@ -16,7 +16,7 @@ import { ListItemWithnavigate, ListItemWithnavigateprops } from 'app/molecules/L
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
 import { AddContact } from 'app/templates/AddressBook/AddContact';
-import AddressBook from 'app/templates/AddressBook/AddressBook';
+import { AddressBook } from 'app/templates/AddressBook/AddressBook';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 import HelpAndCommunity from 'app/templates/HelpAndCommunity';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
@@ -32,11 +32,16 @@ type SettingsProps = {
   tabSlug?: string | null;
 };
 
+export type TabComponentProps = {
+  setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+  toolbarRightSidedComponent: JSX.Element | null;
+};
+
 const RevealPrivateKey: FC = () => <RevealSecret reveal="private-key" />;
 const RevealSeedPhrase: FC = () => <RevealSecret reveal="seed-phrase" />;
 
 type Tab = ListItemWithnavigateprops & {
-  Component: React.FC;
+  Component: React.FC<TabComponentProps>;
   testID?: SettingsSelectors;
   hidden?: boolean;
 };
@@ -153,6 +158,7 @@ const TABS: Tab[] = [
 
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {
   const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
+  const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
 
   const tId = activeTab?.i18nKey ?? 'settings';
 
@@ -165,15 +171,19 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
       }
       isTopbarVisible={false}
       removePaddings={!activeTab}
+      RightSidedComponent={toolbarRightSidedComponent}
     >
       <div className=" h-full">
         <div className="h-full">
           {activeTab ? (
-            <activeTab.Component />
+            <activeTab.Component
+              setToolbarRightSidedComponent={setToolbarRightSidedComponent}
+              toolbarRightSidedComponent={toolbarRightSidedComponent}
+            />
           ) : (
             <ul className="flex flex-col">
               {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                <ListItemWithnavigate {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
+                <ListItemWithnavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}
             </ul>
           )}

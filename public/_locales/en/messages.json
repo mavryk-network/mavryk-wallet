@@ -3221,6 +3221,6 @@
     "message": "Go to Address Book"
   },
   "addContactSuccessDesc": {
-    "message": "New contact was successfully added to your Address Book"
+    "message": "New contact was successfully added to your \nAddress Book"
   }
 }

@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t, T } from 'lib/i18n';
 import { useContactsActions, useFilteredContacts, useAccount } from 'lib/temple/front';
@@ -19,7 +20,7 @@ type ContactActions = {
   remove: (address: string) => void;
 };
 
-const AddressBook: React.FC = () => {
+export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
   const { removeContact } = useContactsActions();
   const { allContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
@@ -59,6 +60,25 @@ const AddressBook: React.FC = () => {
     [handleRemoveContactClick]
   );
 
+  const AddComponent = useMemo(
+    () => (
+      <div className="text-base-plus text-accent-blue cursor-pointer" onClick={handleAddContactClick}>
+        Add
+      </div>
+    ),
+    [handleAddContactClick]
+  );
+
+  useEffect(() => {
+    if (!isContactsEmpty) {
+      setToolbarRightSidedComponent(AddComponent);
+    }
+
+    return () => {
+      setToolbarRightSidedComponent(null);
+    };
+  }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
+
   return isContactsEmpty ? (
     <section className="w-full h-full flex justify-center items-center">
       <div className="flex flex-col">
@@ -90,8 +110,6 @@ const AddressBook: React.FC = () => {
     </div>
   );
 };
-
-export default AddressBook;
 
 const ContactIcon: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item }) => (
   <Identicon type="bottts" hash={item.address} size={32} className="flex-shrink-0 shadow-xs rounded-full" />

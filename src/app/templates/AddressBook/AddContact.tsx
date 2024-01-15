@@ -9,7 +9,7 @@ import { t, T } from 'lib/i18n';
 import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
-import { navigate } from 'lib/woozie';
+import { HistoryAction, goBack, navigate, useLocation } from 'lib/woozie';
 
 import { AddressBookSelectors } from './AddressBook.selectors';
 
@@ -31,6 +31,7 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const { addContact } = useContactsActions();
   const domainsClient = useTezosDomainsClient();
+  const { historyPosition, pathname } = useLocation();
 
   const {
     register,
@@ -42,11 +43,14 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     errors,
     watch
   } = useForm<ContactFormData>();
+
   const submitting = formState.isSubmitting;
   const name = watch('name') ?? '';
   const address = watch('address') ?? '';
 
+  const inHome = pathname === '/';
   const isSubmitDisabled = !name.length || !address.length;
+  const properHistoryPosition = historyPosition > 0 || !inHome;
 
   const onCancelSubmit = useCallback(() => {
     if (submitting) return;
@@ -54,8 +58,12 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     clearError();
     resetForm();
 
-    navigate('/settings/address-book');
-  }, [clearError, resetForm, submitting]);
+    if (properHistoryPosition) {
+      return goBack();
+    }
+
+    navigate('/', HistoryAction.Replace);
+  }, [clearError, properHistoryPosition, resetForm, submitting]);
 
   const onAddContactSubmit = useCallback(
     async ({ address, name }: ContactFormData) => {

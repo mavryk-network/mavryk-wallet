@@ -3194,5 +3194,8 @@
   },
   "enterWalletPassword": {
     "message": "Enter your wallet password"
+  },
+  "connectLedgerDesc": {
+    "message": "Connect your ledger device to access your funds from this wallet application."
   }
 }

@@ -1,12 +1,10 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import classNames from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
-import { ReactComponent as OkIcon } from 'app/icons/ok.svg';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
@@ -22,6 +20,7 @@ export type FormData = {
   name: string;
   customDerivationPath: string;
   derivationType?: DerivationType;
+  derivationPath?: string;
   accountNumber?: number;
 };
 
@@ -77,20 +76,19 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, errors, formState, watch, setValue } = useForm<FormData>({
+  const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
       accountNumber: 1,
-      derivationType: DerivationType.ED25519
+      derivationType: DerivationType.ED25519,
+      derivationPath: DERIVATION_PATHS[0].type
     }
   });
   const submitting = formState.isSubmitting;
-  const temp = watch('derivationType');
-  console.log(temp);
+  const derivationPathType = watch('derivationPath');
 
   const [error, setError] = useState<ReactNode>(null);
-  const [derivationPathType, setDerivationPathType] = useState(DERIVATION_PATHS[0].type);
 
   const onSubmit = useCallback(
     async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
@@ -148,108 +146,87 @@ const ConnectLedger: FC = () => {
   );
 
   return (
-    <div className="relative w-full">
-      <div className="w-full max-w-sm mx-auto mt-6 mb-8">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
-
-          <FormField
-            ref={register({
-              pattern: {
-                value: /^.{0,16}$/,
-                message: t('ledgerNameConstraint')
-              }
-            })}
-            label={t('accountName')}
-            labelDescription={t('ledgerNameInputDescription')}
-            id="create-ledger-name"
-            type="text"
-            name="name"
-            placeholder={defaultName}
-            errorCaption={errors.name?.message}
-            containerClassName="mb-4"
-            testID={ConnectLedgerSelectors.accountNameInput}
-          />
-
-          <div className="mb-4 flex flex-col">
-            <h2 className="mb-4 leading-tight flex flex-col">
-              <span className="text-base font-semibold text-gray-700">
-                <T id="derivationType" />{' '}
-                <span className="text-sm font-light text-gray-600">
-                  <T id="optionalComment" />
-                </span>
-              </span>
-
-              <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-                <T id="derivationTypeFieldDescription" />
-              </span>
-            </h2>
-            <Controller
-              as={DerivationTypeFieldSelect}
-              control={control}
-              name="derivationType"
-              options={DERIVATION_TYPES}
-            />
-          </div>
-
-          {/* <BlockExplorerSelect options={DERIVATION_TYPES} /> */}
-
-          <div className="mb-4 flex flex-col">
-            <h2 className="mb-4 leading-tight flex flex-col">
-              <span className="text-base font-semibold text-gray-700">
-                <T id="derivationPath" />{' '}
-                <span className="text-sm font-light text-gray-600">
-                  <T id="optionalComment" />
-                </span>
-              </span>
-
-              <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-                <T id="defaultDerivationPathLabel" substitutions={[<b>44'/1729'/0'/0'</b>]} />
-                <br />
-                <T id="clickOnCustomDerivationPath" />
-              </span>
-            </h2>
-            <TypeSelect options={DERIVATION_PATHS} value={derivationPathType} onChange={setDerivationPathType} />
-          </div>
-
-          {derivationPathType === 'another' && (
+    <div className="relative w-full h-full">
+      <div className="w-full h-full max-w-sm mx-auto flex flex-col">
+        <form className="flex-grow flex flex-col justify-between pb-8" onSubmit={handleSubmit(onSubmit)}>
+          <div>
+            {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
+            <div className="text-sm text-secondary-white mb-4">
+              <T id="connectLedgerDesc" />
+            </div>
             <FormField
               ref={register({
-                min: { value: 1, message: t('positiveIntMessage') },
-                required: t('required')
+                pattern: {
+                  value: /^.{0,16}$/,
+                  message: t('ledgerNameConstraint')
+                }
               })}
-              min={0}
-              type="number"
-              name="accountNumber"
-              id="importacc-acc-number"
-              label={t('accountNumber')}
-              placeholder="1"
-              errorCaption={errors.accountNumber?.message}
+              label={t('accountName')}
+              // labelDescription={t('ledgerNameInputDescription')}
+              id="create-ledger-name"
+              type="text"
+              name="name"
+              placeholder={defaultName}
+              errorCaption={errors.name?.message}
+              containerClassName="mb-2"
+              testID={ConnectLedgerSelectors.accountNameInput}
             />
-          )}
 
-          {derivationPathType === 'custom' && (
-            <FormField
-              ref={register({
-                required: t('required'),
-                validate: validateDerivationPath
-              })}
-              name="customDerivationPath"
-              id="importacc-cdp"
-              label={t('customDerivationPath')}
-              placeholder={t('derivationPathExample2')}
-              errorCaption={errors.customDerivationPath?.message}
-              containerClassName="mb-6"
-              testID={ConnectLedgerSelectors.customDerivationPathInput}
-            />
-          )}
+            <div className="flex flex-col">
+              <Controller
+                as={DerivationTypeFieldSelect}
+                control={control}
+                name="derivationType"
+                options={DERIVATION_TYPES}
+                i18nKey="derivationType"
+              />
+            </div>
 
-          <FormSubmitButton
-            loading={submitting}
-            className="mt-8"
-            testID={ConnectLedgerSelectors.addLedgerAccountButton}
-          >
-            <T id="addLedgerAccount" />
+            <div className="flex flex-col">
+              <Controller
+                as={DerivationTypeFieldSelect}
+                control={control}
+                name="derivationPath"
+                options={DERIVATION_PATHS}
+                i18nKey="derivationPath"
+              />
+            </div>
+
+            {derivationPathType === 'another' && (
+              <FormField
+                ref={register({
+                  min: { value: 1, message: t('positiveIntMessage') },
+                  required: t('required')
+                })}
+                min={0}
+                type="number"
+                name="accountNumber"
+                id="importacc-acc-number"
+                label={t('accountNumber')}
+                placeholder="1"
+                errorCaption={errors.accountNumber?.message}
+              />
+            )}
+
+            {derivationPathType === 'custom' && (
+              <FormField
+                ref={register({
+                  required: t('required'),
+                  validate: validateDerivationPath
+                })}
+                name="customDerivationPath"
+                id="importacc-cdp"
+                label={t('customDerivationPath')}
+                placeholder={t('derivationPathExample2')}
+                errorCaption={errors.customDerivationPath?.message}
+                containerClassName="mb-6"
+                testID={ConnectLedgerSelectors.customDerivationPathInput}
+              />
+            )}
+          </div>
+
+          <FormSubmitButton loading={submitting} testID={ConnectLedgerSelectors.addLedgerAccountButton}>
+            <T id="connectLedger" />
           </FormSubmitButton>
         </form>
       </div>
@@ -260,77 +237,3 @@ const ConnectLedger: FC = () => {
 };
 
 export default ConnectLedger;
-
-type TypeSelectOption<T extends string | number> = {
-  type: T;
-  name: string;
-};
-type TypeSelectProps<T extends string | number> = {
-  options: TypeSelectOption<T>[];
-  value?: T;
-  onChange: (value: T) => void;
-};
-
-const TypeSelect = <T extends string | number>(props: TypeSelectProps<T>) => {
-  const { options, value, onChange } = props;
-
-  return (
-    <div
-      className={classNames(
-        'flex flex-col rounded-md overflow-hidden',
-        'text-gray-700 text-sm leading-tight border-2 bg-gray-100'
-      )}
-    >
-      {options.map((option, index) => (
-        <TypeSelectItem
-          key={option.type}
-          option={option}
-          onSelect={onChange}
-          selected={option.type === value}
-          last={index === options.length - 1}
-        />
-      ))}
-    </div>
-  );
-};
-
-type TypeSelectItemProps<T extends string | number> = {
-  option: TypeSelectOption<T>;
-  onSelect: (value: T) => void;
-  selected: boolean;
-  last: boolean;
-};
-
-const TypeSelectItem = <T extends string | number>(props: TypeSelectItemProps<T>) => {
-  const { option, onSelect, selected, last } = props;
-
-  const handleClick = useCallback(() => onSelect(option.type), [onSelect, option.type]);
-
-  return (
-    <button
-      type="button"
-      className={classNames(
-        'flex items-center block w-full overflow-hidden',
-        'text-gray-700 opacity-90 hover:opacity-100 focus:outline-none',
-        'transition ease-in-out duration-200',
-        !last && 'border-b border-gray-200',
-        selected ? 'bg-gray-300' : 'hover:bg-gray-200 focus:bg-gray-200'
-      )}
-      style={{
-        padding: '0.4rem 0.375rem 0.4rem 0.375rem'
-      }}
-      onClick={handleClick}
-    >
-      {option.name}
-      <div className="flex-1" />
-      {selected && (
-        <OkIcon
-          className="mx-2 h-4 w-auto stroke-2"
-          style={{
-            stroke: '#777'
-          }}
-        />
-      )}
-    </button>
-  );
-};

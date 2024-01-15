@@ -5,7 +5,7 @@ import { isEqual } from 'lodash';
 
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
-import { T } from 'lib/i18n';
+import { T, TID } from 'lib/i18n';
 
 type TypeSelectOption<T extends string | number> = {
   type: T;
@@ -16,48 +16,17 @@ type TypeSelectProps<T extends string | number> = {
   options: TypeSelectOption<T>[];
   value?: T;
   onChange: (value: T) => void;
+  i18nKey: TID;
 };
 
 const renderOptionContent = <T extends string | number>(option: TypeSelectOption<T>, isSelected: boolean) => (
   <LedgerOptionContent option={option} isSelected={isSelected} />
 );
 
-export const DerivationTypeFieldSelect = <T extends string | number>(props: TypeSelectProps<T>) => {
-  const { options, value, onChange } = props;
-  const selectedDerivationOption = options.find(op => op.type === value) ?? options[0];
-
-  const [searchValue, setSearchValue] = useState<string>('');
-
-  return (
-    <div className="mb-4">
-      <InputContainer header={<DerivationFieldTitle />}>
-        <DropdownSelect
-          optionsListClassName="p-2"
-          dropdownButtonClassName="px-4 py-14px"
-          DropdownFaceContent={<LedgerFieldContent {...selectedDerivationOption} />}
-          optionsProps={{
-            options,
-            noItemsText: 'No items',
-            getKey: ({ type }) => {
-              return type.toString();
-            },
-            renderOptionContent: option => renderOptionContent(option, isEqual(option.type, value)),
-            onOptionChange: ({ type }) => onChange(type)
-          }}
-          searchProps={{
-            searchValue,
-            onSearchChange: event => setSearchValue(event?.target.value)
-          }}
-        />
-      </InputContainer>
-    </div>
-  );
-};
-
-const DerivationFieldTitle: FC = () => (
+const DerivationFieldTitle: FC<{ i18nKey: TID }> = ({ i18nKey }) => (
   <h2 className="leading-tight flex flex-col mb-3">
     <span className="text-base-plus text-white">
-      <T id="blockExplorer" />
+      <T id={i18nKey} />
     </span>
   </h2>
 );
@@ -85,6 +54,38 @@ const LedgerOptionContent = <T extends string | number>({ option, isSelected }: 
       )}
     >
       <div className="w-full text-left text-base-plus">{option.name}</div>
+    </div>
+  );
+};
+
+export const DerivationTypeFieldSelect = <T extends string | number>(props: TypeSelectProps<T>) => {
+  const { options, value, onChange, i18nKey } = props;
+  const selectedDerivationOption = options.find(op => op.type === value) ?? options[0];
+
+  const [searchValue, setSearchValue] = useState<string>('');
+
+  return (
+    <div className="mb-4">
+      <InputContainer header={<DerivationFieldTitle i18nKey={i18nKey} />}>
+        <DropdownSelect
+          optionsListClassName="p-2"
+          dropdownButtonClassName="px-4 py-14px"
+          DropdownFaceContent={<LedgerFieldContent {...selectedDerivationOption} />}
+          optionsProps={{
+            options,
+            noItemsText: 'No items',
+            getKey: ({ type }) => {
+              return type.toString();
+            },
+            renderOptionContent: option => renderOptionContent(option, isEqual(option.type, value)),
+            onOptionChange: ({ type }) => onChange(type)
+          }}
+          searchProps={{
+            searchValue,
+            onSearchChange: event => setSearchValue(event?.target.value)
+          }}
+        />
+      </InputContainer>
     </div>
   );
 };

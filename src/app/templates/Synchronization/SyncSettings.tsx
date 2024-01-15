@@ -8,6 +8,7 @@ import { T, t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
 
 import { SyncSettingsSelectors } from './SyncSettings.selectors';
 
@@ -20,7 +21,9 @@ const SyncSettings: FC = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
   const [payload, setPayload] = useVanishingState();
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>();
+  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>({
+    defaultValues: { password: 'Xiwkec-jebga1-xafqyv' }
+  });
 
   const focusPasswordField = useCallback(
     () => formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus(),
@@ -51,8 +54,17 @@ const SyncSettings: FC = () => {
     [formState.isSubmitting, clearError, setError, generateSyncPayload, setPayload, focusPasswordField]
   );
 
+  const handleQRBttonClick = useCallback(() => {
+    setPayload(null);
+    navigate('/');
+  }, [setPayload]);
+
+  const passwordValue = watch('password');
+
+  const isPasswordEntered = passwordValue?.length ?? 0 > 0;
+
   return (
-    <div className="w-full max-w-sm p-2 mx-auto">
+    <div className="w-full h-full max-w-sm  mx-auto flex flex-col">
       {payload ? (
         <>
           <Alert
@@ -62,50 +74,54 @@ const SyncSettings: FC = () => {
                 <T id="syncSettingsAlert" />
               </p>
             }
-            className="mt-4 mb-8"
+            className="mb-7"
           />
 
-          <p className="mb-4 text-sm text-gray-600">
+          <p className="mb-6 text-sm text-white">
             <T id="scanQRWithTempleMobile" />
           </p>
 
-          <div className="mb-8 p-1 bg-gray-100 border-2 border-gray-300 rounded">
-            <QRCode value={payload} bgColor="#f7fafc" fgColor="#000000" level="Q" style={{ width: '100%' }} />
+          <div className="p-1 mb-8 bg-white rounded-2xl self-center">
+            <QRCode value={payload} bgColor="#f7fafc" fgColor="#000000" level="Q" style={{ width: 254 }} />
           </div>
 
           <FormSubmitButton
-            className="w-full justify-center"
-            onClick={() => setPayload(null)}
+            className="w-full justify-center mt-2"
+            onClick={handleQRBttonClick}
             testID={SyncSettingsSelectors.doneButton}
           >
-            <T id="done" />
+            <T id="goToMain" />
           </FormSubmitButton>
         </>
       ) : (
         <>
-          <h2 className="mb-3 text-base text-gray-700">
-            <T id="syncSettingsTitle" />
-          </h2>
-
-          <p className="mb-6 text-xs text-gray-600">
+          <p className="mb-4 text-sm text-secondary-white">
             <T id="syncSettingsDescription" />
           </p>
 
-          <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col flex-grow justify-between pb-8"
+          >
             <FormField
               ref={register({ required: t('required') })}
               label={t('password')}
-              labelDescription={t('syncPasswordDescription')}
+              // labelDescription={t('syncPasswordDescription')}
               id="reveal-secret-password"
               type="password"
               name="password"
-              placeholder="********"
+              placeholder={t('enterWalletPassword')}
               errorCaption={errors.password?.message}
               containerClassName="mb-4"
               testID={SyncSettingsSelectors.passwordInput}
             />
 
-            <FormSubmitButton loading={formState.isSubmitting} testID={SyncSettingsSelectors.syncButton}>
+            <FormSubmitButton
+              disabled={!isPasswordEntered}
+              loading={formState.isSubmitting}
+              testID={SyncSettingsSelectors.syncButton}
+            >
               <T id="sync" />
             </FormSubmitButton>
           </form>

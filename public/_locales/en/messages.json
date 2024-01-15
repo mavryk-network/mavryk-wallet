@@ -2962,7 +2962,7 @@
     "message": "Sync"
   },
   "synchronization": {
-    "message": "Synchronization"
+    "message": "Sync With Mobile"
   },
   "synchronizationSettingsDescription": {
     "message": "Sync with Mobile Temple Wallet."
@@ -2971,7 +2971,7 @@
     "message": "Sync with Mobile Temple Wallet"
   },
   "syncSettingsDescription": {
-    "message": "You can sync your Seed Phrase and accounts (HD) with your mobile device. If you just open the Temple Mobile app for the first time, click 'Sync' button and follow the steps in your phone."
+    "message": "You can sync your Seed Phrase and accounts (HD) with your mobile device. If you just open the Mavryk Mobile app for the first time, click 'Sync' button and follow the steps in your phone."
   },
   "syncPasswordDescription": {
     "message": "Use your current wallet password to start the synchronization."
@@ -2980,7 +2980,7 @@
     "message": "Make sure nobody else is looking at your screen when you scan this code."
   },
   "scanQRWithTempleMobile": {
-    "message": "Scan this QR-code with yor Temple Wallet Mobile app."
+    "message": "Scan this QR code from your Mavryk Mobile app"
   },
   "serviceIsUnavailable": {
     "message": "Sorry, service is temporarily unavailable. Try again later!"
@@ -3191,5 +3191,8 @@
   },
   "general": {
     "message": "General"
+  },
+  "enterWalletPassword": {
+    "message": "Enter your wallet password"
   }
 }

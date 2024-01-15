@@ -157,36 +157,8 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
       isTopbarVisible={false}
       removePaddings={!activeTab}
     >
-      <div className="mb-8">
-        {activeTab && (
-          <>
-            {/* <h1
-              className={classNames(
-                'mb-2',
-                'flex items-center justify-center',
-                'text-2xl font-light text-white text-center'
-              )}
-            >
-              {(() => {
-                const { Icon, i18nKey } = activeTab;
-                return (
-                  <T id={i18nKey}>
-                    {message => (
-                      <>
-                        <Icon className="mr-2 h-8 w-8 fill-white" />
-                        {message}
-                      </>
-                    )}
-                  </T>
-                );
-              })()}
-            </h1> */}
-
-            {/* <hr className="mb-8" /> */}
-          </>
-        )}
-
-        <div>
+      <div className=" h-full">
+        <div className="h-full">
           {activeTab ? (
             <activeTab.Component />
           ) : (

@@ -2,7 +2,8 @@ import React, { ComponentProps, FC, useCallback, useMemo, useRef, useState } fro
 
 import classNames from 'clsx';
 
-import { Name, FormCheckbox, HashChip } from 'app/atoms';
+import { Name, HashChip, Divider } from 'app/atoms';
+import { Switcher } from 'app/atoms/Switcher';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
@@ -12,7 +13,7 @@ import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
 
-import { DAppSettingsSelectors } from './DAppSettings.selectors';
+// import { DAppSettingsSelectors } from './DAppSettings.selectors';
 
 type DAppEntry = [string, TempleDAppSession];
 type DAppActions = {
@@ -69,47 +70,35 @@ const DAppSettings: FC = () => {
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
 
   return (
-    <div className="w-full max-w-sm mx-auto my-8">
-      <h2 className="w-full mb-4 leading-tight flex flex-col">
-        <span className="text-xs font-light text-gray-600 max-w-9/10">
-          <T id="dAppsCheckmarkPrompt" substitutions={t(dAppEnabled ? 'disable' : 'enable')} />
+    <div className="w-full h-full max-w-sm mx-auto pb-8">
+      <p className="text-sm text-secondary-white mb-4">
+        <T id="dAppsCheckmarkPrompt" />
+      </p>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-white tracking-normal">
+          <T id="dAppsInteraction" />
         </span>
-      </h2>
 
-      <FormCheckbox
-        checked={dAppEnabled}
-        onChange={handleChange}
-        name="dAppEnabled"
-        label={t(dAppEnabled ? 'enabled' : 'disabled')}
-        labelDescription={t('dAppsInteraction')}
-        errorCaption={error?.message}
-        containerClassName="mb-4"
-        testID={DAppSettingsSelectors.DAppInteractionCheckBox}
-      />
+        <Switcher on={dAppEnabled} onChange={handleChange} />
+        {error?.message && <div className="text-sm text-primary-error my-1">{error.message}</div>}
+      </div>
+      <Divider className="my-4" color="bg-divider" />
 
+      <div className="text-base-plus text-white mb-4">
+        <T id="authorizedDApps" />
+      </div>
       {dAppEntries.length > 0 && (
         <>
-          <h2>
-            <span className="text-base font-semibold text-gray-700">
-              <T id="authorizedDApps" />
-            </span>
-          </h2>
-
-          <div className="mb-4">
-            <span className="text-xs font-light text-gray-600 max-w-9/10">
-              <T id="clickIconToResetPermissions" />
-            </span>
-          </div>
-
           <CustomSelect
             actions={{ remove: handleRemoveClick }}
-            className="mb-6"
+            className="pb-6"
             getItemId={getDAppKey}
             items={dAppEntries}
             OptionIcon={DAppIcon}
             OptionContent={DAppDescription}
             light
             hoverable={false}
+            padding={0}
           />
         </>
       )}
@@ -120,7 +109,12 @@ const DAppSettings: FC = () => {
 export default DAppSettings;
 
 const DAppIcon: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = props => (
-  <DAppLogo className="flex-none ml-2 mr-1 my-1" style={{ alignSelf: 'flex-start' }} origin={props.item[0]} size={36} />
+  <DAppLogo
+    className="flex-none ml-2 mr-1 my-1 rounded-full"
+    style={{ alignSelf: 'flex-start' }}
+    origin={props.item[0]}
+    size={44}
+  />
 );
 
 const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = props => {
@@ -155,23 +149,23 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
             href={origin}
             target="_blank"
             rel="noopener noreferrer"
-            className={classNames('text-blue-700 hover:underline', className)}
+            className={classNames('text-blue-200 hover:underline', className)}
           >
             <Name {...rest} />
           </a>
         )
-      },
-      {
-        key: 'networkLabel',
-        value: typeof network === 'string' ? network : network.name || network.rpc,
-        valueClassName: (typeof network === 'string' || network.name) && 'capitalize',
-        Component: Name
-      },
-      {
-        key: 'pkhLabel',
-        value: <HashChip hash={pkh} type="link" small />,
-        Component: 'span'
       }
+      // {
+      //   key: 'networkLabel',
+      //   value: typeof network === 'string' ? network : network.name || network.rpc,
+      //   valueClassName: (typeof network === 'string' || network.name) && 'capitalize',
+      //   Component: Name
+      // },
+      // {
+      //   key: 'pkhLabel',
+      //   value: <HashChip hash={pkh} type="link" small />,
+      //   Component: 'span'
+      // }
     ],
     [origin, network, pkh]
   );
@@ -179,12 +173,12 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
   return (
     <div className="flex flex-1 w-full">
       <div className="flex flex-col justify-between flex-1">
-        <Name className="mb-1 text-sm font-medium leading-tight text-left" style={{ maxWidth: '14rem' }}>
+        <Name className="text-base-plus text-left" style={{ maxWidth: '14rem' }}>
           {appMeta.name}
         </Name>
 
         {dAppAttributes.map(({ key, value, valueClassName, Component }) => (
-          <div className="text-xs font-light leading-tight text-gray-600" key={key}>
+          <div className="text-sm font-light leading-tight text-gray-600" key={key}>
             <T
               id={key}
               substitutions={[
@@ -202,11 +196,7 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
       </div>
 
       <button
-        className={classNames(
-          'flex-none p-2',
-          'text-gray-500 hover:text-gray-600',
-          'transition ease-in-out duration-200'
-        )}
+        className={classNames('flex-none p-2', 'text-white hover:text-gray-600', 'transition ease-in-out duration-200')}
         onClick={handleRemoveClick}
       >
         <CloseIcon className="w-auto h-5 stroke-current stroke-2" title={t('delete')} />

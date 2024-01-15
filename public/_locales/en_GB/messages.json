@@ -226,7 +226,7 @@
     }
   },
   "originLabel": {
-    "message": "Origin: $origin$",
+    "message": "$origin$",
     "placeholders": {
       "origin": {
         "content": "$1"
@@ -1019,7 +1019,7 @@
     "message": "Here's the deal: share some data with us (wallet address, IP) to see the most relevant ads and we'll *pay you* a fair share monthly. By doing so, you support the developers of Temple Wallet. Change your mind? Easily disable sharing in settings.\n\nStart earning now!"
   },
   "dAppsCheckmarkPrompt": {
-    "message": "Click on the checkmark to $action$ DApps interaction feature",
+    "message": "This section allows you to control the decentralized applications connected to your wallet.",
     "description": "DApps = Decentralized Applications",
     "placeholders": {
       "action": {
@@ -3221,6 +3221,6 @@
     "message": "Go to Address Book"
   },
   "addContactSuccessDesc": {
-    "message": "New contact was successfully added to your Address Book"
+    "message": "New contact was successfully added to your \nAddress Book"
   }
 }

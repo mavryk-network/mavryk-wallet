@@ -15,6 +15,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ListItemWithnavigate, ListItemWithnavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
+import { AddContact } from 'app/templates/AddressBook/AddContact';
 import AddressBook from 'app/templates/AddressBook/AddressBook';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 import HelpAndCommunity from 'app/templates/HelpAndCommunity';
@@ -58,6 +59,15 @@ const TABS: Tab[] = [
     onClick: () => {},
     testID: SettingsSelectors.addressBookButton,
     fillIcon: false
+  },
+  {
+    linkTo: 'add-contact',
+    i18nKey: 'addContact',
+    Icon: null,
+    Component: AddContact,
+    onClick: () => {},
+    hidden: true,
+    testID: SettingsSelectors.addContactButton
   },
   {
     linkTo: 'dapps',
@@ -162,7 +172,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
             <activeTab.Component />
           ) : (
             <ul className="flex flex-col">
-              {TABS.map(({ linkTo, ...tab }) => (
+              {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
                 <ListItemWithnavigate {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}
             </ul>

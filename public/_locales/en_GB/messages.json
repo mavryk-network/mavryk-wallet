@@ -2404,6 +2404,12 @@
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."
   },
+  "contactName": {
+    "message": "Contact Name"
+  },
+  "publicAddress": {
+    "message": "Public Address"
+  },
   "addNewContact": {
     "message": "New contact"
   },
@@ -2411,8 +2417,12 @@
     "message": "Add contact"
   },
   "newContactPlaceholder": {
-    "message": "e.g. Alice Bob"
+    "message": "Enter contact name"
   },
+  "enterPublicAddressPlaceholder": {
+    "message": "Enter public address"
+  },
+
   "contactWithTheSameAddressAlreadyExists": {
     "message": "Contact with the same address already exists"
   },
@@ -3194,5 +3204,23 @@
   },
   "enterWalletPassword": {
     "message": "Enter your wallet password"
+  },
+  "connectLedgerDesc": {
+    "message": "Connect your ledger device to access your funds from this wallet application."
+  },
+  "noContacts": {
+    "message": "You have not got any contacts yet"
+  },
+  "addAddress": {
+    "message": "Add address"
+  },
+  "addAddresesDesc": {
+    "message": "Add addresses of people you know"
+  },
+  "goToAddressBook": {
+    "message": "Go to Address Book"
+  },
+  "addContactSuccessDesc": {
+    "message": "New contact was successfully added to your Address Book"
   }
 }

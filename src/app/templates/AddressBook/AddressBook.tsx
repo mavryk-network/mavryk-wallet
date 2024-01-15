@@ -1,17 +1,16 @@
 import React, { useCallback, useMemo } from 'react';
 
 import classNames from 'clsx';
-import { useForm } from 'react-hook-form';
 
-import { Name, Identicon, FormField, FormSubmitButton, HashChip, SubTitle } from 'app/atoms';
+import { Name, Identicon, HashChip } from 'app/atoms';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t, T } from 'lib/i18n';
-import { isDomainNameValid, useTezosDomainsClient, useContactsActions, useFilteredContacts } from 'lib/temple/front';
-import { isAddressValid } from 'lib/temple/helpers';
+import { useContactsActions, useFilteredContacts, useAccount } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
 import { AddressBookSelectors } from './AddressBook.selectors';
@@ -22,8 +21,20 @@ type ContactActions = {
 
 const AddressBook: React.FC = () => {
   const { removeContact } = useContactsActions();
-  const { allContacts } = useFilteredContacts();
+  const { allContacts: filteredContacts } = useFilteredContacts();
+  const account = useAccount();
   const confirm = useConfirm();
+
+  const allContacts = useMemo(
+    () => filteredContacts.filter(contact => contact.address !== account.publicKeyHash),
+    [account.publicKeyHash, filteredContacts]
+  );
+
+  const isContactsEmpty = allContacts.length === 0;
+
+  const handleAddContactClick = useCallback(() => {
+    navigate('/settings/add-contact');
+  }, []);
 
   const handleRemoveContactClick = useCallback(
     async (address: string) => {
@@ -48,7 +59,21 @@ const AddressBook: React.FC = () => {
     [handleRemoveContactClick]
   );
 
-  return (
+  return isContactsEmpty ? (
+    <section className="w-full h-full flex justify-center items-center">
+      <div className="flex flex-col">
+        <div className="text-base-plus text-white mb-2">
+          <T id="noContacts" />
+        </div>
+        <div className="text-sm text-secondary-white mb-4">
+          <T id="addAddresesDesc" />
+        </div>
+        <ButtonRounded size="small" className="self-center" onClick={handleAddContactClick} fill>
+          <T id="addAddress" />
+        </ButtonRounded>
+      </div>
+    </section>
+  ) : (
     <div className="w-full max-w-sm mx-auto -mt-3">
       <CustomSelect
         actions={contactActions}

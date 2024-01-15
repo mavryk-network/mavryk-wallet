@@ -7,7 +7,7 @@ import { T, TID } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
 export type ListItemWithnavigateprops = {
-  Icon: ImportedSVGComponent;
+  Icon: ImportedSVGComponent | null;
   linkTo: string | null;
   i18nKey: TID;
   onClick: () => void;
@@ -32,7 +32,7 @@ export const ListItemWithnavigate: FC<ListItemWithnavigateprops> = ({
     children: (
       <>
         <div className="flex items-center">
-          <Icon className={classNames('w-6 h-6 mr-2', fillIcon && 'fill-white')} />
+          {Icon && <Icon className={classNames('w-6 h-6 mr-2', fillIcon && 'fill-white')} />}
           <span className="text-base-plus text-white">
             <T id={i18nKey} />
           </span>

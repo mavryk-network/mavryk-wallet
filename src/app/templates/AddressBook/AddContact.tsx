@@ -1,81 +1,21 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
-import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
-import { Name, Identicon, FormField, FormSubmitButton, HashChip, SubTitle } from 'app/atoms';
-import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
-import { setAnotherSelector, setTestID } from 'lib/analytics';
+import { FormField, FormSubmitButton } from 'app/atoms';
+import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { t, T } from 'lib/i18n';
-import { isDomainNameValid, useTezosDomainsClient, useContactsActions, useFilteredContacts } from 'lib/temple/front';
+import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
-import { TempleContact } from 'lib/temple/types';
-import { useConfirm } from 'lib/ui/dialog';
 import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
 
-import CustomSelect, { OptionRenderProps } from '../CustomSelect';
 import { AddressBookSelectors } from './AddressBook.selectors';
 
-type ContactActions = {
-  remove: (address: string) => void;
-};
-
 export const AddContact: React.FC = () => {
-  const { removeContact } = useContactsActions();
-  const { allContacts } = useFilteredContacts();
-  const confirm = useConfirm();
-
-  const handleRemoveContactClick = useCallback(
-    async (address: string) => {
-      if (
-        !(await confirm({
-          title: t('actionConfirmation'),
-          children: t('deleteContactConfirm')
-        }))
-      ) {
-        return;
-      }
-
-      await removeContact(address);
-    },
-    [confirm, removeContact]
-  );
-
-  const contactActions = useMemo<ContactActions>(
-    () => ({
-      remove: handleRemoveContactClick
-    }),
-    [handleRemoveContactClick]
-  );
-
   return (
-    <div className="w-full max-w-sm p-2 pb-4 mx-auto">
-      <SubTitle className="mb-4">
-        <T id="addNewContact" />
-      </SubTitle>
-
-      <AddNewContactForm className="mb-8" />
-
-      <div className="mb-4 flex flex-col">
-        <span className="text-base font-semibold text-gray-700">
-          <T id="currentContacts" />
-        </span>
-
-        <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-          <T id="updateContactDescription" />
-        </span>
-      </div>
-
-      <CustomSelect
-        actions={contactActions}
-        className="mb-6"
-        getItemId={getContactKey}
-        items={allContacts}
-        OptionIcon={ContactIcon}
-        OptionContent={ContactContent}
-        light
-        hoverable={false}
-      />
+    <div className="w-full h-full max-w-sm pb-8 mx-auto">
+      <AddNewContactForm className="h-full flex flex-col justify-between" />
     </div>
   );
 };
@@ -124,6 +64,14 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
 
         await addContact({ address, name, addedAt: Date.now() });
         resetForm();
+
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'addContact',
+          btnText: 'goToAddressBook',
+          btnLink: '/settings/address-book',
+          description: 'addContactSuccessDesc',
+          subHeader: 'success'
+        });
       } catch (err: any) {
         console.error(err);
 
@@ -157,37 +105,39 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
 
   return (
     <form className={className} onSubmit={handleSubmit(onAddContactSubmit)}>
-      <FormField
-        ref={register({ validate: validateAddressField })}
-        label={t('address')}
-        id="address"
-        name="address"
-        placeholder={t('recipientInputPlaceholderWithDomain')}
-        errorCaption={errors.address?.message}
-        containerClassName="mb-4"
-        testIDs={{
-          input: AddressBookSelectors.addressInput,
-          inputSection: AddressBookSelectors.addressInputSection
-        }}
-      />
+      <div>
+        <FormField
+          ref={register({
+            required: t('required'),
+            maxLength: { value: 50, message: t('maximalAmount', '50') }
+          })}
+          label={t('contactName')}
+          id="name"
+          name="name"
+          placeholder={t('newContactPlaceholder')}
+          errorCaption={errors.name?.message}
+          containerClassName="mb-2"
+          maxLength={50}
+          testIDs={{
+            input: AddressBookSelectors.nameInput,
+            inputSection: AddressBookSelectors.nameInputSection
+          }}
+        />
 
-      <FormField
-        ref={register({
-          required: t('required'),
-          maxLength: { value: 50, message: t('maximalAmount', '50') }
-        })}
-        label={t('name')}
-        id="name"
-        name="name"
-        placeholder={t('newContactPlaceholder')}
-        errorCaption={errors.name?.message}
-        containerClassName="mb-6"
-        maxLength={50}
-        testIDs={{
-          input: AddressBookSelectors.nameInput,
-          inputSection: AddressBookSelectors.nameInputSection
-        }}
-      />
+        <FormField
+          ref={register({ validate: validateAddressField })}
+          label={t('publicAddress')}
+          id="address"
+          name="address"
+          placeholder={t('enterPublicAddressPlaceholder')}
+          errorCaption={errors.address?.message}
+          containerClassName="mb-2"
+          testIDs={{
+            input: AddressBookSelectors.addressInput,
+            inputSection: AddressBookSelectors.addressInputSection
+          }}
+        />
+      </div>
 
       <FormSubmitButton loading={submitting} testID={AddressBookSelectors.addContactButton}>
         <T id="addContact" />
@@ -195,54 +145,3 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     </form>
   );
 };
-
-const ContactIcon: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item }) => (
-  <Identicon type="bottts" hash={item.address} size={32} className="flex-shrink-0 shadow-xs" />
-);
-
-const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item, actions }) => (
-  <div
-    className="flex flex-1 w-full"
-    {...setTestID(AddressBookSelectors.contactItem)}
-    {...setAnotherSelector('hash', item.address)}
-  >
-    <div className="flex flex-col justify-between flex-1">
-      <Name className="mb-px text-sm font-medium leading-tight text-left">{item.name}</Name>
-
-      <div className="text-xs font-light leading-tight text-gray-600">
-        <HashChip hash={item.address} small />
-      </div>
-    </div>
-
-    {item.accountInWallet ? (
-      <div className="flex items-center">
-        <span
-          className={classNames(
-            'mx-1 px-1 py-px leading-tight text-opacity-50',
-            'rounded-sm border border-opacity-25 border-black text-black'
-          )}
-          style={{ fontSize: '0.6rem' }}
-          {...setTestID(AddressBookSelectors.contactOwnLabelText)}
-        >
-          <T id="ownAccount" />
-        </span>
-      </div>
-    ) : (
-      <button
-        className="flex-none p-2 text-gray-500 hover:text-gray-600 transition ease-in-out duration-200"
-        onClick={evt => {
-          evt.stopPropagation();
-          actions?.remove(item.address);
-        }}
-        {...setTestID(AddressBookSelectors.deleteContactButton)}
-        {...setAnotherSelector('hash', item.address)}
-      >
-        <CloseIcon className="w-auto h-5 stroke-current stroke-2" title={t('delete')} />
-      </button>
-    )}
-  </div>
-);
-
-function getContactKey(contract: TempleContact) {
-  return contract.address;
-}

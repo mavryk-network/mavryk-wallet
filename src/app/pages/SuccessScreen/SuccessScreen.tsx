@@ -15,13 +15,15 @@ export type SuccessStateType = {
   subHeader: TID;
   description?: TID;
   btnText: TID;
+  btnLink?: string;
 };
 
 const defaultStateValues: SuccessStateType = {
   pageTitle: 'operations',
   subHeader: 'success',
   description: undefined,
-  btnText: 'goToMain'
+  btnText: 'goToMain',
+  btnLink: '/'
 };
 
 export const SuccessScreen = () => {
@@ -56,7 +58,7 @@ export const SuccessScreen = () => {
             )}
           </section>
           <div className="w-full">
-            <ButtonLink linkTo="/" testID={SuccessScreenSelectors.buttonSuccess}>
+            <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess}>
               <ButtonRounded size="big" fill className="w-full">
                 <T id={state.btnText} />
               </ButtonRounded>

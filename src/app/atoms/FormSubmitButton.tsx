@@ -31,7 +31,7 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
     small ? 'px-6 py-2 text-sm' : 'px-8 py-2.5 text-base',
     loading || disabled
       ? 'opacity-75 pointer-events-none'
-      : 'opacity-90 hover:opacity-100 focus:opacity-100 shadow-sm hover:shadow focus:shadow',
+      : 'hover:opacity-100 focus:opacity-100 shadow-sm hover:shadow focus:shadow',
     className
   );
 

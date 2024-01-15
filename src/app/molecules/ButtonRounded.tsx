@@ -11,8 +11,8 @@ export type ButtonRoundedProps = React.PropsWithRef<
   React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
 > & { size?: ButtonRoundedSizeType; isLoading?: boolean; fill?: boolean } & TestIDProps;
 
-const btnSmall = 'px-4 py-2 text-base-plus text-primary-white rounded-2xl-plus';
-const btnBig = 'px-11 py-3.5 text-base-plus text-primary-white rounded-full';
+const btnSmall = 'px-4 py-2 text-base-plus text-white rounded-2xl-plus';
+const btnBig = 'px-11 py-3.5 text-base-plus text-white rounded-full';
 
 export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedProps>(
   (

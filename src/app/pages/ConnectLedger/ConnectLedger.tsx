@@ -6,9 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
-import { ReactComponent as LinkIcon } from 'app/icons/link.svg';
 import { ReactComponent as OkIcon } from 'app/icons/ok.svg';
-import PageLayout from 'app/layouts/PageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
@@ -17,10 +15,10 @@ import { DerivationType, TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
-import BlockExplorerSelect from './components/DerivationTypeField';
+import { DerivationTypeFieldSelect } from './components/DerivationTypeFieldSelect';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
-type FormData = {
+export type FormData = {
   name: string;
   customDerivationPath: string;
   derivationType?: DerivationType;
@@ -79,7 +77,7 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, errors, formState } = useForm<FormData>({
+  const { control, register, handleSubmit, errors, formState, watch, setValue } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
@@ -88,6 +86,8 @@ const ConnectLedger: FC = () => {
     }
   });
   const submitting = formState.isSubmitting;
+  const temp = watch('derivationType');
+  console.log(temp);
 
   const [error, setError] = useState<ReactNode>(null);
   const [derivationPathType, setDerivationPathType] = useState(DERIVATION_PATHS[0].type);
@@ -184,10 +184,15 @@ const ConnectLedger: FC = () => {
                 <T id="derivationTypeFieldDescription" />
               </span>
             </h2>
-            <Controller as={TypeSelect} control={control} name="derivationType" options={DERIVATION_TYPES} />
+            <Controller
+              as={DerivationTypeFieldSelect}
+              control={control}
+              name="derivationType"
+              options={DERIVATION_TYPES}
+            />
           </div>
 
-          <BlockExplorerSelect />
+          {/* <BlockExplorerSelect options={DERIVATION_TYPES} /> */}
 
           <div className="mb-4 flex flex-col">
             <h2 className="mb-4 leading-tight flex flex-col">

@@ -37,6 +37,7 @@ const RevealSeedPhrase: FC = () => <RevealSecret reveal="seed-phrase" />;
 type Tab = ListItemWithnavigateprops & {
   Component: React.FC;
   testID?: SettingsSelectors;
+  hidden?: boolean;
 };
 
 const TABS: Tab[] = [

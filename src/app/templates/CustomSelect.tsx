@@ -22,6 +22,7 @@ type CustomSelectProps<T, K extends string | number = string | number, A extends
   autoFocus?: boolean;
   light?: boolean;
   hoverable?: boolean;
+  itemWithBorder?: boolean;
   onSelect?: (itemId: K) => void;
   OptionIcon?: ComponentType<OptionRenderProps<T, K, A>>;
   OptionContent: ComponentType<OptionRenderProps<T, K, A>>;
@@ -43,6 +44,7 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
     autoFocus = false,
     light = false,
     hoverable = true,
+    itemWithBorder = false,
     OptionIcon,
     OptionContent
   } = props;
@@ -70,6 +72,7 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
             autoFocus={autoFocus}
             light={light}
             hoverable={hoverable}
+            itemWithBorder={itemWithBorder}
             OptionIcon={OptionIcon}
             OptionContent={OptionContent}
           />
@@ -90,6 +93,7 @@ type CustomSelectItemProps<T, K extends string | number, A extends Actions<K>> =
   itemId: K;
   index: number;
   item: T;
+  itemWithBorder?: boolean;
 };
 
 const CustomSelectItem = <T extends {}, K extends string | number, A extends Actions<K>>(
@@ -108,7 +112,8 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
     light,
     hoverable,
     OptionIcon,
-    OptionContent
+    OptionContent,
+    itemWithBorder
   } = props;
 
   const handleSelect = useCallback(() => onSelect?.(itemId), [itemId, onSelect]);
@@ -121,7 +126,8 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
       className={classNames(
         'w-full flex-shrink-0 overflow-hidden flex items-center',
         'flex items-center text-white transition ease-in-out duration-200',
-        'focus:outline-none opacity-90 hover:opacity-100'
+        'focus:outline-none',
+        itemWithBorder && 'border-b border-divider'
       )}
       style={{ padding }}
       autoFocus={autoFocus && active}

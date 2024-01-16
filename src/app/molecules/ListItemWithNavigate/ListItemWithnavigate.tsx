@@ -6,16 +6,16 @@ import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg'
 import { T, TID } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
-export type ListItemWithnavigateprops = {
+export type ListItemWithNavigateprops = {
   Icon: ImportedSVGComponent | null;
-  linkTo: string | null;
+  linkTo?: string | null;
   i18nKey: TID;
-  onClick: () => void;
+  onClick?: () => void;
   className?: string;
   fillIcon?: boolean;
 };
 
-export const ListItemWithnavigate: FC<ListItemWithnavigateprops> = ({
+export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
   Icon,
   i18nKey,
   onClick,

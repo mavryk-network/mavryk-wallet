@@ -904,9 +904,7 @@
   "info": {
     "message": "Info"
   },
-  "aboutDescription": {
-    "message": "Use this section to view meta info about Temple Wallet."
-  },
+
   "unlockWallet": {
     "message": "Unlock the Wallet to continue"
   },
@@ -3222,5 +3220,17 @@
   },
   "addContactSuccessDesc": {
     "message": "New contact was successfully added to your \nAddress Book"
+  },
+  "aboutDescription": {
+    "message": "The Mavryk wallet is your go to platform for seizing control of your financial freedom through real-world assets and DeFi. Mavryk Wallet is fully non-custodial, ensuring exclusive control over your assets. Welcome to a new era of financial empowerment."
+  },
+  "ourWebsite": {
+    "message": "Our Website"
+  },
+  "contactUs": {
+    "message": "Contact Us"
+  },
+  "aboutFooterDescription": {
+    "message": "In case you have any questions, get in touch\n with the community!"
   }
 }

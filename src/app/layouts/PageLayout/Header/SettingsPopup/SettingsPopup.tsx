@@ -7,7 +7,7 @@ import { ReactComponent as ExtendSvgIcon } from 'app/icons/extend.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
-import { ListItemWithnavigate, ListItemWithnavigateprops } from 'app/molecules/ListItemWithNavigate';
+import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -25,7 +25,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     }
   }, [appEnv.popup, closePopup]);
 
-  const settingsListData: ListItemWithnavigateprops[] = useMemo(
+  const settingsListData: ListItemWithNavigateprops[] = useMemo(
     () => [
       {
         key: 'accountDetails',
@@ -75,7 +75,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   return (
     <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
-        <ListItemWithnavigate {...item} />
+        <ListItemWithNavigate {...item} />
       ))}
     </div>
   );

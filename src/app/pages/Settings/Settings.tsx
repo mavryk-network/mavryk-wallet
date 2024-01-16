@@ -12,7 +12,7 @@ import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { ReactComponent as StickerIcon } from 'app/icons/sticker.svg';
 import { ReactComponent as SyncIcon } from 'app/icons/sync.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { ListItemWithnavigate, ListItemWithnavigateprops } from 'app/molecules/ListItemWithNavigate';
+import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
 import { AddContact } from 'app/templates/AddressBook/AddContact';
@@ -40,7 +40,7 @@ export type TabComponentProps = {
 const RevealPrivateKey: FC = () => <RevealSecret reveal="private-key" />;
 const RevealSeedPhrase: FC = () => <RevealSecret reveal="seed-phrase" />;
 
-type Tab = ListItemWithnavigateprops & {
+type Tab = ListItemWithNavigateprops & {
   Component: React.FC<TabComponentProps>;
   testID?: SettingsSelectors;
   hidden?: boolean;
@@ -52,7 +52,6 @@ const TABS: Tab[] = [
     Icon: SettingsIcon,
     i18nKey: 'general',
     Component: GeneralSettings,
-    onClick: () => {},
     testID: SettingsSelectors.generalButton,
     fillIcon: false
   },
@@ -61,7 +60,6 @@ const TABS: Tab[] = [
     i18nKey: 'addressBook',
     Icon: AddressBookIcon,
     Component: AddressBook,
-    onClick: () => {},
     testID: SettingsSelectors.addressBookButton,
     fillIcon: false
   },
@@ -70,7 +68,6 @@ const TABS: Tab[] = [
     i18nKey: 'addContact',
     Icon: null,
     Component: AddContact,
-    onClick: () => {},
     hidden: true,
     testID: SettingsSelectors.addContactButton
   },
@@ -79,7 +76,6 @@ const TABS: Tab[] = [
     i18nKey: 'authorizedDApps',
     Icon: AppsIcon,
     Component: DAppSettings,
-    onClick: () => {},
     testID: SettingsSelectors.dAppsButton,
     fillIcon: false
   },
@@ -88,7 +84,6 @@ const TABS: Tab[] = [
     i18nKey: 'synchronization',
     Icon: SyncIcon,
     Component: SyncSettings,
-    onClick: () => {},
     testID: SettingsSelectors.synchronizationButton,
     fillIcon: false
   },
@@ -97,7 +92,6 @@ const TABS: Tab[] = [
     i18nKey: 'connectLedger',
     Icon: ConnectLedgericon,
     Component: ConnectLedger,
-    onClick: () => {},
     testID: SettingsSelectors.connectLedger,
     fillIcon: false
   },
@@ -106,7 +100,6 @@ const TABS: Tab[] = [
     i18nKey: 'revealPrivateKey',
     Icon: KeyIcon,
     Component: RevealPrivateKey,
-    onClick: () => {},
     testID: SettingsSelectors.revealPrivateKeyButton,
     fillIcon: false
   },
@@ -115,7 +108,6 @@ const TABS: Tab[] = [
     i18nKey: 'revealSeedPhrase',
     Icon: StickerIcon,
     Component: RevealSeedPhrase,
-    onClick: () => {},
     testID: SettingsSelectors.revealSeedPhraseButton,
     fillIcon: false
   },
@@ -124,7 +116,6 @@ const TABS: Tab[] = [
     i18nKey: 'activateAccount',
     Icon: RoundedPlusIcon,
     Component: ActivateAccount,
-    onClick: () => {},
     testID: SettingsSelectors.activateAccountButton,
     fillIcon: false
   },
@@ -133,7 +124,6 @@ const TABS: Tab[] = [
     i18nKey: 'removeAccount',
     Icon: RoundedMinusIcon,
     Component: RemoveAccount,
-    onClick: () => {},
     testID: SettingsSelectors.removeAccountButton,
     fillIcon: false
   },
@@ -142,7 +132,6 @@ const TABS: Tab[] = [
     i18nKey: 'about',
     Icon: RoundedInfoIcon,
     Component: About,
-    onClick: () => {},
     testID: SettingsSelectors.aboutButton,
     fillIcon: false
   },
@@ -151,7 +140,6 @@ const TABS: Tab[] = [
     i18nKey: 'helpAndCommunity',
     Icon: HelpIcon,
     Component: HelpAndCommunity,
-    onClick: () => {},
     fillIcon: false
   }
 ];
@@ -183,7 +171,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
           ) : (
             <ul className="flex flex-col">
               {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                <ListItemWithnavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
+                <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}
             </ul>
           )}

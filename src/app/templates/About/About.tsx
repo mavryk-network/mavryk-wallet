@@ -25,7 +25,8 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
     link: 'https://templewallet.com',
     testID: AboutSelectors.websiteLink,
     i18nKey: 'ourWebsite',
-    Icon: PlanetIcon
+    Icon: PlanetIcon,
+    fillIcon: false
   },
 
   {
@@ -33,21 +34,24 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
     link: 'https://templewallet.com/privacy',
     testID: AboutSelectors.privacyPolicyLink,
     i18nKey: 'privacyPolicy',
-    Icon: ShieldIcon
+    Icon: ShieldIcon,
+    fillIcon: false
   },
   {
     key: 'termsOfUse',
     link: 'https://templewallet.com/terms',
     testID: AboutSelectors.termsOfUseLink,
     i18nKey: 'termsOfUse',
-    Icon: DocumentIcon
+    Icon: DocumentIcon,
+    fillIcon: false
   },
   {
     key: 'contact',
     link: 'https://templewallet.com/contact',
     testID: AboutSelectors.contactLink,
     i18nKey: 'contactUs',
-    Icon: HelpIcon
+    Icon: HelpIcon,
+    fillIcon: false
   }
 ];
 

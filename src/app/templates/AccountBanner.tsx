@@ -2,7 +2,7 @@ import React, { HTMLAttributes, memo, ReactNode } from 'react';
 
 import classNames from 'clsx';
 
-import { Alert, HashChip } from 'app/atoms';
+import { HashChip } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import Identicon from 'app/atoms/Identicon';
 import Money from 'app/atoms/Money';

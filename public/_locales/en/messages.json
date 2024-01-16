@@ -526,7 +526,7 @@
     "message": "Hierarchical Deterministic accounts cannot be removed."
   },
   "doNotSharePrivateKey": {
-    "message": "<b>DO NOT share</b> this set of chars with anyone! It can be used to steal your current account."
+    "message": "DO NOT share this with anyone! It can be used to steal your current account."
   },
   "appWouldLikeToConnectToYourWallet": {
     "message": "$origin$ would like to connect to your wallet",

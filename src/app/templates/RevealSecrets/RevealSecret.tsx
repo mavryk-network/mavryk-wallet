@@ -5,12 +5,14 @@ import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { getAccountBadgeTitle } from 'app/defaults';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { Link } from 'lib/woozie';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 import { SecretField } from './SecretField';
@@ -31,6 +33,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
 
   const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
+
   const walletPasswordValue = watch('password') ?? '';
 
   const [secret, setSecret] = useVanishingState();
@@ -98,17 +101,11 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
       case 'private-key':
         return {
           name: t('privateKey'),
-          accountBanner: (
-            <AccountBanner
-              account={account}
-              labelDescription={t('ifYouWantToRevealPrivateKeyFromOtherAccount')}
-              className="mb-4"
-            />
-          ),
+          accountBanner: <AccountBanner account={account} className="mb-4" />,
           derivationPathBanner: account.derivationPath && (
             <div className="mb-6 flex flex-col">
               <label className="mb-4 flex flex-col">
-                <span className="text-base font-semibold text-gray-700">
+                <span className="text-base font-semibold text-white">
                   <T id="derivationPath" />
                 </span>
               </label>
@@ -116,7 +113,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
                 className={clsx(
                   'appearance-none w-full py-3 pl-4',
                   'rounded-md border-2 border-gray-300',
-                  'bg-transparent text-gray-700 text-lg leading-tight'
+                  'bg-transparent text-white text-lg leading-tight'
                 )}
                 disabled={true}
                 value={account.derivationPath}
@@ -159,28 +156,30 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const mainContent = useMemo(() => {
     if (forbidPrivateKeyRevealing) {
       return (
-        <Alert
-          title={t('privateKeyCannotBeRevealed')}
-          description={
-            <p>
-              <T
-                id="youCannotGetPrivateKeyFromThisAccountType"
-                substitutions={[
-                  <span
-                    key="account-type"
-                    className="rounded-sm border px-1 py-px font-normal leading-tight border-current"
-                    style={{
-                      fontSize: '0.75em'
-                    }}
-                  >
-                    {getAccountBadgeTitle(account)}
-                  </span>
-                ]}
-              />
-            </p>
-          }
-          className="my-4"
-        />
+        <>
+          <Alert
+            title={t('privateKeyCannotBeRevealed')}
+            description={
+              <p>
+                <T
+                  id="youCannotGetPrivateKeyFromThisAccountType"
+                  substitutions={[
+                    <span
+                      key="account-type"
+                      className="rounded-sm border px-1 py-px font-normal leading-tight border-current"
+                      style={{
+                        fontSize: '0.75em'
+                      }}
+                    >
+                      {getAccountBadgeTitle(account)}
+                    </span>
+                  ]}
+                />
+              </p>
+            }
+            className="my-4"
+          />
+        </>
       );
     }
 
@@ -191,7 +190,6 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
         <FormField
           ref={register({ required: t('required') })}
           label={t('password')}
-          labelDescription={t('revealSecretPasswordInputDescription', texts.name)}
           id="reveal-secret-password"
           type="password"
           name="password"
@@ -218,11 +216,9 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     handleSubmit,
     onSubmit,
     register,
-    texts.name,
     errors.password?.message,
     walletPasswordValue.length,
     submitting,
-    account,
     clearError
   ]);
 
@@ -230,9 +226,9 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     <div className="w-full h-full max-w-sm mx-auto flex flex-col">
       {texts.accountBanner}
 
-      {texts.derivationPathBanner}
-
       {mainContent}
+
+      {texts.derivationPathBanner}
     </div>
   );
 };

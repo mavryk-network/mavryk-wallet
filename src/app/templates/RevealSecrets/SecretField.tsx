@@ -2,6 +2,7 @@ import React, { FC, useMemo } from 'react';
 
 import { Alert } from 'app/atoms/Alert';
 import { ReadOnlySecretField } from 'app/atoms/ReadOnlySecretField';
+import { ButtonNavigate } from 'app/molecules/ButtonNavigate';
 import { TID, T } from 'lib/i18n';
 import { SPACE_CHAR } from 'lib/ui/utils';
 
@@ -14,7 +15,7 @@ interface Props {
 
 interface Texts {
   title: TID;
-  description: React.ReactNode;
+  description?: React.ReactNode;
   attention: TID;
 }
 
@@ -24,7 +25,6 @@ export const SecretField: FC<Props> = ({ revealType, value }) => {
       case 'private-key':
         return {
           title: 'privateKey',
-          description: <T id="privateKeyFieldDescription" />,
           attention: 'doNotSharePrivateKey'
         };
 
@@ -45,14 +45,6 @@ export const SecretField: FC<Props> = ({ revealType, value }) => {
 
   return (
     <>
-      <ReadOnlySecretField
-        value={value}
-        label={texts.title}
-        description={texts.description}
-        testID={RevealSecretsSelectors.RevealSecretsValue}
-        secretCoverTestId={RevealSecretsSelectors.RevealSecretsProtectedMask}
-      />
-
       <Alert
         title={<T id="attentionExclamation" />}
         description={
@@ -60,8 +52,22 @@ export const SecretField: FC<Props> = ({ revealType, value }) => {
             <T id={texts.attention} />
           </p>
         }
-        className="my-4"
+        className="mb-6"
       />
+
+      <div className="flex-grow">
+        <ReadOnlySecretField
+          value={value}
+          label={texts.title}
+          description={texts.description}
+          testID={RevealSecretsSelectors.RevealSecretsValue}
+          secretCoverTestId={RevealSecretsSelectors.RevealSecretsProtectedMask}
+        />
+      </div>
+
+      <div className="pb-8">
+        <ButtonNavigate link="/" i18nKey="goToMain" />
+      </div>
     </>
   );
 };

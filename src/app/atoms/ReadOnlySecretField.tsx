@@ -37,13 +37,14 @@ export const ReadOnlySecretField: FC<ReadOnlySecretFieldProps> = ({
 
   return (
     <div className="w-full flex flex-col">
-      <FieldLabel label={<T id={label} />} description={description} className="mb-4" />
+      <FieldLabel label={<T id={label} />} description={description} className="mb-3" />
 
       <div className="relative flex items-stretch">
         <p
           ref={fieldRef}
           tabIndex={0}
-          className={clsx(FORM_FIELD_CLASS_NAME, 'h-32 break-words py-3 px-4 overflow-y-auto')}
+          className={clsx(FORM_FIELD_CLASS_NAME, 'break-words py-3 px-4 overflow-y-auto')}
+          style={{ height: 85 }}
           onFocus={() => void setFocused(true)}
           onBlur={() => void setFocused(false)}
           {...setTestID(testID)}

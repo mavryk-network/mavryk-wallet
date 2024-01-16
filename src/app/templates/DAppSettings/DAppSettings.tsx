@@ -2,7 +2,7 @@ import React, { ComponentProps, FC, useCallback, useMemo, useRef, useState } fro
 
 import classNames from 'clsx';
 
-import { Name, HashChip, Divider } from 'app/atoms';
+import { Name, Divider } from 'app/atoms';
 import { Switcher } from 'app/atoms/Switcher';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
@@ -98,7 +98,7 @@ const DAppSettings: FC = () => {
             OptionContent={DAppDescription}
             light
             hoverable={false}
-            padding={0}
+            padding={'8px 0 8px 0'}
           />
         </>
       )}
@@ -110,7 +110,7 @@ export default DAppSettings;
 
 const DAppIcon: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = props => (
   <DAppLogo
-    className="flex-none ml-2 mr-1 my-1 rounded-full"
+    className="flex-none ml-2 mr-3 rounded-full"
     style={{ alignSelf: 'flex-start' }}
     origin={props.item[0]}
     size={44}

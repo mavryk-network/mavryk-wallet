@@ -21,9 +21,7 @@ const SyncSettings: FC = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
   const [payload, setPayload] = useVanishingState();
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>({
-    defaultValues: { password: 'Xiwkec-jebga1-xafqyv' }
-  });
+  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
 
   const focusPasswordField = useCallback(
     () => formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus(),
@@ -81,8 +79,15 @@ const SyncSettings: FC = () => {
             <T id="scanQRWithTempleMobile" />
           </p>
 
-          <div className="p-1 mb-8 bg-white rounded-2xl self-center">
-            <QRCode value={payload} bgColor="#f7fafc" fgColor="#000000" level="Q" style={{ width: 254 }} />
+          <div className="p-6 mb-8 bg-white rounded-2xl self-center">
+            <QRCode
+              value={payload}
+              bgColor="#f4f4f4"
+              fgColor="#000000"
+              level="L"
+              style={{ width: 256 }}
+              viewBox={`0 0 256 256`}
+            />
           </div>
 
           <FormSubmitButton

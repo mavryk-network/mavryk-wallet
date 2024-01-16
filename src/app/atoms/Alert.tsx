@@ -66,7 +66,7 @@ export const Alert: FC<AlertProps> = ({
       aria-label={t('alert')}
       {...rest}
     >
-      {type === 'warning' && <AlertIcon className="w-6 h-auto" />}
+      {type === 'warning' && <AlertIcon className="w-6 h-6" style={{ minWidth: 24 }} />}
       <div>
         {title && (
           <h2

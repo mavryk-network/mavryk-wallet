@@ -29,8 +29,9 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const { revealPrivateKey, revealMnemonic } = useTempleClient();
   const account = useAccount();
 
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>();
+  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
+  const walletPasswordValue = watch('password') ?? '';
 
   const [secret, setSecret] = useVanishingState();
 
@@ -101,7 +102,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
             <AccountBanner
               account={account}
               labelDescription={t('ifYouWantToRevealPrivateKeyFromOtherAccount')}
-              className="mb-6"
+              className="mb-4"
             />
           ),
           derivationPathBanner: account.derivationPath && (
@@ -186,7 +187,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     if (secret) return <SecretField value={secret} revealType={reveal} />;
 
     return (
-      <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col justify-between pb-8">
         <FormField
           ref={register({ required: t('required') })}
           label={t('password')}
@@ -194,34 +195,39 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
           id="reveal-secret-password"
           type="password"
           name="password"
-          placeholder="********"
+          placeholder={t('enterWalletPassword')}
           errorCaption={errors.password?.message}
           containerClassName="mb-4"
           onChange={() => clearError()}
           testID={RevealSecretsSelectors.RevealPasswordInput}
         />
 
-        <FormSubmitButton loading={submitting} testID={RevealSecretsSelectors.RevealButton}>
+        <FormSubmitButton
+          disabled={!walletPasswordValue.length}
+          loading={submitting}
+          testID={RevealSecretsSelectors.RevealButton}
+        >
           <T id="reveal" />
         </FormSubmitButton>
       </form>
     );
   }, [
-    account,
-    reveal,
     forbidPrivateKeyRevealing,
-    errors,
+    secret,
+    reveal,
     handleSubmit,
     onSubmit,
     register,
-    secret,
-    texts,
+    texts.name,
+    errors.password?.message,
+    walletPasswordValue.length,
     submitting,
+    account,
     clearError
   ]);
 
   return (
-    <div className="w-full max-w-sm p-2 mx-auto">
+    <div className="w-full h-full max-w-sm mx-auto flex flex-col">
       {texts.accountBanner}
 
       {texts.derivationPathBanner}

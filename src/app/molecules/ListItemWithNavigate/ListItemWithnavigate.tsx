@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 
 import classNames from 'clsx';
 
+import { Anchor } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { T, TID } from 'lib/i18n';
 import { Link } from 'lib/woozie';
@@ -12,6 +13,7 @@ export type ListItemWithNavigateprops = {
   i18nKey: TID;
   onClick?: () => void;
   className?: string;
+  hasExternalLink?: boolean;
   fillIcon?: boolean;
   showDivider?: boolean;
 };
@@ -22,6 +24,7 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
   onClick,
   linkTo,
   className,
+  hasExternalLink = false,
   fillIcon = true,
   showDivider = true
 }) => {
@@ -44,6 +47,10 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
       </>
     )
   };
+
+  if (hasExternalLink && linkTo) {
+    return <Anchor href={linkTo} {...baseProps} />;
+  }
 
   return linkTo ? <Link {...baseProps} to={linkTo} /> : <div {...baseProps} />;
 };

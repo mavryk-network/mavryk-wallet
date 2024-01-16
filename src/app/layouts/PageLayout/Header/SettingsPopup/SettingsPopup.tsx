@@ -8,6 +8,7 @@ import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
+import { useAccount } from 'lib/temple/front';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -15,6 +16,7 @@ type SettingsPopupProps = {
 
 export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   const appEnv = useAppEnv();
+  const { publicKeyHash } = useAccount();
 
   const handleMaximiseViewClick = useCallback(() => {
     openInFullPage();
@@ -36,7 +38,8 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
       },
       {
         key: 'viewOnBlockExplorer',
-        linkTo: null,
+        linkTo: `https://ghost.tzstats.com/${publicKeyHash}`,
+        hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer',
         onClick: closePopup

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 
 import { FormCheckboxProps } from 'app/atoms';
 import { Switcher } from 'app/atoms/Switcher';
-import { T, TID, t } from 'lib/i18n';
+import { T, TID } from 'lib/i18n';
 
 interface Props extends Pick<FormCheckboxProps, 'onChange' | 'testID' | 'errorCaption'> {
   titleI18nKey: TID;
@@ -15,7 +15,7 @@ export const EnablingSetting = ({
   descriptionI18nKey,
   enabled,
   onChange,
-  testID,
+  // testID,
   errorCaption
 }: Props) => {
   const handleChange = useCallback(

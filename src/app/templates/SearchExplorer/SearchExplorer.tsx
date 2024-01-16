@@ -1,15 +1,4 @@
-import React, {
-  FC,
-  useCallback,
-  createContext,
-  useState,
-  useMemo,
-  useContext,
-  CSSProperties,
-  memo,
-  useRef,
-  useEffect
-} from 'react';
+import React, { FC, useCallback, createContext, useState, useMemo, useContext, memo } from 'react';
 
 import classNames from 'clsx';
 

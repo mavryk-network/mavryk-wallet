@@ -54,3 +54,5 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
 
   return linkTo ? <Link {...baseProps} to={linkTo} /> : <div {...baseProps} />;
 };
+
+export default ListItemWithNavigate;

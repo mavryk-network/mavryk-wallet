@@ -31,13 +31,6 @@ export const SecretField: FC<Props> = ({ revealType, value }) => {
       case 'seed-phrase':
         return {
           title: 'seedPhrase',
-          description: (
-            <>
-              <T id="youWillNeedThisSeedPhrase" />
-              {SPACE_CHAR}
-              <T id="keepSeedPhraseSecret" />
-            </>
-          ),
           attention: 'doNotSharePhrase'
         };
     }

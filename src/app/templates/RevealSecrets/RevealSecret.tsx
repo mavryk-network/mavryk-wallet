@@ -125,21 +125,21 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
       case 'seed-phrase':
         return {
           name: t('seedPhrase'),
-          accountBanner: null,
+          accountBanner: <AccountBanner account={account} className="mb-4" />,
           derivationPathBanner: (
-            <div className="mb-6 flex flex-col">
-              <h2 className="mb-4 leading-tight flex flex-col">
-                <span className="text-base font-semibold text-gray-700">
+            <div className="mb-4 flex flex-col">
+              <h2 className="mb-3 leading-tight flex flex-col">
+                <span className="text-base-plus text-white">
                   <T id="derivationPath" />
                 </span>
 
-                <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
+                <span className="mt-1 text-sm font-light text-secondary-white max-w-9/10">
                   <T id="pathForHDAccounts" />
                 </span>
               </h2>
 
-              <div className="w-full border rounded-md p-2 flex items-center">
-                <span className="text-sm font-medium text-gray-800">
+              <div className="w-full border rounded-md py-3 px-4 flex items-center">
+                <span className="text-base-plus text-white">
                   <T id="derivationPathExample" />
                 </span>
               </div>
@@ -219,6 +219,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     errors.password?.message,
     walletPasswordValue.length,
     submitting,
+    account,
     clearError
   ]);
 
@@ -226,9 +227,9 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     <div className="w-full h-full max-w-sm mx-auto flex flex-col">
       {texts.accountBanner}
 
-      {mainContent}
-
       {texts.derivationPathBanner}
+
+      {mainContent}
     </div>
   );
 };

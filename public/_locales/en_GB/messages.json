@@ -1419,8 +1419,7 @@
     "message": "The elliptical curve that the account will use."
   },
   "pathForHDAccounts": {
-    "message": "for HD acccounts. This is the thing you use to recover all your accounts from your seed phrase.",
-    "description": "HD = Hierarchical Deterministic"
+    "message": "It's for HD accounts. This is the thing you use to recover all your accounts from your seed phrase."
   },
   "derivationPathExample": {
     "message": "m/44'/1729'/<account_index>'/0'"

@@ -54,7 +54,10 @@ const RemoveAccount: FC = () => {
   );
 
   return (
-    <div className="w-full max-w-sm p-2 mx-auto">
+    <div className="w-full h-full max-w-sm mx-auto flex flex-col pb-8">
+      <p className="text-sm text-secondary-white mb-4">
+        <T id="removeAccountParagraph" />
+      </p>
       <AccountBanner
         account={account}
         labelDescription={
@@ -78,29 +81,32 @@ const RemoveAccount: FC = () => {
           className="my-4"
         />
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FormField
-            ref={register({ required: t('required') })}
-            label={t('password')}
-            labelDescription={t('enterPasswordToRemoveAccount')}
-            id="removeacc-secret-password"
-            type="password"
-            name="password"
-            placeholder="********"
-            errorCaption={errors.password?.message}
-            containerClassName="mb-4"
-            testID={RemoveAccountSelectors.passwordInput}
-          />
+        <>
+          <Alert title={t('attention')} description={t('removeAccountMessage')} className="mb-4" />
+          <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
+            <FormField
+              ref={register({ required: t('required') })}
+              label={t('password')}
+              id="removeacc-secret-password"
+              type="password"
+              name="password"
+              placeholder={t('enterWalletPassword')}
+              errorCaption={errors.password?.message}
+              containerClassName="flex-grow"
+              testID={RemoveAccountSelectors.passwordInput}
+            />
 
-          <FormSubmitButton
-            loading={submitting}
-            disabled={submitting}
-            testID={RemoveAccountSelectors.removeButton}
-            testIDProperties={{ accountTypeEnum: account.type }}
-          >
-            <T id="remove" />
-          </FormSubmitButton>
-        </form>
+            <FormSubmitButton
+              loading={submitting}
+              disabled={submitting}
+              testID={RemoveAccountSelectors.removeButton}
+              testIDProperties={{ accountTypeEnum: account.type }}
+              className="mt-8"
+            >
+              <T id="remove" />
+            </FormSubmitButton>
+          </form>
+        </>
       )}
     </div>
   );

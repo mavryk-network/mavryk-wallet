@@ -973,10 +973,10 @@
     "message": "Secret"
   },
   "activateAccountSecretDescription": {
-    "message": "'secret' field from Fundraiser Account or Faucet"
+    "message": "This field is from Fundraiser Account or Faucet"
   },
   "activateAccountSecretPlaceholder": {
-    "message": "e.g. n4hs7sd3..."
+    "message": "Enter secret"
   },
   "activate": {
     "message": "Activate"
@@ -3231,5 +3231,14 @@
   },
   "aboutFooterDescription": {
     "message": "In case you have any questions, get in touch\n with the community!"
+  },
+  "activateAccountParagraph": {
+    "message": "It may be necessary to activate your account from the Fundraiser. You may do so below. "
+  },
+  "removeAccountParagraph": {
+    "message": "You are removing this account from your wallet. Please make sure you have secured your recovery phrase."
+  },
+  "removeAccountMessage": {
+    "message": "Do not remove this account until you are absolutely sure you have backed up your seed phrase/private key."
   }
 }

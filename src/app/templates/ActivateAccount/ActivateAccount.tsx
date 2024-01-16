@@ -86,7 +86,10 @@ const ActivateAccount: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm p-2 mx-auto" onSubmit={submit}>
+    <form className="w-full h-full max-w-sm mx-auto flex flex-col pb-8" onSubmit={submit}>
+      <p className="text-sm text-secondary-white mb-4">
+        <T id="activateAccountParagraph" />
+      </p>
       <AccountBanner
         account={account}
         labelDescription={
@@ -103,7 +106,7 @@ const ActivateAccount: FC = () => {
 
       <FormField
         textarea
-        rows={2}
+        rows={1}
         ref={register({ required: t('required') })}
         name="secret"
         id="activateaccount-secret"
@@ -112,13 +115,14 @@ const ActivateAccount: FC = () => {
         placeholder={t('activateAccountSecretPlaceholder')}
         errorCaption={errors.secret?.message}
         style={{ resize: 'none' }}
-        containerClassName="mb-4"
+        containerClassName="mb-4 flex-grow"
         onKeyPress={handleSecretFieldKeyPress}
         testID={ActivateAccountSelectors.secretInput}
       />
 
       <FormSubmitButton
         loading={submitting}
+        className="mt-8"
         testID={ActivateAccountSelectors.activateButton}
         testIDProperties={{ accountTypeEnum: account.type }}
       >

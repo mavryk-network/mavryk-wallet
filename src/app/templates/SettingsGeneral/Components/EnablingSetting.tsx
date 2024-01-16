@@ -26,7 +26,7 @@ export const EnablingSetting = ({
   );
   return (
     <div className="flex items-start w-full justify-between gap-1">
-      <div className="mb-4 leading-tight flex flex-col">
+      <div className="mb-4 leading-tight flex flex-col" style={{ maxWidth: 283 }}>
         <span className="text-base-plus text-white">
           <T id={titleI18nKey} />
         </span>

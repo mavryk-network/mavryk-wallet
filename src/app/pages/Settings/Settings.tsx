@@ -89,7 +89,7 @@ const TABS: Tab[] = [
   },
   {
     linkTo: 'connect-ledger',
-    i18nKey: 'connectLedger',
+    i18nKey: 'connectWithLedger',
     Icon: ConnectLedgericon,
     Component: ConnectLedger,
     testID: SettingsSelectors.connectLedger,
@@ -148,7 +148,8 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
   const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
 
-  const tId = activeTab?.i18nKey ?? 'settings';
+  let tId = activeTab?.i18nKey ?? 'settings';
+  tId = activeTab?.i18nKey === 'connectWithLedger' ? 'connectLedger' : tId;
 
   return (
     <PageLayout
@@ -161,7 +162,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
       removePaddings={!activeTab}
       RightSidedComponent={toolbarRightSidedComponent}
     >
-      <div className=" h-full">
+      <div className="h-full">
         <div className="h-full">
           {activeTab ? (
             <activeTab.Component
@@ -169,7 +170,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
               toolbarRightSidedComponent={toolbarRightSidedComponent}
             />
           ) : (
-            <ul className="flex flex-col">
+            <ul className="flex flex-col px-4 pb-8">
               {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
                 <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}

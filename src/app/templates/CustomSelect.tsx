@@ -55,8 +55,9 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
       id={id}
       style={{ maxHeight }}
     >
-      {items.map((item, index) => {
+      {items.map((item, index, arr) => {
         const itemId = getItemId ? getItemId(item) : index;
+        const lastItem = index === arr.length - 1;
 
         return (
           <CustomSelectItem
@@ -72,7 +73,7 @@ const CustomSelect = <T extends {}, K extends string | number = string | number,
             autoFocus={autoFocus}
             light={light}
             hoverable={hoverable}
-            itemWithBorder={itemWithBorder}
+            itemWithBorder={lastItem ? false : itemWithBorder}
             OptionIcon={OptionIcon}
             OptionContent={OptionContent}
           />

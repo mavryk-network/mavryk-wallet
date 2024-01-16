@@ -75,19 +75,12 @@ const SyncSettings: FC = () => {
             className="mb-7"
           />
 
-          <p className="mb-6 text-sm text-white">
+          <p className="mb-6 text-sm text-white text-center">
             <T id="scanQRWithTempleMobile" />
           </p>
 
           <div className="p-6 mb-8 bg-white rounded-2xl self-center">
-            <QRCode
-              value={payload}
-              bgColor="#f4f4f4"
-              fgColor="#000000"
-              level="L"
-              style={{ width: 256 }}
-              viewBox={`0 0 256 256`}
-            />
+            <QRCode value={payload} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 256 }} />
           </div>
 
           <FormSubmitButton

@@ -13,6 +13,7 @@ export type ListItemWithNavigateprops = {
   onClick?: () => void;
   className?: string;
   fillIcon?: boolean;
+  showDivider?: boolean;
 };
 
 export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
@@ -21,11 +22,13 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
   onClick,
   linkTo,
   className,
-  fillIcon = true
+  fillIcon = true,
+  showDivider = true
 }) => {
   const baseProps = {
     className: classNames(
-      'py-4 px-4 flex items-center justify-between border-b border-divider cursor-pointer hover:bg-primary-card-hover',
+      'py-4 flex items-center justify-between cursor-pointer hover:bg-primary-card-hover',
+      showDivider && 'border-b border-divider',
       className
     ),
     onClick,

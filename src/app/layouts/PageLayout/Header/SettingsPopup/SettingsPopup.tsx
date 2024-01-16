@@ -67,13 +67,14 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         linkTo: null,
         Icon: ExitSvgIcon,
         i18nKey: 'logout',
-        onClick: closePopup
+        onClick: closePopup,
+        showDivider: false
       }
     ],
     [closePopup, handleMaximiseViewClick]
   );
   return (
-    <div className="text-white mt-6 flex flex-col">
+    <div className="text-white mt-6 flex flex-col px-4">
       {settingsListData.map(item => (
         <ListItemWithNavigate {...item} />
       ))}

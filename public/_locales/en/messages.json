@@ -41,7 +41,7 @@
     }
   },
   "authorizedDApps": {
-    "message": "Authorized DApps",
+    "message": "Authorized dApps",
     "description": "DApps = Decentralized Applications"
   },
   "clickIconToResetPermissions": {
@@ -928,6 +928,10 @@
   },
   "connectLedger": {
     "message": "Connect Ledger",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "connectWithLedger": {
+    "message": "Connect with Ledger ",
     "description": "Ledger = https://www.ledger.com/"
   },
   "importExistingWallet": {

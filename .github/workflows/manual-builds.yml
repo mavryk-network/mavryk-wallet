@@ -101,8 +101,8 @@ jobs:
         with:
           token: ${{ secrets.SLACK_E2E_VIDEO_UPLOADER_TOKEN }}
           path: e2e/video-rep/test-runs.mp4
-          channel: temple-test-runs
-          initial_comment: <https://github.com/madfish-solutions/templewallet-extension/pull/${{ github.event.number }}|${{ github.event.pull_request.title }}>  (Run <https://github.com/madfish-solutions/templewallet-extension/actions/runs/${{ github.run_id }}|№${{ github.run_number }}>)
+          channel: mavryk-test-runs
+          initial_comment: <https://github.com/mavryk-network/mavryk-wallet/pull/${{ github.event.number }}|${{ github.event.pull_request.title }}>  (Run <https://github.com/mavryk-network/mavryk-wallet/actions/runs/${{ github.run_id }}|№${{ github.run_number }}>)
 
       - name: Create Firefox build
         if: ${{ github.event.inputs.firefox == 'true' }}

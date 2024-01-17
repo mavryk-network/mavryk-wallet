@@ -23,7 +23,7 @@ Feature: Add Custom Node
     And I press Selected Network Button on the Header page
 
     And I select Custom Test Net node in the networks drop-down list on the Header page
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     Then I check that Custom Test Net node is selected correctly
 
@@ -117,6 +117,6 @@ Feature: Add Custom Node
      And I press Selected Network Button on the Header page
 
      And I select Custom Test Net node in the networks drop-down list on the Header page
-     And I press Temple Logo Icon on the Header page
+     And I press Mavryk Wallet Logo Icon on the Header page
 
      Then I check that Custom Test Net node is selected correctly

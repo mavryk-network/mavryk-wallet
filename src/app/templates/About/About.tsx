@@ -20,7 +20,7 @@ const LINKS: {
   },
   {
     key: 'repo',
-    link: 'https://github.com/madfish-solutions/templewallet-extension',
+    link: 'https://github.com/mavryk-network/mavryk-wallet',
     testID: AboutSelectors.repoLink
   },
   {

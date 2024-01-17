@@ -1,15 +1,15 @@
-# Temple - Tezos Wallet
+# Mavryk Wallet
 
-Cryptocurrency wallet for [Tezos blockchain](https://tezos.com) as Web Extension for your Browser.<br>
+Cryptocurrency wallet for [Mavryk blockchain](https://mavryk.org/) as Web Extension for your Browser.<br>
 Providing ability to manage NFT, tez tokens and interact with dApps.
 
-![Temple Wallet](https://user-images.githubusercontent.com/11996139/108867944-64e7fc00-75fe-11eb-975e-87c0fda9bfbe.png)
+![Mavryk Wallet](https://user-images.githubusercontent.com/11996139/108867944-64e7fc00-75fe-11eb-975e-87c0fda9bfbe.png)
 
 <hr />
 
 ## ▶️ Install
 
-You can install Temple Wallet right now: https://templewallet.com/download.
+You can install Mavryk Wallet right now: https://templewallet.com/download.
 
 ## Browser Support
 
@@ -29,7 +29,7 @@ Then run the following:
 ### 1) Clone the repository
 
 ```bash
-git clone https://github.com/madfish-solutions/templewallet-extension && cd templewallet-extension
+git clone https://github.com/mavryk-network/mavryk-wallet && cd mavryk-wallet
 ```
 
 ### 2) Install dependencies
@@ -68,7 +68,7 @@ yarn build-all
 
 ### 5) Load extension to your Browser
 
-![TempleWallet_Load](https://user-images.githubusercontent.com/11996139/73763346-f8435a80-4779-11ea-9e9d-4c1db9560f64.gif)
+![MavrykWallet_Load](https://user-images.githubusercontent.com/11996139/73763346-f8435a80-4779-11ea-9e9d-4c1db9560f64.gif)
 
 ## 🧱 Development
 

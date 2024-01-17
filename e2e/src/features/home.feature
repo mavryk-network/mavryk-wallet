@@ -8,7 +8,7 @@ Feature: Check functional on the Home page
     And The Fiat-Tez Switch Text on the Home page has correct Total Equity Value value
 
     And I press Fiat-Tez Switch Button on the Home page
-    And The Fiat-Tez Switch Text on the Home page has correct Tezos Balance value
+    And The Fiat-Tez Switch Text on the Home page has correct Mavryk Balance value
 
     And I enter shortRandomContent into Search Assets Input (Tokens) on the Assets page
 #  empty state error

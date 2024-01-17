@@ -1,6 +1,6 @@
 # Documentation
 
-This doc describes how Temple Wallet works internally.
+This doc describes how Mavryk Wallet works internally.
 
 ## Architecture
 

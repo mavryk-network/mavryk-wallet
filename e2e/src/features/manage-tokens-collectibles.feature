@@ -20,7 +20,7 @@ Feature: Manage tokens + collectibles
 
     And I am on the Token page
     And I check that customTokenSymbol page with customTokenName token displayed or selected correctly
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     And I am on the Home page
     And I scroll 900 pixels on the Home page
@@ -44,7 +44,7 @@ Feature: Manage tokens + collectibles
     # hide
     And I click on kUSD token label to hide or reveal it
   #   checking that the token disappears on the Home page
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     And I am on the Home page
     And I scroll 900 pixels on the Home page
@@ -59,7 +59,7 @@ Feature: Manage tokens + collectibles
     # reveal
     And I click on kUSD token label to hide or reveal it
   #   checking that the token displays on the Home page
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     And I am on the Home page
     And I scroll 900 pixels on the Home page
@@ -78,7 +78,7 @@ Feature: Manage tokens + collectibles
 
     And I check that kUSD token is deleted from token list
 #   checking that the token disappears on the Home page
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     And I am on the Home page
     And I scroll 900 pixels on the Home page
@@ -165,7 +165,7 @@ Feature: Manage tokens + collectibles
 
     And I am on the Token page
     And I check that customTokenSymbol page with customTokenName token displayed or selected correctly
-    And I press Temple Logo Icon on the Header page
+    And I press Mavryk Wallet Logo Icon on the Header page
 
     And I am on the Home page
     And I scroll 900 pixels on the Home page

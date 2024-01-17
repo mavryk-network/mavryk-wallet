@@ -52,6 +52,8 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
 
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
 
+  console.log(dAppEntries);
+
   const activeDAppEntry = useMemo(
     () => dAppEntries.find(entry => areUrlsContainSameHost(entry[0], activeUrl)),
     [activeUrl, dAppEntries]

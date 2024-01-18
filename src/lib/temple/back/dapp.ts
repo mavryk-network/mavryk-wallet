@@ -1,9 +1,3 @@
-import { TezosOperationError } from '@mavrykdynamics/taquito';
-import { localForger } from '@mavrykdynamics/taquito-local-forging';
-import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
-import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
-import { emitMicheline } from '@mavrykdynamics/taquito-michel-codec';
-import { RpcClient } from '@mavrykdynamics/taquito-rpc';
 import {
   MavrykWalletDAppMessageType,
   MavrykWalletDAppErrorType,
@@ -18,6 +12,12 @@ import {
   MavrykWalletDAppBroadcastResponse,
   MavrykWalletDAppNetwork
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
+import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
+import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
+import { emitMicheline } from '@mavrykdynamics/taquito-michel-codec';
+import { RpcClient } from '@mavrykdynamics/taquito-rpc';
 import { nanoid } from 'nanoid';
 import browser, { Runtime } from 'webextension-polyfill';
 

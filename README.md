@@ -9,7 +9,7 @@ Providing ability to manage NFT, tez tokens and interact with dApps.
 
 ## ▶️ Install
 
-You can install Mavryk Wallet right now: https://templewallet.com/download.
+You can install Mavryk Wallet right now: https://mavryk.org/wallet.
 
 ## Browser Support
 

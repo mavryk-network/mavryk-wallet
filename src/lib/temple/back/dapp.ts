@@ -230,7 +230,10 @@ const safeGetChain = async (networkRpc: string, op: any) => {
   } catch {}
 };
 
-export async function requestSign(origin: string, req: MavrykWalletDAppSignRequest): Promise<MavrykWalletDAppSignResponse> {
+export async function requestSign(
+  origin: string,
+  req: MavrykWalletDAppSignRequest
+): Promise<MavrykWalletDAppSignResponse> {
   if (req?.payload?.startsWith('0x')) {
     req = { ...req, payload: req.payload.substring(2) };
   }

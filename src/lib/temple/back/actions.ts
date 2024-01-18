@@ -1,12 +1,12 @@
-import { TezosOperationError } from '@mavrykdynamics/taquito';
-import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
-import { char2Bytes } from '@mavrykdynamics/taquito-utils';
 import {
   MavrykWalletDAppMessageType,
   MavrykWalletDAppErrorType,
   MavrykWalletDAppRequest,
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
+import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { char2Bytes } from '@mavrykdynamics/taquito-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { BACKGROUND_IS_WORKER } from 'lib/env';
@@ -395,7 +395,10 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
   );
 }
 
-export async function processDApp(origin: string, req: MavrykWalletDAppRequest): Promise<MavrykWalletDAppResponse | void> {
+export async function processDApp(
+  origin: string,
+  req: MavrykWalletDAppRequest
+): Promise<MavrykWalletDAppResponse | void> {
   switch (req?.type) {
     case MavrykWalletDAppMessageType.GetCurrentPermissionRequest:
       return withInited(() => getCurrentPermission(origin));

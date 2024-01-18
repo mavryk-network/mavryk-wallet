@@ -9,7 +9,7 @@ import {
   fetchKUSDApy$,
   fetchTzBtcApy$,
   // fetchUBTCApr$,
-  fetchUSDTApy$,
+  fetchUSDTApy$
   // fetchUUSDCApr$,
   // fetchYOUApr$
 } from 'app/store/d-apps/utils';
@@ -29,7 +29,7 @@ export const useTokensApyLoading = () => {
       const subscription = forkJoin([
         fetchTzBtcApy$(),
         fetchKUSDApy$(),
-        fetchUSDTApy$(),
+        fetchUSDTApy$()
         // fetchUUSDCApr$(tezos),
         // fetchUBTCApr$(tezos),
         // fetchYOUApr$(tezos, usdToTokenRates)

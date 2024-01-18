@@ -4,4 +4,4 @@
 //   UUSD = 'uUSD'
 // }
 
-export {}
+export {};

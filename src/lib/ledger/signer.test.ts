@@ -30,7 +30,7 @@ const PUBLIC_KEYS = {
 };
 
 const PUBLIC_KEY_HASHES = {
-  ed: ['mv1VBAULLAGMCbF7FRHNtoUqiFJv1csUwqmE', 'mv19ts6JJsthFneCdesiZxGu2fU1AwxvqQCx'],
+  ed: ['mv1VBAULLAGMCbF7FRHNtoUqiFJv1csUwqmE', 'mv1SfGu3E3BZHusCtwFxRRmfXyjbWiDNMasQ'],
   sp: ['mv2iHs2Z3Nupd2dDrpSsSyBCHZYhuAyf9GuU'],
   p2: ['mv3DjKu7AWyQTrr2VNhBi4q2PHB3LEdJbTwU']
 };

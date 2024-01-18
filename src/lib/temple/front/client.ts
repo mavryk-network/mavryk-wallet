@@ -398,6 +398,16 @@ type TaquitoWalletOps = {
 
 class TaquitoWallet implements WalletProvider {
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
+  
+  async sign(_bytes: string, _watermark?: Uint8Array | undefined) {
+    throw new Error('Method not implemented.');
+    return "";
+  }
+
+  async getPK() {
+    throw new Error('Method not implemented.');
+    return "";
+  }
 
   async getPKH() {
     return this.pkh;

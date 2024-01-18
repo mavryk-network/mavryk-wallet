@@ -2,11 +2,11 @@ import { TezosOperationError } from '@mavrykdynamics/taquito';
 import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import { char2Bytes } from '@mavrykdynamics/taquito-utils';
 import {
-  TempleDAppMessageType,
-  TempleDAppErrorType,
-  TempleDAppRequest,
-  TempleDAppResponse
-} from '@temple-wallet/dapp/dist/types';
+  MavrykWalletDAppMessageType,
+  MavrykWalletDAppErrorType,
+  MavrykWalletDAppRequest,
+  MavrykWalletDAppResponse
+} from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { BACKGROUND_IS_WORKER } from 'lib/env';
@@ -395,21 +395,21 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
   );
 }
 
-export async function processDApp(origin: string, req: TempleDAppRequest): Promise<TempleDAppResponse | void> {
+export async function processDApp(origin: string, req: MavrykWalletDAppRequest): Promise<MavrykWalletDAppResponse | void> {
   switch (req?.type) {
-    case TempleDAppMessageType.GetCurrentPermissionRequest:
+    case MavrykWalletDAppMessageType.GetCurrentPermissionRequest:
       return withInited(() => getCurrentPermission(origin));
 
-    case TempleDAppMessageType.PermissionRequest:
+    case MavrykWalletDAppMessageType.PermissionRequest:
       return withInited(() => enqueueDApp(() => requestPermission(origin, req)));
 
-    case TempleDAppMessageType.OperationRequest:
+    case MavrykWalletDAppMessageType.OperationRequest:
       return withInited(() => enqueueDApp(() => requestOperation(origin, req)));
 
-    case TempleDAppMessageType.SignRequest:
+    case MavrykWalletDAppMessageType.SignRequest:
       return withInited(() => enqueueDApp(() => requestSign(origin, req)));
 
-    case TempleDAppMessageType.BroadcastRequest:
+    case MavrykWalletDAppMessageType.BroadcastRequest:
       return withInited(() => requestBroadcast(origin, req));
   }
 }
@@ -531,11 +531,11 @@ const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: stri
       // Map Temple DApp error to Beacon error
       const beaconErrorType = (() => {
         switch (err?.message) {
-          case TempleDAppErrorType.InvalidParams:
+          case MavrykWalletDAppErrorType.InvalidParams:
             return Beacon.ErrorType.PARAMETERS_INVALID_ERROR;
 
-          case TempleDAppErrorType.NotFound:
-          case TempleDAppErrorType.NotGranted:
+          case MavrykWalletDAppErrorType.NotFound:
+          case MavrykWalletDAppErrorType.NotGranted:
             return req.beaconId ? Beacon.ErrorType.NOT_GRANTED_ERROR : Beacon.ErrorType.ABORTED_ERROR;
 
           default:
@@ -566,7 +566,7 @@ const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: stri
   }
 };
 
-const getTempleReq = (req: Beacon.Request): TempleDAppRequest | void => {
+const getTempleReq = (req: Beacon.Request): MavrykWalletDAppRequest | void => {
   switch (req.type) {
     case Beacon.MessageType.PermissionRequest:
       const network =
@@ -578,7 +578,7 @@ const getTempleReq = (req: Beacon.Request): TempleDAppRequest | void => {
           : req.network.type;
 
       return {
-        type: TempleDAppMessageType.PermissionRequest,
+        type: MavrykWalletDAppMessageType.PermissionRequest,
         network: network as any,
         appMeta: req.appMetadata,
         force: true
@@ -586,28 +586,28 @@ const getTempleReq = (req: Beacon.Request): TempleDAppRequest | void => {
 
     case Beacon.MessageType.OperationRequest:
       return {
-        type: TempleDAppMessageType.OperationRequest,
+        type: MavrykWalletDAppMessageType.OperationRequest,
         sourcePkh: req.sourceAddress,
         opParams: req.operationDetails.map(Beacon.formatOpParams)
       };
 
     case Beacon.MessageType.SignPayloadRequest:
       return {
-        type: TempleDAppMessageType.SignRequest,
+        type: MavrykWalletDAppMessageType.SignRequest,
         sourcePkh: req.sourceAddress,
         payload: req.signingType === Beacon.SigningType.RAW ? generateRawPayloadBytes(req.payload) : req.payload
       };
 
     case Beacon.MessageType.BroadcastRequest:
       return {
-        type: TempleDAppMessageType.BroadcastRequest,
+        type: MavrykWalletDAppMessageType.BroadcastRequest,
         signedOpBytes: req.signedTransaction
       };
   }
 };
 
 const formatTempleReq = async (
-  templeReq: TempleDAppRequest | void,
+  templeReq: MavrykWalletDAppRequest | void,
   req: Beacon.Request,
   resBase: any,
   origin: string
@@ -618,7 +618,7 @@ const formatTempleReq = async (
     if (templeRes) {
       // Map Temple DApp response to Beacon response
       switch (templeRes.type) {
-        case TempleDAppMessageType.PermissionResponse:
+        case MavrykWalletDAppMessageType.PermissionResponse:
           return {
             ...resBase,
             type: Beacon.MessageType.PermissionResponse,
@@ -627,21 +627,21 @@ const formatTempleReq = async (
             scopes: [Beacon.PermissionScope.OPERATION_REQUEST, Beacon.PermissionScope.SIGN]
           };
 
-        case TempleDAppMessageType.OperationResponse:
+        case MavrykWalletDAppMessageType.OperationResponse:
           return {
             ...resBase,
             type: Beacon.MessageType.OperationResponse,
             transactionHash: templeRes.opHash
           };
 
-        case TempleDAppMessageType.SignResponse:
+        case MavrykWalletDAppMessageType.SignResponse:
           return {
             ...resBase,
             type: Beacon.MessageType.SignPayloadResponse,
             signature: templeRes.signature
           };
 
-        case TempleDAppMessageType.BroadcastResponse:
+        case MavrykWalletDAppMessageType.BroadcastResponse:
           return {
             ...resBase,
             type: Beacon.MessageType.BroadcastResponse,

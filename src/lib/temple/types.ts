@@ -1,6 +1,6 @@
 import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import type { Estimate } from '@mavrykdynamics/taquito';
-import type { TempleDAppMetadata, TempleDAppNetwork } from '@temple-wallet/dapp/dist/types';
+import type { TempleDAppMetadata, TempleDAppNetwork } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 
 import type { TID } from 'lib/i18n/types';
 
@@ -23,8 +23,8 @@ export interface ReadyTempleState extends TempleState {
 }
 
 export interface TempleDAppSession {
-  network: TempleDAppNetwork;
-  appMeta: TempleDAppMetadata;
+  network: MavrykWalletDAppNetwork;
+  appMeta: MavrykWalletDAppMetadata;
   pkh: string;
   publicKey: string;
 }
@@ -182,7 +182,7 @@ export type TempleConfirmationPayload = TempleSignConfirmationPayload | TempleOp
  * DApp confirmation payloads
  */
 
-export type DappMetadata = TempleDAppMetadata & {
+export type DappMetadata = MavrykWalletDAppMetadata & {
   icon?: string;
 };
 

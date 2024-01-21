@@ -22,7 +22,7 @@ type AboutFooterLinkItemType = AboutLinkAdditionalprops & { Icon: ImportedSVGCom
 const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
   {
     key: 'website',
-    link: 'https://templewallet.com',
+    link: 'https://mavryk.org',
     testID: AboutSelectors.websiteLink,
     i18nKey: 'ourWebsite',
     Icon: PlanetIcon,
@@ -31,7 +31,7 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
 
   {
     key: 'privacyPolicy',
-    link: 'https://templewallet.com/privacy',
+    link: 'https://ghostnet.mavenfinance.io',
     testID: AboutSelectors.privacyPolicyLink,
     i18nKey: 'privacyPolicy',
     Icon: ShieldIcon,
@@ -39,7 +39,7 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
   },
   {
     key: 'termsOfUse',
-    link: 'https://templewallet.com/terms',
+    link: 'https://ghostnet.mavenfinance.io',
     testID: AboutSelectors.termsOfUseLink,
     i18nKey: 'termsOfUse',
     Icon: DocumentIcon,
@@ -47,7 +47,7 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
   },
   {
     key: 'contact',
-    link: 'https://templewallet.com/contact',
+    link: 'https://t.me/+skFJjewPdRU5ZGQ0',
     testID: AboutSelectors.contactLink,
     i18nKey: 'contactUs',
     Icon: HelpIcon,
@@ -58,25 +58,25 @@ const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
 const FOOTER_LINKS: AboutFooterLinkItemType[] = [
   {
     key: 'twitter',
-    link: 'https://templewallet.com',
+    link: 'https://twitter.com/MavrykNetwork',
     testID: AboutSelectors.twitterLink,
     Icon: TwitterIcon
   },
   {
     key: 'discord',
-    link: 'https://templewallet.com',
+    link: 'https://discord.com/invite/BDBYA4ASf2',
     testID: AboutSelectors.discordLink,
     Icon: Discordicon
   },
   {
     key: 'telegram',
-    link: 'https://templewallet.com',
+    link: 'https://t.me/+skFJjewPdRU5ZGQ0',
     testID: AboutSelectors.telegramLink,
     Icon: TelegramIcon
   },
   {
     key: 'repo',
-    link: 'https://templewallet.com',
+    link: 'https://github.com/mavryk-network',
     testID: AboutSelectors.repoLink,
     Icon: RepoIcon
   }

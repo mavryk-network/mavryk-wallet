@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -14,19 +14,18 @@ import { TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 
 import { areUrlsContainSameHost, getActiveTabUrl } from './utils/activeTab';
 
-type DAppsPopupProps = {
-  opened: boolean;
-  setOpened: (v: boolean) => void;
+// -----------------------Dapps context logic
+type DappsContextType = {
+  isLoading: boolean;
+  activeDAppEntry: [string, TempleDAppSession] | undefined;
+  getAccName: (activeDAppEntry: [string, TempleDAppSession]) => string;
+  handleRemoveClick: (origin: string) => Promise<void>;
+  dAppEntries: [string, TempleDAppSession][];
 };
 
-type DAppEntry = [string, TempleDAppSession];
-type DAppActions = {
-  remove: (origin: string) => void;
-};
+const dappsContext = createContext<DappsContextType>(undefined!);
 
-const getDAppKey = (entry: DAppEntry) => entry[0];
-
-export const DAppsPopup: FC<DAppsPopupProps> = () => {
+export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
   const { getAllDAppSessions, removeDAppSession } = useTempleClient();
   const allAccounts = useRelevantAccounts();
 
@@ -38,7 +37,7 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
     revalidateOnReconnect: false
   });
 
-  const dAppSessions = data! ?? {};
+  const dAppSessions = useMemo(() => data! ?? {}, [data]);
 
   const [activeUrl, setActiveUrl] = useState<string | undefined>('');
 
@@ -52,20 +51,55 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
 
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
 
-  console.log(dAppEntries);
-
   const activeDAppEntry = useMemo(
     () => dAppEntries.find(entry => areUrlsContainSameHost(entry[0], activeUrl)),
     [activeUrl, dAppEntries]
   );
 
-  function getAccName(activeDAppEntry: [string, TempleDAppSession]) {
-    return allAccounts.find(acc => acc.publicKeyHash === activeDAppEntry[1].pkh)?.name ?? t('unknownAccount');
-  }
+  const getAccName = useCallback(
+    (activeDAppEntry: [string, TempleDAppSession]) => {
+      return allAccounts.find(acc => acc.publicKeyHash === activeDAppEntry[1].pkh)?.name ?? t('unknownAccount');
+    },
+    [allAccounts]
+  );
 
   useEffect(() => {
     getActiveTabUrl(u => setActiveUrl(u));
   }, []);
+
+  const value = useMemo(
+    () => ({ isLoading, activeDAppEntry, getAccName, handleRemoveClick, dAppEntries }),
+    [activeDAppEntry, dAppEntries, getAccName, handleRemoveClick, isLoading]
+  );
+  return <dappsContext.Provider value={value}>{children}</dappsContext.Provider>;
+};
+
+export const useDappsContext = () => {
+  const ctx = useContext(dappsContext);
+
+  if (!ctx) {
+    throw new Error('useDappsContext must be used within DappsContext');
+  }
+
+  return ctx;
+};
+
+// -----------------------------------------------
+// Popup & components
+type DAppsPopupProps = {
+  opened: boolean;
+  setOpened: (v: boolean) => void;
+};
+
+type DAppEntry = [string, TempleDAppSession];
+type DAppActions = {
+  remove: (origin: string) => void;
+};
+
+const getDAppKey = (entry: DAppEntry) => entry[0];
+
+export const DAppsPopup: FC<DAppsPopupProps> = () => {
+  const { isLoading, activeDAppEntry, getAccName, handleRemoveClick, dAppEntries } = useDappsContext();
 
   if (isLoading)
     return (

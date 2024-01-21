@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useTempleClient, useAccount, useNetwork } from 'lib/temple/front';
+import { useTempleClient, useAccount } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
 
 import styles from './Header.module.css';
@@ -17,7 +17,7 @@ import { HeaderSelectors } from './Header.selectors';
 import AccountDropdown from './Header/AccountDropdown';
 import AccountPopup from './Header/AccountPopup';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
-import { DAppsPopup } from './Header/DAapsPopup/DAppsPopup';
+import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
 import { SettingButton, SettingsPopup } from './Header/SettingsPopup';
@@ -41,7 +41,6 @@ export default Header;
 
 const Control: FC = () => {
   const account = useAccount();
-  const currentNetwork = useNetwork();
 
   // popup states
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
@@ -54,7 +53,7 @@ const Control: FC = () => {
   }, []);
 
   return (
-    <>
+    <DappsContext>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
       <Popper
         placement="left-start"
@@ -102,11 +101,8 @@ const Control: FC = () => {
 
         <div className="flex-1" />
         <div className="flex item gap-2 items-center">
-          <NetworkButton
-            enabled={Boolean(currentNetwork)}
-            onClick={handlePopupToggle.bind(null, setShowNetworkPopup, true)}
-          />
           <DAapsDropdownButton onClick={handlePopupToggle.bind(null, setShowDAppsPopup, true)} />
+          <NetworkButton onClick={handlePopupToggle.bind(null, setShowNetworkPopup, true)} />
           <SettingButton onClick={handlePopupToggle.bind(null, setShowSettingsPopup, true)} />
         </div>
       </div>
@@ -147,6 +143,6 @@ const Control: FC = () => {
       >
         <SettingsPopup closePopup={handlePopupToggle.bind(null, setShowSettingsPopup, false)} />
       </PopupModalWithTitle>
-    </>
+    </DappsContext>
   );
 };

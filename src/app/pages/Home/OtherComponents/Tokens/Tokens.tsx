@@ -60,10 +60,7 @@ export const TokensTab: FC = () => {
 
   const slugs = useMemoWithCompare(() => tokens.map(({ tokenSlug }) => tokenSlug).sort(), [tokens], isEqual);
 
-  const leadingAssets = useMemo(
-    () => (chainId === ChainIds.MAINNET ? [TEZ_TOKEN_SLUG, TEMPLE_TOKEN_SLUG] : [TEZ_TOKEN_SLUG]),
-    [chainId]
-  );
+  const leadingAssets = useMemo(() => (chainId === ChainIds.MAINNET ? [TEZ_TOKEN_SLUG] : [TEZ_TOKEN_SLUG]), [chainId]);
 
   const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(
     slugs,

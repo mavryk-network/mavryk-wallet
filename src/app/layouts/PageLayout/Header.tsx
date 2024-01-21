@@ -8,7 +8,7 @@ import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useAccount, useTempleClient } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
 
 import styles from './Header.module.css';
@@ -39,6 +39,8 @@ const Header: FC = () => {
 export default Header;
 
 const Control: FC = () => {
+  const account = useAccount();
+
   // popup states
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
   const [showNetworkPopup, setShowNetworkPopup] = useState(false);
@@ -77,7 +79,7 @@ const Control: FC = () => {
         )}
       </Popper> */}
 
-      <AccountPopupButton child={<GetProlabel />} />
+      <AccountPopupButton account={account} child={<GetProlabel />} />
 
       <div className="ml-2 flex-1 flex items-start">
         <div className="flex-1" />

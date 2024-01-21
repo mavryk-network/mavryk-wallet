@@ -6,13 +6,14 @@ import { Button, Identicon, Name } from 'app/atoms';
 import { ReactComponent as ArrowDownicon } from 'app/icons/chevron-down.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useAccount } from 'lib/temple/front';
+import { TempleAccount } from 'lib/temple/types';
 
 import AccountPopup from '.';
 
 export type AccountButtonProps = {
   child?: JSX.Element;
   iconSize?: number;
+  account: TempleAccount;
 };
 
 export enum AccountSelectors {
@@ -20,9 +21,7 @@ export enum AccountSelectors {
   accountIcon = 'Header/Account Icon'
 }
 
-export const AccountPopupButton: FC<AccountButtonProps> = ({ child, iconSize = 24 }) => {
-  const account = useAccount();
-
+export const AccountPopupButton: FC<AccountButtonProps> = ({ account, child, iconSize = 24 }) => {
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
   const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {

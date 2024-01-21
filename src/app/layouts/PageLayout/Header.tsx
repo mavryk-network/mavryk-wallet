@@ -4,18 +4,17 @@ import classNames from 'clsx';
 
 import { Button } from 'app/atoms/Button';
 import Identicon from 'app/atoms/Identicon';
-import Name from 'app/atoms/Name';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useTempleClient, useAccount } from 'lib/temple/front';
+import { useTempleClient } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
 import AccountDropdown from './Header/AccountDropdown';
-import AccountPopup from './Header/AccountPopup';
+import { AccountPopupButton, GetProlabel } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
@@ -40,10 +39,7 @@ const Header: FC = () => {
 export default Header;
 
 const Control: FC = () => {
-  const account = useAccount();
-
   // popup states
-  const [showAccountsPopup, setShowAccountsPopup] = useState(false);
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
   const [showNetworkPopup, setShowNetworkPopup] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
@@ -55,7 +51,7 @@ const Control: FC = () => {
   return (
     <DappsContext>
       {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      <Popper
+      {/* <Popper
         placement="left-start"
         strategy="fixed"
         style={{ pointerEvents: 'none' }}
@@ -79,26 +75,11 @@ const Control: FC = () => {
             <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
           </Button>
         )}
-      </Popper>
+      </Popper> */}
 
-      <Button
-        className={classNames(
-          'flex-shrink-0 flex self-center',
-          'rounded-full overflow-hidden',
-          'bg-primary-bg bg-opacity-10 cursor-pointer',
-          'transition ease-in-out duration-200'
-        )}
-        testID={HeaderSelectors.accountIcon}
-        onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}
-      >
-        <Identicon type="bottts" hash={account.publicKeyHash} size={24} />
-      </Button>
+      <AccountPopupButton child={<GetProlabel />} />
 
       <div className="ml-2 flex-1 flex items-start">
-        <div className="max-w-full overflow-x-hidden">
-          <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
-        </div>
-
         <div className="flex-1" />
         <div className="flex item gap-2 items-center">
           <DAapsDropdownButton onClick={handlePopupToggle.bind(null, setShowDAppsPopup, true)} />
@@ -108,15 +89,6 @@ const Control: FC = () => {
       </div>
 
       {/* ________popups ________ */}
-      {/* accounts */}
-      <PopupModalWithTitle
-        isOpen={showAccountsPopup}
-        onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
-        title={<T id="selectAccount" />}
-        portalClassName="accounts-popup"
-      >
-        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
-      </PopupModalWithTitle>
       {/* connected dapps */}
       <PopupModalWithTitle
         isOpen={showDAppsPopup}

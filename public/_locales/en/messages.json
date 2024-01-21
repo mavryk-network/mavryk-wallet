@@ -3244,5 +3244,8 @@
   },
   "removeAccountMessage": {
     "message": "Do not remove this account until you are absolutely sure you have backed up your seed phrase/private key."
+  },
+  "getPro": {
+    "message": "Get Pro"
   }
 }

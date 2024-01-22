@@ -170,7 +170,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
               toolbarRightSidedComponent={toolbarRightSidedComponent}
             />
           ) : (
-            <ul className="flex flex-col px-4 pb-8">
+            <ul className="flex flex-col pb-8">
               {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
                 <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}

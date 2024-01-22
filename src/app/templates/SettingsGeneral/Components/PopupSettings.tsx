@@ -16,7 +16,7 @@ const PopupSettings: FC<{}> = () => {
       changingRef.current = true;
       setError(null);
 
-      setPopupMode(checked);
+      setPopupMode(!checked);
       changingRef.current = false;
       window.location.reload();
     },

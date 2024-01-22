@@ -7,6 +7,8 @@ import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg'
 import { T, TID } from 'lib/i18n';
 import { Link } from 'lib/woozie';
 
+import styles from './ListItemWithNavigate.module.css';
+
 export type ListItemWithNavigateprops = {
   Icon: ImportedSVGComponent | null;
   linkTo?: string | null;
@@ -30,8 +32,8 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
 }) => {
   const baseProps = {
     className: classNames(
-      'py-4 flex items-center justify-between cursor-pointer hover:bg-primary-card-hover',
-      showDivider && 'border-b border-divider',
+      'p-4 flex items-center justify-between cursor-pointer hover:bg-primary-card-hover relative',
+      showDivider && styles.listItemBorder,
       className
     ),
     onClick,

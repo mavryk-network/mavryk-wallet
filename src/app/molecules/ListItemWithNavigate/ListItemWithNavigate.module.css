@@ -1,0 +1,14 @@
+.listItemBorder {
+  position: relative;
+}
+
+.listItemBorder::after {
+  content: '';
+
+  width: calc(100% - 32px);
+  height: 100%;
+  position: absolute;
+  left: 16px;
+  bottom: 0;
+  border-bottom: 1px solid #333;
+}

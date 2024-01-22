@@ -77,7 +77,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     [closePopup, handleMaximiseViewClick]
   );
   return (
-    <div className="text-white mt-6 flex flex-col px-4">
+    <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
         <ListItemWithNavigate {...item} />
       ))}

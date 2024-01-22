@@ -62,7 +62,7 @@ const SyncSettings: FC = () => {
   const isPasswordEntered = passwordValue?.length ?? 0 > 0;
 
   return (
-    <div className="w-full h-full max-w-sm  mx-auto flex flex-col">
+    <div className="w-full h-full flex flex-col">
       {payload ? (
         <>
           <Alert
@@ -80,16 +80,18 @@ const SyncSettings: FC = () => {
           </p>
 
           <div className="p-6 mb-8 bg-white rounded-2xl self-center">
-            <QRCode value={payload} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 256 }} />
+            <QRCode value={payload} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 216 }} />
           </div>
 
-          <FormSubmitButton
-            className="w-full justify-center mt-2"
-            onClick={handleQRBttonClick}
-            testID={SyncSettingsSelectors.doneButton}
-          >
-            <T id="goToMain" />
-          </FormSubmitButton>
+          <div className="pb-8">
+            <FormSubmitButton
+              className="w-full justify-center mt-2"
+              onClick={handleQRBttonClick}
+              testID={SyncSettingsSelectors.doneButton}
+            >
+              <T id="goToMain" />
+            </FormSubmitButton>
+          </div>
         </>
       ) : (
         <>

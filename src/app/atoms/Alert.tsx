@@ -79,7 +79,7 @@ export const Alert: FC<AlertProps> = ({
         )}
         {description && (
           <div
-            className={classNames('text-sm max-h-32 break-words overflow-y-auto mt-1', textColorClassName)}
+            className={classNames('text-sm break-words mt-1', textColorClassName)}
             {...setTestID(AlertSelectors.alertDescription)}
           >
             {description}

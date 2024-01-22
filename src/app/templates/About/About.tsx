@@ -93,14 +93,7 @@ const About: FC = () => (
         </h4>
 
         <p className="text-sm text-secondary-white">
-          <T
-            id="versionLabel"
-            substitutions={[
-              <span className="font-bold" key="version">
-                {process.env.VERSION}
-              </span>
-            ]}
-          />
+          <T id="versionLabel" substitutions={[<span key="version">{process.env.VERSION}</span>]} />
         </p>
       </div>
     </div>

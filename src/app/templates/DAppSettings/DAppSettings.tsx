@@ -5,6 +5,7 @@ import classNames from 'clsx';
 import { Name, Divider } from 'app/atoms';
 import { Switcher } from 'app/atoms/Switcher';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
@@ -12,6 +13,7 @@ import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
+import { delay } from 'lodash';
 
 // import { DAppSettingsSelectors } from './DAppSettings.selectors';
 
@@ -38,6 +40,7 @@ const DAppSettings: FC = () => {
 
   const changingRef = useRef(false);
   const [error, setError] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = useCallback(
     async (checked: boolean) => {
@@ -69,6 +72,18 @@ const DAppSettings: FC = () => {
 
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
 
+  const handleRemoveAllClick = useCallback(async () => {
+    setIsLoading(true);
+    const promises = dAppEntries.map(async ([origin]) => {
+      await removeDAppSession(origin);
+    });
+
+    await Promise.all(promises);
+    mutate();
+
+    setIsLoading(false);
+  }, [dAppEntries, mutate, removeDAppSession]);
+
   return (
     <div className="w-full h-full max-w-sm mx-auto pb-8">
       <p className="text-sm text-secondary-white mb-4">
@@ -88,19 +103,23 @@ const DAppSettings: FC = () => {
         <T id="authorizedDApps" />
       </div>
       {dAppEntries.length > 0 && (
-        <>
-          <CustomSelect
-            actions={{ remove: handleRemoveClick }}
-            className="pb-6"
-            getItemId={getDAppKey}
-            items={dAppEntries}
-            OptionIcon={DAppIcon}
-            OptionContent={DAppDescription}
-            light
-            hoverable={false}
-            padding={'8px 0 8px 0'}
-          />
-        </>
+        <div className="flex-grow flex flex-col pb-8">
+          <div style={{ height: 290 }} className="no-scrollbar mb-6">
+            <CustomSelect
+              actions={{ remove: handleRemoveClick }}
+              getItemId={getDAppKey}
+              items={dAppEntries}
+              OptionIcon={DAppIcon}
+              OptionContent={DAppDescription}
+              light
+              hoverable={false}
+              padding={'8px 0 8px 0'}
+            />
+          </div>
+          <ButtonRounded isLoading={isLoading} onClick={handleRemoveAllClick} className="w-full" size="big">
+            Disconnect all
+          </ButtonRounded>
+        </div>
       )}
     </div>
   );

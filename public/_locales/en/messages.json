@@ -48,7 +48,7 @@
     "message": "Click on the X icon to reset permissions."
   },
   "versionLabel": {
-    "message": "version: $version$",
+    "message": "Version: $version$",
     "placeholders": {
       "version": {
         "content": "$1"

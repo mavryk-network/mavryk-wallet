@@ -703,7 +703,7 @@ interface TempleRemoveDAppSessionResponse extends TempleMessageBase {
 }
 interface TempleRemoveDAppAllSessionsRequest extends TempleMessageBase {
   type: TempleMessageType.DAppRemoveAllSessionsRequest;
-  sessions: TempleDAppSessions;
+  origins: string[];
 }
 interface TempleRemoveDAppAllSessionsResponse extends TempleMessageBase {
   type: TempleMessageType.DAppRemoveAllSessionsResponse;

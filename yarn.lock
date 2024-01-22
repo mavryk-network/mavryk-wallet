@@ -2203,6 +2203,62 @@
     "@stablelib/utf8" "^1.0.1"
     bs58check "2.1.2"
 
+"@mavrykdynamics/mavryk-domains-core@1.26.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-core/-/mavryk-domains-core-1.26.0.tgz#16e765a25e5bdedb503aa045e30d1422f8a264d8"
+  integrity sha512-vim02Q61h3wHXJ+3yf1CDIZn0I+uRr9lTre/k2Vte3cDaEmzbcubR7HhsmlUGkcAhQNP9Bjg0yz4j5EUtAqjOg==
+  dependencies:
+    idna-uts46-hx "^3.3.0"
+    lodash.isplainobject "4.0.6"
+
+"@mavrykdynamics/mavryk-domains-core@^1.26.0", "@mavrykdynamics/mavryk-domains-core@^1.26.1":
+  version "1.26.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-core/-/mavryk-domains-core-1.26.1.tgz#97bccf1fe1d547e574616383fde1e9830f8fa0c4"
+  integrity sha512-DhQVmuw04AfPe5g5SFXFVJpSNkKIljzdSbbeKqwS5I7VNNivGkq8imxrB4v4EYrm7krOxMQjgHMki2D2UXrcMw==
+  dependencies:
+    idna-uts46-hx "^3.3.0"
+    lodash.isplainobject "4.0.6"
+
+"@mavrykdynamics/mavryk-domains-manager@^1.26.0":
+  version "1.26.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-manager/-/mavryk-domains-manager-1.26.1.tgz#104ec9eed2a6e2f35b1624c72b0be860ba4bef3f"
+  integrity sha512-CkOqU61md4uzB7h6K0nbvwWa5x+VhMjx8p8MWgdQ+PmbVBrahYKqrpmV35BPU6sAZvZoOvAHesKLU7YewSw94A==
+  dependencies:
+    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
+    "@mavrykdynamics/mavryk-domains-taquito" "^1.26.1"
+    "@types/sha.js" "^2.4.0"
+    bignumber.js "^9.1.0"
+    sha.js "^2.4.11"
+
+"@mavrykdynamics/mavryk-domains-resolver@^1.26.0":
+  version "1.26.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-resolver/-/mavryk-domains-resolver-1.26.1.tgz#a7f2ab18dff8d6c73da8b93c051577b8ec922a4a"
+  integrity sha512-jfHgQiN/bFtKKq9pphjakxFc3NtQ6BxozlUN7h9ba3p3dkxI+o/zvsxVLZfDlzmbNokWpJn+5C6+YuAQ5aVB5w==
+  dependencies:
+    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
+    node-cache "^5.1.2"
+
+"@mavrykdynamics/mavryk-domains-taquito-client@1.26.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-taquito-client/-/mavryk-domains-taquito-client-1.26.0.tgz#a62e5082fed75a49c6b82445ca20274eba592643"
+  integrity sha512-m+NhjfLIqoJqgcgrtns6g1BWJVG1r+gW9pvKRPOVfYYIlWD/t0bq7hgBDXvU+d6/MX14BB2LSGKLnbnjN6KXjA==
+  dependencies:
+    "@mavrykdynamics/mavryk-domains-core" "^1.26.0"
+    "@mavrykdynamics/mavryk-domains-manager" "^1.26.0"
+    "@mavrykdynamics/mavryk-domains-resolver" "^1.26.0"
+    "@mavrykdynamics/mavryk-domains-taquito" "^1.26.0"
+    bignumber.js "^9.1.0"
+    node-cache "^5.1.2"
+
+"@mavrykdynamics/mavryk-domains-taquito@^1.26.0", "@mavrykdynamics/mavryk-domains-taquito@^1.26.1":
+  version "1.26.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-taquito/-/mavryk-domains-taquito-1.26.1.tgz#2380c12ec6f3c365d2fb432daa18129164c59b93"
+  integrity sha512-If1qcjXe8m/4GX0Y98XcscCWhD31gcgAfrUZjDTxLMnJKkX/+l6Qx6MslW1HFL4Fc3uAvX4Phd7ZNAjrl7svIg==
+  dependencies:
+    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
+    bignumber.js "^9.1.0"
+    node-cache "^5.1.2"
+
 "@mavrykdynamics/mavryk-wallet-dapp@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-wallet-dapp/-/mavryk-wallet-dapp-8.0.0.tgz#181f4d640c256b4604dc73bc1b028011a622d5d9"
@@ -3015,62 +3071,6 @@
     bs58check "^3.0.1"
     crc "^3.8.0"
     jssha "2.3.1"
-
-"@tezos-domains/core@1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/core/-/core-1.26.0.tgz#ed106476ad8f27931a2f4700cb0972451fad50de"
-  integrity sha512-Ux11MPiTbV6M56ZyQ6GmPO1Hu2rMWdKy4hmc0vlsSa8/31XO6VTZujHI5sPJs0sIinX3wBYGu9T5FM2ms1DvzQ==
-  dependencies:
-    idna-uts46-hx "^3.3.0"
-    lodash.isplainobject "4.0.6"
-
-"@tezos-domains/core@^1.26.0", "@tezos-domains/core@^1.27.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/core/-/core-1.27.0.tgz#2177b52e33e1070615ed6b2e6793baf6d86acdb8"
-  integrity sha512-mlH38Z7e4cN9+yQ5WQMSeqaM+VZjuBOj8vwJBlR1p+nKTLBnFSPYF3qq5azErRGoJA6y1XSJQxZRULuQTNZDVA==
-  dependencies:
-    idna-uts46-hx "^3.3.0"
-    lodash.isplainobject "4.0.6"
-
-"@tezos-domains/manager@^1.26.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/manager/-/manager-1.27.0.tgz#6cb9f9909c64871b79e653b363cbcb9fbd4fc555"
-  integrity sha512-olIO5ovQLg74fy9EbdG3czVF9OSBj4Tktg8cRHprKC7mie9upBdvaaLu/XuTtSENXY7nTKR0XvVb9uOZ3q9OtA==
-  dependencies:
-    "@tezos-domains/core" "^1.27.0"
-    "@tezos-domains/taquito" "^1.27.0"
-    "@types/sha.js" "^2.4.0"
-    bignumber.js "^9.1.2"
-    sha.js "^2.4.11"
-
-"@tezos-domains/resolver@^1.26.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/resolver/-/resolver-1.27.0.tgz#c07ed1df3ea846ce4b7deb71ae61f7293f8f96ad"
-  integrity sha512-53zkgjKiS8iekOOPjtHHnnUSOvT3yQzBq+Xi5DAOmucqLyAHN8inQH0XaLc+/hQi0NcspnDl+hebL1cwwYVknA==
-  dependencies:
-    "@tezos-domains/core" "^1.27.0"
-    node-cache "^5.1.2"
-
-"@tezos-domains/taquito-client@1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/taquito-client/-/taquito-client-1.26.0.tgz#396ada1fc78f2b4621e83a470ebe06bb9013a407"
-  integrity sha512-5bdUxJrmGhbCx7Uaojp6vxZfcgKmhd0bswgP1B3uztnuEG7DnVgizgcP4uM3qSyVc4wa43eg9tfvy20+ZAwjZg==
-  dependencies:
-    "@tezos-domains/core" "^1.26.0"
-    "@tezos-domains/manager" "^1.26.0"
-    "@tezos-domains/resolver" "^1.26.0"
-    "@tezos-domains/taquito" "^1.26.0"
-    bignumber.js "^9.1.0"
-    node-cache "^5.1.2"
-
-"@tezos-domains/taquito@^1.26.0", "@tezos-domains/taquito@^1.27.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@tezos-domains/taquito/-/taquito-1.27.0.tgz#f9108fa045c756be8744e0f78934a575dbbf9d49"
-  integrity sha512-msSJLexZ46nobQPhc3jdSyhH9XU3dVOobe1SkzvBYWxWq38Z+Raq2zdLRw7X1KPqKtNJqsvr9dGWRKEt+g4Fhw==
-  dependencies:
-    "@tezos-domains/core" "^1.27.0"
-    bignumber.js "^9.1.2"
-    node-cache "^5.1.2"
 
 "@tootallnate/once@1":
   version "1.1.2"

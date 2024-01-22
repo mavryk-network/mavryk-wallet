@@ -13,7 +13,6 @@ import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-import { delay } from 'lodash';
 
 // import { DAppSettingsSelectors } from './DAppSettings.selectors';
 
@@ -25,7 +24,7 @@ type DAppActions = {
 const getDAppKey = (entry: DAppEntry) => entry[0];
 
 const DAppSettings: FC = () => {
-  const { getAllDAppSessions, removeDAppSession } = useTempleClient();
+  const { getAllDAppSessions, removeDAppSession, removeAllDAppSessions } = useTempleClient();
   const confirm = useConfirm();
 
   const { data, mutate } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
@@ -40,7 +39,8 @@ const DAppSettings: FC = () => {
 
   const changingRef = useRef(false);
   const [error, setError] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
 
   const handleChange = useCallback(
     async (checked: boolean) => {
@@ -70,19 +70,20 @@ const DAppSettings: FC = () => {
     [removeDAppSession, mutate, confirm]
   );
 
-  const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);
-
   const handleRemoveAllClick = useCallback(async () => {
-    setIsLoading(true);
-    const promises = dAppEntries.map(async ([origin]) => {
-      await removeDAppSession(origin);
-    });
+    if (
+      await confirm({
+        title: t('actionConfirmation'),
+        children: t('resetPermissionsConfirmation', origin)
+      })
+    ) {
+      const origins = dAppEntries.map(([origin]) => origin);
+      await removeAllDAppSessions(origins);
+      mutate();
+    }
 
-    await Promise.all(promises);
-    mutate();
-
-    setIsLoading(false);
-  }, [dAppEntries, mutate, removeDAppSession]);
+    // mutate();
+  }, [confirm, dAppEntries, mutate, removeAllDAppSessions]);
 
   return (
     <div className="w-full h-full max-w-sm mx-auto pb-8">
@@ -116,8 +117,8 @@ const DAppSettings: FC = () => {
               padding={'8px 0 8px 0'}
             />
           </div>
-          <ButtonRounded isLoading={isLoading} onClick={handleRemoveAllClick} className="w-full" size="big">
-            Disconnect all
+          <ButtonRounded onClick={handleRemoveAllClick} className="w-full" size="big">
+            <T id="disconnectAll" />
           </ButtonRounded>
         </div>
       )}

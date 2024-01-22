@@ -3247,5 +3247,8 @@
   },
   "getPro": {
     "message": "Get Pro"
+  },
+  "disconnectAll": {
+    "message": "Disconnect All"
   }
 }

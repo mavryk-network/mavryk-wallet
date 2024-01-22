@@ -29,7 +29,8 @@ import {
   requestSign,
   requestBroadcast,
   getAllDApps,
-  removeDApp
+  removeDApp,
+  removeAllDApps
 } from './dapp';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
@@ -229,6 +230,10 @@ export function updateSettings(settings: Partial<TempleSettings>) {
 
 export function getAllDAppSessions() {
   return getAllDApps();
+}
+
+export function removeAllDAppSessions(origins: string[]) {
+  return removeAllDApps(origins);
 }
 
 export function removeDAppSession(origin: string) {

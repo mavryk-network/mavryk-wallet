@@ -284,6 +284,8 @@ export enum TempleMessageType {
   DAppSignConfirmationResponse = 'TEMPLE_DAPP_SIGN_CONFIRMATION_RESPONSE',
   DAppGetAllSessionsRequest = 'TEMPLE_DAPP_GET_ALL_SESSIONS_REQUEST',
   DAppGetAllSessionsResponse = 'TEMPLE_DAPP_GET_ALL_SESSIONS_RESPONSE',
+  DAppRemoveAllSessionsRequest = 'TEMPLE_DAPP_REMOVE_ALL_SESSIONS_REQUEST',
+  DAppRemoveAllSessionsResponse = 'TEMPLE_DAPP_REMOVE_ALL_SESSIONS_RESPONSE',
   DAppRemoveSessionRequest = 'TEMPLE_DAPP_REMOVE_SESSION_REQUEST',
   DAppRemoveSessionResponse = 'TEMPLE_DAPP_REMOVE_SESSION_RESPONSE',
   SendTrackEventRequest = 'SEND_TRACK_EVENT_REQUEST',
@@ -328,6 +330,7 @@ export type TempleRequest =
   | TempleUpdateSettingsRequest
   | TempleGetAllDAppSessionsRequest
   | TempleRemoveDAppSessionRequest
+  | TempleRemoveDAppAllSessionsRequest
   | TempleSendTrackEventRequest
   | TempleSendPageEventRequest;
 
@@ -361,6 +364,7 @@ export type TempleResponse =
   | TempleUpdateSettingsResponse
   | TempleGetAllDAppSessionsResponse
   | TempleRemoveDAppSessionResponse
+  | TempleRemoveDAppAllSessionsResponse
   | TempleSendTrackEventResponse
   | TempleSendPageEventResponse;
 
@@ -695,6 +699,14 @@ interface TempleRemoveDAppSessionRequest extends TempleMessageBase {
 
 interface TempleRemoveDAppSessionResponse extends TempleMessageBase {
   type: TempleMessageType.DAppRemoveSessionResponse;
+  sessions: TempleDAppSessions;
+}
+interface TempleRemoveDAppAllSessionsRequest extends TempleMessageBase {
+  type: TempleMessageType.DAppRemoveAllSessionsRequest;
+  sessions: TempleDAppSessions;
+}
+interface TempleRemoveDAppAllSessionsResponse extends TempleMessageBase {
+  type: TempleMessageType.DAppRemoveAllSessionsResponse;
   sessions: TempleDAppSessions;
 }
 

@@ -335,6 +335,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     return res.sessions;
   }, []);
 
+  const removeAllDAppSessions = useCallback(async (origins: string[]) => {
+    const res = await request({
+      type: TempleMessageType.DAppRemoveAllSessionsRequest,
+      origins
+    });
+    assertResponse(res.type === TempleMessageType.DAppRemoveAllSessionsResponse);
+    return res.sessions;
+  }, []);
+
   const removeDAppSession = useCallback(async (origin: string) => {
     const res = await request({
       type: TempleMessageType.DAppRemoveSessionRequest,
@@ -387,6 +396,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     createTaquitoWallet,
     createTaquitoSigner,
     getAllDAppSessions,
+    removeAllDAppSessions,
     removeDAppSession
   };
 });

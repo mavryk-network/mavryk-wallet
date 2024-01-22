@@ -374,6 +374,20 @@ export async function removeDApp(origin: string) {
   return restDApps;
 }
 
+export async function removeAllDApps(origins: string[]) {
+  await setDApps({});
+
+  const promises = origins.map(async origin => {
+    return await Beacon.removeDAppPublicKey(origin);
+  });
+
+  await Promise.all(promises);
+
+  return {} as {
+    [x: string]: TempleDAppSession;
+  };
+}
+
 function setDApps(newDApps: TempleDAppSessions) {
   return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
 }

@@ -658,6 +658,7 @@ module.exports = {
       },
       spacing: {
         10: '0.625rem',
+        '40px': '2.5rem',
         '14px': '0.875rem',
         13: '3.25rem',
         15: '3.75rem',

@@ -53,7 +53,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
       },
       {
         key: 'support',
-        linkTo: null,
+        linkTo: '/stake',
         Icon: SupportSvgIcon,
         i18nKey: 'support',
         onClick: closePopup

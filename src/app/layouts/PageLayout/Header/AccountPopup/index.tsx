@@ -45,7 +45,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         setAccountPkh(publicKeyHash);
       }
       setOpened(false);
-      navigate('/', HistoryAction.Replace);
     },
     [account, setAccountPkh, setOpened]
   );

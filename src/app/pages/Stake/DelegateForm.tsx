@@ -284,37 +284,6 @@ const DelegateForm: FC = () => {
       {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8" />}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* {useMemo(
-          () => (
-            <div className="mb-6 border rounded-md p-2 flex items-center">
-              <img src={browser.runtime.getURL(logo)} alt={symbol} className="w-auto h-12 mr-3" />
-
-              <div className="font-light leading-none">
-                <div className="flex items-center">
-                  <div className="flex flex-col">
-                    <span className="text-xl text-gray-700 flex items-baseline">
-                      <Money>{balance}</Money>{' '}
-                      <span style={{ fontSize: '0.75em' }}>
-                        <span className="ml-1">{symbol}</span>
-                      </span>
-                    </span>
-
-                    <InFiat assetSlug="tez" volume={balance}>
-                      {({ balance, symbol }) => (
-                        <div className="mt-1 text-sm text-gray-500 flex items-baseline">
-                          {balance}
-                          <span className="ml-1">{symbol}</span>
-                        </div>
-                      )}
-                    </InFiat>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ),
-          [balance, symbol, logo]
-        )} */}
-
         <Controller
           name="to"
           as={<NoSpaceField ref={toFieldRef} />}
@@ -323,21 +292,12 @@ const DelegateForm: FC = () => {
           onChange={([v]) => v}
           onFocus={() => toFieldRef.current?.focus()}
           textarea
-          rows={2}
+          rows={1}
           cleanable={Boolean(toValue)}
           onClean={cleanToField}
           id="delegate-to"
-          label={isDcpNetwork ? t('producer') : t('baker')}
-          labelDescription={
-            canUseDomainNames
-              ? t('bakerInputDescriptionWithDomain')
-              : isDcpNetwork
-              ? t('producerInputDescription')
-              : null
-          }
-          placeholder={
-            canUseDomainNames ? t('recipientInputPlaceholderWithDomain') : t('enterPublicAddressPlaceholder')
-          }
+          label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
+          placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
           errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
           style={{
             resize: 'none'
@@ -585,9 +545,9 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
   ];
 
   return (
-    <div className="my-6 flex flex-col">
-      <h2 className="mb-4 leading-tight flex flex-col">
-        <span className="text-base font-semibold text-gray-700">
+    <div className="flex flex-col">
+      <h2 className="mb-4 -mt-2 leading-tight flex items-center justify-between">
+        <span className="text-base-plus text-white">
           <T id="delegateToPromotedValidators" />
         </span>
 
@@ -601,7 +561,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         <T id="promoteYourself" />
       </AlertWithAction>
 
-      <div className="flex flex-col rounded-md overflow-hidden border text-gray-700 text-sm leading-tight">
+      <div className="flex flex-col overflow-hidden text-white text-sm mt-1">
         {sortedKnownBakers.map((baker, i, arr) => {
           const last = i === arr.length - 1;
           const handleBakerClick = () => {
@@ -612,10 +572,9 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
 
           let testId = DelegateFormSelectors.knownBakerItemButton;
           let classnames = classNames(
-            'hover:bg-gray-100 focus:bg-gray-100',
+            'hover:bg-primary-card',
             'transition ease-in-out duration-200',
-            'focus:outline-none',
-            'opacity-90 hover:opacity-100'
+            'focus:outline-none'
           );
 
           if (baker.address === RECOMMENDED_BAKER_ADDRESS) {
@@ -623,11 +582,10 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
             if (testGroupName === ABTestGroup.B) {
               testId = DelegateFormSelectors.knownBakerItemBButton;
               classnames = classNames(
-                'hover:bg-gray-100 focus:bg-gray-100',
+                'hover:bg-primary-card',
                 'transition ease-in-out duration-200',
                 'focus:outline-none',
-                'opacity-90 hover:opacity-100',
-                'bg-orange-100'
+                'opacity-90 hover:opacity-100'
               );
             }
           }
@@ -645,7 +603,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
                 bakerPkh={baker.address}
                 link
                 style={{ width: undefined }}
-                className={classNames(!last && 'border-b border-gray-200')}
+                className={classNames(!last && 'border-b border-divider')}
               />
             </Button>
           );

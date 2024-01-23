@@ -10,8 +10,8 @@ import { FooterSocials } from '../Socials/FooterSocials';
 import { LINKS } from '../Socials/socials.consts';
 
 const About: FC = () => (
-  <div className="flex flex-col items-center pb-8">
-    <div className="flex flex-col items-center mb-4">
+  <div className="flex flex-col items-center pb-8 pt-4">
+    <div className="flex flex-col items-center mb-4 px-4">
       <LogoSecondary style={{ width: 44, height: 44 }} className="mb-3" />
 
       <div className="text-center">
@@ -25,20 +25,20 @@ const About: FC = () => (
       </div>
     </div>
 
-    <div className="text-base-plus text-white">
+    <div className="text-base-plus text-white px-4">
       <T id="aboutDescription" />
     </div>
 
-    <Divider color="bg-divider" className="mt-4" />
+    <Divider color="bg-divider" className="mt-4 px-4" />
 
     <div className="w-full">
       {LINKS.map(({ link, testID, ...rest }) => (
         <Anchor key={link} href={link} testID={testID}>
-          <ListItemWithNavigate {...rest} fullWidthDivider className="px-0 py-4" />
+          <ListItemWithNavigate {...rest} />
         </Anchor>
       ))}
     </div>
-    <section className="flex flex-col items-center mt-8">
+    <section className="flex flex-col items-center mt-8 px-4">
       <div className="mb-3 text-sm text-white text-center">
         <T id="aboutFooterDescription" />
       </div>

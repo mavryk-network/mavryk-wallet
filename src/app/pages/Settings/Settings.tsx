@@ -159,7 +159,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
         </>
       }
       isTopbarVisible={false}
-      removePaddings={!activeTab}
+      removePaddings={!activeTab || activeTab.linkTo === 'about'}
       RightSidedComponent={toolbarRightSidedComponent}
     >
       <div className="h-full">

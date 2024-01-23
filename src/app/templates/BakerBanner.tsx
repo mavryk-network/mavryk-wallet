@@ -36,7 +36,7 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
 
   return (
     <div
-      className={classNames('w-full', 'border rounded-md', 'p-3', className)}
+      className={classNames('w-full', 'py-14px px-4', className)}
       style={{
         maxWidth: undefined,
         ...style
@@ -44,26 +44,22 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
     >
       {baker ? (
         <>
-          <div className={classNames('flex items-stretch', 'text-gray-700')}>
+          <div className={classNames('flex items-stretch', 'text-white')}>
             <div>
               <img
                 src={baker.logo}
                 alt={baker.name}
-                className={classNames('flex-shrink-0', 'w-16 h-16', 'bg-white rounded shadow-xs')}
+                className={classNames('flex-shrink-0', 'bg-white rounded-full')}
                 style={{
-                  minHeight: '2rem'
+                  minHeight: '2rem',
+                  width: 59,
+                  height: 59
                 }}
               />
             </div>
 
             <div className="flex flex-col items-start flex-1 ml-2 relative">
-              <div
-                className={classNames(
-                  'w-full mb-2 text-lg text-gray-900',
-                  'flex flex-wrap items-center',
-                  'leading-none'
-                )}
-              >
+              <div className={classNames('w-full mb-2 text-base-plus text-white', 'flex flex-wrap items-center')}>
                 <Name
                   style={{
                     fontSize: '17px',

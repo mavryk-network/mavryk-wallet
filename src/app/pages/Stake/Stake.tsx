@@ -5,6 +5,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
 
+import DelegateForm from './DelegateForm';
 import { useBakingHistory } from './hooks/use-baking-history';
 
 export const Stake: FC = () => {
@@ -12,9 +13,7 @@ export const Stake: FC = () => {
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<T id="stake"></T>}>
-      <div className="h-full pb-8">
-        {unfamiliarWithDelegation ? <UnfamiliarWithDelegationScreen /> : <DelegateForm />}
-      </div>
+      <div className="h-full pb-8">{false ? <UnfamiliarWithDelegationScreen /> : <DelegateForm />}</div>
     </PageLayout>
   );
 };
@@ -78,8 +77,4 @@ const UnfamiliarWithDelegationScreen: FC = () => {
       </ButtonRounded>
     </>
   );
-};
-
-const DelegateForm: FC = () => {
-  return <div className="text-white text-base-plus">Delegate Form (Replase it)</div>;
 };

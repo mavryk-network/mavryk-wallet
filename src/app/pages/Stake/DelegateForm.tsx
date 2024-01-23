@@ -7,6 +7,7 @@ import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useFor
 import browser from 'webextension-polyfill';
 
 import { Alert, Button, FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
@@ -282,7 +283,7 @@ const DelegateForm: FC = () => {
       {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8" />}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {useMemo(
+        {/* {useMemo(
           () => (
             <div className="mb-6 border rounded-md p-2 flex items-center">
               <img src={browser.runtime.getURL(logo)} alt={symbol} className="w-auto h-12 mr-3" />
@@ -311,7 +312,7 @@ const DelegateForm: FC = () => {
             </div>
           ),
           [balance, symbol, logo]
-        )}
+        )} */}
 
         <Controller
           name="to"
@@ -331,9 +332,11 @@ const DelegateForm: FC = () => {
               ? t('bakerInputDescriptionWithDomain')
               : isDcpNetwork
               ? t('producerInputDescription')
-              : t('bakerInputDescription')
+              : null
           }
-          placeholder={canUseDomainNames ? t('recipientInputPlaceholderWithDomain') : t('bakerInputPlaceholder')}
+          placeholder={
+            canUseDomainNames ? t('recipientInputPlaceholderWithDomain') : t('enterPublicAddressPlaceholder')
+          }
           errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
           style={{
             resize: 'none'
@@ -581,26 +584,13 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
     <div className="my-6 flex flex-col">
       <h2 className="mb-4 leading-tight flex flex-col">
         <span className="text-base font-semibold text-gray-700">
-          <T id="delegateToRecommendedBakers" />
-        </span>
-
-        <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-          <T
-            id="clickOnBakerPrompt"
-            substitutions={[
-              <a
-                href="https://baking-bad.org/"
-                key="link"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-normal underline"
-              >
-                Baking Bad
-              </a>
-            ]}
-          />
+          <T id="delegateToPromotedValidators" />
         </span>
       </h2>
+
+      <AlertWithAction btnLabel={t('promote')}>
+        <T id="promoteYourself" />
+      </AlertWithAction>
 
       <div className="mb-2 flex items-center">
         <span className="mr-1 text-xs text-gray-500">
@@ -616,7 +606,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
             <Link
               key={key}
               to={{
-                pathname: '/delegate',
+                pathname: '/stake',
                 search: `${SORT_BAKERS_BY_KEY}=${key}`
               }}
               replace

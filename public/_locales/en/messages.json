@@ -3271,5 +3271,17 @@
   },
   "stakeListItem4": {
     "message": "Your Mavryk tokens always remain liquid in your wallet & under you control. Use anytime!"
+  },
+  "delegateToValidator": {
+    "message": "Delegate to Custom Validator"
+  },
+  "delegateToPromotedValidators": {
+    "message": "Delegate to Promoted Validators "
+  },
+  "promote": {
+    "message": "Promote"
+  },
+  "promoteYourself": {
+    "message": "Are you a validator? Promote yourself!"
   }
 }

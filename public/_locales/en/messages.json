@@ -3283,5 +3283,11 @@
   },
   "promoteYourself": {
     "message": "Are you a validator? Promote yourself!"
+  },
+  "availableSpace": {
+    "message": "Available Space"
+  },
+  "upTime": {
+    "message": "Up time"
   }
 }

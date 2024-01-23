@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { FC, ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_FEE, WalletOperation } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
@@ -16,6 +16,7 @@ import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeIn
 import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
 import OperationStatus from 'app/templates/OperationStatus';
+import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
@@ -390,6 +391,12 @@ interface BakerFormProps {
   formState: FormStateProxy<FormData>;
 }
 
+export enum SortOptions {
+  AVAILABLE_SPACE = 'availableSpace',
+  FEE = 'fee',
+  UP_TIME = 'upTime'
+}
+
 const BakerForm: React.FC<BakerFormProps> = ({
   baker,
   submitError,
@@ -517,59 +524,55 @@ const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, ba
 
 const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {
   const knownBakers = useKnownBakers();
-  const { search } = useLocation();
   const testGroupName = useUserTestingGroupNameSelector();
 
-  const bakerSortTypes = useMemo(
+  const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
+
+  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
     () => [
       {
-        key: 'rank',
-        title: t('rank'),
-        testID: DelegateFormSelectors.sortBakerByRankTab
+        id: SortOptions.AVAILABLE_SPACE,
+        selected: sortOption === SortOptions.AVAILABLE_SPACE,
+        onClick: () => {
+          setSortOption(SortOptions.AVAILABLE_SPACE);
+        },
+        nameI18nKey: 'availableSpace'
       },
       {
-        key: 'fee',
-        title: t('fee'),
-        testID: DelegateFormSelectors.sortBakerByFeeTab
+        id: SortOptions.FEE,
+        selected: sortOption === SortOptions.FEE,
+        onClick: () => setSortOption(SortOptions.FEE),
+        nameI18nKey: 'fee'
       },
       {
-        key: 'space',
-        title: t('space'),
-        testID: DelegateFormSelectors.sortBakerBySpaceTab
-      },
-      {
-        key: 'staking',
-        title: t('staking'),
-        testID: DelegateFormSelectors.sortBakerByStakingTab
+        id: SortOptions.UP_TIME,
+        selected: sortOption === SortOptions.UP_TIME,
+        onClick: () => setSortOption(SortOptions.UP_TIME),
+        nameI18nKey: 'upTime'
       }
     ],
-    []
+    [sortOption]
   );
 
-  const sortBakersBy = useMemo(() => {
-    const usp = new URLSearchParams(search);
-    const val = usp.get(SORT_BAKERS_BY_KEY);
-    return bakerSortTypes.find(({ key }) => key === val) ?? bakerSortTypes[0];
-  }, [search, bakerSortTypes]);
   const baseSortedKnownBakers = useMemo(() => {
     if (!knownBakers) return null;
 
     const toSort = Array.from(knownBakers);
-    switch (sortBakersBy.key) {
-      case 'fee':
-        return toSort.sort((a, b) => a.fee - b.fee);
-
-      case 'space':
+    switch (sortOption) {
+      case SortOptions.AVAILABLE_SPACE:
         return toSort.sort((a, b) => b.freeSpace - a.freeSpace);
 
-      case 'staking':
-        return toSort.sort((a, b) => b.stakingBalance - a.stakingBalance);
+      case SortOptions.FEE:
+        return toSort.sort((a, b) => a.fee - b.fee);
 
-      case 'rank':
+      case SortOptions.UP_TIME:
+        return toSort.sort((a, b) => b.estimatedRoi - a.estimatedRoi);
+
       default:
         return toSort;
     }
-  }, [knownBakers, sortBakersBy]);
+  }, [knownBakers, sortOption]);
+
   if (!baseSortedKnownBakers) return null;
   const sponsoredBakers = baseSortedKnownBakers.filter(
     baker => baker.address === RECOMMENDED_BAKER_ADDRESS || baker.address === HELP_UKRAINE_BAKER_ADDRESS
@@ -580,50 +583,23 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
       baker => baker.address !== RECOMMENDED_BAKER_ADDRESS && baker.address !== HELP_UKRAINE_BAKER_ADDRESS
     )
   ];
+
   return (
     <div className="my-6 flex flex-col">
       <h2 className="mb-4 leading-tight flex flex-col">
         <span className="text-base font-semibold text-gray-700">
           <T id="delegateToPromotedValidators" />
         </span>
+
+        <SortPopup>
+          <SortButton />
+          <SortPopupContent items={memoizedSortAssetsOptions} />
+        </SortPopup>
       </h2>
 
       <AlertWithAction btnLabel={t('promote')}>
         <T id="promoteYourself" />
       </AlertWithAction>
-
-      <div className="mb-2 flex items-center">
-        <span className="mr-1 text-xs text-gray-500">
-          <T id="sortBy" />
-        </span>
-
-        {bakerSortTypes.map(({ key, title, testID }, i, arr) => {
-          const first = i === 0;
-          const last = i === arr.length - 1;
-          const selected = sortBakersBy.key === key;
-
-          return (
-            <Link
-              key={key}
-              to={{
-                pathname: '/stake',
-                search: `${SORT_BAKERS_BY_KEY}=${key}`
-              }}
-              replace
-              className={classNames(
-                'border px-2 py-px text-xs text-gray-600',
-                first ? 'rounded rounded-r-none' : last ? 'rounded rounded-l-none border-l-0' : 'border-l-0',
-                selected && 'bg-gray-100'
-              )}
-              testID={testID}
-            >
-              {title}
-            </Link>
-          );
-        })}
-
-        <div className="flex-1" />
-      </div>
 
       <div className="flex flex-col rounded-md overflow-hidden border text-gray-700 text-sm leading-tight">
         {sortedKnownBakers.map((baker, i, arr) => {

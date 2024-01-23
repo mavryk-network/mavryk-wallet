@@ -34,7 +34,7 @@ const About: FC = () => (
     <div className="w-full">
       {LINKS.map(({ link, testID, ...rest }) => (
         <Anchor key={link} href={link} testID={testID}>
-          <ListItemWithNavigate {...rest} />
+          <ListItemWithNavigate {...rest} fullWidthDivider />
         </Anchor>
       ))}
     </div>

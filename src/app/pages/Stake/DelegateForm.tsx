@@ -305,7 +305,7 @@ const DelegateForm: FC = () => {
           style={{
             resize: 'none'
           }}
-          containerClassName={'px-4 mb-4'}
+          containerClassName={classNames('px-4 mb-4', toFilled && 'hidden')}
           testID={DelegateFormSelectors.bakerInput}
         />
 
@@ -407,24 +407,30 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const tzError = submitError || estimationError;
 
   return restFormDisplayed ? (
-    <div className="flex-grow flex flex-col">
+    <div className="flex-grow flex flex-col mt-4">
       <BakerBannerComponent baker={baker} tzError={tzError} />
       <div className="mx-4 px-3 py-2 bg-primary-card rounded-lg mb-6">
         <HashChip hash={toValue} type="link" small trim={false} />
       </div>
 
-      <div className="px-4 flex flex-col flex-grow">
-        <AdditionalFeeInput
-          name="fee"
-          control={control}
-          onChange={handleFeeFieldChange}
-          assetSymbol={assetSymbol}
-          baseFee={baseFee}
-          error={errors.fee}
-          id="delegate-fee"
-        />
+      <div className={classNames('h-full px-4 flex flex-col flex-grow')}>
+        <div className={classNames(!Boolean(tzError) && 'flex-grow')}>
+          <AdditionalFeeInput
+            name="fee"
+            control={control}
+            onChange={handleFeeFieldChange}
+            assetSymbol={assetSymbol}
+            baseFee={baseFee}
+            error={errors.fee}
+            id="delegate-fee"
+          />
+        </div>
 
-        {tzError && <DelegateErrorAlert type={submitError ? 'submit' : 'estimation'} error={tzError} />}
+        {tzError && (
+          <div className="flex-grow flex items-start">
+            <DelegateErrorAlert type={submitError ? 'submit' : 'estimation'} error={tzError} />
+          </div>
+        )}
 
         <FormSubmitButton
           loading={formState.isSubmitting}

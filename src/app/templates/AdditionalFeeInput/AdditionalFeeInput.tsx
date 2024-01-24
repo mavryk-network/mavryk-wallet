@@ -7,6 +7,7 @@ import React, {
   MutableRefObject,
   SVGProps,
   useCallback,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -27,6 +28,8 @@ import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { TID, toLocalFixed, T, t } from 'lib/i18n';
 import { useGasToken } from 'lib/temple/front';
 
+import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
+import { InputContainer } from '../InputContainer/InputContainer';
 import { AdditionalFeeInputSelectors } from './AdditionalFeeInput.selectors';
 
 type AssetFieldProps = typeof AssetField extends ForwardRefExoticComponent<infer T> ? T : never;
@@ -100,7 +103,7 @@ const AdditionalFeeInput: FC<AdditionalFeeInputProps> = props => {
       id={id}
       assetSymbol={assetSymbol}
       onFocus={focusCustomFeeInput}
-      label={t('additionalFee')}
+      label={t('networkFee')}
       labelDescription={
         baseFee instanceof BigNumber && (
           <T
@@ -141,6 +144,7 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
   const [selectedPreset, setSelectedPreset] = useState<FeeOption['type']>(
     feeOptions.find(({ amount }) => amount === value)?.type || 'custom'
   );
+
   const handlePresetSelected = useCallback(
     (newType: FeeOption['type']) => {
       setSelectedPreset(newType);
@@ -152,33 +156,38 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
     [onChange]
   );
 
+  const selectedFeeOption = useMemo(
+    () => feeOptions.find(option => option.type === selectedPreset) ?? feeOptions[0],
+    [selectedPreset]
+  );
+
   return (
-    <div className="flex flex-col w-full mb-2">
+    <div className="flex flex-col w-full mb-2 flex-grow">
       {label ? (
         <label className="flex flex-col mb-4 leading-tight" htmlFor={`${id}-select`}>
-          <span className="text-base font-semibold text-gray-700">{label}</span>
+          <span className="text-base-plus text-white">{label}</span>
 
-          {labelDescription && (
-            <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">{labelDescription}</span>
-          )}
+          {labelDescription && <span className="mt-1 text-sm text-secondary-white max-w-9/10">{labelDescription}</span>}
         </label>
       ) : null}
 
-      <div className="relative flex flex-col items-stretch">
-        <CustomSelect
-          activeItemId={selectedPreset}
-          className="mb-4"
-          getItemId={getFeeOptionId}
-          id={`${id}-select`}
-          items={feeOptions}
-          onSelect={handlePresetSelected}
-          padding="0.2rem 0.375rem 0.2rem 0.375rem"
-          OptionIcon={FeeOptionIcon}
-          OptionContent={FeeOptionContent}
+      <div className="relative flex flex-col items-stretch rounded">
+        <DropdownSelect
+          optionsListClassName="p-0"
+          dropdownWrapperClassName="border-none rounded-2xl-plus"
+          dropdownButtonClassName="px-4 py-14px"
+          DropdownFaceContent={<FeeOptionFace {...selectedFeeOption} />}
+          optionsProps={{
+            options: feeOptions,
+            noItemsText: 'No items',
+            getKey: getFeeOptionId,
+            renderOptionContent: option => <FeeOptionContent {...option} />,
+            onOptionChange: option => handlePresetSelected(option.type)
+          }}
         />
 
         <AssetField
-          containerClassName={classNames(selectedPreset !== 'custom' && 'hidden', 'mb-2')}
+          containerClassName={classNames(selectedPreset !== 'custom' && 'hidden', 'my-4')}
           id={id}
           onChange={onChange}
           ref={customFeeInputRef}
@@ -191,26 +200,34 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
   );
 };
 
-const FeeOptionIcon: FC<OptionRenderProps<FeeOption>> = ({ item: { Icon } }) => {
-  if (Icon) {
-    return <Icon className="flex-none inline-block stroke-current opacity-90" style={{ width: 24, height: 24 }} />;
-  }
+const FeeOptionFace: FC<FeeOption> = ({ type, amount }) => {
+  const { metadata } = useGasToken();
 
-  return <div style={{ width: 24, height: 24 }} />;
+  return (
+    <section className="flex items-center justify-between w-full text-base-plus text-white">
+      <span>{type}</span>
+      <div className="flex items-center text-secondary-white text-sm">
+        {amount && <Money cryptoDecimals={5}>{amount}</Money>}
+        <span className="ml-1" style={{ fontSize: '0.75em' }}>
+          {metadata.symbol}
+        </span>
+      </div>
+    </section>
+  );
 };
 
-const FeeOptionContent: FC<OptionRenderProps<FeeOption>> = ({ item: { descriptionI18nKey, amount } }) => {
+const FeeOptionContent: FC<FeeOption> = ({ descriptionI18nKey, amount }) => {
   const { metadata } = useGasToken();
 
   return (
     <>
-      <div className="flex flex-wrap items-center">
-        <Name className="w-16 text-sm font-medium leading-tight text-left">
+      <div className="p-4 flex items-center justify-between w-full bg-primary-card hover:bg-gray-710">
+        <Name className="text-base-plus text-white text-left">
           <T id={descriptionI18nKey} />
         </Name>
 
         {amount && (
-          <div className="ml-2 leading-none text-gray-600 flex items-baseline">
+          <div className="ml-2 text-sm text-secondary-white flex items-baseline">
             <Money cryptoDecimals={5}>{amount}</Money>{' '}
             <span className="ml-1" style={{ fontSize: '0.75em' }}>
               {metadata.symbol}

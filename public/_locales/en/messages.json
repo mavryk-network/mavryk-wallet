@@ -75,7 +75,7 @@
     }
   },
   "feeInputDescription": {
-    "message": "Base Fee for this operation is: $fee$\nAdditional - speeds up its confirmation",
+    "message": "Base fee for this operation is $fee$",
     "placeholders": {
       "fee": {
         "content": "$1"
@@ -999,6 +999,9 @@
   },
   "additionalFee": {
     "message": "Additional Fee"
+  },
+  "networkFee": {
+    "message": "Network Fee"
   },
   "asset": {
     "message": "Asset"

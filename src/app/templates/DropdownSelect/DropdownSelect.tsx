@@ -18,7 +18,8 @@ interface Props<T> {
   Input?: ReactNode;
   optionsListClassName?: string;
   dropdownButtonClassName?: string;
-  searchProps: SelectSearchProps;
+  dropdownWrapperClassName?: string;
+  searchProps?: SelectSearchProps;
   optionsProps: SelectOptionsPropsBase<T>;
   testIds?: {
     dropdownTestId?: string;
@@ -32,7 +33,8 @@ export const DropdownSelect = <T extends unknown>({
   testIds,
   DropdownFaceContent,
   optionsListClassName,
-  dropdownButtonClassName
+  dropdownButtonClassName,
+  dropdownWrapperClassName
 }: Props<T>) => {
   const isInputDefined = isDefined(Input);
   const { trackEvent } = useAnalytics();
@@ -52,6 +54,7 @@ export const DropdownSelect = <T extends unknown>({
       popup={({ opened, setOpened }) => (
         <SelectOptions
           optionsListClassName={optionsListClassName}
+          dropdownWrapperClassName={dropdownWrapperClassName}
           opened={opened}
           setOpened={setOpened}
           {...optionsProps}
@@ -60,11 +63,12 @@ export const DropdownSelect = <T extends unknown>({
     >
       {({ ref, opened, toggleOpened }) => (
         <div ref={ref as unknown as React.RefObject<HTMLDivElement>} {...setTestID(testIds?.dropdownTestId)}>
-          {opened ? (
+          {opened && searchProps ? (
             <SelectSearch {...searchProps} className={dropdownButtonClassName} />
           ) : (
             <div className="box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18">
               <button
+                type="button"
                 className={classNames(
                   'flex gap-2 items-center max-h-18',
                   isInputDefined ? 'border-r border-gray-50' : 'w-full justify-between',
@@ -91,6 +95,7 @@ interface SelectOptionsPropsBase<Type> {
   noItemsText: ReactNode;
   isLoading?: boolean;
   optionsListClassName?: string;
+  dropdownWrapperClassName?: string;
   getKey: (option: Type) => string;
   onOptionChange: (newValue: Type) => void;
   renderOptionContent: (option: Type) => ReactNode;
@@ -106,6 +111,7 @@ const SelectOptions = <Type extends unknown>({
   noItemsText,
   isLoading,
   optionsListClassName,
+  dropdownWrapperClassName,
   getKey,
   onOptionChange,
   setOpened,
@@ -119,7 +125,7 @@ const SelectOptions = <Type extends unknown>({
   return (
     <DropdownWrapper
       opened={opened}
-      className="origin-top overflow-x-hidden overflow-y-auto"
+      className={classNames('origin-top overflow-x-hidden overflow-y-auto', dropdownWrapperClassName)}
       style={{
         maxHeight: '15.125rem',
         backgroundColor: '#010101',
@@ -141,7 +147,12 @@ const SelectOptions = <Type extends unknown>({
       <ul className={optionsListClassName}>
         {options.map(option => (
           <li key={getKey(option)}>
-            <button className="w-full" disabled={(option as any).disabled} onClick={() => handleOptionClick(option)}>
+            <button
+              type="button"
+              className="w-full"
+              disabled={(option as any).disabled}
+              onClick={() => handleOptionClick(option)}
+            >
               {renderOptionContent(option)}
             </button>
           </li>

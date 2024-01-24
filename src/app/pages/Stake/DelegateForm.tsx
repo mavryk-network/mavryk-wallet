@@ -6,7 +6,7 @@ import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
 import browser from 'webextension-polyfill';
 
-import { Alert, Button, FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { Alert, Button, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
@@ -191,6 +191,7 @@ const DelegateForm: FC = () => {
     }
   );
   const baseFeeError = baseFee instanceof Error ? baseFee : estimateBaseFeeError;
+
   const estimationError = !estimating ? baseFeeError : null;
 
   const { data: baker, isValidating: bakerValidating } = useKnownBaker(toResolved || null, false);
@@ -279,11 +280,13 @@ const DelegateForm: FC = () => {
     ]
   );
 
-  return (
-    <>
-      {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8" />}
+  const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+  return (
+    <div className={classNames(!restFormDisplayed && 'pt-4', 'h-full')}>
+      {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8 px-4" />}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
         <Controller
           name="to"
           as={<NoSpaceField ref={toFieldRef} />}
@@ -302,12 +305,12 @@ const DelegateForm: FC = () => {
           style={{
             resize: 'none'
           }}
-          containerClassName={baker?.address === HELP_UKRAINE_BAKER_ADDRESS ? 'mb-2' : 'mb-4'}
+          containerClassName={'px-4 mb-4'}
           testID={DelegateFormSelectors.bakerInput}
         />
 
         {resolvedAddress && (
-          <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
+          <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center px-4">
             <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
             <span className="font-normal">{resolvedAddress}</span>
           </div>
@@ -327,9 +330,11 @@ const DelegateForm: FC = () => {
           setValue={setValue}
           triggerValidation={triggerValidation}
           formState={formState}
+          restFormDisplayed={restFormDisplayed}
+          toValue={toValue}
         />
       </form>
-    </>
+    </div>
   );
 };
 
@@ -342,6 +347,8 @@ interface BakerFormProps {
   estimationError: any;
   estimating: boolean;
   bakerValidating: boolean;
+  restFormDisplayed: boolean;
+  toValue: string;
   baseFee?: BigNumber | ArtificialError | UnchangedError | UnregisteredDelegateError;
   control: Control<FormData>;
   handleFeeFieldChange: ([v]: any) => any;
@@ -370,7 +377,9 @@ const BakerForm: React.FC<BakerFormProps> = ({
   handleFeeFieldChange,
   setValue,
   triggerValidation,
-  formState
+  formState,
+  restFormDisplayed,
+  toValue
 }) => {
   const testGroupName = useUserTestingGroupNameSelector();
   const assetSymbol = 'ꜩ';
@@ -395,45 +404,41 @@ const BakerForm: React.FC<BakerFormProps> = ({
       </div>
     );
   }
-  const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
   const tzError = submitError || estimationError;
 
   return restFormDisplayed ? (
-    <>
-      {baker?.address === HELP_UKRAINE_BAKER_ADDRESS && (
-        <Alert
-          type="delegate"
-          title={t('helpUkraineDisclainerTitle')}
-          description={t('helpUkraineDisclainerDescription')}
-          className="mb-6"
-        />
-      )}
-
+    <div className="flex-grow flex flex-col">
       <BakerBannerComponent baker={baker} tzError={tzError} />
+      <div className="mx-4 px-3 py-2 bg-primary-card rounded-lg mb-6">
+        <HashChip hash={toValue} type="link" small trim={false} />
+      </div>
 
-      {tzError && <DelegateErrorAlert type={submitError ? 'submit' : 'estimation'} error={tzError} />}
+      <div className="px-4 flex flex-col flex-grow">
+        <AdditionalFeeInput
+          name="fee"
+          control={control}
+          onChange={handleFeeFieldChange}
+          assetSymbol={assetSymbol}
+          baseFee={baseFee}
+          error={errors.fee}
+          id="delegate-fee"
+        />
 
-      <AdditionalFeeInput
-        name="fee"
-        control={control}
-        onChange={handleFeeFieldChange}
-        assetSymbol={assetSymbol}
-        baseFee={baseFee}
-        error={errors.fee}
-        id="delegate-fee"
-      />
+        {tzError && <DelegateErrorAlert type={submitError ? 'submit' : 'estimation'} error={tzError} />}
 
-      <FormSubmitButton
-        loading={formState.isSubmitting}
-        disabled={Boolean(estimationError)}
-        testID={DelegateFormSelectors.bakerDelegateButton}
-        testIDProperties={{
-          message: bakerTestMessage
-        }}
-      >
-        {t('delegate')}
-      </FormSubmitButton>
-    </>
+        <FormSubmitButton
+          loading={formState.isSubmitting}
+          disabled={Boolean(estimationError)}
+          className="mt-6"
+          testID={DelegateFormSelectors.bakerDelegateButton}
+          testIDProperties={{
+            message: bakerTestMessage
+          }}
+        >
+          {t('stake')}
+        </FormSubmitButton>
+      </div>
+    </div>
   ) : (
     <KnownDelegatorsList setValue={setValue} triggerValidation={triggerValidation} />
   );
@@ -455,7 +460,7 @@ const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, ba
   const { symbol } = useGasToken();
   return baker ? (
     <>
-      <div className="-mt-2 mb-6 flex flex-col items-center">
+      <div className="-mt-2 flex flex-col items-center">
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
       </div>
 
@@ -546,20 +551,22 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
 
   return (
     <div className="flex flex-col">
-      <h2 className="mb-4 -mt-2 leading-tight flex items-center justify-between">
+      <h2 className=" w-full mb-4 -mt-2 leading-tight flex items-center justify-between px-4">
         <span className="text-base-plus text-white">
           <T id="delegateToPromotedValidators" />
         </span>
 
         <SortPopup>
-          <SortButton />
+          <SortButton className="-mr-1" />
           <SortPopupContent items={memoizedSortAssetsOptions} />
         </SortPopup>
       </h2>
 
-      <AlertWithAction btnLabel={t('promote')}>
-        <T id="promoteYourself" />
-      </AlertWithAction>
+      <div className="px-4">
+        <AlertWithAction btnLabel={t('promote')}>
+          <T id="promoteYourself" />
+        </AlertWithAction>
+      </div>
 
       <div className="flex flex-col overflow-hidden text-white text-sm mt-1">
         {sortedKnownBakers.map((baker, i, arr) => {
@@ -676,7 +683,7 @@ const DelegateErrorAlert: FC<DelegateErrorAlertProps> = ({ type, error }) => {
         }
       })()}
       autoFocus
-      className="mt-6 mb-4"
+      className="my-6"
     />
   );
 };

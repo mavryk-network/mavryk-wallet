@@ -58,7 +58,7 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
               />
             </div>
 
-            <div className="flex flex-col items-start flex-1 ml-2 relative">
+            <div className="flex flex-col items-start flex-1 ml-4 relative">
               <div className={classNames('w-full mb-2 text-base-plus text-white', 'flex flex-wrap items-center')}>
                 <Name
                   style={{
@@ -86,32 +86,31 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
               </div>
 
               <div className="flex flex-wrap items-center w-full">
-                <div className={classNames('flex-1 flex items-start', popup ? (link ? 'mr-3' : 'mr-7') : 'mr-8')}>
+                <div className={classNames('flex items-start', popup ? (link ? 'mr-6' : 'mr-7') : 'mr-8')}>
                   <div
-                    className={classNames('text-xs leading-tight flex', 'text-gray-500 flex-col', 'items-start flex-1')}
+                    className={classNames(
+                      'text-xs leading-tight flex',
+                      'text-secondary-white flex-col',
+                      'items-start flex-1'
+                    )}
                   >
-                    <T id="staking" />:
-                    <span style={{ marginTop: 2 }} className="text-gray-600 flex">
-                      <Money>{(baker.stakingBalance / 1000).toFixed(0)}</Money>K
-                    </span>
-                  </div>
-                </div>
-                <div className={classNames('flex-1 flex items-start', popup ? (link ? 'mr-3' : 'mr-7') : 'mr-8')}>
-                  <div
-                    className={classNames('text-xs leading-tight flex', 'text-gray-500 flex-col', 'items-start flex-1')}
-                  >
-                    <T id="space" />:
-                    <span style={{ marginTop: 2 }} className="text-gray-600 flex">
+                    <T id="space" />
+                    <span className="mt-1 text-white flex">
                       <Money>{(baker.freeSpace / 1000).toFixed(0)}</Money>K
                     </span>
                   </div>
                 </div>
-                <div className={classNames('flex-1 flex items-start', popup ? 'mr-9' : 'mr-16')}>
+
+                <div className={classNames('flex items-start', popup ? 'mr-6' : 'mr-16')}>
                   <div
-                    className={classNames('text-xs leading-tight', 'text-gray-500 flex flex-col', 'items-start flex-1')}
+                    className={classNames(
+                      'text-xs leading-tight',
+                      'text-secondary-white flex flex-col',
+                      'items-start flex-1'
+                    )}
                   >
-                    <T id="fee" />:
-                    <span style={{ marginTop: 2 }} className="text-gray-600">
+                    <T id="fee" />
+                    <span className="mt-1 text-white">
                       {toLocalFormat(new BigNumber(baker.fee).times(100), {
                         decimalPlaces: 2
                       })}
@@ -119,10 +118,28 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
                     </span>
                   </div>
                 </div>
+
+                <div className={classNames('flex items-start', popup ? (link ? 'mr-6' : 'mr-7') : 'mr-8')}>
+                  <div
+                    className={classNames(
+                      'text-xs leading-tight flex',
+                      'text-secondary-white flex-col',
+                      'items-start flex-1'
+                    )}
+                  >
+                    <T id="upTime" />
+                    <span className="mt-1 text-white flex">
+                      {toLocalFormat(new BigNumber(baker.estimatedRoi).times(100), {
+                        decimalPlaces: 2
+                      })}
+                      %{/* <Money>{(baker.estimatedRoi / 1000).toFixed(0)}</Money> */}
+                    </span>
+                  </div>
+                </div>
               </div>
               {link && (
                 <div className={classNames('absolute right-0 top-0 bottom-0', 'flex items-center', 'text-gray-500')}>
-                  <ChevronRightIcon className="h-5 w-auto stroke-current" />
+                  <ChevronRightIcon className="h-6 w-auto stroke-white stroke-1" />
                 </div>
               )}
             </div>
@@ -185,7 +202,7 @@ const BakerAccount: React.FC<{
 
 const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-blue-500 text-white ml-2')}
+    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
     style={{ borderRadius: '10px' }}
   >
     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
@@ -193,7 +210,7 @@ const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBake
 );
 const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-primary-orange text-white ml-2')}
+    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
     style={{ borderRadius: '10px' }}
   >
     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />

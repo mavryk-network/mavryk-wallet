@@ -13,7 +13,7 @@ type HashChipProps = HTMLAttributes<HTMLButtonElement> &
 
 export const HashChip: FC<HashChipProps> = ({
   hash,
-  trim,
+  trim = true,
   trimAfter,
   firstCharsCount,
   lastCharsCount,
@@ -33,6 +33,7 @@ export const HashChip: FC<HashChipProps> = ({
       trimAfter={trimAfter}
       firstCharsCount={firstCharsCount}
       lastCharsCount={lastCharsCount}
+      trim={trim}
     />
     {showIcon && <CopyIcon className="stroke-cyan w-4 h-4" />}
   </CopyButton>

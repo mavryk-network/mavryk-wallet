@@ -11,7 +11,7 @@ export const AlertWithAction: FC<AlertWithActionProps> = ({ children, btnLabel, 
     <section className="bg-accent-blue-hover p-2 text-sm text-gray-410 flex items-center justify-between rounded-lg">
       <div>{children}</div>
       <div
-        className="text-sm tracking-normal bg-accent-blue text-white py-1 px-10px text-center ml-3 rounded"
+        className="text-sm tracking-normal bg-accent-blue text-white py-1 px-10px text-center ml-3 rounded cursor-pointer"
         onClick={onClick}
       >
         {btnLabel}

@@ -1,5 +1,7 @@
 import React, { FC, ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
+import classNames from 'clsx';
+
 import { RadioButton } from 'app/atoms/RadioButton';
 import { Switcher } from 'app/atoms/Switcher';
 import { ReactComponent as SortIcon } from 'app/icons/sort.svg';
@@ -98,11 +100,11 @@ const SortListItem: FC<{ item: SortListItemType }> = ({ item }) => {
 };
 
 // Sort button
-export const SortButton = () => {
+export const SortButton: FC<{ className?: string }> = ({ className }) => {
   const { open } = useSortPopup();
 
   return (
-    <div className="p-1 cursor-pointer" onClick={open}>
+    <div className={classNames('p-1 cursor-pointer', className)} onClick={open}>
       <SortIcon className="w-6 h-auto" />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
@@ -10,10 +10,17 @@ import { useBakingHistory } from './hooks/use-baking-history';
 
 export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
+  const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<T id="stake"></T>}>
-      <div className="h-full pb-8">{false ? <UnfamiliarWithDelegationScreen /> : <DelegateForm />}</div>
+    <PageLayout isTopbarVisible={false} pageTitle={<T id="stake" />} removePaddings>
+      <div className="h-full pb-8">
+        {showStakeScreen ? (
+          <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
+        ) : (
+          <DelegateForm />
+        )}
+      </div>
     </PageLayout>
   );
 };
@@ -53,12 +60,19 @@ const UnfamiliarListItem: FC<UnfamiliarListItemType> = ({ content, i18nKey }) =>
   );
 };
 
-const UnfamiliarWithDelegationScreen: FC = () => {
-  return (
-    <>
-      <div className="text-base text-white text-center">
-        {/* {`${t('delegationPointsHead1', <>text</>)}`} */}
+type UnfamiliarWithDelegationScreenProps = {
+  setShowStakeScreen: (value: boolean) => void;
+};
 
+const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({ setShowStakeScreen }) => {
+  const handleBtnClick = useCallback(() => {
+    // skip delegate onboarding screen
+    setShowStakeScreen(false);
+  }, [setShowStakeScreen]);
+
+  return (
+    <div className="px-4 pt-4">
+      <div className="text-base text-white text-center">
         <T id="delegationPointsHead1" substitutions={<span className="text-accent-blue">~5.6%</span>} />
       </div>
       <div className="bg-primary-card rounded-2xl-plus p-6 flex flex-col gap-6 my-6">
@@ -72,9 +86,9 @@ const UnfamiliarWithDelegationScreen: FC = () => {
         </div>
         <FooterSocials />
       </section>
-      <ButtonRounded size="big" className="mt-40px w-full" fill>
+      <ButtonRounded onClick={handleBtnClick} size="big" className="mt-40px w-full" fill>
         <T id="continue" />
       </ButtonRounded>
-    </>
+    </div>
   );
 };

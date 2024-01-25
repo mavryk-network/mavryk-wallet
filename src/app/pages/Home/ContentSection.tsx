@@ -93,7 +93,7 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
     const history: TabData = {
       name: 'history',
       titleI18nKey: 'history',
-      Component: () => <ActivityComponent assetSlug={assetSlug} />,
+      Component: () => <HistoryComponent assetSlug={assetSlug} />,
       testID: HomeSelectors.historyTab
     };
 

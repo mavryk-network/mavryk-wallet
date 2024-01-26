@@ -9,7 +9,7 @@ import ErrorBoundary from 'app/ErrorBoundary';
 import { ToolbarElement } from 'app/layouts/PageLayout';
 import { ActivityComponent } from 'app/templates/activity/Activity';
 import AssetInfo from 'app/templates/AssetInfo';
-import { TabsBar } from 'app/templates/TabBar';
+import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { isTezAsset } from 'lib/assets';
 import { t, TID } from 'lib/i18n';
 

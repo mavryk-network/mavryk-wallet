@@ -14,7 +14,7 @@ import {
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import AddressChip from 'app/templates/AddressChip';
 import OperationStatus from 'app/templates/OperationStatus';
-import { TabsBar } from 'app/templates/TabBar';
+import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { objktCurrencies } from 'lib/apis/objkt';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';

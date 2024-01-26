@@ -211,10 +211,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({
   return (
     <>
       <div
-        className={classNames(
-          'relative rounded-md overflow-y-auto border',
-          'flex flex-col text-gray-700 text-sm leading-tight'
-        )}
+        className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm')}
         style={{ height: gasFeeError ? '10rem' : '11rem' }}
       >
         {expenses.map((item, index, arr) => (
@@ -380,19 +377,19 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
   const withdrawal = useMemo(() => ['transaction', 'transfer'].includes(item.type), [item.type]);
 
   return (
-    <div className={classNames('pt-3 pb-2 px-2 flex items-stretch', !last && 'border-b border-gray-200')}>
+    <div className={classNames('p-4 flex items-center bg-primary-card rounded-2xl-plus', !last && 'mb-2')}>
       <div className="mr-2">
-        <Identicon hash={iconHash} type={iconType} size={40} className="shadow-xs" />
+        <Identicon hash={iconHash} type={iconType} size={32} className="rounded-full" />
       </div>
 
-      <div className="flex-1 flex-col">
-        <div className="mb-1 text-xs text-gray-500 font-light flex flex-wrap">
-          <span className="mr-1 flex items-center text-blue-600 opacity-100">{operationTypeLabel}</span>
+      <div className="flex-1 flex-col gap-1">
+        <div className="flex items-center text-base-plus text-white">
+          <span className="mr-1 flex items-center">{operationTypeLabel}</span>
 
           {argumentDisplayProps && <OperationArgumentDisplay {...argumentDisplayProps} />}
         </div>
 
-        <div className="flex items-end flex-shrink-0 flex-wrap text-gray-800">
+        <div className="flex items-end flex-shrink-0 flex-wrap text-secondary-white">
           {item.expenses
             .filter(expense => new BigNumber(expense.amount).isGreaterThan(0))
             .map((expense, index, arr) => (
@@ -427,9 +424,9 @@ const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey,
     substitutions={
       <>
         {arg.map((value, index) => (
-          <span key={index}>
+          <span key={index} className="flex">
             &nbsp;
-            <HashChip className="text-blue-600 opacity-75" key={index} hash={value} type="link" />
+            <HashChip key={index} hash={value} type="link" small trim />
             {index === arg.length - 1 ? null : ','}
           </span>
         ))}

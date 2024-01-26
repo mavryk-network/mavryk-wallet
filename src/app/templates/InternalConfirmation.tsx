@@ -32,6 +32,7 @@ import { useSafeState } from 'lib/ui/hooks';
 import { isTruthy, delay } from 'lib/utils';
 
 import { InternalConfirmationSelectors } from './InternalConfirmation.selectors';
+import TabsSwitcher from './TabsSwicther/TabsSwitcher';
 
 type InternalConfiramtionProps = {
   payload: TempleConfirmationPayload;
@@ -255,14 +256,14 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" />
 
                 {signPayloadFormats.length > 1 && (
-                  <div className="w-full flex justify-end mb-3 items-center">
-                    <span className="mr-2 text-base font-semibold text-white">
+                  <div className="w-full flex justify-end mb-3">
+                    <span className="mr-2 text-base-plus text-white">
                       <T id="operations" />
                     </span>
 
                     <div className="flex-1" />
 
-                    <ViewsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
+                    <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
                   </div>
                 )}
 

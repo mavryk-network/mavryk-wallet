@@ -3,7 +3,7 @@ import React, { CSSProperties, memo, ReactNode } from 'react';
 import classNames from 'clsx';
 import ReactJson from 'react-json-view';
 
-import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
+import { ReactComponent as CopyIcon } from 'app/icons/copy-square.svg';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
@@ -29,7 +29,7 @@ type OperationsBannerProps = {
   label?: ReactNode;
   className?: string;
   copyButtonClassName?: string;
-  modifyFeeAndLimitComponent: JSX.Element | null;
+  modifyFeeAndLimitComponent?: JSX.Element | null;
 };
 
 const OperationsBanner = memo<OperationsBannerProps>(
@@ -53,17 +53,15 @@ const OperationsBanner = memo<OperationsBannerProps>(
 
     return (
       <>
-        {label && (
-          <h2 className={classNames('w-full mb-2', 'text-base font-semibold leading-tight', 'text-white')}>{label}</h2>
-        )}
+        {label && <h2 className={classNames('w-full mb-2', 'text-base-plus leading-tight', 'text-white')}>{label}</h2>}
 
         <div className={classNames('relative mb-2', className)}>
           <div
             className={classNames(
-              'block w-full max-w-full p-4',
+              'block w-full max-w-full p-2',
               'rounded-2xl',
-              'border-2 bg-gray-910',
-              'text-base-plus',
+              'bg-gray-910',
+              'text-base-plus text-white',
               typeof opParams === 'string' ? 'break-all' : 'whitespace-nowrap overflow-auto'
             )}
             style={{
@@ -81,10 +79,12 @@ const OperationsBanner = memo<OperationsBannerProps>(
                 iconStyle="square"
                 indentWidth={4}
                 collapsed={collapsedArgs}
-                collapseStringsAfterLength={36}
+                collapseStringsAfterLength={12}
                 enableClipboard={false}
                 displayObjectSize={false}
                 displayDataTypes={false}
+                theme="twilight"
+                style={{ background: '#171717', color: '#f4f4f4', textDecoration: 'none' }}
               />
             )}
           </div>
@@ -150,8 +150,6 @@ const CopyButton = memo<CopyButtonProps>(({ toCopy }) => {
         type="button"
         className={classNames(
           'mx-auto',
-          'p-1',
-          'border border-white rounded',
           'flex items-center justify-center',
           'text-white',
           'text-xs leading-snug',
@@ -159,7 +157,7 @@ const CopyButton = memo<CopyButtonProps>(({ toCopy }) => {
         )}
         onClick={copy}
       >
-        {copied ? <T id="copiedHash" /> : <CopyIcon className={classNames('h-4 w-auto', 'stroke-blue-200 stroke-2')} />}
+        {copied ? <T id="copiedHash" /> : <CopyIcon className={classNames('h-6 w-auto', 'stroke-2')} />}
       </button>
 
       <textarea ref={fieldRef} value={text} readOnly className="sr-only" />

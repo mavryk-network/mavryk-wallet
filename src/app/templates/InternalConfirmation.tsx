@@ -241,7 +241,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         )}
       >
         <div
-          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md overflow-y-auto')}
+          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar')}
           style={{ height: '34rem' }}
         >
           <div>
@@ -357,7 +357,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch pt-4">
+          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch py-4">
             <div className="w-1/2 pr-2">
               <ButtonRounded
                 type="button"

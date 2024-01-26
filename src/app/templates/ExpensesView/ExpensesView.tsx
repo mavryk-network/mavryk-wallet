@@ -56,7 +56,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLi
   return (
     <>
       <div
-        className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm')}
+        className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm')}
         style={{ height: gasFeeError ? '14.5rem' : '15.5rem' }}
       >
         {expenses.map((item, index, arr) => (
@@ -79,13 +79,13 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLi
             <button
               className={classNames(
                 'absolute right-0 top-0 flex items-center justify-center w-4 h-4 rounded',
-                'bg-gray-200 text-gray-500 transform transition-transform duration-500',
+                'text-white transform transition-transform duration-500',
                 showDetails && 'rotate-180'
               )}
               onClick={toggleShowDetails}
               {...setTestID(OperationsBannerSelectors.errorDropDownButton)}
             >
-              <ChevronDownIcon className="w-4 h-4 stroke-1 stroke-current" />
+              <ChevronDownIcon className="w-4 h-4 stroke-2 stroke-white" />
             </button>
           </div>
           <Collapse
@@ -94,7 +94,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLi
             initialStyle={{ height: '0px', overflow: 'hidden' }}
           >
             <div className="flex flex-col mt-2">
-              <OperationsBanner copyButtonClassName="pr-8 pt-4" opParams={error ?? {}} />
+              <OperationsBanner copyButtonClassName="p-2" opParams={error ?? {}} />
             </div>
           </Collapse>
         </div>

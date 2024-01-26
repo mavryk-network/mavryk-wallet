@@ -87,7 +87,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({
     const storageFee = mutezToTz(storageFeeMutez);
 
     return (
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col gap-3">
         {[
           {
             key: 'totalFee',
@@ -135,26 +135,23 @@ const ExpensesView: FC<ExpensesViewProps> = ({
                           'mr-1',
                           'appearance-none',
                           'w-24',
-                          'py-px px-1',
+                          'px-2 py-1',
                           'border',
-                          gasFeeError ? 'border-red-300' : 'border-gray-300',
-                          'focus:border-primary-orange',
-                          'bg-gray-100 focus:bg-transparent',
-                          'focus:outline-none focus:shadow-outline',
+                          gasFeeError ? 'border-primary-error' : 'border-gray-50',
+                          'focus:border-accent-blue',
+                          'bg-primary-bg',
                           'transition ease-in-out duration-200',
                           'rounded',
                           'text-right',
-                          'text-gray-700 text-sm leading-tight',
-                          'placeholder-gray-600'
+                          'text-white text-base-plus',
+                          'placeholder-text-secondary-white'
                         )}
                       />
                       {symbol}
                     </>
                   ) : (
                     <span className="flex items-baseline">
-                      <span className="font-medium">
-                        <Money>{value}</Money>
-                      </span>
+                      <Money>{value}</Money>
                       <span className="ml-1">{symbol}</span>
                     </span>
                   )}
@@ -184,17 +181,16 @@ const ExpensesView: FC<ExpensesViewProps> = ({
                 className={classNames(
                   'appearance-none',
                   'w-24',
-                  'py-px pl-1',
+                  'py-1 px-2',
                   'border',
-                  'border-gray-300',
-                  'focus:border-primary-orange',
-                  'bg-gray-100 focus:bg-transparent',
-                  'focus:outline-none focus:shadow-outline',
+                  'border-gray-50',
+                  'focus:border-accent-blue',
+                  'bg-primary-bg',
                   'transition ease-in-out duration-200',
                   'rounded',
                   'text-right',
-                  'text-gray-700 text-sm leading-tight',
-                  'placeholder-gray-600'
+                  'text-white text-base-plus leading-tight',
+                  'placeholder-secondary-white'
                 )}
               />
             )}
@@ -212,7 +208,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({
     <>
       <div
         className={classNames('relative overflow-y-auto', 'flex flex-col text-white text-sm')}
-        style={{ height: gasFeeError ? '10rem' : '11rem' }}
+        style={{ height: gasFeeError ? '14.5rem' : '15.5rem' }}
       >
         {expenses.map((item, index, arr) => (
           <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
@@ -220,15 +216,18 @@ const ExpensesView: FC<ExpensesViewProps> = ({
 
         {modifyFeeAndLimit && (
           <>
+            <div className="text-white textbase-plus mt-4">
+              <T id="payment" />
+            </div>
             <div className="flex-1" />
 
             <div
               className={classNames(
                 'sticky bottom-0 left-0 right-0',
                 'flex items-center',
-                'px-2 py-1',
-                'bg-gray-200 bg-opacity-90 border-t',
-                'text-sm text-gray-700'
+                'p-4 rounded-2xl-plus',
+                'bg-primary-card',
+                'text-base-plus text-white'
               )}
             >
               {modifyFeeAndLimitSection}
@@ -237,14 +236,14 @@ const ExpensesView: FC<ExpensesViewProps> = ({
         )}
       </div>
       {gasFeeError && (
-        <p className="text-xs text-red-600 pt-1 h-4">
+        <p className="text-xs text-primary-error pt-1 h-4">
           <T id="gasFeeMustBePositive" />
         </p>
       )}
       {error && (
-        <div className="rounded-lg flex flex-col border border-red-700 my-2 py-2 px-4 justify-center">
+        <div className="rounded-lg flex flex-col border border-primary-error my-2 py-2 px-4 justify-center">
           <div className="relative flex justify-center">
-            <span className="text-red-700 text-center" {...setTestID(OperationsBannerSelectors.errorText)}>
+            <span className="text-primary-error text-center" {...setTestID(OperationsBannerSelectors.errorText)}>
               <T id="txIsLikelyToFail" />
             </span>
             <button

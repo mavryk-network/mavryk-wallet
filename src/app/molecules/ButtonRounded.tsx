@@ -49,7 +49,7 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           size === 'big' && btnBig,
           fill && !disabled
             ? 'bg-accent-blue hover:bg-accent-blue-hover border border-accent-blue '
-            : 'bg-transparent  border-2 border-solid border-accent-blue',
+            : 'bg-transparent  border-2 border-solid border-accent-blue hover:bg-accent-blue-hover',
           isLoading && ' flex justify-center w-24 align-middle',
           disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed border-none text-gray-15',
           className

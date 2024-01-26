@@ -14,6 +14,7 @@ import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setOnRampPossibilityAction } from 'app/store/settings/actions';
 import AccountBanner from 'app/templates/AccountBanner';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
@@ -309,18 +310,20 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-0 w-full bg-white shadow-md flex items-stretch px-4 pt-2 pb-4">
+          <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch pt-2 pb-8">
             <div className="w-1/2 pr-2">
-              <FormSecondaryButton
+              <ButtonRounded
                 type="button"
+                size="big"
                 className="w-full"
-                loading={declining}
+                isLoading={declining}
                 disabled={declining}
+                fill={false}
                 onClick={handleDeclineClick}
                 testID={InternalConfirmationSelectors.declineButton}
               >
-                <T id="decline" />
-              </FormSecondaryButton>
+                <T id="cancel" />
+              </ButtonRounded>
             </div>
 
             <div className="w-1/2 pl-2">

@@ -10,6 +10,7 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 import Popper from 'lib/ui/Popper';
+import { Link } from 'lib/woozie';
 
 import styles from './Header.module.css';
 import { HeaderSelectors } from './Header.selectors';
@@ -78,6 +79,10 @@ const Control: FC = () => {
           </Button>
         )}
       </Popper> */}
+
+      <Link to="/temp" className="text-white text-base-plus">
+        temp
+      </Link>
 
       <AccountPopupButton account={account} child={<GetProlabel />} />
 

@@ -13,6 +13,7 @@ import { useAppEnv } from 'app/env';
 import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
+import PageLayout from 'app/layouts/PageLayout';
 import { setOnRampPossibilityAction } from 'app/store/settings/actions';
 import AccountBanner from 'app/templates/AccountBanner';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
@@ -41,6 +42,7 @@ type InternalConfiramtionProps = {
 const MIN_GAS_FEE = 0;
 
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
+  console.log(payload, onConfirm, payloadError);
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
   const { popup } = useAppEnv();
   const dispatch = useDispatch();
@@ -230,126 +232,114 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   );
 
   return (
-    <div className={classNames('h-full w-full max-w-sm mx-auto flex flex-col', !popup && 'justify-center px-2')}>
-      <div className={classNames('flex flex-col items-center justify-center', popup && 'flex-1')}>
-        <div className="flex items-center my-4">
-          <Logo hasTitle />
-        </div>
-      </div>
+    <PageLayout pageTitle={t('confirmOperation')} isTopbarVisible={false}>
+      <div className={classNames('h-full w-full max-w-sm mx-auto flex flex-col', !popup && 'justify-center px-2')}>
+        <NetworkBanner rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc} narrow={false} />
+        <div
+          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md overflow-y-auto')}
+          style={{ height: '34rem' }}
+        >
+          <div className="">
+            {error ? (
+              <Alert
+                closable
+                onClose={handleErrorAlertClose}
+                type="error"
+                title={t('error')}
+                description={error?.message ?? t('smthWentWrong')}
+                className="my-4"
+                autoFocus
+              />
+            ) : (
+              <div>
+                <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" />
 
-      <div
-        className={classNames(
-          'flex flex-col relative bg-white shadow-md overflow-y-auto',
-          popup ? 'border-t border-gray-200' : 'rounded-md'
-        )}
-        style={{ height: '34rem' }}
-      >
-        <div className="px-4 pt-3">
-          <SubTitle small className="mb-4">
-            <T id="confirmAction" substitutions={t(payload.type === 'sign' ? 'signAction' : 'operations')} />
-          </SubTitle>
+                {signPayloadFormats.length > 1 && (
+                  <div className="w-full flex justify-end mb-3 items-center">
+                    <span className="mr-2 text-base font-semibold text-white">
+                      <T id="operations" />
+                    </span>
 
-          {error ? (
-            <Alert
-              closable
-              onClose={handleErrorAlertClose}
-              type="error"
-              title={t('error')}
-              description={error?.message ?? t('smthWentWrong')}
-              className="my-4"
-              autoFocus
-            />
-          ) : (
-            <>
-              <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" />
+                    <div className="flex-1" />
 
-              <NetworkBanner rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc} />
+                    <ViewsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
+                  </div>
+                )}
 
-              {signPayloadFormats.length > 1 && (
-                <div className="w-full flex justify-end mb-3 items-center">
-                  <span className="mr-2 text-base font-semibold text-gray-700">
-                    <T id="operations" />
-                  </span>
-
-                  <div className="flex-1" />
-
-                  <ViewsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
-                </div>
-              )}
-
-              {payload.type === 'operations' && spFormat.key === 'raw' && (
-                <OperationsBanner
-                  opParams={payload.rawToSign ?? payload.opParams}
-                  jsonViewStyle={signPayloadFormats.length > 1 ? { height: '11rem' } : undefined}
-                  modifiedTotalFee={modifiedTotalFeeValue}
-                  modifiedStorageLimit={modifiedStorageLimitValue}
-                />
-              )}
-
-              {payload.type === 'sign' && spFormat.key === 'bytes' && (
-                <>
-                  <RawPayloadView
-                    label={t('payloadToSign')}
-                    payload={payload.bytes}
-                    className="mb-4"
-                    style={{ height: '11rem' }}
+                {payload.type === 'operations' && spFormat.key === 'raw' && (
+                  <OperationsBanner
+                    opParams={payload.rawToSign ?? payload.opParams}
+                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: '11rem' } : undefined}
+                    modifiedTotalFee={modifiedTotalFeeValue}
+                    modifiedStorageLimit={modifiedStorageLimitValue}
                   />
-                </>
-              )}
+                )}
 
-              {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
-                <>
-                  <RawPayloadView payload={payload.bytesToSign} className="mb-4" style={{ height: '11rem' }} />
-                </>
-              )}
+                {payload.type === 'sign' && spFormat.key === 'bytes' && (
+                  <>
+                    <RawPayloadView
+                      label={t('payloadToSign')}
+                      payload={payload.bytes}
+                      className="mb-4"
+                      style={{ height: '11rem' }}
+                    />
+                  </>
+                )}
 
-              {spFormat.key === 'preview' && (
-                <ExpensesView
-                  expenses={expensesData}
-                  error={payloadError}
-                  estimates={payload.type === 'operations' ? payload.estimates : undefined}
-                  modifyFeeAndLimit={modifyFeeAndLimit}
-                  mainnet={mainnet}
-                  gasFeeError={gasFeeError}
-                />
-              )}
-            </>
-          )}
-        </div>
+                {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
+                  <>
+                    <RawPayloadView payload={payload.bytesToSign} className="mb-4" style={{ height: '11rem' }} />
+                  </>
+                )}
 
-        <div className="flex-1" />
-
-        <div className="sticky bottom-0 w-full bg-white shadow-md flex items-stretch px-4 pt-2 pb-4">
-          <div className="w-1/2 pr-2">
-            <FormSecondaryButton
-              type="button"
-              className="w-full"
-              loading={declining}
-              disabled={declining}
-              onClick={handleDeclineClick}
-              testID={InternalConfirmationSelectors.declineButton}
-            >
-              <T id="decline" />
-            </FormSecondaryButton>
+                {spFormat.key === 'preview' && (
+                  <ExpensesView
+                    expenses={expensesData}
+                    error={payloadError}
+                    estimates={payload.type === 'operations' ? payload.estimates : undefined}
+                    modifyFeeAndLimit={modifyFeeAndLimit}
+                    mainnet={mainnet}
+                    gasFeeError={gasFeeError}
+                  />
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="w-1/2 pl-2">
-            <FormSubmitButton
-              type="button"
-              className="justify-center w-full"
-              disabled={gasFeeError}
-              loading={confirming}
-              onClick={handleConfirmClick}
-              testID={error ? InternalConfirmationSelectors.retryButton : InternalConfirmationSelectors.confirmButton}
-            >
-              <T id={error ? 'retry' : 'confirm'} />
-            </FormSubmitButton>
-          </div>
-        </div>
+          <div className="flex-1" />
 
-        <ConfirmLedgerOverlay displayed={confirming && account.type === TempleAccountType.Ledger} />
+          <div className="sticky bottom-0 w-full bg-white shadow-md flex items-stretch px-4 pt-2 pb-4">
+            <div className="w-1/2 pr-2">
+              <FormSecondaryButton
+                type="button"
+                className="w-full"
+                loading={declining}
+                disabled={declining}
+                onClick={handleDeclineClick}
+                testID={InternalConfirmationSelectors.declineButton}
+              >
+                <T id="decline" />
+              </FormSecondaryButton>
+            </div>
+
+            <div className="w-1/2 pl-2">
+              <FormSubmitButton
+                type="button"
+                className="justify-center w-full"
+                disabled={gasFeeError}
+                loading={confirming}
+                onClick={handleConfirmClick}
+                testID={error ? InternalConfirmationSelectors.retryButton : InternalConfirmationSelectors.confirmButton}
+              >
+                <T id={error ? 'retry' : 'confirm'} />
+              </FormSubmitButton>
+            </div>
+          </div>
+
+          <ConfirmLedgerOverlay displayed={confirming && account.type === TempleAccountType.Ledger} />
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

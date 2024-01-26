@@ -16,22 +16,18 @@ const NetworkBanner: FC<NetworkBannerProps> = ({ rpc, narrow = false }) => {
   const knownNetwork = useMemo(() => allNetworks.find(n => n.rpcBaseURL === rpc), [allNetworks, rpc]);
 
   return (
-    <div className={classNames('flex flex-col w-full', narrow ? '-mt-1 mb-2' : 'mb-4')}>
+    <div className={classNames('flex flex-col w-full', narrow ? '-mt-1 mb-2' : 'mb-3')}>
       <h2 className="leading-tight flex flex-col">
-        <span className={classNames(narrow ? 'mb-1' : 'mb-2', 'text-base font-semibold text-gray-700')}>
-          <T id="network" />
-        </span>
-
         {knownNetwork ? (
           <div className="mb-1 flex items-center">
             <div
-              className="mr-1 w-3 h-3 border border-primary-white rounded-full shadow-xs"
+              className="mr-2 w-6 h-6 border border-primary-white rounded-full"
               style={{
                 backgroundColor: knownNetwork.color
               }}
             />
 
-            <span className="text-gray-700 text-sm">
+            <span className="text-white text-base-plus">
               {knownNetwork.nameI18nKey ? t(knownNetwork.nameI18nKey) : knownNetwork.name}
             </span>
           </div>
@@ -39,12 +35,12 @@ const NetworkBanner: FC<NetworkBannerProps> = ({ rpc, narrow = false }) => {
           <div className="w-full mb-1 flex items-center">
             <div
               className={classNames(
-                'flex-shrink-0 mr-1 w-3 h-3 bg-red-500',
-                'border border-primary-white rounded-full shadow-xs'
+                'flex-shrink-0 mr-1 w-3 h-3 bg-primary-error',
+                'border border-primary-white rounded-full'
               )}
             />
 
-            <span className="flex-shrink-0 mr-2 text-xs font-medium uppercase text-red-500">
+            <span className="flex-shrink-0 mr-2 text-xs font-medium uppercase text-primary-error">
               <T id="unknownNetwork" />
             </span>
 

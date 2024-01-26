@@ -3292,5 +3292,8 @@
   },
   "upTime": {
     "message": "Up time"
+  },
+  "confirmOperation": {
+    "message": "Confirm operation"
   }
 }

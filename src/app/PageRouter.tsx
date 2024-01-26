@@ -33,6 +33,8 @@ import * as Woozie from 'lib/woozie';
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
+import InternalConfirmation from './templates/InternalConfirmation';
+import { payloadMock } from './templates/mock';
 import { WithDataLoading } from './WithDataLoading';
 
 interface RouteContext {
@@ -101,6 +103,12 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
   ['/notifications', onlyReady(() => <Notifications />)],
   ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
+  [
+    '/temp',
+    onlyReady(() => (
+      <InternalConfirmation payload={payloadMock as any} onConfirm={(v: boolean) => Promise.resolve()} error={{}} />
+    ))
+  ],
   ['/success', onlyReady(() => <SuccessScreen />)],
   ['*', () => <Woozie.Redirect to="/" />]
 ]);

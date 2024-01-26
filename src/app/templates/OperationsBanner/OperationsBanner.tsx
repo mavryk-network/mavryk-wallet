@@ -29,10 +29,20 @@ type OperationsBannerProps = {
   label?: ReactNode;
   className?: string;
   copyButtonClassName?: string;
+  modifyFeeAndLimitComponent: JSX.Element | null;
 };
 
 const OperationsBanner = memo<OperationsBannerProps>(
-  ({ jsonViewStyle, opParams, modifiedTotalFee, modifiedStorageLimit, label, className, copyButtonClassName }) => {
+  ({
+    jsonViewStyle,
+    opParams,
+    modifiedTotalFee,
+    modifiedStorageLimit,
+    label,
+    className,
+    copyButtonClassName,
+    modifyFeeAndLimitComponent
+  }) => {
     opParams = typeof opParams === 'string' ? opParams : formatOpParams(opParams);
 
     if (typeof opParams === 'object' && !Array.isArray(opParams)) {
@@ -44,18 +54,16 @@ const OperationsBanner = memo<OperationsBannerProps>(
     return (
       <>
         {label && (
-          <h2 className={classNames('w-full mb-2', 'text-base font-semibold leading-tight', 'text-gray-700')}>
-            {label}
-          </h2>
+          <h2 className={classNames('w-full mb-2', 'text-base font-semibold leading-tight', 'text-white')}>{label}</h2>
         )}
 
         <div className={classNames('relative mb-2', className)}>
           <div
             className={classNames(
-              'block w-full max-w-full p-1',
-              'rounded-md',
-              'border-2 bg-gray-100 bg-opacity-50',
-              'text-xs leading-tight font-medium',
+              'block w-full max-w-full p-4',
+              'rounded-2xl',
+              'border-2 bg-gray-910',
+              'text-base-plus',
               typeof opParams === 'string' ? 'break-all' : 'whitespace-nowrap overflow-auto'
             )}
             style={{
@@ -65,9 +73,7 @@ const OperationsBanner = memo<OperationsBannerProps>(
             {...setTestID(OperationsBannerSelectors.errorValue)}
           >
             {typeof opParams === 'string' ? (
-              <div className={classNames('p-1', 'text-lg text-gray-700 font-normal whitespace-pre-line')}>
-                {opParams}
-              </div>
+              <div className={classNames('p-1', 'text-base-plus text-white whitespace-pre-line')}>{opParams}</div>
             ) : (
               <ReactJson
                 src={opParams}
@@ -86,6 +92,8 @@ const OperationsBanner = memo<OperationsBannerProps>(
           <div className={classNames('absolute top-0 right-0 pt-2 pr-2', copyButtonClassName)}>
             <CopyButton toCopy={opParams} />
           </div>
+
+          {modifyFeeAndLimitComponent}
         </div>
       </>
     );
@@ -143,19 +151,15 @@ const CopyButton = memo<CopyButtonProps>(({ toCopy }) => {
         className={classNames(
           'mx-auto',
           'p-1',
-          'bg-primary-orange rounded',
-          'border border-primary-orange',
+          'border border-white rounded',
           'flex items-center justify-center',
-          'text-primary-orange-lighter text-shadow-black-orange',
-          'text-xs font-semibold leading-snug',
-          'transition duration-300 ease-in-out',
-          'opacity-90 hover:opacity-100 focus:opacity-100',
-          'shadow-sm',
-          'hover:shadow focus:shadow'
+          'text-white',
+          'text-xs leading-snug',
+          'transition duration-300 ease-in-out'
         )}
         onClick={copy}
       >
-        {copied ? <T id="copiedHash" /> : <CopyIcon className={classNames('h-4 w-auto', 'stroke-current stroke-2')} />}
+        {copied ? <T id="copiedHash" /> : <CopyIcon className={classNames('h-4 w-auto', 'stroke-blue-200 stroke-2')} />}
       </button>
 
       <textarea ref={fieldRef} value={text} readOnly className="sr-only" />

@@ -5,10 +5,8 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
 
-import { Alert, FormSubmitButton, FormSecondaryButton } from 'app/atoms';
+import { Alert, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
-import Logo from 'app/atoms/Logo';
-import SubTitle from 'app/atoms/SubTitle';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
@@ -21,7 +19,6 @@ import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/Expe
 import NetworkBanner from 'app/templates/NetworkBanner';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import RawPayloadView from 'app/templates/RawPayloadView';
-import ViewsSwitcher from 'app/templates/ViewsSwitcher/ViewsSwitcher';
 import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitcherItem';
 import { toTokenSlug } from 'lib/assets';
 import { T, t } from 'lib/i18n';
@@ -33,6 +30,7 @@ import { useSafeState } from 'lib/ui/hooks';
 import { isTruthy, delay } from 'lib/utils';
 
 import { InternalConfirmationSelectors } from './InternalConfirmation.selectors';
+import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
 import TabsSwitcher from './TabsSwicther/TabsSwitcher';
 
 type InternalConfiramtionProps = {
@@ -44,7 +42,6 @@ type InternalConfiramtionProps = {
 const MIN_GAS_FEE = 0;
 
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
-  console.log(payload, onConfirm, payloadError);
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
   const { popup } = useAppEnv();
   const dispatch = useDispatch();
@@ -90,6 +87,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
       ...restProps
     }));
   }, [rawExpensesData]);
+
+  const estimates = payload.type === 'operations' ? payload.estimates : undefined;
 
   const { data: tezBalanceData } = useBalance('tez', account.publicKeyHash);
   const tezBalance = tezBalanceData!;
@@ -234,14 +233,18 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   );
 
   return (
-    <PageLayout pageTitle={t('confirmOperation')} isTopbarVisible={false}>
-      <div className={classNames('h-full w-full max-w-sm mx-auto flex flex-col', !popup && 'justify-center px-2')}>
-        <NetworkBanner rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc} narrow={false} />
+    <PageLayout pageTitle={t('confirmOperation')} isTopbarVisible={false} removePaddings>
+      <div
+        className={classNames(
+          'h-full w-full max-w-sm mx-auto flex flex-col px-4 mt-4',
+          !popup && 'justify-center px-2'
+        )}
+      >
         <div
           className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md overflow-y-auto')}
           style={{ height: '34rem' }}
         >
-          <div className="">
+          <div>
             {error ? (
               <Alert
                 closable
@@ -254,6 +257,10 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
               />
             ) : (
               <div>
+                <NetworkBanner
+                  rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
+                  narrow={false}
+                />
                 <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" />
 
                 {signPayloadFormats.length > 1 && (
@@ -274,6 +281,15 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     jsonViewStyle={signPayloadFormats.length > 1 ? { height: '11rem' } : undefined}
                     modifiedTotalFee={modifiedTotalFeeValue}
                     modifiedStorageLimit={modifiedStorageLimitValue}
+                    modifyFeeAndLimitComponent={
+                      <ModifyFeeAndLimitComponent
+                        expenses={expensesData}
+                        estimates={estimates}
+                        modifyFeeAndLimit={modifyFeeAndLimit}
+                        mainnet={mainnet}
+                        gasFeeError={gasFeeError}
+                      />
+                    }
                   />
                 )}
 
@@ -284,13 +300,35 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                       payload={payload.bytes}
                       className="mb-4"
                       style={{ height: '11rem' }}
+                      modifyFeeAndLimitComponent={
+                        <ModifyFeeAndLimitComponent
+                          expenses={expensesData}
+                          estimates={estimates}
+                          modifyFeeAndLimit={modifyFeeAndLimit}
+                          mainnet={mainnet}
+                          gasFeeError={gasFeeError}
+                        />
+                      }
                     />
                   </>
                 )}
 
                 {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
                   <>
-                    <RawPayloadView payload={payload.bytesToSign} className="mb-4" style={{ height: '11rem' }} />
+                    <RawPayloadView
+                      payload={payload.bytesToSign}
+                      className="mb-4"
+                      style={{ height: '11rem' }}
+                      modifyFeeAndLimitComponent={
+                        <ModifyFeeAndLimitComponent
+                          expenses={expensesData}
+                          estimates={estimates}
+                          modifyFeeAndLimit={modifyFeeAndLimit}
+                          mainnet={mainnet}
+                          gasFeeError={gasFeeError}
+                        />
+                      }
+                    />
                   </>
                 )}
 
@@ -302,6 +340,15 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     modifyFeeAndLimit={modifyFeeAndLimit}
                     mainnet={mainnet}
                     gasFeeError={gasFeeError}
+                    modifyFeeAndLimitComponent={
+                      <ModifyFeeAndLimitComponent
+                        expenses={expensesData}
+                        estimates={estimates}
+                        modifyFeeAndLimit={modifyFeeAndLimit}
+                        mainnet={mainnet}
+                        gasFeeError={gasFeeError}
+                      />
+                    }
                   />
                 )}
               </div>
@@ -310,7 +357,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch pt-2 pb-8">
+          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch py-4">
             <div className="w-1/2 pr-2">
               <ButtonRounded
                 type="button"

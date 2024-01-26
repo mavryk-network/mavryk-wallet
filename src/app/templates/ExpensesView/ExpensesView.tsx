@@ -6,15 +6,13 @@ import classNames from 'clsx';
 import { Collapse } from 'react-collapse';
 
 import { HashChip, Money, Identicon } from 'app/atoms';
-import PlainAssetInput from 'app/atoms/PlainAssetInput';
 import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import InFiat from 'app/templates/InFiat';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
-import { RawOperationAssetExpense, RawOperationExpenses, useGasToken } from 'lib/temple/front';
-import { mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 
 import { setTestID } from '../../../lib/analytics';
 import OperationsBanner from '../OperationsBanner/OperationsBanner';
@@ -34,6 +32,7 @@ type ExpensesViewProps = {
   estimates?: Estimate[];
   mainnet?: boolean;
   modifyFeeAndLimit?: ModifyFeeAndLimit;
+  modifyFeeAndLimitComponent: JSX.Element | null;
   gasFeeError?: boolean;
   error?: any;
 };
@@ -45,160 +44,10 @@ export interface ModifyFeeAndLimit {
   onStorageLimitChange: (storageLimit: number) => void;
 }
 
-const MAX_GAS_FEE = 1000;
-
-const ExpensesView: FC<ExpensesViewProps> = ({
-  expenses,
-  estimates,
-  mainnet,
-  modifyFeeAndLimit,
-  gasFeeError,
-  error
-}) => {
-  const { symbol } = useGasToken();
+const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLimitComponent, gasFeeError, error }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const toggleShowDetails = useCallback(() => setShowDetails(prevValue => !prevValue), []);
-  const modifyFeeAndLimitSection = useMemo(() => {
-    if (!modifyFeeAndLimit) return null;
-
-    let defaultGasFeeMutez = new BigNumber(0);
-    let storageFeeMutez = new BigNumber(0);
-    if (estimates) {
-      try {
-        let i = 0;
-        for (const e of estimates) {
-          defaultGasFeeMutez = defaultGasFeeMutez.plus(e.suggestedFeeMutez);
-          storageFeeMutez = storageFeeMutez.plus(
-            Math.ceil(
-              (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *
-                (e as any).minimalFeePerStorageByteMutez
-            )
-          );
-          i++;
-        }
-      } catch {
-        return null;
-      }
-    }
-
-    const gasFee = mutezToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mutezToTz(defaultGasFeeMutez);
-    const storageFee = mutezToTz(storageFeeMutez);
-
-    return (
-      <div className="w-full flex flex-col gap-3">
-        {[
-          {
-            key: 'totalFee',
-            title: t('gasFee'),
-            value: gasFee,
-            onChange: modifyFeeAndLimit.onTotalFeeChange
-          },
-          {
-            key: 'storageFeeMax',
-            title: t('storageFeeMax'),
-            value: storageFee
-          },
-          ...(modifyFeeAndLimit.storageLimit !== null
-            ? [
-                {
-                  key: 'storageLimit',
-                  title: t('storageLimit'),
-                  value: modifyFeeAndLimit.storageLimit,
-                  onChange: modifyFeeAndLimit.onStorageLimitChange
-                }
-              ]
-            : [])
-        ].map(({ key, title, value, onChange }, i, arr) => (
-          <div key={key} className={classNames('w-full flex items-center', i !== arr.length - 1 && 'mb-1')}>
-            <div className="whitespace-nowrap overflow-x-auto no-scrollbar opacity-90" style={{ maxWidth: '45%' }}>
-              {title}
-            </div>
-            <div className="mr-1">:</div>
-
-            <div className="flex-1" />
-
-            {value instanceof BigNumber ? (
-              <>
-                <div className="mr-1">
-                  {onChange ? (
-                    <>
-                      <PlainAssetInput
-                        value={value.toFixed()}
-                        onChange={val => {
-                          onChange?.(tzToMutez(val ?? defaultGasFee).toNumber());
-                        }}
-                        max={MAX_GAS_FEE}
-                        placeholder={defaultGasFee.toFixed()}
-                        className={classNames(
-                          'mr-1',
-                          'appearance-none',
-                          'w-24',
-                          'px-2 py-1',
-                          'border',
-                          gasFeeError ? 'border-primary-error' : 'border-gray-50',
-                          'focus:border-accent-blue',
-                          'bg-primary-bg',
-                          'transition ease-in-out duration-200',
-                          'rounded',
-                          'text-right',
-                          'text-white text-base-plus',
-                          'placeholder-text-secondary-white'
-                        )}
-                      />
-                      {symbol}
-                    </>
-                  ) : (
-                    <span className="flex items-baseline">
-                      <Money>{value}</Money>
-                      <span className="ml-1">{symbol}</span>
-                    </span>
-                  )}
-                </div>
-
-                <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet}>
-                  {({ balance, symbol }) => (
-                    <div className="flex">
-                      <span className="opacity-75">(</span>
-                      {balance}
-                      <span className="pr-px ml-1">{symbol}</span>
-                      <span className="opacity-75">)</span>
-                    </div>
-                  )}
-                </InFiat>
-              </>
-            ) : (
-              <input
-                type="number"
-                value={value || ''}
-                onChange={e => {
-                  if (e.target.value.length > 8) return;
-                  const val = +e.target.value;
-                  onChange?.(val > 0 ? val : 0);
-                }}
-                placeholder="0"
-                className={classNames(
-                  'appearance-none',
-                  'w-24',
-                  'py-1 px-2',
-                  'border',
-                  'border-gray-50',
-                  'focus:border-accent-blue',
-                  'bg-primary-bg',
-                  'transition ease-in-out duration-200',
-                  'rounded',
-                  'text-right',
-                  'text-white text-base-plus leading-tight',
-                  'placeholder-secondary-white'
-                )}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  }, [modifyFeeAndLimit, estimates, gasFeeError, mainnet, symbol]);
 
   if (!expenses) {
     return null;
@@ -214,26 +63,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({
           <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
         ))}
 
-        {modifyFeeAndLimit && (
-          <>
-            <div className="text-white textbase-plus mt-4">
-              <T id="payment" />
-            </div>
-            <div className="flex-1" />
-
-            <div
-              className={classNames(
-                'sticky bottom-0 left-0 right-0',
-                'flex items-center',
-                'p-4 rounded-2xl-plus',
-                'bg-primary-card',
-                'text-base-plus text-white'
-              )}
-            >
-              {modifyFeeAndLimitSection}
-            </div>
-          </>
-        )}
+        {modifyFeeAndLimitComponent}
       </div>
       {gasFeeError && (
         <p className="text-xs text-primary-error pt-1 h-4">

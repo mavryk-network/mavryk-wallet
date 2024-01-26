@@ -9,26 +9,38 @@ type RawPayloadViewProps = {
   className?: string;
   style?: CSSProperties;
   fieldWrapperBottomMargin?: boolean;
+  modifyFeeAndLimitComponent: JSX.Element | null;
 };
 
 const RawPayloadView = memo(
-  ({ className, payload, label, rows, style = {}, fieldWrapperBottomMargin = false }: RawPayloadViewProps) => (
-    <FormField
-      textarea
-      rows={rows}
-      id="sign-payload"
-      label={label}
-      value={payload}
-      spellCheck={false}
-      readOnly
-      fieldWrapperBottomMargin={fieldWrapperBottomMargin}
-      className={className}
-      style={{
-        resize: 'none',
-        marginBottom: 0,
-        ...style
-      }}
-    />
+  ({
+    className,
+    payload,
+    label,
+    rows,
+    modifyFeeAndLimitComponent,
+    style = {},
+    fieldWrapperBottomMargin = false
+  }: RawPayloadViewProps) => (
+    <div>
+      <FormField
+        textarea
+        rows={rows}
+        id="sign-payload"
+        label={label}
+        value={payload}
+        spellCheck={false}
+        readOnly
+        fieldWrapperBottomMargin={fieldWrapperBottomMargin}
+        className={className}
+        style={{
+          resize: 'none',
+          marginBottom: 0,
+          ...style
+        }}
+      />
+      {modifyFeeAndLimitComponent}
+    </div>
   )
 );
 

@@ -38,7 +38,7 @@ const ConfirmationOverlay: FC = () => {
 
   return (
     <>
-      {displayed && <DocBg bgClassName="bg-primary-white" />}
+      {displayed && <DocBg bgClassName="bg-primary-bg" />}
 
       <Portal>
         <CSSTransition
@@ -51,7 +51,7 @@ const ConfirmationOverlay: FC = () => {
           }}
           unmountOnExit
         >
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-primary-white">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-primary-bg">
             {confirmation && (
               <InternalConfirmation
                 payload={confirmation.payload}

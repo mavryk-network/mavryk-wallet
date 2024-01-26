@@ -5,13 +5,13 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
 
-import { Alert, FormSubmitButton } from 'app/atoms';
+import { Alert, FormSubmitButton, SubTitle } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
-import PageLayout from 'app/layouts/PageLayout';
+import PageLayout, { ContentPaper, Toolbar } from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setOnRampPossibilityAction } from 'app/store/settings/actions';
 import AccountBanner from 'app/templates/AccountBanner';
@@ -233,17 +233,24 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   );
 
   return (
-    <PageLayout pageTitle={t('confirmOperation')} isTopbarVisible={false} removePaddings>
-      <div
-        className={classNames(
-          'h-full w-full max-w-sm mx-auto flex flex-col px-4 mt-4',
-          !popup && 'justify-center px-2'
-        )}
-      >
+    <div
+      className={classNames(
+        'h-full w-full max-w-sm mx-auto flex flex-col relative overflow-x-hidden',
+        !popup && 'justify-center px-2'
+      )}
+    >
+      <ContentPaper>
+        <Toolbar pageTitle={<T id="confirmOperation" />} />
+
         <div
-          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar')}
+          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar px-4 pt-4')}
           style={{ height: '34rem' }}
         >
+          {/* <div className="sticky top-0 w-full p-4 bg-primary-card">
+          <SubTitle small={false}>
+            <T id="confirmOperation" />
+          </SubTitle>
+        </div> */}
           <div>
             {error ? (
               <Alert
@@ -278,7 +285,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 {payload.type === 'operations' && spFormat.key === 'raw' && (
                   <OperationsBanner
                     opParams={payload.rawToSign ?? payload.opParams}
-                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: '11rem' } : undefined}
+                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: '345px' } : undefined}
                     modifiedTotalFee={modifiedTotalFeeValue}
                     modifiedStorageLimit={modifiedStorageLimitValue}
                     modifyFeeAndLimitComponent={
@@ -357,7 +364,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch py-4">
+          <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch py-4">
             <div className="w-1/2 pr-2">
               <ButtonRounded
                 type="button"
@@ -389,8 +396,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <ConfirmLedgerOverlay displayed={confirming && account.type === TempleAccountType.Ledger} />
         </div>
-      </div>
-    </PageLayout>
+      </ContentPaper>
+    </div>
   );
 };
 

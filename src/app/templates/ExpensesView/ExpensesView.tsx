@@ -32,7 +32,7 @@ type ExpensesViewProps = {
   estimates?: Estimate[];
   mainnet?: boolean;
   modifyFeeAndLimit?: ModifyFeeAndLimit;
-  modifyFeeAndLimitComponent: JSX.Element | null;
+  modifyFeeAndLimitComponent?: JSX.Element | null;
   gasFeeError?: boolean;
   error?: any;
 };

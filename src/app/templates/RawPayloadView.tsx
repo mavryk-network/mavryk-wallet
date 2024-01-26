@@ -9,7 +9,7 @@ type RawPayloadViewProps = {
   className?: string;
   style?: CSSProperties;
   fieldWrapperBottomMargin?: boolean;
-  modifyFeeAndLimitComponent: JSX.Element | null;
+  modifyFeeAndLimitComponent?: JSX.Element | null;
 };
 
 const RawPayloadView = memo(

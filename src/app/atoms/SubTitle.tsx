@@ -9,28 +9,20 @@ type SubTitleProps = HTMLAttributes<HTMLHeadingElement> & {
   small?: boolean;
 };
 
-const SubTitle: FC<SubTitleProps> = ({ className, children, uppercase = true, small = false, ...rest }) => {
-  const comp = (
-    <span className="text-gray-500 px-1">
-      <ComponentIcon className="h-5 w-auto stroke-current" />
-    </span>
-  );
-
+const SubTitle: FC<SubTitleProps> = ({ className, children, uppercase = false, small = false, ...rest }) => {
   return (
     <h2
       className={classNames(
-        'flex items-center justify-center',
-        'text-gray-700',
-        small ? 'text-xl' : 'text-2xl',
+        'flex items-center justify-center text-center',
+        'text-white',
+        small ? 'text-base-plus' : 'text-xl leading-5 tracking-tight',
         'font-light',
         uppercase && 'uppercase',
         className
       )}
       {...rest}
     >
-      {comp}
       {children}
-      {comp}
     </h2>
   );
 };

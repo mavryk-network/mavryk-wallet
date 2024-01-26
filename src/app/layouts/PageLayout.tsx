@@ -84,7 +84,7 @@ export default PageLayout;
 
 type ContentPaparProps = ComponentProps<typeof ContentContainer>;
 
-const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, ...rest }) => {
+export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, ...rest }) => {
   const appEnv = useAppEnv();
 
   return appEnv.fullPage ? (
@@ -123,7 +123,7 @@ type ToolbarProps = {
 
 export let ToolbarElement: HTMLDivElement | null = null;
 
-const Toolbar: FC<ToolbarProps> = ({
+export const Toolbar: FC<ToolbarProps> = ({
   pageTitle,
   hasBackAction = true,
   step,

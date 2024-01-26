@@ -298,8 +298,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     <RawPayloadView
                       label={t('payloadToSign')}
                       payload={payload.bytes}
-                      className="mb-4"
-                      style={{ height: '11rem' }}
+                      className="mb-4 px-4 py-4"
+                      style={{ height: 127, maxHeight: '10rem' }}
                       modifyFeeAndLimitComponent={
                         <ModifyFeeAndLimitComponent
                           expenses={expensesData}
@@ -317,8 +317,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   <>
                     <RawPayloadView
                       payload={payload.bytesToSign}
-                      className="mb-4"
-                      style={{ height: '11rem' }}
+                      className="mb-4 px-4 py-4"
+                      style={{ minHeight: 127, maxHeight: '10rem' }}
                       modifyFeeAndLimitComponent={
                         <ModifyFeeAndLimitComponent
                           expenses={expensesData}
@@ -357,7 +357,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch py-4">
+          <div className="sticky bottom-4 w-full bg-primary-bg shadow-md flex items-stretch pt-4">
             <div className="w-1/2 pr-2">
               <ButtonRounded
                 type="button"

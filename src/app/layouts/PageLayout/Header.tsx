@@ -80,10 +80,6 @@ const Control: FC = () => {
         )}
       </Popper> */}
 
-      <Link to="/temp" className="text-white text-base-plus">
-        temp
-      </Link>
-
       <AccountPopupButton account={account} child={<GetProlabel />} />
 
       <div className="ml-2 flex-1 flex items-start">

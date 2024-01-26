@@ -103,12 +103,12 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
   ['/notifications', onlyReady(() => <Notifications />)],
   ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
-  [
-    '/temp',
-    onlyReady(() => (
-      <InternalConfirmation payload={payloadMock as any} onConfirm={(v: boolean) => Promise.resolve()} error={{}} />
-    ))
-  ],
+  // [
+  //   '/temp',
+  //   onlyReady(() => (
+  //     <InternalConfirmation payload={payloadMock as any} onConfirm={(v: boolean) => Promise.resolve()} error={{}} />
+  //   ))
+  // ],
   ['/success', onlyReady(() => <SuccessScreen />)],
   ['*', () => <Woozie.Redirect to="/" />]
 ]);

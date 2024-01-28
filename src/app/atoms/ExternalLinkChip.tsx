@@ -2,8 +2,8 @@ import React, { FC, useMemo } from 'react';
 
 import clsx from 'clsx';
 
-import { ReactComponent as ArrowTopRightSvgIcon } from 'app/icons/arrow-top-right.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
+import { ReactComponent as ArrowTopRightSvgIcon } from 'app/icons/m_send.svg';
 import type { TestIDProps } from 'lib/analytics';
 import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 
@@ -48,17 +48,14 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
       href={href}
       className={clsx(
         'flex items-center justify-center rounded select-none p-1',
-        'bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-300',
-        alternativeDesign
-          ? 'text-gray-500 bg-gray-200 hover:bg-gray-300'
-          : 'text-gray-600 bg-gray-100 hover:bg-gray-200',
+        'bg-primary-card transition ease-in-out duration-300',
         className
       )}
       treatAsButton={true}
       testID={testID}
       testIDProperties={testIDProperties}
     >
-      <SvgIcon className={clsx('stroke-current fill-current', small ? 'h-3 w-3' : 'h-4 w-4')} />
+      <SvgIcon className={clsx('stroke-cyan', small ? 'h-3 w-3' : 'h-4 w-4')} />
     </Anchor>
   );
 };

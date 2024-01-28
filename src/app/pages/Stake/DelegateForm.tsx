@@ -15,6 +15,7 @@ import { useAppEnv } from 'app/env';
 import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
+import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import OperationStatus from 'app/templates/OperationStatus';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
@@ -44,14 +45,14 @@ import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'l
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
-import { Link, useLocation } from 'lib/woozie';
+import { Link, navigate, useLocation } from 'lib/woozie';
 
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import { DelegateFormSelectors } from './delegateForm.selectors';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
-const SORT_BAKERS_BY_KEY = 'sort_bakers_by';
 
 interface FormData {
   to: string;
@@ -252,6 +253,17 @@ const DelegateForm: FC = () => {
         }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
+
+        // navigate to success screen
+        const hash = operation.hash || operation.opHash;
+
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'stake',
+          btnText: 'goToMain',
+          contentId: 'hash',
+          contentIdFnProps: { hash, i18nKey: 'staking' },
+          subHeader: 'success'
+        });
       } catch (err: any) {
         formAnalytics.trackSubmitFail(analyticsProperties);
 
@@ -267,16 +279,19 @@ const DelegateForm: FC = () => {
       }
     },
     [
-      acc,
+      toResolved,
       formState.isSubmitting,
-      tezos,
-      accountPkh,
       setSubmitError,
       setOperation,
-      reset,
-      getEstimation,
       formAnalytics,
-      toResolved
+      getEstimation,
+      acc.type,
+      acc.publicKeyHash,
+      reset,
+      operation.hash,
+      operation.opHash,
+      tezos,
+      accountPkh
     ]
   );
 

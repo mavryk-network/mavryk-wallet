@@ -217,6 +217,21 @@ const DelegateForm: FC = () => {
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
+  useLayoutEffect(() => {
+    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+      // navigate to success screen
+      const hash = operation.hash || operation.opHash;
+
+      navigate<SuccessStateType>('/success', undefined, {
+        pageTitle: 'stake',
+        btnText: 'goToMain',
+        contentId: 'hash',
+        contentIdFnProps: { hash, i18nKey: 'staking' },
+        subHeader: 'success'
+      });
+    }
+  }, [operation]);
+
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
       const to = toResolved;
@@ -253,17 +268,6 @@ const DelegateForm: FC = () => {
         }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
-
-        // navigate to success screen
-        const hash = operation.hash || operation.opHash;
-
-        navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'stake',
-          btnText: 'goToMain',
-          contentId: 'hash',
-          contentIdFnProps: { hash, i18nKey: 'staking' },
-          subHeader: 'success'
-        });
       } catch (err: any) {
         formAnalytics.trackSubmitFail(analyticsProperties);
 
@@ -288,8 +292,6 @@ const DelegateForm: FC = () => {
       acc.type,
       acc.publicKeyHash,
       reset,
-      operation.hash,
-      operation.opHash,
       tezos,
       accountPkh
     ]

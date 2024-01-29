@@ -188,7 +188,7 @@ export const Toolbar: FC<ToolbarProps> = ({
     <div
       ref={updateRootRef}
       className={classNames(
-        'sticky z-20 flex items-center py-4 px-4',
+        'sticky z-20 flex items-center justify-center py-4 px-4 relative',
         fullPage && !sticked && 'rounded-t',
         sticked ? 'shadow' : 'shadow-sm',
         'bg-primary-card overflow-hidden transition ease-in-out duration-300'
@@ -222,7 +222,10 @@ export const Toolbar: FC<ToolbarProps> = ({
       </div>
 
       {pageTitle && (
-        <h2 className="px-1 flex items-center text-xl tracking-tight text-white font-normal overflow-hidden">
+        <h2
+          className="px-1 flex items-center text-xl tracking-tight text-white font-normal overflow-hidden absolute top-1/2 left-1/2"
+          style={{ transform: 'translate(-50%, -50%)' }}
+        >
           {pageTitle}
         </h2>
       )}

@@ -36,6 +36,7 @@ import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
 import { AcceptAdsBanner } from './AcceptAdsBanner';
 import { ListItem } from './components/ListItem';
+import { TokenDetailsPopup } from './components/TokenDetailsPopup';
 import { StakeTezosTag } from './components/TokenTag/DelegateTag';
 import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
@@ -54,6 +55,15 @@ export const TokensTab: FC = () => {
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
+  const [assetSlug, setAssetSlug] = useState('');
+
+  const handleAssetOpen = useCallback((assetSlug: string) => {
+    setAssetSlug(assetSlug);
+  }, []);
+
+  const handleAssetClose = useCallback(() => {
+    setAssetSlug('');
+  }, []);
 
   const toggleHideZeroBalances = useCallback(
     () => void setIsZeroBalancesHidden(val => !val),
@@ -115,6 +125,7 @@ export const TokensTab: FC = () => {
         assetSlug={assetSlug}
         active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
         balance={balances[assetSlug] ?? new BigNumber(0)}
+        onClick={handleAssetOpen}
       />
     ));
 
@@ -212,6 +223,7 @@ export const TokensTab: FC = () => {
       ) : (
         <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-sm leading-tight">
           {tokensView}
+          <TokenDetailsPopup assetSlug={assetSlug} isOpen={assetSlug.length > 0} onRequestClose={handleAssetClose} />
         </div>
       )}
 

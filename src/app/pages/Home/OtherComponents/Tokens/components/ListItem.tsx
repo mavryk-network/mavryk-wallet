@@ -19,10 +19,11 @@ interface Props {
   active: boolean;
   assetSlug: string;
   balance: BigNumber;
+  onClick: (assetSlug: string) => void;
 }
 
 export const ListItem = memo<Props>(
-  ({ active, assetSlug, balance }) => {
+  ({ active, assetSlug, balance, onClick }) => {
     const metadata = useAssetMetadata(assetSlug);
 
     const apyInfo = useTokenApyInfo(assetSlug);
@@ -44,12 +45,13 @@ export const ListItem = memo<Props>(
     const assetName = getAssetName(metadata);
 
     return (
-      <Link
-        to={toExploreAssetLink(assetSlug)}
+      <div
+        // to={toExploreAssetLink(assetSlug)}
         className={classNameMemo}
-        testID={AssetsSelectors.assetItemButton}
-        testIDProperties={{ key: assetSlug }}
+        // testID={AssetsSelectors.assetItemButton}
+        // testIDProperties={{ key: assetSlug }}
         {...setAnotherSelector('name', assetName)}
+        onClick={() => onClick(assetSlug)}
       >
         <AssetIcon assetSlug={assetSlug} size={44} className="mr-2 flex-shrink-0" />
 
@@ -75,7 +77,7 @@ export const ListItem = memo<Props>(
             />
           </div>
         </div>
-      </Link>
+      </div>
     );
   },
   (prevProps, nextProps) => {

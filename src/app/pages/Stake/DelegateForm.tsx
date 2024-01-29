@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_FEE, WalletOperation } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
@@ -225,7 +225,7 @@ const DelegateForm: FC = () => {
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
       // navigate to success screen
       const hash = operation.hash || operation.opHash;

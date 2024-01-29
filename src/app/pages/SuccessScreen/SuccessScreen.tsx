@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { FC } from 'react';
 
+import CustomPopup, { CustomPopupProps } from 'app/atoms/CustomPopup';
 import { ReactComponent as SuccessIcon } from 'app/icons/m_chevron-down.svg';
 import { BgImageLayout } from 'app/layouts/BgImageLayout/BgImageLayout';
 import PageLayout from 'app/layouts/PageLayout';
@@ -81,3 +82,11 @@ export const SuccessScreen = () => {
     </PageLayout>
   );
 };
+
+// export const SuccesModal: FC<CustomPopupProps> = ({ ...props }) => {
+//   return (
+//     <CustomPopup {...props} className="w-full">
+//       <SuccessScreen />
+//     </CustomPopup>
+//   );
+// };

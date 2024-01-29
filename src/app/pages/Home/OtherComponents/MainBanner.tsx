@@ -56,7 +56,6 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
     <BalanceInfo />
     <div className="flex justify-between items-center w-full">
       <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
-      <ButtonRounded>Delegate</ButtonRounded>
     </div>
   </div>
 );

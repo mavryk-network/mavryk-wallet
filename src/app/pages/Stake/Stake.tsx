@@ -75,7 +75,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
       <div className="text-base text-white text-center">
         <T id="delegationPointsHead1" substitutions={<span className="text-accent-blue">~5.6%</span>} />
       </div>
-      <div className="bg-primary-card rounded-2xl-plus p-6 flex flex-col gap-6 my-6">
+      <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 my-6">
         {unfamiliarDelegateList.map(item => (
           <UnfamiliarListItem key={item.i18nKey} {...item} />
         ))}

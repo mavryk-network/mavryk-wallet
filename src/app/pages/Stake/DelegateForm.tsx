@@ -301,7 +301,7 @@ const DelegateForm: FC = () => {
 
   return (
     <div className={classNames(!restFormDisplayed && 'pt-4', 'h-full')}>
-      {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8 px-4" />}
+      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
         <Controller
@@ -424,7 +424,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const tzError = submitError || estimationError;
 
   return restFormDisplayed ? (
-    <div className="flex-grow flex flex-col mt-4">
+    <div className="flex-grow flex flex-col" style={{ marginTop: 2 }}>
       <BakerBannerComponent baker={baker} tzError={tzError} />
       <div className="mx-4 px-3 py-2 bg-primary-card rounded-lg mb-6">
         <HashChip hash={toValue} type="link" small trim={false} />
@@ -483,7 +483,7 @@ const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, ba
   const { symbol } = useGasToken();
   return baker ? (
     <>
-      <div className="-mt-2 flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
       </div>
 

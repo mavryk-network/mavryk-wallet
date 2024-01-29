@@ -30,7 +30,9 @@ const Header: FC = () => {
     <header className={classNames('bg-primary-card', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
       <ContentContainer className="py-3">
         <div className={classNames(appEnv.fullPage && 'px-4')}>
-          <div className="flex items-center">{ready && <Control />}</div>
+          <div className="flex items-center" style={{ maxHeight: 56 }}>
+            {ready && <Control />}
+          </div>
         </div>
       </ContentContainer>
     </header>

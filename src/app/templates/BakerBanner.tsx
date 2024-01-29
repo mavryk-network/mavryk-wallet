@@ -62,8 +62,8 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
               <div className={classNames('w-full mb-2 text-base-plus text-white', 'flex flex-wrap items-center')}>
                 <Name
                   style={{
-                    fontSize: '17px',
-                    lineHeight: '20px',
+                    fontSize: '16px',
+                    lineHeight: '16px',
                     maxWidth: isHelpUkraineBaker ? (popup ? '5rem' : '8rem') : '12rem'
                   }}
                   testID={BakingSectionSelectors.delegatedBakerName}
@@ -138,8 +138,8 @@ const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAdd
                 </div>
               </div>
               {link && (
-                <div className={classNames('absolute right-0 top-0 bottom-0', 'flex items-center', 'text-gray-500')}>
-                  <ChevronRightIcon className="h-6 w-auto stroke-white stroke-1" />
+                <div className={classNames('absolute right-0 top-0 bottom-0', 'flex items-center', 'text-white')}>
+                  <ChevronRightIcon className="h-6 w-auto" />
                 </div>
               )}
             </div>

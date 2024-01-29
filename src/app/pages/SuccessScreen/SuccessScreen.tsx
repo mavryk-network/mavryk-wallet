@@ -20,7 +20,7 @@ export type SuccessStateType = {
   btnText: TID;
   btnLink?: string;
   contentId?: keyof typeof successContentData;
-  contentIdFnProps: any;
+  contentIdFnProps?: any;
 };
 
 const defaultStateValues: SuccessStateType = {

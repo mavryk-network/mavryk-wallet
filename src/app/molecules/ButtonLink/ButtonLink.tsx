@@ -8,6 +8,7 @@ export interface ActionButtonProps {
   onClick?: () => void;
   testID: string;
   children: React.ReactNode;
+  replace?: boolean;
 }
 
 /**
@@ -19,12 +20,20 @@ export interface ActionButtonProps {
           </ButtonRounded>
         </ButtonLink>
  */
-export const ButtonLink: React.FC<ActionButtonProps> = ({ children, state, linkTo, onClick, testID }) => {
+export const ButtonLink: React.FC<ActionButtonProps> = ({
+  children,
+  state,
+  linkTo,
+  onClick,
+  testID,
+  replace = false
+}) => {
   const baseProps = {
     testID,
     onClick,
     children,
-    state
+    state,
+    replace
   };
 
   return <Link className="w-full" {...baseProps} to={linkTo} />;

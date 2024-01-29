@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 
 import BigNumber from 'bignumber.js';
+import classNames from 'clsx';
 
 import Money from 'app/atoms/Money';
 import InFiat from 'app/templates/InFiat';
@@ -20,9 +21,10 @@ export const CryptoBalance = memo<CryptoBalanceProps>(({ value, testID, testIDPr
 
 interface FiatBalanceProps extends CryptoBalanceProps {
   assetSlug: string;
+  className?: string;
 }
 
-export const FiatBalance = memo<FiatBalanceProps>(({ assetSlug, value, testID, testIDProperties }) => (
+export const FiatBalance = memo<FiatBalanceProps>(({ assetSlug, value, testID, testIDProperties, className }) => (
   <InFiat
     assetSlug={assetSlug}
     volume={value}
@@ -31,7 +33,9 @@ export const FiatBalance = memo<FiatBalanceProps>(({ assetSlug, value, testID, t
     testIDProperties={testIDProperties}
   >
     {({ balance, symbol }) => (
-      <div className="ml-1 font-normal text-secondary-white text-xs flex items-center truncate text-right">
+      <div
+        className={classNames('ml-1 font-normal text-current text-xs flex items-center truncate text-right', className)}
+      >
         <span className="mr-1">≈</span>
         <span>{symbol}</span>
         {balance}

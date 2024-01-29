@@ -9,7 +9,7 @@
 
 .headerComponent {
   position: absolute;
-  top: -6%;
+  top: -16px;
   left: 50%;
 
   transform: translate(-50%, -25%);

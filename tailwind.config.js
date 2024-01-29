@@ -615,7 +615,7 @@ module.exports = {
         xs: [
           '0.75rem',
           {
-            lineHeight: '14px',
+            lineHeight: 'normal',
             letterSpacing: '-0.24px',
             fontWeight: '400'
           }
@@ -625,7 +625,7 @@ module.exports = {
         sm: [
           '0.875rem',
           {
-            lineHeight: '14px',
+            lineHeight: 'normal',
             letterSpacing: '-0.28px',
             fontWeight: '400'
           }
@@ -633,7 +633,7 @@ module.exports = {
         base: [
           '1rem',
           {
-            lineHeight: '16px',
+            lineHeight: 'normal',
             letterSpacing: 'normal',
             fontWeight: '400'
           }
@@ -641,7 +641,7 @@ module.exports = {
         'base-plus': [
           '1rem',
           {
-            lineHeight: '16px',
+            lineHeight: 'normal',
             letterSpacing: '-0.32px',
             fontWeight: '400'
           }

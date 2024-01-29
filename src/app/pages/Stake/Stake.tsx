@@ -11,6 +11,7 @@ import { useBakingHistory } from './hooks/use-baking-history';
 export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
+  console.log(unfamiliarWithDelegation, 'unfamiliarWithDelegation');
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<T id="stake" />} removePaddings>

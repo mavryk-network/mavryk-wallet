@@ -480,7 +480,7 @@ interface BakerBannerComponentProps {
   tzError: any;
 }
 
-const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker }) => {
+export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker }) => {
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;

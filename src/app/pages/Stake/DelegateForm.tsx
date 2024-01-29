@@ -45,7 +45,7 @@ import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'l
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
-import { Link, navigate, useLocation } from 'lib/woozie';
+import { HistoryAction, Link, navigate, useLocation } from 'lib/woozie';
 
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -66,6 +66,8 @@ const DelegateForm: FC = () => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { symbol, isDcpNetwork, logo } = useGasToken();
+
+  const { pathname } = useLocation();
 
   const acc = useAccount();
   const tezos = useTezos();
@@ -125,6 +127,12 @@ const DelegateForm: FC = () => {
     setValue('to', '');
     triggerValidation('to');
   }, [setValue, triggerValidation]);
+
+  useLayoutEffect(() => {
+    if (pathname === '/stake') {
+      cleanToField();
+    }
+  }, [pathname, cleanToField]);
 
   useLayoutEffect(() => {
     if (toFilled) {
@@ -598,6 +606,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
             setValue('to', baker.address);
             triggerValidation('to');
             window.scrollTo(0, 0);
+            navigate(`/stake/${baker.address}`);
           };
 
           let testId = DelegateFormSelectors.knownBakerItemButton;

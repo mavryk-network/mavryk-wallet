@@ -279,7 +279,7 @@ const DelegateForm: FC = () => {
 
   return (
     <>
-      {operation && <OperationStatus typeTitle={t('delegation')} operation={operation} className="mb-8" />}
+      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8" />}
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {useMemo(

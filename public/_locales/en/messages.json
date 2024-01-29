@@ -742,6 +742,9 @@
   "operations": {
     "message": "Operations"
   },
+  "operation": {
+    "message": "Operation"
+  },
   "delegationInfoWhileMessage": {
     "message": "fetching or processing your delegation info"
   },
@@ -1071,6 +1074,9 @@
   },
   "staking": {
     "message": "Staking"
+  },
+  "unStaking": {
+    "message": "Unstaking"
   },
   "stake": {
     "message": "Stake"

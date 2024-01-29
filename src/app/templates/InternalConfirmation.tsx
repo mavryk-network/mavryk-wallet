@@ -273,7 +273,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 {signPayloadFormats.length > 1 && (
                   <div className="w-full flex justify-end mb-3">
                     <span className="mr-2 text-base-plus text-white">
-                      <T id="operations" />
+                      <T id="operation" />
                     </span>
 
                     <div className="flex-1" />

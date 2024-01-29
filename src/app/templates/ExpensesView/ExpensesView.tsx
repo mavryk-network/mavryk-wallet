@@ -121,7 +121,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
       case 'approve':
         return t('approveToken');
       case 'delegation':
-        return item.delegate ? t('delegation') : t('undelegation');
+        return item.delegate ? t('staking') : t('unStaking');
       default:
         return item.isEntrypointInteraction ? (
           <>

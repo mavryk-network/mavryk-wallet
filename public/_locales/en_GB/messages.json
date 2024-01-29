@@ -742,6 +742,9 @@
   "operations": {
     "message": "Operations"
   },
+  "operation": {
+    "message": "Operation"
+  },
   "delegationInfoWhileMessage": {
     "message": "fetching or processing your delegation info"
   },

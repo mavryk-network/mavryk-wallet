@@ -205,7 +205,7 @@ const FeeOptionFace: FC<FeeOption> = ({ type, amount }) => {
 
   return (
     <section className="flex items-center justify-between w-full text-base-plus text-white">
-      <span>{type}</span>
+      <span className="capitalize">{type}</span>
       <div className="flex items-center text-secondary-white text-sm">
         {amount && <Money cryptoDecimals={5}>{amount}</Money>}
         <span className="ml-1" style={{ fontSize: '0.75em' }}>

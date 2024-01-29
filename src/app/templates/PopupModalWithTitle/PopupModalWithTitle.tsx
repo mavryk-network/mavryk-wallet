@@ -9,12 +9,14 @@ import styles from './PopupModalWithTitle.module.css';
 
 export interface PopupModalWithTitlePropsProps extends CustomPopupProps {
   title?: ReactNode;
+  headerComponent?: JSX.Element;
 }
 
 export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
   title,
   children,
   className,
+  headerComponent,
   ...restProps
 }) => {
   return (
@@ -27,12 +29,22 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
       shouldCloseOnEsc
     >
       <>
+        {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
         <div className={classNames('w-full max-h-500 overflow-hidden', styles.container)}>
           <CloseIcon
             className="w-6 h-auto absolute top-4 right-4 cursor-pointer stroke stroke-1"
             onClick={restProps.onRequestClose}
           />
-          {title && <div className="text-white mb-4 w-full text-center text-xl px-4 bg-primary-card">{title}</div>}
+          {title && (
+            <div
+              className={classNames(
+                'text-white mb-4 w-auto mx-auto text-center text-xl px-4 bg-primary-card flex flex-col items-center',
+                headerComponent && 'mt-2'
+              )}
+            >
+              {title}
+            </div>
+          )}
           <div className="h-full no-scrollbar">{children}</div>
         </div>
       </>

@@ -37,14 +37,14 @@ type ExploreProps = {
   assetSlug?: string | null;
 };
 
-const tippyPropsMock = {
+export const tippyPropsMock = {
   trigger: 'mouseenter',
   hideOnClick: false,
   content: t('disabledForWatchOnlyAccount'),
   animation: 'shift-away-subtle'
 };
 
-const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'];
+export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'];
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { fullPage, registerBackHandler } = useAppEnv();
@@ -173,7 +173,7 @@ interface ActionButtonProps extends TestIDProps {
   tippyProps?: Partial<TippyProps>;
 }
 
-const ActionButton: FC<ActionButtonProps> = ({
+export const ActionButton: FC<ActionButtonProps> = ({
   label,
   Icon,
   to,

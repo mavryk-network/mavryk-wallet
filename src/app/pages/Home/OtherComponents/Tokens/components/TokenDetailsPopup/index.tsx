@@ -1,1 +1,1 @@
-export * from './TokenDetailspopup';
+export * from './TokenDetailsPopup';

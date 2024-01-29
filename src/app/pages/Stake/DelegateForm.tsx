@@ -531,9 +531,11 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
         />
       )}
     </>
-  ) : !tzError && net.type === 'main' ? (
-    <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} className="mb-6" />
-  ) : null;
+  ) : (
+    <div className="p-4">
+      <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
+    </div>
+  );
 };
 
 const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {

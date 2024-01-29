@@ -32,8 +32,9 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>();
+  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
+  const password = watch('password') ?? '';
 
   const onSubmit = useCallback<OnSubmit<FormData>>(
     async ({ password }) => {
@@ -98,7 +99,7 @@ const RemoveAccount: FC = () => {
 
             <FormSubmitButton
               loading={submitting}
-              disabled={submitting}
+              disabled={submitting || !password.length}
               testID={RemoveAccountSelectors.removeButton}
               testIDProperties={{ accountTypeEnum: account.type }}
               className="mt-8"

@@ -48,7 +48,9 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({ account, child, ico
           className="max-w-full overflow-x-hidden cursor-pointer flex items-center"
           onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}
         >
-          <Name className="text-primary-white text-sm font-semibold text-shadow-black opacity-90">{account.name}</Name>
+          <Name className="text-primary-white text-base-plus font-semibold text-shadow-black opacity-90">
+            {account.name}
+          </Name>
           <ArrowDownicon className="stroke stroke-2 stroke-white w-4 h-auto ml-1" />
         </div>
         {child && child}

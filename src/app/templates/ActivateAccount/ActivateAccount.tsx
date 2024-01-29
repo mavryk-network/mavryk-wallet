@@ -33,8 +33,9 @@ const ActivateAccount: FC = () => {
     [setSuccessPure, isMounted]
   );
 
-  const { register, handleSubmit, formState, clearError, setError, errors } = useForm<FormData>();
+  const { register, handleSubmit, formState, clearError, setError, errors, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
+  const secret = watch('secret') ?? '';
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -122,6 +123,7 @@ const ActivateAccount: FC = () => {
 
       <FormSubmitButton
         loading={submitting}
+        disabled={submitting || !secret.length}
         className="mt-8"
         testID={ActivateAccountSelectors.activateButton}
         testIDProperties={{ accountTypeEnum: account.type }}

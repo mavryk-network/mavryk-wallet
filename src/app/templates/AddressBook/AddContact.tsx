@@ -88,7 +88,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
         await addContact({ address, name, addedAt: Date.now() });
         resetForm();
 
-        navigate<SuccessStateType>('/success', HistoryAction.Replace, {
+        navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addContact',
           btnText: 'goToAddressBook',
           btnLink: '/settings/address-book',

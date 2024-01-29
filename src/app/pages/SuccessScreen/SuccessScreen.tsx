@@ -71,7 +71,7 @@ export const SuccessScreen = () => {
             )}
           </section>
           <div className="w-full">
-            <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess}>
+            <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess} replace>
               <ButtonRounded size="big" fill className="w-full">
                 <T id={state.btnText} />
               </ButtonRounded>
@@ -83,10 +83,10 @@ export const SuccessScreen = () => {
   );
 };
 
-// export const SuccesModal: FC<CustomPopupProps> = ({ ...props }) => {
-//   return (
-//     <CustomPopup {...props} className="w-full">
-//       <SuccessScreen />
-//     </CustomPopup>
-//   );
-// };
+export const SuccesModal: FC<CustomPopupProps> = ({ ...props }) => {
+  return (
+    <CustomPopup {...props} className="w-full">
+      <SuccessScreen />
+    </CustomPopup>
+  );
+};

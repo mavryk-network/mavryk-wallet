@@ -3316,5 +3316,8 @@
   },
   "reStake": {
     "message": "Re-stake"
+  },
+  "deleteContact": {
+    "message": "Delete Contact"
   }
 }

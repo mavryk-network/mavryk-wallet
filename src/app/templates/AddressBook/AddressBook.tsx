@@ -41,7 +41,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     async (address: string) => {
       if (
         !(await confirm({
-          title: t('actionConfirmation'),
+          title: t('deleteContact'),
           children: t('deleteContactConfirm')
         }))
       ) {

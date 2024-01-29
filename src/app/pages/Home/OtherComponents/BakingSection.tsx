@@ -334,7 +334,7 @@ interface DelegateLinkProps {
 
 const DelegateLink: React.FC<DelegateLinkProps> = ({ canDelegate, delegateButtonRef, delegateButtonProps }) =>
   canDelegate ? (
-    <Link to="/delegate" type="button" {...delegateButtonProps} />
+    <Link to="/stake" type="button" {...delegateButtonProps} />
   ) : (
     <Button ref={delegateButtonRef} {...delegateButtonProps} />
   );

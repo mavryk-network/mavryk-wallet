@@ -3307,5 +3307,8 @@
   },
   "details": {
     "message": "Details"
+  },
+  "deleteContact": {
+    "message": "Delete Contact"
   }
 }

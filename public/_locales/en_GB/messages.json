@@ -3298,5 +3298,17 @@
   },
   "payment": {
     "message": "Payment"
+  },
+  "stakeToEarn": {
+    "message": "Stake you MVRK and earn rewards!"
+  },
+  "stakedTo": {
+    "message": "Staked to:"
+  },
+  "details": {
+    "message": "Details"
+  },
+  "deleteContact": {
+    "message": "Delete Contact"
   }
 }

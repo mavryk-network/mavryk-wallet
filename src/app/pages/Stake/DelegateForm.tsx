@@ -4,9 +4,8 @@ import { DEFAULT_FEE, WalletOperation } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
-import browser from 'webextension-polyfill';
 
-import { Alert, Button, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
+import { Alert, Anchor, Button, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
@@ -14,8 +13,6 @@ import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defa
 import { useAppEnv } from 'app/env';
 import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
-import InFiat from 'app/templates/InFiat';
-import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import OperationStatus from 'app/templates/OperationStatus';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
@@ -45,7 +42,7 @@ import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'l
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
-import { HistoryAction, Link, navigate, useLocation } from 'lib/woozie';
+import { navigate, useLocation } from 'lib/woozie';
 
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -62,7 +59,11 @@ interface FormData {
 export const RECOMMENDED_BAKER_ADDRESS = 'tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM';
 export const HELP_UKRAINE_BAKER_ADDRESS = 'tz1bMFzs2aECPn4aCRmKQWHSLHF8ZnZbYcah';
 
-const DelegateForm: FC = () => {
+type DelegateFormProps = {
+  setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+};
+
+const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { symbol, isDcpNetwork, logo } = useGasToken();
@@ -143,6 +144,23 @@ const DelegateForm: FC = () => {
     }
     return undefined;
   }, [toFilled, registerBackHandler, cleanToField]);
+
+  const AllValidatorsComponent = useMemo(
+    () => (
+      <Anchor href="https://tezos-nodes.com/" className="text-base-plus text-accent-blue cursor-pointer">
+        All Validators
+      </Anchor>
+    ),
+    []
+  );
+
+  useEffect(() => {
+    setToolbarRightSidedComponent(AllValidatorsComponent);
+
+    return () => {
+      setToolbarRightSidedComponent(null);
+    };
+  }, []);
 
   const estimateBaseFee = useCallback(async () => {
     try {

@@ -3308,6 +3308,15 @@
   "details": {
     "message": "Details"
   },
+  "marketPrice": {
+    "message": "Market price"
+  },
+  "stakeYourTokensBannerDescription": {
+    "message": "Stake your tokens to trusted validators and Lorem ipsum dolor sit amet consectetur. Egestas vel maecenas in a. Semper aliquet sagittis aliquam."
+  },
+  "reStake": {
+    "message": "Re-stake"
+  },
   "deleteContact": {
     "message": "Delete Contact"
   }

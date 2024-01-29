@@ -11,15 +11,20 @@ import { useBakingHistory } from './hooks/use-baking-history';
 export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
-  console.log(unfamiliarWithDelegation, 'unfamiliarWithDelegation');
+  const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<T id="stake" />} removePaddings>
+    <PageLayout
+      isTopbarVisible={false}
+      pageTitle={<T id="stake" />}
+      removePaddings
+      RightSidedComponent={toolbarRightSidedComponent}
+    >
       <div className="h-full pb-8">
         {showStakeScreen ? (
           <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
         ) : (
-          <DelegateForm />
+          <DelegateForm setToolbarRightSidedComponent={setToolbarRightSidedComponent} />
         )}
       </div>
     </PageLayout>

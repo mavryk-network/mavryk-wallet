@@ -1,12 +1,15 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
+import { DelegateResponse } from '@taquito/rpc';
 import classNames from 'clsx';
 
+import { HashChip } from 'app/atoms';
+import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
-import { T } from 'lib/i18n';
-import { useAccount, useDelegate } from 'lib/temple/front';
+import { T, t } from 'lib/i18n';
+import { useAccount, useDelegate, useKnownBaker, useKnownBakers } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { AssetsSelectors } from '../../../Assets.selectors';
@@ -54,4 +57,89 @@ export const DelegateTezosTag: FC = () => {
   );
 
   return myBakerPkh ? TezosDelegated : NotDelegatedButton;
+};
+
+export const StakeTezosTag: FC = () => {
+  const acc = useAccount();
+  const { data: myBakerPkh } = useDelegate(acc.publicKeyHash);
+  const { trackEvent } = useAnalytics();
+
+  const handleTagClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
+      if (myBakerPkh) {
+        navigate('/explore/tez/?tab=delegation');
+      } else {
+        navigate('/stake');
+      }
+    },
+    [trackEvent, myBakerPkh]
+  );
+
+  const NotStakedButton = useMemo(
+    () => (
+      <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick}>
+        <T id="stakeToEarn" />
+      </AlertWithAction>
+    ),
+    [handleTagClick]
+  );
+
+  const StakedButton = useMemo(
+    () => <BakerBanner myBakerPkh={myBakerPkh} handleTagClick={handleTagClick} />,
+    [handleTagClick, myBakerPkh]
+  );
+
+  return myBakerPkh ? StakedButton : NotStakedButton;
+};
+
+type BakerBannerProps = {
+  myBakerPkh: DelegateResponse | undefined;
+  handleTagClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+};
+
+const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
+  const { data: baker } = useKnownBaker(myBakerPkh ?? null);
+
+  const renderBakerData = () => {
+    if (myBakerPkh) {
+      return (
+        <div className="flex items-center gap-3">
+          <T id="stakedTo" />
+          {baker ? (
+            <div className="flex items-center gap-2">
+              <img
+                src={baker?.logo}
+                alt={baker?.name}
+                className={classNames('flex-shrink-0', 'bg-white rounded-full')}
+                style={{
+                  minHeight: '1rem',
+                  width: 24,
+                  height: 24
+                }}
+              />
+              <span>{baker?.name}</span>
+            </div>
+          ) : (
+            <HashChip hash={myBakerPkh} small />
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-3">
+        <T id="stakedTo" />
+        <T id="unknownBakerTitle" />;
+      </div>
+    );
+  };
+
+  return (
+    <AlertWithAction btnLabel={t('details')} onClick={handleTagClick}>
+      {renderBakerData()}
+    </AlertWithAction>
+  );
 };

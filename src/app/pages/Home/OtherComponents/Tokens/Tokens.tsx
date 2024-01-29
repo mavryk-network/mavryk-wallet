@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { isEqual } from 'lodash';
 
 import { SyncSpinner } from 'app/atoms';
+import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
@@ -35,6 +36,7 @@ import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
 import { AcceptAdsBanner } from './AcceptAdsBanner';
 import { ListItem } from './components/ListItem';
+import { StakeTezosTag } from './components/TokenTag/DelegateTag';
 import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
 
@@ -195,6 +197,9 @@ export const TokensTab: FC = () => {
       </div>
 
       {isEnabledAdsBanner && <AcceptAdsBanner />}
+      <div className="px-4 mb-4">
+        <StakeTezosTag />
+      </div>
 
       {sortedSlugs.length === 0 ? (
         <div className="pt-20 pb-8 flex flex-col items-center justify-center text-white">

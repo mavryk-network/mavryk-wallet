@@ -3,7 +3,7 @@ import React, { ReactNode, FC } from 'react';
 export type AlertWithActionProps = {
   children: ReactNode;
   btnLabel: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export const AlertWithAction: FC<AlertWithActionProps> = ({ children, btnLabel, onClick }) => {

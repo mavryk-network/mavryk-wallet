@@ -26,7 +26,16 @@
   color: #f4f4f4;
 }
 
-.listItem:not(:last-of-type) {
+.listItem:not(:last-of-type)::before {
+  content: '';
+  height: 0;
+
+  position: absolute;
+
+  width: calc(100% - 32px);
+  left: 16px;
+  bottom: 0;
+
   border-bottom: 1px solid #333;
 }
 

@@ -134,14 +134,14 @@ const TABS: Tab[] = [
     Component: About,
     testID: SettingsSelectors.aboutButton,
     fillIcon: false
-  },
-  {
-    linkTo: 'help-and-community',
-    i18nKey: 'helpAndCommunity',
-    Icon: HelpIcon,
-    Component: HelpAndCommunity,
-    fillIcon: false
   }
+  // {
+  //   linkTo: 'help-and-community',
+  //   i18nKey: 'helpAndCommunity',
+  //   Icon: HelpIcon,
+  //   Component: HelpAndCommunity,
+  //   fillIcon: false
+  // }
 ];
 
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {

@@ -31,7 +31,7 @@ export const FiatBalance = memo<FiatBalanceProps>(({ assetSlug, value, testID, t
     testIDProperties={testIDProperties}
   >
     {({ balance, symbol }) => (
-      <div className="ml-1 font-normal text-secondary-white text-xs flex items-center text-right truncate text-right">
+      <div className="ml-1 font-normal text-secondary-white text-xs flex items-center truncate text-right">
         <span className="mr-1">≈</span>
         <span>{symbol}</span>
         {balance}

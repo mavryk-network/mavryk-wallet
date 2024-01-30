@@ -155,30 +155,33 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                 </InFiat>
               </>
             ) : (
-              <input
-                type="number"
-                value={value || ''}
-                onChange={e => {
-                  if (e.target.value.length > 8) return;
-                  const val = +e.target.value;
-                  onChange?.(val > 0 ? val : 0);
-                }}
-                placeholder="0"
-                className={classNames(
-                  'appearance-none',
-                  'w-24',
-                  'py-1 px-2',
-                  'border',
-                  'border-gray-50',
-                  'focus:border-accent-blue',
-                  'bg-primary-bg',
-                  'transition ease-in-out duration-200',
-                  'rounded',
-                  'text-right',
-                  'text-white text-base-plus leading-tight',
-                  'placeholder-secondary-white'
-                )}
-              />
+              <div className="flex items-center mr-1">
+                <input
+                  type="number"
+                  value={value || ''}
+                  onChange={e => {
+                    if (e.target.value.length > 8) return;
+                    const val = +e.target.value;
+                    onChange?.(val > 0 ? val : 0);
+                  }}
+                  placeholder="0"
+                  className={classNames(
+                    'appearance-none',
+                    'w-24',
+                    'py-1 px-2 mr-1',
+                    'border',
+                    'border-gray-50',
+                    'focus:border-accent-blue',
+                    'bg-primary-bg',
+                    'transition ease-in-out duration-200',
+                    'rounded',
+                    'text-right',
+                    'text-white text-base-plus leading-tight',
+                    'placeholder-secondary-white'
+                  )}
+                />
+                {symbol}
+              </div>
             )}
           </div>
         ))}

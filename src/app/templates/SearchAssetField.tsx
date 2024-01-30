@@ -13,7 +13,7 @@ const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, ...rest }
       'py-2 pl-8 pr-2 bg-primary-card',
       'rounded-lg outline-none',
       'transition ease-in-out duration-200',
-      'text-white text-sm leading-tight',
+      'text-white text-sm',
       'focus:text-white',
       className
     )}

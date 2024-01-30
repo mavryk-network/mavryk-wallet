@@ -3325,5 +3325,8 @@
   },
   "deleteContact": {
     "message": "Delete Contact"
+  },
+  "history": {
+    "message": "History"
   }
 }

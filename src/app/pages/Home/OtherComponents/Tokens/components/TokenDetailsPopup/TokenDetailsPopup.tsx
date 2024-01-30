@@ -25,6 +25,7 @@ import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { FiatBalance } from '../Balance';
+import { TransactionHistory } from './components/TransactionHistory';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
@@ -145,6 +146,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         </div>
         {/* staking section */}
         <BakerBannerSection myBakerPkh={myBakerPkh} />
+        <TransactionHistory assetSlug={assetSlug} />
       </div>
     </section>
   );
@@ -180,12 +182,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       baker ? (
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
       ) : (
-        <Alert
-          type="warning"
-          title={t('unknownBakerTitle')}
-          description={t('unknownBakerDescription')}
-          className="mb-6"
-        />
+        <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),
     [baker]
   );

@@ -147,8 +147,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   {({ balance, symbol }) => (
                     <div className="flex">
                       <span className="opacity-75">(</span>
+                      <span>{symbol}</span>
                       {balance}
-                      <span className="pr-px ml-1">{symbol}</span>
                       <span className="opacity-75">)</span>
                     </div>
                   )}

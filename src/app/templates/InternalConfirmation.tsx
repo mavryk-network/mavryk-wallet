@@ -246,11 +246,6 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
           className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar px-4 pt-4')}
           style={{ height: '34rem' }}
         >
-          {/* <div className="sticky top-0 w-full p-4 bg-primary-card">
-          <SubTitle small={false}>
-            <T id="confirmOperation" />
-          </SubTitle>
-        </div> */}
           <div>
             {error ? (
               <Alert

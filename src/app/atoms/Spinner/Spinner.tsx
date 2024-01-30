@@ -19,7 +19,7 @@ const Spinner = memo<SpinnerProps>(({ theme = 'primary', className, ...rest }) =
           (() => {
             switch (theme) {
               case 'primary':
-                return 'bg-primary-orange';
+                return 'bg-accent-blue';
 
               case 'white':
                 return 'bg-white shadow-sm';

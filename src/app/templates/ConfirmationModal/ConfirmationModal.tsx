@@ -17,7 +17,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
   return (
     <PopupModalWithTitle {...restProps} onRequestClose={onRequestClose}>
       <div className="px-4">
-        <div className="my-11 text-white text-sm text-center">{children}</div>
+        <div className="mb-11 mt-7 text-white text-sm text-center">{children}</div>
         <div className="grid grid-cols-2 gap-x-3">
           <ButtonRounded
             size="big"

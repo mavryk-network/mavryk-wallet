@@ -9,19 +9,10 @@ type RawPayloadViewProps = {
   className?: string;
   style?: CSSProperties;
   fieldWrapperBottomMargin?: boolean;
-  modifyFeeAndLimitComponent?: JSX.Element | null;
 };
 
 const RawPayloadView = memo(
-  ({
-    className,
-    payload,
-    label,
-    rows,
-    modifyFeeAndLimitComponent,
-    style = {},
-    fieldWrapperBottomMargin = false
-  }: RawPayloadViewProps) => (
+  ({ className, payload, label, rows, style = {}, fieldWrapperBottomMargin = false }: RawPayloadViewProps) => (
     <div>
       <FormField
         textarea
@@ -39,7 +30,6 @@ const RawPayloadView = memo(
           ...style
         }}
       />
-      {modifyFeeAndLimitComponent}
     </div>
   )
 );

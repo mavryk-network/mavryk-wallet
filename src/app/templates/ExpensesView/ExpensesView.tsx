@@ -32,7 +32,6 @@ type ExpensesViewProps = {
   estimates?: Estimate[];
   mainnet?: boolean;
   modifyFeeAndLimit?: ModifyFeeAndLimit;
-  modifyFeeAndLimitComponent?: JSX.Element | null;
   gasFeeError?: boolean;
   error?: any;
 };
@@ -44,7 +43,7 @@ export interface ModifyFeeAndLimit {
   onStorageLimitChange: (storageLimit: number) => void;
 }
 
-const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLimitComponent, gasFeeError, error }) => {
+const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError, error }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const toggleShowDetails = useCallback(() => setShowDetails(prevValue => !prevValue), []);
@@ -61,8 +60,6 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLi
             <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
           ))}
         </div>
-
-        {modifyFeeAndLimitComponent}
       </div>
       {gasFeeError && (
         <p className="text-xs text-primary-error pt-1 h-4">

@@ -3,6 +3,7 @@ import React, { CSSProperties, memo, ReactNode } from 'react';
 import classNames from 'clsx';
 import ReactJson from 'react-json-view';
 
+import { darkJSONTheme } from 'app/consts/jsonTheme';
 import { ReactComponent as CopyIcon } from 'app/icons/copy-square.svg';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
@@ -29,20 +30,10 @@ type OperationsBannerProps = {
   label?: ReactNode;
   className?: string;
   copyButtonClassName?: string;
-  modifyFeeAndLimitComponent?: JSX.Element | null;
 };
 
 const OperationsBanner = memo<OperationsBannerProps>(
-  ({
-    jsonViewStyle,
-    opParams,
-    modifiedTotalFee,
-    modifiedStorageLimit,
-    label,
-    className,
-    copyButtonClassName,
-    modifyFeeAndLimitComponent
-  }) => {
+  ({ jsonViewStyle, opParams, modifiedTotalFee, modifiedStorageLimit, label, className, copyButtonClassName }) => {
     opParams = typeof opParams === 'string' ? opParams : formatOpParams(opParams);
 
     if (typeof opParams === 'object' && !Array.isArray(opParams)) {
@@ -83,8 +74,8 @@ const OperationsBanner = memo<OperationsBannerProps>(
                 enableClipboard={false}
                 displayObjectSize={false}
                 displayDataTypes={false}
-                theme="twilight"
-                style={{ background: '#171717', color: '#f4f4f4', textDecoration: 'none' }}
+                theme={darkJSONTheme}
+                style={{ maxHeight: 345 }}
               />
             )}
           </div>
@@ -92,8 +83,6 @@ const OperationsBanner = memo<OperationsBannerProps>(
           <div className={classNames('absolute top-0 right-0 pt-2 pr-2', copyButtonClassName)}>
             <CopyButton toCopy={opParams} />
           </div>
-
-          {modifyFeeAndLimitComponent}
         </div>
       </>
     );

@@ -283,15 +283,6 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
                     modifiedTotalFee={modifiedTotalFeeValue}
                     modifiedStorageLimit={modifiedStorageLimitValue}
-                    modifyFeeAndLimitComponent={
-                      <ModifyFeeAndLimitComponent
-                        expenses={expensesData}
-                        estimates={estimates}
-                        modifyFeeAndLimit={modifyFeeAndLimit}
-                        mainnet={mainnet}
-                        gasFeeError={gasFeeError}
-                      />
-                    }
                   />
                 )}
 
@@ -302,15 +293,6 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                       payload={payload.bytes}
                       className="mb-4 px-4 py-4"
                       style={{ height: 127, maxHeight: '10rem' }}
-                      modifyFeeAndLimitComponent={
-                        <ModifyFeeAndLimitComponent
-                          expenses={expensesData}
-                          estimates={estimates}
-                          modifyFeeAndLimit={modifyFeeAndLimit}
-                          mainnet={mainnet}
-                          gasFeeError={gasFeeError}
-                        />
-                      }
                     />
                   </>
                 )}
@@ -321,15 +303,6 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                       payload={payload.bytesToSign}
                       className="mb-4 px-4 py-4"
                       style={{ minHeight: 127, maxHeight: '10rem' }}
-                      modifyFeeAndLimitComponent={
-                        <ModifyFeeAndLimitComponent
-                          expenses={expensesData}
-                          estimates={estimates}
-                          modifyFeeAndLimit={modifyFeeAndLimit}
-                          mainnet={mainnet}
-                          gasFeeError={gasFeeError}
-                        />
-                      }
                     />
                   </>
                 )}
@@ -342,17 +315,16 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     modifyFeeAndLimit={modifyFeeAndLimit}
                     mainnet={mainnet}
                     gasFeeError={gasFeeError}
-                    modifyFeeAndLimitComponent={
-                      <ModifyFeeAndLimitComponent
-                        expenses={expensesData}
-                        estimates={estimates}
-                        modifyFeeAndLimit={modifyFeeAndLimit}
-                        mainnet={mainnet}
-                        gasFeeError={gasFeeError}
-                      />
-                    }
                   />
                 )}
+
+                <ModifyFeeAndLimitComponent
+                  expenses={expensesData}
+                  estimates={estimates}
+                  modifyFeeAndLimit={modifyFeeAndLimit}
+                  mainnet={mainnet}
+                  gasFeeError={gasFeeError}
+                />
               </div>
             )}
           </div>

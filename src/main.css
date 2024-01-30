@@ -254,3 +254,27 @@ input::-webkit-inner-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+
+/* JSON lin styles */
+.string-value,
+.object-key,
+.array-key,
+.icon-container {
+  font-family: 'Aeonik';
+  letter-spacing: -0.32px;
+  text-decoration: none;
+  opacity: 1 !important;
+}
+
+.object-key > span {
+  opacity: 1 !important;
+}
+
+span:has(> span.object-key),
+span:has(> span.array-key) {
+  opacity: 1 !important;
+}
+
+.node-ellipsis {
+  color: #5f58ff !important;
+}

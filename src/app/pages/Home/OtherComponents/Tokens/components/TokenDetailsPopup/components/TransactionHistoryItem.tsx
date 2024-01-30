@@ -16,7 +16,7 @@ interface Props {
   address: string;
 }
 
-export const ActivityItem = memo<Props>(({ activity, address }) => {
+export const TransactionHistoryItem = memo<Props>(({ activity, address }) => {
   const { hash, addedAt, status } = activity;
 
   const operStack = useMemo(() => buildOperStack(activity, address), [activity, address]);

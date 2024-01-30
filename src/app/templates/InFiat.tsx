@@ -56,24 +56,22 @@ const InFiat: FC<InFiatProps> = ({
 
   const cryptoDecimals = showCents ? undefined : 0;
 
-  return mainnet && isDefined(price)
-    ? children({
-        balance: (
-          <Money
-            fiat={showCents}
-            cryptoDecimals={cryptoDecimals}
-            roundingMode={roundingMode}
-            shortened={shortened}
-            smallFractionFont={smallFractionFont}
-            testID={testID}
-            testIDProperties={testIDProperties}
-          >
-            {roundedInFiat}
-          </Money>
-        ),
-        symbol: selectedFiatCurrency.symbol
-      })
-    : null;
+  return children({
+    balance: (
+      <Money
+        fiat={showCents}
+        cryptoDecimals={cryptoDecimals}
+        roundingMode={roundingMode}
+        shortened={shortened}
+        smallFractionFont={smallFractionFont}
+        testID={testID}
+        testIDProperties={testIDProperties}
+      >
+        {roundedInFiat}
+      </Money>
+    ),
+    symbol: selectedFiatCurrency.symbol
+  });
 };
 
 export default InFiat;

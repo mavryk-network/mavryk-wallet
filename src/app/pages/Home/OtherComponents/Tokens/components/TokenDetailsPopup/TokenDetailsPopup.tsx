@@ -13,7 +13,6 @@ import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, NETWORK_TYPES_WITH_BUY_BUTTON, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
-import { BakerBannerComponent } from 'app/pages/Stake/DelegateForm';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
@@ -25,8 +24,7 @@ import { useAccount, useDelegate, useKnownBaker, useNetwork } from 'lib/temple/f
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
-import { AssetsSelectors } from '../../../Assets.selectors';
-import { CryptoBalance, FiatBalance } from '../Balance';
+import { FiatBalance } from '../Balance';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;

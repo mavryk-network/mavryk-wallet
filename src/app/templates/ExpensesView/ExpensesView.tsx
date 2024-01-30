@@ -55,13 +55,12 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, modifyFeeAndLi
 
   return (
     <>
-      <div
-        className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm')}
-        style={{ height: gasFeeError ? '14.5rem' : '15.5rem' }}
-      >
-        {expenses.map((item, index, arr) => (
-          <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
-        ))}
+      <div className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm')}>
+        <div className="no-scrollbar" style={{ maxHeight: gasFeeError ? '14.5rem' : '15.5rem' }}>
+          {expenses.map((item, index, arr) => (
+            <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
+          ))}
+        </div>
 
         {modifyFeeAndLimitComponent}
       </div>
@@ -206,7 +205,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
   const withdrawal = useMemo(() => ['transaction', 'transfer'].includes(item.type), [item.type]);
 
   return (
-    <div className={classNames('p-4 flex items-center bg-primary-card rounded-2xl-plus', !last && 'mb-2')}>
+    <div className={classNames('p-4 flex items-center bg-primary-card rounded-2xl-plus', !last && 'mb-3')}>
       <div className="mr-2">
         <Identicon hash={iconHash} type={iconType} size={32} className="rounded-full" />
       </div>

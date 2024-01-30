@@ -199,7 +199,6 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
       <div
         className={classNames(
-          'sticky bottom-0 left-0 right-0',
           'flex items-center',
           'p-4 rounded-2xl-plus',
           'bg-primary-card',

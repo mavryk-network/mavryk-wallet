@@ -235,7 +235,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   return (
     <div
       className={classNames(
-        'h-full w-full max-w-sm mx-auto flex flex-col relative overflow-x-hidden',
+        'h-full w-full max-w-sm mx-auto flex flex-col relative overflow-x-hidden no-scrollbar',
         !popup && 'justify-center px-2'
       )}
     >
@@ -285,7 +285,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 {payload.type === 'operations' && spFormat.key === 'raw' && (
                   <OperationsBanner
                     opParams={payload.rawToSign ?? payload.opParams}
-                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: '345px' } : undefined}
+                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
                     modifiedTotalFee={modifiedTotalFeeValue}
                     modifiedStorageLimit={modifiedStorageLimitValue}
                     modifyFeeAndLimitComponent={

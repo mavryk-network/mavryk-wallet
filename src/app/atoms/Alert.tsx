@@ -81,6 +81,7 @@ export const Alert: FC<AlertProps> = ({
           <div
             className={classNames('text-sm break-words mt-1', textColorClassName)}
             {...setTestID(AlertSelectors.alertDescription)}
+            style={{ wordBreak: 'break-word' }}
           >
             {description}
           </div>

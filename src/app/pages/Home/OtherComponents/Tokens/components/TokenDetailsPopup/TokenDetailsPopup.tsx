@@ -18,6 +18,7 @@ import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { useAssetFiatCurrencyPrice } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useDelegate, useKnownBaker, useNetwork } from 'lib/temple/front';
@@ -62,6 +63,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const network = useNetwork();
   const balances = useBalancesWithDecimals();
   const balance = useMemo(() => balances[assetSlug] ?? new BigNumber(0), [assetSlug, balances]);
+  const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
 
   const assetSymbol = getAssetSymbol(assetMetadata);
 
@@ -141,7 +143,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
           <T id="marketPrice" />
           <div className="p-4 bg-gray-920 text-left rounded-2xl-plus">
-            <FiatBalance value={new BigNumber(0)} assetSlug={assetSlug} className="text-white text-base-plus" />
+            <FiatBalance value={price} assetSlug={assetSlug} className="text-white text-base-plus" />
           </div>
         </div>
         {/* staking section */}

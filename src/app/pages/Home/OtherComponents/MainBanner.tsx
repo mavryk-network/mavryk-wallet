@@ -116,10 +116,10 @@ interface BalanceProps {
 const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
   <>
     <span className="mr-1">≈</span>
+    <span className="ml-1">{currency}</span>
     <Money smallFractionFont={false} fiat>
       {volume}
     </Money>
-    <span className="ml-1">{currency}</span>
   </>
 );
 

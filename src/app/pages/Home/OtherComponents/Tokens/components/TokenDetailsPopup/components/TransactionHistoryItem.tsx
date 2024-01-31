@@ -81,19 +81,19 @@ interface ActivityItemStatusCompProps {
   activity: Activity;
 }
 
-const ActivityItemStatusComp: React.FC<ActivityItemStatusCompProps> = ({ activity }) => {
-  const explorerStatus = activity.status;
-  const content = explorerStatus ?? 'pending';
-  const conditionalTextColor = explorerStatus ? 'text-red-600' : 'text-yellow-600';
+// const ActivityItemStatusComp: React.FC<ActivityItemStatusCompProps> = ({ activity }) => {
+//   const explorerStatus = activity.status;
+//   const content = explorerStatus ?? 'pending';
+//   const conditionalTextColor = explorerStatus ? 'text-red-600' : 'text-yellow-600';
 
-  return (
-    <div className="mb-px text-xs font-light leading-none">
-      <span className={classNames(explorerStatus === 'applied' ? 'text-gray-600' : conditionalTextColor, 'capitalize')}>
-        {t(content) || content}
-      </span>
-    </div>
-  );
-};
+//   return (
+//     <div className="mb-px text-xs font-light leading-none">
+//       <span className={classNames(explorerStatus === 'applied' ? 'text-gray-600' : conditionalTextColor, 'capitalize')}>
+//         {t(content) || content}
+//       </span>
+//     </div>
+//   );
+// };
 
 type TimeProps = {
   children: () => React.ReactElement;

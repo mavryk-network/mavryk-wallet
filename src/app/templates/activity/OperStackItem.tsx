@@ -4,7 +4,7 @@ import { HashChip } from 'app/atoms';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import { TID, T } from 'lib/i18n';
 import { OperStackItemInterface, OperStackItemTypeEnum } from 'lib/temple/activity-new/types';
-import { ListItemDivider } from 'app/atoms/Divider';
+// import { ListItemDivider } from 'app/atoms/Divider';
 
 interface Props {
   item: OperStackItemInterface;

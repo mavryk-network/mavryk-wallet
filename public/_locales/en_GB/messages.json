@@ -83,7 +83,7 @@
     }
   },
   "resetPermissionsConfirmation": {
-    "message": "Are you sure you want to reset permissions for\n$origin$?",
+    "message": "Are you sure you want to delete \n$origin$?",
     "placeholders": {
       "origin": {
         "content": "$1"
@@ -3334,5 +3334,8 @@
   },
   "unknown": {
     "message": "Unknown"
+  },
+  "deleteDapp": {
+    "message": "Delete dApp"
   }
 }

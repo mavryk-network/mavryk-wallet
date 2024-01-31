@@ -59,8 +59,9 @@ const DAppSettings: FC = () => {
     async (origin: string) => {
       if (
         await confirm({
-          title: t('actionConfirmation'),
-          children: t('resetPermissionsConfirmation', origin)
+          title: t('deleteDapp'),
+          children: t('resetPermissionsConfirmation', origin),
+          comfirmButtonText: t('delete')
         })
       ) {
         await removeDAppSession(origin);

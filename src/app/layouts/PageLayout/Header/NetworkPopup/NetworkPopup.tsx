@@ -107,12 +107,12 @@ const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick 
   const { id, name, color, disabled, nameI18nKey } = network;
 
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
       <div className="flex items-center">
         <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
         <span className="text-base-plus text-white">{(nameI18nKey && <T id={nameI18nKey} />) || name}</span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} onClick={onClick} shouldUseChangeHandler />
+      <RadioButton id={id} checked={selected} disabled={disabled} shouldUseChangeHandler />
     </div>
   );
 };

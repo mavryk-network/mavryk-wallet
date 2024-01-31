@@ -96,8 +96,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                 }
               ]
             : [])
-        ].map(({ key, title, value, onChange }, i, arr) => (
-          <div key={key} className={classNames('w-full flex items-center', i !== arr.length - 1 && 'mb-1')}>
+        ].map(({ key, title, value, onChange }) => (
+          <div key={key} className={classNames('w-full flex items-center')}>
             <div className="whitespace-nowrap overflow-x-auto no-scrollbar opacity-90" style={{ maxWidth: '45%' }}>
               {title}
             </div>
@@ -133,10 +133,10 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                           'placeholder-text-secondary-white'
                         )}
                       />
-                      {symbol}
+                      <span style={{ maxHeight: 19 }}>{symbol}</span>
                     </>
                   ) : (
-                    <span className="flex items-baseline">
+                    <span className="flex items-baseline" style={{ maxHeight: 19 }}>
                       <Money>{value}</Money>
                       <span className="ml-1">{symbol}</span>
                     </span>
@@ -147,7 +147,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   {({ balance, symbol }) => (
                     <div className="flex">
                       <span className="opacity-75">(</span>
-                      <span>{symbol}</span>
+                      <span style={{ maxHeight: 19 }}>{symbol}</span>
                       {balance}
                       <span className="opacity-75">)</span>
                     </div>
@@ -176,11 +176,11 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                     'transition ease-in-out duration-200',
                     'rounded',
                     'text-right',
-                    'text-white text-base-plus leading-tight',
+                    'text-white text-base-plus',
                     'placeholder-secondary-white'
                   )}
                 />
-                {symbol}
+                <span style={{ maxHeight: 19 }}>{symbol}</span>
               </div>
             )}
           </div>

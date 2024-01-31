@@ -40,6 +40,7 @@ type InternalConfiramtionProps = {
 };
 
 const MIN_GAS_FEE = 0;
+const bytesStyle = { height: 112, background: '#171717', border: 'none' };
 
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
@@ -292,18 +293,14 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                       label={t('payloadToSign')}
                       payload={payload.bytes}
                       className="mb-4 px-4 py-4"
-                      style={{ height: 127, maxHeight: '10rem' }}
+                      style={bytesStyle}
                     />
                   </>
                 )}
 
                 {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
                   <>
-                    <RawPayloadView
-                      payload={payload.bytesToSign}
-                      className="mb-4 px-4 py-4"
-                      style={{ minHeight: 127, maxHeight: '10rem' }}
-                    />
+                    <RawPayloadView payload={payload.bytesToSign} className="mb-4 px-4 py-4" style={bytesStyle} />
                   </>
                 )}
 

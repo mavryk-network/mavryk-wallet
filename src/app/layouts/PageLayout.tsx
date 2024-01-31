@@ -21,6 +21,7 @@ import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { T } from 'lib/i18n';
 import { NotificationsBell } from 'lib/notifications';
+import { useTempleClient } from 'lib/temple/front';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
 import { DonationBanner } from '../atoms/DonationBanner/DonationBanner';
@@ -136,6 +137,9 @@ export const Toolbar: FC<ToolbarProps> = ({
   const { historyPosition, pathname } = useLocation();
   const { fullPage } = useAppEnv();
   const { setOnboardingCompleted } = useOnboardingProgress();
+  // hide back icon on the confirm operation screen
+  const { confirmation } = useTempleClient();
+  const displayed = Boolean(confirmation);
 
   const onStepBack = () => {
     if (step && setStep && step > 0) {
@@ -147,7 +151,7 @@ export const Toolbar: FC<ToolbarProps> = ({
   const properHistoryPosition = historyPosition > 0 || !inHome;
   const canBack = hasBackAction && properHistoryPosition;
   const canStepBack = Boolean(step) && step! > 0;
-  const isBackButtonAvailable = canBack || canStepBack;
+  const isBackButtonAvailable = displayed ? false : canBack || canStepBack;
 
   const handleBack = () => {
     if (canBack) {

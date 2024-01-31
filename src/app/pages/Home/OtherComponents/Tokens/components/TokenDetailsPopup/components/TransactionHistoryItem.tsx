@@ -23,8 +23,6 @@ interface Props {
 export const TransactionHistoryItem = memo<Props>(({ activity, address, last, slug }) => {
   const tokenMetadata = useAssetMetadata(slug ?? '');
   const { hash, addedAt, status } = activity;
-  console.log(activity, '----');
-  console.log(tokenMetadata, 'metadata');
 
   const operStack = useMemo(() => buildOperStack(activity, address), [activity, address]);
   const moneyDiffs = useMemo(() => buildMoneyDiffs(activity), [activity]);

@@ -14,6 +14,7 @@ export type AccountButtonProps = {
   child?: JSX.Element;
   iconSize?: number;
   account: TempleAccount;
+  onlyAccSelect?: boolean;
 };
 
 export enum AccountSelectors {
@@ -21,7 +22,12 @@ export enum AccountSelectors {
   accountIcon = 'Header/Account Icon'
 }
 
-export const AccountPopupButton: FC<AccountButtonProps> = ({ account, child, iconSize = 24 }) => {
+export const AccountPopupButton: FC<AccountButtonProps> = ({
+  account,
+  child,
+  iconSize = 24,
+  onlyAccSelect = false
+}) => {
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
   const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {
@@ -61,7 +67,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({ account, child, ico
         title={<T id="selectAccount" />}
         portalClassName="accounts-popup"
       >
-        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
+        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} onlyAccSelect={onlyAccSelect} />
       </PopupModalWithTitle>
     </div>
   );

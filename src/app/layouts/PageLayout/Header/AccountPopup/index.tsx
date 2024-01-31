@@ -7,7 +7,6 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField/SearchField';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh, useGasToken } from 'lib/temple/front';
-import { HistoryAction, navigate } from 'lib/woozie';
 
 import { AccountDropdownSelectors } from '../selectors';
 import { AccountItem } from './AccountItem';
@@ -15,9 +14,10 @@ import { AccountItem } from './AccountItem';
 type AccountPopupProps = {
   opened: boolean;
   setOpened: (v: boolean) => void;
+  onlyAccSelect?: boolean;
 };
 
-const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
+const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect = false }) => {
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const setAccountPkh = useSetAccountPkh();
@@ -112,13 +112,15 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         </div>
       </div>
 
-      <div className="w-full flex justify-cente px-4">
-        <ButtonLink {...action}>
-          <ButtonRounded size="big" fill={false} className="w-full mt-4">
-            <T id="addRestoreAccount" />
-          </ButtonRounded>
-        </ButtonLink>
-      </div>
+      {!onlyAccSelect && (
+        <div className="w-full flex justify-cente px-4">
+          <ButtonLink {...action}>
+            <ButtonRounded size="big" fill={false} className="w-full mt-4">
+              <T id="addRestoreAccount" />
+            </ButtonRounded>
+          </ButtonLink>
+        </div>
+      )}
     </div>
   );
 };

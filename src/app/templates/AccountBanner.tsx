@@ -28,6 +28,7 @@ const AccountBanner = memo<AccountBannerProps>(({ account, displayBalance = true
           <AccountPopupButton
             account={account}
             iconSize={32}
+            onlyAccSelect
             child={
               <div className="flex items-center mt-1">
                 <div className="text-xs leading-none text-gray-700">

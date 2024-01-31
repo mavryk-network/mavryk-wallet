@@ -2937,6 +2937,9 @@
   "collectibles": {
     "message": "Collectibles"
   },
+  "NFTs": {
+    "message": "NFTs"
+  },
   "attentionSendAmount": {
     "message": "You need to send the exact amount of cryptocurrency to the deposit address. Otherwise the transaction will fail and you will have to contact $support$",
     "placeholders": {
@@ -3306,7 +3309,7 @@
     "message": "Payment"
   },
   "stakeToEarn": {
-    "message": "Stake you MVRK and earn rewards!"
+    "message": "Stake your MVRK and earn rewards!"
   },
   "stakedTo": {
     "message": "Staked to:"

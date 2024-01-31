@@ -82,7 +82,7 @@ const Control: FC = () => {
         )}
       </Popper> */}
 
-      <AccountPopupButton account={account} child={<GetProlabel />} />
+      <AccountPopupButton iconSize={34} account={account} child={<GetProlabel />} />
 
       <div className="ml-2 flex-1 flex items-start">
         <div className="flex-1" />

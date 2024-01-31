@@ -88,13 +88,13 @@ const SortListItem: FC<{ item: SortListItemType }> = ({ item }) => {
   const { nameI18nKey, selected, disabled = false, onClick, id } = item;
 
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
       <div className="flex items-center">
         <span className="text-base-plus text-white">
           <T id={nameI18nKey} />
         </span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} onClick={onClick} />
+      <RadioButton id={id} checked={selected} disabled={disabled} />
     </div>
   );
 };

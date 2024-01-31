@@ -26,7 +26,7 @@ export const ListItem = memo<Props>(
   ({ active, assetSlug, balance, onClick }) => {
     const metadata = useAssetMetadata(assetSlug);
 
-    const apyInfo = useTokenApyInfo(assetSlug);
+    // const apyInfo = useTokenApyInfo(assetSlug);
 
     const classNameMemo = useMemo(
       () =>
@@ -59,7 +59,7 @@ export const ListItem = memo<Props>(
           <div className="flex justify-between w-full mb-1">
             <div className="flex items-center flex-initial">
               <div className={styles['tokenSymbol']}>{assetSymbol}</div>
-              <TokenTag assetSlug={assetSlug} assetSymbol={assetSymbol} apyInfo={apyInfo} />
+              {/* <TokenTag assetSlug={assetSlug} assetSymbol={assetSymbol} apyInfo={apyInfo} /> */}
             </div>
             <CryptoBalance
               value={balance}

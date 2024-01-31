@@ -23,7 +23,7 @@ type Props = {
   className?: string;
 };
 
-type TabName = 'tokens' | 'collectibles' | 'activity' | 'delegation' | 'info';
+type TabName = 'tokens' | 'NFTs' | 'activity' | 'delegation' | 'info';
 
 interface TabData {
   name: TabName;
@@ -60,8 +60,8 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
           testID: HomeSelectors.assetsTab
         },
         {
-          name: 'collectibles',
-          titleI18nKey: 'collectibles',
+          name: 'NFTs',
+          titleI18nKey: 'NFTs',
           Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
           testID: HomeSelectors.collectiblesTab
         },

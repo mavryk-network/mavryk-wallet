@@ -25,7 +25,7 @@ export const DelegateTezosTag: FC = () => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
-      navigate('/explore/tez/?tab=delegation');
+      navigate('/stake');
     },
     [trackEvent]
   );
@@ -69,13 +69,9 @@ export const StakeTezosTag: FC = () => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
-      if (myBakerPkh) {
-        navigate('/explore/tez/?tab=delegation');
-      } else {
-        navigate('/stake');
-      }
+      navigate('/stake');
     },
-    [trackEvent, myBakerPkh]
+    [trackEvent]
   );
 
   const NotStakedButton = useMemo(

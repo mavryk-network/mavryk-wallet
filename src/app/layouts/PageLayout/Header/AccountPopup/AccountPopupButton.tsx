@@ -43,7 +43,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({ account, child, ico
         <Identicon type="bottts" hash={account.publicKeyHash} size={iconSize} />
       </Button>
 
-      <div>
+      <div className="flex flex-col items-start">
         <div
           className="max-w-full overflow-x-hidden cursor-pointer flex items-center"
           onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}

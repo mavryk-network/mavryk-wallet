@@ -1,5 +1,3 @@
-import BigNumber from 'bignumber.js';
-
 import type { UserHistoryItem } from 'lib/temple/history';
 
 // export function buildUserHistory(userHistoryItems: any[]): UserHistory {
@@ -77,7 +75,5 @@ export function buildMoneyDiffs(historyItem: UserHistoryItem) {
 
   return diffs;
 }
-
-const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
 
 const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) => `${contractAddress}_${tokenId}`;

@@ -21,7 +21,7 @@ interface TzktOperationError {
 /**
  * To be reviewed if a new operation type is added
  */
-interface TzktOperationBase {
+export interface TzktOperationBase {
   type: TzktOperationType;
   id: number;
   level?: number;
@@ -41,7 +41,7 @@ interface TzktOperationBase {
 
 type TzktQuote = Partial<Record<TzktQuoteCurrency, number>>;
 
-interface TzktDelegationOperation extends TzktOperationBase {
+export interface TzktDelegationOperation extends TzktOperationBase {
   type: 'delegation';
   initiator?: TzktAlias;
   nonce?: number;
@@ -60,18 +60,18 @@ export interface TzktTransactionOperation extends TzktOperationBase {
   allocationFee: number;
   target: TzktAlias;
   amount: number;
-  parameter?: unknown;
+  parameter?: any;
   entrypoint?: string;
   hasInternals: boolean;
 }
 
-interface TzktOriginationOperation extends TzktOperationBase {
+export interface TzktOriginationOperation extends TzktOperationBase {
   type: 'origination';
   originatedContract?: TzktAlias;
   contractBalance?: string;
 }
 
-interface TzktRevealOperation extends TzktOperationBase {
+export interface TzktRevealOperation extends TzktOperationBase {
   type: 'reveal';
 }
 

@@ -1,4 +1,4 @@
-import { TzktAlias, TzktTokenTransfer, TzktOperation } from 'lib/apis/tzkt';
+import { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
 
 export type HistoryItemStatus = TzktOperation['status'] | 'pending';
 export type HistoryMember = TzktAlias;
@@ -16,8 +16,8 @@ export interface UserHistoryItem {
   operations: IndividualHistoryItem[];
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
-  firstOperation?: IndividualHistoryItem;
-  oldestOperation?: IndividualHistoryItem;
+  firstOperation: IndividualHistoryItem;
+  oldestOperation: IndividualHistoryItem;
 }
 
 type PickedPropsFromTzktOperation = Pick<TzktOperation, 'id' | 'level' | 'hash' | 'block'>;

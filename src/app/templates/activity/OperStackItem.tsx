@@ -4,9 +4,11 @@ import { HashChip } from 'app/atoms';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import { TID, T } from 'lib/i18n';
 import { OperStackItemInterface, OperStackItemTypeEnum } from 'lib/temple/activity-new/types';
+import { ListItemDivider } from 'app/atoms/Divider';
 
 interface Props {
   item: OperStackItemInterface;
+  isTiny?: boolean;
 }
 
 // TODO delete this after transaction history update
@@ -72,25 +74,28 @@ export const OperStackItem = memo<Props>(({ item }) => {
   }
 });
 
-export const OpertionStackItem = memo<Props>(({ item }) => {
+// ---------------------------------
+
+export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
+  const Component = isTiny ? StackItemBaseTiny : StackItemBase;
+
   switch (item.type) {
     case OperStackItemTypeEnum.Delegation:
       return (
-        <StackItemBase
+        <Component
           titleNode={<T id="delegation" />}
           argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[item.to]} />}
         />
       );
 
     case OperStackItemTypeEnum.Origination:
-      return <StackItemBase titleNode={<T id="origination" />} />;
+      return <Component titleNode={<T id="origination" />} />;
 
     case OperStackItemTypeEnum.Interaction:
       return (
-        <StackItemBase
+        <Component
           titleNode={
             <>
-              <ClipboardIcon className="mr-1 h-3 w-auto stroke-current" />
               <T id="interaction" />
             </>
           }
@@ -100,7 +105,7 @@ export const OpertionStackItem = memo<Props>(({ item }) => {
 
     case OperStackItemTypeEnum.TransferFrom:
       return (
-        <StackItemBase
+        <Component
           titleNode={
             <>
               <T id="transfer" />
@@ -112,7 +117,7 @@ export const OpertionStackItem = memo<Props>(({ item }) => {
 
     case OperStackItemTypeEnum.TransferTo:
       return (
-        <StackItemBase
+        <Component
           titleNode={
             <>
               <T id="transfer" />
@@ -124,7 +129,7 @@ export const OpertionStackItem = memo<Props>(({ item }) => {
 
     case OperStackItemTypeEnum.Other:
       return (
-        <StackItemBase
+        <Component
           titleNode={item.name
             .split('_')
             .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
@@ -149,13 +154,23 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
   );
 };
 
+const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
+  return (
+    <div className="flex items-center text-white text-xs">
+      <div className="flex items-center">{titleNode}</div>
+      <span>&nbsp;</span>
+      {argsNode}
+    </div>
+  );
+};
+
 interface StackItemArgsProps {
   i18nKey: TID;
   args: string[];
 }
 
 const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => (
-  <span className="text-white text-base-plus">
+  <span className="text-white">
     <T
       id={i18nKey}
       substitutions={args.map((value, index) => (

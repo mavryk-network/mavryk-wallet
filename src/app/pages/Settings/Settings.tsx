@@ -3,7 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
 import { ReactComponent as ConnectLedgericon } from 'app/icons/connect-clip.svg';
-import { ReactComponent as HelpIcon } from 'app/icons/help.svg';
+// import { ReactComponent as HelpIcon } from 'app/icons/help.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import { ReactComponent as RoundedInfoIcon } from 'app/icons/rounded-info.svg';
 import { ReactComponent as RoundedMinusIcon } from 'app/icons/rounded-minus.svg';
@@ -18,7 +18,7 @@ import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
 import { AddContact } from 'app/templates/AddressBook/AddContact';
 import { AddressBook } from 'app/templates/AddressBook/AddressBook';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
-import HelpAndCommunity from 'app/templates/HelpAndCommunity';
+// import HelpAndCommunity from 'app/templates/HelpAndCommunity';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
 import RevealSecret from 'app/templates/RevealSecrets/RevealSecret';
 import GeneralSettings from 'app/templates/SettingsGeneral';
@@ -26,6 +26,7 @@ import SyncSettings from 'app/templates/Synchronization/SyncSettings';
 import { T } from 'lib/i18n';
 
 import ConnectLedger from '../ConnectLedger/ConnectLedger';
+// import ImportAccount from '../ImportAccount';
 import { SettingsSelectors } from './Settings.selectors';
 
 type SettingsProps = {
@@ -139,7 +140,7 @@ const TABS: Tab[] = [
   //   linkTo: 'help-and-community',
   //   i18nKey: 'helpAndCommunity',
   //   Icon: HelpIcon,
-  //   Component: HelpAndCommunity,
+  //   Component: ImportAccount,
   //   fillIcon: false
   // }
 ];

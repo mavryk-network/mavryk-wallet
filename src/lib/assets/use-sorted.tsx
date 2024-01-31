@@ -13,7 +13,8 @@ export enum SortOptions {
 export function useSortededAssetsSlugs(
   sortOption: SortOptions | null,
   assetsSlugs: string[],
-  balances: Record<string, BigNumber>
+  balances: Record<string, BigNumber>,
+  topSlug = 'tez'
 ) {
   const tokensMetadata = useTokensMetadataSelector();
 
@@ -26,29 +27,36 @@ export function useSortededAssetsSlugs(
     [assetsSlugs, tokensMetadata]
   );
 
+  let sortedAssetSlugs = [...assetsSlugs].filter(slug => slug !== topSlug);
+
   switch (sortOption) {
     case SortOptions.BY_NAME:
-      return assetsSlugNames
+      sortedAssetSlugs = assetsSlugNames
         .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
         .map(asset => asset.slug);
+      break;
 
     case SortOptions.HIGH_TO_LOW:
-      return assetsSlugs.sort((a, b) => {
+      sortedAssetSlugs = sortedAssetSlugs.sort((a, b) => {
         const tokenABalance = balances[a] ?? new BigNumber(0);
         const tokenBBalance = balances[b] ?? new BigNumber(0);
 
         return tokenBBalance.comparedTo(tokenABalance);
       });
+      break;
 
     case SortOptions.LOW_TO_HIGH:
-      return assetsSlugs.sort((a, b) => {
+      sortedAssetSlugs = sortedAssetSlugs.sort((a, b) => {
         const tokenABalance = balances[a] ?? new BigNumber(0);
         const tokenBBalance = balances[b] ?? new BigNumber(0);
 
         return tokenABalance.comparedTo(tokenBBalance);
       });
+      break;
 
     default:
-      return assetsSlugs;
+      sortedAssetSlugs = [...sortedAssetSlugs];
   }
+
+  return [topSlug, ...sortedAssetSlugs];
 }

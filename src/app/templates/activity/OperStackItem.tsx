@@ -9,6 +9,7 @@ interface Props {
   item: OperStackItemInterface;
 }
 
+// TODO delete this after transaction history update
 export const OperStackItem = memo<Props>(({ item }) => {
   switch (item.type) {
     case OperStackItemTypeEnum.Delegation:
@@ -71,15 +72,78 @@ export const OperStackItem = memo<Props>(({ item }) => {
   }
 });
 
+export const OpertionStackItem = memo<Props>(({ item }) => {
+  switch (item.type) {
+    case OperStackItemTypeEnum.Delegation:
+      return (
+        <StackItemBase
+          titleNode={<T id="delegation" />}
+          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[item.to]} />}
+        />
+      );
+
+    case OperStackItemTypeEnum.Origination:
+      return <StackItemBase titleNode={<T id="origination" />} />;
+
+    case OperStackItemTypeEnum.Interaction:
+      return (
+        <StackItemBase
+          titleNode={
+            <>
+              <ClipboardIcon className="mr-1 h-3 w-auto stroke-current" />
+              <T id="interaction" />
+            </>
+          }
+          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[item.with]} />}
+        />
+      );
+
+    case OperStackItemTypeEnum.TransferFrom:
+      return (
+        <StackItemBase
+          titleNode={
+            <>
+              <T id="transfer" />
+            </>
+          }
+          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[item.from]} />}
+        />
+      );
+
+    case OperStackItemTypeEnum.TransferTo:
+      return (
+        <StackItemBase
+          titleNode={
+            <>
+              <T id="transfer" />
+            </>
+          }
+          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[item.to]} />}
+        />
+      );
+
+    case OperStackItemTypeEnum.Other:
+      return (
+        <StackItemBase
+          titleNode={item.name
+            .split('_')
+            .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
+            .join(' ')}
+        />
+      );
+  }
+});
+
 interface StackItemBaseProps {
   titleNode: React.ReactNode;
   argsNode?: React.ReactNode;
 }
+
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
   return (
-    <div className="flex flex-wrap items-center">
-      <div className="flex items-center text-xs text-blue-600 opacity-75">{titleNode}</div>
-
+    <div className="flex items-center text-white text-base-plus">
+      <div className="flex items-center">{titleNode}</div>
+      <span>&nbsp;</span>
       {argsNode}
     </div>
   );
@@ -91,12 +155,19 @@ interface StackItemArgsProps {
 }
 
 const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => (
-  <span className="font-light text-gray-500 text-xs ml-1">
+  <span className="text-white text-base-plus">
     <T
       id={i18nKey}
       substitutions={args.map((value, index) => (
         <span key={index}>
-          <HashChip className="text-blue-600 opacity-75" key={index} hash={value} type="link" />
+          <HashChip
+            className="text-blue-200"
+            firstCharsCount={5}
+            key={index}
+            hash={value}
+            type="link"
+            showIcon={false}
+          />
           {index === args.length - 1 ? null : ', '}
         </span>
       ))}

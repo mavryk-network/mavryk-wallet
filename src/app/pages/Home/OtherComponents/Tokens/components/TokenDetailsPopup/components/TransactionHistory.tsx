@@ -90,6 +90,8 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
     [sortOption]
   );
 
+  console.log(activities);
+
   // search
   const [searchValue, setSearchValue] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -99,46 +101,48 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
 
   return (
     <section>
-      <div className=" flex items-center justify-between relative">
-        <span className="text-base-plus text-white">
-          <T id="history" />
-        </span>
-        <div
-          style={{ transform: 'translateY(-50%)' }}
-          className="flex items-center gap-2 w-full h-8 top-1/2 left-0 justify-end absolute"
-        >
-          <SearchExplorer>
-            <>
-              <SearchExplorerOpened>
-                <div className={classNames('w-full flex justify-end')}>
-                  <SearchExplorerFinder
-                    value={searchValue}
-                    onValueChange={setSearchValue}
-                    onFocus={handleSearchFieldFocus}
-                    onBlur={handleSearchFieldBlur}
-                    containerClassName="mr-2"
-                    className={styles.inputBg}
-                    cleanButtonIconStyle={cleanBtnStyles}
-                    // testID={AssetsSelectors.searchAssetsInputTokens}
-                  />
-                </div>
-              </SearchExplorerOpened>
-              <SearchExplorerClosed>
-                <div className={classNames('flex justify-end items-center')}>
-                  <SearchExplorerIconBtn />
+      <div className="px-4 mb-3">
+        <div className="flex items-center justify-between relative">
+          <span className="text-base-plus text-white">
+            <T id="history" />
+          </span>
+          <div
+            style={{ transform: 'translateY(-50%)' }}
+            className="flex items-center gap-2 w-full h-8 top-1/2 left-0 justify-end absolute"
+          >
+            <SearchExplorer>
+              <>
+                <SearchExplorerOpened>
+                  <div className={classNames('w-full flex justify-end')}>
+                    <SearchExplorerFinder
+                      value={searchValue}
+                      onValueChange={setSearchValue}
+                      onFocus={handleSearchFieldFocus}
+                      onBlur={handleSearchFieldBlur}
+                      containerClassName="mr-2"
+                      className={styles.inputBg}
+                      cleanButtonIconStyle={cleanBtnStyles}
+                      // testID={AssetsSelectors.searchAssetsInputTokens}
+                    />
+                  </div>
+                </SearchExplorerOpened>
+                <SearchExplorerClosed>
+                  <div className={classNames('flex justify-end items-center')}>
+                    <SearchExplorerIconBtn />
 
-                  <SortPopup>
-                    <SortButton />
-                    <SortPopupContent items={memoizedSortAssetsOptions} />
-                  </SortPopup>
-                </div>
-              </SearchExplorerClosed>
-            </>
-          </SearchExplorer>
+                    <SortPopup>
+                      <SortButton />
+                      <SortPopupContent items={memoizedSortAssetsOptions} />
+                    </SortPopup>
+                  </div>
+                </SearchExplorerClosed>
+              </>
+            </SearchExplorer>
+          </div>
         </div>
       </div>
       <div className="w-full max-w-sm mx-auto">
-        <div className={classNames('my-3 flex flex-col', popup && 'mx-4')}>
+        <div className={classNames('flex flex-col')}>
           <InfiniteScroll
             dataLength={activities.length}
             hasMore={reachedTheEnd === false}
@@ -148,7 +152,7 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
           >
             {activities.map((activity, index) => (
               <Fragment key={activity.hash}>
-                <TransactionHistoryItem address={accountAddress} activity={activity} />
+                <TransactionHistoryItem address={accountAddress} activity={activity} slug={assetSlug} />
                 {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
               </Fragment>
             ))}

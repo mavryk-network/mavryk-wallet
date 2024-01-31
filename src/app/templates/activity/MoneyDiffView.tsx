@@ -21,25 +21,26 @@ export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = 
 
   const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
 
-  const conditionalPopupClassName = popup ? 'text-xs' : 'text-sm';
-  const conditionalDiffClassName = diffBN.gt(0) ? 'text-green-500' : 'text-red-700';
+  const conditionalPopupClassName = 'text-base-plus';
+  const conditionalDiffClassName = diffBN.gt(0) ? 'text-primary-success' : 'text-primary-error';
   const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
   const showPlus = diffBN.gt(0) ? '+' : '';
 
   return metadata ? (
     <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
       <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
-        <span className="mr-1">{showPlus}</span>
+        <span>{showPlus}</span>
         <Money>{diffBN}</Money>
-        <span className="ml-1">{getAssetSymbol(metadata, true)}</span>
+        <span>&nbsp;</span>
+        <span>{getAssetSymbol(metadata, true)}</span>
       </div>
 
       {assetSlug && (
         <InFiat volume={diffBN.abs()} assetSlug={assetSlug}>
           {({ balance, symbol }) => (
-            <div className="text-xs text-gray-500 ml-1 flex">
-              {balance}
+            <div className="text-sm tracking-normal text-secondary-white flex">
               <span className="mr-px">{symbol}</span>
+              {balance}
             </div>
           )}
         </InFiat>

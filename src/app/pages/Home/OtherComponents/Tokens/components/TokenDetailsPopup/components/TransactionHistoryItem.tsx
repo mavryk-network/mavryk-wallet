@@ -4,64 +4,80 @@ import classNames from 'clsx';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
 import { HashChip } from 'app/atoms';
+import { ListItemDivider } from 'app/atoms/Divider';
 import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
-import { OperStack } from 'app/templates/activity/OperStack';
+import { OperationStack, OperStack } from 'app/templates/activity/OperStack';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { getDateFnsLocale } from 'lib/i18n';
 import { t } from 'lib/i18n/react';
+import { AssetMetadataBase, useAssetMetadata } from 'lib/metadata';
 import { Activity, buildOperStack, buildMoneyDiffs } from 'lib/temple/activity-new';
 
 interface Props {
   activity: Activity;
   address: string;
+  last?: boolean;
+  slug?: string;
 }
 
-export const TransactionHistoryItem = memo<Props>(({ activity, address }) => {
+export const TransactionHistoryItem = memo<Props>(({ activity, address, last, slug }) => {
+  const tokenMetadata = useAssetMetadata(slug ?? '');
   const { hash, addedAt, status } = activity;
+  console.log(activity, '----');
+  console.log(tokenMetadata, 'metadata');
 
   const operStack = useMemo(() => buildOperStack(activity, address), [activity, address]);
   const moneyDiffs = useMemo(() => buildMoneyDiffs(activity), [activity]);
 
   return (
-    <div className={classNames('my-3')}>
-      <div className="w-full flex items-center">
-        <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" />
-
-        <OpenInExplorerChip hash={hash} className="mr-2" small />
-
-        <div className={classNames('flex-1', 'h-px', 'bg-gray-200')} />
-      </div>
-
-      <div className="flex items-stretch">
-        <div className="flex flex-col pt-2">
-          <OperStack operStack={operStack} className="mb-2" />
-
-          <ActivityItemStatusComp activity={activity} />
-
-          <Time
-            children={() => (
-              <span className="text-xs font-light text-gray-500">
-                {formatDistanceToNow(new Date(addedAt), {
-                  includeSeconds: true,
-                  addSuffix: true,
-                  locale: getDateFnsLocale()
-                })}
-              </span>
-            )}
-          />
+    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
+      <div className="flex items-center justify-between">
+        <div className="flex -tems-center gap-3">
+          <TransactionIcon tokenMetadata={tokenMetadata} />
+          <div className="flex flex-col gap-1 items-start justify-center">
+            <OperationStack operStack={operStack} />
+            <Time
+              children={() => (
+                <span className="text-sm text-secondary-white">
+                  {formatDistanceToNow(new Date(addedAt), {
+                    includeSeconds: true,
+                    addSuffix: true,
+                    locale: getDateFnsLocale()
+                  })}
+                </span>
+              )}
+            />
+            {/* <ActivityItemStatusComp activity={activity} /> */}
+            {/* <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" /> */}
+          </div>
         </div>
 
-        <div className="flex-1" />
-
-        <div className="flex flex-col flex-shrink-0 pt-2">
+        <div className="flex flex-col justify-center items-end" style={{ maxWidth: 76 }}>
           {moneyDiffs.map(({ assetSlug, diff }, i) => (
             <MoneyDiffView key={i} assetId={assetSlug} diff={diff} pending={status === 'pending'} />
           ))}
         </div>
       </div>
+      {!last && <ListItemDivider />}
     </div>
   );
 });
+
+type TransactionIconType = {
+  tokenMetadata: AssetMetadataBase | undefined;
+};
+
+const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata }) => {
+  return (
+    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center">
+      {tokenMetadata?.thumbnailUri ? (
+        <img className="rounded-full w-8 h-8" src={tokenMetadata?.thumbnailUri} alt={tokenMetadata?.name} />
+      ) : (
+        <div className="text-white text-xs">{tokenMetadata?.name ?? t('unknown')}</div>
+      )}
+    </div>
+  );
+};
 
 interface ActivityItemStatusCompProps {
   activity: Activity;

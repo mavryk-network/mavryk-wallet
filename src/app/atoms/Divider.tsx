@@ -19,4 +19,8 @@ const Divider: FC<DividerProps> = ({ style, className, color = 'bg-accent-blue',
   />
 );
 
+export const ListItemDivider: FC = () => {
+  return <div className="absolute bottom-0 left-4 bg-divider" style={{ height: 1, width: 'calc(100% - 32px)' }} />;
+};
+
 export default Divider;

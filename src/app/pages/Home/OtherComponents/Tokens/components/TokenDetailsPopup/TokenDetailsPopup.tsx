@@ -148,8 +148,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         </div>
         {/* staking section */}
         <BakerBannerSection myBakerPkh={myBakerPkh} />
-        <TransactionHistory assetSlug={assetSlug} />
       </div>
+      <TransactionHistory assetSlug={assetSlug} />
     </section>
   );
 };

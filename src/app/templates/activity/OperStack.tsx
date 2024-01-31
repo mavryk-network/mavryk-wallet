@@ -8,7 +8,7 @@ import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
 import { T } from 'lib/i18n/react';
 import { OperStackItemInterface } from 'lib/temple/activity-new/types';
 
-import { OperStackItem } from './OperStackItem';
+import { OperStackItem, OpertionStackItem } from './OperStackItem';
 
 interface Props {
   operStack: OperStackItemInterface[];
@@ -48,6 +48,18 @@ export const OperStack = memo<Props>(({ operStack, className }) => {
           </button>
         </div>
       )}
+    </div>
+  );
+});
+
+export const OperationStack = memo<Props>(({ operStack, className }) => {
+  const base = useMemo(() => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE), [operStack]);
+
+  return (
+    <div className={classNames('flex flex-col', className)}>
+      {base.map((item, i) => (
+        <OpertionStackItem key={i} item={item} />
+      ))}
     </div>
   );
 });

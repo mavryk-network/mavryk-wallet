@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { Alert, Money } from 'app/atoms';
+import { Alert, HashChip, Money } from 'app/atoms';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ConfirmedIcon } from 'app/icons/confirmed.svg';
@@ -13,6 +13,7 @@ import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, NETWORK_TYPES_WITH_BUY_BUTTON, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
+import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
@@ -21,7 +22,7 @@ import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useAssetFiatCurrencyPrice } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker, useNetwork, useRelevantAccounts } from 'lib/temple/front';
+import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
@@ -64,8 +65,10 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const balances = useBalancesWithDecimals();
   const balance = useMemo(() => balances[assetSlug] ?? new BigNumber(0), [assetSlug, balances]);
   const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
+  const tokenMetadata = useTokenMetadataSelector(assetSlug);
 
   const assetSymbol = getAssetSymbol(assetMetadata);
+  const isMainToken = assetSlug === TEZ_TOKEN_SLUG;
 
   // derived states
   const accountPkh = account.publicKeyHash;
@@ -147,7 +150,16 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         </div>
         {/* staking section */}
-        <BakerBannerSection myBakerPkh={myBakerPkh} />
+        {isMainToken ? (
+          <BakerBannerSection myBakerPkh={myBakerPkh} />
+        ) : tokenMetadata?.address ? (
+          <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
+            <T id="tokenAddress" />
+            <div className="p-4 bg-gray-920 text-left rounded-2xl-plus">
+              <HashChip hash={tokenMetadata.address} small />
+            </div>
+          </div>
+        ) : null}
       </div>
       <TransactionHistory assetSlug={assetSlug} />
     </section>

@@ -3337,5 +3337,11 @@
   },
   "deleteDapp": {
     "message": "Delete dApp"
+  },
+  "ETD": {
+    "message": "E.T.D"
+  },
+  "nextPayout": {
+    "message": "Next payout"
   }
 }

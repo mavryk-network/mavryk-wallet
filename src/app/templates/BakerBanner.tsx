@@ -2,167 +2,316 @@ import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
+import { formatDistanceToNow } from 'date-fns';
 
 import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
+import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
-import { toLocalFormat, T } from 'lib/i18n';
+import { toLocalFormat, T, getDateFnsLocale } from 'lib/i18n';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
 import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from './DelegateForm';
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 
+// const mockedBaker: any = {
+//   address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
+//   name: 'Everstake',
+//   logo: 'https://services.tzkt.io/v1/avatars/tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
+//   balance: 12923.010257,
+//   stakingBalance: 113315.976957,
+//   stakingCapacity: 114000,
+//   maxStakingBalance: 114000,
+//   freeSpace: 684.0230429999938,
+//   fee: 0.04,
+//   minDelegation: 5,
+//   payoutDelay: 6,
+//   payoutPeriod: 1,
+//   openForDelegation: true,
+//   estimatedRoi: 0.06024,
+//   serviceType: 'tezos_only',
+//   serviceHealth: 'active',
+//   payoutTiming: 'suspicious',
+//   payoutAccuracy: 'inaccurate',
+//   audit: '64e7621dd0970a602a90d4b1',
+//   insuranceCoverage: 0,
+//   config: {
+//     address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
+//     fee: [
+//       {
+//         cycle: 586,
+//         value: 0.04
+//       },
+//       {
+//         cycle: 0,
+//         value: 0.15
+//       }
+//     ],
+//     minDelegation: [
+//       {
+//         cycle: 586,
+//         value: 5
+//       },
+//       {
+//         cycle: 0,
+//         value: 50
+//       }
+//     ],
+//     payoutFee: [
+//       {
+//         cycle: 0,
+//         value: true
+//       }
+//     ],
+//     payoutDelay: [
+//       {
+//         cycle: 0,
+//         value: 6
+//       }
+//     ],
+//     payoutPeriod: [
+//       {
+//         cycle: 0,
+//         value: 1
+//       }
+//     ],
+//     minPayout: [
+//       {
+//         cycle: 0,
+//         value: 0
+//       }
+//     ],
+//     rewardStruct: [
+//       {
+//         cycle: 0,
+//         value: 21
+//       }
+//     ],
+//     payoutRatio: [
+//       {
+//         cycle: 0,
+//         value: 666
+//       }
+//     ],
+//     maxStakingThreshold: [
+//       {
+//         cycle: 0,
+//         value: 1
+//       }
+//     ],
+//     openForDelegation: [
+//       {
+//         cycle: 0,
+//         value: true
+//       }
+//     ],
+//     allocationFee: [
+//       {
+//         cycle: 0,
+//         value: true
+//       }
+//     ]
+//   }
+// };
+
 type BakerBannerProps = HTMLAttributes<HTMLDivElement> & {
   bakerPkh: string;
   link?: boolean;
   displayAddress?: boolean;
+  displayBg?: boolean;
+  displayDivider?: boolean;
+  alternativeTableData?: boolean;
 };
 
-const BakerBanner = memo<BakerBannerProps>(({ bakerPkh, link = false, displayAddress = false, className, style }) => {
-  const allAccounts = useRelevantAccounts();
-  const account = useAccount();
-  const { popup } = useAppEnv();
-  const { data: baker } = useKnownBaker(bakerPkh);
+const BakerBanner = memo<BakerBannerProps>(
+  ({
+    bakerPkh,
+    link = false,
+    displayAddress = false,
+    displayDivider = false,
+    displayBg = false,
+    alternativeTableData = false,
+    className,
+    style
+  }) => {
+    const allAccounts = useRelevantAccounts();
+    const account = useAccount();
+    const { popup } = useAppEnv();
+    const { data: baker } = useKnownBaker(bakerPkh);
 
-  const bakerAcc = useMemo(
-    () => allAccounts.find(acc => acc.publicKeyHash === bakerPkh) ?? null,
-    [allAccounts, bakerPkh]
-  );
+    const bakerAcc = useMemo(
+      () => allAccounts.find(acc => acc.publicKeyHash === bakerPkh) ?? null,
+      [allAccounts, bakerPkh]
+    );
 
-  const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
-  const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
+    const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
+    const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
-  return (
-    <div
-      className={classNames('w-full', 'py-14px px-4', className)}
-      style={{
-        maxWidth: undefined,
-        ...style
-      }}
-    >
-      {baker ? (
-        <>
-          <div className={classNames('flex items-stretch', 'text-white')}>
-            <div>
-              <img
-                src={baker.logo}
-                alt={baker.name}
-                className={classNames('flex-shrink-0', 'bg-white rounded-full')}
-                style={{
-                  minHeight: '2rem',
-                  width: 59,
-                  height: 59
-                }}
-              />
-            </div>
+    const feeTableItem: BakerTableData = useMemo(
+      () => ({
+        i18nKey: 'fee',
+        child: (
+          <>
+            {toLocalFormat(new BigNumber(baker?.fee ?? 0).times(100), {
+              decimalPlaces: 2
+            })}
+            %
+          </>
+        )
+      }),
+      [baker?.fee]
+    );
 
-            <div className="flex flex-col items-start flex-1 ml-4 relative">
-              <div className={classNames('w-full mb-2 text-base-plus text-white', 'flex flex-wrap items-center')}>
-                <Name
-                  style={{
-                    fontSize: '16px',
-                    lineHeight: '16px',
-                    maxWidth: isHelpUkraineBaker ? (popup ? '5rem' : '8rem') : '12rem'
-                  }}
-                  testID={BakingSectionSelectors.delegatedBakerName}
-                >
-                  {baker.name}
-                </Name>
-
-                {(isRecommendedBaker || isHelpUkraineBaker) && (
-                  <ABContainer
-                    groupAComponent={<SponsoredBaker isRecommendedBaker={isRecommendedBaker} />}
-                    groupBComponent={<PromotedBaker isRecommendedBaker={isRecommendedBaker} />}
-                  />
-                )}
-
-                {displayAddress && (
-                  <div className="ml-2 flex flex-wrap items-center">
-                    <OpenInExplorerChip hash={baker.address} type="account" small alternativeDesign />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center w-full">
-                <div className={classNames('flex items-start', popup ? (link ? 'mr-6' : 'mr-7') : 'mr-8')}>
-                  <div
-                    className={classNames(
-                      'text-xs leading-tight flex',
-                      'text-secondary-white flex-col',
-                      'items-start flex-1'
-                    )}
-                  >
-                    <T id="space" />
-                    <span className="mt-1 text-white flex">
-                      <Money>{(baker.freeSpace / 1000).toFixed(0)}</Money>K
-                    </span>
-                  </div>
-                </div>
-
-                <div className={classNames('flex items-start', popup ? 'mr-6' : 'mr-16')}>
-                  <div
-                    className={classNames(
-                      'text-xs leading-tight',
-                      'text-secondary-white flex flex-col',
-                      'items-start flex-1'
-                    )}
-                  >
-                    <T id="fee" />
-                    <span className="mt-1 text-white">
-                      {toLocalFormat(new BigNumber(baker.fee).times(100), {
-                        decimalPlaces: 2
+    const bakerTableData: BakerTableData[] = useMemo(
+      () =>
+        baker
+          ? alternativeTableData
+            ? [
+                { ...feeTableItem },
+                {
+                  i18nKey: 'ETD',
+                  child: (
+                    <>
+                      {/* TODO calculate ETD and add symbol */}
+                      <Money>{(baker.stakingBalance / 1000).toFixed(0)}</Money>
+                    </>
+                  )
+                },
+                {
+                  i18nKey: 'nextPayout',
+                  child: (
+                    <>
+                      {/* TODO calculate baker payout time */}
+                      {formatDistanceToNow(new Date(new Date().getTime() + 90 * 60 * 60 * 1000), {
+                        includeSeconds: true,
+                        addSuffix: true,
+                        locale: getDateFnsLocale()
                       })}
-                      %
-                    </span>
-                  </div>
-                </div>
-
-                <div className={classNames('flex items-start', popup ? (link ? 'mr-6' : 'mr-7') : 'mr-8')}>
-                  <div
-                    className={classNames(
-                      'text-xs leading-tight flex',
-                      'text-secondary-white flex-col',
-                      'items-start flex-1'
-                    )}
-                  >
-                    <T id="upTime" />
-                    <span className="mt-1 text-white flex">
+                    </>
+                  )
+                }
+              ]
+            : [
+                {
+                  i18nKey: 'space',
+                  child: (
+                    <>
+                      <Money>{(baker.freeSpace / 1000).toFixed(0)}</Money>K
+                    </>
+                  )
+                },
+                { ...feeTableItem },
+                {
+                  i18nKey: 'upTime',
+                  child: (
+                    <>
                       {toLocalFormat(new BigNumber(baker.estimatedRoi).times(100), {
                         decimalPlaces: 2
                       })}
-                      %{/* <Money>{(baker.estimatedRoi / 1000).toFixed(0)}</Money> */}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {link && (
-                <div className={classNames('absolute right-0 top-0 bottom-0', 'flex items-center', 'text-white')}>
-                  <ChevronRightIcon className="h-6 w-auto" />
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className={classNames('flex items-stretch', 'text-gray-700')}>
-          <div>
-            <Identicon type="bottts" hash={bakerPkh} size={40} className="shadow-xs" />
-          </div>
+                      %
+                    </>
+                  )
+                }
+              ]
+          : [],
+      [alternativeTableData, baker, feeTableItem]
+    );
 
-          <div className="flex flex-col items-start flex-1 ml-2">
-            <div className={classNames('mb-px w-full', 'flex flex-wrap items-center', 'leading-none')}>
-              <Name className="pb-1 mr-1 text-lg font-medium">
-                <BakerAccount account={account} bakerAcc={bakerAcc} bakerPkh={bakerPkh} />
-              </Name>
+    return (
+      <div
+        className={classNames('w-full', 'py-14px px-4', displayBg && 'bg-gray-920 rounded-2xl-plus', className)}
+        style={{
+          maxWidth: undefined,
+          ...style
+        }}
+      >
+        {baker ? (
+          <>
+            <div className={classNames('flex items-center', 'text-white')}>
+              <div>
+                <img
+                  src={baker.logo}
+                  alt={baker.name}
+                  className={classNames('flex-shrink-0', 'bg-white rounded-full')}
+                  style={{
+                    minHeight: '2rem',
+                    width: 59,
+                    height: 59
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col items-start flex-1 ml-4 relative">
+                <div
+                  className={classNames(
+                    'w-full mb-2 text-base-plus text-white',
+                    'flex flex-wrap items-center',
+                    displayDivider && 'border-b boder-divider pb-2',
+                    displayAddress && 'justify-between'
+                  )}
+                >
+                  <Name
+                    style={{
+                      fontSize: '16px',
+                      lineHeight: '16px',
+                      maxWidth: isHelpUkraineBaker ? (popup ? '5rem' : '8rem') : '12rem'
+                    }}
+                    testID={BakingSectionSelectors.delegatedBakerName}
+                  >
+                    {baker.name}
+                  </Name>
+
+                  {(isRecommendedBaker || isHelpUkraineBaker) && (
+                    <ABContainer
+                      groupAComponent={<SponsoredBaker isRecommendedBaker={isRecommendedBaker} />}
+                      groupBComponent={<PromotedBaker isRecommendedBaker={isRecommendedBaker} />}
+                    />
+                  )}
+
+                  {displayAddress && (
+                    <div className="ml-2 flex flex-wrap items-center">
+                      <HashChip hash={baker.address} small />
+                    </div>
+                  )}
+                </div>
+
+                <BakerTable data={bakerTableData} />
+
+                {link && (
+                  <div className={classNames('absolute right-0 top-0 bottom-0', 'flex items-center', 'text-white')}>
+                    <ChevronRightIcon className="h-6 w-auto" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={classNames('flex items-stretch', 'text-white')}>
+            <div>
+              <Identicon type="bottts" hash={bakerPkh} size={59} className="shadow-xs rounded-full" />
+            </div>
+
+            <div className="flex flex-col items-start flex-1 ml-2">
+              <div className={classNames('mb-px w-full', 'flex flex-col gap-2 items-start ml-3', 'leading-none')}>
+                <Name className="pb-1 mr-1 text-base-plus">
+                  <BakerAccount account={account} bakerAcc={bakerAcc} bakerPkh={bakerPkh} />
+                </Name>
+
+                {displayAddress && (
+                  <div className="flex flex-wrap items-center">
+                    <HashChip hash={bakerPkh} small />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-});
+        )}
+      </div>
+    );
+  }
+);
 
 export default BakerBanner;
 

@@ -21,7 +21,7 @@ import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useAssetFiatCurrencyPrice } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker, useNetwork } from 'lib/temple/front';
+import { useAccount, useDelegate, useKnownBaker, useNetwork, useRelevantAccounts } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
@@ -159,8 +159,6 @@ type BakerBannerSectionProps = {
 };
 
 const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
-  const { data: baker } = useKnownBaker(myBakerPkh ?? null);
-
   const handleButtonClick = useCallback(() => {
     navigate('/stake');
   }, []);
@@ -181,12 +179,19 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
 
   const StakedBanner = useMemo(
     () =>
-      baker ? (
-        <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
+      myBakerPkh ? (
+        <BakerBanner
+          bakerPkh={myBakerPkh ?? ''}
+          displayAddress
+          displayDivider
+          alternativeTableData
+          displayBg
+          style={{ width: undefined }}
+        />
       ) : (
         <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),
-    [baker]
+    [myBakerPkh]
   );
 
   return (

@@ -188,7 +188,7 @@ export const Toolbar: FC<ToolbarProps> = ({
     ToolbarElement = elem;
   }, []);
 
-  return (
+  return inHome ? null : (
     <div
       ref={updateRootRef}
       className={classNames(
@@ -206,7 +206,7 @@ export const Toolbar: FC<ToolbarProps> = ({
       }}
     >
       <div className="flex-1">
-        {!isBackButtonAvailable && adShow && <DonationBanner />}
+        {/* {!isBackButtonAvailable && adShow && <DonationBanner />} */}
 
         {isBackButtonAvailable && (
           <Button
@@ -237,12 +237,12 @@ export const Toolbar: FC<ToolbarProps> = ({
       <div className="flex-1" />
       {RightSidedComponent && RightSidedComponent}
 
-      {attention && (
+      {/* {attention && (
         <div className="flex items-center content-end absolute right-0">
           <AdvertisingBanner />
           <NotificationsBell />
         </div>
-      )}
+      )} */}
 
       {skip && (
         <div className="flex content-end">

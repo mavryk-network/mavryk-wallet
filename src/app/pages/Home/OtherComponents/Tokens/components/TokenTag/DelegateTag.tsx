@@ -9,7 +9,7 @@ import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useAccount, useDelegate, useKnownBaker, useKnownBakers } from 'lib/temple/front';
+import { useAccount, useDelegate, useKnownBaker } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { AssetsSelectors } from '../../../Assets.selectors';

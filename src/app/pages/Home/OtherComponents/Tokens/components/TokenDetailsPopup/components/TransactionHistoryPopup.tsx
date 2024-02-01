@@ -4,7 +4,7 @@ import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
-import { T, t } from 'lib/i18n';
+import { T } from 'lib/i18n';
 
 export const TransactionHistoryPopup: FC<PopupModalWithTitlePropsProps> = ({ isOpen, ...props }) => {
   return (

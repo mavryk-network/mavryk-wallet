@@ -3,17 +3,13 @@ import React, { memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { useTokenApyInfo } from 'app/hooks/use-token-apy.hook';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
 import { useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
-import { Link } from 'lib/woozie';
 
 import { AssetsSelectors } from '../../Assets.selectors';
 import styles from '../Tokens.module.css';
-import { toExploreAssetLink } from '../utils';
 import { CryptoBalance, FiatBalance } from './Balance';
-import { TokenTag } from './TokenTag';
 
 interface Props {
   active: boolean;

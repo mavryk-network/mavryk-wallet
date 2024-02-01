@@ -2,7 +2,6 @@ import React from 'react';
 
 import clsx from 'clsx';
 
-import { ReactComponent as LockAltIcon } from 'app/icons/lock-alt.svg';
 import { setTestID, TestIDProps } from 'lib/analytics';
 import { T } from 'lib/i18n';
 

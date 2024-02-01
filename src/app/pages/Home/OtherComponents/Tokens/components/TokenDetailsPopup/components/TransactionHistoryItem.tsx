@@ -3,11 +3,9 @@ import React, { useEffect, useState, useMemo, memo } from 'react';
 import classNames from 'clsx';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
-import { HashChip } from 'app/atoms';
 import { ListItemDivider } from 'app/atoms/Divider';
 import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
-import { OperationStack, OperStack } from 'app/templates/activity/OperStack';
-import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
+import { OperationStack } from 'app/templates/activity/OperStack';
 import { getDateFnsLocale } from 'lib/i18n';
 import { t } from 'lib/i18n/react';
 import { AssetMetadataBase, useAssetMetadata } from 'lib/metadata';
@@ -79,9 +77,9 @@ const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata, onClick
   );
 };
 
-interface ActivityItemStatusCompProps {
-  activity: Activity;
-}
+// interface ActivityItemStatusCompProps {
+//   activity: Activity;
+// }
 
 // const ActivityItemStatusComp: React.FC<ActivityItemStatusCompProps> = ({ activity }) => {
 //   const explorerStatus = activity.status;

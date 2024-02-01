@@ -2,19 +2,13 @@ import React, { FC, useCallback, useState } from 'react';
 
 import classNames from 'clsx';
 
-import { Button } from 'app/atoms/Button';
-import Identicon from 'app/atoms/Identicon';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
-import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { T, t } from 'lib/i18n';
+import { T } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
-import Popper from 'lib/ui/Popper';
 
 import styles from './Header.module.css';
-import { HeaderSelectors } from './Header.selectors';
-import AccountDropdown from './Header/AccountDropdown';
 import { AccountPopupButton, GetProlabel } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';

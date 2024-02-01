@@ -6,7 +6,6 @@ import clsx from 'clsx';
 import { isEqual } from 'lodash';
 
 import { SyncSpinner } from 'app/atoms';
-import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
@@ -22,7 +21,7 @@ import {
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
-import { TEMPLE_TOKEN_SLUG, TEZ_TOKEN_SLUG } from 'lib/assets';
+import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { T, t } from 'lib/i18n';
@@ -44,6 +43,7 @@ import { toExploreAssetLink } from './utils';
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
 export const TokensTab: FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const chainId = useChainId(true)!;
   const balances = useBalancesWithDecimals();
 
@@ -136,6 +136,7 @@ export const TokensTab: FC = () => {
     }
 
     return tokensJsx;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedSlugs, activeAssetSlug, balances, sortOption]);
 
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);

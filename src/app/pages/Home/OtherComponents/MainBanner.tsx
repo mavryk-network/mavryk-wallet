@@ -2,12 +2,8 @@ import React, { memo, FC } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
-// import { useDispatch } from 'react-redux';
 
-// import { Button } from 'app/atoms';
 import Money from 'app/atoms/Money';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
-// import { toggleBalanceModeAction } from 'app/store/settings/actions';
 import { useBalanceModeSelector } from 'app/store/settings/selectors';
 import { BalanceMode } from 'app/store/settings/state';
 import AddressChip from 'app/templates/AddressChip';
@@ -16,12 +12,9 @@ import Balance from 'app/templates/Balance';
 import InFiat from 'app/templates/InFiat';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { useFiatCurrency } from 'lib/fiat-currency';
-// import { t } from 'lib/i18n';
-// import { TezosLogoIcon } from 'lib/icons';
 import { getAssetName, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { useGasToken, useNetwork } from 'lib/temple/front';
 import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
-// import useTippy from 'lib/ui/useTippy';
 
 import { HomeSelectors } from '../Home.selectors';
 import styles from './MainBanner.module.css';

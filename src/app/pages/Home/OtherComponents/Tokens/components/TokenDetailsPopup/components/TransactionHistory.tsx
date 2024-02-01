@@ -82,6 +82,7 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
 
   const handleItemClick = useCallback((activityhash: string) => {
     setIsOpen(true);
+    console.log(activityhash);
     // TODO set active item in state
   }, []);
 

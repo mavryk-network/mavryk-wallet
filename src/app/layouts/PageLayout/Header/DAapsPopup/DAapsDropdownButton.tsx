@@ -13,7 +13,7 @@ export type NetworkButtonProps = {
   onClick: () => void;
 };
 
-export const DAapsDropdownButton: FC<NetworkButtonProps> = ({ enabled, className, onClick }) => {
+export const DAapsDropdownButton: FC<NetworkButtonProps> = ({ className, onClick }) => {
   const { activeDAppEntry } = useDappsContext();
   const Icon = Boolean(activeDAppEntry) ? EnabledNetworkIcon : DisabledNetworkIcon;
 

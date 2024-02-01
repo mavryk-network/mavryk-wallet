@@ -67,7 +67,7 @@ export const PartnersPromotionSettings: FC = () => {
           </span>
         </span>
       </label>
-      <div className="w-12">
+      <div className="w-auto">
         <Switcher on={shouldShowPartnersPromo} onChange={togglePartnersPromotion} />
       </div>
     </div>

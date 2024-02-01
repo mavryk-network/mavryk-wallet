@@ -76,7 +76,10 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
 // TODO move to GetPro popup | screen
 export const GetProlabel: FC = () => {
   return (
-    <div className="px-2 py-1 text-white text-xs bg-accent-blue mt-1 rounded text-center cursor-not-allowed">
+    <div
+      className="px-2 text-white text-xs leading-3 bg-accent-blue rounded text-center cursor-not-allowed"
+      style={{ paddingBlock: 3, marginTop: 1 }}
+    >
       <T id="getPro" />
     </div>
   );

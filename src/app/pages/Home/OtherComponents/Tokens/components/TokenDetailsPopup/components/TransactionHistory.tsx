@@ -23,6 +23,7 @@ import { useAccount } from 'lib/temple/front';
 
 import styles from './transactionHistory.module.css';
 import { TransactionHistoryItem } from './TransactionHistoryItem';
+import { TransactionHistoryPopup } from './TransactionHistoryPopup';
 
 const INITIAL_NUMBER = 30;
 const LOAD_STEP = 30;
@@ -72,6 +73,17 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
   // search
   const [searchValue, setSearchValue] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  // popup
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleRequestClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const handleItemClick = useCallback((activityhash: string) => {
+    setIsOpen(true);
+    // TODO set active item in state
+  }, []);
 
   const handleSearchFieldFocus = useCallback(() => void setSearchFocused(true), [setSearchFocused]);
   const handleSearchFieldBlur = useCallback(() => void setSearchFocused(false), [setSearchFocused]);
@@ -150,13 +162,19 @@ export const TransactionHistory: React.FC<Props> = ({ assetSlug }) => {
           >
             {activities.map((activity, index) => (
               <Fragment key={activity.hash}>
-                <TransactionHistoryItem address={accountAddress} activity={activity} slug={assetSlug} />
+                <TransactionHistoryItem
+                  address={accountAddress}
+                  activity={activity}
+                  slug={assetSlug}
+                  handleItemClick={handleItemClick}
+                />
                 {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
               </Fragment>
             ))}
           </InfiniteScroll>
         </div>
       </div>
+      <TransactionHistoryPopup isOpen={isOpen} onRequestClose={handleRequestClose} />
     </section>
   );
 };

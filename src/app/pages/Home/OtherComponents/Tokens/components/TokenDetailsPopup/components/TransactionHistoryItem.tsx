@@ -18,9 +18,10 @@ interface Props {
   address: string;
   last?: boolean;
   slug?: string;
+  handleItemClick: (hash: string) => void;
 }
 
-export const TransactionHistoryItem = memo<Props>(({ activity, address, last, slug }) => {
+export const TransactionHistoryItem = memo<Props>(({ activity, address, last, slug, handleItemClick }) => {
   const tokenMetadata = useAssetMetadata(slug ?? '');
   const { hash, addedAt, status } = activity;
 
@@ -31,7 +32,7 @@ export const TransactionHistoryItem = memo<Props>(({ activity, address, last, sl
     <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
       <div className="flex items-center justify-between">
         <div className="flex -tems-center gap-3">
-          <TransactionIcon tokenMetadata={tokenMetadata} />
+          <TransactionIcon tokenMetadata={tokenMetadata} onClick={() => handleItemClick(hash)} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack operStack={operStack} />
             <Time
@@ -63,11 +64,12 @@ export const TransactionHistoryItem = memo<Props>(({ activity, address, last, sl
 
 type TransactionIconType = {
   tokenMetadata: AssetMetadataBase | undefined;
+  onClick: () => void;
 };
 
-const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata }) => {
+const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata, onClick }) => {
   return (
-    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center">
+    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center" onClick={onClick}>
       {tokenMetadata?.thumbnailUri ? (
         <img className="rounded-full w-8 h-8" src={tokenMetadata?.thumbnailUri} alt={tokenMetadata?.name} />
       ) : (

@@ -3346,5 +3346,8 @@
   },
   "tokenAddress": {
     "message": "Token Address"
+  },
+  "status": {
+    "message": "Status"
   }
 }

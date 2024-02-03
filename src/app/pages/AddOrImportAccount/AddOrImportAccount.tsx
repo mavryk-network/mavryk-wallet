@@ -36,7 +36,7 @@ export const AddOrImportAccount: FC = () => {
       isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
-        <div className="text-base-plus text-white mb-20">
+        <div className="text-sm text-white mb-20">
           <T id="addOrImportAccountDescfiption" />
         </div>
         <div className="flex flex-col gap-4 items-stretch">

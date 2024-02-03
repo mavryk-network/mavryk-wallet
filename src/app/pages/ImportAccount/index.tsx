@@ -1,12 +1,13 @@
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { TabSwitcher } from 'app/atoms';
+import { Name, TabSwitcher } from 'app/atoms';
 import { ReactComponent as DownloadIcon } from 'app/icons/download.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { TID, T } from 'lib/i18n';
 import { useSetAccountPkh, useAllAccounts, useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
-import { navigate } from 'lib/woozie';
+import { HistoryAction, navigate } from 'lib/woozie';
 
 import { ByFundraiserForm } from './ByFundraiserForm';
 import { ByMnemonicForm } from './ByMnemonicForm';
@@ -42,7 +43,8 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const allTabs = useMemo(() => {
+  // private key, seed phrase, Fundaiser, Managed KT, Watch-only
+  const importOptions = useMemo(() => {
     const unfiltered: (ImportTabDescriptor | null)[] = [
       {
         slug: 'private-key',
@@ -82,9 +84,9 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
   }, [network.type]);
 
   const { slug, Form } = useMemo(() => {
-    const tab = tabSlug ? allTabs.find(currentTab => currentTab.slug === tabSlug) : null;
-    return tab ?? allTabs[0];
-  }, [allTabs, tabSlug]);
+    const tab = tabSlug ? importOptions.find(currentTab => currentTab.slug === tabSlug) : null;
+    return tab ?? importOptions[0];
+  }, [importOptions, tabSlug]);
 
   useEffect(() => {
     const prevNetworkType = prevNetworkRef.current.type;
@@ -94,11 +96,20 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
     }
   }, [network, slug]);
 
+  const handlePresetSelected = useCallback((slug: string) => {
+    navigate(`/import-account/${slug}`, HistoryAction.Replace);
+  }, []);
+
+  const selectedImportOtion = useMemo(
+    () => importOptions.find(option => option.slug === slug) ?? importOptions[0],
+    [importOptions, slug]
+  );
+
   return (
     <PageLayout
+      isTopbarVisible={false}
       pageTitle={
         <>
-          <DownloadIcon className="w-auto h-4 mr-1 stroke-current" />
           <span className="capitalize">
             <T id="importAccount" />
           </span>
@@ -106,11 +117,50 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
       }
     >
       <div className="py-4">
-        <TabSwitcher className="mb-4" tabs={allTabs} activeTabSlug={slug} urlPrefix="/import-account" />
+        <div className="relative flex flex-col items-stretch rounded">
+          <DropdownSelect
+            optionsListClassName="p-0"
+            dropdownWrapperClassName="border-none rounded-2xl-plus"
+            dropdownButtonClassName="px-4 py-14px"
+            DropdownFaceContent={<ImportOptionFace {...selectedImportOtion} />}
+            optionsProps={{
+              options: importOptions,
+              noItemsText: 'No items',
+              getKey: getImportOption,
+              renderOptionContent: option => <ImportAccountOptionContent {...option} />,
+              onOptionChange: option => handlePresetSelected(option.slug)
+            }}
+          />
+        </div>
 
         <Form />
       </div>
     </PageLayout>
+  );
+};
+
+// Dropdown additional components ---------------
+const getImportOption = (option: ImportTabDescriptor) => option.slug;
+
+const ImportOptionFace: FC<ImportTabDescriptor> = ({ i18nKey }) => {
+  return (
+    <section className="flex items-center justify-between w-full text-base-plus text-white">
+      <span className="capitalize">
+        <T id={i18nKey} />
+      </span>
+    </section>
+  );
+};
+
+const ImportAccountOptionContent: FC<ImportTabDescriptor> = ({ i18nKey }) => {
+  return (
+    <>
+      <div className="p-4 flex items-center justify-between w-full bg-primary-card hover:bg-gray-710">
+        <div className="text-base-plus text-white text-left">
+          <T id={i18nKey} />
+        </div>
+      </div>
+    </>
   );
 };
 

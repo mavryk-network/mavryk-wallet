@@ -127,7 +127,7 @@ const SelectOptions = <Type extends unknown>({
       opened={opened}
       className={classNames('origin-top overflow-x-hidden overflow-y-auto', dropdownWrapperClassName)}
       style={{
-        maxHeight: '15.125rem',
+        // maxHeight: '15.125rem',
         backgroundColor: '#010101',
         borderColor: '#44494A'
       }}

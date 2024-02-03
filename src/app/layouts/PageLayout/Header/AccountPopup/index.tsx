@@ -56,9 +56,9 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
 
   const action = useMemo(
     () => ({
-      key: 'create-account',
-      linkTo: '/create-account',
-      testID: AccountDropdownSelectors.createOrRestoreAccountButton,
+      key: 'add-or-import-account',
+      linkTo: '/add-or-import-account',
+      testID: AccountDropdownSelectors.addorImportAccountButton,
       onClick: () => setOpened(false)
     }),
     [setOpened]
@@ -116,7 +116,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
         <div className="w-full flex justify-cente px-4">
           <ButtonLink {...action}>
             <ButtonRounded size="big" fill={false} className="w-full mt-4">
-              <T id="addRestoreAccount" />
+              <T id="addOrImportAccount" />
             </ButtonRounded>
           </ButtonLink>
         </div>

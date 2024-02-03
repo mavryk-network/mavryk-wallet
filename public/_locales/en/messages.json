@@ -3349,5 +3349,14 @@
   },
   "status": {
     "message": "Status"
+  },
+  "addOrImportAccount": {
+    "message": "Add or Import Account"
+  },
+  "addOrImportAccountDescfiption": {
+    "message": " Here you can create a brand new account, import an old account you currently use on a different platform or restore an account you no longer have access to but have kept the seed phrase or keystore file."
+  },
+  "addNewAccount": {
+    "message": "Add New account"
   }
 }

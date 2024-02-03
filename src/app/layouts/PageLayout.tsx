@@ -227,8 +227,8 @@ export const Toolbar: FC<ToolbarProps> = ({
 
       {pageTitle && (
         <h2
-          className="px-1 flex items-center text-xl tracking-tight text-white font-normal overflow-hidden absolute top-1/2 left-1/2"
-          style={{ transform: 'translate(-50%, -50%)' }}
+          className="px-1 flex items-center justify-center text-xl tracking-tight text-white font-normal overflow-hidden absolute top-1/2 left-1/2"
+          style={{ transform: 'translate(-50%, -50%)', width: 300 }}
         >
           {pageTitle}
         </h2>

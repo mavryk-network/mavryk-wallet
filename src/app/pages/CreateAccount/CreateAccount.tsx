@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import classNames from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
@@ -11,7 +10,7 @@ import { T, t } from 'lib/i18n';
 import { useTempleClient, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
-import { Link, navigate } from 'lib/woozie';
+import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import { CreateAccountSelectors } from './CreateAccount.selectors';
@@ -93,22 +92,6 @@ const CreateAccount: FC = () => {
       isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
-        <div className="text-sm text-secondary-white mb-4">
-          This is to create a new account using the private key of your current wallet. If you want to restore an
-          account, please go{' '}
-          <Link
-            to="/import-wallet"
-            className={classNames(
-              'text-accent-blue',
-              'text-sm font-semibold',
-              'transition duration-200 ease-in-out',
-              'opacity-75 hover:opacity-100 focus:opacity-100'
-            )}
-            testID={CreateAccountSelectors.restoreWalletUsingSeedPhrase}
-          >
-            <T id="here" />.
-          </Link>
-        </div>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full justify-between">
           <FormField
             ref={register({

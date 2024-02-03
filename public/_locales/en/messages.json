@@ -3358,5 +3358,8 @@
   },
   "addNewAccount": {
     "message": "Add New account"
+  },
+  "chooseImportMethod": {
+    "message": "Choose an import method "
   }
 }

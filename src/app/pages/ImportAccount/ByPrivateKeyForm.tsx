@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useMemo, useState } from 'react';
 
+import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
@@ -10,13 +11,14 @@ import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 interface ByPrivateKeyFormData {
   privateKey: string;
   encPassword?: string;
 }
 
-export const ByPrivateKeyForm: FC = () => {
+export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const { importAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
 
@@ -50,49 +52,54 @@ export const ByPrivateKeyForm: FC = () => {
   const encrypted = useMemo(() => keyValue?.substring(2, 3) === 'e', [keyValue]);
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
-      {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
+    <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
 
-      <FormField
-        ref={register({ required: t('required') })}
-        type="password"
-        revealForbidden
-        name="privateKey"
-        id="importacc-privatekey"
-        label={t('privateKey')}
-        labelDescription={t('privateKeyInputDescription')}
-        placeholder={t('privateKeyInputPlaceholder')}
-        errorCaption={errors.privateKey?.message}
-        className="resize-none"
-        containerClassName="mb-6"
-        onPaste={clearClipboard}
-        testID={ImportAccountSelectors.privateKeyInput}
-      />
-
-      {encrypted && (
         <FormField
-          ref={register}
-          name="encPassword"
+          ref={register({ required: t('required') })}
           type="password"
-          id="importacc-password"
-          label={
-            <>
-              <T id="password" />{' '}
-              <span className="text-sm font-light text-gray-600">
-                <T id="optionalComment" />
-              </span>
-            </>
-          }
-          labelDescription={t('isPrivateKeyEncrypted')}
-          placeholder="*********"
-          errorCaption={errors.encPassword?.message}
+          revealForbidden
+          name="privateKey"
+          id="importacc-privatekey"
+          label={t('privateKey')}
+          labelDescription={t('privateKeyInputDescription')}
+          placeholder={t('privateKeyInputPlaceholder')}
+          errorCaption={errors.privateKey?.message}
+          className="resize-none"
           containerClassName="mb-6"
+          onPaste={clearClipboard}
+          testID={ImportAccountSelectors.privateKeyInput}
         />
-      )}
 
-      <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.privateKeyImportButton}>
-        {t('importAccount')}
-      </FormSubmitButton>
+        {encrypted && (
+          <FormField
+            ref={register}
+            name="encPassword"
+            type="password"
+            id="importacc-password"
+            label={
+              <>
+                <T id="password" />{' '}
+                <span className="text-sm font-light text-gray-600">
+                  <T id="optionalComment" />
+                </span>
+              </>
+            }
+            labelDescription={t('isPrivateKeyEncrypted')}
+            placeholder="*********"
+            errorCaption={errors.encPassword?.message}
+            containerClassName="mb-6 flex-grow"
+          />
+        )}
+      </div>
+
+      <div>
+        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.privateKeyImportButton}>
+          {t('importAccount')}
+        </FormSubmitButton>
+        <div className="h-8" />
+      </div>
     </form>
   );
 };

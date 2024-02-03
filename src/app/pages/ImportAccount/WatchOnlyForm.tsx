@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
+import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
 
 import { Alert, FormSubmitButton, NoSpaceField } from 'app/atoms';
@@ -11,12 +12,13 @@ import { isAddressValid, isKTAddress } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 interface WatchOnlyFormData {
   address: string;
 }
 
-export const WatchOnlyForm: FC = () => {
+export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const { importWatchOnlyAccount } = useTempleClient();
   const tezos = useTezos();
   const domainsClient = useTezosDomainsClient();
@@ -82,7 +84,7 @@ export const WatchOnlyForm: FC = () => {
   }, [importWatchOnlyAccount, finalAddress, tezos, formState.isSubmitting, setError, formAnalytics]);
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
 
       <Controller
@@ -120,9 +122,12 @@ export const WatchOnlyForm: FC = () => {
         </div>
       )}
 
-      <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.watchOnlyImportButton}>
-        {t('importAccount')}
-      </FormSubmitButton>
+      <div>
+        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.watchOnlyImportButton}>
+          {t('importAccount')}
+        </FormSubmitButton>
+        <div className="h-8" />
+      </div>
     </form>
   );
 };

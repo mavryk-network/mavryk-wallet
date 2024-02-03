@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react';
 
+import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
@@ -12,6 +13,7 @@ import { delay } from 'lib/utils';
 
 import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 interface ByFundraiserFormData {
   email: string;
@@ -19,7 +21,7 @@ interface ByFundraiserFormData {
   mnemonic: string;
 }
 
-export const ByFundraiserForm: FC = () => {
+export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useTempleClient();
   const { register, errors, handleSubmit, formState } = useForm<ByFundraiserFormData>();
   const [error, setError] = useState<ReactNode>(null);
@@ -60,7 +62,7 @@ export const ByFundraiserForm: FC = () => {
   const resetSeedPhrase = useCallback(() => void setSeedPhrase(''), []);
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
 
       <FormField
@@ -98,13 +100,16 @@ export const ByFundraiserForm: FC = () => {
         testID={ImportAccountSelectors.fundraiserSeedPhraseInput}
       />
 
-      <FormSubmitButton
-        className="mt-8"
-        loading={formState.isSubmitting}
-        testID={ImportAccountSelectors.fundraiserImportButton}
-      >
-        {t('importAccount')}
-      </FormSubmitButton>
+      <div>
+        <FormSubmitButton
+          className="mt-8"
+          loading={formState.isSubmitting}
+          testID={ImportAccountSelectors.fundraiserImportButton}
+        >
+          {t('importAccount')}
+        </FormSubmitButton>
+        <div className="h-8" />
+      </div>
     </form>
   );
 };

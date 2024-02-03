@@ -1,7 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { Name, TabSwitcher } from 'app/atoms';
-import { ReactComponent as DownloadIcon } from 'app/icons/download.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { TID, T } from 'lib/i18n';
@@ -12,8 +10,9 @@ import { HistoryAction, navigate } from 'lib/woozie';
 import { ByFundraiserForm } from './ByFundraiserForm';
 import { ByMnemonicForm } from './ByMnemonicForm';
 import { ByPrivateKeyForm } from './ByPrivateKeyForm';
-import { FromFaucetForm } from './FromFaucetForm';
+// import { FromFaucetForm } from './FromFaucetForm';
 import { ManagedKTForm } from './ManagedKTForm';
+import { ImportformProps } from './types';
 import { WatchOnlyForm } from './WatchOnlyForm';
 
 type ImportAccountProps = {
@@ -23,7 +22,7 @@ type ImportAccountProps = {
 interface ImportTabDescriptor {
   slug: string;
   i18nKey: TID;
-  Form: FC<{}>;
+  Form: FC<ImportformProps>;
 }
 
 const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
@@ -61,13 +60,13 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
         i18nKey: 'fundraiser',
         Form: ByFundraiserForm
       },
-      network.type !== 'main'
-        ? {
-            slug: 'faucet',
-            i18nKey: 'faucetFileTitle',
-            Form: FromFaucetForm
-          }
-        : null,
+      // network.type !== 'main'
+      //   ? {
+      //       slug: 'faucet',
+      //       i18nKey: 'faucetFileTitle',
+      //       Form: FromFaucetForm
+      //     }
+      //   : null,
       {
         slug: 'managed-kt',
         i18nKey: 'managedKTAccount',
@@ -116,25 +115,32 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
         </>
       }
     >
-      <div className="py-4">
-        <div className="relative flex flex-col items-stretch rounded">
-          <DropdownSelect
-            optionsListClassName="p-0"
-            dropdownWrapperClassName="border-none rounded-2xl-plus"
-            dropdownButtonClassName="px-4 py-14px"
-            DropdownFaceContent={<ImportOptionFace {...selectedImportOtion} />}
-            optionsProps={{
-              options: importOptions,
-              noItemsText: 'No items',
-              getKey: getImportOption,
-              renderOptionContent: option => <ImportAccountOptionContent {...option} />,
-              onOptionChange: option => handlePresetSelected(option.slug)
-            }}
-          />
+      <section className="h-full flex flex-col">
+        <div className="pb-4 border-b border-divider mb-4">
+          <label className="flex flex-col mb-4 leading-tight">
+            <span className="text-base-plus text-white">
+              <T id="chooseImportMethod" />
+            </span>
+          </label>
+          <div className="relative flex flex-col items-stretch rounded">
+            <DropdownSelect
+              optionsListClassName="p-0"
+              dropdownWrapperClassName="border-none rounded-2xl-plus"
+              dropdownButtonClassName="px-4 py-14px"
+              DropdownFaceContent={<ImportOptionFace {...selectedImportOtion} />}
+              optionsProps={{
+                options: importOptions,
+                noItemsText: 'No items',
+                getKey: getImportOption,
+                renderOptionContent: option => <ImportAccountOptionContent {...option} />,
+                onOptionChange: option => handlePresetSelected(option.slug)
+              }}
+            />
+          </div>
         </div>
 
-        <Form />
-      </div>
+        <Form className="h-full flex-grow flex flex-col justify-between" />
+      </section>
     </PageLayout>
   );
 };

@@ -14,6 +14,7 @@ import { delay } from 'lib/utils';
 
 import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 interface DerivationPath {
   type: string;
@@ -37,7 +38,7 @@ interface ByMnemonicFormData {
   accountNumber?: number;
 }
 
-export const ByMnemonicForm: FC = () => {
+export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { importMnemonicAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
@@ -97,7 +98,7 @@ export const ByMnemonicForm: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
       {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
 
       <div className="mb-8">
@@ -218,14 +219,16 @@ export const ByMnemonicForm: FC = () => {
         containerClassName="mb-6"
         testID={ImportAccountSelectors.mnemonicPasswordInput}
       />
-
-      <FormSubmitButton
-        loading={formState.isSubmitting}
-        className="mt-8"
-        testID={ImportAccountSelectors.mnemonicImportButton}
-      >
-        <T id="importAccount" />
-      </FormSubmitButton>
+      <div>
+        <FormSubmitButton
+          loading={formState.isSubmitting}
+          className="mt-8"
+          testID={ImportAccountSelectors.mnemonicImportButton}
+        >
+          <T id="importAccount" />
+        </FormSubmitButton>
+        <div className="h-8" />
+      </div>
     </form>
   );
 };

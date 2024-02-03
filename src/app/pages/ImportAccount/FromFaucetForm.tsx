@@ -13,6 +13,7 @@ import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 interface FaucetData {
   mnemonic: string[];
@@ -28,7 +29,7 @@ interface FaucetTextInputFormData {
   text: string;
 }
 
-export const FromFaucetForm: FC = () => {
+export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useTempleClient();
   const setAccountPkh = useSetAccountPkh();
   const tezos = useTezos();
@@ -153,7 +154,7 @@ export const FromFaucetForm: FC = () => {
 
   return (
     <>
-      <form ref={formRef} className="w-full max-w-sm mx-auto mt-8" onSubmit={handleFormSubmit}>
+      <form ref={formRef} className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleFormSubmit}>
         {alert && (
           <Alert
             type={alert instanceof Error ? 'error' : 'success'}
@@ -216,10 +217,11 @@ export const FromFaucetForm: FC = () => {
           }}
           containerClassName="mb-4"
         />
-        <div className="w-full flex">
+        <div className="w-full flex flex-col">
           <FormSubmitButton loading={processing}>
             <T id="submit" />
           </FormSubmitButton>
+          <div className="h-8" />
         </div>
       </form>
     </>

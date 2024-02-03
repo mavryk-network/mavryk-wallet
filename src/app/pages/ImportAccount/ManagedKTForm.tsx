@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
+import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormSubmitButton, NoSpaceField } from 'app/atoms';
@@ -19,6 +20,7 @@ import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
+import { ImportformProps } from './types';
 
 type ImportKTAccountFormData = {
   contractAddress: string;
@@ -26,7 +28,7 @@ type ImportKTAccountFormData = {
 
 const getContractAddress = (contract: TzktRelatedContract) => contract.address;
 
-export const ManagedKTForm: FC = () => {
+export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const accounts = useRelevantAccounts();
   const tezos = useTezos();
   const { importKTManagedAccount } = useTempleClient();
@@ -141,7 +143,7 @@ export const ManagedKTForm: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
       {error && <Alert type="error" title="Error" description={error} autoFocus className="mb-6" />}
 
       <Controller
@@ -193,32 +195,35 @@ export const ManagedKTForm: FC = () => {
         testID={ImportAccountSelectors.managedContractInput}
       />
 
-      <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.managedKTImportButton}>
-        <T id="importAccount" />
-      </FormSubmitButton>
+      <div>
+        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.managedKTImportButton}>
+          <T id="importAccount" />
+        </FormSubmitButton>
 
-      {remainingUsersContracts.length > 0 && !contractAddressFilled && (
-        <div className="mt-8 mb-6 flex flex-col">
-          <h2 className="mb-4 leading-tight flex flex-col">
-            <span className="text-base font-semibold text-gray-700">
-              <T id="addKnownManagedContract" />
-            </span>
+        {remainingUsersContracts.length > 0 && !contractAddressFilled && (
+          <div className="mt-8 mb-6 flex flex-col">
+            <h2 className="mb-4 leading-tight flex flex-col">
+              <span className="text-base font-semibold text-gray-700">
+                <T id="addKnownManagedContract" />
+              </span>
 
-            <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-              <T id="clickOnContractToImport" />
-            </span>
-          </h2>
+              <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
+                <T id="clickOnContractToImport" />
+              </span>
+            </h2>
 
-          <CustomSelect
-            getItemId={getContractAddress}
-            items={remainingUsersContracts}
-            maxHeight="11rem"
-            onSelect={handleKnownContractSelect}
-            OptionIcon={ContractIcon}
-            OptionContent={ContractOptionContent}
-          />
-        </div>
-      )}
+            <CustomSelect
+              getItemId={getContractAddress}
+              items={remainingUsersContracts}
+              maxHeight="11rem"
+              onSelect={handleKnownContractSelect}
+              OptionIcon={ContractIcon}
+              OptionContent={ContractOptionContent}
+            />
+          </div>
+        )}
+        <div className="h-8" />
+      </div>
     </form>
   );
 };

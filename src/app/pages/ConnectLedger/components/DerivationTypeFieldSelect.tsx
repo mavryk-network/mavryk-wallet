@@ -17,17 +17,23 @@ type TypeSelectProps<T extends string | number> = {
   value?: T;
   onChange: (value: T) => void;
   i18nKey: TID;
+  descriptionI18nKey?: TID;
 };
 
 const renderOptionContent = <T extends string | number>(option: TypeSelectOption<T>, isSelected: boolean) => (
   <LedgerOptionContent option={option} isSelected={isSelected} />
 );
 
-const DerivationFieldTitle: FC<{ i18nKey: TID }> = ({ i18nKey }) => (
+const DerivationFieldTitle: FC<{ i18nKey: TID; descriptionI18nKey?: TID }> = ({ i18nKey, descriptionI18nKey }) => (
   <h2 className="leading-tight flex flex-col mb-3">
     <span className="text-base-plus text-white">
       <T id={i18nKey} />
     </span>
+    {descriptionI18nKey && (
+      <span className="text-sm text-secondary-white mt-1 block">
+        <T id={descriptionI18nKey} />
+      </span>
+    )}
   </h2>
 );
 
@@ -59,14 +65,14 @@ const LedgerOptionContent = <T extends string | number>({ option, isSelected }: 
 };
 
 export const DerivationTypeFieldSelect = <T extends string | number>(props: TypeSelectProps<T>) => {
-  const { options, value, onChange, i18nKey } = props;
+  const { options, value, onChange, i18nKey, descriptionI18nKey } = props;
   const selectedDerivationOption = options.find(op => op.type === value) ?? options[0];
 
   const [searchValue, setSearchValue] = useState<string>('');
 
   return (
     <div className="mb-4">
-      <InputContainer header={<DerivationFieldTitle i18nKey={i18nKey} />}>
+      <InputContainer header={<DerivationFieldTitle i18nKey={i18nKey} descriptionI18nKey={descriptionI18nKey} />}>
         <DropdownSelect
           optionsListClassName="p-2"
           dropdownButtonClassName="px-4 py-14px"

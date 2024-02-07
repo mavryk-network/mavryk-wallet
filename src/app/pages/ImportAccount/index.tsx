@@ -7,6 +7,7 @@ import { useSetAccountPkh, useAllAccounts, useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 import { HistoryAction, navigate } from 'lib/woozie';
 
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import { ByFundraiserForm } from './ByFundraiserForm';
 import { ByMnemonicForm } from './ByMnemonicForm';
 import { ByPrivateKeyForm } from './ByPrivateKeyForm';
@@ -37,7 +38,13 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current < accLength) {
       setAccountPkh(allAccounts[accLength - 1].publicKeyHash);
-      navigate('/');
+
+      navigate<SuccessStateType>('/success', undefined, {
+        pageTitle: 'importAccount',
+        btnText: 'goToMain',
+        description: 'impoprtAccSuccessMessage',
+        subHeader: 'success'
+      });
     }
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
@@ -52,7 +59,7 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
       },
       {
         slug: 'mnemonic',
-        i18nKey: 'mnemonic',
+        i18nKey: 'seedPhrase',
         Form: ByMnemonicForm
       },
       {

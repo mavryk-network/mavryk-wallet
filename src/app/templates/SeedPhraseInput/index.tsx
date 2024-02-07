@@ -3,6 +3,7 @@ import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { validateMnemonic } from 'bip39';
 import classNames from 'clsx';
 
+import { Alert } from 'app/atoms';
 import { FormFieldElement } from 'app/atoms/FormField';
 import { formatMnemonic } from 'app/defaults';
 import { useAppEnv } from 'app/env';
@@ -148,6 +149,9 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
 
   return (
     <div>
+      <div className="w-full text-left text-sm pb-4 text-secondary-white" style={{ maxWidth: 300 }}>
+        <p>{t('seedPhraseTip')}</p>
+      </div>
       <div className="flex justify-between mb-6">
         <h1
           className={classNames(
@@ -180,23 +184,9 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         </div>
       </div>
 
-      {labelWarning && (
-        <div className="text-xs font-medium text-primary-error text-center whitespace-pre-line mb-6">
-          {labelWarning}
-        </div>
-      )}
+      {labelWarning && <Alert title={t('attention')} description={labelWarning} className="mb-4" />}
 
-      <div className="w-full text-center pb-2 mb-4 text-secondary-white border-b-2" style={{ borderBottomWidth: 1 }}>
-        <p>{t('seedPhraseTip')}</p>
-      </div>
-
-      <div
-        className={classNames(
-          'grid',
-          hasError ? 'mb-0' : 'mb-8',
-          isFirstAccount ? 'grid-cols-2 gap-4' : 'grid-cols-2 gap-2'
-        )}
-      >
+      <div className={classNames('grid', hasError ? 'mb-0' : 'mb-8', 'grid-cols-2 gap-4')}>
         {[...Array(numberOfWords).keys()].map(index => {
           const key = `import-seed-word-${index}`;
 

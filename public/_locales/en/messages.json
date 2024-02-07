@@ -3361,5 +3361,11 @@
   },
   "chooseImportMethod": {
     "message": "Choose an import method "
+  },
+  "impoprtAccSuccessMessage": {
+    "message": "Your account was successfully imported"
+  },
+  "createPasswordPlaceholder": {
+    "message": "Create Password"
   }
 }

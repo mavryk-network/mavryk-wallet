@@ -3367,5 +3367,11 @@
   },
   "createPasswordPlaceholder": {
     "message": "Create Password"
+  },
+  "enterEmailPlaceholder": {
+    "message": "Enter Email"
+  },
+  "enterPasswordPlaceholder": {
+    "message": "Enter Password"
   }
 }

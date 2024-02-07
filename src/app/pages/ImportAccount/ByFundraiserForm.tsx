@@ -70,7 +70,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
         name="email"
         id="importfundacc-email"
         label={t('email')}
-        placeholder="email@example.com"
+        placeholder={t('enterEmailPlaceholder')}
         errorCaption={errors.email?.message}
         containerClassName="mb-4"
         testID={ImportAccountSelectors.fundraiserEmailInput}
@@ -82,7 +82,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
         type="password"
         id="importfundacc-password"
         label={t('password')}
-        placeholder="*********"
+        placeholder={t('enterPasswordPlaceholder')}
         errorCaption={errors.password?.message}
         containerClassName="mb-6"
         testID={ImportAccountSelectors.fundraiserPasswordInput}
@@ -101,11 +101,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       />
 
       <div>
-        <FormSubmitButton
-          className="mt-8"
-          loading={formState.isSubmitting}
-          testID={ImportAccountSelectors.fundraiserImportButton}
-        >
+        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.fundraiserImportButton}>
           {t('importAccount')}
         </FormSubmitButton>
         <div className="h-8" />

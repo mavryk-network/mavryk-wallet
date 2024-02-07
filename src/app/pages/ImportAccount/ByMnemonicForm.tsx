@@ -160,7 +160,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       <div>
         <FormSubmitButton
           loading={formState.isSubmitting}
-          className="mt-8"
+          className="mt-6"
           testID={ImportAccountSelectors.mnemonicImportButton}
         >
           <T id="importAccount" />

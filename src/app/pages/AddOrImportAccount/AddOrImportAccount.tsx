@@ -42,7 +42,7 @@ export const AddOrImportAccount: FC = () => {
         <div className="flex flex-col gap-4 items-stretch">
           {buttonRoutes.map(btn => (
             <Link to={btn.linkTo} key={btn.linkTo} className="w-full">
-              <ButtonRounded size="big" fill={false} className="w-full">
+              <ButtonRounded size="big" fill={false} className="w-full capitalize">
                 <T id={btn.i18nKey} />
               </ButtonRounded>
             </Link>

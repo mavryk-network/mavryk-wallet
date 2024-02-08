@@ -1489,7 +1489,7 @@
     }
   },
   "addressInputDescription": {
-    "message": "Address of Tezos account or smart contract."
+    "message": "Address or Mavryk domain of the account or smart contract"
   },
   "addressInputDescriptionWithDomain": {
     "message": "Address or Mavryk domain of the account or smart contract"

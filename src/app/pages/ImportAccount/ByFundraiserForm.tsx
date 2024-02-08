@@ -23,7 +23,7 @@ interface ByFundraiserFormData {
 
 export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useTempleClient();
-  const { register, errors, handleSubmit, formState } = useForm<ByFundraiserFormData>();
+  const { register, errors, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
   const [error, setError] = useState<ReactNode>(null);
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Fundraiser);
 
@@ -60,6 +60,11 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   );
 
   const resetSeedPhrase = useCallback(() => void setSeedPhrase(''), []);
+
+  const emailKey = watch('email') ?? '';
+  const passowrdKey = watch('password') ?? '';
+
+  const isBtnDisabled = !emailKey.length || !passowrdKey.length || !seedPhrase.length;
 
   return (
     <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
@@ -101,7 +106,12 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       />
 
       <div>
-        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.fundraiserImportButton}>
+        <FormSubmitButton
+          className="capitalize mt-6"
+          disabled={isBtnDisabled}
+          loading={formState.isSubmitting}
+          testID={ImportAccountSelectors.fundraiserImportButton}
+        >
           {t('importAccount')}
         </FormSubmitButton>
         <div className="h-8" />

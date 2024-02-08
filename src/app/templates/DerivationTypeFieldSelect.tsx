@@ -21,7 +21,7 @@ type TypeSelectProps<T extends string | number> = {
 };
 
 const renderOptionContent = <T extends string | number>(option: TypeSelectOption<T>, isSelected: boolean) => (
-  <LedgerOptionContent option={option} isSelected={isSelected} />
+  <DerivationOptionContent option={option} isSelected={isSelected} />
 );
 
 const DerivationFieldTitle: FC<{ i18nKey: TID; descriptionI18nKey?: TID }> = ({ i18nKey, descriptionI18nKey }) => (
@@ -37,7 +37,7 @@ const DerivationFieldTitle: FC<{ i18nKey: TID; descriptionI18nKey?: TID }> = ({ 
   </h2>
 );
 
-const LedgerFieldContent = <T extends string | number>({ name }: TypeSelectOption<T>) => {
+const DerivationFieldContent = <T extends string | number>({ name }: TypeSelectOption<T>) => {
   return (
     <div className="flex items-center">
       <span className="text-base-plus text-white">{name}</span>
@@ -50,7 +50,7 @@ interface LedgerOptionContentProps<T extends string | number> {
   isSelected?: boolean;
 }
 
-const LedgerOptionContent = <T extends string | number>({ option, isSelected }: LedgerOptionContentProps<T>) => {
+const DerivationOptionContent = <T extends string | number>({ option, isSelected }: LedgerOptionContentProps<T>) => {
   return (
     <div
       className={classNames(
@@ -76,7 +76,7 @@ export const DerivationTypeFieldSelect = <T extends string | number>(props: Type
         <DropdownSelect
           optionsListClassName="p-2"
           dropdownButtonClassName="px-4 py-14px"
-          DropdownFaceContent={<LedgerFieldContent {...selectedDerivationOption} />}
+          DropdownFaceContent={<DerivationFieldContent {...selectedDerivationOption} />}
           optionsProps={{
             options,
             noItemsText: 'No items',

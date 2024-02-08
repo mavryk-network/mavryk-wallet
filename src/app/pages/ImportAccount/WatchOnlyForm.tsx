@@ -32,7 +32,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
   const addressFieldRef = useRef<HTMLTextAreaElement>(null);
 
-  const addressValue = watch('address');
+  const addressValue = watch('address') ?? '';
 
   const { data: resolvedAddress } = useTezosAddressByDomainName(addressValue);
 
@@ -123,7 +123,12 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       )}
 
       <div>
-        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.watchOnlyImportButton}>
+        <FormSubmitButton
+          className="capitalize"
+          disabled={!addressValue.length}
+          loading={formState.isSubmitting}
+          testID={ImportAccountSelectors.watchOnlyImportButton}
+        >
           {t('importAccount')}
         </FormSubmitButton>
         <div className="h-8" />

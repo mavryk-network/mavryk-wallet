@@ -48,7 +48,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
     [importAccount, formState.isSubmitting, setError, formAnalytics]
   );
 
-  const keyValue = watch('privateKey');
+  const keyValue = watch('privateKey') ?? '';
   const encrypted = useMemo(() => keyValue?.substring(2, 3) === 'e', [keyValue]);
 
   return (
@@ -64,7 +64,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
           id="importacc-privatekey"
           label={t('privateKey')}
           labelDescription={t('privateKeyInputDescription')}
-          placeholder={t('privateKeyInputPlaceholder')}
+          placeholder={t('enterSecretKey')}
           errorCaption={errors.privateKey?.message}
           className="resize-none"
           containerClassName="mb-6"
@@ -95,7 +95,12 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
       </div>
 
       <div>
-        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.privateKeyImportButton}>
+        <FormSubmitButton
+          className="capitalize"
+          disabled={!keyValue.length}
+          loading={formState.isSubmitting}
+          testID={ImportAccountSelectors.privateKeyImportButton}
+        >
           {t('importAccount')}
         </FormSubmitButton>
         <div className="h-8" />

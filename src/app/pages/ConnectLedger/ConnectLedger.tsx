@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
@@ -13,7 +14,6 @@ import { DerivationType, TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
-import { DerivationTypeFieldSelect } from './components/DerivationTypeFieldSelect';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
 export type FormData = {

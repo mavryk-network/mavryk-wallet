@@ -5,13 +5,13 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { DEFAULT_DERIVATION_PATH, formatMnemonic } from 'app/defaults';
+import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient, validateDerivationPath } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 
-import { DerivationTypeFieldSelect } from '../ConnectLedger/components/DerivationTypeFieldSelect';
 import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -111,6 +111,8 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
         />
       </div>
 
+      <div className="border-b border-divider w-full my-4" />
+
       <div className="flex flex-col">
         <div>
           <Controller
@@ -160,7 +162,8 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       <div>
         <FormSubmitButton
           loading={formState.isSubmitting}
-          className="mt-6"
+          disabled={!seedPhrase.length}
+          className="mt-6 capitalize"
           testID={ImportAccountSelectors.mnemonicImportButton}
         >
           <T id="importAccount" />

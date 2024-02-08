@@ -614,7 +614,7 @@
     "message": "We don't track your derivation path on imported accounts"
   },
   "seedPhraseTip": {
-    "message": "You can paste your entire secret Seed phrase into any field"
+    "message": "You can paste your entire secret Seed Phrase into any field"
   },
   "oops": {
     "message": "Oops!"
@@ -691,6 +691,9 @@
   },
   "accountName": {
     "message": "Account Name"
+  },
+  "newAccountName": {
+    "message": "New Account Name"
   },
   "accountNameInputDescription": {
     "message": "What will be the name of the new account?"
@@ -3357,6 +3360,24 @@
     "message": " Here you can create a brand new account, import an old account you currently use on a different platform or restore an account you no longer have access to but have kept the seed phrase or keystore file."
   },
   "addNewAccount": {
-    "message": "Add New account"
+    "message": "Add New Account"
+  },
+  "chooseImportMethod": {
+    "message": "Choose an import method "
+  },
+  "impoprtAccSuccessMessage": {
+    "message": "Your account was successfully imported"
+  },
+  "createPasswordPlaceholder": {
+    "message": "Create Password"
+  },
+  "enterEmailPlaceholder": {
+    "message": "Enter Email"
+  },
+  "enterPasswordPlaceholder": {
+    "message": "Enter Password"
+  },
+  "enterSecretKey": {
+    "message": "Enter Secret Key"
   }
 }

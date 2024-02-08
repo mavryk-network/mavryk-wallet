@@ -82,7 +82,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
     [accounts]
   );
 
-  const contractAddress = watch('contractAddress');
+  const contractAddress = watch('contractAddress') ?? '';
   const cleanContractAddressField = useCallback(() => {
     setValue('contractAddress', '');
     triggerValidation('contractAddress');
@@ -196,7 +196,12 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
       />
 
       <div>
-        <FormSubmitButton loading={formState.isSubmitting} testID={ImportAccountSelectors.managedKTImportButton}>
+        <FormSubmitButton
+          className="capitalize"
+          disabled={!contractAddress.length}
+          loading={formState.isSubmitting}
+          testID={ImportAccountSelectors.managedKTImportButton}
+        >
           <T id="importAccount" />
         </FormSubmitButton>
 

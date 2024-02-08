@@ -100,7 +100,7 @@ const CreateAccount: FC = () => {
                 message: t('accountNameInputTitle')
               }
             })}
-            label={t('accountName')}
+            label={t('newAccountName')}
             labelDescription={t('accountNameInputDescription')}
             id="create-account-name"
             type="text"

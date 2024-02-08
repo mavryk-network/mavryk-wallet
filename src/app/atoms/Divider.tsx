@@ -12,7 +12,7 @@ interface DividerProps {
 const Divider: FC<DividerProps> = ({ style, className, color = 'bg-accent-blue', ignoreParent = false }) => (
   <div
     style={{
-      height: '1px',
+      height: 1,
       ...style
     }}
     className={clsx('w-full', color, className, ignoreParent && 'relative w-screen -left-4')}

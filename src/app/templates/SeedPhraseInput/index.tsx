@@ -152,7 +152,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       <div className="w-full text-left text-sm pb-4 text-secondary-white" style={{ maxWidth: 300 }}>
         <p>{t('seedPhraseTip')}</p>
       </div>
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between mb-4">
         <h1
           className={classNames(
             'font-aeonik flex self-center text-white text-base-plus'
@@ -186,7 +186,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
 
       {labelWarning && <Alert title={t('attention')} description={labelWarning} className="mb-4" />}
 
-      <div className={classNames('grid', hasError ? 'mb-0' : 'mb-8', 'grid-cols-2 gap-4')}>
+      <div className={classNames('grid', 'grid-cols-2 gap-4')}>
         {[...Array(numberOfWords).keys()].map(index => {
           const key = `import-seed-word-${index}`;
 

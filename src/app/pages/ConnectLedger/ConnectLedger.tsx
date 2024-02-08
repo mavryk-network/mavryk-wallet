@@ -178,7 +178,7 @@ const ConnectLedger: FC = () => {
                 control={control}
                 name="derivationType"
                 options={DERIVATION_TYPES}
-                i18nKey="derivationType"
+                i18nKey={t('derivationType')}
               />
             </div>
 
@@ -188,7 +188,7 @@ const ConnectLedger: FC = () => {
                 control={control}
                 name="derivationPath"
                 options={DERIVATION_PATHS}
-                i18nKey="derivationPath"
+                i18nKey={t('derivationPath')}
               />
             </div>
 

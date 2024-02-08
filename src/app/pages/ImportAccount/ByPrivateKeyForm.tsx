@@ -54,7 +54,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   return (
     <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
       <div>
-        {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
+        {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-4" />}
 
         <FormField
           ref={register({ required: t('required') })}

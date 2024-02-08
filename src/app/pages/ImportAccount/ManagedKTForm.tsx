@@ -157,7 +157,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         onChange={([v]) => v}
         onFocus={handleContactAddressFocus}
         textarea
-        rows={2}
+        rows={1}
         cleanable={Boolean(contractAddress)}
         onClean={cleanContractAddressField}
         id="contract-address"
@@ -186,7 +186,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
             t('contractAddressInputDescription')
           )
         }
-        placeholder={t('contractAddressInputPlaceholder')}
+        placeholder={t('addressContactPlaceholder')}
         errorCaption={errors.contractAddress?.message}
         style={{
           resize: 'none'

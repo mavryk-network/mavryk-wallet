@@ -89,9 +89,10 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
         label={t('password')}
         placeholder={t('enterPasswordPlaceholder')}
         errorCaption={errors.password?.message}
-        containerClassName="mb-6"
         testID={ImportAccountSelectors.fundraiserPasswordInput}
       />
+
+      <div className="border-b border-divider my-4" />
 
       <SeedPhraseInput
         labelWarning={t('mnemonicInputWarning')}

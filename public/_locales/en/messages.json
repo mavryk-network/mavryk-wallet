@@ -1492,7 +1492,7 @@
     "message": "Address of Tezos account or smart contract."
   },
   "addressInputDescriptionWithDomain": {
-    "message": "Address or Tezos domain of the account or smart contract."
+    "message": "Address or Mavryk domain of the account or smart contract"
   },
   "recipientInputPlaceholder": {
     "message": "e.g. tz1a9w1S7hN5s..."
@@ -2440,6 +2440,9 @@
   },
   "newContactPlaceholder": {
     "message": "Enter contact name"
+  },
+  "addressContactPlaceholder": {
+    "message": "Enter contact Address"
   },
   "enterPublicAddressPlaceholder": {
     "message": "Enter public address"

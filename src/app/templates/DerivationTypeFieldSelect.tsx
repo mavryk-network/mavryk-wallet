@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 
 import classNames from 'clsx';
 import { isEqual } from 'lodash';
@@ -16,7 +16,7 @@ type TypeSelectProps<T extends string | number> = {
   options: TypeSelectOption<T>[];
   value?: T;
   onChange: (value: T) => void;
-  i18nKey: TID;
+  i18nKey: ReactNode;
   descriptionI18nKey?: TID;
 };
 
@@ -24,11 +24,12 @@ const renderOptionContent = <T extends string | number>(option: TypeSelectOption
   <DerivationOptionContent option={option} isSelected={isSelected} />
 );
 
-const DerivationFieldTitle: FC<{ i18nKey: TID; descriptionI18nKey?: TID }> = ({ i18nKey, descriptionI18nKey }) => (
+const DerivationFieldTitle: FC<{ i18nKey: ReactNode; descriptionI18nKey?: TID }> = ({
+  i18nKey,
+  descriptionI18nKey
+}) => (
   <h2 className="leading-tight flex flex-col mb-3">
-    <span className="text-base-plus text-white">
-      <T id={i18nKey} />
-    </span>
+    <span className="text-base-plus text-white">{i18nKey}</span>
     {descriptionI18nKey && (
       <span className="text-sm text-secondary-white mt-1 block">
         <T id={descriptionI18nKey} />

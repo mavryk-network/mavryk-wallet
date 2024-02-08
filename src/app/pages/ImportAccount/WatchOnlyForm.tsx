@@ -85,7 +85,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
   return (
     <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
-      {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
+      {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-4 self-start" />}
 
       <Controller
         name="address"
@@ -112,7 +112,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         style={{
           resize: 'none'
         }}
-        containerClassName="mb-4"
+        containerClassName="mb-4 flex-grow"
       />
 
       {resolvedAddress && (

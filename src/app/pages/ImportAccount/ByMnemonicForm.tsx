@@ -120,7 +120,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
             control={control}
             name="customDerivationPath"
             options={DERIVATION_PATHS}
-            i18nKey="derivationPath"
+            i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
             descriptionI18nKey="addDerivationPathPrompt"
           />
         </div>

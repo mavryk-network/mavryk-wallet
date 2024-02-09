@@ -3391,5 +3391,13 @@
   },
   "enterSecretKey": {
     "message": "Enter Secret Key"
+  },
+  "selectedCount": {
+    "message": "$count$ selected",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   }
 }

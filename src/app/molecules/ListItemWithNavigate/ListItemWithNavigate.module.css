@@ -1,6 +1,13 @@
 .listItemBorder {
   position: relative;
 }
+.listItemBorder:hover {
+  outline: 2px solid #333;
+}
+
+.listItemBorder:hover::after {
+  border-bottom: none;
+}
 
 .listItemBorder::after {
   content: '';

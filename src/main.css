@@ -131,7 +131,7 @@
 }
 
 .ReactModal__Content {
-  transform: scale(0.75);
+  /* transform: scale(0.75); */
   transition: transform 200ms ease-in-out;
 }
 
@@ -144,11 +144,11 @@
 }
 
 .ReactModal__Overlay--after-open .ReactModal__Content {
-  transform: scale(1);
+  /* transform: scale(1); */
 }
 
 .ReactModal__Overlay--before-close .ReactModal__Content {
-  transform: scale(0.75);
+  /* transform: scale(0.75); */
 }
 
 /**

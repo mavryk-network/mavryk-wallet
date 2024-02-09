@@ -553,6 +553,7 @@ interface TempleImportWatchOnlyAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportWatchOnlyAccountRequest;
   address: string;
   chainId?: string;
+  accName?: string;
 }
 
 interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {

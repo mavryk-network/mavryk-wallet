@@ -3,12 +3,13 @@ import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 're
 import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
 
-import { Alert, FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient, useTezos, useTezosDomainsClient, validateDelegate } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { isAddressValid, isKTAddress } from 'lib/temple/helpers';
+import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
@@ -16,6 +17,7 @@ import { ImportformProps } from './types';
 
 interface WatchOnlyFormData {
   address: string;
+  accName?: string;
 }
 
 export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
@@ -40,6 +42,9 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
     () => (resolvedAddress && resolvedAddress !== null ? resolvedAddress : addressValue),
     [resolvedAddress, addressValue]
   );
+
+  const accName = watch('accName') ?? '';
+  const finalAccName = accName?.trim() !== '' ? accName : undefined;
 
   const cleanAddressField = useCallback(() => {
     setValue('address', '');
@@ -69,7 +74,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         chainId = await tezos.rpc.getChainId();
       }
 
-      await importWatchOnlyAccount(finalAddress, chainId);
+      await importWatchOnlyAccount(finalAddress, chainId, finalAccName);
 
       formAnalytics.trackSubmitSuccess();
     } catch (err: any) {
@@ -81,7 +86,15 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       await delay();
       setError(err.message);
     }
-  }, [importWatchOnlyAccount, finalAddress, tezos, formState.isSubmitting, setError, formAnalytics]);
+  }, [
+    formState.isSubmitting,
+    formAnalytics,
+    finalAddress,
+    importWatchOnlyAccount,
+    finalAccName,
+    tezos.rpc,
+    tezos.contract
+  ]);
 
   return (
     <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
@@ -107,20 +120,26 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         labelDescription={
           <T id={canUseDomainNames ? 'addressInputDescriptionWithDomain' : 'addressInputDescription'} />
         }
-        placeholder={t(canUseDomainNames ? 'recipientInputPlaceholderWithDomain' : 'recipientInputPlaceholder')}
+        placeholder={t('enterAddress')}
         errorCaption={errors.address?.message}
         style={{
           resize: 'none'
         }}
-        containerClassName="mb-4 flex-grow"
+        containerClassName="mb-2"
       />
 
-      {resolvedAddress && (
-        <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
-          <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
-          <span className="font-normal">{resolvedAddress}</span>
-        </div>
-      )}
+      <Controller
+        name="accName"
+        as={<FormField />}
+        control={control}
+        onPaste={clearClipboard}
+        id="acc-name"
+        label={`${t('accountName')} ${t('optionalComment')}`}
+        labelDescription={<T id="accountNameAlternativeInputDescription" />}
+        placeholder={t('enterAccountName')}
+        errorCaption={errors.accName?.message}
+        containerClassName="mb-4 flex-grow"
+      />
 
       <div>
         <FormSubmitButton

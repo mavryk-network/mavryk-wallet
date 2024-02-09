@@ -695,8 +695,17 @@
   "newAccountName": {
     "message": "New Account Name"
   },
+  "enterAccountName": {
+    "message": "Enter Account Name"
+  },
+  "enterAddress": {
+    "message": "Enter Address"
+  },
   "accountNameInputDescription": {
     "message": "What will be the name of the new account?"
+  },
+  "accountNameAlternativeInputDescription": {
+    "message": "What will be the name of the account?"
   },
   "createNewWallet": {
     "message": "Create a new Wallet"

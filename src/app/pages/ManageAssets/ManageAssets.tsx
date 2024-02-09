@@ -2,11 +2,12 @@ import React, { FC, memo, useCallback } from 'react';
 
 import classNames from 'clsx';
 
+import { Divider } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
-import { ReactComponent as AddIcon } from 'app/icons/add-to-list.svg';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
-import { ReactComponent as ControlCentreIcon } from 'app/icons/control-centre.svg';
+import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
+import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { ManageAssetsSelectors } from 'app/pages/ManageAssets/ManageAssets.selectors';
@@ -21,7 +22,6 @@ import { setTokenStatus } from 'lib/temple/assets';
 import { useAccount, useChainId, useAvailableAssetsSlugs } from 'lib/temple/front';
 import { ITokenStatus } from 'lib/temple/repo';
 import { useConfirm } from 'lib/ui/dialog';
-import { Link } from 'lib/woozie';
 
 import styles from './ManageAssets.module.css';
 
@@ -35,7 +35,7 @@ const ManageAssets: FC<Props> = ({ assetType }) => (
     RightSidedComponent={<TopbarRightText linkTo="/add-asset" label={t('add')} />}
     pageTitle={
       <>
-        <T id="manageTokens" />
+        <T id="manageAssets" />
       </>
     }
   >
@@ -79,28 +79,20 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   return (
     <div className="w-full max-w-sm mx-auto mb-6">
-      <SearchAssetField
-        value={searchValue}
-        onValueChange={setSearchValue}
-        testID={ManageAssetsSelectors.searchAssetsInput}
-      />
-      <div className="mb-3 w-full flex items-strech">
-        <Link
-          to="/add-asset"
-          className={classNames(
-            'flex items-center ml-2 flex-shrink-0 px-3 py-1 text-gray-600 text-sm rounded overflow-hidden',
-            'opacity-75 hover:bg-gray-100 hover:opacity-100 focus:opacity-100',
-            'transition ease-in-out duration-200'
-          )}
-          testID={
-            assetType === AssetTypesEnum.Collectibles
-              ? ManageAssetsSelectors.addCollectiblesButton
-              : ManageAssetsSelectors.addAssetButton
-          }
-        >
-          <AddIcon className="mr-1 h-5 w-auto stroke-current stroke-2" />
-          <T id={assetType === AssetTypesEnum.Collectibles ? 'addCollectible' : 'addToken'} />
-        </Link>
+      <div>
+        <SearchAssetField
+          value={searchValue}
+          onValueChange={setSearchValue}
+          testID={ManageAssetsSelectors.searchAssetsInput}
+        />
+        <div className="mt-4 flex items-center justify-between">
+          <div>Counter select</div>
+          <div className="flex items-center gap-1">
+            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" />
+            <TrashIcon className="w-6 h-6 fill-white cursor-pointer" />
+          </div>
+        </div>
+        <Divider ignoreParent color="bg-divider" className="mt-4" />
       </div>
 
       {filteredAssets.length > 0 ? (

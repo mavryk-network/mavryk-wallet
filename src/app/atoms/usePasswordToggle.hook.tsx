@@ -39,7 +39,7 @@ const usePasswordToggle = (
         }}
         onBlur={handleBlur}
       >
-        {visible ? <EyeClosedBold /> : <EyeOpenBold />}
+        {visible ? <EyeClosedBold className="fill-accent-blue" /> : <EyeOpenBold className="fill-accent-blue" />}
       </button>
     ),
     [smallPaddings, handleBlur, visible, onReveal]

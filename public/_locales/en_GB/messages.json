@@ -1737,6 +1737,7 @@
   },
   "manage": { "message": "Manage" },
   "manageTokens": { "message": "Manage Tokens" },
+  "manageAssets": { "message": "Manage Assets" },
   "manageAssetsList": { "message": "Manage assets list" },
   "noItemsWithPositiveBalance": {
     "message": "No items with positive balance"
@@ -3391,5 +3392,13 @@
   },
   "enterSecretKey": {
     "message": "Enter Secret Key"
+  },
+  "selectedCount": {
+    "message": "$count$ selected",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -1737,6 +1737,7 @@
   },
   "manage": { "message": "Manage" },
   "manageTokens": { "message": "Manage Tokens" },
+  "manageAssets": { "message": "Manage Assets" },
   "manageAssetsList": { "message": "Manage assets list" },
   "noItemsWithPositiveBalance": {
     "message": "No items with positive balance"

@@ -2,8 +2,9 @@ import React, { FC, ReactNode, useCallback, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { Checkbox, FormCheckbox } from 'app/atoms';
+import { FormCheckbox } from 'app/atoms';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
+import { ReactComponent as MinusIcon } from 'app/icons/negative.svg';
 import { t } from 'lib/i18n';
 
 export type CounterSelectOptionType = {
@@ -35,7 +36,7 @@ export const CounterSelect: FC<CounterSelectProps> = ({ selectedCount, unselectA
         opened={opened}
       />
       {opened && (
-        <div className="fixed">
+        <div className="fixed z-10">
           <CounterSelectContent options={options} />
         </div>
       )}
@@ -61,13 +62,19 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
   );
 
   return (
-    <section className="p-2 flex items-center gap-2">
-      <FormCheckbox checked={count > 0} onChange={handleCheckBoxChange} />
+    <section className="p-2 flex items-center gap-2 bg-primary-card rounded-md">
+      <FormCheckbox
+        checked={count > 0}
+        onChange={handleCheckBoxChange}
+        IconFromProps={MinusIcon}
+        iconClassName="h-4/6 w-4/6 stroke-accent-blue pointer-events-none"
+        labelClassName={clsx(count === 0 && 'pointer-events-none opacity-75', 'py-0 bg-primary-card')}
+      />
       <div className="flex items-center gap-2 cursor-pointer" onClick={toggleOpened}>
         <p className="text-white text-sm">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(
-            'w-8 h-auto stroke-white stroke-2 transition ease-in-out duration-200 cursor-pointer',
+            'w-6 h-auto stroke-white stroke-2 transition ease-in-out duration-200 cursor-pointer',
             opened && 'transform rotate-180'
           )}
         />
@@ -82,7 +89,7 @@ type CounterSelectContentProps = {
 
 const CounterSelectContent: FC<CounterSelectContentProps> = ({ options }) => {
   return (
-    <section className="p-2 flex flex-col bg-primary-card rounded-2xl overflow-hidden">
+    <section className="flex flex-col bg-primary-card rounded-2xl overflow-hidden animate-drop">
       {options.map(option => (
         <CounterSelectOption key={option.type} {...option} />
       ))}
@@ -99,9 +106,14 @@ const CounterSelectOption: FC<CounterSelectOptionType> = ({ checked, handleChang
   );
 
   return (
-    <div className="flex items-center gap-2 bg-primary-card hover:bg-primary-card-hover ">
-      <FormCheckbox checked={checked} onChange={handleOptionChange} className="bg-primary-card" />
-      <div className="text-white text-sm">{content}</div>
+    <div className="bg-primary-card">
+      <FormCheckbox
+        checked={checked}
+        onChange={handleOptionChange}
+        className="bg-primary-card"
+        labelClassName="py-4 px-2 bg-primary-card hover:bg-primary-card-hover w-full"
+        label={<div className="text-white text-sm">{content}</div>}
+      />
     </div>
   );
 };

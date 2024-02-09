@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import Checkbox, { CheckboxProps } from 'app/atoms/Checkbox';
 import { AnalyticsEventCategory, setTestID, useAnalytics } from 'lib/analytics';
+import { merge } from 'lib/utils/merge';
 
 export interface FormCheckboxProps extends CheckboxProps {
   label?: ReactNode;
@@ -42,7 +43,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
     return (
       <div className={classNames('flex flex-col', containerClassName)}>
         <label
-          className={classNames(
+          className={merge(
             'flex items-center py-2',
             'rounded-md overflow-hidden cursor-pointer bg-primary-bg',
             labelClassName

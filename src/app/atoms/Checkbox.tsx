@@ -12,6 +12,8 @@ export interface CheckboxProps
   overrideClassNames?: string;
   errored?: boolean;
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  IconFromProps?: ImportedSVGComponent;
+  iconClassName?: string;
 }
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
@@ -26,6 +28,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       onBlur,
       testID,
       testIDProperties,
+      IconFromProps,
+      iconClassName,
       ...rest
     },
     ref
@@ -87,6 +91,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       [localChecked, localFocused, errored, overrideClassNames]
     );
 
+    const Icon = IconFromProps ? IconFromProps : OkIcon;
+
     return (
       <div className={classNameMemo} {...setTestID(testID)}>
         <input
@@ -100,9 +106,9 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           {...rest}
         />
 
-        <OkIcon
+        <Icon
           className={clsx(
-            'h-4/6 w-4/6 stroke-2 stroke-accent-blue pointer-events-none',
+            iconClassName ? iconClassName : 'h-4/6 w-4/6 stroke-2 stroke-accent-blue pointer-events-none',
             localChecked ? 'block' : 'hidden'
           )}
         />

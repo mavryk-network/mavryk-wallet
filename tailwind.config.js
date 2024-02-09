@@ -582,7 +582,8 @@ module.exports = {
       spin: 'spin 1s linear infinite',
       ping: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
       pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      bounce: 'bounce 1s infinite'
+      bounce: 'bounce 1s infinite',
+      drop: 'drop 200ms ease-in-out'
     },
     keyframes: {
       spin: {
@@ -596,6 +597,10 @@ module.exports = {
       pulse: {
         '0%, 100%': { opacity: '1' },
         '50%': { opacity: '.5' }
+      },
+      drop: {
+        '0%': { maxHeight: '1px' },
+        '100%': { maxHeight: '400px' }
       },
       bounce: {
         '0%, 100%': {

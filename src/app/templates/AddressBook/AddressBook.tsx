@@ -5,6 +5,7 @@ import classNames from 'clsx';
 import { Name, Identicon, HashChip } from 'app/atoms';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t, T } from 'lib/i18n';
@@ -62,11 +63,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   );
 
   const AddComponent = useMemo(
-    () => (
-      <div className="text-base-plus text-accent-blue cursor-pointer" onClick={handleAddContactClick}>
-        Add
-      </div>
-    ),
+    () => <TopbarRightText onClick={handleAddContactClick} label={t('add')} />,
     [handleAddContactClick]
   );
 

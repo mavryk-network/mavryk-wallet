@@ -8,6 +8,7 @@ import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as ControlCentreIcon } from 'app/icons/control-centre.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { ManageAssetsSelectors } from 'app/pages/ManageAssets/ManageAssets.selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import SearchAssetField from 'app/templates/SearchAssetField';
@@ -30,10 +31,11 @@ interface Props {
 
 const ManageAssets: FC<Props> = ({ assetType }) => (
   <PageLayout
+    isTopbarVisible={false}
+    RightSidedComponent={<TopbarRightText linkTo="/add-asset" label={t('add')} />}
     pageTitle={
       <>
-        <ControlCentreIcon className="w-auto h-4 mr-1 stroke-current" />
-        <T id={assetType === AssetTypesEnum.Collectibles ? 'manageCollectibles' : 'manageTokens'} />
+        <T id="manageTokens" />
       </>
     }
   >
@@ -77,13 +79,12 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   return (
     <div className="w-full max-w-sm mx-auto mb-6">
+      <SearchAssetField
+        value={searchValue}
+        onValueChange={setSearchValue}
+        testID={ManageAssetsSelectors.searchAssetsInput}
+      />
       <div className="mb-3 w-full flex items-strech">
-        <SearchAssetField
-          value={searchValue}
-          onValueChange={setSearchValue}
-          testID={ManageAssetsSelectors.searchAssetsInput}
-        />
-
         <Link
           to="/add-asset"
           className={classNames(

@@ -10,6 +10,7 @@ import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-
 import { useAppEnv } from 'app/env';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
+import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
 import {
   SearchExplorerClosed,
@@ -202,6 +203,8 @@ export const TokensTab: FC = () => {
                     toggle={toggleHideZeroBalances}
                   />
                 </SortPopup>
+
+                <ManageAssetsButton />
               </div>
             </SearchExplorerClosed>
           </>

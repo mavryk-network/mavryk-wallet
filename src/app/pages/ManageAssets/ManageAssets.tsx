@@ -7,6 +7,7 @@ import { Divider, HashChip } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
+import { ReactComponent as HiddenviewIcon } from 'app/icons/hidden-view.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
@@ -74,13 +75,6 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const handleAssetUpdate = useCallback(
     async (assetSlug: string, status: ITokenStatus) => {
       try {
-        if (status === ITokenStatus.Removed) {
-          const confirmed = await confirm({
-            title: t('deleteTokenConfirm')
-          });
-          if (!confirmed) return;
-        }
-
         await setTokenStatus(chainId, address, assetSlug, status);
         await mutate();
       } catch (err: any) {
@@ -90,6 +84,31 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     },
     [chainId, address, confirm, mutate, assetType]
   );
+
+  // TODO add loading handler
+  const handleDeleteSelectedTokens = useCallback(async () => {
+    const confirmed = await confirm({
+      title: t('deleteTokenConfirm')
+    });
+    if (!confirmed) return;
+    const promises = selectedAssets.map(async slug => {
+      return await handleAssetUpdate(slug, ITokenStatus.Removed);
+    });
+
+    await Promise.all(promises);
+  }, [confirm, handleAssetUpdate, selectedAssets]);
+
+  const handleHideSelectedTokens = useCallback(async () => {
+    const promises = selectedAssets.map(async slug => {
+      return await handleAssetUpdate(
+        slug,
+        ITokenStatus.Enabled
+        // selectedOption === SELECT_HIDDEN_ASSETS ? ITokenStatus.Enabled : ITokenStatus.Disabled
+      );
+    });
+
+    await Promise.all(promises);
+  }, [handleAssetUpdate, selectedAssets, selectedOption]);
 
   const unselectAll = useCallback(() => {
     setSelectedAssets([]);
@@ -165,7 +184,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
           <CounterSelect selectedCount={selectedAssets.length} options={options} unselectAll={unselectAll} />
 
           <div className="flex items-center gap-1">
-            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" />
+            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleHideSelectedTokens} />
             <TrashIcon className="w-6 h-6 fill-white cursor-pointer" />
           </div>
         </div>
@@ -183,6 +202,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
                 assetSlug={slug}
                 last={last}
                 checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
+                hidden={!assetsStatuses[slug]?.displayed ?? false}
                 assetType={assetType}
                 balance={balances[assetType] ?? new BigNumber(0)}
                 address={address}
@@ -206,9 +226,10 @@ type ListItemProps = {
   assetType: string;
   balance: BigNumber;
   address: string;
+  hidden: boolean;
 };
 
-const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, address, setSelectedAssets }) => {
+const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, address, hidden, setSelectedAssets }) => {
   const metadata = useAssetMetadata(assetSlug);
 
   const handleCheckboxChange = useCallback(
@@ -234,7 +255,8 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
       {...setAnotherSelector('slug', assetSlug)}
     >
       <Checkbox checked={checked} onChange={handleCheckboxChange} />
-      <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-4 flex-shrink-0" />
+      {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />}
+      <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />
 
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
@@ -251,19 +273,17 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
 
       <div className="flex-1" />
 
-      <div
-        className={classNames(
-          'flex items-center gap-1 mr-2 p-1 rounded-full text-white text-sm flex-wrap',
-          'transition ease-in-out duration-200'
-        )}
-        // onClick={evt => {
-        //   evt.preventDefault();
-        //   onUpdate(assetSlug, ITokenStatus.Removed);
-        // }}
-      >
-        <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
-        {getAssetSymbol(metadata)}
-      </div>
+      {!hidden && (
+        <div
+          className={classNames(
+            'flex items-center gap-1 mr-2 p-1 rounded-full text-white text-sm flex-wrap',
+            'transition ease-in-out duration-200'
+          )}
+        >
+          <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
+          {getAssetSymbol(metadata)}
+        </div>
+      )}
     </label>
   );
 });

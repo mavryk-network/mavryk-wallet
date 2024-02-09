@@ -3400,5 +3400,11 @@
         "content": "$1"
       }
     }
+  },
+  "selectAll": {
+    "message": "Select All"
+  },
+  "selectHidden": {
+    "message": "Select Hidden"
   }
 }

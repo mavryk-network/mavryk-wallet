@@ -2,7 +2,7 @@ import React, { FC, ReactNode, useCallback, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { FormCheckbox } from 'app/atoms';
+import { Checkbox, FormCheckbox } from 'app/atoms';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { t } from 'lib/i18n';
 
@@ -10,7 +10,7 @@ export type CounterSelectOptionType = {
   checked: boolean;
   type: string;
   content: ReactNode;
-  handleChange?: () => void;
+  handleChange?: (checked: boolean) => void;
 };
 
 export type CounterSelectProps = {
@@ -82,9 +82,9 @@ type CounterSelectContentProps = {
 
 const CounterSelectContent: FC<CounterSelectContentProps> = ({ options }) => {
   return (
-    <section className="p-2 flex flex-col bg-primary-card">
+    <section className="p-2 flex flex-col bg-primary-card rounded-2xl overflow-hidden">
       {options.map(option => (
-        <CounterSelectOption {...option} />
+        <CounterSelectOption key={option.type} {...option} />
       ))}
     </section>
   );
@@ -93,17 +93,15 @@ const CounterSelectContent: FC<CounterSelectContentProps> = ({ options }) => {
 const CounterSelectOption: FC<CounterSelectOptionType> = ({ checked, handleChange, content }) => {
   const handleOptionChange = useCallback(
     (checked: boolean) => {
-      if (checked) {
-        handleChange?.();
-      }
+      handleChange?.(checked);
     },
     [handleChange]
   );
 
   return (
-    <div className="flex items-center gap-2 bg-primary-card hover:bg-primary-card-hover">
-      <FormCheckbox checked={checked} onChange={handleOptionChange} />
-      {content}
+    <div className="flex items-center gap-2 bg-primary-card hover:bg-primary-card-hover ">
+      <FormCheckbox checked={checked} onChange={handleOptionChange} className="bg-primary-card" />
+      <div className="text-white text-sm">{content}</div>
     </div>
   );
 };

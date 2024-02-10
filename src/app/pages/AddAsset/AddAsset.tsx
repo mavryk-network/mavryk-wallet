@@ -42,9 +42,9 @@ import { AddAssetSelectors } from './AddAsset.selectors';
 
 const AddAsset: FC = () => (
   <PageLayout
+    isTopbarVisible={false}
     pageTitle={
       <>
-        <AddIcon className="w-auto h-4 mr-1 stroke-current" />
         <T id="addAsset" />
       </>
     }
@@ -261,7 +261,7 @@ const Form: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full max-w-sm mx-auto" onSubmit={handleSubmit(onSubmit)}>
       <NoSpaceField
         ref={register({
           required: t('required'),
@@ -275,9 +275,9 @@ const Form: FC = () => {
         onClean={cleanContractAddress}
         label={t('address')}
         labelDescription={t('addressOfDeployedTokenContract')}
-        placeholder={t('tokenContractPlaceholder')}
+        placeholder={t('addressContactPlaceholder')}
         errorCaption={errors.address?.message}
-        containerClassName="mb-6"
+        containerClassName="mb-4"
         testIDs={{
           inputSection: AddAssetSelectors.addressInputSection,
           input: AddAssetSelectors.addressInput
@@ -296,7 +296,7 @@ const Form: FC = () => {
         labelDescription={t('tokenIdInputDescription')}
         placeholder="0"
         errorCaption={errors.id?.message}
-        containerClassName="mb-6"
+        containerClassName="mb-4"
         testID={AddAssetSelectors.assetIDInput}
       />
 
@@ -310,7 +310,7 @@ const Form: FC = () => {
           title={t('failedToParseMetadata')}
           autoFocus
           description={tokenDataError}
-          className="mb-8"
+          className="mb-4"
         />
       )}
 
@@ -323,7 +323,7 @@ const Form: FC = () => {
       </div>
 
       {processing && (
-        <div className="my-8 w-full flex items-center justify-center pb-4">
+        <div className="my-4 w-full flex items-center justify-center pb-4">
           <div>
             <Spinner theme="gray" className="w-20" />
           </div>

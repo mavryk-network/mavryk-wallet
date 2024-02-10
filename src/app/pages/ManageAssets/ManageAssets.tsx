@@ -3,10 +3,11 @@ import React, { FC, memo, useCallback, useMemo, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { Divider, HashChip } from 'app/atoms';
+import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
+import { ReactComponent as EyeOpenedBold } from 'app/icons/eye.svg';
 import { ReactComponent as HiddenviewIcon } from 'app/icons/hidden-view.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
@@ -82,10 +83,9 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         alert(err.message);
       }
     },
-    [chainId, address, confirm, mutate, assetType]
+    [chainId, address, mutate]
   );
 
-  // TODO add loading handler
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
       title: t('deleteTokenConfirm')
@@ -96,19 +96,24 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     });
 
     await Promise.all(promises);
+    setSelectedAssets([]);
   }, [confirm, handleAssetUpdate, selectedAssets]);
 
-  const handleHideSelectedTokens = useCallback(async () => {
-    const promises = selectedAssets.map(async slug => {
-      return await handleAssetUpdate(
-        slug,
-        ITokenStatus.Enabled
-        // selectedOption === SELECT_HIDDEN_ASSETS ? ITokenStatus.Enabled : ITokenStatus.Disabled
-      );
-    });
+  const handleHideSelectedTokens = useCallback(
+    async (status: ITokenStatus) => {
+      const promises = selectedAssets.map(async slug => {
+        return await handleAssetUpdate(
+          slug,
+          status
+          // selectedOption === SELECT_HIDDEN_ASSETS ? ITokenStatus.Enabled : ITokenStatus.Disabled
+        );
+      });
 
-    await Promise.all(promises);
-  }, [handleAssetUpdate, selectedAssets, selectedOption]);
+      await Promise.all(promises);
+      setSelectedAssets([]);
+    },
+    [handleAssetUpdate, selectedAssets]
+  );
 
   const unselectAll = useCallback(() => {
     setSelectedAssets([]);
@@ -172,6 +177,9 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [filteredAssets.length, hiddenAssets.length, selectAll, selectAllHidden, selectedOption]
   );
 
+  const loading = isLoading;
+  const noItemsSelected = !selectedAssets.length;
+
   return (
     <div className="w-full max-w-sm mx-auto mb-6">
       <div>
@@ -183,15 +191,27 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         <div className="mt-4 flex items-center justify-between">
           <CounterSelect selectedCount={selectedAssets.length} options={options} unselectAll={unselectAll} />
 
-          <div className="flex items-center gap-1">
-            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleHideSelectedTokens} />
-            <TrashIcon className="w-6 h-6 fill-white cursor-pointer" />
+          <div
+            className={classNames(
+              'flex items-center gap-1 transition duration-300 ease-in-out',
+              noItemsSelected && 'pointer-events-none opacity-75'
+            )}
+          >
+            <EyeOpenedBold
+              className="w-6 h-6 fill-white cursor-pointer"
+              onClick={handleHideSelectedTokens.bind(null, ITokenStatus.Enabled)}
+            />
+            <EyeIcon
+              className="w-6 h-6 fill-white cursor-pointer"
+              onClick={handleHideSelectedTokens.bind(null, ITokenStatus.Disabled)}
+            />
+            <TrashIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleDeleteSelectedTokens} />
           </div>
         </div>
         <Divider ignoreParent color="bg-divider" className="mt-4" />
       </div>
 
-      {filteredAssets.length > 0 ? (
+      {filteredAssets.length > 0 && !loading ? (
         <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-base-plus">
           {filteredAssets.map((slug, i, arr) => {
             const last = i === arr.length - 1;
@@ -212,7 +232,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
           })}
         </div>
       ) : (
-        <LoadingComponent loading={isLoading} searchValue={searchValue} assetType={assetType} />
+        <LoadingComponent loading={loading} searchValue={searchValue} assetType={assetType} />
       )}
     </div>
   );
@@ -295,7 +315,9 @@ interface LoadingComponentProps {
 }
 
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValue, assetType }) => {
-  return loading ? null : (
+  return loading ? (
+    <Spinner theme="primary" className="w-20 mx-auto my-11" />
+  ) : (
     <div className="my-8 flex flex-col items-center justify-center text-white">
       <p className="mb-2 flex items-center justify-center text-white text-base-plus">
         {Boolean(searchValue) && <SearchIcon className="w-5 h-auto mr-1 stroke-current" />}

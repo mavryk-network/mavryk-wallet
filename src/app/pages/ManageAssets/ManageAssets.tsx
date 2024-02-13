@@ -7,7 +7,6 @@ import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
-import { ReactComponent as EyeOpenedBold } from 'app/icons/eye.svg';
 import { ReactComponent as HiddenviewIcon } from 'app/icons/hidden-view.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
@@ -99,21 +98,18 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     setSelectedAssets([]);
   }, [confirm, handleAssetUpdate, selectedAssets]);
 
-  const handleHideSelectedTokens = useCallback(
-    async (status: ITokenStatus) => {
-      const promises = selectedAssets.map(async slug => {
-        return await handleAssetUpdate(
-          slug,
-          status
-          // selectedOption === SELECT_HIDDEN_ASSETS ? ITokenStatus.Enabled : ITokenStatus.Disabled
-        );
-      });
+  const handleHideSelectedTokens = useCallback(async () => {
+    const status = selectedAssets.some(slug => assetsStatuses[slug]?.displayed)
+      ? ITokenStatus.Disabled
+      : ITokenStatus.Enabled;
 
-      await Promise.all(promises);
-      setSelectedAssets([]);
-    },
-    [handleAssetUpdate, selectedAssets]
-  );
+    const promises = selectedAssets.map(async slug => {
+      return await handleAssetUpdate(slug, status);
+    });
+
+    await Promise.all(promises);
+    setSelectedAssets([]);
+  }, [assetsStatuses, handleAssetUpdate, selectedAssets]);
 
   const unselectAll = useCallback(() => {
     setSelectedAssets([]);
@@ -197,14 +193,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
               noItemsSelected && 'pointer-events-none opacity-75'
             )}
           >
-            <EyeOpenedBold
-              className="w-6 h-6 fill-white cursor-pointer"
-              onClick={handleHideSelectedTokens.bind(null, ITokenStatus.Enabled)}
-            />
-            <EyeIcon
-              className="w-6 h-6 fill-white cursor-pointer"
-              onClick={handleHideSelectedTokens.bind(null, ITokenStatus.Disabled)}
-            />
+            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleHideSelectedTokens} />
             <TrashIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleDeleteSelectedTokens} />
           </div>
         </div>
@@ -254,8 +243,6 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
 
   const handleCheckboxChange = useCallback(
     (checked: boolean) => {
-      // onUpdate(assetSlug, checked ? ITokenStatus.Enabled : ITokenStatus.Disabled);
-
       setSelectedAssets(prev =>
         checked ? [...new Set([...prev, assetSlug])] : prev.filter(asset => asset !== assetSlug)
       );

@@ -32,6 +32,7 @@ import * as Woozie from 'lib/woozie';
 
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
+import { EditAccount } from './pages/EditAccount';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
@@ -82,6 +83,10 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/create-wallet', onlyNotReady(() => <CreateWallet />)],
   ['/add-or-import-account', onlyReady(() => <AddOrImportAccount />)],
   ['/create-account', onlyReady(() => <CreateAccount />)],
+  [
+    '/edit-account/:accHash/:accName',
+    onlyReady(({ accHash, accName }) => <EditAccount accHash={accHash} accName={accName} />)
+  ],
   ['/import-account/:tabSlug?', onlyReady(({ tabSlug }) => <ImportAccount tabSlug={tabSlug} />)],
   ['/connect-ledger', onlyReady(onlyInFullPage(() => <ConnectLedger />))],
   ['/receive', onlyReady(() => <Receive />)],

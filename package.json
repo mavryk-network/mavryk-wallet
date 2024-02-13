@@ -155,6 +155,7 @@
     "prettier": "^2.7.1",
     "process": "^0.11.10",
     "qs": "^6.11.1",
+    "query-string": "^8.2.0",
     "react": "18.2.0",
     "react-collapse": "5.1.1",
     "react-countdown": "2.3.2",

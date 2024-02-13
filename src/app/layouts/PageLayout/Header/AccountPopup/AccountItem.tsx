@@ -4,9 +4,11 @@ import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Money, Identicon } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+import { ReactComponent as EditAccIcon } from 'app/icons/edit-title.svg';
 import Balance from 'app/templates/Balance';
 import { TempleAccount } from 'lib/temple/types';
 import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
+import { Link } from 'lib/woozie';
 
 import { setAnotherSelector, setTestID } from '../../../../../lib/analytics';
 import { AccountDropdownSelectors } from '../selectors';
@@ -39,7 +41,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
     <Button
       ref={elemRef}
       className={classNameMemo}
-      onClick={onClick}
+      // onClick={onClick}
       testID={AccountDropdownSelectors.accountItemButton}
       testIDProperties={{ accountTypeEnum: type }}
     >
@@ -52,6 +54,9 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
 
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
         <Name className="text-base">{name}</Name>
+        <Link to={`/edit-account/${publicKeyHash}/${name}`}>
+          <EditAccIcon className="stroke w-5 h-6 fill-white ml-1" />
+        </Link>
 
         <div
           className="text-xs text-blue-200 mt-1"

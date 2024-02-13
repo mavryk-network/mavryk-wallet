@@ -3415,5 +3415,8 @@
   },
   "assetsModalDeleteDescr": {
     "message": "The assets will be taken off the list but will stay in your wallet."
+  },
+  "assetAddedSuccessMsg": {
+    "message": "Your asset was successfully added"
   }
 }

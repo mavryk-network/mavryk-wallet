@@ -8,7 +8,6 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
-import { ReactComponent as AddIcon } from 'app/icons/add.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { addTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import { useFormAnalytics } from 'lib/analytics';
@@ -38,6 +37,7 @@ import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import { AddAssetSelectors } from './AddAsset.selectors';
 
 const AddAsset: FC = () => (
@@ -236,6 +236,13 @@ const Form: FC = () => {
           pathname: `/explore/${tokenSlug}`,
           search: 'after_token_added=true'
         });
+
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'addAsset',
+          btnText: 'goToMain',
+          description: 'assetAddedSuccessMsg',
+          subHeader: 'success'
+        });
       } catch (err: any) {
         formAnalytics.trackSubmitFail();
 
@@ -261,7 +268,7 @@ const Form: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto" onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full max-w-sm mx-auto pb-8" onSubmit={handleSubmit(onSubmit)}>
       <NoSpaceField
         ref={register({
           required: t('required'),
@@ -433,7 +440,7 @@ const BottomSection: FC<BottomSectionProps> = props => {
         label={
           <>
             <T id="iconURL" />{' '}
-            <span className="text-sm font-light text-gray-600">
+            <span className="text-base-plus text-white">
               <T id="optionalComment" />
             </span>
           </>
@@ -441,14 +448,14 @@ const BottomSection: FC<BottomSectionProps> = props => {
         labelDescription={t('iconURLInputDescription')}
         placeholder="e.g. https://cdn.com/mytoken.png"
         errorCaption={errors.thumbnailUri?.message}
-        containerClassName="mb-6"
+        containerClassName="mb-4"
         testIDs={{
           inputSection: AddAssetSelectors.iconURLInputSection,
           input: AddAssetSelectors.iconURLInput
         }}
       />
 
-      {submitError && <Alert type="error" title={t('error')} autoFocus description={submitError} className="mb-6" />}
+      {submitError && <Alert type="error" title={t('error')} autoFocus description={submitError} className="mb-4" />}
 
       <FormSubmitButton loading={formState.isSubmitting} testID={AddAssetSelectors.addAssetButton}>
         <T id="addToken" />

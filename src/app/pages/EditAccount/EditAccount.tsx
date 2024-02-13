@@ -91,31 +91,24 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
       isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
-        <div className="text-sm text-white mb-20">
-          <form className="flex flex-col items-center flex-1" onSubmit={handleEditSubmit}>
-            <FormField
-              ref={editAccNameFieldRef}
-              name="name"
-              defaultValue={accountName}
-              maxLength={16}
-              pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
-              title={t('accountNameInputTitle')}
-              spellCheck={false}
-              className="w-full mx-auto max-w-xs text-base-plus text-white text-center"
-              onFocus={handleEditFieldFocus}
-            />
+        <form className="flex flex-col items-center flex-1 justify-between" onSubmit={handleEditSubmit}>
+          <FormField
+            ref={editAccNameFieldRef}
+            name="name"
+            defaultValue={accountName}
+            maxLength={16}
+            label={t('accountName')}
+            placeholder={t('enterAccountName')}
+            pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
+            title={t('accountNameInputTitle')}
+            spellCheck={false}
+            onFocus={handleEditFieldFocus}
+          />
 
-            <ButtonRounded
-              size="big"
-              fill={false}
-              className="w-full capitalize"
-              testID={EditableTitleSelectors.saveButton}
-            >
-              <T id="save" />
-            </ButtonRounded>
-          </form>
-        </div>
-        <div className="flex flex-col gap-4 items-stretch"></div>
+          <ButtonRounded size="big" className="w-full capitalize" testID={EditableTitleSelectors.saveButton}>
+            <T id="save" />
+          </ButtonRounded>
+        </form>
       </div>
     </PageLayout>
   );

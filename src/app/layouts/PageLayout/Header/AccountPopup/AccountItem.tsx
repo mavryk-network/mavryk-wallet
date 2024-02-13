@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import classNames from 'clsx';
 
@@ -37,11 +37,15 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
     [selected]
   );
 
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+  }, []);
+
   return (
     <Button
       ref={elemRef}
       className={classNameMemo}
-      // onClick={onClick}
+      onClick={onClick}
       testID={AccountDropdownSelectors.accountItemButton}
       testIDProperties={{ accountTypeEnum: type }}
     >
@@ -53,8 +57,8 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       />
 
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
-        <Name className="text-base">{name}</Name>
-        <Link to={`/edit-account/${publicKeyHash}/${name}`}>
+        <Link to={`/edit-account/${publicKeyHash}/${name}`} onClick={handleLinkClick} className="flex items-center">
+          <Name className="text-base">{name}</Name>
           <EditAccIcon className="stroke w-5 h-6 fill-white ml-1" />
         </Link>
 

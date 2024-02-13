@@ -116,7 +116,7 @@ const CreateAccount: FC = () => {
             loading={submitting}
             testID={CreateAccountSelectors.createOrRestoreButton}
           >
-            <T id="createAccount" />
+            <T id="addNewAccount" />
           </FormSubmitButton>
         </form>
       </div>

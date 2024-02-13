@@ -64,6 +64,8 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
           id="importacc-privatekey"
           label={t('privateKey')}
           labelDescription={t('privateKeyInputDescription')}
+          textarea
+          rows={2}
           placeholder={t('enterSecretKey')}
           errorCaption={errors.privateKey?.message}
           className="resize-none"

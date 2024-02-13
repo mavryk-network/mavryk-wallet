@@ -25,6 +25,7 @@ import { setTokenStatus } from 'lib/temple/assets';
 import { useAccount, useChainId, useAvailableAssetsSlugs } from 'lib/temple/front';
 import { ITokenStatus } from 'lib/temple/repo';
 import { useConfirm } from 'lib/ui/dialog';
+import useTippy from 'lib/ui/useTippy';
 
 import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance';
 import { SELECT_ALL_ASSETS, SELECT_HIDDEN_ASSETS } from './manageAssets.const';
@@ -51,10 +52,14 @@ const ManageAssets: FC<Props> = ({ assetType }) => (
 
 export default ManageAssets;
 
-type SelectedAssetsToUpdate = {
-  assetSlug: string;
-  ITokenStatus: ITokenStatus;
+const tippyPropsDeleteBtn = {
+  trigger: 'mouseenter',
+  hideOnClick: false,
+  content: t('delete'),
+  animation: 'shift-away-subtle'
 };
+
+const tippyPropsHideBtn = { ...tippyPropsDeleteBtn, content: t('hideUnhide') };
 
 const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const chainId = useChainId(true)!;
@@ -71,6 +76,9 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const [selectedOption, setSelectedOption] = useState<ManageAssetsSelectOptionType | null>(null);
 
   const confirm = useConfirm();
+
+  const buttonHideRef = useTippy<HTMLButtonElement>(tippyPropsHideBtn);
+  const buttonDeleteRef = useTippy<HTMLButtonElement>(tippyPropsDeleteBtn);
 
   const handleAssetUpdate = useCallback(
     async (assetSlug: string, status: ITokenStatus) => {
@@ -202,8 +210,12 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
               noItemsSelected && 'pointer-events-none opacity-75'
             )}
           >
-            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleHideSelectedTokens} />
-            <TrashIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleDeleteSelectedTokens} />
+            <button ref={buttonHideRef}>
+              <EyeIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleHideSelectedTokens} />
+            </button>
+            <button ref={buttonDeleteRef}>
+              <TrashIcon className="w-6 h-6 fill-white cursor-pointer" onClick={handleDeleteSelectedTokens} />
+            </button>
           </div>
         </div>
         <Divider ignoreParent color="bg-divider" className="mt-4" />

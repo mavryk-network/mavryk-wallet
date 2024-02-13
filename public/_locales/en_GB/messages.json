@@ -3418,5 +3418,11 @@
   },
   "assetAddedSuccessMsg": {
     "message": "Your asset was successfully added"
+  },
+  "editAccount": {
+    "message": "Edit Account"
+  },
+  "hideUnhide": {
+    "message": "Hide/Unhide"
   }
 }

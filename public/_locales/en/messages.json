@@ -3421,5 +3421,8 @@
   },
   "editAccount": {
     "message": "Edit Account"
+  },
+  "hideUnhide": {
+    "message": "Hide/Unhide"
   }
 }

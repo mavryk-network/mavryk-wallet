@@ -46,3 +46,11 @@
   top: -45px;
   z-index: 2;
 }
+
+.listItem:hover {
+  outline: 2px solid #333;
+}
+
+.listItem:hover::before {
+  border-bottom: none;
+}

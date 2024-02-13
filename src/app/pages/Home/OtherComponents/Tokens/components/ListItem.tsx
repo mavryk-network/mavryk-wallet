@@ -28,7 +28,7 @@ export const ListItem = memo<Props>(
       () =>
         classNames(
           'relative block w-full overflow-hidden flex items-center px-4 py-3 rounded',
-          'hover:bg-primary-card transition ease-in-out duration-200 focus:outline-none',
+          'hover:bg-primary-card',
           active && 'focus:bg-gray-200',
           styles.listItem
         ),

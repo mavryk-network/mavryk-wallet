@@ -3406,5 +3406,14 @@
   },
   "selectHidden": {
     "message": "Select Hidden"
+  },
+  "deleteAssets": {
+    "message": "Delete Assets"
+  },
+  "areYousureAssetModalDeleteAction": {
+    "message": "Are you sure you want to delete the assets?"
+  },
+  "assetsModalDeleteDescr": {
+    "message": "The assets will be taken off the list but will stay in your wallet."
   }
 }

@@ -87,7 +87,16 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
-      title: t('deleteTokenConfirm')
+      title: t('deleteContact'),
+      children: (
+        <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: 270 }}>
+          <div>
+            <T id={'areYousureAssetModalDeleteAction'} />
+          </div>
+          <T id={'assetsModalDeleteDescr'} />
+        </div>
+      ),
+      comfirmButtonText: t('delete')
     });
     if (!confirmed) return;
     const promises = selectedAssets.map(async slug => {

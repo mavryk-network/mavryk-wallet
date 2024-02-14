@@ -12,7 +12,7 @@ import { t, T } from 'lib/i18n';
 import { useContactsActions, useFilteredContacts, useAccount } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-import { navigate } from 'lib/woozie';
+import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
 import { AddressBookSelectors } from './AddressBook.selectors';
@@ -139,7 +139,13 @@ const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactA
       </div>
     </div>
 
-    {!item.accountInWallet && (
+    <Link to={`/edit-account/${item.address}/${item.name}`} className="flex items-center">
+      <ButtonRounded size="xs" fill={false}>
+        <T id="edit" />
+      </ButtonRounded>
+    </Link>
+
+    {/* {!item.accountInWallet && (
       <button
         className="flex-none py-2 text-white hover:text-gray-600 transition ease-in-out duration-200"
         onClick={evt => {
@@ -151,7 +157,7 @@ const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactA
       >
         <CloseIcon className="w-5 h-auto text-white stroke-current stroke-2" title={t('delete')} />
       </button>
-    )}
+    )} */}
   </div>
 );
 

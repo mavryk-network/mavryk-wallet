@@ -2,7 +2,7 @@ import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef } 
 
 import queryString from 'query-string';
 
-import { FormField } from 'app/atoms';
+import { FormField, HashChip } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
@@ -91,6 +91,12 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
       isTopbarVisible={false}
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
+        <div className="flex flex-col gap-1 mb-4">
+          <div className="text-primary-white text-base-plus">
+            <T id="publicAddress" />:
+          </div>
+          <HashChip hash={accountHash} small trim={false} />
+        </div>
         <form className="flex flex-col items-center flex-1 justify-between" onSubmit={handleEditSubmit}>
           <FormField
             ref={editAccNameFieldRef}

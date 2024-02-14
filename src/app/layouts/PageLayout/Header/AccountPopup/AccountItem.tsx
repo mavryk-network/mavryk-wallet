@@ -71,12 +71,13 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       />
 
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
-        <div ref={accNameRef}>
+        <Name className="text-base">{name}</Name>
+        {/* <div ref={accNameRef}>
           <Link to={`/edit-account/${publicKeyHash}/${name}`} onClick={handleLinkClick} className="flex items-center">
             <Name className="text-base">{name}</Name>
             <EditAccIcon className="stroke w-5 h-6 fill-white ml-1" />
           </Link>
-        </div>
+        </div> */}
 
         <div
           className="text-xs text-blue-200 mt-1"

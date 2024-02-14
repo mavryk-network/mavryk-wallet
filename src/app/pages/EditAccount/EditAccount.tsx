@@ -1,37 +1,52 @@
 import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import queryString from 'query-string';
-
 import { FormField, HashChip } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import {
+  useAccount,
+  useContactsActions,
+  useFilteredContacts,
+  useSetAccountPkh,
+  useTempleClient
+} from 'lib/temple/front';
 import { useAlert } from 'lib/ui';
-import { goBack } from 'lib/woozie';
+import { useConfirm } from 'lib/ui/dialog';
+import { goBack, navigate } from 'lib/woozie';
 
 import { EditableTitleSelectors } from './editAccount.selectors';
 
 export type EditAccountProps = {
   accHash?: string | null;
-  accName?: string | null;
 };
 
-export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
+export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
   const { editAccountName } = useTempleClient();
+  const setAccountPkh = useSetAccountPkh();
+  const { allContacts: filteredContacts } = useFilteredContacts();
+  const { removeContact, editContact } = useContactsActions();
   const account = useAccount();
   const customAlert = useAlert();
   const formAnalytics = useFormAnalytics('ChangeAccountName');
+  const confirm = useConfirm();
 
   const editAccNameFieldRef = useRef<HTMLInputElement>(null);
   const accNamePrevRef = useRef<string>();
 
-  const accountHash = useMemo(() => accHash ?? account.publicKeyHash, [accHash, account.publicKeyHash]);
-  const accountName = useMemo(
-    () => (accName ? Object.keys(queryString.parse(accName))[0] : account.name),
-    [accName, account.name]
+  const accToChange = filteredContacts.find(acc => acc.address === accHash);
+
+  const accountHash = useMemo(
+    () => (accToChange ? accToChange.address : account.publicKeyHash),
+    [accToChange, account.publicKeyHash]
+  );
+  const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
+  const isOwn = useMemo(
+    () => (accToChange?.accountInWallet ? accToChange.accountInWallet : false),
+    [accToChange?.accountInWallet]
   );
 
   useEffect(() => {
@@ -55,8 +70,12 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
         formAnalytics.trackSubmit();
         try {
           const newName = editAccNameFieldRef.current?.value;
-          if (newName && newName !== accountName) {
+          if (newName && newName !== accountName && isOwn) {
+            // update "own" account name
             await editAccountName(accountHash, newName);
+          } else if (!isOwn && newName && newName !== accountName) {
+            // update contact from address book
+            await editContact(accountHash, { name: newName });
           }
 
           formAnalytics.trackSubmitSuccess();
@@ -74,8 +93,29 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
         }
       })();
     },
-    [accountName, editAccountName, accountHash, customAlert, formAnalytics]
+    [formAnalytics, accountName, isOwn, editAccountName, accountHash, editContact, customAlert]
   );
+
+  const handleRemoveContactClick = useCallback(async () => {
+    if (isOwn) {
+      // switch acc so u will see proper acc on the settings/remove-account screen
+      setAccountPkh(accountHash);
+      // navigate to the /sremove-account screen
+      return navigate('/settings/remove-account');
+    }
+
+    if (
+      !(await confirm({
+        title: t('deleteContact'),
+        children: t('deleteContactConfirm'),
+        comfirmButtonText: t('delete')
+      }))
+    ) {
+      return;
+    }
+
+    await removeContact(accountHash);
+  }, [accountHash, confirm, isOwn, removeContact, setAccountPkh]);
 
   const handleEditFieldFocus = useCallback(() => {
     clearTimeout(autoCancelTimeoutRef.current);
@@ -89,6 +129,11 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash, accName }) => {
         </>
       }
       isTopbarVisible={false}
+      RightSidedComponent={
+        <button className="flex-none text-white" onClick={handleRemoveContactClick}>
+          <TrashIcon className="w-5 h-5" title={t('remove')} />
+        </button>
+      }
     >
       <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
         <div className="flex flex-col gap-1 mb-4">

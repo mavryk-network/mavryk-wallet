@@ -83,10 +83,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/create-wallet', onlyNotReady(() => <CreateWallet />)],
   ['/add-or-import-account', onlyReady(() => <AddOrImportAccount />)],
   ['/create-account', onlyReady(() => <CreateAccount />)],
-  [
-    '/edit-account/:accHash/:accName',
-    onlyReady(({ accHash, accName }) => <EditAccount accHash={accHash} accName={accName} />)
-  ],
+  ['/edit-account/:accHash', onlyReady(({ accHash }) => <EditAccount accHash={accHash} />)],
   ['/import-account/:tabSlug?', onlyReady(({ tabSlug }) => <ImportAccount tabSlug={tabSlug} />)],
   ['/connect-ledger', onlyReady(onlyInFullPage(() => <ConnectLedger />))],
   ['/receive', onlyReady(() => <Receive />)],

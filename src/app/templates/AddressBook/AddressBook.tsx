@@ -9,9 +9,8 @@ import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t, T } from 'lib/i18n';
-import { useContactsActions, useFilteredContacts, useAccount } from 'lib/temple/front';
+import { useFilteredContacts, useAccount } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
-import { useConfirm } from 'lib/ui/dialog';
 import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
@@ -22,10 +21,8 @@ type ContactActions = {
 };
 
 export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
-  const { removeContact } = useContactsActions();
   const { allContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
-  const confirm = useConfirm();
 
   const allContacts = useMemo(
     () => filteredContacts.filter(contact => contact.address !== account.publicKeyHash),
@@ -37,30 +34,6 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   const handleAddContactClick = useCallback(() => {
     navigate('/settings/add-contact');
   }, []);
-
-  const handleRemoveContactClick = useCallback(
-    async (address: string) => {
-      if (
-        !(await confirm({
-          title: t('deleteContact'),
-          children: t('deleteContactConfirm'),
-          comfirmButtonText: t('delete')
-        }))
-      ) {
-        return;
-      }
-
-      await removeContact(address);
-    },
-    [confirm, removeContact]
-  );
-
-  const contactActions = useMemo<ContactActions>(
-    () => ({
-      remove: handleRemoveContactClick
-    }),
-    [handleRemoveContactClick]
-  );
 
   const AddComponent = useMemo(
     () => <TopbarRightText onClick={handleAddContactClick} label={t('add')} />,
@@ -94,7 +67,6 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   ) : (
     <div className="w-full max-w-sm mx-auto -mt-3">
       <CustomSelect
-        actions={contactActions}
         className="mb-6 p-0"
         getItemId={getContactKey}
         items={allContacts}
@@ -113,7 +85,7 @@ const ContactIcon: React.FC<OptionRenderProps<TempleContact, string, ContactActi
   <Identicon type="bottts" hash={item.address} size={32} className="flex-shrink-0 shadow-xs rounded-full" />
 );
 
-const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item, actions }) => (
+const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item }) => (
   <div
     className="flex flex-1 w-full py-3"
     {...setTestID(AddressBookSelectors.contactItem)}
@@ -139,25 +111,11 @@ const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactA
       </div>
     </div>
 
-    <Link to={`/edit-account/${item.address}/${item.name}`} className="flex items-center">
+    <Link to={`/edit-account/${item.address}`} className="flex items-center">
       <ButtonRounded size="xs" fill={false}>
         <T id="edit" />
       </ButtonRounded>
     </Link>
-
-    {/* {!item.accountInWallet && (
-      <button
-        className="flex-none py-2 text-white hover:text-gray-600 transition ease-in-out duration-200"
-        onClick={evt => {
-          evt.stopPropagation();
-          actions?.remove(item.address);
-        }}
-        {...setTestID(AddressBookSelectors.deleteContactButton)}
-        {...setAnotherSelector('hash', item.address)}
-      >
-        <CloseIcon className="w-5 h-auto text-white stroke-current stroke-2" title={t('delete')} />
-      </button>
-    )} */}
   </div>
 );
 

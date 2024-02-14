@@ -45,7 +45,7 @@ export const CounterSelect: FC<CounterSelectProps> = ({ selectedCount, unselectA
         opened={opened}
       />
       {opened && (
-        <div className="absolute top-12 z-10">
+        <div className="absolute top-12 z-10" style={{ minWidth: 'fit-content' }}>
           <CounterSelectContent options={options} />
         </div>
       )}
@@ -129,7 +129,7 @@ const CounterSelectOption: FC<CounterSelectOptionType> = ({ checked, handleChang
         onChange={handleOptionChange}
         className="bg-primary-card"
         labelClassName="py-4 px-2 bg-primary-card hover:bg-primary-card-hover w-full"
-        label={<div className="text-white text-sm">{content}</div>}
+        label={<div className="text-white text-sm whitespace-nowrap">{content}</div>}
         overrideClassNames="w-4 h-4 rounded-md"
       />
     </div>

@@ -115,6 +115,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
     await Promise.all(promises);
     setSelectedAssets([]);
+    setSelectedOption(null);
   }, [confirm, handleAssetUpdate, selectedAssets]);
 
   const handleHideSelectedTokens = useCallback(async () => {
@@ -128,6 +129,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
     await Promise.all(promises);
     setSelectedAssets([]);
+    setSelectedOption(null);
   }, [assetsStatuses, handleAssetUpdate, selectedAssets]);
 
   const unselectAll = useCallback(() => {
@@ -267,7 +269,7 @@ type ListItemProps = {
   hidden: boolean;
 };
 
-const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, address, hidden, setSelectedAssets }) => {
+const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidden, setSelectedAssets }) => {
   const metadata = useAssetMetadata(assetSlug);
 
   const handleCheckboxChange = useCallback(

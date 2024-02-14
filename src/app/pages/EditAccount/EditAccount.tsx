@@ -142,7 +142,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
           </div>
           <HashChip hash={accountHash} small trim={false} />
         </div>
-        <form className="flex flex-col items-center flex-1 justify-between" onSubmit={handleEditSubmit}>
+        <form className="flex flex-col items-center flex-1 justify-start gap-3" onSubmit={handleEditSubmit}>
           <FormField
             ref={editAccNameFieldRef}
             name="name"

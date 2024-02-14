@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 
 import { FormSubmitButton } from 'app/atoms';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import ModalWithTitle, { ModalWithTitleProps } from 'app/templates/ModalWithTitle';
 import { t } from 'lib/i18n';
 
@@ -14,9 +15,9 @@ const AlertModal: FC<AlertModalProps> = props => {
       <div className="flex flex-col">
         <div className="mb-8">{children}</div>
         <div className="flex justify-end">
-          <FormSubmitButton type="button" onClick={onRequestClose}>
+          <ButtonRounded size="big" fill type="button" onClick={onRequestClose}>
             {t('ok')}
-          </FormSubmitButton>
+          </ButtonRounded>
         </div>
       </div>
     </ModalWithTitle>

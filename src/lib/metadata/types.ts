@@ -8,6 +8,7 @@ export interface AssetMetadataBase {
   symbol: string;
   decimals: number;
   thumbnailUri?: string;
+  address?: string;
 }
 
 export interface TokenMetadata extends AssetMetadataBase {

@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -67,6 +67,8 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const balances = useBalancesWithDecimals();
   const address = account.publicKeyHash;
 
+  const initialLoading = useRef(true);
+
   const { availableAssets, assetsStatuses, isLoading, mutate } = useAvailableAssetsSlugs(
     assetType === AssetTypesEnum.Collectibles ? AssetTypesEnum.Collectibles : AssetTypesEnum.Tokens
   );
@@ -95,7 +97,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
-      title: t('deleteContact'),
+      title: t('deleteAssets'),
       children: (
         <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: 270 }}>
           <div>
@@ -190,7 +192,13 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [filteredAssets.length, hiddenAssets.length, selectAll, selectAllHidden, selectedOption]
   );
 
-  const loading = isLoading;
+  useEffect(() => {
+    if (initialLoading.current && isLoading) {
+      initialLoading.current = false;
+    }
+  }, [isLoading]);
+
+  const loading = initialLoading.current;
   const noItemsSelected = !selectedAssets.length;
 
   return (
@@ -282,7 +290,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
       {...setTestID(ManageAssetsSelectors.assetItem)}
       {...setAnotherSelector('slug', assetSlug)}
     >
-      <Checkbox checked={checked} onChange={handleCheckboxChange} />
+      <Checkbox checked={checked} onChange={handleCheckboxChange} overrideClassNames="w-4 h-4 rounded-md" />
       {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />}
       <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />
 
@@ -294,7 +302,14 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
 
           <div className="text-sm text-secondary-white truncate w-full flex items-center">
             {`${getAssetSymbol(metadata)} |`}&nbsp;
-            <HashChip hash={address} small showIcon={false} />
+            <HashChip
+              hash={metadata?.address ?? t('unknown')}
+              small
+              showIcon={false}
+              className="text-sm"
+              firstCharsCount={5}
+              lastCharsCount={4}
+            />
           </div>
         </div>
       </div>
@@ -304,12 +319,11 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
       {!hidden && (
         <div
           className={classNames(
-            'flex items-center gap-1 mr-2 p-1 rounded-full text-white text-sm flex-wrap',
+            'flex items-center gap-1 p-1 rounded-full text-white text-sm flex-wrap',
             'transition ease-in-out duration-200'
           )}
         >
           <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
-          {getAssetSymbol(metadata)}
         </div>
       )}
     </label>

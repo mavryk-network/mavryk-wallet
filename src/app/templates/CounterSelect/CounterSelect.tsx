@@ -1,6 +1,7 @@
-import React, { FC, ReactNode, useCallback, useState } from 'react';
+import React, { ElementRef, FC, ReactNode, useCallback, useState } from 'react';
 
 import clsx from 'clsx';
+import useOnClickOutside from 'use-onclickoutside';
 
 import { FormCheckbox } from 'app/atoms';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
@@ -22,13 +23,21 @@ export type CounterSelectProps = {
 
 export const CounterSelect: FC<CounterSelectProps> = ({ selectedCount, unselectAll, options }) => {
   const [opened, setOpened] = useState(false);
+  const ref = React.useRef<ElementRef<'section'>>(null);
 
   const toggleOpened = useCallback(() => {
     setOpened(!opened);
   }, [opened]);
 
+  const close = useCallback(() => {
+    if (!opened) return;
+    setOpened(false);
+  }, [opened]);
+
+  useOnClickOutside(ref, close);
+
   return (
-    <section className="relative">
+    <section ref={ref} className="relative">
       <CounterSelectOptionFace
         count={selectedCount}
         unselectAll={unselectAll}
@@ -36,7 +45,7 @@ export const CounterSelect: FC<CounterSelectProps> = ({ selectedCount, unselectA
         opened={opened}
       />
       {opened && (
-        <div className="fixed z-10">
+        <div className="absolute top-12 z-10">
           <CounterSelectContent options={options} />
         </div>
       )}
@@ -62,15 +71,23 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
   );
 
   return (
-    <section className="p-2 flex items-center gap-2 bg-primary-card rounded-md">
+    <section
+      className={clsx(
+        'p-2 flex items-center gap-3 bg-primary-card rounded-md',
+        'transition ease-in-out duration-200 border border-transparent',
+        opened && 'border border-accent-blue'
+      )}
+    >
       <FormCheckbox
         checked={count > 0}
         onChange={handleCheckBoxChange}
         IconFromProps={MinusIcon}
         iconClassName="h-4/6 w-4/6 stroke-accent-blue pointer-events-none"
         labelClassName={clsx(count === 0 && 'pointer-events-none opacity-75', 'py-0 bg-primary-card')}
+        overrideClassNames="w-4 h-4 rounded-md"
+        shouldFocus={false}
       />
-      <div className="flex items-center gap-2 cursor-pointer" onClick={toggleOpened}>
+      <div className="flex items-center gap-3 cursor-pointer" onClick={toggleOpened}>
         <p className="text-white text-sm">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(
@@ -113,6 +130,7 @@ const CounterSelectOption: FC<CounterSelectOptionType> = ({ checked, handleChang
         className="bg-primary-card"
         labelClassName="py-4 px-2 bg-primary-card hover:bg-primary-card-hover w-full"
         label={<div className="text-white text-sm">{content}</div>}
+        overrideClassNames="w-4 h-4 rounded-md"
       />
     </div>
   );

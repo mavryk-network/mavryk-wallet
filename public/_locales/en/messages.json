@@ -413,7 +413,7 @@
     "message": "Address"
   },
   "addressOfDeployedTokenContract": {
-    "message": "Address of a deployed asset contract."
+    "message": "Address of a deployed asset contract"
   },
   "tokenContractPlaceholder": {
     "message": "e.g. KT1v9CmPy..."
@@ -425,7 +425,7 @@
     "message": "Symbol"
   },
   "tokenSymbolInputDescription": {
-    "message": "Asset symbol, like 'USD' for United States Dollar."
+    "message": "Asset symbol, like 'USD' for United States Dollar"
   },
   "tokenSymbolInputPlaceholder": {
     "message": "e.g. WEW, BOW, LAL etc."
@@ -700,6 +700,9 @@
   },
   "enterAddress": {
     "message": "Enter Address"
+  },
+  "enterAmount": {
+    "message": "Enter amount"
   },
   "accountNameInputDescription": {
     "message": "What will be the name of the new account?"
@@ -3394,7 +3397,7 @@
     "message": "Enter Secret Key"
   },
   "selectedCount": {
-    "message": "$count$ selected",
+    "message": "$count$ Selected",
     "placeholders": {
       "count": {
         "content": "$1"

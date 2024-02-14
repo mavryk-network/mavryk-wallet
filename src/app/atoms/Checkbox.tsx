@@ -14,6 +14,7 @@ export interface CheckboxProps
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
   IconFromProps?: ImportedSVGComponent;
   iconClassName?: string;
+  shouldFocus?: boolean;
 }
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
@@ -30,6 +31,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       testIDProperties,
       IconFromProps,
       iconClassName,
+      shouldFocus = true,
       ...rest
     },
     ref
@@ -72,8 +74,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           'flex justify-center items-center flex-shrink-0',
           'text-white border overflow-hidden',
           'transition ease-in-out duration-200 disable-outline-for-click',
-          // localChecked ? 'bg-primary-orange' : 'bg-black-40',
-          localFocused && 'shadow-outline',
+          localFocused && shouldFocus && 'shadow-outline',
           (() => {
             switch (true) {
               case localChecked:

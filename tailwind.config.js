@@ -647,7 +647,7 @@ module.exports = {
         'base-plus': [
           '1rem',
           {
-            lineHeight: 'normal',
+            lineHeight: '17px',
             letterSpacing: '-0.32px',
             fontWeight: '400'
           }

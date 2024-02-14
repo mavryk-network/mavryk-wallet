@@ -268,7 +268,7 @@ const Form: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto pb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full max-w-sm mx-auto pb-8 h-full flex flex-col" onSubmit={handleSubmit(onSubmit)}>
       <NoSpaceField
         ref={register({
           required: t('required'),
@@ -278,6 +278,7 @@ const Form: FC = () => {
         id="addtoken-address"
         textarea
         rows={2}
+        extraInnerWrapper={'none'}
         cleanable={Boolean(contractAddress)}
         onClean={cleanContractAddress}
         label={t('address')}
@@ -285,6 +286,9 @@ const Form: FC = () => {
         placeholder={t('addressContactPlaceholder')}
         errorCaption={errors.address?.message}
         containerClassName="mb-4"
+        style={{
+          resize: 'none'
+        }}
         testIDs={{
           inputSection: AddAssetSelectors.addressInputSection,
           input: AddAssetSelectors.addressInput
@@ -301,7 +305,7 @@ const Form: FC = () => {
         id="token-id"
         label={`${t('assetId')} ${t('optionalComment')}`}
         labelDescription={t('tokenIdInputDescription')}
-        placeholder="0"
+        placeholder={t('enterAmount')}
         errorCaption={errors.id?.message}
         containerClassName="mb-4"
         testID={AddAssetSelectors.assetIDInput}
@@ -336,6 +340,15 @@ const Form: FC = () => {
           </div>
         </div>
       )}
+
+      <div className="flex-1" />
+      <FormSubmitButton
+        disabled={!bottomSectionVisible || processing}
+        loading={formState.isSubmitting}
+        testID={AddAssetSelectors.addAssetButton}
+      >
+        <T id="addToken" />
+      </FormSubmitButton>
     </form>
   );
 };
@@ -456,10 +469,6 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       {submitError && <Alert type="error" title={t('error')} autoFocus description={submitError} className="mb-4" />}
-
-      <FormSubmitButton loading={formState.isSubmitting} testID={AddAssetSelectors.addAssetButton}>
-        <T id="addToken" />
-      </FormSubmitButton>
     </>
   );
 };

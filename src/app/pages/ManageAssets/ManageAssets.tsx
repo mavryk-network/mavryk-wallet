@@ -291,8 +291,15 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, addre
       {...setAnotherSelector('slug', assetSlug)}
     >
       <Checkbox checked={checked} onChange={handleCheckboxChange} overrideClassNames="w-4 h-4 rounded-md" />
-      {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />}
-      <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />
+      {/* {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />} */}
+      <div className="relative">
+        <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />
+        {hidden && (
+          <div className={classNames('w-11 h-11 rounded-full bg-primary-bg opacity-75', styles.hiddenAsset)}>
+            <EyeIcon className="w-6 h-6 fill-white cursor-pointer" />
+          </div>
+        )}
+      </div>
 
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">

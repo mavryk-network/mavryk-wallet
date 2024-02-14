@@ -88,7 +88,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
         shouldFocus={false}
       />
       <div className="flex items-center gap-3 cursor-pointer" onClick={toggleOpened}>
-        <p className="text-white text-sm">{t('selectedCount', [`${count}`])}</p>
+        <p className="text-white text-sm capitalize">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(
             'w-6 h-auto stroke-white stroke-2 transition ease-in-out duration-200 cursor-pointer',

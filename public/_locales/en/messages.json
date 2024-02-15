@@ -412,6 +412,9 @@
   "address": {
     "message": "Address"
   },
+  "myAddress": {
+    "message": "My address"
+  },
   "addressOfDeployedTokenContract": {
     "message": "Address of a deployed asset contract"
   },

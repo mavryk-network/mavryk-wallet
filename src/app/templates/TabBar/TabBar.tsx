@@ -20,7 +20,7 @@ interface TabInterface extends TestIDProps {
 }
 
 export const TabsBar = React.forwardRef<HTMLDivElement, Props>(({ activeTabName, tabs, withOutline }, ref) => (
-  <div ref={ref} className="w-full flex gap-4">
+  <div ref={ref} className={clsx('w-full gap-4 px-4', styles.tabbar)}>
     {tabs.map(tab => (
       <TabButton key={tab.name} active={tab.name === activeTabName} withOutline={withOutline} {...tab} />
     ))}

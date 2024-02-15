@@ -23,7 +23,7 @@ type Props = {
   className?: string;
 };
 
-type TabName = 'tokens' | 'NFTs' | 'activity' | 'delegation' | 'info';
+type TabName = 'tokens' | 'NFTs' | 'activity' | 'delegation' | 'info' | 'history';
 
 interface TabData {
   name: TabName;
@@ -114,9 +114,7 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
   return (
     <div className={clsx('-mx-4 shadow-top-light', fullPage && 'rounded-t-md', className)}>
       {/* TODO change to RWA the last teb when working on this task */}
-      <div style={{ maxWidth: 268 }}>
-        <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
-      </div>
+      <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
 
       <SuspenseContainer whileMessage={whileMessageI18nKey ? t(whileMessageI18nKey) : 'displaying tab'}>
         {Component && <Component />}

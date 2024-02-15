@@ -269,7 +269,10 @@ const Form: FC = () => {
 
   return (
     <form
-      className={classNames('w-full max-w-sm mx-auto pb-8 flex flex-col', !Boolean(tokenDataError) && 'h-full')}
+      className={classNames(
+        'w-full max-w-sm mx-auto pb-8 flex flex-col',
+        (!bottomSectionVisible || processing) && 'h-full'
+      )}
       onSubmit={handleSubmit(onSubmit)}
     >
       <NoSpaceField

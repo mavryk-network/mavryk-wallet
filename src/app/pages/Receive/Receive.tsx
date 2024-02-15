@@ -1,24 +1,16 @@
 import React, { FC, memo, useEffect } from 'react';
 
-import classNames from 'clsx';
 import { QRCode } from 'react-qr-svg';
 
-import { FormField } from 'app/atoms';
-import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
+import { HashChip } from 'app/atoms';
 import { ReactComponent as GlobeIcon } from 'app/icons/globe.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
-import { ReactComponent as QRIcon } from 'app/icons/qr.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import ViewsSwitcher, { ViewsSwitcherProps } from 'app/templates/ViewsSwitcher/ViewsSwitcher';
-import { setTestID } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useAccount, useTezosDomainsClient } from 'lib/temple/front';
 import { useTezosDomainNameByAddress } from 'lib/temple/front/tzdns';
 import { useSafeState } from 'lib/ui/hooks';
-import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
-
-import { PageTitle } from '../../atoms/PageTitle';
-import { ReceiveSelectors } from './Receive.selectors';
 
 const ADDRESS_FIELD_VIEWS = [
   {
@@ -38,7 +30,6 @@ const Receive: FC = () => {
   const { isSupported } = useTezosDomainsClient();
   const address = account.publicKeyHash;
 
-  const { fieldRef, copy, copied } = useCopyToClipboard();
   const [activeView, setActiveView] = useSafeState(ADDRESS_FIELD_VIEWS[1]);
 
   const { data: reverseName } = useTezosDomainNameByAddress(address);
@@ -50,48 +41,16 @@ const Receive: FC = () => {
   }, [isSupported, setActiveView]);
 
   return (
-    <PageLayout pageTitle={<PageTitle icon={<QRIcon className="w-auto h-4 stroke-current" />} title={t('receive')} />}>
-      <div className="py-4">
+    <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
+      <div className="">
         <div className="w-full max-w-sm mx-auto">
-          <FormField
-            extraSection={reverseName && <AddressFieldExtraSection activeView={activeView} onSwitch={setActiveView} />}
-            textarea
-            rows={2}
-            ref={fieldRef}
-            id="receive-address"
-            label={t('address')}
-            labelDescription={t('accountAddressLabel')}
-            value={activeView.key === 'hash' ? address : reverseName || ''}
-            size={36}
-            spellCheck={false}
-            readOnly
-            style={{
-              resize: 'none'
-            }}
-            testID={ReceiveSelectors.addressValue}
-          />
+          <div className="text-primary-white text-base-plus mb-4">
+            <T id="myAddress" />
+          </div>
 
-          <button
-            type="button"
-            className={classNames(
-              'flex items-center justify-center mx-auto mb-6 py-1 px-2 w-40',
-              'border rounded border-primary-orange bg-primary-orange shadow-sm',
-              'text-sm font-semibold text-primary-orange-lighter text-shadow-black-orange',
-              'opacity-90 hover:opacity-100 focus:opacity-100 hover:shadow focus:shadow',
-              'transition duration-300 ease-in-out'
-            )}
-            onClick={copy}
-            {...setTestID(ReceiveSelectors.copyToClipboardButton)}
-          >
-            {copied ? (
-              <T id="copiedAddress" />
-            ) : (
-              <>
-                <CopyIcon className="mr-1 h-4 w-auto stroke-current stroke-2" />
-                <T id="copyAddressToClipboard" />
-              </>
-            )}
-          </button>
+          <div className="p-4 rounded-2xl-plus bg-primary-card">
+            <HashChip hash={activeView.key === 'hash' ? address : reverseName || ''} trim={false} />
+          </div>
 
           <div className="flex flex-col items-center">
             <div className="mb-2 leading-tight text-center">
@@ -100,8 +59,12 @@ const Receive: FC = () => {
               </span>
             </div>
 
-            <div className="p-1 bg-gray-100 border-2 border-gray-300 rounded" style={{ maxWidth: '60%' }}>
+            {/* <div className="p-1 bg-gray-100 border-2 border-gray-300 rounded" style={{ maxWidth: '60%' }}>
               <QRCode bgColor="#f7fafc" fgColor="#000000" level="Q" style={{ width: '100%' }} value={address} />
+            </div> */}
+
+            <div className="p-6 mb-8 bg-white rounded-2xl self-center">
+              <QRCode value={address} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 216 }} />
             </div>
 
             {/* <Deposit address={address} /> */}

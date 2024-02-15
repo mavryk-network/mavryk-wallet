@@ -1,3 +1,8 @@
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(3, min-content);
+}
+
 .tab {
   position: relative;
   padding-bottom: 8px;

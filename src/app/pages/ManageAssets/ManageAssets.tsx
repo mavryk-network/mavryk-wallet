@@ -7,7 +7,6 @@ import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
-import { ReactComponent as HiddenviewIcon } from 'app/icons/hidden-view.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
@@ -204,7 +203,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const noItemsSelected = !selectedAssets.length;
 
   return (
-    <div className="w-full max-w-sm mx-auto mb-6">
+    <div className="w-full max-w-sm mx-auto mb-6 h-full">
       <div>
         <SearchAssetField
           value={searchValue}
@@ -236,9 +235,14 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
           {filteredAssets.map((slug, i, arr) => {
             const last = i === arr.length - 1;
 
+            // return (
+            //   <div key={i} className="text-white p-6 border border-accent-blue">
+            //     {slug}
+            //   </div>
+            // );
             return (
               <ListItem
-                key={slug}
+                key={slug.concat(i.toString())}
                 assetSlug={slug}
                 last={last}
                 checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
@@ -284,6 +288,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
   return (
     <label
       className={classNames(
+        'relative',
         !last && 'border-b border-divider',
         'w-full flex items-center py-2 text-white',
         'focus:outline-none overflow-hidden cursor-pointer',
@@ -293,16 +298,18 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       {...setAnotherSelector('slug', assetSlug)}
     >
       <Checkbox checked={checked} onChange={handleCheckboxChange} overrideClassNames="w-4 h-4 rounded" />
-      {/* {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />} */}
       <div className="relative">
-        <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />
+        <AssetIcon
+          assetSlug={assetSlug}
+          size={44}
+          className="mr-3 ml-3 flex-shrink-0 w-11 h-11 rounded-full overflow-hidden"
+        />
         {hidden && (
-          <div className={classNames('w-11 h-11 rounded-full bg-primary-bg opacity-75', styles.hiddenAsset)}>
+          <div className={classNames('w-11 h-11 bg-primary-bg opacity-75', styles.hiddenAsset)}>
             <EyeIcon className="w-6 h-6 fill-white cursor-pointer" />
           </div>
         )}
       </div>
-
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
           <div className="text-base-plus text-white truncate w-full" style={{ marginBottom: '0.125rem' }}>
@@ -322,19 +329,15 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
           </div>
         </div>
       </div>
-
       <div className="flex-1" />
-
-      {!hidden && (
-        <div
-          className={classNames(
-            'flex items-center gap-1 p-1 rounded-full text-white text-sm flex-wrap',
-            'transition ease-in-out duration-200'
-          )}
-        >
-          <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
-        </div>
-      )}
+      <div
+        className={classNames(
+          'flex items-center gap-1 p-1 rounded-full text-white text-sm flex-wrap',
+          'transition ease-in-out duration-200'
+        )}
+      >
+        <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
+      </div>
     </label>
   );
 });
@@ -345,7 +348,7 @@ interface LoadingComponentProps {
   assetType: string;
 }
 
-const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValue, assetType }) => {
+const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValue }) => {
   return loading ? (
     <Spinner theme="primary" className="w-20 mx-auto my-11" />
   ) : (
@@ -359,12 +362,14 @@ const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValu
       </p>
 
       <p className="text-center text-sm text-secondary-white">
-        <T id="ifYouDontSeeYourAsset" substitutions={[<RenderAssetComponent assetType={assetType} />]} />
+        <T id="ifYouDontSeeYourAsset" substitutions={[<RenderAssetComponent />]} />
       </p>
     </div>
   );
 };
 
-const RenderAssetComponent: React.FC<{ assetType: string }> = ({ assetType }) => (
-  <b>{assetType === AssetTypesEnum.Collectibles ? <T id={'addCollectible'} /> : <T id={'addToken'} />}</b>
+const RenderAssetComponent: React.FC = () => (
+  <b>
+    <T id={'addAsset'} />
+  </b>
 );

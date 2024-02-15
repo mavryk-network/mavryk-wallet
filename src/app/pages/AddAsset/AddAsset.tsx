@@ -268,7 +268,10 @@ const Form: FC = () => {
   );
 
   return (
-    <form className="w-full max-w-sm mx-auto pb-8 h-full flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={classNames('w-full max-w-sm mx-auto pb-8 flex flex-col', !Boolean(tokenDataError) && 'h-full')}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <NoSpaceField
         ref={register({
           required: t('required'),

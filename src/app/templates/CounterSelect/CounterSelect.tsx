@@ -84,7 +84,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
         IconFromProps={MinusIcon}
         iconClassName="h-4/6 w-4/6 stroke-accent-blue pointer-events-none"
         labelClassName={clsx(count === 0 && 'pointer-events-none opacity-75', 'py-0 bg-primary-card')}
-        overrideClassNames="w-4 h-4 rounded-md"
+        overrideClassNames="w-4 h-4 rounded"
         shouldFocus={false}
       />
       <div className="flex items-center gap-3 cursor-pointer" onClick={toggleOpened}>
@@ -130,7 +130,7 @@ const CounterSelectOption: FC<CounterSelectOptionType> = ({ checked, handleChang
         className="bg-primary-card"
         labelClassName="py-4 px-2 bg-primary-card hover:bg-primary-card-hover w-full"
         label={<div className="text-white text-sm whitespace-nowrap">{content}</div>}
-        overrideClassNames="w-4 h-4 rounded-md"
+        overrideClassNames="w-4 h-4 rounded"
       />
     </div>
   );

@@ -45,7 +45,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
         <label
           className={merge(
             'flex items-center py-2',
-            'rounded-md overflow-hidden cursor-pointer bg-primary-bg',
+            'rounded overflow-hidden cursor-pointer bg-primary-bg',
             labelClassName
           )}
           {...setTestID(testID)}

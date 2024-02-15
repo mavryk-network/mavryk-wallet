@@ -292,7 +292,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       {...setTestID(ManageAssetsSelectors.assetItem)}
       {...setAnotherSelector('slug', assetSlug)}
     >
-      <Checkbox checked={checked} onChange={handleCheckboxChange} overrideClassNames="w-4 h-4 rounded-md" />
+      <Checkbox checked={checked} onChange={handleCheckboxChange} overrideClassNames="w-4 h-4 rounded" />
       {/* {hidden && <HiddenviewIcon className="min-w-11 w-11 h-11 ml-3" />} */}
       <div className="relative">
         <AssetIcon assetSlug={assetSlug} size={44} className="mr-3 ml-3 flex-shrink-0" />

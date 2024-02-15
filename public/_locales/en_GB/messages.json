@@ -412,6 +412,9 @@
   "address": {
     "message": "Address"
   },
+  "myAddress": {
+    "message": "My address"
+  },
   "addressOfDeployedTokenContract": {
     "message": "Address of a deployed asset contract"
   },
@@ -3430,5 +3433,8 @@
   },
   "manageAddresses": {
     "message": "Manage Adresses"
+  },
+  "receiveAlert": {
+    "message": "Please verify that the address you wish to receive tokens to is correct. Specifically when using the QR code"
   }
 }

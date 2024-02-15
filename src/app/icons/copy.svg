@@ -1,1 +1,11 @@
-<svg role="img" xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 24 24" aria-labelledby="copyIconTitle" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"> <title id="copyIconTitle">Copy</title> <rect width="12" height="14" x="8" y="7"/> <polyline points="16 3 4 3 4 17"/> </svg>
+<svg viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#clip0_5307_87800)">
+    <path d="M15.6541 4.28571H5.9097C5.01241 4.28571 4.28564 4.91337 4.28564 5.6883V15.5065H5.9097V5.6883H15.6541V4.28571ZM18.0902 7.0909H9.15782C8.26053 7.0909 7.53376 7.71856 7.53376 8.4935V18.3117C7.53376 19.0866 8.26053 19.7143 9.15782 19.7143H18.0902C18.9874 19.7143 19.7142 19.0866 19.7142 18.3117V8.4935C19.7142 7.71856 18.9874 7.0909 18.0902 7.0909ZM18.0902 18.3117H9.15782V8.4935H18.0902V18.3117Z" />
+  </g>
+  <defs>
+    <clipPath id="clip0_5307_87800">
+      <rect width="24" height="24" rx="2" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>

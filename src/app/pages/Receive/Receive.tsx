@@ -2,7 +2,9 @@ import React, { FC, memo, useEffect } from 'react';
 
 import { QRCode } from 'react-qr-svg';
 
-import { HashChip } from 'app/atoms';
+import { Alert, HashShortView } from 'app/atoms';
+import CopyButton from 'app/atoms/CopyButton';
+import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
 import { ReactComponent as GlobeIcon } from 'app/icons/globe.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import PageLayout from 'app/layouts/PageLayout';
@@ -40,32 +42,33 @@ const Receive: FC = () => {
     }
   }, [isSupported, setActiveView]);
 
+  const hash = activeView.key === 'hash' ? address : reverseName || '';
+
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
       <div className="">
-        <div className="w-full max-w-sm mx-auto">
+        <div className="w-full max-w-sm mx-auto h-full pb-8">
           <div className="text-primary-white text-base-plus mb-4">
             <T id="myAddress" />
           </div>
 
-          <div className="p-4 rounded-2xl-plus bg-primary-card">
-            <HashChip hash={activeView.key === 'hash' ? address : reverseName || ''} trim={false} />
+          <div className="p-4 rounded-2xl-plus bg-primary-card relative">
+            <CopyButton type="button" text={hash}>
+              <div className="w-11 absolute top-4 right-4 bg-transparent flex justify-end items-center">
+                <CopyIcon className="w-6 h-6  text-blue-200 fill-current" />
+              </div>
+              <div className="break-all text-left" style={{ maxWidth: 271 }}>
+                <HashShortView hash={hash} trim={false} />
+              </div>
+            </CopyButton>
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="mb-2 leading-tight text-center">
-              <span className="text-sm font-semibold text-gray-700">
-                <T id="qrCode" />
-              </span>
+            <div className="p-6 bg-white rounded-2xl self-center my-7">
+              <QRCode value={address} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 196 }} />
             </div>
 
-            {/* <div className="p-1 bg-gray-100 border-2 border-gray-300 rounded" style={{ maxWidth: '60%' }}>
-              <QRCode bgColor="#f7fafc" fgColor="#000000" level="Q" style={{ width: '100%' }} value={address} />
-            </div> */}
-
-            <div className="p-6 mb-8 bg-white rounded-2xl self-center">
-              <QRCode value={address} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 216 }} />
-            </div>
+            <Alert type="warning" title={`${t('attention')}!`} description={t('receiveAlert')} />
 
             {/* <Deposit address={address} /> */}
           </div>

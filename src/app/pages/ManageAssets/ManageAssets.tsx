@@ -235,11 +235,6 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
           {filteredAssets.map((slug, i, arr) => {
             const last = i === arr.length - 1;
 
-            // return (
-            //   <div key={i} className="text-white p-6 border border-accent-blue">
-            //     {slug}
-            //   </div>
-            // );
             return (
               <ListItem
                 key={slug.concat(i.toString())}
@@ -312,7 +307,10 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       </div>
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
-          <div className="text-base-plus text-white truncate w-full" style={{ marginBottom: '0.125rem' }}>
+          <div
+            className="text-base-plus text-white truncate w-full"
+            style={{ marginBottom: '0.125rem', lineHeight: '19px' }}
+          >
             {getAssetName(metadata)}
           </div>
 

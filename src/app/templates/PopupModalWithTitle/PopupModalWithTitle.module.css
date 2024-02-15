@@ -14,3 +14,13 @@
 
   transform: translate(-50%, -25%);
 }
+
+.headerContent {
+  display: grid;
+  grid-template-columns: minmax(24px, 50px) 1fr minmax(24px, 50px);
+  align-items: center;
+}
+
+.middle {
+  grid-column: 2 / 3;
+}

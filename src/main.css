@@ -121,6 +121,15 @@
   white-space: pre-line;
 }
 
+.tippy-box[data-theme~='maven'] {
+  background-color: #373479;
+  color: #f4f4f4;
+}
+
+.tippy-box[data-theme~='tomato'][data-placement^='right'] > .tippy-arrow::before {
+  background-color: #373479;
+}
+
 /**
  * React Modal
  */

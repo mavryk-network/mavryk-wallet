@@ -3,12 +3,22 @@ import React, { FC, useCallback, useState } from 'react';
 import classNames from 'clsx';
 
 import { Button, Identicon, Name } from 'app/atoms';
+import { ReactComponent as AddressIcon } from 'app/icons/adress-with-setting.svg';
 import { ReactComponent as ArrowDownicon } from 'app/icons/chevron-down.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { T } from 'lib/i18n';
+import { T, t } from 'lib/i18n';
 import { TempleAccount } from 'lib/temple/types';
+import { useTippyById } from 'lib/ui/useTippy';
+import { Link } from 'lib/woozie';
 
 import AccountPopup from '.';
+
+const tippyProps = {
+  trigger: 'mouseenter',
+  hideOnClick: true,
+  content: t('manageAddresses'),
+  animation: 'shift-away-subtle'
+};
 
 export type AccountButtonProps = {
   child?: JSX.Element;
@@ -33,6 +43,8 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {
     popupFunction(popupValue);
   }, []);
+
+  const handleMouseEnter = useTippyById('#manageAddressesBtn', tippyProps);
 
   return (
     <div className="flex gap-2">
@@ -66,6 +78,13 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
         onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
         title={<T id="selectAccount" />}
         portalClassName="accounts-popup"
+        leftSidedComponent={
+          <button id="manageAddressesBtn" onMouseEnter={handleMouseEnter} className="w-6">
+            <Link to="/settings/address-book" className="w-6">
+              <AddressIcon className="w-6 h-6" />
+            </Link>
+          </button>
+        }
       >
         <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} onlyAccSelect={onlyAccSelect} />
       </PopupModalWithTitle>

@@ -3427,5 +3427,8 @@
   },
   "hideUnhide": {
     "message": "Hide/Unhide"
+  },
+  "manageAddresses": {
+    "message": "Manage Adresses"
   }
 }

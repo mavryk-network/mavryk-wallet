@@ -1,4 +1,4 @@
-import React, { AnchorHTMLAttributes, FC, MouseEventHandler, useCallback, useMemo } from 'react';
+import React, { AnchorHTMLAttributes, MouseEventHandler, forwardRef, useCallback, useMemo } from 'react';
 
 import { TestIDProps, useAnalytics, AnalyticsEventCategory, setTestID } from 'lib/analytics';
 
@@ -12,7 +12,7 @@ interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, TestIDProps
   state?: any;
 }
 
-export const Link: FC<LinkProps> = ({ to, replace, state = {}, ...rest }) => {
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(({ to, replace, state = {}, ...rest }, ref) => {
   const lctn = useLocation();
 
   const { pathname, search, hash, state: internalState } = useMemo(() => createLocationUpdates(to, lctn), [to, lctn]);
@@ -27,8 +27,8 @@ export const Link: FC<LinkProps> = ({ to, replace, state = {}, ...rest }) => {
     changeState(action, { ...internalState, ...state }, url);
   }, [replace, url, lctn.pathname, lctn.search, lctn.hash, internalState, state]);
 
-  return <LinkAnchor {...rest} href={href} onNavigate={handleNavigate} />;
-};
+  return <LinkAnchor ref={ref} {...rest} href={href} onNavigate={handleNavigate} />;
+});
 
 interface LinkAnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement>, TestIDProps {
   onNavigate: () => void;
@@ -36,49 +36,43 @@ interface LinkAnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement>, TestI
   target?: string;
 }
 
-const LinkAnchor: FC<LinkAnchorProps> = ({
-  children,
-  onNavigate,
-  onClick,
-  target,
-  testID,
-  testIDProperties,
-  ...rest
-}) => {
-  const { trackEvent } = useAnalytics();
+const LinkAnchor = forwardRef<HTMLAnchorElement, LinkAnchorProps>(
+  ({ children, onNavigate, onClick, target, testID, testIDProperties, ...rest }, ref) => {
+    const { trackEvent } = useAnalytics();
 
-  const handleClick = useCallback(
-    (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
+    const handleClick = useCallback(
+      (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
 
-      try {
-        if (onClick) {
-          onClick(evt);
+        try {
+          if (onClick) {
+            onClick(evt);
+          }
+        } catch (err: any) {
+          evt.preventDefault();
+          throw err;
         }
-      } catch (err: any) {
-        evt.preventDefault();
-        throw err;
-      }
 
-      if (
-        !evt.defaultPrevented && // onClick prevented default
-        evt.button === 0 && // ignore everything but left clicks
-        (!target || target === '_self') && // let browser handle "target=_blank" etc.
-        !isModifiedEvent(evt) // ignore clicks with modifier keys
-      ) {
-        evt.preventDefault();
-        onNavigate();
-      }
-    },
-    [onClick, target, onNavigate, trackEvent, testID, testIDProperties]
-  );
+        if (
+          !evt.defaultPrevented && // onClick prevented default
+          evt.button === 0 && // ignore everything but left clicks
+          (!target || target === '_self') && // let browser handle "target=_blank" etc.
+          !isModifiedEvent(evt) // ignore clicks with modifier keys
+        ) {
+          evt.preventDefault();
+          onNavigate();
+        }
+      },
+      [onClick, target, onNavigate, trackEvent, testID, testIDProperties]
+    );
 
-  return (
-    <a onClick={handleClick} target={target} {...rest} {...setTestID(testID)}>
-      {children}
-    </a>
-  );
-};
+    return (
+      <a ref={ref} onClick={handleClick} target={target} {...rest} {...setTestID(testID)}>
+        {children}
+      </a>
+    );
+  }
+);
 
 function isModifiedEvent(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);

@@ -12,6 +12,7 @@ import { AnalyticsEventCategory, setTestID, useAnalytics } from 'lib/analytics';
 import { t } from 'lib/i18n';
 import Popper from 'lib/ui/Popper';
 import { sameWidthModifiers } from 'lib/ui/same-width-modifiers';
+import { merge } from 'lib/utils/merge';
 
 interface Props<T> {
   DropdownFaceContent: ReactNode;
@@ -19,6 +20,7 @@ interface Props<T> {
   optionsListClassName?: string;
   dropdownButtonClassName?: string;
   dropdownWrapperClassName?: string;
+  fontContentWrapperClassname?: string;
   searchProps?: SelectSearchProps;
   optionsProps: SelectOptionsPropsBase<T>;
   testIds?: {
@@ -34,7 +36,8 @@ export const DropdownSelect = <T extends unknown>({
   DropdownFaceContent,
   optionsListClassName,
   dropdownButtonClassName,
-  dropdownWrapperClassName
+  dropdownWrapperClassName,
+  fontContentWrapperClassname
 }: Props<T>) => {
   const isInputDefined = isDefined(Input);
   const { trackEvent } = useAnalytics();
@@ -66,7 +69,12 @@ export const DropdownSelect = <T extends unknown>({
           {opened && searchProps ? (
             <SelectSearch {...searchProps} className={dropdownButtonClassName} />
           ) : (
-            <div className="box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18">
+            <div
+              className={merge(
+                'box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18',
+                fontContentWrapperClassname
+              )}
+            >
               <button
                 type="button"
                 className={classNames(
@@ -80,7 +88,7 @@ export const DropdownSelect = <T extends unknown>({
                 }}
               >
                 {DropdownFaceContent}
-                <ChevronDownIcon className="text-secondary-white stroke-current stroke-2 h-4 w-4" />
+                <ChevronDownIcon className="text-white stroke-current stroke-2 h-4 w-4" />
               </button>
               {Input}
             </div>

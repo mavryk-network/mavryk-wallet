@@ -36,13 +36,13 @@ interface AssetItemContentComponentProps extends AssetItemContentWithUseMetaProp
 
 const AssetItemContentComponent: FC<AssetItemContentComponentProps> = ({ slug, metadata = null, publicKeyHash }) => (
   <>
-    <div className="flex flex-col items-start mr-2 leading-none">
-      <span className="text-gray-910 text-lg mb-2">{getAssetSymbol(metadata)}</span>
-      <span className="text-gray-600 text-xs">{getAssetName(metadata)}</span>
+    <div className="flex flex-col items-start mr-2">
+      <span className="text-white text-base-plus">{getAssetSymbol(metadata)}</span>
+      {/* <span className="text-gray-600 text-xs">{getAssetName(metadata)}</span> */}
     </div>
 
-    <div className="flex-1 flex flex-col items-end text-right leading-none">
-      <span className="text-gray-910 text-lg mb-2">
+    <div className="flex-1 flex flex-col items-end text-right">
+      <span className="text-secondary-white text-sm">
         <Balance assetSlug={slug} address={publicKeyHash}>
           {balance => (
             <Money smallFractionFont={false} tooltip={false}>
@@ -50,9 +50,11 @@ const AssetItemContentComponent: FC<AssetItemContentComponentProps> = ({ slug, m
             </Money>
           )}
         </Balance>
+        &nbsp;
+        <span className="text-secondary-white text-sm">{getAssetSymbol(metadata)}</span>
       </span>
 
-      <span className="text-xs text-gray-600">
+      {/* <span className="text-xs text-gray-600">
         <Balance assetSlug={slug} address={publicKeyHash}>
           {volume => (
             <InFiat assetSlug={slug} volume={volume} smallFractionFont={false}>
@@ -66,7 +68,7 @@ const AssetItemContentComponent: FC<AssetItemContentComponentProps> = ({ slug, m
             </InFiat>
           )}
         </Balance>
-      </span>
+      </span> */}
     </div>
   </>
 );

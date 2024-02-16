@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { BTN_PRIMARY, ButtonRounded, ButtonRoundedType } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { t } from 'lib/i18n';
 
@@ -9,10 +9,18 @@ import { ConfirmatonModalSelectors } from './ConfirmatonModal.selectors';
 export interface ConfirmationModalProps extends PopupModalWithTitlePropsProps {
   onConfirm: () => void;
   comfirmButtonText?: string;
+  confirmButtonType?: ButtonRoundedType;
 }
 
 const ConfirmationModal: FC<ConfirmationModalProps> = props => {
-  const { onRequestClose, children, onConfirm, comfirmButtonText = t('ok'), ...restProps } = props;
+  const {
+    onRequestClose,
+    children,
+    onConfirm,
+    comfirmButtonText = t('ok'),
+    confirmButtonType = BTN_PRIMARY,
+    ...restProps
+  } = props;
 
   return (
     <PopupModalWithTitle {...restProps} onRequestClose={onRequestClose}>
@@ -28,6 +36,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
             {t('cancel')}
           </ButtonRounded>
           <ButtonRounded
+            btnType={confirmButtonType}
             size="big"
             className="capitalize"
             type="button"

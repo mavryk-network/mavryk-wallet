@@ -3426,13 +3426,22 @@
     "message": "Your asset was successfully added"
   },
   "editAccount": {
-    "message": "Edit Account"
+    "message": "Edit Your Account"
+  },
+  "editContact": {
+    "message": "Edit Contact"
+  },
+  "editAccountName": {
+    "message": "Edit Account Name"
+  },
+  "editContactName": {
+    "message": "Edit Contact Name"
   },
   "hideUnhide": {
     "message": "Hide/Unhide"
   },
   "manageAddresses": {
-    "message": "Manage Adresses"
+    "message": "Manage Addresses"
   },
   "receiveAlert": {
     "message": "Please verify that the address you wish to receive tokens to is correct. Specifically when using the QR code"

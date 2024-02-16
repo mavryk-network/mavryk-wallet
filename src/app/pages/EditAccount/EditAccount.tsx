@@ -4,7 +4,7 @@ import { FormField, HashChip } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import {
@@ -108,7 +108,8 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
       !(await confirm({
         title: t('deleteContact'),
         children: t('deleteContactConfirm'),
-        comfirmButtonText: t('delete')
+        comfirmButtonText: t('delete'),
+        confirmButtonType: BTN_ERROR
       }))
     ) {
       return;
@@ -123,11 +124,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
 
   return (
     <PageLayout
-      pageTitle={
-        <>
-          <T id="editAccount" />
-        </>
-      }
+      pageTitle={<span>{isOwn ? t('editAccount') : t('editContact')}</span>}
       isTopbarVisible={false}
       RightSidedComponent={
         <button className="flex-none text-white" onClick={handleRemoveContactClick}>
@@ -148,7 +145,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
             name="name"
             defaultValue={accountName}
             maxLength={16}
-            label={t('accountName')}
+            label={isOwn ? t('editAccountName') : t('editContactName')}
             placeholder={t('enterAccountName')}
             pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
             title={t('accountNameInputTitle')}

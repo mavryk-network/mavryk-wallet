@@ -8,7 +8,6 @@ import Money from 'app/atoms/Money';
 import { useTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import Balance from 'app/templates/Balance';
-import InFiat from 'app/templates/InFiat';
 import { setTestID, setAnotherSelector } from 'lib/analytics';
 import { searchAssetsWithNoMeta } from 'lib/assets/search.utils';
 import { T, t } from 'lib/i18n';
@@ -63,15 +62,9 @@ const AssetSelect: FC<AssetSelectProps> = ({ value, assets, onChange, className,
     <InputContainer className={className} header={<AssetSelectTitle />}>
       <DropdownSelect
         DropdownFaceContent={<AssetFieldContent asset={value} />}
-        searchProps={{
-          testId: testIDs?.searchInput,
-          searchValue: searchString,
-          onSearchChange: event => setSearchString(event.target.value),
-          className: 'bg-primary-card'
-        }}
         testIds={{ dropdownTestId: testIDs?.main }}
         dropdownButtonClassName="p-4 bg-primary-card h-66px"
-        fontContentWrapperClassname="border border-transparent"
+        fontContentWrapperClassname="border border-transparent rounded-xl"
         dropdownWrapperClassName="border-none rounded-2xl-plus"
         optionsListClassName="bg-primary-card"
         optionsProps={{
@@ -89,13 +82,9 @@ const AssetSelect: FC<AssetSelectProps> = ({ value, assets, onChange, className,
 export default AssetSelect;
 
 const AssetSelectTitle: FC = () => (
-  <h2 className="leading-tight flex flex-col">
-    <span className="text-base font-semibold text-gray-700">
+  <h2 className="leading-tight flex flex-col mb-3">
+    <span className="text-base-plus text-white">
       <T id="asset" />
-    </span>
-
-    <span className="mt-1 text-xs font-light text-gray-600 max-w-9/10">
-      <T id="selectAnotherAssetPrompt" />
     </span>
   </h2>
 );

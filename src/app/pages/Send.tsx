@@ -12,11 +12,12 @@ type SendProps = {
 };
 
 const Send: FC<SendProps> = ({ assetSlug }) => (
-  <PageLayout pageTitle={<PageTitle icon={<SendIcon className="w-auto h-4 stroke-current" />} title={t('send')} />}>
-    <div className="py-4">
-      <div className="w-full max-w-sm mx-auto">
-        <SendForm assetSlug={assetSlug} />
-      </div>
+  <PageLayout
+    isTopbarVisible={false}
+    pageTitle={<PageTitle icon={<SendIcon className="w-auto h-4 stroke-current" />} title={t('send')} />}
+  >
+    <div className="w-full max-w-sm mx-auto">
+      <SendForm assetSlug={assetSlug} />
     </div>
   </PageLayout>
 );

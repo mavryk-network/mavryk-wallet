@@ -58,7 +58,8 @@ const ContactsDropdown = memo<ContactsDropdownProps>(({ contacts, opened, onSele
       opened={opened}
       className={classNames(
         'z-50 absolute left-0 right-0 top-full max-h-44',
-        'origin-top overflow-x-hidden overflow-y-auto overscroll-contain'
+        'origin-top overflow-x-hidden overflow-y-auto overscroll-contain',
+        'bg-primary-card rounded-2xl-plus border-none'
       )}
     >
       {filteredContacts.length > 0 ? (
@@ -75,7 +76,7 @@ const ContactsDropdown = memo<ContactsDropdownProps>(({ contacts, opened, onSele
           className={classNames(
             !opened && 'invisible',
             'flex items-center justify-center my-6',
-            'text-gray-600 text-base font-light'
+            'text-white text-base-plus'
           )}
         >
           <ContactBookIcon className="w-5 h-auto mr-1 stroke-current" />

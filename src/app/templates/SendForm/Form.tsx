@@ -461,33 +461,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         cleanable={Boolean(toValue)}
         onClean={cleanToField}
         id="send-to"
-        label={t('recipient')}
-        labelDescription={
-          filledContact ? (
-            <div className="flex flex-wrap items-baseline">
-              <Identicon
-                type="bottts"
-                hash={filledContact.address}
-                size={14}
-                className="flex-shrink-0 shadow-xs opacity-75"
-              />
-              <div className="ml-1 mr-px font-normal">{filledContact.name}</div> (
-              <Balance assetSlug={assetSlug} address={filledContact.address}>
-                {bal => (
-                  <span className="text-xs leading-none flex items-baseline">
-                    <Money>{bal}</Money>{' '}
-                    <span className="ml-1" style={{ fontSize: '0.75em' }}>
-                      {assetSymbol}
-                    </span>
-                  </span>
-                )}
-              </Balance>
-              )
-            </div>
-          ) : (
-            <T id={assetDomainName} substitutions={assetSymbol} />
-          )
-        }
+        label={t('sendTo')}
         placeholder={t(getDomainTextError(canUseDomainNames))}
         errorCaption={!toFieldFocused ? errors.to?.message : null}
         style={{

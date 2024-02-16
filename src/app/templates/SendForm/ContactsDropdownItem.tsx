@@ -28,41 +28,37 @@ const ContactsDropdownItem: FC<ContactsDropdownItemProps> = ({ contact, active, 
       testID={SendFormSelectors.contactItemButton}
       className={classNames(
         'w-full flex items-center',
-        'p-2 text-left',
-        active ? 'bg-gray-100' : 'hover:bg-gray-100 focus:bg-gray-100'
+        'px-4 py-2 text-left',
+        active ? 'bg-gray-700' : 'hover:bg-gray-700 focus:bg-gray-800'
       )}
       tabIndex={-1}
       {...rest}
     >
-      <Identicon type="bottts" hash={contact.address} size={32} className="flex-shrink-0 shadow-xs" />
+      <Identicon
+        type="bottts"
+        hash={contact.address}
+        size={24}
+        className="flex-shrink-0 rounded-full overflow-hidden"
+      />
 
-      <div className="ml-3 flex flex-1 w-full">
+      <div className="ml-2 flex flex-1 w-full">
         <div className="flex flex-col justify-between flex-1">
-          <Name className="mb-px text-sm font-medium leading-tight text-left">{contact.name}</Name>
+          <Name className="text-base-plus text-white text-left">{contact.name}</Name>
 
           <span
-            className={classNames('text-xs font-light leading-tight text-gray-600')}
+            className={classNames('text-sm font-light text-white')}
             {...setTestID(SendFormSelectors.contactHashValue)}
             {...setAnotherSelector('hash', contact.address)}
           >
-            <HashShortView hash={contact.address} />
+            <div className="text-sm text-blue-200 font-normal">
+              <HashShortView hash={contact.address} />
+            </div>
           </span>
         </div>
 
         {contact.accountInWallet ? (
           <div className="flex items-center">
-            <span
-              className={classNames(
-                'mx-1',
-                'rounded-sm',
-                'border border-opacity-25',
-                'px-1 py-px',
-                'leading-tight',
-                'text-opacity-50',
-                'border-black text-black'
-              )}
-              style={{ fontSize: '0.6rem' }}
-            >
+            <span className={'p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue'}>
               <T id="ownAccount" />
             </span>
           </div>

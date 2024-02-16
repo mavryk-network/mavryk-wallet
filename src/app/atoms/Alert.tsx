@@ -53,7 +53,7 @@ export const Alert: FC<AlertProps> = ({
     <div
       ref={ref}
       className={classNames(
-        'relative w-full p-3',
+        'relative w-full px-3 pb-3 pt-2',
         'flex items-center gap-3',
         bgColorClassName,
         // 'border',

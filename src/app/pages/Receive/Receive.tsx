@@ -57,7 +57,7 @@ const Receive: FC = () => {
               <div className="w-11 absolute top-4 right-4 bg-transparent flex justify-end items-center">
                 <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />
               </div>
-              <div className="break-all text-left" style={{ maxWidth: 271 }}>
+              <div className="break-all text-left text-base-plus" style={{ maxWidth: 271 }}>
                 <HashShortView hash={hash} trim={false} />
               </div>
             </CopyButton>

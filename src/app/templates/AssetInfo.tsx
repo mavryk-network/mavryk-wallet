@@ -87,7 +87,7 @@ const InfoField: FC<InfoFieldProps> = props => {
           <T id="copiedAddress" />
         ) : (
           <>
-            <CopyIcon className="mr-1 h-4 w-auto stroke-current stroke-2" />
+            <CopyIcon className="mr-1 h-4 w-auto text-blue-200 fill-current" />
             <T id="copyAddressToClipboard" />
           </>
         )}

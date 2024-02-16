@@ -35,6 +35,6 @@ export const HashChip: FC<HashChipProps> = ({
       lastCharsCount={lastCharsCount}
       trim={trim}
     />
-    {showIcon && <CopyIcon className="stroke-cyan w-4 h-4" />}
+    {showIcon && <CopyIcon className="text-blue-200 fill-current w-4 h-4" />}
   </CopyButton>
 );

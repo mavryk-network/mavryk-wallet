@@ -118,7 +118,7 @@ const ExchangeStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, step,
                   >
                     <CopyIcon
                       style={{ verticalAlign: 'inherit' }}
-                      className={classNames('h-4 ml-1 w-auto inline', 'stroke-orange stroke-2')}
+                      className={classNames('h-4 ml-1 w-auto inline', 'text-blue-200 fill-current')}
                       onClick={() => copy()}
                     />
                   </CopyButton>

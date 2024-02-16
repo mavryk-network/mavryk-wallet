@@ -69,6 +69,11 @@ interface FormData {
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
+const amountStyle = {
+  resize: 'none',
+  height: 66,
+  position: 'relative'
+};
 
 type FormProps = {
   assetSlug: string;
@@ -277,6 +282,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
     const maxAmountAsset = isTezAsset(assetSlug) ? getMaxAmountToken(acc, balance, baseFee, safeFeeValue) : balance;
     const maxAmountFiat = getMaxAmountFiat(assetPrice.toNumber(), maxAmountAsset);
+
     return shoudUseFiat ? maxAmountFiat : maxAmountAsset;
   }, [acc, assetSlug, balance, baseFee, safeFeeValue, shoudUseFiat, assetPrice]);
 
@@ -432,7 +438,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 
   return (
-    <form className="min-h-96" onSubmit={handleSubmit(onSubmit)}>
+    <form className="min-h-96 pb-8" onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="to"
         as={
@@ -462,17 +468,17 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         onClean={cleanToField}
         id="send-to"
         label={t('sendTo')}
-        placeholder={t(getDomainTextError(canUseDomainNames))}
+        placeholder={t('enterAddress')}
         errorCaption={!toFieldFocused ? errors.to?.message : null}
         style={{
           resize: 'none'
         }}
-        containerClassName="mb-4"
+        containerClassName="mb-2"
         testID={SendFormSelectors.recipientInput}
       />
 
       {resolvedAddress && (
-        <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
+        <div className="mb-4 -mt-3 text-xs font-light text-white flex flex-wrap items-center">
           <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
           <span className="font-normal">{resolvedAddress}</span>
         </div>
@@ -490,65 +496,77 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         </div>
       ) : null}
 
-      <Controller
-        name="amount"
-        as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
-        control={control}
-        rules={{
-          validate: validateAmount
-        }}
-        onChange={([v]) => v}
-        onFocus={() => amountFieldRef.current?.focus()}
-        id="send-amount"
-        assetSymbol={
-          canToggleFiat ? (
-            <button
-              type="button"
-              onClick={handleFiatToggle}
-              className={classNames(
-                'px-1 rounded-md flex items-center font-light',
-                'hover:bg-black hover:bg-opacity-5',
-                'trasition ease-in-out duration-200',
-                'cursor-pointer pointer-events-auto'
-              )}
-            >
-              {visibleAssetSymbol}
-              <div className="ml-1 h-4 flex flex-col justify-between">
-                <ChevronUpIcon className="h-2 w-auto stroke-current stroke-2" />
-                <ChevronDownIcon className="h-2 w-auto stroke-current stroke-2" />
-              </div>
-            </button>
-          ) : (
-            assetSymbol
-          )
-        }
-        assetDecimals={shoudUseFiat ? 2 : assetMetadata?.decimals ?? 0}
-        label={t('amount')}
-        labelDescription={
-          restFormDisplayed &&
-          maxAmount && (
-            <>
-              <T id="availableToSend" />{' '}
-              <button type="button" className="underline" onClick={handleSetMaxAmount}>
-                {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
-                {toLocalFixed(maxAmount)}
+      <div className="relative">
+        <Controller
+          name="amount"
+          as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
+          control={control}
+          rules={{
+            validate: validateAmount
+          }}
+          onChange={([v]) => v}
+          onFocus={() => amountFieldRef.current?.focus()}
+          id="send-amount"
+          assetSymbol={
+            canToggleFiat ? (
+              <button
+                type="button"
+                onClick={handleFiatToggle}
+                className={classNames(
+                  'px-1 rounded-md flex items-center font-light',
+                  'hover:bg-black hover:bg-opacity-5',
+                  'trasition ease-in-out duration-200',
+                  'cursor-pointer pointer-events-auto'
+                )}
+              >
+                {visibleAssetSymbol}
+                <div className="ml-1 h-4 flex flex-col justify-between">
+                  <ChevronUpIcon className="h-2 w-auto stroke-current stroke-2" />
+                  <ChevronDownIcon className="h-2 w-auto stroke-current stroke-2" />
+                </div>
               </button>
-              <TokenToFiat
-                amountValue={amountValue}
-                assetMetadata={assetMetadata}
-                shoudUseFiat={shoudUseFiat}
-                assetSlug={assetSlug}
-                toAssetAmount={toAssetAmount}
-              />
-            </>
-          )
-        }
-        placeholder={t('amountPlaceholder')}
-        errorCaption={restFormDisplayed && errors.amount?.message}
-        containerClassName="mb-4"
-        autoFocus={Boolean(maxAmount)}
-        testID={SendFormSelectors.amountInput}
-      />
+            ) : (
+              assetSymbol
+            )
+          }
+          assetDecimals={shoudUseFiat ? 2 : assetMetadata?.decimals ?? 0}
+          label={t('amount')}
+          labelDescription={
+            restFormDisplayed &&
+            maxAmount && (
+              <div className="flex items-center">
+                <T id="availableToSend" />
+                <button type="button" onClick={handleSetMaxAmount}>
+                  &nbsp;
+                  {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
+                  {toLocalFixed(maxAmount)}
+                </button>
+                <span className="text-accent-blue">
+                  &nbsp;
+                  <T id="send" />
+                </span>
+              </div>
+            )
+          }
+          textarea
+          rows={2}
+          placeholder={0}
+          errorCaption={restFormDisplayed && errors.amount?.message}
+          containerClassName="mb-2"
+          autoFocus={Boolean(maxAmount)}
+          testID={SendFormSelectors.amountInput}
+          style={amountStyle}
+          childForInputWrapper={
+            <TokenToFiat
+              amountValue={amountValue}
+              assetMetadata={assetMetadata}
+              shoudUseFiat={shoudUseFiat}
+              assetSlug={assetSlug}
+              toAssetAmount={toAssetAmount}
+            />
+          }
+        />
+      </div>
 
       {estimateFallbackDisplayed ? (
         <SpinnerSection />
@@ -579,7 +597,7 @@ interface TokenToFiatProps {
 }
 
 const TokenToFiat: React.FC<TokenToFiatProps> = ({
-  amountValue,
+  amountValue = new BigNumber(0),
   assetMetadata,
   shoudUseFiat,
   assetSlug,
@@ -588,29 +606,32 @@ const TokenToFiat: React.FC<TokenToFiatProps> = ({
   if (!amountValue) return null;
 
   return (
-    <>
-      <br />
+    <div className="absolute left-4 bottom-4">
       {shoudUseFiat ? (
-        <div className="mt-1 -mb-3">
-          <span className="mr-1">≈</span>
-          <span className="font-normal text-gray-700 mr-1">{toAssetAmount(amountValue)}</span>{' '}
+        <div className="text-secondary-white text-sm ">
+          <span className="text-base-plus">≈&nbsp;</span>
+          <span className="font-normal text-secondary-white mr-1">{toAssetAmount(amountValue)}</span>{' '}
           <T id="inAsset" substitutions={getAssetSymbol(assetMetadata, true)} />
         </div>
       ) : (
-        <InFiat assetSlug={assetSlug} volume={amountValue} roundingMode={BigNumber.ROUND_FLOOR}>
+        <InFiat
+          assetSlug={assetSlug}
+          volume={amountValue}
+          roundingMode={BigNumber.ROUND_FLOOR}
+          smallFractionFont={false}
+        >
           {({ balance, symbol }) => (
-            <div className="mt-1 -mb-3 flex items-baseline">
-              <span className="mr-1">≈</span>
-              <span className="font-normal text-gray-700 mr-1 flex items-baseline">
+            <div className="flex items-baseline text-sm text-secondary-white ">
+              <span>≈&nbsp;</span>
+              <span className="flex items-baseline">
                 {balance}
-                <span className="pr-px">{symbol}</span>
-              </span>{' '}
-              <T id="inFiat" />
+                <span className="pr-px">&nbsp;{symbol}</span>
+              </span>
             </div>
           )}
         </InFiat>
       )}
-    </>
+    </div>
   );
 };
 

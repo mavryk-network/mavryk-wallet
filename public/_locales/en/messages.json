@@ -1526,7 +1526,7 @@
     "message": "Amount"
   },
   "availableToSend": {
-    "message": "Available to send(max):"
+    "message": "Max to send:"
   },
   "inFiat": {
     "message": "in Fiat"

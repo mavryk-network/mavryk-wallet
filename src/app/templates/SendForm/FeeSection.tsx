@@ -53,6 +53,7 @@ export const FeeSection: React.FC<FeeComponentProps> = ({
         loading={isSubmitting}
         disabled={Boolean(estimationError)}
         testID={SendFormSelectors.sendButton}
+        className="mt-6"
       >
         <T id="send" />
       </FormSubmitButton>
@@ -88,7 +89,7 @@ const FeeAlert: React.FC<FeeAlertProps> = ({
         type="warning"
         title={t('attentionExclamation')}
         description={<T id="tryingToTransferToYourself" />}
-        className="mt-6 mb-4"
+        className="my-4"
       />
     );
 
@@ -98,7 +99,7 @@ const FeeAlert: React.FC<FeeAlertProps> = ({
         type="warning"
         title={t('attentionExclamation')}
         description={<T id="tryingToTransferToContract" />}
-        className="mt-6 mb-4"
+        className="my-4"
       />
     );
 

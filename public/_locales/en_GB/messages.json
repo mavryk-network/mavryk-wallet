@@ -1526,7 +1526,7 @@
     "message": "Amount"
   },
   "availableToSend": {
-    "message": "Available to send(max):"
+    "message": "Max to send:"
   },
   "inFiat": {
     "message": "in Fiat"
@@ -3445,5 +3445,8 @@
   },
   "receiveAlert": {
     "message": "Please verify that the address you wish to receive tokens to is correct. Specifically when using the QR code"
+  },
+  "sendTo": {
+    "message": "Send To"
   }
 }

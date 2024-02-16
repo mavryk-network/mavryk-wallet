@@ -29,7 +29,7 @@ const ContactsDropdownItem: FC<ContactsDropdownItemProps> = ({ contact, active, 
       className={classNames(
         'w-full flex items-center',
         'px-4 py-2 text-left',
-        active ? 'bg-gray-700' : 'hover:bg-gray-700 focus:bg-gray-800'
+        active ? 'bg-gray-710' : 'hover:bg-gray-710 focus:bg-gray-710'
       )}
       tabIndex={-1}
       {...rest}

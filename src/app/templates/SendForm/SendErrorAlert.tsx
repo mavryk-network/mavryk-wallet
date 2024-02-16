@@ -58,7 +58,7 @@ const SendErrorAlert: FC<SendErrorAlertProps> = ({ type, error }) => {
         }
       })()}
       autoFocus
-      className="mt-6 mb-4"
+      className="my-4"
     />
   );
 };

@@ -38,6 +38,7 @@ export interface FormFieldProps extends TestIDProperty, Omit<FormFieldAttrs, 'ty
   labelDescription?: ReactNode;
   labelWarning?: ReactNode;
   errorCaption?: ReactNode;
+  childForInputWrapper?: ReactNode;
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
   textarea?: boolean;
@@ -102,6 +103,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
       copyable,
       testID,
       testIDs,
+      childForInputWrapper,
       ...rest
     },
     ref
@@ -187,6 +189,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
           {isPasswordInput && !revealForbidden && localValue !== '' && RevealPasswordIcon}
 
           <ExtraInner innerComponent={extraInner} useDefaultWrapper={extraInnerWrapper === 'default'} />
+          {childForInputWrapper}
 
           {secretCovered && <SecretCover onClick={handleSecretBannerClick} />}
 
@@ -218,10 +221,10 @@ const ExtraInner: React.FC<ExtraInnerProps> = ({ useDefaultWrapper, innerCompone
       <div
         className={classNames(
           'absolute flex items-center justify-end inset-y-0 right-0 w-32',
-          'opacity-50 pointer-events-none overflow-hidden'
+          'pointer-events-none overflow-hidden'
         )}
       >
-        <span className="mx-4 text-base font-light text-gray-900">{innerComponent}</span>
+        <span className="mx-4 text-base-plus text-secondary-white">{innerComponent}</span>
       </div>
     );
   return <>{innerComponent}</>;

@@ -1,4 +1,27 @@
+import { BigNumber } from 'bignumber.js';
+
 import type { UserHistoryItem } from 'lib/temple/history';
+
+import { useAssetMetadata } from '../../metadata';
+import { HistoryItemOpTypeEnum } from './types';
+
+export function fillUserHistoryItemsWithTokenMetadata(userHistoryItems: UserHistoryItem[]): UserHistoryItem[] {
+  return userHistoryItems.map(item => fillTokenMetadata(item));
+}
+
+function fillTokenMetadata(userHistoryItem: UserHistoryItem): UserHistoryItem {
+  if (!txHasToken(userHistoryItem.type)) return userHistoryItem;
+  const filledOperations = userHistoryItem.operations.map(op => {
+    const metadata = useAssetMetadata(op.assetSlug ?? '');
+    console.log(metadata);
+    if (metadata !== null) {
+      op.assetMetadata = metadata;
+    }
+    return op;
+  });
+  userHistoryItem.operations = filledOperations;
+  return userHistoryItem;
+}
 
 // export function buildUserHistory(userHistoryItems: any[]): UserHistory {
 //   const historyItems: UserHistoryItem[] = [];
@@ -64,8 +87,9 @@ interface MoneyDiff {
 }
 
 export function buildMoneyDiffs(historyItem: UserHistoryItem) {
+  //TODO: This was how the money diffs were compiled before. It created a separate array for the diffs that was rendered
+  // on the side. We need it to render together.
   const diffs: MoneyDiff[] = [];
-
   // for (const oper of historyItem.operations) {
   //   if (oper.opType !== 'transaction' || isZero(oper.amountSigned)) continue;
   //   const assetSlug = oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenId);
@@ -76,4 +100,20 @@ export function buildMoneyDiffs(historyItem: UserHistoryItem) {
   return diffs;
 }
 
-const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) => `${contractAddress}_${tokenId}`;
+const txHasToken = (txType: HistoryItemOpTypeEnum) => {
+  switch (txType) {
+    case HistoryItemOpTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.TransferFrom:
+    case HistoryItemOpTypeEnum.Delegation:
+    case HistoryItemOpTypeEnum.Swap:
+      return true;
+    case HistoryItemOpTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Origination:
+    case HistoryItemOpTypeEnum.Reveal:
+    case HistoryItemOpTypeEnum.Other:
+    default:
+      return false;
+  }
+};
+
+export const getMoneyDiff = (amountSigned: string): string => new BigNumber(amountSigned).toFixed();

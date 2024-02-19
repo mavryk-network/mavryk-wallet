@@ -10,7 +10,10 @@ import {
 } from 'lib/apis/tzkt/utils';
 import { isTruthy } from 'lib/utils';
 
+import { toTokenSlug } from '../../assets';
+import { AssetMetadataBase } from '../../metadata';
 import { OperationsGroup } from '../activity-new/types';
+import { getMoneyDiff } from './helpers';
 import {
   Fa2TransferSummaryArray,
   HistoryItemDelegationOp,
@@ -29,6 +32,7 @@ import {
 } from './types';
 
 export function operationsGroupToHistoryItem({ hash, operations }: OperationsGroup, address: string): UserHistoryItem {
+  // TODO: This returns a userHistoryItem. Missing the money diffs. See the JIRA task.
   let firstOperation = undefined,
     oldestOperation = undefined;
 
@@ -122,10 +126,17 @@ function reduceOneTzktTransactionOperation(
   }) {
     const { amount, source, contractAddress, tokenTransfers } = args;
     const HistoryOpBase = buildHistoryItemOpBase(operation, address, Number(amount), source, index);
+    const metadata: AssetMetadataBase = {
+      decimals: 0,
+      name: '',
+      symbol: ''
+    };
     const historyTxOp: HistoryItemTransactionOp = {
       ...HistoryOpBase,
       type: 'transaction',
-      destination: operation.target
+      destination: operation.target,
+      assetSlug: '',
+      assetMetadata: metadata
     };
     if (contractAddress != null) historyTxOp.contractAddress = contractAddress;
     if (isTzktOperParam(operation.parameter)) {
@@ -134,7 +145,9 @@ function reduceOneTzktTransactionOperation(
     }
     if (tokenTransfers) {
       historyTxOp.tokenTransfers = tokenTransfers;
-      const { sender } = tokenTransfers;
+      const { sender, tokenContractAddress, tokenId } = tokenTransfers;
+
+      historyTxOp.assetSlug = toTokenSlug(tokenContractAddress, tokenId);
       if (sender.address === address && !historyTxOp.entrypoint?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.TransferTo;
       } else if (historyTxOp.entrypoint?.includes('swap')) {
@@ -159,7 +172,7 @@ function reduceOneTzktTransactionOperation(
     return _buildReturn({
       amount,
       source,
-      contractAddress: 'tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg',
+      contractAddress: 'tez',
       tokenTransfers
     });
   } else if (isTzktOperParam_Fa2(parameter)) {
@@ -221,6 +234,7 @@ function buildHistoryItemOpBase(
     isHighlighted: false,
     opIndex: index
   };
+  if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
   return reducedOperation;
 }
 
@@ -345,6 +359,7 @@ function buildTokenTransferItem(
     const values = reduceParameterFa2Values(params.value, address);
     const firstVal = values[0];
     if (firstVal == null) return null;
+    const tokenSlug = toTokenSlug(operation.target.address, Number(firstVal.tokenId));
     return {
       totalAmount: firstVal.totalAmount,
       recipients: firstVal.recipients,
@@ -353,8 +368,8 @@ function buildTokenTransferItem(
       sender: transformToHistoryMember(firstVal.from),
       tokenContractAddress: operation.target.address,
       tokenId: Number(firstVal.tokenId),
-      tokenMetadata: { decimals: '', name: '', symbol: '' },
-      tokenType: tokenType
+      tokenType: tokenType,
+      assetSlug: tokenSlug
     };
   } else if (tokenType === 'fa12') {
     const source = { ...operation.sender };
@@ -362,7 +377,7 @@ function buildTokenTransferItem(
     if (params.value.from === address) source.address = address;
     else if (params.value.to === address) source.address = params.value.from;
     else return null;
-
+    const tokenSlug = toTokenSlug(operation.target.address, 0);
     return {
       totalAmount: params.value.value,
       recipients: [{ to: recipient, amount: params.value.value }],
@@ -371,8 +386,8 @@ function buildTokenTransferItem(
       sender: source,
       tokenContractAddress: operation.target.address,
       tokenId: 0,
-      tokenMetadata: { decimals: '', name: '', symbol: '' },
-      tokenType: tokenType
+      tokenType: tokenType,
+      assetSlug: tokenSlug
     };
   } else {
     const source = operation.sender;
@@ -386,8 +401,8 @@ function buildTokenTransferItem(
       sender: source,
       tokenContractAddress: 'tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg',
       tokenId: 0,
-      tokenMetadata: { decimals: '6', name: 'tez', symbol: 'XTZ' },
-      tokenType: tokenType
+      tokenType: tokenType,
+      assetSlug: 'tez'
     };
   }
 }

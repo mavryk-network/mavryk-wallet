@@ -1,5 +1,7 @@
 import { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
 
+import { AssetMetadataBase } from '../../metadata';
+
 export type HistoryItemStatus = TzktOperation['status'] | 'pending';
 export type HistoryMember = TzktAlias;
 
@@ -16,8 +18,8 @@ export interface UserHistoryItem {
   operations: IndividualHistoryItem[];
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
-  firstOperation: IndividualHistoryItem;
-  oldestOperation: IndividualHistoryItem;
+  firstOperation?: IndividualHistoryItem;
+  oldestOperation?: IndividualHistoryItem;
 }
 
 type PickedPropsFromTzktOperation = Pick<TzktOperation, 'id' | 'level' | 'hash' | 'block'>;
@@ -40,8 +42,11 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   amountSigned: string;
   addedAt: string;
   isHighlighted: boolean;
-  opType?: HistoryItemOpTypeEnum;
   opIndex: number;
+  opType?: HistoryItemOpTypeEnum;
+  assetSlug?: string;
+  assetMetadata?: AssetMetadataBase;
+  amountDiff?: string;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {
@@ -100,12 +105,8 @@ export interface HistoryItemTokenTransfer extends PickedPropsFromTzktTokenTransf
   tokenContractAddress: string;
   tokenId: number;
   tokenType: TokenType;
-  tokenMetadata: {
-    name: string;
-    symbol: string;
-    decimals: string;
-    thumbnailUri?: string;
-  };
+  assetSlug: string;
+  assetMetadata?: AssetMetadataBase;
 }
 
 export type RecipientInfo = {

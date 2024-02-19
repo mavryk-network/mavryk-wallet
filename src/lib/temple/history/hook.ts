@@ -1,5 +1,5 @@
 import { isKnownChainId } from 'lib/apis/tzkt/api';
-import { useTezos, useChainId, useAccount } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
 import fetchUserHistory from './fetch';

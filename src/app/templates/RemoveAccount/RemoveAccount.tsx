@@ -11,6 +11,7 @@ import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { RemoveAccountSelectors } from './RemoveAccount.selectors';
+import clsx from 'clsx';
 
 const SUBMIT_ERROR_TYPE = 'submit-error';
 
@@ -68,6 +69,7 @@ const RemoveAccount: FC = () => {
             <T id="ifYouWantToRemoveAnotherAccount" />
           </>
         }
+        className={clsx(account.type !== TempleAccountType.HD && 'mb-4')}
       />
 
       {account.type === TempleAccountType.HD ? (

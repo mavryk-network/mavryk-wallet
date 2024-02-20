@@ -23,6 +23,7 @@ interface Props<T> {
   fontContentWrapperClassname?: string;
   searchProps?: SelectSearchProps;
   optionsProps: SelectOptionsPropsBase<T>;
+  extraHeight?: number;
   testIds?: {
     dropdownTestId?: string;
   };
@@ -32,6 +33,7 @@ export const DropdownSelect = <T extends unknown>({
   Input,
   searchProps,
   optionsProps,
+  extraHeight = 0,
   testIds,
   DropdownFaceContent,
   optionsListClassName,
@@ -65,35 +67,39 @@ export const DropdownSelect = <T extends unknown>({
       )}
     >
       {({ ref, opened, toggleOpened }) => (
-        <div ref={ref as unknown as React.RefObject<HTMLDivElement>} {...setTestID(testIds?.dropdownTestId)}>
-          {opened && searchProps ? (
-            <SelectSearch {...searchProps} className={dropdownButtonClassName} />
-          ) : (
-            <div
-              className={merge(
-                'box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18',
-                fontContentWrapperClassname
-              )}
-            >
-              <button
-                type="button"
-                className={classNames(
-                  'flex gap-2 items-center max-h-18',
-                  isInputDefined ? 'border-r border-gray-50' : 'w-full justify-between',
-                  dropdownButtonClassName
+        <>
+          <div ref={ref as unknown as React.RefObject<HTMLDivElement>} {...setTestID(testIds?.dropdownTestId)}>
+            {opened && searchProps ? (
+              <SelectSearch {...searchProps} className={dropdownButtonClassName} />
+            ) : (
+              <div
+                className={merge(
+                  'box-border w-full flex items-center justify-between border rounded-md border-gray-50 overflow-hidden max-h-18',
+                  fontContentWrapperClassname
                 )}
-                onClick={() => {
-                  toggleOpened();
-                  trackDropdownClick();
-                }}
               >
-                {DropdownFaceContent}
-                <ChevronDownIcon className="text-white stroke-current stroke-2 h-4 w-4" />
-              </button>
-              {Input}
-            </div>
-          )}
-        </div>
+                <button
+                  type="button"
+                  className={classNames(
+                    'flex gap-2 items-center max-h-18',
+                    isInputDefined ? 'border-r border-gray-50' : 'w-full justify-between',
+                    dropdownButtonClassName
+                  )}
+                  onClick={() => {
+                    toggleOpened();
+                    trackDropdownClick();
+                  }}
+                >
+                  {DropdownFaceContent}
+                  <ChevronDownIcon className="text-white stroke-current stroke-2 h-4 w-4" />
+                </button>
+                {Input}
+              </div>
+            )}
+          </div>
+
+          {opened && extraHeight && <div style={{ height: extraHeight > 0 ? extraHeight : 0, visibility: 'hidden' }} />}
+        </>
       )}
     </Popper>
   );

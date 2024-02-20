@@ -23,13 +23,11 @@ import { ReactComponent as CoffeeIcon } from 'app/icons/coffee.svg';
 import { ReactComponent as CupIcon } from 'app/icons/cup.svg';
 import { ReactComponent as RocketIcon } from 'app/icons/rocket.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
-import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { TID, toLocalFixed, T, t } from 'lib/i18n';
 import { useGasToken } from 'lib/temple/front';
 
 import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
-import { InputContainer } from '../InputContainer/InputContainer';
 import { AdditionalFeeInputSelectors } from './AdditionalFeeInput.selectors';
 
 type AssetFieldProps = typeof AssetField extends ForwardRefExoticComponent<infer T> ? T : never;
@@ -39,6 +37,7 @@ type AdditionalFeeInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'co
   baseFee?: BigNumber | Error;
   error?: FieldError;
   id: string;
+  extraHeight?: number;
 };
 
 type FeeOption = {
@@ -79,7 +78,7 @@ const feeOptions: FeeOption[] = [
 const getFeeOptionId = (option: FeeOption) => option.type;
 
 const AdditionalFeeInput: FC<AdditionalFeeInputProps> = props => {
-  const { assetSymbol, baseFee, control, id, name, onChange } = props;
+  const { assetSymbol, baseFee, control, id, name, onChange, extraHeight = 0 } = props;
   const { trackEvent } = useAnalytics();
 
   const customFeeInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +100,7 @@ const AdditionalFeeInput: FC<AdditionalFeeInputProps> = props => {
       customFeeInputRef={customFeeInputRef}
       onChange={handleChange}
       id={id}
+      extraHeight={extraHeight}
       assetSymbol={assetSymbol}
       onFocus={focusCustomFeeInput}
       label={t('networkFee')}
@@ -125,6 +125,7 @@ export default AdditionalFeeInput;
 
 type AdditionalFeeInputContentProps = AssetFieldProps & {
   customFeeInputRef: MutableRefObject<HTMLInputElement | null>;
+  extraHeight?: number;
 };
 
 const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
@@ -138,6 +139,7 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
     label,
     labelDescription,
     value,
+    extraHeight = 0,
     ...restProps
   } = props;
 
@@ -177,6 +179,7 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
           dropdownWrapperClassName="border-none rounded-2xl-plus"
           dropdownButtonClassName="px-4 py-14px"
           DropdownFaceContent={<FeeOptionFace {...selectedFeeOption} />}
+          extraHeight={extraHeight}
           optionsProps={{
             options: feeOptions,
             noItemsText: 'No items',

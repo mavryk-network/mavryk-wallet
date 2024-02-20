@@ -45,6 +45,7 @@ export const FeeSection: React.FC<FeeComponentProps> = ({
         onChange={handleFeeFieldChange}
         assetSymbol={metadata.symbol}
         baseFee={baseFee}
+        extraHeight={150}
         error={error}
         id="send-fee"
       />

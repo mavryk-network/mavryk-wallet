@@ -2,6 +2,7 @@ import React, { FC, Suspense, useCallback, useMemo, useState } from 'react';
 
 import type { WalletOperation } from '@taquito/taquito';
 
+import { useOperationStatus } from 'app/hooks/use-operation-status';
 import AssetSelect from 'app/templates/AssetSelect/AssetSelect';
 import { IAsset } from 'app/templates/AssetSelect/interfaces';
 import { getSlug } from 'app/templates/AssetSelect/utils';
@@ -64,9 +65,25 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
     setAddContactModalAddress(null);
   }, [setAddContactModalAddress]);
 
+  const navigateProps = useMemo(
+    () => ({
+      pageTitle: 'stake',
+      btnText: 'goToMain',
+      contentId: 'hash',
+      // @ts-expect-error
+      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'send' },
+      subHeader: 'success'
+    }),
+    // @ts-expect-error
+    [operation?.hash, operation?.opHash]
+  );
+
+  // @ts-expect-error
+  useOperationStatus(operation, navigateProps);
+
   return (
     <>
-      {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />}
+      {/* {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />} */}
 
       <AssetSelect
         value={selectedAsset}

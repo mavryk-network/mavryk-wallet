@@ -3448,5 +3448,8 @@
   },
   "sendTo": {
     "message": "Send To"
+  },
+  "sendSuccessMsg": {
+    "message": "Send request sent!"
   }
 }

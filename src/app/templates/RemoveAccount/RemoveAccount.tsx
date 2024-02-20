@@ -73,7 +73,7 @@ const RemoveAccount: FC = () => {
 
       {account.type === TempleAccountType.HD ? (
         <Alert
-          title={t('cannotBeRemoved')}
+          title={`${t('attention')}!`}
           description={
             <p>
               <T id="accountsToRemoveConstraint" />

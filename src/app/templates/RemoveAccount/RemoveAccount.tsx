@@ -68,7 +68,6 @@ const RemoveAccount: FC = () => {
             <T id="ifYouWantToRemoveAnotherAccount" />
           </>
         }
-        className="mb-6"
       />
 
       {account.type === TempleAccountType.HD ? (

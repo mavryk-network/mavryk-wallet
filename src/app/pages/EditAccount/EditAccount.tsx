@@ -116,6 +116,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
     }
 
     await removeContact(accountHash);
+    goBack();
   }, [accountHash, confirm, isOwn, removeContact, setAccountPkh]);
 
   const handleEditFieldFocus = useCallback(() => {

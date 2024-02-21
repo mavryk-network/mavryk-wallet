@@ -454,26 +454,26 @@ export const SwapForm: FC = () => {
                 <InfoIcon className="w-3 h-auto stroke-2 stroke-white" />
               </span>
             </div>
-            <td className="text-right text-white">{ROUTING_FEE_PERCENT}%</td>
+            <div className="text-right text-white">{ROUTING_FEE_PERCENT}%</div>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <T id="exchangeRate" />
             </div>
-            <td className="text-right text-white">
+            <div className="text-right text-white">
               <SwapExchangeRate
                 inputAmount={swapParams.data.input !== undefined ? new BigNumber(swapParams.data.input) : undefined}
                 outputAmount={swapParams.data.output !== undefined ? new BigNumber(swapParams.data.output) : undefined}
                 inputAssetMetadata={inputAssetMetadata}
                 outputAssetMetadata={outputAssetMetadata}
               />
-            </td>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <T id="slippageTolerance" />
             </div>
-            <td className="justify-end text-white flex">
+            <div className="justify-end text-white flex">
               <Controller
                 control={control}
                 as={SlippageToleranceInput}
@@ -481,18 +481,18 @@ export const SwapForm: FC = () => {
                 name="slippageTolerance"
                 rules={{ validate: slippageToleranceInputValidationFn }}
               />
-            </td>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <T id="minimumReceived" />
             </div>
-            <td className="text-right text-white">
+            <div className="text-right text-white">
               <SwapMinimumReceived
                 minimumReceivedAmount={minimumReceivedAmountAtomic}
                 outputAssetMetadata={outputAssetMetadata}
               />
-            </td>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -502,7 +502,7 @@ export const SwapForm: FC = () => {
                 <InfoIcon className="w-3 h-auto stroke-2 stroke-white" />
               </span>
             </div>
-            <td className="text-right text-white">{SWAP_CASHBACK_PERCENT}%</td>
+            <div className="text-right text-white">{SWAP_CASHBACK_PERCENT}%</div>
           </div>
         </section>
       </div>

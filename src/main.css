@@ -126,8 +126,24 @@
   color: #f4f4f4;
 }
 
-.tippy-box[data-theme~='tomato'][data-placement^='right'] > .tippy-arrow::before {
-  background-color: #373479;
+/* Right placement tooltip arrow (arrow will be on left side of tooltip) */
+.tippy-box[data-theme~='maven'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #373479;
+}
+
+/* Left placement tooltip arrow (arrow will be on right side of tooltip) */
+.tippy-box[data-theme~='maven'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #373479;
+}
+
+/* Top placement tooltip arrow (arrow will be on bottom side of tooltip) */
+.tippy-box[data-theme~='maven'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #373479;
+}
+
+/* Bottom placement tooltip arrow (arrow will be on top side of tooltip) */
+.tippy-box[data-theme~='maven'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #373479;
 }
 
 /**

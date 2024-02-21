@@ -61,14 +61,14 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
 
   return (
     <>
-      {SLIPPAGE_PRESETS.map(preset => (
+      {/* {SLIPPAGE_PRESETS.map(preset => (
         <SlippageTolerancePresetButton
           key={preset}
           active={value === preset}
           value={preset}
           onClick={handlePresetClick}
         />
-      ))}
+      ))} */}
       <div className="relative" style={{ width: inputWidth }}>
         <span className="text-xs h-0 overflow-y-hidden absolute top-0 left-0" ref={contentCopyRef}>
           {customPercentageValue}
@@ -78,9 +78,8 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
           className={classNames('rounded-md border bg-opacity-0 -mb-2 text-right', borderClassName)}
           containerClassName="relative"
           style={{
-            padding: '0.09375rem 0.875rem 0.09375rem 0.25rem',
-            minWidth: 'unset',
-            fontSize: '0.75rem'
+            padding: '2px 0.975rem 2px 0.25rem',
+            minWidth: 'unset'
           }}
           name={name}
           ref={ref}
@@ -90,8 +89,8 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
           assetSymbol={
             <span
               className={classNames(
-                'absolute text-xs right-1 pointer-events-none',
-                assetFieldActive ? 'text-gray-700' : 'text-gray-600'
+                'absolute text-base-plus right-1 pointer-events-none',
+                assetFieldActive ? 'text-white' : 'text-secondary-white'
               )}
               style={{ top: '0.125rem' }}
             >

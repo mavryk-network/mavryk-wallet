@@ -108,10 +108,10 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
     trackChange({ [name]: assetMetadata.symbol }, { [name]: newAssetMetadata.symbol });
   };
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setTokenId(undefined);
-    setSearchValue(e.target.value);
-  };
+  // const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setTokenId(undefined);
+  //   setSearchValue(e.target.value);
+  // };
 
   const prettyError = useMemo(() => {
     if (!error) {
@@ -151,9 +151,12 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
             dropdownTestId: testIDs?.dropdown
           }}
           fontContentWrapperClassname="bg-primary-card max-h-66px border border-transparent rounded-xl"
-          dropdownButtonClassName={classNames('p-0 m-4 min-h-9 min-w-85', styles.extraFaceContentWrapper)}
+          dropdownButtonClassName={classNames(
+            'p-0 m-4 min-h-9 min-w-85 flex justify-between pr-4',
+            styles.extraFaceContentWrapper
+          )}
           dropdownWrapperClassName="border-none rounded-2xl-plus"
-          optionsListClassName="bg-primary-card"
+          optionsListClassName="bg-primary-card "
           DropdownFaceContent={
             <SwapDropdownFace
               testId={testIDs?.assetDropDownButton}

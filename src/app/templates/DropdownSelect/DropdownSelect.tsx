@@ -82,7 +82,7 @@ export const DropdownSelect = <T extends unknown>({
                   type="button"
                   className={classNames(
                     'flex gap-2 items-center max-h-18',
-                    isInputDefined ? 'border-r border-gray-50' : 'w-full justify-between',
+                    isInputDefined ? 'border-r border-divider' : 'w-full justify-between',
                     dropdownButtonClassName
                   )}
                   onClick={() => {
@@ -98,7 +98,7 @@ export const DropdownSelect = <T extends unknown>({
             )}
           </div>
 
-          {opened && extraHeight && <div style={{ height: extraHeight > 0 ? extraHeight : 0, visibility: 'hidden' }} />}
+          {opened && extraHeight > 0 ? <div style={{ height: extraHeight, visibility: 'hidden' }} /> : null}
         </>
       )}
     </Popper>

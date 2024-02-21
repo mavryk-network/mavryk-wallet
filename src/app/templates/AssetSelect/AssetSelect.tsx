@@ -89,7 +89,7 @@ const AssetSelectTitle: FC = () => (
   </h2>
 );
 
-const AssetFieldContent: FC<{ asset: IAsset }> = ({ asset }) => {
+export const AssetFieldContent: FC<{ asset: IAsset }> = ({ asset }) => {
   const account = useAccount();
   const assetSlug = getSlug(asset);
   const metadata = useAssetMetadata(assetSlug);
@@ -123,7 +123,7 @@ const AssetFieldContent: FC<{ asset: IAsset }> = ({ asset }) => {
   );
 };
 
-const AssetOptionContent: FC<{ asset: IAsset; selected: boolean }> = ({ asset, selected }) => {
+export const AssetOptionContent: FC<{ asset: IAsset; selected: boolean }> = ({ asset, selected }) => {
   const slug = getSlug(asset);
 
   return (

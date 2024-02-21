@@ -3451,5 +3451,8 @@
   },
   "sendSuccessMsg": {
     "message": "Send request sent!"
+  },
+  "token": {
+    "message": "Token"
   }
 }

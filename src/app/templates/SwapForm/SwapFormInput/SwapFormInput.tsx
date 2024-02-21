@@ -20,6 +20,7 @@ import { useAccount, useBalance, useGetTokenMetadata, useOnBlock } from 'lib/tem
 
 import { AssetOption } from './AssetsMenu/AssetOption';
 import { PercentageButton } from './PercentageButton/PercentageButton';
+import styles from './SwapFormInput.module.css';
 import { SwapFormInputProps } from './SwapFormInput.props';
 
 const EXCHANGE_XTZ_RESERVE = new BigNumber('0.3');
@@ -136,7 +137,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
         }
         footer={
           <div className={classNames('w-full flex items-center', prettyError ? 'justify-between' : 'justify-end')}>
-            {prettyError && <div className="text-red-700 text-xs">{prettyError}</div>}
+            {prettyError && <div className="text-primary-error text-xs">{prettyError}</div>}
             <SwapFooter
               amountInputDisabled={Boolean(amountInputDisabled)}
               selectedAssetSlug={assetSlugWithFallback}
@@ -149,7 +150,10 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
           testIds={{
             dropdownTestId: testIDs?.dropdown
           }}
-          dropdownButtonClassName="pl-4 pr-3 py-5"
+          fontContentWrapperClassname="bg-primary-card max-h-66px border border-transparent rounded-xl"
+          dropdownButtonClassName={classNames('p-0 m-4 min-h-9 min-w-85', styles.extraFaceContentWrapper)}
+          dropdownWrapperClassName="border-none rounded-2xl-plus"
+          optionsListClassName="bg-primary-card"
           DropdownFaceContent={
             <SwapDropdownFace
               testId={testIDs?.assetDropDownButton}
@@ -157,11 +161,6 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
               selectedAssetMetadata={assetMetadata}
             />
           }
-          searchProps={{
-            searchValue,
-            testId: testIDs?.searchInput,
-            onSearchChange: handleSearchChange
-          }}
           Input={
             <SwapInput
               testId={testIDs?.input}
@@ -193,18 +192,18 @@ interface SwapFieldProps {
 }
 
 const SwapDropdownFace: FC<SwapFieldProps> = ({ testId, selectedAssetSlug, selectedAssetMetadata }) => (
-  <div {...setTestID(testId)} className="max-h-18">
+  <div {...setTestID(testId)} className="max-h-66px">
     {selectedAssetSlug ? (
-      <div className="flex gap-2 align-center">
+      <div className="flex items-center gap-2 align-center">
         <AssetIcon assetSlug={selectedAssetSlug} size={32} className="w-8" />
-        <span className="text-gray-700 text-lg overflow-hidden w-16 leading-8 text-ellipsis">
+        <span className="text-white text-base-plus overflow-hidden leading-5 text-ellipsis">
           {selectedAssetMetadata.symbol}
         </span>
       </div>
     ) : (
-      <div className="w-24 mr-2 text-gray-500 text-sm font-medium leading-tight">
+      <div className="w-24 mr-2 text-secondary-white text-base-plus">
         <div className="w-12">
-          <T id="selectToken" />
+          <T id="token" />
         </div>
       </div>
     )}
@@ -231,8 +230,8 @@ const SwapInput: FC<SwapInputProps> = ({
   return (
     <div
       className={classNames(
-        'flex-1 px-2 flex items-center justify-between rounded-r-md h-18',
-        amountInputDisabled && 'bg-gray-100'
+        'flex-1 px-2 flex items-center justify-between rounded-r-md max-h-66px',
+        amountInputDisabled && 'bg-primary-card'
       )}
     >
       <div className="h-full flex-1 flex items-end justify-center flex-col">
@@ -240,7 +239,10 @@ const SwapInput: FC<SwapInputProps> = ({
           autoFocus
           testID={testId}
           value={amount?.toString()}
-          className="text-gray-700 text-2xl text-right border-none bg-opacity-0 pl-0 focus:shadow-none"
+          className={classNames(
+            'text-base-plus text-right border-none bg-opacity-0 pl-0 focus:shadow-none',
+            amount?.isEqualTo(0) ? 'text-secondary-white' : 'text-white'
+          )}
           style={{ padding: 0, borderRadius: 0 }}
           placeholder={toLocalFormat(0, { decimalPlaces: 2 })}
           min={0}
@@ -252,10 +254,10 @@ const SwapInput: FC<SwapInputProps> = ({
 
         <InFiat assetSlug={selectedAssetSlug} volume={selectedAssetSlug ? amount ?? 0 : 0} smallFractionFont={false}>
           {({ balance, symbol }) => (
-            <div className="text-gray-500 flex">
-              <span className="mr-1">≈</span>
-              {balance}
-              <span className="ml-1">{symbol}</span>
+            <div className="text-secondary-white flex text-sm">
+              <span>≈&nbsp;</span>
+              {balance}&nbsp;
+              <span>{symbol}</span>
             </div>
           )}
         </InFiat>
@@ -274,8 +276,8 @@ const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selecte
   useOnBlock(_ => balance.mutate());
 
   return (
-    <div className="w-full flex items-center justify-between">
-      <span className="text-xl text-gray-900">{label}</span>
+    <div className="w-full flex items-center justify-between mb-3">
+      <span className="text-base-plus text-white">{label}</span>
 
       {selectedAssetSlug && (
         <span className="text-xs text-gray-500 flex items-baseline">
@@ -283,7 +285,7 @@ const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selecte
             <T id="balance" />:
           </span>
           {balance.data && (
-            <span className={classNames('text-sm mr-1 text-gray-700', balance.data.eq(0) && 'text-red-700')}>
+            <span className={classNames('text-sm mr-1 text-secondary-white')}>
               <Money smallFractionFont={false} fiat={false}>
                 {balance.data}
               </Money>

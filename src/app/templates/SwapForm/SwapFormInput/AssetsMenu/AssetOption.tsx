@@ -24,15 +24,15 @@ export const AssetOption: FC<Props> = ({ assetSlug, selected }) => {
   return (
     <div
       className={classNames(
-        'py-3 px-2 w-full flex items-center rounded h-16',
-        selected ? 'bg-gray-200' : 'hover:bg-gray-100'
+        'flex items-center w-full p-4 h-14',
+        selected ? 'bg-gray-710' : 'bg-primary-card hover:bg-gray-710'
       )}
       {...setTestID(AssetsMenuSelectors.assetsMenuAssetItem)}
       {...setAnotherSelector('slug', assetSlug)}
     >
-      <AssetIcon assetSlug={assetSlug} size={32} className="mx-2" />
+      <AssetIcon assetSlug={assetSlug} className="mr-2" size={32} />
 
-      <AssetItemContent slug={assetSlug} metadata={assetMetadata} />
+      <AssetItemContent slug={assetSlug} />
     </div>
   );
 };

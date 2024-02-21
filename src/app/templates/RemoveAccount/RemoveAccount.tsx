@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
 
+import clsx from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
@@ -11,7 +12,6 @@ import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { RemoveAccountSelectors } from './RemoveAccount.selectors';
-import clsx from 'clsx';
 
 const SUBMIT_ERROR_TYPE = 'submit-error';
 

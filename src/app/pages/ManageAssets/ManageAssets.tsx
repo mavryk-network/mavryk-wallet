@@ -66,8 +66,6 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const balances = useBalancesWithDecimals();
   const address = account.publicKeyHash;
 
-  const initialLoading = useRef(true);
-
   const { availableAssets, assetsStatuses, isLoading, mutate } = useAvailableAssetsSlugs(
     assetType === AssetTypesEnum.Collectibles ? AssetTypesEnum.Collectibles : AssetTypesEnum.Tokens
   );
@@ -193,13 +191,6 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [filteredAssets.length, hiddenAssets.length, selectAll, selectAllHidden, selectedOption]
   );
 
-  useEffect(() => {
-    if (initialLoading.current && isLoading) {
-      initialLoading.current = false;
-    }
-  }, [isLoading]);
-
-  const loading = initialLoading.current;
   const noItemsSelected = !selectedAssets.length;
 
   return (
@@ -230,7 +221,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         <Divider ignoreParent color="bg-divider" className="mt-4" />
       </div>
 
-      {filteredAssets.length > 0 && !loading ? (
+      {filteredAssets.length > 0 ? (
         <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-base-plus">
           {filteredAssets.map((slug, i, arr) => {
             const last = i === arr.length - 1;
@@ -251,7 +242,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
           })}
         </div>
       ) : (
-        <LoadingComponent loading={loading} searchValue={searchValue} assetType={assetType} />
+        <LoadingComponent loading={isLoading} searchValue={searchValue} assetType={assetType} />
       )}
     </div>
   );

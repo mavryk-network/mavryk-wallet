@@ -21,14 +21,14 @@ export const Swap: FC = () => {
   }, []);
 
   return (
-    <PageLayout pageTitle={<PageTitle icon={<SwapIcon className="w-auto h-4 stroke-current" />} title={t('swap')} />}>
-      <div className="py-4">
+    <PageLayout isTopbarVisible={false} pageTitle={<>{t('swap')}</>}>
+      <div>
         <div className="w-full max-w-sm mx-auto">
           <Suspense fallback={null}>
             {network.type === 'main' ? (
               <SwapForm />
             ) : (
-              <p className="text-center text-sm">
+              <p className="text-center text-base-plus text-white">
                 <T id="noExchangersAvailable" />
               </p>
             )}

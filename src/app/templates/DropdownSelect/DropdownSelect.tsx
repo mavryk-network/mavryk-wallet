@@ -80,7 +80,7 @@ export const DropdownSelect = <T extends unknown>({
               >
                 <button
                   type="button"
-                  className={classNames(
+                  className={merge(
                     'flex gap-2 items-center max-h-18',
                     isInputDefined ? 'border-r border-divider' : 'w-full justify-between',
                     dropdownButtonClassName

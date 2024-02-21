@@ -1,15 +1,19 @@
-.listItemBorder {
+.listItemBorder,
+.listItemWithoutDivider {
   position: relative;
 }
-.listItemBorder:hover {
+.listItemBorder:hover,
+.listItemWithoutDivider:hover {
   outline: 2px solid #333;
 }
 
-.listItemBorder:hover::after {
+.listItemBorder:hover::after,
+.listItemWithoutDivider::after {
   border-bottom: none;
 }
 
-.listItemBorder::after {
+.listItemBorder::after,
+.listItemWithoutDivider ::after {
   content: '';
 
   width: calc(100% - 32px);
@@ -17,5 +21,12 @@
   position: absolute;
   left: 16px;
   bottom: 0;
+}
+
+.listItemBorder::after {
   border-bottom: 1px solid #333;
+}
+
+.listItemWithoutDivider::after {
+  border-bottom: 1px solid transparent;
 }

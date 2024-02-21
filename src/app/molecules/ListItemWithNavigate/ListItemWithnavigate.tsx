@@ -36,7 +36,7 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
     className: classNames(
       'p-4 flex items-center justify-between cursor-pointer hover:bg-primary-card-hover relative ',
       showDivider && 'hover:outline hover:outline-2 hover:outline-offset-2',
-      showDivider && !fullWidthDivider && styles.listItemBorder,
+      !fullWidthDivider && (showDivider ? styles.listItemBorder : styles.listItemWithoutDivider),
       showDivider && fullWidthDivider && 'border-b border-divider',
       className
     ),

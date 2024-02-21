@@ -74,12 +74,12 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         showDivider: false
       }
     ],
-    [closePopup, handleMaximiseViewClick]
+    [closePopup, handleMaximiseViewClick, publicKeyHash]
   );
   return (
     <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
-        <ListItemWithNavigate {...item} fullWidthDivider />
+        <ListItemWithNavigate {...item} />
       ))}
     </div>
   );

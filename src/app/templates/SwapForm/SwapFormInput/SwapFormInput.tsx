@@ -246,6 +246,7 @@ const SwapInput: FC<SwapInputProps> = ({
           style={{ padding: 0, borderRadius: 0 }}
           placeholder={toLocalFormat(0, { decimalPlaces: 2 })}
           min={0}
+          max={9999999999999}
           disabled={amountInputDisabled}
           assetDecimals={selectedAssetMetadata.decimals}
           fieldWrapperBottomMargin={false}
@@ -280,7 +281,7 @@ const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selecte
       <span className="text-base-plus text-white">{label}</span>
 
       {selectedAssetSlug && (
-        <span className="text-xs text-gray-500 flex items-baseline">
+        <span className="text-sm text-secondary-white flex items-baseline">
           <span className="mr-1">
             <T id="balance" />:
           </span>
@@ -308,7 +309,7 @@ const SwapFooter: FC<{
   useOnBlock(_ => balance.mutate());
 
   return amountInputDisabled ? null : (
-    <div className="flex">
+    <div className="flex mt-2">
       {PERCENTAGE_BUTTONS.map(percentage => (
         <PercentageButton
           disabled={!balance.data}

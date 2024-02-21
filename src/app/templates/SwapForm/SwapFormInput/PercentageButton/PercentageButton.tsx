@@ -18,8 +18,8 @@ export const PercentageButton: FC<Props> = ({ percentage, onClick, disabled }) =
       disabled={disabled}
       type="button"
       className={classNames(
-        'border border-gray-300 text-gray-500 rounded-md ml-1',
-        'h-5 w-8 flex justify-center items-center leading-tight'
+        'border border-divider text-secondary-white rounded-md ml-1',
+        'text-xs p-0.5 flex justify-center items-center'
       )}
       onClick={handleClick}
     >

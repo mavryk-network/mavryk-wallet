@@ -408,9 +408,9 @@ export const SwapForm: FC = () => {
         noItemsText={t('noItemsWithPositiveBalance')}
       />
 
-      <div className="w-full my-4 flex justify-center">
+      <div className="w-full my-6 flex justify-center">
         <button onClick={handleToggleIconClick} type="button" {...setTestID(SwapFormSelectors.swapPlacesButton)}>
-          <ToggleIcon className="w-6 h-auto stroke-2 stroke-current text-blue-500" />
+          <ToggleIcon className="w-6 h-auto stroke-2 stroke-current text-accent-blue" />
         </button>
       </div>
 

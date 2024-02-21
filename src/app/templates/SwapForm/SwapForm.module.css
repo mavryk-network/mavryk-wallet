@@ -39,6 +39,6 @@
   filter: grayscale(100%);
 }
 
-.swap-form-table {
-  border-spacing: 0.5rem;
+.swapTableRow > td {
+  padding-bottom: 12px;
 }

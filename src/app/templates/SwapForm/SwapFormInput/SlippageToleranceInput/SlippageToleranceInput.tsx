@@ -1,11 +1,11 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
 import AssetField from 'app/atoms/AssetField';
+import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 
 import { MAX_SLIPPAGE_TOLERANCE_PERCENT } from './SlippageToleranceInput.validation';
-import { SlippageTolerancePresetButton } from './SlippageTolerancePresetButton/SlippageTolerancePresetButton';
 
 interface Props {
   name: string;
@@ -60,20 +60,10 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
   }, [customPercentageValue]);
 
   return (
-    <>
-      {/* {SLIPPAGE_PRESETS.map(preset => (
-        <SlippageTolerancePresetButton
-          key={preset}
-          active={value === preset}
-          value={preset}
-          onClick={handlePresetClick}
-        />
-      ))} */}
-      <div className="relative" style={{ width: inputWidth }}>
-        <span className="text-xs h-0 overflow-y-hidden absolute top-0 left-0" ref={contentCopyRef}>
-          {customPercentageValue}
-        </span>
-
+    <DropdownSelect
+      dropdownWrapperClassName="border-none rounded-2xl-plus"
+      optionsListClassName="bg-primary-card "
+      DropdownFaceContent={
         <AssetField
           className={classNames('rounded-md border bg-opacity-0 -mb-2 text-right', borderClassName)}
           containerClassName="relative"
@@ -101,7 +91,27 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
           assetDecimals={2}
           onChange={handleCustomPercentageChange}
         />
-      </div>
-    </>
+      }
+      optionsProps={{
+        options: SLIPPAGE_PRESETS,
+        getKey: option => String(option),
+        noItemsText: 'No Items',
+        renderOptionContent: option => renderOptionContent(option, value === option),
+        onOptionChange: handlePresetClick
+      }}
+    />
   );
 });
+
+const renderOptionContent = (percentage: number, selected: boolean) => {
+  return (
+    <div
+      className={classNames(
+        'p-4 hover:bg-gray-710 text-base-plus text-white',
+        selected ? 'bg-gray-710' : 'bg-primary-card'
+      )}
+    >
+      {percentage}%
+    </div>
+  );
+};

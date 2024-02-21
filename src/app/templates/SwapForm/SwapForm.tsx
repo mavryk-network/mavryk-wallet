@@ -74,11 +74,13 @@ export const SwapForm: FC = () => {
   const { handleSubmit, errors, watch, setValue, control, register, triggerValidation } = useForm<SwapFormValue>({
     defaultValues
   });
-  const isValid = Object.keys(errors).length === 0;
 
-  const inputValue = watch('input');
-  const outputValue = watch('output');
+  const inputValue = watch('input') ?? { assetSlug: undefined, amount: 0 };
+  const outputValue = watch('output') ?? { assetSlug: undefined, amount: 0 };
   const slippageTolerance = watch('slippageTolerance');
+
+  const isFormBtnDisabled =
+    !inputValue?.assetSlug || !outputValue?.assetSlug || !inputValue?.amount || !outputValue.amount;
 
   const fromRoute3Token = useSwapTokenSelector(inputValue.assetSlug ?? '');
   const toRoute3Token = useSwapTokenSelector(outputValue.assetSlug ?? '');
@@ -433,11 +435,8 @@ export const SwapForm: FC = () => {
 
       <FormSubmitButton
         className="w-full justify-center border-none mb-6"
-        style={{
-          padding: '10px 2rem',
-          background: isValid && !isAlertVisible ? '#4299e1' : '#c2c2c2'
-        }}
         loading={isSubmitting || swapParams.isLoading}
+        disabled={isFormBtnDisabled || isSubmitting || swapParams.isLoading}
         keepChildrenWhenLoading={swapParams.isLoading}
         onClick={handleSubmitButtonClick}
         testID={SwapFormSelectors.swapButton}

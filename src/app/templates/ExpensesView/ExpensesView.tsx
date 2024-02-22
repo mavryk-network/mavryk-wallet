@@ -285,11 +285,11 @@ const OperationVolumeDisplay = memo<OperationVolumeDisplayProps>(({ expense, vol
       </span>
 
       {expense?.assetSlug && (
-        <InFiat volume={finalVolume || 0} assetSlug={expense.assetSlug} mainnet={mainnet}>
+        <InFiat volume={finalVolume || 0} assetSlug={expense.assetSlug} mainnet={mainnet} smallFractionFont={false}>
           {({ balance, symbol }) => (
             <div className="text-xs text-secondary-white flex items-baseline">
               (≈ {balance}
-              <span className="mr-px">{symbol}</span>)
+              <span className="mr-px">&nbsp;{symbol}</span>)
             </div>
           )}
         </InFiat>

@@ -49,15 +49,6 @@ export const FeeSection: React.FC<FeeComponentProps> = ({
         error={error}
         id="send-fee"
       />
-
-      <FormSubmitButton
-        loading={isSubmitting}
-        disabled={Boolean(estimationError)}
-        testID={SendFormSelectors.sendButton}
-        className="mt-6"
-      >
-        <T id="send" />
-      </FormSubmitButton>
     </>
   );
 };

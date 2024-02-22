@@ -10,7 +10,7 @@ type SendProps = {
 
 const Send: FC<SendProps> = ({ assetSlug }) => (
   <PageLayout isTopbarVisible={false} pageTitle={<>{t('send')}</>}>
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full max-w-sm mx-auto min-h-full flex flex-col">
       <SendForm assetSlug={assetSlug} />
     </div>
   </PageLayout>

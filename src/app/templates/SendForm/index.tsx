@@ -65,7 +65,7 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
 
   const navigateProps = useMemo(
     () => ({
-      pageTitle: 'stake',
+      pageTitle: 'send',
       btnText: 'goToMain',
       contentId: 'hash',
       // @ts-expect-error

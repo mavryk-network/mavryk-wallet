@@ -16,7 +16,7 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
 
-import { NoSpaceField } from 'app/atoms';
+import { FormSubmitButton, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import Identicon from 'app/atoms/Identicon';
 import Money from 'app/atoms/Money';
@@ -438,7 +438,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 
   return (
-    <form className="min-h-96 pb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="min-h-96 pb-8 flex flex-col flex-grow" onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="to"
         as={
@@ -584,6 +584,16 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           isSubmitting={formState.isSubmitting}
         />
       )}
+      <div className="flex-1" />
+
+      <FormSubmitButton
+        loading={formState.isSubmitting}
+        disabled={Boolean(estimationError) || estimateFallbackDisplayed || formState.isSubmitting || !filledContact}
+        testID={SendFormSelectors.sendButton}
+        className="mt-6"
+      >
+        <T id="send" />
+      </FormSubmitButton>
     </form>
   );
 };

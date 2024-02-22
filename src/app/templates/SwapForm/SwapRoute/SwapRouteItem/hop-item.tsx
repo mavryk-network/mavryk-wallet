@@ -39,7 +39,12 @@ export const HopItem: FC<Props> = ({ dex, aToken, bToken, className }) => {
   });
 
   return (
-    <div className={classNames(className, 'flex items-center p-2 border border-divider rounded-lg bg-primary-bg')}>
+    <div
+      className={classNames(
+        className,
+        'flex items-center p-1 border border-divider rounded-lg bg-primary-bg max-w-19 max-h-9'
+      )}
+    >
       <div ref={dexInfoDivRef} className="max-w-6 max-h-6 rounded-full overflow-hidden">
         <DexTypeIcon dexType={dex?.type ?? null} />
       </div>

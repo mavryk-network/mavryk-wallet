@@ -3454,5 +3454,8 @@
   },
   "token": {
     "message": "Token"
+  },
+  "useMax": {
+    "message": "Use Max"
   }
 }

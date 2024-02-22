@@ -534,16 +534,16 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           labelDescription={
             restFormDisplayed &&
             maxAmount && (
-              <div className="flex items-center">
+              <div className="flex items-center w-full">
                 <T id="availableToSend" />
-                <button type="button" onClick={handleSetMaxAmount}>
+                <span>
                   &nbsp;
                   {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
                   {toLocalFixed(maxAmount)}
-                </button>
-                <span className="text-accent-blue">
+                </span>
+                <span onClick={handleSetMaxAmount} className="text-accent-blue cursor-pointer ml-auto">
                   &nbsp;
-                  <T id="send" />
+                  <T id="useMax" />
                 </span>
               </div>
             )

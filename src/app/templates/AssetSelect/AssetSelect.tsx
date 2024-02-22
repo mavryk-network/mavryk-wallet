@@ -65,7 +65,7 @@ const AssetSelect: FC<AssetSelectProps> = ({ value, assets, onChange, className,
         testIds={{ dropdownTestId: testIDs?.main }}
         dropdownButtonClassName="p-4 bg-primary-card h-66px"
         fontContentWrapperClassname="border border-transparent rounded-xl"
-        dropdownWrapperClassName="border-none rounded-2xl-plus"
+        dropdownWrapperClassName="border-none rounded-2xl-plus max-h-80"
         optionsListClassName="bg-primary-card"
         optionsProps={{
           options: searchedOptions,

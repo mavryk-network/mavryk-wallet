@@ -169,7 +169,7 @@ const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
         <label className="flex flex-col mb-4 leading-tight" htmlFor={`${id}-select`}>
           <span className="text-base-plus text-white">{label}</span>
 
-          {labelDescription && <span className="mt-1 text-sm text-secondary-white max-w-9/10">{labelDescription}</span>}
+          {labelDescription && <span className="mt-1 text-sm text-secondary-white">{labelDescription}</span>}
         </label>
       ) : null}
 

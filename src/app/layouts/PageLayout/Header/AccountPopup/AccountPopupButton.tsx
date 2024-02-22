@@ -25,6 +25,7 @@ export type AccountButtonProps = {
   iconSize?: number;
   account: TempleAccount;
   onlyAccSelect?: boolean;
+  showDropDownIcon?: boolean;
 };
 
 export enum AccountSelectors {
@@ -36,7 +37,8 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   account,
   child,
   iconSize = 24,
-  onlyAccSelect = false
+  onlyAccSelect = false,
+  showDropDownIcon = true
 }) => {
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
@@ -67,7 +69,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
           onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}
         >
           <Name className="text-primary-white text-base-plus">{account.name}</Name>
-          <ArrowDownicon className="stroke stroke-2 stroke-white w-4 h-auto ml-1" />
+          {showDropDownIcon && <ArrowDownicon className="stroke stroke-2 stroke-white w-4 h-auto ml-1" />}
         </div>
         {child && child}
       </div>

@@ -16,46 +16,50 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
   label?: ReactNode;
   labelDescription?: ReactNode;
   labelIndent?: 'sm' | 'md';
+  showDropDownIcon?: boolean;
 };
 
-const AccountBanner = memo<AccountBannerProps>(({ account, displayBalance = true, networkRpc, className }) => {
-  const { metadata } = useGasToken();
+const AccountBanner = memo<AccountBannerProps>(
+  ({ account, displayBalance = true, showDropDownIcon = true, networkRpc, className }) => {
+    const { metadata } = useGasToken();
 
-  return (
-    <div className={classNames('flex flex-col', className)}>
-      <div className="w-full flex items-center justify-between pb-4 border-b bordeer-divider">
-        <div className=" flex items-center">
-          <AccountPopupButton
-            account={account}
-            iconSize={32}
-            onlyAccSelect
-            child={
-              <div className="flex items-center mt-1">
-                <div className="text-xs leading-none text-gray-700">
-                  <HashChip hash={account.publicKeyHash} small />
+    return (
+      <div className={classNames('flex flex-col', className)}>
+        <div className="w-full flex items-center justify-between pb-4 border-b bordeer-divider">
+          <div className=" flex items-center">
+            <AccountPopupButton
+              account={account}
+              iconSize={32}
+              onlyAccSelect
+              showDropDownIcon={showDropDownIcon}
+              child={
+                <div className="flex items-center mt-1">
+                  <div className="text-xs leading-none text-gray-700">
+                    <HashChip hash={account.publicKeyHash} small />
+                  </div>
                 </div>
-              </div>
-            }
-          />
+              }
+            />
+          </div>
+
+          {displayBalance && (
+            <>
+              <Balance address={account.publicKeyHash} networkRpc={networkRpc}>
+                {bal => (
+                  <div className="ml-2 text-base-plus flex items-baseline text-white">
+                    <Money>{bal}</Money>
+                    <span className="ml-1" style={{ fontSize: '0.75em' }}>
+                      {metadata.symbol}
+                    </span>
+                  </div>
+                )}
+              </Balance>
+            </>
+          )}
         </div>
-
-        {displayBalance && (
-          <>
-            <Balance address={account.publicKeyHash} networkRpc={networkRpc}>
-              {bal => (
-                <div className="ml-2 text-base-plus flex items-baseline text-white">
-                  <Money>{bal}</Money>
-                  <span className="ml-1" style={{ fontSize: '0.75em' }}>
-                    {metadata.symbol}
-                  </span>
-                </div>
-              )}
-            </Balance>
-          </>
-        )}
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default AccountBanner;

@@ -155,7 +155,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
             'p-0 m-4 min-h-9 min-w-85 flex justify-between pr-4',
             styles.extraFaceContentWrapper
           )}
-          dropdownWrapperClassName="border-none rounded-2xl-plus"
+          dropdownWrapperClassName="border-none rounded-2xl-plus max-h-44"
           optionsListClassName="bg-primary-card "
           DropdownFaceContent={
             <SwapDropdownFace

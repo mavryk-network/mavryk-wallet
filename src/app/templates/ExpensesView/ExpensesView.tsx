@@ -215,23 +215,25 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
         </div>
 
         <div className="flex items-end flex-shrink-0 flex-wrap text-secondary-white">
-          {item.expenses
-            .filter(expense => new BigNumber(expense.amount).isGreaterThan(0))
-            .map((expense, index, arr) => (
-              <span key={index}>
-                <OperationVolumeDisplay
-                  expense={expense}
-                  volume={item.amount}
-                  withdrawal={withdrawal}
-                  mainnet={mainnet}
-                />
-                {index === arr.length - 1 ? null : ',\u00a0'}
-              </span>
-            ))}
+          <div className="flex items-center gap-1">
+            {item.expenses
+              .filter(expense => new BigNumber(expense.amount).isGreaterThan(0))
+              .map((expense, index, arr) => (
+                <span key={index}>
+                  <OperationVolumeDisplay
+                    expense={expense}
+                    volume={item.amount}
+                    withdrawal={withdrawal}
+                    mainnet={mainnet}
+                  />
+                  {index === arr.length - 1 ? null : ',\u00a0'}
+                </span>
+              ))}
 
-          {item.expenses.length === 0 && item.amount && new BigNumber(item.amount).isGreaterThan(0) ? (
-            <OperationVolumeDisplay volume={item.amount!} mainnet={mainnet} />
-          ) : null}
+            {item.expenses.length === 0 && item.amount && new BigNumber(item.amount).isGreaterThan(0) ? (
+              <OperationVolumeDisplay volume={item.amount!} mainnet={mainnet} />
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -273,10 +275,10 @@ const OperationVolumeDisplay = memo<OperationVolumeDisplayProps>(({ expense, vol
   const finalVolume = expense ? expense.amount.div(10 ** (metadata?.decimals || 0)) : volume;
 
   return (
-    <>
-      <span className="text-sm flex items-center">
+    <div className="flex items-center gap-1">
+      <span className="text-sm text-white flex items-center">
         {/* {withdrawal && "-"} */}
-        <span className="font-medium">
+        <span>
           <Money>{finalVolume || 0}</Money>
         </span>
         <span className="ml-1">{getAssetSymbol(metadata, true)}</span>
@@ -285,13 +287,13 @@ const OperationVolumeDisplay = memo<OperationVolumeDisplayProps>(({ expense, vol
       {expense?.assetSlug && (
         <InFiat volume={finalVolume || 0} assetSlug={expense.assetSlug} mainnet={mainnet}>
           {({ balance, symbol }) => (
-            <div className="text-xs text-gray-500 ml-1 flex items-baseline">
-              ({balance}
+            <div className="text-xs text-secondary-white flex items-baseline">
+              (≈ {balance}
               <span className="mr-px">{symbol}</span>)
             </div>
           )}
         </InFiat>
       )}
-    </>
+    </div>
   );
 });

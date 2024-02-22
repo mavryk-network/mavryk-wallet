@@ -2,8 +2,7 @@ import React, { FC } from 'react';
 
 import Money from 'app/atoms/Money';
 import Balance from 'app/templates/Balance';
-import InFiat from 'app/templates/InFiat';
-import { AssetMetadataBase, useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
+import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 
 interface Props {

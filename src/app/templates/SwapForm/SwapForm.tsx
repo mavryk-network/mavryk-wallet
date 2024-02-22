@@ -45,7 +45,6 @@ import { HistoryAction, navigate } from 'lib/woozie';
 
 import { SwapExchangeRate } from './SwapExchangeRate/SwapExchangeRate';
 import { SwapFormValue, SwapInputValue, useSwapFormDefaultValue } from './SwapForm.form';
-import styles from './SwapForm.module.css';
 import { SwapFormSelectors, SwapFormFromInputSelectors, SwapFormToInputSelectors } from './SwapForm.selectors';
 import { cashbackInfoTippyProps, feeInfoTippyProps } from './SwapForm.tippy';
 import { SlippageToleranceInput } from './SwapFormInput/SlippageToleranceInput/SlippageToleranceInput';

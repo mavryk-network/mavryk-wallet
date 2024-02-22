@@ -18,13 +18,10 @@ import { Controller, FieldError, useForm } from 'react-hook-form';
 
 import { FormSubmitButton, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
-import Identicon from 'app/atoms/Identicon';
-import Money from 'app/atoms/Money';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
-import Balance from 'app/templates/Balance';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
 import { isTezAsset, toPenny } from 'lib/assets';

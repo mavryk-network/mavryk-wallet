@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, ReactNode, useMemo } from 'react';
+import React, { FC, ReactNode, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
@@ -60,7 +60,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
   useOnBlock(_ => balance.mutate());
 
   const { isLoading, route3tokensSlugs } = useAvailableRoute3TokensSlugs();
-  const { filteredAssets, searchValue, setSearchValue, setTokenId } = useFilteredAssetsSlugs(
+  const { filteredAssets, setSearchValue, setTokenId } = useFilteredAssetsSlugs(
     route3tokensSlugs,
     name === 'input',
     LEADING_ASSETS

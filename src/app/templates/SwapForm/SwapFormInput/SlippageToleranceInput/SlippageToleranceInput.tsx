@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -17,9 +17,8 @@ interface Props {
 
 const SLIPPAGE_PRESETS = [0.25, 0.5, 0.75];
 
-export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ name, value, error, onChange }, ref) => {
+export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ name, value, onChange }, ref) => {
   const [customPercentageValue, setCustomPercentageValue] = useState<number>();
-  const [inputWidth, setInputWidth] = useState(40);
   const contentCopyRef = useRef<HTMLDivElement | null>(null);
 
   const handlePresetClick = useCallback(
@@ -39,7 +38,7 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
     [onChange]
   );
 
-  const assetFieldActive = !value || !SLIPPAGE_PRESETS.includes(value);
+  // const assetFieldActive = !value || !SLIPPAGE_PRESETS.includes(value);
 
   // const borderClassName = useMemo(() => {
   //   switch (true) {
@@ -55,8 +54,6 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
   useEffect(() => {
     const contentCopyElement = contentCopyRef.current;
     if (contentCopyElement) {
-      const contentWidth = Math.max(40, contentCopyElement.getBoundingClientRect().width + 20);
-      setInputWidth(contentWidth);
     }
   }, [customPercentageValue]);
 

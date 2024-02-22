@@ -30,7 +30,7 @@ export const usePushNotifications = () => {
             setFcmToken(token);
           }
 
-          await trackEvent('PUSH_NOTIFICATIONS_ENABLED', AnalyticsEventCategory.General);
+          // await trackEvent('PUSH_NOTIFICATIONS_ENABLED', AnalyticsEventCategory.General);
         }
       });
     }

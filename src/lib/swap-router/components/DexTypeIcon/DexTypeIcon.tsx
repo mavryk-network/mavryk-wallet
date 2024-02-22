@@ -24,28 +24,28 @@ export const DexTypeIcon: FC<Props> = ({ dexType }) => {
     case Route3DexTypeEnum.QuipuSwapTokenToToken:
     case Route3DexTypeEnum.QuipuSwapTokenToTokenStable:
     case Route3DexTypeEnum.QuipuSwapV3:
-      return <QuipuSwapIcon height={20} width={20} />;
+      return <QuipuSwapIcon height={24} width={24} />;
     case Route3DexTypeEnum.PlentyCtezStable:
     case Route3DexTypeEnum.PlentyTokenToToken:
     case Route3DexTypeEnum.PlentyTokenToTokenStable:
     case Route3DexTypeEnum.PlentyTokenToTokenVolatile:
     case Route3DexTypeEnum.PlentyWrappedTokenBridgeSwap:
-      return <PlentyIcon height={20} width={20} />;
+      return <PlentyIcon height={24} width={24} />;
     case Route3DexTypeEnum.FlatYouvesStable:
     case Route3DexTypeEnum.FlatYouvesStableUXTZ:
       return <YouvesIcon />;
     case Route3DexTypeEnum.VortexTokenToTokenFa12:
     case Route3DexTypeEnum.VortexTokenToTokenFa2:
-      return <VortexIcon height={20} width={20} />;
+      return <VortexIcon height={24} width={24} />;
     case Route3DexTypeEnum.SpicyTokenToToken:
-      return <SpicyIcon height={20} width={20} />;
+      return <SpicyIcon height={24} width={24} />;
     case Route3DexTypeEnum.CtezToXtz:
-      return <CtezIcon height={20} width={20} />;
+      return <CtezIcon height={24} width={24} />;
     case Route3DexTypeEnum.DexterLb:
-      return <img src={DexterLogoSrc} height={20} width={20} alt="Dexter logo" />;
+      return <img src={DexterLogoSrc} height={24} width={24} alt="Dexter logo" />;
     case Route3DexTypeEnum.WTZSwap:
     case Route3DexTypeEnum.wTEZSwap:
-      return <img src={WtzLogoSrc} height={20} width={20} alt="Dexter logo" />;
+      return <img src={WtzLogoSrc} height={24} width={24} alt="Dexter logo" />;
 
     default:
       return <AssetIcon assetSlug="" size={24} />;

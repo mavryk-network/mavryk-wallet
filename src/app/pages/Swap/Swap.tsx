@@ -9,8 +9,6 @@ import { SwapForm } from 'app/templates/SwapForm/SwapForm';
 import { t, T } from 'lib/i18n';
 import { useNetwork } from 'lib/temple/front';
 
-import { PageTitle } from '../../atoms/PageTitle';
-
 export const Swap: FC = () => {
   const dispatch = useDispatch();
 

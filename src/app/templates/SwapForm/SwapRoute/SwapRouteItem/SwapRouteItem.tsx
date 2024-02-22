@@ -40,8 +40,8 @@ export const SwapRouteItem: FC<Props> = ({ chain, baseInput, baseOutput }) => {
         <Separator />
       </div>
       <div className="z-10">
-        <div className="text-gray-600">{new BigNumber(chain.input).toFixed(AMOUNT_DECIMALS)}</div>
-        <div className="text-blue-500">{calculatePercentage(baseInput, chain.input)}%</div>
+        <div className="text-white text-sm">{new BigNumber(chain.input).toFixed(AMOUNT_DECIMALS)}</div>
+        <div className="text-accent-blue text-sm pt-2">{calculatePercentage(baseInput, chain.input)}%</div>
       </div>
       {chain.hops.map((hop, index) => {
         const dex = route3Dexes.find(dex => dex.id === hop.dex);
@@ -53,8 +53,8 @@ export const SwapRouteItem: FC<Props> = ({ chain, baseInput, baseOutput }) => {
       })}
 
       <div className="z-10">
-        <div className="text-right text-gray-600">{new BigNumber(chain.output).toFixed(AMOUNT_DECIMALS)}</div>
-        <div className="text-right text-blue-500">{calculatePercentage(baseOutput, chain.output)}%</div>
+        <div className="text-right text-white text-sm">{new BigNumber(chain.output).toFixed(AMOUNT_DECIMALS)}</div>
+        <div className="text-right text-accent-blue text-sm pt-2">{calculatePercentage(baseOutput, chain.output)}%</div>
       </div>
     </div>
   );

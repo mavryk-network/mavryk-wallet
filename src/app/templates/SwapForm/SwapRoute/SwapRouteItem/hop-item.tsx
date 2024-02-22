@@ -39,16 +39,24 @@ export const HopItem: FC<Props> = ({ dex, aToken, bToken, className }) => {
   });
 
   return (
-    <div className={classNames(className, 'flex items-center p-1 border border-gray-400 rounded-lg bg-white')}>
-      <div ref={dexInfoDivRef}>
+    <div className={classNames(className, 'flex items-center p-2 border border-divider rounded-lg bg-primary-bg')}>
+      <div ref={dexInfoDivRef} className="max-w-6 max-h-6 rounded-full overflow-hidden">
         <DexTypeIcon dexType={dex?.type ?? null} />
       </div>
       <div className="flex items-center ml-2">
         <div ref={tokenAInfoDivRef}>
-          <AssetIcon assetSlug={toAssetSlugLocal(aToken)} size={20} />
+          <AssetIcon
+            assetSlug={toAssetSlugLocal(aToken)}
+            size={20}
+            className="max-w-5 max-h-5 rounded-full overflow-hidden"
+          />
         </div>
         <div ref={tokenBInfoDivRef} style={{ marginLeft: -8 }}>
-          <AssetIcon assetSlug={toAssetSlugLocal(bToken)} size={20} />
+          <AssetIcon
+            assetSlug={toAssetSlugLocal(bToken)}
+            size={20}
+            className="max-w-5 max-h-5 rounded-full overflow-hidden"
+          />
         </div>
       </div>
     </div>

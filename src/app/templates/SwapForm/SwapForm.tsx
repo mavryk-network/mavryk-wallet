@@ -519,7 +519,7 @@ export const SwapForm: FC = () => {
 
       <Divider className="my-6" color="bg-divider" />
 
-      <SwapRoute className="mb-4" />
+      <SwapRoute className="mb-8" />
     </form>
   );
 };

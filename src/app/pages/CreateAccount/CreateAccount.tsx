@@ -85,9 +85,9 @@ const CreateAccount: FC = () => {
   return (
     <PageLayout
       pageTitle={
-        <>
+        <span className="capitalize">
           <T id="createAccount" />
-        </>
+        </span>
       }
       isTopbarVisible={false}
     >

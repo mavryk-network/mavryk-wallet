@@ -12,27 +12,27 @@ export const usePushNotifications = () => {
   const [fcmToken, setFcmToken] = useLocalStorage<string | undefined>('fcmToken', undefined);
   const { trackEvent } = useAnalytics();
 
-  useEffect(() => {
-    if ('serviceWorker' in navigator && 'Notification' in window) {
-      initializeApp(JSON.parse(EnvVars.TEMPLE_FIREBASE_CONFIG));
-      const messaging = getMessaging();
+  // useEffect(() => {
+  //   if ('serviceWorker' in navigator && 'Notification' in window) {
+  //     initializeApp(JSON.parse(EnvVars.TEMPLE_FIREBASE_CONFIG));
+  //     const messaging = getMessaging();
 
-      Notification.requestPermission().then(async permission => {
-        if (permission === 'granted' && !fcmToken) {
-          const token = await getToken(messaging, {
-            vapidKey: EnvVars.TEMPLE_FIREBASE_MESSAGING_VAPID_KEY,
-            serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(
-              browser.runtime.getURL('background/index.js')
-            )
-          });
+  //     Notification.requestPermission().then(async permission => {
+  //       if (permission === 'granted' && !fcmToken) {
+  //         const token = await getToken(messaging, {
+  //           vapidKey: EnvVars.TEMPLE_FIREBASE_MESSAGING_VAPID_KEY,
+  //           serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(
+  //             browser.runtime.getURL('background/index.js')
+  //           )
+  //         });
 
-          if (token) {
-            setFcmToken(token);
-          }
+  //         if (token) {
+  //           setFcmToken(token);
+  //         }
 
-          // await trackEvent('PUSH_NOTIFICATIONS_ENABLED', AnalyticsEventCategory.General);
-        }
-      });
-    }
-  }, [trackEvent]);
+  //         // await trackEvent('PUSH_NOTIFICATIONS_ENABLED', AnalyticsEventCategory.General);
+  //       }
+  //     });
+  //   }
+  // }, [trackEvent]);
 };

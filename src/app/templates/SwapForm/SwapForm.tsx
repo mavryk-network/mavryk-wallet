@@ -10,10 +10,10 @@ import { useDispatch } from 'react-redux';
 
 import { Alert, Divider, FormSubmitButton } from 'app/atoms';
 import { useBlockLevel } from 'app/hooks/use-block-level.hook';
+import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { useRoute3 } from 'app/hooks/use-route3.hook';
 import { ReactComponent as InfoIcon } from 'app/icons/info.svg';
 import { ReactComponent as ToggleIcon } from 'app/icons/toggle.svg';
-import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { useSelector } from 'app/store';
 import { loadSwapParamsAction, resetSwapParamsAction } from 'app/store/swap/actions';
 import { useSwapParamsSelector, useSwapTokenSelector, useSwapTokensSelector } from 'app/store/swap/selectors';
@@ -177,6 +177,22 @@ export const SwapForm: FC = () => {
     });
   }, [register]);
 
+  const successScreenProps = useMemo(
+    () => ({
+      pageTitle: 'swap',
+      btnText: 'goToMain',
+      contentId: 'hash',
+      // @ts-expect-error
+      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'swap' },
+      subHeader: 'success'
+    }),
+    // @ts-expect-error
+    [operation?.hash, operation?.opHash]
+  );
+
+  // @ts-expect-error
+  useOperationStatus(operation, successScreenProps);
+
   const onSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -294,15 +310,6 @@ export const SwapForm: FC = () => {
       setError(undefined);
       formAnalytics.trackSubmitSuccess(analyticsProperties);
       setOperation(batchOperation);
-
-      navigate<SuccessStateType>('/success', undefined, {
-        pageTitle: 'swap',
-        btnText: 'goToMain',
-        contentId: 'hash',
-        // @ts-expect-error
-        contentIdFnProps: { hash: batchOperation.opHash ?? batchOperation.hash, i18nKey: 'swap' },
-        subHeader: 'success'
-      });
     } catch (err: any) {
       if (err.message !== 'Declined') {
         setError(err);

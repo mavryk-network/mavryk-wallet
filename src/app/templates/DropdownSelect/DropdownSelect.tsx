@@ -139,7 +139,7 @@ const SelectOptions = <Type extends unknown>({
   return (
     <DropdownWrapper
       opened={opened}
-      className={classNames('origin-top overflow-x-hidden overflow-y-auto', dropdownWrapperClassName)}
+      className={classNames('origin-top overflow-x-hidden overflow-y-auto no-scrollbar', dropdownWrapperClassName)}
       style={{
         // maxHeight: '15.125rem',
         backgroundColor: '#010101',

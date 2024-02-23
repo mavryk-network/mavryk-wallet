@@ -8,7 +8,7 @@ import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
-import { useAccount } from 'lib/temple/front';
+import { useAccount, useTempleClient } from 'lib/temple/front';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -17,6 +17,11 @@ type SettingsPopupProps = {
 export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   const appEnv = useAppEnv();
   const { publicKeyHash } = useAccount();
+  const { lock } = useTempleClient();
+
+  const handleLogoutClick = useCallback(() => {
+    lock();
+  }, [lock]);
 
   const handleMaximiseViewClick = useCallback(() => {
     openInFullPage();
@@ -70,11 +75,11 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         linkTo: null,
         Icon: ExitSvgIcon,
         i18nKey: 'logout',
-        onClick: closePopup,
+        onClick: handleLogoutClick,
         showDivider: false
       }
     ],
-    [closePopup, handleMaximiseViewClick, publicKeyHash]
+    [closePopup, handleLogoutClick, handleMaximiseViewClick, publicKeyHash]
   );
   return (
     <div className="text-white mt-6 flex flex-col">

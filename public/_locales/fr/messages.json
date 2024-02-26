@@ -1339,6 +1339,9 @@
   "activity": {
     "message": "Activité"
   },
+  "history": {
+    "message": "Activité"
+  },
   "manage": {
     "message": "Gérer"
   },

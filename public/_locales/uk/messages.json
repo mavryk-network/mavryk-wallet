@@ -1368,6 +1368,9 @@
   "activity": {
     "message": "Активність"
   },
+  "history": {
+    "message": "Активність"
+  },
   "manage": { "message": "Керувати" },
   "manageTokens": { "message": "Керувати Токенами" },
   "manageAssetsList": { "message": "Керувати Активами" },

@@ -1741,6 +1741,9 @@
   "activity": {
     "message": "Activity"
   },
+  "History": {
+    "message": "History"
+  },
   "manage": { "message": "Manage" },
   "manageTokens": { "message": "Manage Tokens" },
   "manageAssets": { "message": "Manage Assets" },

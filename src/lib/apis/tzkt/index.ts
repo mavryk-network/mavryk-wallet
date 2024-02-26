@@ -1,4 +1,5 @@
 export type {
+  TzktOperationBase,
   TzktOperation,
   TzktTokenTransfer,
   TzktRelatedContract,
@@ -6,7 +7,10 @@ export type {
   TzktAlias,
   TzktOperationType,
   TzktTransactionOperation,
-  TzktAccountToken
+  TzktAccountToken,
+  TzktDelegationOperation,
+  TzktRevealOperation,
+  TzktOriginationOperation
 } from './types';
 
 export type { TzktApiChainId } from './api';

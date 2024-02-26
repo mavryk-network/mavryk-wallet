@@ -1330,6 +1330,9 @@
   "activity": {
     "message": "活動"
   },
+  "history": {
+    "message": "活動"
+  },
   "manage": {
     "message": "管理"
   },

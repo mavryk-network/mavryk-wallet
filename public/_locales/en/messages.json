@@ -9,7 +9,7 @@
     "message": "🔐💰Cryptocurrency wallet for Tezos blockchain as Web Extension for your Browser."
   },
   "createAccount": {
-    "message": "Add account"
+    "message": "Add Account"
   },
   "importAccount": {
     "message": "Import account"

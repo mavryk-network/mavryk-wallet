@@ -87,7 +87,7 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
         value={selectedAsset}
         assets={assets}
         onChange={handleAssetChange}
-        className="mb-6"
+        className="mb-6 no-scrollbar"
         testIDs={{
           main: SendFormSelectors.assetDropDown,
           searchInput: SendFormSelectors.assetDropDownSearchInput

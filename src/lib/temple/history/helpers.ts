@@ -199,12 +199,14 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem) {
   const diffs: MoneyDiff[] = [];
 
   for (const oper of historyItem.operations) {
-    if (isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
+    if (!isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
     // @ts-ignore
     const assetSlug = oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }
+
+  console.log(diffs);
 
   return diffs;
 }

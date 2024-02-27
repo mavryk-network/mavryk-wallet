@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 
 import { HashChip } from 'app/atoms';
-import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import { TID, T } from 'lib/i18n';
 import {
   IndividualHistoryItem,
@@ -15,79 +14,6 @@ interface Props {
   item: IndividualHistoryItem;
   isTiny?: boolean;
 }
-
-// TODO delete this after transaction history update
-export const OperStackItem = memo<Props>(({ item }) => {
-  switch (item.opType) {
-    case HistoryItemOpTypeEnum.Delegation:
-      const opDelegate = item as HistoryItemDelegationOp;
-      return (
-        <StackItemBase
-          titleNode={<T id="delegation" />}
-          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
-        />
-      );
-
-    case HistoryItemOpTypeEnum.Origination:
-      return <StackItemBase titleNode={<T id="origination" />} />;
-
-    case HistoryItemOpTypeEnum.Interaction:
-      const opInteract = item as HistoryItemTransactionOp;
-      return (
-        <StackItemBase
-          titleNode={
-            <>
-              <ClipboardIcon className="mr-1 h-3 w-auto stroke-current" />
-              <T id="interaction" />
-            </>
-          }
-          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
-        />
-      );
-
-    case HistoryItemOpTypeEnum.TransferFrom:
-      const opFrom = item as HistoryItemTransactionOp;
-
-      return (
-        <StackItemBase
-          titleNode={
-            <>
-              ↓ <T id="transfer" />
-            </>
-          }
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
-        />
-      );
-
-    case HistoryItemOpTypeEnum.TransferTo:
-      const opTo = item as HistoryItemTransactionOp;
-      return (
-        <StackItemBase
-          titleNode={
-            <>
-              ↑ <T id="transfer" />
-            </>
-          }
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
-        />
-      );
-
-    // Other
-    default:
-      const opOther = item as HistoryItemOtherOp;
-
-      return (
-        <StackItemBase
-          titleNode={opOther.name
-            .split('_')
-            .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
-            .join(' ')}
-        />
-      );
-  }
-});
-
-// ---------------------------------
 
 export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;

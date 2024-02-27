@@ -3,85 +3,99 @@ import React, { useEffect, useState, useMemo, memo } from 'react';
 import classNames from 'clsx';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
-import { HashChip } from 'app/atoms';
+import { ListItemDivider } from 'app/atoms/Divider';
 import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
-import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { getDateFnsLocale } from 'lib/i18n';
 import { t } from 'lib/i18n/react';
+import { AssetMetadataBase, useAssetMetadata } from 'lib/metadata';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
 
-import { OperStack } from './OperStack';
+import { OperationStack } from './OperStack';
 
 interface Props {
   historyItem: UserHistoryItem;
   address: string;
+  last?: boolean;
+  slug?: string;
+  handleItemClick: (hash: string) => void;
 }
 
-export const HistoryItem = memo<Props>(({ historyItem, address }) => {
+export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
+  const tokenMetadata = useAssetMetadata(slug ?? '');
   const { hash, addedAt, status } = historyItem;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
 
   return (
-    <div className={classNames('my-3')}>
-      <div className="w-full flex items-center">
-        <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" />
-
-        <OpenInExplorerChip hash={hash} className="mr-2" small />
-
-        <div className={classNames('flex-1', 'h-px', 'bg-gray-200')} />
-      </div>
-
-      <div className="flex items-stretch">
-        <div className="flex flex-col pt-2">
-          <OperStack operStack={operStack} className="mb-2" />
-
-          <HistoryItemStatusComp historyItem={historyItem} />
-
-          <Time
-            children={() => (
-              <span className="text-xs font-light text-gray-500">
-                {formatDistanceToNow(new Date(addedAt), {
-                  includeSeconds: true,
-                  addSuffix: true,
-                  locale: getDateFnsLocale()
-                })}
-              </span>
-            )}
-          />
+    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
+      <div className="flex items-center justify-between">
+        <div className="flex -tems-center gap-3">
+          <TransactionIcon tokenMetadata={tokenMetadata} onClick={() => handleItemClick(hash)} />
+          <div className="flex flex-col gap-1 items-start justify-center">
+            <OperationStack operStack={operStack} />
+            <Time
+              children={() => (
+                <span className="text-sm text-secondary-white">
+                  {formatDistanceToNow(new Date(addedAt), {
+                    includeSeconds: true,
+                    addSuffix: true,
+                    locale: getDateFnsLocale()
+                  })}
+                </span>
+              )}
+            />
+            {/* <ActivityItemStatusComp activity={activity} /> */}
+            {/* <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" /> */}
+          </div>
         </div>
 
-        <div className="flex-1" />
-
-        {/* <div className="flex flex-col flex-shrink-0 pt-2">
+        <div className="flex flex-col justify-center items-end" style={{ maxWidth: 76 }}>
           {moneyDiffs.map(({ assetSlug, diff }, i) => (
             <MoneyDiffView key={i} assetId={assetSlug} diff={diff} pending={status === 'pending'} />
           ))}
-        </div> */}
+        </div>
       </div>
+      {!last && <ListItemDivider />}
     </div>
   );
 });
 
-interface ActivityItemStatusCompProps {
-  historyItem: UserHistoryItem;
-}
+type TransactionIconType = {
+  tokenMetadata: AssetMetadataBase | undefined;
+  onClick: () => void;
+};
 
-const HistoryItemStatusComp: React.FC<ActivityItemStatusCompProps> = ({ historyItem }) => {
-  const explorerStatus = historyItem.status;
-  const content = explorerStatus ?? 'pending';
-  const conditionalTextColor = explorerStatus ? 'text-red-600' : 'text-yellow-600';
-
+const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata, onClick }) => {
   return (
-    <div className="mb-px text-xs font-light leading-none">
-      <span className={classNames(explorerStatus === 'applied' ? 'text-gray-600' : conditionalTextColor, 'capitalize')}>
-        {t(content) || content}
-      </span>
+    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center" onClick={onClick}>
+      {tokenMetadata?.thumbnailUri ? (
+        <img className="rounded-full w-8 h-8" src={tokenMetadata?.thumbnailUri} alt={tokenMetadata?.name} />
+      ) : (
+        <div className="text-white text-xs">{tokenMetadata?.name ?? t('unknown')}</div>
+      )}
     </div>
   );
 };
+
+// interface ActivityItemStatusCompProps {
+//   activity: Activity;
+// }
+
+// const ActivityItemStatusComp: React.FC<ActivityItemStatusCompProps> = ({ activity }) => {
+//   const explorerStatus = activity.status;
+//   const content = explorerStatus ?? 'pending';
+//   const conditionalTextColor = explorerStatus ? 'text-red-600' : 'text-yellow-600';
+
+//   return (
+//     <div className="mb-px text-xs font-light leading-none">
+//       <span className={classNames(explorerStatus === 'applied' ? 'text-gray-600' : conditionalTextColor, 'capitalize')}>
+//         {t(content) || content}
+//       </span>
+//     </div>
+//   );
+// };
 
 type TimeProps = {
   children: () => React.ReactElement;

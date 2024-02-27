@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 
 import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -12,6 +12,7 @@ import { useAccount } from 'lib/temple/front';
 
 import useHistory from '../../../lib/temple/history/hook';
 import { PartnersPromotion, PartnersPromotionVariant } from '../../atoms/partners-promotion';
+import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 
 const INITIAL_NUMBER = 30;
@@ -30,6 +31,19 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
   const { publicKeyHash: accountAddress } = useAccount();
 
   useLoadPartnersPromo();
+
+  // popup
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleRequestClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const handleItemClick = useCallback((activityhash: string) => {
+    setIsOpen(true);
+    console.log(activityhash);
+    // TODO set active item in state
+  }, []);
 
   if (userHistory.length === 0 && !loading && reachedTheEnd) {
     return (
@@ -63,12 +77,18 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
           {userHistory.map((historyItem, index) => (
             <Fragment key={historyItem.hash}>
               {/* I want to render the list of userHistory here in flex box items */}
-              <HistoryItem address={accountAddress} historyItem={historyItem} />
+              <HistoryItem
+                address={accountAddress}
+                historyItem={historyItem}
+                slug={assetSlug}
+                handleItemClick={handleItemClick}
+              />
               {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
             </Fragment>
           ))}
         </InfiniteScroll>
       </div>
+      <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} />
     </div>
   );
 };

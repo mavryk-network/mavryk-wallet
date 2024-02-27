@@ -95,7 +95,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
-      type: oper.type,
+      type: oper.type ?? 'unknown',
       assetSlug: oper.assetSlug,
       assetMetadata: oper.assetMetadata,
       amountDiff: oper.amountDiff,
@@ -103,7 +103,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       hash: oper.hash
     };
 
-    switch (oper.type) {
+    switch (oper.type ?? oper.opType) {
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = oper as HistoryItemTransactionOp;
 
@@ -173,6 +173,8 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
         break;
       default:
         const opOther = oper as HistoryItemOtherOp;
+
+        console.log(oper, 'oper');
 
         opStack.push({
           ...basicFields,

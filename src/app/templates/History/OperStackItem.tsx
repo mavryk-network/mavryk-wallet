@@ -71,7 +71,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, showIcon = false }
         />
       );
     // Other
-    default:
+    case HistoryItemOpTypeEnum.Other:
       const opOther = item as HistoryItemOtherOp;
       return (
         <Component
@@ -81,6 +81,9 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, showIcon = false }
             .join(' ')}
         />
       );
+    default:
+      console.log(item, 'item');
+      return null;
   }
 });
 

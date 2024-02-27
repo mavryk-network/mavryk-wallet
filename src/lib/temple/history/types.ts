@@ -43,7 +43,7 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;
-  type?: HistoryItemOpTypeEnum | 'string';
+  type?: HistoryItemOpTypeEnum | string;
   assetSlug?: string;
   assetMetadata?: AssetMetadataBase;
   amountDiff?: string;

@@ -13,9 +13,10 @@ import {
 interface Props {
   item: IndividualHistoryItem;
   isTiny?: boolean;
+  showIcon?: boolean;
 }
 
-export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
+export const OpertionStackItem = memo<Props>(({ item, isTiny, showIcon = false }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
   switch (item.type) {

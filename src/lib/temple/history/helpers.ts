@@ -127,7 +127,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           entrypoint: opFrom.entrypoint
         });
         break;
-      // TODO ass swap
+      // TODO add swap
       case HistoryItemOpTypeEnum.Swap:
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = oper as HistoryItemTransactionOp;
@@ -199,6 +199,7 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem) {
     if (isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
 
     const assetSlug =
+      // @ts-ignore
       oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });

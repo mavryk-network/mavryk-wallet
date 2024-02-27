@@ -107,7 +107,8 @@ function reduceOneTzktOperation(
       const otherOpBase = buildHistoryItemOpBase(operation, address, 0, source, index);
       const otherOp: HistoryItemOtherOp = {
         ...otherOpBase,
-        opType: HistoryItemOpTypeEnum.Other
+        opType: HistoryItemOpTypeEnum.Other,
+        name: otherOpBase.type as string
       };
       return otherOp;
   }
@@ -136,7 +137,8 @@ function reduceOneTzktTransactionOperation(
       type: 'transaction',
       destination: operation.target,
       assetSlug: '',
-      assetMetadata: metadata
+      assetMetadata: metadata,
+      opType: HistoryItemOpTypeEnum.TransferTo
     };
     if (contractAddress != null) historyTxOp.contractAddress = contractAddress;
     if (isTzktOperParam(operation.parameter)) {
@@ -177,7 +179,7 @@ function reduceOneTzktTransactionOperation(
     });
   } else if (isTzktOperParam_Fa2(parameter)) {
     const tokenTransfers = buildTokenTransferItem(operation, 'fa2', address);
-    console.log('FA2 - Got to here in buildTokenTransferItem. Hash & Op:', operation.hash, operation, tokenTransfers);
+    // console.log('FA2 - Got to here in buildTokenTransferItem. Hash & Op:', operation.hash, operation, tokenTransfers);
     const source = tokenTransfers?.sender.address === address ? { ...operation.sender, address } : operation.sender;
     const contractAddress = operation.target.address;
     const amount = tokenTransfers?.totalAmount || '0';

@@ -66,7 +66,7 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
 
   return (
     <div className="w-full max-w-sm mx-auto">
-      <div className={classNames('my-3 flex flex-col', popup && 'mx-4')}>
+      <div className={classNames('my-3 flex flex-col')}>
         <InfiniteScroll
           dataLength={userHistory.length}
           hasMore={reachedTheEnd === false}

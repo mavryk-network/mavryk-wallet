@@ -19,6 +19,7 @@ interface Props {
 export const OpertionStackItem = memo<Props>(({ item, isTiny, showIcon = false }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
+  if (isTiny) console.log(item, 'istiny');
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation:
       const opDelegate = item as HistoryItemDelegationOp;
@@ -72,18 +73,20 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, showIcon = false }
       );
     // Other
     case HistoryItemOpTypeEnum.Other:
+    default:
       const opOther = item as HistoryItemOtherOp;
       return (
         <Component
-          titleNode={opOther.name
-            .split('_')
-            .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
-            .join(' ')}
+          titleNode={
+            opOther.name
+              ? opOther.name
+                  .split('_')
+                  .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
+                  .join(' ')
+              : 'unknown'
+          }
         />
       );
-    default:
-      console.log(item, 'item');
-      return null;
   }
 });
 

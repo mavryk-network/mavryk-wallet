@@ -12,6 +12,7 @@ import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
+import { toHistoryTokenSlug } from './utils';
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
@@ -23,6 +24,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
   if (!historyItem) return null;
 
+  const assetslug = toHistoryTokenSlug(historyItem);
   return (
     <PopupModalWithTitle
       isOpen={isOpen}
@@ -39,7 +41,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         </div>
       }
       portalClassName="token-details-popup"
-      headerComponent={<HistoryTokenIcon size={44} slug="tez" />}
+      headerComponent={<HistoryTokenIcon size={44} slug={assetslug} />}
       {...props}
     >
       <div className="px-4">

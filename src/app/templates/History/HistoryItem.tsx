@@ -14,6 +14,7 @@ import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/histor
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OperationStack } from './OperStack';
+import { toHistoryTokenSlug } from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -24,17 +25,9 @@ interface Props {
 }
 
 // TODO cechk for token asset slug
-const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
-  contractAddress === 'tez' ? contractAddress : `${contractAddress}_${tokenId}`;
 
 export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
-  const assetSlug =
-    slug || !historyItem.operations[0]?.contractAddress
-      ? 'tez'
-      : toTokenSlug(
-          historyItem.operations[0].contractAddress ?? '',
-          historyItem.operations[0]?.tokenTransfers?.tokenId
-        );
+  const assetSlug = toHistoryTokenSlug(historyItem, slug);
 
   const tokenMetadata = useAssetMetadata(assetSlug);
   const { hash, addedAt, status } = historyItem;

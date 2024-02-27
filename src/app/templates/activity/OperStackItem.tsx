@@ -3,28 +3,36 @@ import React, { memo } from 'react';
 import { HashChip } from 'app/atoms';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import { TID, T } from 'lib/i18n';
-import { OperStackItemInterface, OperStackItemTypeEnum } from 'lib/temple/activity-new/types';
+import {
+  IndividualHistoryItem,
+  HistoryItemOpTypeEnum,
+  HistoryItemDelegationOp,
+  HistoryItemTransactionOp,
+  HistoryItemOtherOp
+} from 'lib/temple/history/types';
 
 interface Props {
-  item: OperStackItemInterface;
+  item: IndividualHistoryItem;
   isTiny?: boolean;
 }
 
 // TODO delete this after transaction history update
 export const OperStackItem = memo<Props>(({ item }) => {
-  switch (item.type) {
-    case OperStackItemTypeEnum.Delegation:
+  switch (item.opType) {
+    case HistoryItemOpTypeEnum.Delegation:
+      const opDelegate = item as HistoryItemDelegationOp;
       return (
         <StackItemBase
           titleNode={<T id="delegation" />}
-          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[item.to]} />}
+          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
         />
       );
 
-    case OperStackItemTypeEnum.Origination:
+    case HistoryItemOpTypeEnum.Origination:
       return <StackItemBase titleNode={<T id="origination" />} />;
 
-    case OperStackItemTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Interaction:
+      const opInteract = item as HistoryItemTransactionOp;
       return (
         <StackItemBase
           titleNode={
@@ -33,11 +41,13 @@ export const OperStackItem = memo<Props>(({ item }) => {
               <T id="interaction" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[item.with]} />}
+          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
         />
       );
 
-    case OperStackItemTypeEnum.TransferFrom:
+    case HistoryItemOpTypeEnum.TransferFrom:
+      const opFrom = item as HistoryItemTransactionOp;
+
       return (
         <StackItemBase
           titleNode={
@@ -45,11 +55,12 @@ export const OperStackItem = memo<Props>(({ item }) => {
               ↓ <T id="transfer" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[item.from]} />}
+          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
         />
       );
 
-    case OperStackItemTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.TransferTo:
+      const opTo = item as HistoryItemTransactionOp;
       return (
         <StackItemBase
           titleNode={
@@ -57,14 +68,17 @@ export const OperStackItem = memo<Props>(({ item }) => {
               ↑ <T id="transfer" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[item.to]} />}
+          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
         />
       );
 
-    case OperStackItemTypeEnum.Other:
+    // Other
+    default:
+      const opOther = item as HistoryItemOtherOp;
+
       return (
         <StackItemBase
-          titleNode={item.name
+          titleNode={opOther.name
             .split('_')
             .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
             .join(' ')}
@@ -79,18 +93,20 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
   switch (item.type) {
-    case OperStackItemTypeEnum.Delegation:
+    case HistoryItemOpTypeEnum.Delegation:
+      const opDelegate = item as HistoryItemDelegationOp;
       return (
         <Component
           titleNode={<T id="delegation" />}
-          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[item.to]} />}
+          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
         />
       );
 
-    case OperStackItemTypeEnum.Origination:
+    case HistoryItemOpTypeEnum.Origination:
       return <Component titleNode={<T id="origination" />} />;
 
-    case OperStackItemTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Interaction:
+      const opInteract = item as HistoryItemTransactionOp;
       return (
         <Component
           titleNode={
@@ -98,11 +114,12 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
               <T id="interaction" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[item.with]} />}
+          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
         />
       );
 
-    case OperStackItemTypeEnum.TransferFrom:
+    case HistoryItemOpTypeEnum.TransferFrom:
+      const opFrom = item as HistoryItemTransactionOp;
       return (
         <Component
           titleNode={
@@ -110,11 +127,12 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
               <T id="transfer" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[item.from]} />}
+          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
         />
       );
 
-    case OperStackItemTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.TransferTo:
+      const opTo = item as HistoryItemTransactionOp;
       return (
         <Component
           titleNode={
@@ -122,14 +140,15 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
               <T id="transfer" />
             </>
           }
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[item.to]} />}
+          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
         />
       );
-
-    case OperStackItemTypeEnum.Other:
+    // Other
+    default:
+      const opOther = item as HistoryItemOtherOp;
       return (
         <Component
-          titleNode={item.name
+          titleNode={opOther.name
             .split('_')
             .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
             .join(' ')}

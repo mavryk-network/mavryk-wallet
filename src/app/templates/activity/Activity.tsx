@@ -24,6 +24,8 @@ interface Props {
 export const ActivityComponent: React.FC<Props> = ({ assetSlug }) => {
   const { loading, reachedTheEnd, list: activities, loadMore } = useActivities(INITIAL_NUMBER, assetSlug);
 
+  console.log(activities, 'activities');
+
   const { popup } = useAppEnv();
 
   const { publicKeyHash: accountAddress } = useAccount();

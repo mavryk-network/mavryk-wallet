@@ -9,6 +9,7 @@ import ErrorBoundary from 'app/ErrorBoundary';
 import { ToolbarElement } from 'app/layouts/PageLayout';
 import { ActivityComponent } from 'app/templates/activity/Activity';
 import AssetInfo from 'app/templates/AssetInfo';
+import { HistoryComponent } from 'app/templates/History/History';
 import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { isTezAsset } from 'lib/assets';
 import { t, TID } from 'lib/i18n';
@@ -68,7 +69,7 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
         {
           name: 'activity',
           titleI18nKey: 'activity',
-          Component: ActivityComponent,
+          Component: HistoryComponent,
           testID: HomeSelectors.activityTab,
           whileMessageI18nKey: 'operationHistoryWhileMessage'
         }

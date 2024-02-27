@@ -43,14 +43,14 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;
-  opType?: HistoryItemOpTypeEnum;
+  type?: HistoryItemOpTypeEnum | 'string';
   assetSlug?: string;
   assetMetadata?: AssetMetadataBase;
   amountDiff?: string;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {
-  type: HistoryItemOpTypeEnum | 'transaction';
+  opType: HistoryItemOpTypeEnum;
   destination: HistoryMember;
   tokenTransfers?: HistoryItemTokenTransfer;
   entrypoint?: string;
@@ -58,6 +58,7 @@ export interface HistoryItemTransactionOp extends HistoryItemOperationBase {
 
 export interface HistoryItemOtherOp extends HistoryItemOperationBase {
   destination?: HistoryMember;
+  name: string;
   opType: HistoryItemOpTypeEnum.Other;
 }
 

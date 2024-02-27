@@ -46,6 +46,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
   const { popup } = useAppEnv();
   const dispatch = useDispatch();
+  console.log(payload, 'payload');
 
   const getContentToParse = useCallback(async () => {
     switch (payload.type) {

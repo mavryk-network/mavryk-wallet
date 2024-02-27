@@ -194,11 +194,13 @@ interface MoneyDiff {
   diff: string;
 }
 
-export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem) {
+export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null) {
   const diffs: MoneyDiff[] = [];
 
+  if (!historyItem) return diffs;
+
   for (const oper of historyItem.operations) {
-    if (isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
+    if (isZero(oper.amountSigned)) continue;
 
     const assetSlug =
       // @ts-ignore
@@ -209,11 +211,6 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem) {
 
   return diffs;
 }
-
-const isTransaction = (type: HistoryItemOpTypeEnum) =>
-  type === HistoryItemOpTypeEnum.TransferFrom ||
-  type === HistoryItemOpTypeEnum.TransferTo ||
-  type === HistoryItemOpTypeEnum.Interaction;
 
 const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
 

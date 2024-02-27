@@ -9,6 +9,7 @@ import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { T } from 'lib/i18n/react';
 import { useAccount } from 'lib/temple/front';
+import { UserHistoryItem } from 'lib/temple/history';
 
 import useHistory from '../../../lib/temple/history/hook';
 import { PartnersPromotion, PartnersPromotionVariant } from '../../atoms/partners-promotion';
@@ -26,7 +27,6 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
   console.log('Logging user history in the HistoryComponent:', userHistory);
-  const { popup } = useAppEnv();
 
   const { publicKeyHash: accountAddress } = useAccount();
 
@@ -34,16 +34,20 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
 
   // popup
   const [isOpen, setIsOpen] = useState(false);
+  const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
 
   const handleRequestClose = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  const handleItemClick = useCallback((activityhash: string) => {
-    setIsOpen(true);
-    console.log(activityhash);
-    // TODO set active item in state
-  }, []);
+  const handleItemClick = useCallback(
+    (hash: string) => {
+      setIsOpen(true);
+
+      setActiveHistoryItem(userHistory.find(item => item.hash === hash) ?? null);
+    },
+    [userHistory]
+  );
 
   if (userHistory.length === 0 && !loading && reachedTheEnd) {
     return (
@@ -88,7 +92,7 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
           ))}
         </InfiniteScroll>
       </div>
-      <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} />
+      <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} historyItem={activeHistoryItem} />
     </div>
   );
 };

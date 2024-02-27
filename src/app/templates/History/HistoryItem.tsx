@@ -11,6 +11,8 @@ import { AssetMetadataBase, useAssetMetadata } from 'lib/metadata';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
 
+import { HistoryTime } from './HistoryTime';
+import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OperationStack } from './OperStack';
 
 interface Props {
@@ -21,8 +23,20 @@ interface Props {
   handleItemClick: (hash: string) => void;
 }
 
+// TODO cechk for token asset slug
+const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
+  contractAddress === 'tez' ? contractAddress : `${contractAddress}_${tokenId}`;
+
 export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
-  const tokenMetadata = useAssetMetadata(slug ?? '');
+  const assetSlug =
+    slug || !historyItem.operations[0]?.contractAddress
+      ? 'tez'
+      : toTokenSlug(
+          historyItem.operations[0].contractAddress ?? '',
+          historyItem.operations[0]?.tokenTransfers?.tokenId
+        );
+
+  const tokenMetadata = useAssetMetadata(assetSlug);
   const { hash, addedAt, status } = historyItem;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
@@ -32,20 +46,10 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
     <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <TransactionIcon tokenMetadata={tokenMetadata} onClick={() => handleItemClick(hash)} />
+          <HistoryTokenIcon slug={assetSlug} onClick={() => handleItemClick(hash)} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack operStack={operStack} />
-            <Time
-              children={() => (
-                <span className="text-sm text-secondary-white">
-                  {formatDistanceToNow(new Date(addedAt), {
-                    includeSeconds: true,
-                    addSuffix: true,
-                    locale: getDateFnsLocale()
-                  })}
-                </span>
-              )}
-            />
+            <HistoryTime addedAt={addedAt} />
             {/* <ActivityItemStatusComp activity={activity} /> */}
             {/* <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" /> */}
           </div>
@@ -61,23 +65,6 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
     </div>
   );
 });
-
-type TransactionIconType = {
-  tokenMetadata: AssetMetadataBase | undefined;
-  onClick: () => void;
-};
-
-const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata, onClick }) => {
-  return (
-    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center" onClick={onClick}>
-      {tokenMetadata?.thumbnailUri ? (
-        <img className="rounded-full w-8 h-8" src={tokenMetadata?.thumbnailUri} alt={tokenMetadata?.name} />
-      ) : (
-        <div className="text-white text-xs">{tokenMetadata?.name ?? t('unknown')}</div>
-      )}
-    </div>
-  );
-};
 
 // interface ActivityItemStatusCompProps {
 //   activity: Activity;
@@ -96,23 +83,3 @@ const TransactionIcon: React.FC<TransactionIconType> = ({ tokenMetadata, onClick
 //     </div>
 //   );
 // };
-
-type TimeProps = {
-  children: () => React.ReactElement;
-};
-
-const Time: React.FC<TimeProps> = ({ children }) => {
-  const [value, setValue] = useState(children);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setValue(children());
-    }, 5_000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [setValue, children]);
-
-  return value;
-};

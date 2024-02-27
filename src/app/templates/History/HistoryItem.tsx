@@ -5,13 +5,13 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
 import { HashChip } from 'app/atoms';
 import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
-import { OperStack } from 'app/templates/activity/OperStack';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { getDateFnsLocale } from 'lib/i18n';
 import { t } from 'lib/i18n/react';
-import { buildOperStack, buildMoneyDiffs } from 'lib/temple/activity-new';
 import { UserHistoryItem } from 'lib/temple/history';
-import { buildHistoryOperStack } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
+
+import { OperStack } from './OperStack';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -22,7 +22,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address }) => {
   const { hash, addedAt, status } = historyItem;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
-  const moneyDiffs = useMemo(() => buildMoneyDiffs(historyItem), [historyItem]);
+  const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
 
   return (
     <div className={classNames('my-3')}>

@@ -7,12 +7,12 @@ import { OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
 import { T } from 'lib/i18n/react';
-import { IndividualHistoryItem } from 'lib/temple/history/types';
+import { OperStackItemInterface } from 'lib/temple/activity-new/types';
 
 import { OperStackItem, OpertionStackItem } from './OperStackItem';
 
 interface Props {
-  operStack: IndividualHistoryItem[];
+  operStack: OperStackItemInterface[];
   className?: string;
 }
 

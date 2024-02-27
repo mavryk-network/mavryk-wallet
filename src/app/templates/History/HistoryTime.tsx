@@ -5,10 +5,11 @@ import { formatDistanceToNow } from 'date-fns';
 import { getDateFnsLocale } from 'lib/i18n';
 
 type HistoryTimeProps = {
-  addedAt: string;
+  addedAt?: string;
 };
 
 export const HistoryTime: FC<HistoryTimeProps> = ({ addedAt }) => {
+  if (!addedAt) return null;
   return (
     <Time
       children={() => (

@@ -13,15 +13,16 @@ interface Props {
   diff: string;
   pending?: boolean;
   className?: string;
+  moneyClassname?: string;
 }
 
-export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = false, className }) => {
+export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = false, className, moneyClassname }) => {
   const { popup } = useAppEnv();
   const metadata = useAssetMetadata(assetSlug);
 
   const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
 
-  const conditionalPopupClassName = 'text-base-plus';
+  const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-base-plus';
   const conditionalDiffClassName = diffBN.gt(0) ? 'text-primary-success' : 'text-primary-error';
   const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
   const showPlus = diffBN.gt(0) ? '+' : '';
@@ -30,15 +31,16 @@ export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = 
     <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
       <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
         <span>{showPlus}</span>
-        <Money>{diffBN}</Money>
+        <Money smallFractionFont={false}>{diffBN}</Money>
         <span>&nbsp;</span>
         <span>{getAssetSymbol(metadata, true)}</span>
       </div>
 
       {assetSlug && (
-        <InFiat volume={diffBN.abs()} assetSlug={assetSlug}>
+        <InFiat volume={diffBN.abs()} assetSlug={assetSlug} smallFractionFont={false}>
           {({ balance, symbol }) => (
             <div className="text-sm tracking-normal text-secondary-white flex">
+              <span>{showPlus ? showPlus : '-'}</span>
               <span className="mr-px">{symbol}</span>
               {balance}
             </div>

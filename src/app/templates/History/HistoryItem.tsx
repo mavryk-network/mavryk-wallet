@@ -1,13 +1,9 @@
-import React, { useEffect, useState, useMemo, memo } from 'react';
+import React, { useMemo, memo } from 'react';
 
 import classNames from 'clsx';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
-import { getDateFnsLocale } from 'lib/i18n';
-import { t } from 'lib/i18n/react';
-import { AssetMetadataBase, useAssetMetadata } from 'lib/metadata';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
 
@@ -29,7 +25,6 @@ interface Props {
 export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
   const assetSlug = toHistoryTokenSlug(historyItem, slug);
 
-  const tokenMetadata = useAssetMetadata(assetSlug);
   const { hash, addedAt, status } = historyItem;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
@@ -42,14 +37,12 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           <HistoryTokenIcon slug={assetSlug} onClick={() => handleItemClick(hash)} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack operStack={operStack} />
-            <HistoryTime addedAt={addedAt} />
-            {/* <ActivityItemStatusComp activity={activity} /> */}
-            {/* <HashChip hash={hash} firstCharsCount={10} lastCharsCount={7} small className="mr-2" /> */}
+            <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
           </div>
         </div>
 
         <div className="flex flex-col justify-center items-end" style={{ maxWidth: 76 }}>
-          {moneyDiffs.map(({ assetSlug, diff }, i) => (
+          {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
             <MoneyDiffView key={i} assetId={assetSlug} diff={diff} pending={status === 'pending'} />
           ))}
         </div>

@@ -4,8 +4,7 @@ import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_SIZE } from 'app/defaults';
-import { T, t } from 'lib/i18n/react';
-import { useAssetMetadata } from 'lib/metadata';
+import { T } from 'lib/i18n/react';
 import { IndividualHistoryItem } from 'lib/temple/history/types';
 
 import { OpertionStackItem } from './OperStackItem';
@@ -25,9 +24,7 @@ export const OperationStack = memo<Props>(({ operStack, className }) => {
     <div className={classNames('flex flex-col', className)}>
       {base.map((item, i) => (
         <div key={i}>
-          {/* TODO pick token metadata based on operation as well as op name */}
-          {/* <TransactionIcon slug={item.tokenType} onClick={() => {}} /> */}
-          <OpertionStackItem item={item} />s
+          <OpertionStackItem item={item} />
         </div>
       ))}
 
@@ -59,20 +56,4 @@ export const OperationStack = memo<Props>(({ operStack, className }) => {
 type TransactionIconType = {
   slug: string | undefined;
   onClick: () => void;
-};
-
-const TransactionIcon: React.FC<TransactionIconType> = ({ slug, onClick }) => {
-  const tokenMetadata = useAssetMetadata(slug ?? '');
-
-  console.log(slug, 'slug');
-
-  return (
-    <div className="w-11 h-11 bg-transparent rounded-full flex items-center justify-center" onClick={onClick}>
-      {tokenMetadata?.thumbnailUri ? (
-        <img className="rounded-full w-8 h-8" src={tokenMetadata?.thumbnailUri} alt={tokenMetadata?.name} />
-      ) : (
-        <div className="text-white text-xs">{tokenMetadata?.name ?? t('unknown')}</div>
-      )}
-    </div>
-  );
 };

@@ -1,5 +1,7 @@
 import React, { FC, useMemo } from 'react';
 
+import clsx from 'clsx';
+
 import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { AssetIcon } from 'app/templates/AssetIcon';
@@ -9,9 +11,10 @@ import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
 
+import { MoneyDiffView } from '../activity/MoneyDiffView';
+import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
-import { MoneyDiffView } from './MoneyDiffView';
 import { toHistoryTokenSlug } from './utils';
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
@@ -29,15 +32,22 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     <PopupModalWithTitle
       isOpen={isOpen}
       title={
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-xs text-secondary-white">{HistoryItemOpTypeTexts[historyItem.type]}</div>
-          <div className="">
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-sm text-secondary-white">{HistoryItemOpTypeTexts[historyItem.type]}</div>
+          <div className="flex flex-col">
             {moneyDiffs.map(({ assetSlug, diff }, i) => (
-              <MoneyDiffView key={i} assetId={assetSlug} diff={diff} pending={status === 'pending'} />
+              <MoneyDiffView
+                key={i}
+                assetId={assetSlug}
+                diff={diff}
+                pending={status === 'pending'}
+                className="flex flex-col items-center"
+                moneyClassname="text-lg"
+              />
             ))}
           </div>
 
-          <HistoryTime addedAt={addedAt} />
+          <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} />
         </div>
       }
       portalClassName="token-details-popup"

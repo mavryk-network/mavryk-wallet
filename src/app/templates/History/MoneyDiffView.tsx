@@ -7,6 +7,7 @@ import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { merge } from 'lib/utils/merge';
 
 interface Props {
   assetId: string;
@@ -27,17 +28,20 @@ export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = 
   const showPlus = diffBN.gt(0) ? '+' : '';
 
   return metadata ? (
-    <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
-      <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
-        <span className="mr-1">{showPlus}</span>
+    <div className={merge('inline-flex flex-wrap justify-end items-end', className)}>
+      <div
+        id="token-money"
+        className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}
+      >
+        <span>{showPlus}&nbsp;</span>
         <Money>{diffBN}</Money>
-        <span className="ml-1">{getAssetSymbol(metadata, true)}</span>
+        <span>&nbsp;{getAssetSymbol(metadata, true)}</span>
       </div>
 
       {assetSlug && (
         <InFiat volume={diffBN.abs()} assetSlug={assetSlug}>
           {({ balance, symbol }) => (
-            <div className="text-xs text-gray-500 ml-1 flex">
+            <div id="infiat" className="text-xs text-gray-500 ml-1 flex">
               {balance}
               <span className="mr-px">{symbol}</span>
             </div>

@@ -1,0 +1,10 @@
+.moneyDiff #token-money {
+  font-size: 20px;
+  color: #f4f4f4;
+  font-weight: 400;
+}
+
+.moneyDiff #infiat {
+  font-size: 14px;
+  font-weight: 400;
+}

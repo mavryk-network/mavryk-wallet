@@ -112,7 +112,6 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           opType: HistoryItemOpTypeEnum.TransferTo,
           destination: opTo.destination,
           tokenTransfers: opTo.tokenTransfers,
-          tokenId: opTo.tokenId,
           entrypoint: opTo.entrypoint
         });
         break;
@@ -125,7 +124,6 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           opType: HistoryItemOpTypeEnum.TransferFrom,
           destination: opFrom.destination,
           tokenTransfers: opFrom.tokenTransfers,
-          tokenId: opFrom.tokenId,
           entrypoint: opFrom.entrypoint
         });
         break;
@@ -139,7 +137,6 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           opType: HistoryItemOpTypeEnum.Interaction,
           destination: opInteract.destination,
           tokenTransfers: opInteract.tokenTransfers,
-          tokenId: opInteract.tokenId,
           entrypoint: opInteract.entrypoint
         });
 
@@ -199,14 +196,13 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem) {
   const diffs: MoneyDiff[] = [];
 
   for (const oper of historyItem.operations) {
-    if (!isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
-    // @ts-ignore
-    const assetSlug = oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenId);
+    if (isTransaction(oper.opType) || isZero(oper.amountSigned)) continue;
+
+    const assetSlug =
+      oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }
-
-  console.log(diffs);
 
   return diffs;
 }
@@ -218,7 +214,8 @@ const isTransaction = (type: HistoryItemOpTypeEnum) =>
 
 const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
 
-const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) => `${contractAddress}_${tokenId}`;
+const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
+  contractAddress === 'tez' ? contractAddress : `${contractAddress}_${tokenId}`;
 
 const txHasToken = (txType: HistoryItemOpTypeEnum) => {
   switch (txType) {

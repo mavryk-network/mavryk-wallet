@@ -54,7 +54,6 @@ export interface HistoryItemTransactionOp extends HistoryItemOperationBase {
   destination: HistoryMember;
   tokenTransfers?: HistoryItemTokenTransfer;
   entrypoint?: string;
-  tokenId?: string;
 }
 
 export interface HistoryItemOtherOp extends HistoryItemOperationBase {

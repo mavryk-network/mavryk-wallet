@@ -63,21 +63,23 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
-      type: oper.type ?? oper.opType ?? 'unknown',
+      type: oper.type ?? 'unknown',
       assetSlug: oper.assetSlug,
       assetMetadata: oper.assetMetadata,
       amountDiff: oper.amountDiff,
       id: oper.id,
-      hash: oper.hash
+      hash: oper.hash,
+      bakerFee: oper.bakerFee,
+      storageFee: oper.storageFee
     };
 
-    switch (oper.type ?? oper.opType) {
+    switch (oper.type) {
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = oper as HistoryItemTransactionOp;
 
         opStack.push({
           ...basicFields,
-          opType: HistoryItemOpTypeEnum.TransferTo,
+          type: HistoryItemOpTypeEnum.TransferTo,
           destination: opTo.destination,
           tokenTransfers: opTo.tokenTransfers,
           entrypoint: opTo.entrypoint
@@ -89,7 +91,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
 
         opStack.push({
           ...basicFields,
-          opType: HistoryItemOpTypeEnum.TransferFrom,
+          type: HistoryItemOpTypeEnum.TransferFrom,
           destination: opFrom.destination,
           tokenTransfers: opFrom.tokenTransfers,
           entrypoint: opFrom.entrypoint
@@ -102,7 +104,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
 
         opStack.push({
           ...basicFields,
-          opType: HistoryItemOpTypeEnum.Interaction,
+          type: HistoryItemOpTypeEnum.Interaction,
           destination: opInteract.destination,
           tokenTransfers: opInteract.tokenTransfers,
           entrypoint: opInteract.entrypoint
@@ -118,14 +120,14 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           nonce: opDelegate.nonce,
           prevDelegate: opDelegate.prevDelegate,
           newDelegate: opDelegate.newDelegate,
-          opType: HistoryItemOpTypeEnum.Delegation
+          type: HistoryItemOpTypeEnum.Delegation
         });
         break;
       case HistoryItemOpTypeEnum.Reveal:
         // const opReveal = oper as HistoryItemOpReveal;
         opStack.push({
           ...basicFields,
-          opType: HistoryItemOpTypeEnum.Reveal
+          type: HistoryItemOpTypeEnum.Reveal
         });
 
         break;
@@ -136,7 +138,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           ...basicFields,
           originatedContract: opOrigination.originatedContract,
           contractBalance: opOrigination.contractBalance,
-          opType: HistoryItemOpTypeEnum.Origination
+          type: HistoryItemOpTypeEnum.Origination
         });
         break;
       default:
@@ -147,14 +149,14 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
         opStack.push({
           ...basicFields,
           destination: opOther.destination,
-          opType: HistoryItemOpTypeEnum.Other,
-          name: opOther.type as string // type will be smth like this "USDT|BTC"
+          type: HistoryItemOpTypeEnum.Other,
+          name: opOther.type as unknown as string
         });
         break;
     }
   }
 
-  return opStack.sort((a, b) => a.opType - b.opType);
+  return opStack.sort((a, b) => a.type - b.type);
 }
 
 export interface MoneyDiff {

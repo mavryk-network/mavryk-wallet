@@ -44,6 +44,7 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
   }
 
   const historyItemOperations = reduceTzktOperations(operations, address);
+
   const status = deriveHistoryItemStatus(historyItemOperations);
   const type = deriveHistoryItemType(historyItemOperations, address, operations[0]);
 
@@ -85,7 +86,7 @@ function reduceOneTzktOperation(
       const delegationOpBase = buildHistoryItemOpBase(operation, address, 0, operation.sender, index);
       const delegationOp: HistoryItemDelegationOp = {
         ...delegationOpBase,
-        opType: HistoryItemOpTypeEnum.Delegation
+        type: HistoryItemOpTypeEnum.Delegation
       };
       if (operation.newDelegate) delegationOp.newDelegate = operation.newDelegate;
       if (operation.newDelegate) delegationOp.prevDelegate = operation.prevDelegate;
@@ -97,7 +98,7 @@ function reduceOneTzktOperation(
       const originationOpBase = buildHistoryItemOpBase(operation, address, Number(contractBalance), source, index);
       const originationOp: HistoryItemOriginationOp = {
         ...originationOpBase,
-        opType: HistoryItemOpTypeEnum.Origination
+        type: HistoryItemOpTypeEnum.Origination
       };
       if (operation.originatedContract) originationOp.originatedContract = operation.originatedContract;
       return originationOp;
@@ -107,8 +108,8 @@ function reduceOneTzktOperation(
       const otherOpBase = buildHistoryItemOpBase(operation, address, 0, source, index);
       const otherOp: HistoryItemOtherOp = {
         ...otherOpBase,
-        opType: HistoryItemOpTypeEnum.Other,
-        name: otherOpBase.type as string
+        type: HistoryItemOpTypeEnum.Other,
+        name: operation.type
       };
       return otherOp;
   }
@@ -134,11 +135,10 @@ function reduceOneTzktTransactionOperation(
     };
     const historyTxOp: HistoryItemTransactionOp = {
       ...HistoryOpBase,
-      type: 'transaction',
       destination: operation.target,
       assetSlug: '',
       assetMetadata: metadata,
-      opType: HistoryItemOpTypeEnum.TransferTo
+      type: HistoryItemOpTypeEnum.TransferTo
     };
     if (contractAddress != null) historyTxOp.contractAddress = contractAddress;
     if (isTzktOperParam(operation.parameter)) {
@@ -224,6 +224,7 @@ function buildHistoryItemOpBase(
   index: number
 ): HistoryItemOperationBase {
   const { id, level, timestamp: addedAt, hash, block, bakerFee, storageFee } = operation;
+
   const reducedOperation: HistoryItemOperationBase = {
     id,
     level,
@@ -236,7 +237,8 @@ function buildHistoryItemOpBase(
     isHighlighted: false,
     opIndex: index,
     bakerFee, // gas fee
-    storageFee: storageFee ?? 0 // storage fee
+    storageFee: storageFee ?? 0, // storage fee
+    entrypoint: (operation as TzktTransactionOperation).entrypoint ?? ''
   };
   if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
   return reducedOperation;
@@ -322,34 +324,37 @@ function deriveHistoryItemType(
   address: string,
   firstOperation: TzktOperation
 ): HistoryItemOpTypeEnum {
-  let opType = HistoryItemOpTypeEnum.Other;
+  let type = HistoryItemOpTypeEnum.Other;
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
   // Is Delegation operation
   if (firstOperation.type === 'delegation') {
-    opType = HistoryItemOpTypeEnum.Delegation;
-    return opType;
+    type = HistoryItemOpTypeEnum.Delegation;
+    return type;
   } else if (firstOperation.type === 'origination') {
-    opType = HistoryItemOpTypeEnum.Origination;
-    return opType;
+    type = HistoryItemOpTypeEnum.Origination;
+    return type;
   } else {
-    for (const item of items) {
-      // Handle transactions now
-      if (isZero(item.amountSigned)) {
-        opType = HistoryItemOpTypeEnum.Interaction;
-      } else if (item.source.address === address) {
-        opType = HistoryItemOpTypeEnum.TransferTo;
-      } else if ('tokenTransfers' in item && item.tokenTransfers)
-        if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
-          opType = HistoryItemOpTypeEnum.TransferFrom;
-        } else {
-          opType = HistoryItemOpTypeEnum.TransferTo;
-        }
-      // Need to check if it is a swap operation
+    if (items.some(item => item?.entrypoint === 'swap')) {
+      type = HistoryItemOpTypeEnum.Swap;
+    } else {
+      for (const item of items) {
+        // Handle transactions now
+        if (isZero(item.amountSigned)) {
+          type = HistoryItemOpTypeEnum.Interaction;
+        } else if (item.source.address === address) {
+          type = HistoryItemOpTypeEnum.TransferTo;
+        } else if ('tokenTransfers' in item && item.tokenTransfers)
+          if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
+            type = HistoryItemOpTypeEnum.TransferFrom;
+          } else {
+            type = HistoryItemOpTypeEnum.TransferTo;
+          }
+      }
     }
   }
 
-  return opType;
+  return type;
 }
 
 function buildTokenTransferItem(

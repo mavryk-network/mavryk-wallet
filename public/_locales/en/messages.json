@@ -1961,6 +1961,15 @@
       }
     }
   },
+  "swappedContract": {
+    "message": "$contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
+
   "delegationToSmb": {
     "message": "to $delegate$",
     "placeholders": {

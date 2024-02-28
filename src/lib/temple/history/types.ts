@@ -43,25 +43,29 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;
-  type?: HistoryItemOpTypeEnum | string;
+  type?: HistoryItemOpTypeEnum;
   assetSlug?: string;
   assetMetadata?: AssetMetadataBase;
   amountDiff?: string;
   bakerFee: number;
   storageFee: number;
+  entrypoint?: string;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {
-  opType: HistoryItemOpTypeEnum;
+  type: HistoryItemOpTypeEnum;
   destination: HistoryMember;
   tokenTransfers?: HistoryItemTokenTransfer;
   entrypoint?: string;
+}
+export interface HistoryItemSwapOp extends HistoryItemOperationBase {
+  type: HistoryItemOpTypeEnum.Swap;
 }
 
 export interface HistoryItemOtherOp extends HistoryItemOperationBase {
   destination?: HistoryMember;
   name: string;
-  opType: HistoryItemOpTypeEnum.Other;
+  type: HistoryItemOpTypeEnum.Other;
 }
 
 export interface HistoryItemDelegationOp extends HistoryItemOperationBase {
@@ -71,19 +75,19 @@ export interface HistoryItemDelegationOp extends HistoryItemOperationBase {
   amount?: number;
   prevDelegate?: HistoryMember | null;
   newDelegate?: HistoryMember | null;
-  opType: HistoryItemOpTypeEnum.Delegation;
+  type: HistoryItemOpTypeEnum.Delegation;
 }
 
 export interface HistoryItemOriginationOp extends HistoryItemOperationBase {
   isHighlighted: boolean;
   originatedContract?: HistoryMember;
   contractBalance?: string;
-  opType: HistoryItemOpTypeEnum.Origination;
+  type: HistoryItemOpTypeEnum.Origination;
 }
 
 export interface HistoryItemOpReveal extends HistoryItemOperationBase {
   isHighlighted: boolean;
-  opType: HistoryItemOpTypeEnum.Reveal;
+  type: HistoryItemOpTypeEnum.Reveal;
 }
 
 export type IndividualHistoryItem =
@@ -91,7 +95,8 @@ export type IndividualHistoryItem =
   | HistoryItemDelegationOp
   | HistoryItemOriginationOp
   | HistoryItemOpReveal
-  | HistoryItemOtherOp;
+  | HistoryItemOtherOp
+  | HistoryItemSwapOp;
 
 export interface UserHistory {
   items: UserHistoryItem[];

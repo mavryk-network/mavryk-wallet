@@ -3,7 +3,7 @@ import React, { FC, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { HashChip, Identicon, Money } from 'app/atoms';
+import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
@@ -154,6 +154,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <span>
               <T id="burnedFromFees" />
             </span>
+            {/* TODO calculate Burned fees */}
             <span className="text-secondary-white">0,12 TEZ</span>
           </div>
         </CardContainer>

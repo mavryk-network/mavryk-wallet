@@ -51,6 +51,15 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff }) => {
           argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
         />
       );
+    case HistoryItemOpTypeEnum.Swap:
+      const opSwap = item as HistoryItemTransactionOp;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={HistoryItemOpTypeTexts[item.type]}
+          argsNode={<StackItemArgs i18nKey="swappedContract" args={[opSwap.destination.address]} />}
+        />
+      );
 
     case HistoryItemOpTypeEnum.TransferFrom:
       const opFrom = item as HistoryItemTransactionOp;

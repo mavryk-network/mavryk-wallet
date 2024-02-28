@@ -34,11 +34,16 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
-  const base = useMemo(() => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE), [operStack]);
+  const base = useMemo(
+    () => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE).map(op => ({ ...op, type: Number(historyItem.type) })),
+    [historyItem.type, operStack]
+  );
   const rest = useMemo(() => operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [operStack]);
 
   const moneyDiffsBase = useMemo(() => moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
   const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
+
+  console.log(historyItem);
 
   return (
     <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>

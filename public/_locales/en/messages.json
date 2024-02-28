@@ -2890,7 +2890,7 @@
     "message": "Fixed rate:"
   },
   "transactionId": {
-    "message": "Transaction ID:"
+    "message": "Transaction ID"
   },
   "atomDepositMemo": {
     "message": "Atom Deposit Memo"
@@ -3471,5 +3471,14 @@
   },
   "useMax": {
     "message": "Use Max"
+  },
+  "receivedFrom": {
+    "message": "Receive from"
+  },
+  "networkFees": {
+    "message": "Network Fees"
+  },
+  "burnedFromFees": {
+    "message": "rom Fees 🔥"
   }
 }

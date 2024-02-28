@@ -33,7 +33,7 @@ export default function useHistory(initialPseudoLimit: number, assetSlug?: strin
     let newHistoryItems: UserHistoryItem[];
     try {
       newHistoryItems = await fetchUserHistory(chainId, account, assetSlug, pseudoLimit, tezos, lastHistoryItem);
-      console.log('Logging user history in the History Hook:', newHistoryItems);
+      // console.log('Logging user history in the History Hook:', newHistoryItems);
       if (shouldStop()) return;
     } catch (error) {
       if (shouldStop()) return;

@@ -24,7 +24,7 @@ interface Props {
 export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
-  console.log('Logging user history in the HistoryComponent:', userHistory);
+  // console.log('Logging user history in the HistoryComponent:', userHistory);
 
   const { publicKeyHash: accountAddress } = useAccount();
 

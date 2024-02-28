@@ -223,7 +223,7 @@ function buildHistoryItemOpBase(
   source: HistoryMember,
   index: number
 ): HistoryItemOperationBase {
-  const { id, level, timestamp: addedAt, hash, block } = operation;
+  const { id, level, timestamp: addedAt, hash, block, bakerFee, storageFee } = operation;
   const reducedOperation: HistoryItemOperationBase = {
     id,
     level,
@@ -234,7 +234,9 @@ function buildHistoryItemOpBase(
     block,
     hash,
     isHighlighted: false,
-    opIndex: index
+    opIndex: index,
+    bakerFee, // gas fee
+    storageFee: storageFee ?? 0 // storage fee
   };
   if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
   return reducedOperation;

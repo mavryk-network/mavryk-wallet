@@ -34,6 +34,7 @@ export interface TzktOperationBase {
   gasLimit: number;
   gasUsed: number;
   bakerFee: number;
+  storageFee?: number;
   quote?: TzktQuote;
   errors?: TzktOperationError[] | null;
   status: TzktOperationStatus;

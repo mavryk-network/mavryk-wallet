@@ -47,6 +47,8 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   assetSlug?: string;
   assetMetadata?: AssetMetadataBase;
   amountDiff?: string;
+  bakerFee: number;
+  storageFee: number;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {

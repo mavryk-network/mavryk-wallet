@@ -6,6 +6,8 @@ import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
+import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
+import { mutezToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
@@ -22,10 +24,29 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
 
+  const assetslug = toHistoryTokenSlug(historyItem);
+  const assetMetadata = useAssetMetadata(assetslug);
+  const assetSymbol = getAssetSymbol(assetMetadata);
+
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
+
+  const fees = useMemo(
+    () =>
+      historyItem?.operations.reduce<{ gasFee: number; storageFee: number; networkFee: number }>(
+        (acc, item) => {
+          acc.gasFee += item.bakerFee;
+          acc.storageFee += item.storageFee;
+          acc.networkFee = acc.gasFee + acc.storageFee;
+
+          return acc;
+        },
+        { gasFee: 0, storageFee: 0, networkFee: 0 }
+      ),
+    [historyItem?.operations]
+  );
+
   if (!historyItem) return null;
 
-  const assetslug = toHistoryTokenSlug(historyItem);
   return (
     <PopupModalWithTitle
       isOpen={isOpen}
@@ -63,13 +84,18 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Transaction ID</span>
+            <span>
+              <T id="transactionId" />
+            </span>
             <HashChip hash={hash} small />
           </div>
         </CardContainer>
 
         <CardContainer className="mb-6 text-base-plus text-white">
-          <span className="mb-2">Received from</span>
+          <span className="mb-2">
+            <T id="receivedFrom" />
+            {/* {HistoryItemOpTypeTexts[historyItem.type].concat(` ${getOperationTypeI18nKeyVerb(historyItem.type)}`)} */}
+          </span>
           <div className="flex items-center gap-3">
             <Identicon
               type="bottts"
@@ -83,19 +109,41 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         <CardContainer className="text-base-plus text-white flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <span>Network Fees</span>
-            <span>-$1.88</span>
+            <span>
+              <T id="networkFees" />
+            </span>
+            <span>
+              <span>{mutezToTz(fees?.networkFee).toFixed()}</span>
+              &nbsp;
+              <span>{assetSymbol}</span>
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Gas Fee</span>
-            <span className="text-secondary-white">-0.02 MVRK</span>
+            <span>
+              <T id="gasFee" />
+            </span>
+            <span className="text-secondary-white flex items-center">
+              <span>{mutezToTz(fees?.gasFee).toFixed()}</span>
+              &nbsp;
+              <span>{assetSymbol}</span>
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Storage Fee</span>
-            <span className="text-secondary-white">-0.08 MVRK</span>
+            <span>
+              <T id="storageFee" />
+            </span>
+            <span className="text-secondary-white">
+              <span className="text-secondary-white flex items-center">
+                <span>{mutezToTz(fees?.storageFee).toFixed()}</span>
+                &nbsp;
+                <span>{assetSymbol}</span>
+              </span>
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Burned From Fees 🔥</span>
+            <span>
+              <T id="burnedFromFees" />
+            </span>
             <span className="text-secondary-white">-0.09 MVRK</span>
           </div>
         </CardContainer>

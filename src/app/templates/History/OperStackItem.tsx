@@ -134,23 +134,29 @@ interface StackItemArgsProps {
   args: string[];
 }
 
-const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => (
-  <span className="text-white">
-    <T
-      id={i18nKey}
-      substitutions={args.map((value, index) => (
-        <span key={index}>
-          <HashChip
-            className="text-blue-200"
-            firstCharsCount={5}
-            key={index}
-            hash={value}
-            type="link"
-            showIcon={false}
-          />
-          {index === args.length - 1 ? null : ', '}
-        </span>
-      ))}
-    />
-  </span>
-));
+const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
+  const handleHashClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation();
+  };
+
+  return (
+    <span className="text-white">
+      <T
+        id={i18nKey}
+        substitutions={args.map((value, index) => (
+          <span key={index} onClick={handleHashClick}>
+            <HashChip
+              className="text-blue-200"
+              firstCharsCount={5}
+              key={index}
+              hash={value}
+              type="link"
+              showIcon={false}
+            />
+            {index === args.length - 1 ? null : ', '}
+          </span>
+        ))}
+      />
+    </span>
+  );
+});

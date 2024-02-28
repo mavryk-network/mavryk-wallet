@@ -1,10 +1,7 @@
 import React, { FC, useMemo } from 'react';
 
-import clsx from 'clsx';
-
 import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
-import { AssetIcon } from 'app/templates/AssetIcon';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
@@ -12,7 +9,6 @@ import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
-import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { toHistoryTokenSlug } from './utils';
@@ -51,7 +47,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         </div>
       }
       portalClassName="token-details-popup"
-      headerComponent={<HistoryTokenIcon size={44} slug={assetslug} />}
+      headerComponent={<HistoryTokenIcon transactionType={historyItem.type} size={44} slug={assetslug} />}
       {...props}
     >
       <div className="px-4">

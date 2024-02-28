@@ -8,3 +8,9 @@ export const toHistoryTokenSlug = (historyItem: UserHistoryItem, slug?: string) 
     ? 'tez'
     : toTokenSlug(historyItem.operations[0].contractAddress ?? '', historyItem.operations[0]?.tokenTransfers?.tokenId);
 };
+
+export const alterIpfsUrl = (url?: string) => {
+  if (!url || url?.split('//')?.shift() !== 'ipfs:') return url;
+
+  return 'https://ipfs.io/ipfs/'.concat(url.split('//').pop() ?? '');
+};

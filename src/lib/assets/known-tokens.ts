@@ -66,7 +66,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'Temple Key',
     symbol: 'TKEY',
     decimals: 18,
-    thumbnailUri: 'ipfs://Qmb9QUXYn1PW8e7E2CwpBMgEur7gFAPPpq2Zh7H2D7eQcT',
+    thumbnailUri: 'https://ipfs.io/ipfs/Qmb9QUXYn1PW8e7E2CwpBMgEur7gFAPPpq2Zh7H2D7eQcT',
     standard: TokenStandardsEnum.Fa2
   },
   {
@@ -75,7 +75,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'Tether USD',
     symbol: 'USDt',
     decimals: 6,
-    thumbnailUri: 'ipfs://QmRymVGWEudMfLrbjaEiXxngCRTDgWCsscjQMwizy4ZJjX',
+    thumbnailUri: 'https://ipfs.io/ipfs/QmRymVGWEudMfLrbjaEiXxngCRTDgWCsscjQMwizy4ZJjX',
     standard: TokenStandardsEnum.Fa2
   },
   {
@@ -84,7 +84,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'youves uUSD',
     symbol: 'uUSD',
     decimals: 12,
-    thumbnailUri: 'ipfs://QmbvhanNCxydZEbGu1RdqkG3LcpNGv7XYsCHgzWBXnmxRd',
+    thumbnailUri: 'https://ipfs.io/ipfs/QmbvhanNCxydZEbGu1RdqkG3LcpNGv7XYsCHgzWBXnmxRd',
     standard: TokenStandardsEnum.Fa2
   },
   {
@@ -111,7 +111,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'youves uBTC',
     symbol: 'uBTC',
     decimals: 12,
-    thumbnailUri: 'ipfs://Qmbev41h4axBqVzxsXP2NSaAF996bJjJBPb8FFZVqTvJTY',
+    thumbnailUri: 'https://ipfs.io/ipfs/Qmbev41h4axBqVzxsXP2NSaAF996bJjJBPb8FFZVqTvJTY',
     standard: TokenStandardsEnum.Fa2
   },
   {
@@ -120,7 +120,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'Quipuswap governance token',
     symbol: 'QUIPU',
     decimals: 6,
-    thumbnailUri: 'ipfs://Qmb2GiHN9EjcrN29J6y9PsXu3ZDosXTv6uLUWGZfRRSzS2/quipu.png',
+    thumbnailUri: 'https://ipfs.io/ipfs/Qmb2GiHN9EjcrN29J6y9PsXu3ZDosXTv6uLUWGZfRRSzS2/quipu.png',
     standard: TokenStandardsEnum.Fa2
   },
   {
@@ -129,7 +129,7 @@ export const LOCAL_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
     name: 'youves YOU Governance',
     symbol: 'YOU',
     decimals: 12,
-    thumbnailUri: 'ipfs://QmYAJaJvEJuwvMEgRbBoAUKrTxRTT22nCC9RuY7Jy4L4Gc',
+    thumbnailUri: 'https://ipfs.io/ipfs/QmYAJaJvEJuwvMEgRbBoAUKrTxRTT22nCC9RuY7Jy4L4Gc',
     standard: TokenStandardsEnum.Fa2
   }
 ];

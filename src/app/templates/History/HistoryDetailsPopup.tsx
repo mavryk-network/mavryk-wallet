@@ -1,9 +1,11 @@
 import React, { FC, useMemo } from 'react';
 
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { HashChip, Identicon } from 'app/atoms';
+import { HashChip, Identicon, Money } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
+import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
@@ -107,16 +109,24 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        <CardContainer className="text-base-plus text-white flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <span>
+        <CardContainer className="text-sm text-white flex flex-col gap-2">
+          <div className="flex justify-between items-start text-base-plus">
+            <div>
               <T id="networkFees" />
-            </span>
-            <span>
-              <span>{mutezToTz(fees?.networkFee).toFixed()}</span>
-              &nbsp;
-              <span>{assetSymbol}</span>
-            </span>
+            </div>
+            <div className="flex flex-col items-end">
+              <FiatBalance
+                assetSlug={assetslug}
+                value={new BigNumber(fees?.networkFee ?? 0)}
+                showEqualSymbol={false}
+                className="text-base-plus"
+              />
+              <div className="text-sm text-secondary-white">
+                <span>{mutezToTz(fees?.networkFee).toFixed()}</span>
+                &nbsp;
+                <span>{assetSymbol}</span>
+              </div>
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <span>
@@ -144,7 +154,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <span>
               <T id="burnedFromFees" />
             </span>
-            <span className="text-secondary-white">-0.09 MVRK</span>
+            <span className="text-secondary-white">0,12 TEZ</span>
           </div>
         </CardContainer>
       </div>

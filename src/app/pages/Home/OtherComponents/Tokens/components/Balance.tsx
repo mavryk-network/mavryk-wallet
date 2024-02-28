@@ -36,7 +36,7 @@ export const FiatBalance = memo<FiatBalanceProps>(
     >
       {({ balance, symbol }) => (
         <div
-          className={merge('ml-1 font-normal text-current text-xs flex items-center truncate text-right', className)}
+          className={merge('ml-1 font-normal text-current flex items-center truncate text-right text-xs', className)}
         >
           {showEqualSymbol && <span className="mr-1">≈</span>}
           <span>{symbol}</span>

@@ -72,10 +72,29 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <Identicon
               type="bottts"
               size={24}
-              hash="tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz"
+              hash={historyItem.operations[0]?.source.address ?? ''}
               className="flex-shrink-0 shadow-xs rounded-full"
             />
-            <HashChip hash="tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz" small />
+            <HashChip hash={historyItem.operations[0]?.source.address ?? ''} small />
+          </div>
+        </CardContainer>
+
+        <CardContainer className="text-base-plus text-white flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <span>Network Fees</span>
+            <span>-$1.88</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Gas Fee</span>
+            <span className="text-secondary-white">-0.02 MVRK</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Storage Fee</span>
+            <span className="text-secondary-white">-0.08 MVRK</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Burned From Fees 🔥</span>
+            <span className="text-secondary-white">-0.09 MVRK</span>
           </div>
         </CardContainer>
       </div>

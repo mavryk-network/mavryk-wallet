@@ -157,18 +157,18 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   return opStack.sort((a, b) => a.opType - b.opType);
 }
 
-interface MoneyDiff {
+export interface MoneyDiff {
   assetSlug: string;
   diff: string;
 }
 
-export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null) {
+export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allowZero = false) {
   const diffs: MoneyDiff[] = [];
 
   if (!historyItem) return diffs;
 
   for (const oper of historyItem.operations) {
-    if (isZero(oper.amountSigned)) continue;
+    if (isZero(oper.amountSigned) && !allowZero) continue;
 
     const assetSlug =
       // @ts-ignore
@@ -180,7 +180,7 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null) {
   return diffs;
 }
 
-const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
+export const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
 
 const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
   contractAddress === 'tez' ? contractAddress : `${contractAddress}_${tokenId}`;

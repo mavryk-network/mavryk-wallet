@@ -3,6 +3,7 @@ import React, { memo } from 'react';
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
+import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
 import {
   IndividualHistoryItem,
   HistoryItemOpTypeEnum,
@@ -11,31 +12,41 @@ import {
   HistoryItemOtherOp
 } from 'lib/temple/history/types';
 
+import { MoneyDiffView } from '../activity/MoneyDiffView';
+
 interface Props {
   item: IndividualHistoryItem;
   isTiny?: boolean;
+  moneyDiff?: MoneyDiff;
 }
 
-export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
+export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
+
+  const componentBaseProps = {
+    status: item.status,
+    moneyDiff
+  };
 
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation:
       const opDelegate = item as HistoryItemDelegationOp;
       return (
         <Component
+          {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
         />
       );
 
     case HistoryItemOpTypeEnum.Origination:
-      return <Component titleNode={HistoryItemOpTypeTexts[item.type]} />;
+      return <Component {...componentBaseProps} titleNode={HistoryItemOpTypeTexts[item.type]} />;
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
       return (
         <Component
+          {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
         />
@@ -45,6 +56,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
       const opFrom = item as HistoryItemTransactionOp;
       return (
         <Component
+          {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
         />
@@ -54,6 +66,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
       const opTo = item as HistoryItemTransactionOp;
       return (
         <Component
+          {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
         />
@@ -73,13 +86,15 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
               .join(' ')
           : 'unknown';
 
-      return <Component titleNode={titleNode} />;
+      return <Component {...componentBaseProps} titleNode={titleNode} />;
   }
 });
 
 interface StackItemBaseProps {
   titleNode: React.ReactNode;
   argsNode?: React.ReactNode;
+  moneyDiff?: MoneyDiff;
+  status?: string;
 }
 
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
@@ -92,12 +107,24 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
   );
 };
 
-const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
+const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status }) => {
   return (
-    <div className="flex items-center text-white text-xs">
-      <div className="flex items-center">{titleNode}</div>
-      <span>&nbsp;</span>
-      {argsNode}
+    <div className="flex items-center justify-between text-white text-xs h-12 border-b border-divider">
+      <div className="flex items-center">
+        <div className="flex items-center">{titleNode}</div>
+        <span>&nbsp;</span>
+        {argsNode}
+      </div>
+
+      {moneyDiff && !isZero(moneyDiff.diff) && (
+        <MoneyDiffView
+          assetId={moneyDiff.assetSlug}
+          diff={moneyDiff.diff}
+          pending={status === 'pending'}
+          className="flex flex-col"
+          moneyClassname="text-sm"
+        />
+      )}
     </div>
   );
 };

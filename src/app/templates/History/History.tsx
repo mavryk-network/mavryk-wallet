@@ -4,8 +4,6 @@ import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
-import { useAppEnv } from 'app/env';
-import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { T } from 'lib/i18n/react';
 import { useAccount } from 'lib/temple/front';
@@ -24,7 +22,6 @@ interface Props {
 }
 
 export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
-  console.log(assetSlug, 'assetSlug');
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
   console.log('Logging user history in the HistoryComponent:', userHistory);

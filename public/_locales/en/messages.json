@@ -2413,8 +2413,16 @@
     "message": "more",
     "description": "Show more"
   },
+  "showMore": {
+    "message": "Show More",
+    "description": "Show more"
+  },
   "less": {
     "message": "less",
+    "description": "Show less"
+  },
+  "showLess": {
+    "message": "Show Less",
     "description": "Show less"
   },
   "showInfo": { "message": "Show info" },

@@ -4,13 +4,12 @@ import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Money, Identicon } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
-import { ReactComponent as EditAccIcon } from 'app/icons/edit-title.svg';
+import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import Balance from 'app/templates/Balance';
 import { t } from 'lib/i18n';
 import { TempleAccount } from 'lib/temple/types';
 import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
 import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
-import { Link } from 'lib/woozie';
 
 import { setAnotherSelector, setTestID } from '../../../../../lib/analytics';
 import { AccountDropdownSelectors } from '../selectors';
@@ -26,19 +25,7 @@ interface AccountItemProps {
 export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gasTokenName, attractSelf, onClick }) => {
   const { name, publicKeyHash, type } = account;
 
-  const tippyProps: UseTippyOptions = useMemo(
-    () => ({
-      trigger: 'mouseenter',
-      hideOnClick: false,
-      content: t('edit'),
-      animation: 'shift-away-subtle',
-      placement: 'right'
-    }),
-    []
-  );
-
   const elemRef = useScrollIntoViewOnMount<HTMLButtonElement>(selected && attractSelf);
-  const accNameRef = useTippy<HTMLDivElement>(tippyProps);
 
   const classNameMemo = useMemo(
     () =>
@@ -50,10 +37,6 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       ),
     [selected]
   );
-
-  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.stopPropagation();
-  }, []);
 
   return (
     <Button
@@ -71,13 +54,10 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       />
 
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
-        <Name className="text-base">{name}</Name>
-        {/* <div ref={accNameRef}>
-          <Link to={`/edit-account/${publicKeyHash}/${name}`} onClick={handleLinkClick} className="flex items-center">
-            <Name className="text-base">{name}</Name>
-            <EditAccIcon className="stroke w-5 h-6 fill-white ml-1" />
-          </Link>
-        </div> */}
+        <div className="flex items-center gap-1">
+          <Name className="text-base">{name}</Name>
+          <AccountTypeBadge account={account} />
+        </div>
 
         <div
           className="text-xs text-blue-200 mt-1"
@@ -91,17 +71,10 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
         <Balance address={publicKeyHash}>
           {bal => (
             <span className="text-base leading-tight flex items-baseline">
-              <Money smallFractionFont={false} tooltip={false}>
-                {bal}
-              </Money>
-
-              <span className="ml-1">{gasTokenName.toUpperCase()}</span>
+              <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
             </span>
           )}
         </Balance>
-        <div className="mt-1">
-          <AccountTypeBadge account={account} darkTheme />
-        </div>
       </div>
     </Button>
   );

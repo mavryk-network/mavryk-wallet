@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import classNames from 'clsx';
 import Modal from 'react-modal';
@@ -7,6 +7,14 @@ export type CustomModalProps = Modal.Props & React.PropsWithChildren;
 
 const CustomModal: FC<CustomModalProps> = props => {
   const { className, overlayClassName, ...restProps } = props;
+
+  useEffect(() => {
+    if (restProps.isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [restProps.isOpen]);
 
   return (
     <Modal

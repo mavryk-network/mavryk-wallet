@@ -4,11 +4,12 @@ import { ReactComponent as StakeIcon } from 'app/icons/operations/stake.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
 import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg';
-// import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
+import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
 import { t } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 import useTippy from 'lib/ui/useTippy';
+
 import { alterIpfsUrl } from './utils';
 
 type HistoryTokenIconProps = {
@@ -44,6 +45,8 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ slug, transactionT
         return <StakeIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Swap:
         return <SwapIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
+      case HistoryItemOpTypeEnum.Interaction:
+        return <WithdrawIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
 
       default:
         return (

@@ -37,7 +37,8 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     [filteredContacts, account.publicKeyHash]
   );
 
-  const isContactsEmpty = allContacts.length === 0;
+  // There is always one account (the current one)
+  const isContactsEmpty = allContacts.length === 1;
 
   const handleAddContactClick = useCallback(() => {
     navigate('/settings/add-contact');
@@ -58,33 +59,36 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     };
   }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
 
-  return isContactsEmpty ? (
-    <section className="w-full h-full flex justify-center items-center">
-      <div className="flex flex-col">
-        <div className="text-base-plus text-white mb-2">
-          <T id="noContacts" />
-        </div>
-        <div className="text-sm text-secondary-white mb-4">
-          <T id="addAddresesDesc" />
-        </div>
-        <ButtonRounded size="small" className="self-center rounded-2xl-plus" onClick={handleAddContactClick} fill>
-          <T id="addAddress" />
-        </ButtonRounded>
+  return (
+    <div className="flex flex-col h-full">
+      <div className="w-full max-w-sm mx-auto -mt-3">
+        <CustomSelect
+          className="mb-6 p-0"
+          getItemId={getContactKey}
+          items={allContacts}
+          OptionIcon={ContactIcon}
+          OptionContent={item => <ContactContent {...item} account={account} />}
+          light
+          hoverable={false}
+          padding={0}
+          itemWithBorder
+        />
       </div>
-    </section>
-  ) : (
-    <div className="w-full max-w-sm mx-auto -mt-3">
-      <CustomSelect
-        className="mb-6 p-0"
-        getItemId={getContactKey}
-        items={allContacts}
-        OptionIcon={ContactIcon}
-        OptionContent={item => <ContactContent {...item} account={account} />}
-        light
-        hoverable={false}
-        padding={0}
-        itemWithBorder
-      />
+      {isContactsEmpty && (
+        <section className="w-full flex-grow flex justify-center items-center">
+          <div className="flex flex-col">
+            <div className="text-base-plus text-white mb-2">
+              <T id="noContacts" />
+            </div>
+            <div className="text-sm text-secondary-white mb-4">
+              <T id="addAddresesDesc" />
+            </div>
+            <ButtonRounded size="small" className="self-center rounded-2xl-plus" onClick={handleAddContactClick} fill>
+              <T id="addAddress" />
+            </ButtonRounded>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

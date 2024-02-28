@@ -54,7 +54,10 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       />
 
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
-        <Name className="text-base">{name}</Name>
+        <div className="flex items-center gap-1">
+          <Name className="text-base">{name}</Name>
+          <AccountTypeBadge account={account} />
+        </div>
 
         <div
           className="text-xs text-blue-200 mt-1"
@@ -72,10 +75,6 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
             </span>
           )}
         </Balance>
-
-        <div className="mt-1">
-          <AccountTypeBadge account={account} />
-        </div>
       </div>
     </Button>
   );

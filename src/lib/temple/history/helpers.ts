@@ -5,7 +5,6 @@ import type { UserHistoryItem } from 'lib/temple/history';
 import { useAssetMetadata } from '../../metadata';
 import {
   HistoryItemDelegationOp,
-  HistoryItemOpReveal,
   HistoryItemOpTypeEnum,
   HistoryItemOperationBase,
   HistoryItemOriginationOp,
@@ -31,37 +30,6 @@ function fillTokenMetadata(userHistoryItem: UserHistoryItem): UserHistoryItem {
   userHistoryItem.operations = filledOperations;
   return userHistoryItem;
 }
-
-// export function buildUserHistory(userHistoryItems: any[]): UserHistory {
-//   const historyItems: UserHistoryItem[] = [];
-//
-//   userHistoryItems.forEach(item => {
-//     switch (item.type) {
-//       case 'transaction':
-//         historyItems.push(processTransactionOperation(item));
-//         break;
-//       // Handle other types (delegation, origination, etc.)
-//       // ...
-//       default:
-//         historyItems.push(transformToTzktHistoryBase(item)); // For other or unknown types
-//     }
-//   });
-//
-//   const groupedItems = groupOperationsByHash(historyItems);
-//
-//   return { items: groupedItems };
-// }
-
-// export enum HistoryItemOpTypeEnum {
-//   TransferTo,
-//   TransferFrom,
-//   Delegation,
-//   Interaction,
-//   Origination,
-//   Other,
-//   Swap,
-//   Reveal
-// }
 
 // function pickHistoryitemType(item: IndividualHistoryItem) {
 //   switch (item.type) {
@@ -95,7 +63,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
-      type: oper.type ?? 'unknown',
+      type: oper.type ?? oper.opType ?? 'unknown',
       assetSlug: oper.assetSlug,
       assetMetadata: oper.assetMetadata,
       amountDiff: oper.amountDiff,

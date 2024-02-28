@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, memo, useCallback, useState } from 'react';
 
 import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -23,14 +23,15 @@ interface Props {
   assetSlug?: string;
 }
 
-export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
+export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
+  console.log(assetSlug, 'assetSlug');
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
   console.log('Logging user history in the HistoryComponent:', userHistory);
 
   const { publicKeyHash: accountAddress } = useAccount();
 
-  useLoadPartnersPromo();
+  // useLoadPartnersPromo();
 
   // popup
   const [isOpen, setIsOpen] = useState(false);
@@ -95,7 +96,7 @@ export const HistoryComponent: React.FC<Props> = ({ assetSlug }) => {
       <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} historyItem={activeHistoryItem} />
     </div>
   );
-};
+});
 
 /**
  * Build onscroll listener to trigger next loading, when fetching data resulted in error.

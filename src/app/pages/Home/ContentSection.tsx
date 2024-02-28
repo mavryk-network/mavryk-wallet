@@ -67,8 +67,8 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
           testID: HomeSelectors.collectiblesTab
         },
         {
-          name: 'activity',
-          titleI18nKey: 'activity',
+          name: 'history',
+          titleI18nKey: 'history',
           Component: HistoryComponent,
           testID: HomeSelectors.activityTab,
           whileMessageI18nKey: 'operationHistoryWhileMessage'
@@ -77,8 +77,8 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
     }
 
     const activity: TabData = {
-      name: 'activity',
-      titleI18nKey: 'activity',
+      name: 'history',
+      titleI18nKey: 'history',
       Component: () => <ActivityComponent assetSlug={assetSlug} />,
       testID: HomeSelectors.activityTab
     };

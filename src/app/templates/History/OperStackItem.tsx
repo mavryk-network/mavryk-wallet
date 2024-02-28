@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
+import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import {
   IndividualHistoryItem,
   HistoryItemOpTypeEnum,
@@ -18,29 +19,24 @@ interface Props {
 export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
-  if (isTiny) console.log(item, 'istiny');
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation:
       const opDelegate = item as HistoryItemDelegationOp;
       return (
         <Component
-          titleNode={<T id="delegation" />}
+          titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
         />
       );
 
     case HistoryItemOpTypeEnum.Origination:
-      return <Component titleNode={<T id="origination" />} />;
+      return <Component titleNode={HistoryItemOpTypeTexts[item.type]} />;
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
       return (
         <Component
-          titleNode={
-            <>
-              <T id="interaction" />
-            </>
-          }
+          titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
         />
       );
@@ -49,11 +45,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
       const opFrom = item as HistoryItemTransactionOp;
       return (
         <Component
-          titleNode={
-            <>
-              <T id="transfer" />
-            </>
-          }
+          titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
         />
       );
@@ -62,30 +54,26 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny }) => {
       const opTo = item as HistoryItemTransactionOp;
       return (
         <Component
-          titleNode={
-            <>
-              <T id="transfer" />
-            </>
-          }
+          titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
         />
       );
     // Other
     case HistoryItemOpTypeEnum.Other:
     default:
+      console.log(item.type, 'other ?');
       const opOther = item as HistoryItemOtherOp;
-      return (
-        <Component
-          titleNode={
-            opOther.name
-              ? opOther.name
-                  .split('_')
-                  .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
-                  .join(' ')
-              : 'unknown'
-          }
-        />
-      );
+      const titleNode =
+        item.type === 5
+          ? HistoryItemOpTypeTexts[item.type]
+          : opOther.name
+          ? opOther.name
+              .split('_')
+              .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
+              .join(' ')
+          : 'unknown';
+
+      return <Component titleNode={titleNode} />;
   }
 });
 

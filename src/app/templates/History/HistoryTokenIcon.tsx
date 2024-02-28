@@ -58,8 +58,6 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ slug, transactionT
     }
   };
 
-  console.log(tokenMetadata?.thumbnailUri, 'tokenMetadata?.thumbnailUri');
-
   return (
     <div className="w-13 h-12 flex items-center justify-center">
       <div

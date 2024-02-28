@@ -53,7 +53,10 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
                 <div className={classNames('flex items-center')}>
                   <button
                     className={classNames('flex items-center ml-1', 'text-accent-blue hover:underline')}
-                    onClick={() => setExpanded(e => !e)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setExpanded(e => !e);
+                    }}
                   >
                     <T id={expanded ? 'showLess' : 'showMore'} />
                   </button>

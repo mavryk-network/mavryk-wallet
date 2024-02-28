@@ -1,5 +1,7 @@
 import React, { FC, useMemo } from 'react';
 
+import clsx from 'clsx';
+
 import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
@@ -54,7 +56,11 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <CardContainer className="text-base-plus mb-6 text-white">
           <div className="flex items-center justify-between">
             <T id="status" />
-            <span className="text-primary-success mb-2 capitalize">{status}</span>
+            <span
+              className={clsx('mb-2 capitalize', status === 'failed' ? 'text-primary-error' : 'text-primary-success')}
+            >
+              {status}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span>Transaction ID</span>

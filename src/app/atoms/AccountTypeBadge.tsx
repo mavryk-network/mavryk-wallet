@@ -7,18 +7,14 @@ import { TempleAccount } from 'lib/temple/types';
 
 type AccountTypeBadgeProps = {
   account: Pick<TempleAccount, 'type'>;
-  darkTheme?: boolean;
 };
 
-const AccountTypeBadge = memo<AccountTypeBadgeProps>(({ account, darkTheme = false }) => {
+const AccountTypeBadge = memo<AccountTypeBadgeProps>(({ account }) => {
   const title = getAccountBadgeTitle(account);
 
   return title ? (
     <span
-      className={clsx(
-        'rounded border border-opacity-25 px-1 py-px ml-2 leading-tight text-opacity-50',
-        darkTheme ? 'border-white text-white' : 'border-black text-black'
-      )}
+      className={clsx('p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
       style={{ fontSize: '0.6rem' }}
     >
       {title.toUpperCase()}

@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
-import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t, T } from 'lib/i18n';
-import { useFilteredContacts, useAccount } from 'lib/temple/front';
-import { TempleContact } from 'lib/temple/types';
+import { useAccount, useFilteredContacts } from 'lib/temple/front';
+import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
@@ -25,8 +24,17 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   const account = useAccount();
 
   const allContacts = useMemo(
-    () => filteredContacts.filter(contact => contact.address !== account.publicKeyHash),
-    [account.publicKeyHash, filteredContacts]
+    () =>
+      filteredContacts.sort((a, b) => {
+        if (a.address === account.publicKeyHash) {
+          return -1;
+        } else if (b.address === account.publicKeyHash) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }),
+    [filteredContacts, account.publicKeyHash]
   );
 
   const isContactsEmpty = allContacts.length === 0;
@@ -59,7 +67,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
         <div className="text-sm text-secondary-white mb-4">
           <T id="addAddresesDesc" />
         </div>
-        <ButtonRounded size="small" className="self-center" onClick={handleAddContactClick} fill>
+        <ButtonRounded size="small" className="self-center rounded-2xl-plus" onClick={handleAddContactClick} fill>
           <T id="addAddress" />
         </ButtonRounded>
       </div>
@@ -71,7 +79,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
         getItemId={getContactKey}
         items={allContacts}
         OptionIcon={ContactIcon}
-        OptionContent={ContactContent}
+        OptionContent={item => <ContactContent {...item} account={account} />}
         light
         hoverable={false}
         padding={0}
@@ -85,39 +93,54 @@ const ContactIcon: React.FC<OptionRenderProps<TempleContact, string, ContactActi
   <Identicon type="bottts" hash={item.address} size={32} className="flex-shrink-0 shadow-xs rounded-full" />
 );
 
-const ContactContent: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item }) => (
-  <div
-    className="flex flex-1 w-full py-3"
-    {...setTestID(AddressBookSelectors.contactItem)}
-    {...setAnotherSelector('hash', item.address)}
-  >
-    <div className="flex flex-col justify-between flex-1">
-      <div className="flex items-center">
-        <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
-        {item.accountInWallet && (
-          <div className="flex items-cente">
-            <span
-              className={classNames('p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
-              {...setTestID(AddressBookSelectors.contactOwnLabelText)}
-            >
-              <T id="ownAccount" />
-            </span>
-          </div>
-        )}
+const ContactContent: React.FC<
+  OptionRenderProps<TempleContact, string, ContactActions> & { account: TempleAccount }
+> = ({ item, account }) => {
+  return (
+    <div
+      className="flex flex-1 w-full py-3"
+      {...setTestID(AddressBookSelectors.contactItem)}
+      {...setAnotherSelector('hash', item.address)}
+    >
+      <div className="flex flex-col justify-between flex-1">
+        <div className="flex items-center">
+          <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
+          <AddressBookBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
+        </div>
+
+        <div className="text-sm mt-1">
+          <HashChip hash={item.address} small />
+        </div>
       </div>
 
-      <div className="text-sm mt-1">
-        <HashChip hash={item.address} small />
-      </div>
+      <Link to={`/edit-account/${item.address}`} className="flex items-center">
+        <ButtonRounded size="xs" fill={false}>
+          <T id="edit" />
+        </ButtonRounded>
+      </Link>
     </div>
+  );
+};
 
-    <Link to={`/edit-account/${item.address}`} className="flex items-center">
-      <ButtonRounded size="xs" fill={false}>
-        <T id="edit" />
-      </ButtonRounded>
-    </Link>
-  </div>
-);
+type AddressBookBadgeProps = {
+  own: boolean | undefined;
+  isCurrent: boolean;
+};
+
+const AddressBookBadge: FC<AddressBookBadgeProps> = ({ own, isCurrent }) => {
+  if (!own) return null;
+
+  return (
+    <div className="flex items-center">
+      <span
+        className={classNames('p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
+        {...setTestID(AddressBookSelectors.contactOwnLabelText)}
+      >
+        {isCurrent ? <T id="current" /> : <T id="ownAccount" />}
+      </span>
+    </div>
+  );
+};
 
 function getContactKey(contract: TempleContact) {
   return contract.address;

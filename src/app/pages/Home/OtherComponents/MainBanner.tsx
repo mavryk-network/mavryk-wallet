@@ -4,33 +4,20 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import Money from 'app/atoms/Money';
-import { useBalanceModeSelector } from 'app/store/settings/selectors';
-import { BalanceMode } from 'app/store/settings/state';
 import AddressChip from 'app/templates/AddressChip';
-import { AssetIcon } from 'app/templates/AssetIcon';
-import Balance from 'app/templates/Balance';
-import InFiat from 'app/templates/InFiat';
-import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { useFiatCurrency } from 'lib/fiat-currency';
-import { getAssetName, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
-import { useGasToken, useNetwork } from 'lib/temple/front';
 import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
 
 import { HomeSelectors } from '../Home.selectors';
 import styles from './MainBanner.module.css';
-import { TokenPageSelectors } from './TokenPage.selectors';
 
 interface Props {
   assetSlug?: string | null;
   accountPkh: string;
 }
 
-const MainBanner = memo<Props>(({ assetSlug, accountPkh }) => {
-  return assetSlug ? (
-    <AssetBanner assetSlug={assetSlug ?? 'tez'} accountPkh={accountPkh} />
-  ) : (
-    <TotalVolumeBanner accountPkh={accountPkh} />
-  );
+const MainBanner = memo<Props>(({ accountPkh }) => {
+  return <TotalVolumeBanner accountPkh={accountPkh} />;
 });
 
 export default MainBanner;
@@ -54,49 +41,17 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
 );
 
 const BalanceInfo: FC = () => {
-  // const dispatch = useDispatch();
-  const network = useNetwork();
-  const { totalBalanceInFiat, totalBalanceInGasToken } = useTotalBalance();
-  const balanceMode = useBalanceModeSelector();
+  const { totalBalanceInFiat } = useTotalBalance();
 
   const {
     // selectedFiatCurrency: { name: fiatName, symbol: fiatSymbol }
     selectedFiatCurrency: { symbol: fiatSymbol }
   } = useFiatCurrency();
 
-  const {
-    // metadata: { name: gasTokenName, symbol: gasTokenSymbol }
-    metadata: { symbol: gasTokenSymbol }
-  } = useGasToken();
-
-  // const tippyProps = useMemo(
-  //   () => ({
-  //     trigger: 'mouseenter',
-  //     hideOnClick: false,
-  //     content: t('showInGasOrFiat', [fiatName, gasTokenSymbol]),
-  //     animation: 'shift-away-subtle'
-  //   }),
-  //   []
-  // );
-
-  // const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
-
-  // const nextBalanceMode = balanceMode === BalanceMode.Fiat ? BalanceMode.Gas : BalanceMode.Fiat;
-
-  // const handleTvlModeToggle = () => dispatch(toggleBalanceModeAction(nextBalanceMode));
-
-  const isMainNetwork = network.type === 'main';
-  const isFiatMode = balanceMode === BalanceMode.Fiat;
-  const shouldShowFiatBanner = isMainNetwork && isFiatMode;
-
   return (
     <div className="flex flex-col justify-between items-start">
       <div className="flex items-center text-3xl-plus">
-        {shouldShowFiatBanner ? (
-          <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
-        ) : (
-          <BalanceGas volume={totalBalanceInGasToken} currency={gasTokenSymbol} />
-        )}
+        <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
       </div>
     </div>
   );
@@ -115,62 +70,3 @@ const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
     </Money>
   </>
 );
-
-const BalanceGas: FC<BalanceProps> = ({ volume, currency }) => (
-  <>
-    <Money smallFractionFont={false}>{volume}</Money>
-    <span className="ml-1">{currency}</span>
-  </>
-);
-
-interface AssetBannerProps {
-  assetSlug: string;
-  accountPkh: string;
-}
-
-const AssetBanner: FC<AssetBannerProps> = ({ assetSlug, accountPkh }) => {
-  const assetMetadata = useAssetMetadata(assetSlug);
-  const assetName = getAssetName(assetMetadata);
-  const assetSymbol = getAssetSymbol(assetMetadata);
-
-  return (
-    <div className="w-full max-w-sm mx-auto mb-4">
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center">
-          <AssetIcon assetSlug={assetSlug} size={24} className="flex-shrink-0" />
-          <div
-            className="text-sm font-normal text-gray-700 truncate flex-1 ml-2"
-            {...setTestID(TokenPageSelectors.tokenName)}
-            {...setAnotherSelector('name', assetName)}
-          >
-            {assetName}
-          </div>
-        </div>
-        <AddressChip pkh={accountPkh} modeSwitch={{ testID: HomeSelectors.addressModeSwitchButton }} />
-      </div>
-      <div className="flex items-center text-2xl">
-        <Balance address={accountPkh} assetSlug={assetSlug}>
-          {balance => (
-            <div className="flex flex-col">
-              <div className="flex text-2xl">
-                <Money smallFractionFont={false} fiat>
-                  {balance}
-                </Money>
-                <span className="ml-1">{assetSymbol}</span>
-              </div>
-              <InFiat assetSlug={assetSlug} volume={balance} smallFractionFont={false}>
-                {({ balance, symbol }) => (
-                  <div style={{ lineHeight: '19px' }} className="mt-1 text-base text-gray-500 flex">
-                    <span className="mr-1">≈</span>
-                    {balance}
-                    <span className="ml-1">{symbol}</span>
-                  </div>
-                )}
-              </InFiat>
-            </div>
-          )}
-        </Balance>
-      </div>
-    </div>
-  );
-};

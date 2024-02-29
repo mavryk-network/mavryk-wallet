@@ -49,6 +49,8 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   amountDiff?: string;
   bakerFee: number;
   storageFee: number;
+  gasUsed: number;
+  storageUsed: number;
   entrypoint?: string;
 }
 

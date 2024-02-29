@@ -19,20 +19,23 @@ export const CryptoBalance = memo<CryptoBalanceProps>(({ value, testID, testIDPr
   </div>
 ));
 
-interface FiatBalanceProps extends CryptoBalanceProps {
+interface FiatBalanceProps extends TestIDProps {
   assetSlug: string;
   className?: string;
   showEqualSymbol?: boolean;
+  value: BigNumber | string | number;
+  roundingMode?: BigNumber.RoundingMode;
 }
 
 export const FiatBalance = memo<FiatBalanceProps>(
-  ({ assetSlug, value, testID, testIDProperties, className, showEqualSymbol = true }) => (
+  ({ assetSlug, value, testID, testIDProperties, className, roundingMode, showEqualSymbol = true }) => (
     <InFiat
       assetSlug={assetSlug}
       volume={value}
       smallFractionFont={false}
       testID={testID}
       testIDProperties={testIDProperties}
+      roundingMode={roundingMode}
     >
       {({ balance, symbol }) => (
         <div

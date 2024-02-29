@@ -35,18 +35,29 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      historyItem?.operations.reduce<{ gasFee: number; storageFee: number; networkFee: number }>(
+      historyItem?.operations.reduce<{
+        gasFee: number;
+        storageFee: number;
+        networkFee: number;
+        gasUsed: number;
+        storageUsed: number;
+      }>(
         (acc, item) => {
           acc.gasFee += item.bakerFee;
           acc.storageFee += item.storageFee;
+          acc.gasUsed += item.gasUsed;
+          acc.storageUsed += item.storageUsed;
+
           acc.networkFee = acc.gasFee + acc.storageFee;
 
           return acc;
         },
-        { gasFee: 0, storageFee: 0, networkFee: 0 }
+        { gasFee: 0, storageFee: 0, networkFee: 0, gasUsed: 0, storageUsed: 0 }
       ),
     [historyItem?.operations]
   );
+
+  const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.gasUsed + fees?.storageUsed) * 0.5 : 0), [fees]);
 
   if (!historyItem) return null;
 
@@ -118,10 +129,12 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={assetslug}
-                value={new BigNumber(fees?.networkFee ?? 0)}
+                value={mutezToTz(fees?.networkFee) ?? 0}
                 showEqualSymbol={false}
                 className="text-base-plus"
+                roundingMode={BigNumber.ROUND_CEIL}
               />
+
               <div className="text-sm text-secondary-white">
                 <span>{mutezToTz(fees?.networkFee).toFixed()}</span>
                 &nbsp;
@@ -156,7 +169,11 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <T id="burnedFromFees" />
             </span>
             {/* TODO calculate Burned fees */}
-            <span className="text-secondary-white">0,12 TEZ</span>
+            <span className="text-secondary-white">
+              <span>{mutezToTz(burnedFee).toFixed()}</span>
+              &nbsp;
+              <span>{assetSymbol}</span>
+            </span>
           </div>
         </CardContainer>
       </div>

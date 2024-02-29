@@ -34,6 +34,7 @@ export interface TzktOperationBase {
   gasLimit: number;
   gasUsed: number;
   bakerFee: number;
+  storageUsed?: number;
   storageFee?: number;
   quote?: TzktQuote;
   errors?: TzktOperationError[] | null;
@@ -56,7 +57,6 @@ export interface TzktTransactionOperation extends TzktOperationBase {
   initiator?: TzktAlias;
   nonce?: number;
   storageLimit: number;
-  storageUsed: number;
   storageFee: number;
   allocationFee: number;
   target: TzktAlias;

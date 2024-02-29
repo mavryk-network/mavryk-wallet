@@ -223,8 +223,7 @@ function buildHistoryItemOpBase(
   source: HistoryMember,
   index: number
 ): HistoryItemOperationBase {
-  const { id, level, timestamp: addedAt, hash, block, bakerFee, storageFee } = operation;
-
+  const { id, level, timestamp: addedAt, hash, block, bakerFee, storageFee, gasUsed, storageUsed = 0 } = operation;
   const reducedOperation: HistoryItemOperationBase = {
     id,
     level,
@@ -237,6 +236,8 @@ function buildHistoryItemOpBase(
     isHighlighted: false,
     opIndex: index,
     bakerFee, // gas fee
+    gasUsed,
+    storageUsed,
     storageFee: storageFee ?? 0, // storage fee
     entrypoint: (operation as TzktTransactionOperation).entrypoint ?? ''
   };

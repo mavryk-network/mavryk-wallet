@@ -13,7 +13,6 @@ import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
-import { toHistoryTokenSlug } from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -23,11 +22,8 @@ interface Props {
   handleItemClick: (hash: string) => void;
 }
 
-// TODO cechk for token asset slug
-
 export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
   const [expanded, setExpanded] = useState(false);
-  const assetSlug = toHistoryTokenSlug(historyItem, slug);
 
   const { hash, addedAt, status } = historyItem;
 
@@ -42,8 +38,6 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
 
   const moneyDiffsBase = useMemo(() => moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
   const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
-
-  console.log(historyItem);
 
   return (
     <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>

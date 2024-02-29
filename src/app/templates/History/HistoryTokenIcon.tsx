@@ -7,7 +7,7 @@ import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
 import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg';
 import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
-import { toTokenSlug } from 'lib/assets';
+import { TEZ_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
 
@@ -25,7 +25,11 @@ function getAssetsFromOperations(item: UserHistoryItem | null) {
   const slugs = item.operations.reduce<string[]>((acc, op) => {
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
-    const assetSlug = op.contractAddress ? toTokenSlug(op.contractAddress, tokenId) : '';
+    const assetSlug = op.contractAddress
+      ? isTezAsset(op.contractAddress)
+        ? TEZ_TOKEN_SLUG
+        : toTokenSlug(op.contractAddress, tokenId)
+      : '';
     acc = [...new Set([...acc, assetSlug].filter(o => Boolean(o)))];
     return acc;
   }, []);
@@ -70,11 +74,14 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
         onClick={onClick}
       >
         {renderOperationIcon()}
-        {tokensMetadata?.map((token, idx) => (
+        {tokensMetadata?.map((token, idx, arr) => (
           <img
             key={idx}
-            className={clsx('rounded-full overflow-hidden w-6 h-6 absolute top-1/2')}
-            style={{ left: `${getLeftImagePosition(idx)}%`, zIndex: idx + 1 }}
+            className={clsx('rounded-full overflow-hidden w-6 h-6 absolute top-1/2 bg-white')}
+            style={{
+              left: `${getLeftImagePosition(idx)}%`,
+              zIndex: arr.length - idx
+            }}
             src={alterIpfsUrl(token?.thumbnailUri)}
             alt={token?.name}
           />

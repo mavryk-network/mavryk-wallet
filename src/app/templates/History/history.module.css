@@ -16,3 +16,15 @@
 .divider {
   bottom: -1px;
 }
+
+.inputBg {
+  background-color: #171717 !important;
+}
+
+.searchWrapper {
+  position: absolute;
+  right: 1px;
+  padding-inline: 16px 12px;
+  top: -45px;
+  z-index: 2;
+}

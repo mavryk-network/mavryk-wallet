@@ -1,22 +1,35 @@
-import React, { Fragment, memo, useCallback, useState } from 'react';
+import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
+import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
+import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n/react';
 import { useAccount } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 
 import useHistory from '../../../lib/temple/history/hook';
 import { PartnersPromotion, PartnersPromotionVariant } from '../../atoms/partners-promotion';
+import {
+  SearchExplorer,
+  SearchExplorerClosed,
+  SearchExplorerFinder,
+  SearchExplorerIconBtn,
+  SearchExplorerOpened
+} from '../SearchExplorer';
+import { SortButton, SortListItemType, SortPopup, SortPopupContent } from '../SortPopup';
+import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 // import { txMocked, StakedMock } from './mock';
 
 const INITIAL_NUMBER = 60;
 const LOAD_STEP = 30;
+
+const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
 
 interface Props {
   assetSlug?: string;
@@ -33,9 +46,45 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
 
   // useLoadPartnersPromo();
 
+  // sort
+  const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
+
+  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
+    () => [
+      {
+        id: SortOptions.HIGH_TO_LOW,
+        selected: sortOption === SortOptions.HIGH_TO_LOW,
+        onClick: () => {
+          setSortOption(SortOptions.HIGH_TO_LOW);
+        },
+        nameI18nKey: 'highToLow'
+      },
+      {
+        id: SortOptions.LOW_TO_HIGH,
+        selected: sortOption === SortOptions.LOW_TO_HIGH,
+        onClick: () => setSortOption(SortOptions.LOW_TO_HIGH),
+        nameI18nKey: 'lowToHigh'
+      },
+      {
+        id: SortOptions.BY_NAME,
+        selected: sortOption === SortOptions.BY_NAME,
+        onClick: () => setSortOption(SortOptions.BY_NAME),
+        nameI18nKey: 'byName'
+      }
+    ],
+    [sortOption]
+  );
+
+  // search
+  const [searchValue, setSearchValue] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+
   // popup
   const [isOpen, setIsOpen] = useState(false);
   const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
+
+  const handleSearchFieldFocus = useCallback(() => void setSearchFocused(true), [setSearchFocused]);
+  const handleSearchFieldBlur = useCallback(() => void setSearchFocused(false), [setSearchFocused]);
 
   const handleRequestClose = useCallback(() => {
     setIsOpen(false);
@@ -70,7 +119,37 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
   const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
 
   return (
-    <div className="w-full max-w-sm mx-auto h-full">
+    <div className="w-full max-w-sm mx-auto h-full relative">
+      <div className={classNames('mt-3 w-full mx-4')}>
+        <SearchExplorer>
+          <>
+            <SearchExplorerOpened>
+              <div className={classNames('w-full flex justify-end', styles.searchWrapper)}>
+                <SearchExplorerFinder
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  onFocus={handleSearchFieldFocus}
+                  onBlur={handleSearchFieldBlur}
+                  containerClassName="mr-2"
+                />
+              </div>
+            </SearchExplorerOpened>
+            <SearchExplorerClosed>
+              <div className={classNames('flex justify-end items-center', styles.searchWrapper)}>
+                <SearchExplorerIconBtn />
+
+                <SortPopup>
+                  <SortButton />
+                  <SortPopupContent items={memoizedSortAssetsOptions} />
+                </SortPopup>
+
+                <ManageAssetsButton />
+              </div>
+            </SearchExplorerClosed>
+          </>
+        </SearchExplorer>
+      </div>
+
       <div className={classNames('my-3 flex flex-col')}>
         <InfiniteScroll
           dataLength={userHistory.length}

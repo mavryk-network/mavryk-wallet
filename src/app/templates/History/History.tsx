@@ -15,7 +15,7 @@ import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 // import { txMocked } from './mock';
 
-const INITIAL_NUMBER = 30;
+const INITIAL_NUMBER = 60;
 const LOAD_STEP = 30;
 
 interface Props {

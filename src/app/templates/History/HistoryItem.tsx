@@ -45,7 +45,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div className="flex flex-col gap-1 items-start justify-center">
-            <OperationStack base={base} />
+            <OperationStack historyItem={historyItem} base={base} />
             <div className="flex items-center">
               <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
               {rest.length > 0 && (

@@ -7,35 +7,16 @@ import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
 import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg';
 import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
-import { TEZ_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
-import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
+import { HistoryItemOpTypeEnum, UserHistoryItem } from 'lib/temple/history/types';
 
-import { alterIpfsUrl, toHistoryTokenSlug } from './utils';
+import { alterIpfsUrl, getAssetsFromOperations } from './utils';
 
 type HistoryTokenIconProps = {
   onClick?: () => void;
   historyItem: UserHistoryItem;
   size?: number;
 };
-
-function getAssetsFromOperations(item: UserHistoryItem | null) {
-  if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
-
-  const slugs = item.operations.reduce<string[]>((acc, op) => {
-    const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
-
-    const assetSlug = op.contractAddress
-      ? isTezAsset(op.contractAddress)
-        ? TEZ_TOKEN_SLUG
-        : toTokenSlug(op.contractAddress, tokenId)
-      : '';
-    acc = [...new Set([...acc, assetSlug].filter(o => Boolean(o)))];
-    return acc;
-  }, []);
-
-  return slugs;
-}
 
 export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onClick, size = 32 }) => {
   const { type } = historyItem;

@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
+import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
 import {
@@ -9,24 +10,30 @@ import {
   HistoryItemOpTypeEnum,
   HistoryItemDelegationOp,
   HistoryItemTransactionOp,
-  HistoryItemOtherOp
+  HistoryItemOtherOp,
+  UserHistoryItem
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
+import { getAssetsFromOperations } from './utils';
 
 interface Props {
   item: IndividualHistoryItem;
   isTiny?: boolean;
   moneyDiff?: MoneyDiff;
+  originalHistoryItem?: UserHistoryItem;
 }
 
-export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff }) => {
+export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, originalHistoryItem }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
   const componentBaseProps = {
     status: item.status,
     moneyDiff
   };
+
+  const slugs = getAssetsFromOperations(originalHistoryItem);
+  const tokensMetadata = useMultipleAssetsMetadata(slugs);
 
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation:
@@ -52,12 +59,21 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff }) => {
         />
       );
     case HistoryItemOpTypeEnum.Swap:
-      const opSwap = item as HistoryItemTransactionOp;
+      // const opSwap = item as HistoryItemTransactionOp;
+      const symbol1 = (tokensMetadata && tokensMetadata[0]?.symbol) ?? '?';
+      const symbol2 = (tokensMetadata && tokensMetadata[1]?.symbol) ?? '?';
+
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="swappedContract" args={[opSwap.destination.address]} />}
+          argsNode={
+            <div className="text-base-plus text-white">
+              <span className="text-accent-blue">{symbol1}&nbsp;</span>
+              to
+              <span className="text-accent-blue">&nbsp;{symbol2}</span>
+            </div>
+          }
         />
       );
 

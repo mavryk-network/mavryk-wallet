@@ -1,7 +1,7 @@
 /**
  * Actually, there is a bunch of other types but only these will be used for now
  */
-export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination';
+export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination' | 'other';
 
 export type TzktQuoteCurrency = 'None' | 'Btc' | 'Eur' | 'Usd' | 'Cny' | 'Jpy' | 'Krw';
 
@@ -75,12 +75,16 @@ export interface TzktOriginationOperation extends TzktOperationBase {
 export interface TzktRevealOperation extends TzktOperationBase {
   type: 'reveal';
 }
+export interface TzkOtherOperation extends TzktOperationBase {
+  type: 'other';
+}
 
 export type TzktOperation =
   | TzktDelegationOperation
   | TzktTransactionOperation
   | TzktRevealOperation
-  | TzktOriginationOperation;
+  | TzktOriginationOperation
+  | TzkOtherOperation;
 
 type TzktDelegateInfo = {
   alias?: string;

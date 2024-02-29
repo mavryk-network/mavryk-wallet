@@ -96,10 +96,18 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
         />
       );
+    case HistoryItemOpTypeEnum.Reveal:
+      const opReveal = item as HistoryItemTransactionOp;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={HistoryItemOpTypeTexts[item.type]}
+          argsNode={<StackItemArgs i18nKey="revealOperationType" args={[opReveal.source.address]} />}
+        />
+      );
     // Other
     case HistoryItemOpTypeEnum.Other:
     default:
-      console.log(item);
       const opOther = item as HistoryItemOtherOp;
       const titleNode = opOther.name
         ? opOther.name
@@ -116,6 +124,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           titleNode={titleNode}
           argsNode={
             <StackItemArgs
+              // using reveal i18n to get empty string
               i18nKey="revealOperationType"
               args={[opOther.destination?.address || opOther.source.address || opOther.hash]}
             />

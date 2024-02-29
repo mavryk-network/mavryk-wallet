@@ -18,6 +18,7 @@ import {
   Fa2TransferSummaryArray,
   HistoryItemDelegationOp,
   HistoryItemOperationBase,
+  HistoryItemOpReveal,
   HistoryItemOpTypeEnum,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
@@ -102,6 +103,15 @@ function reduceOneTzktOperation(
       };
       if (operation.originatedContract) originationOp.originatedContract = operation.originatedContract;
       return originationOp;
+    }
+    case 'reveal': {
+      const revealOpBase = buildHistoryItemOpBase(operation, address, 0, operation.sender, index);
+
+      const revealOp: HistoryItemOpReveal = {
+        ...revealOpBase,
+        type: HistoryItemOpTypeEnum.Reveal
+      };
+      return revealOp;
     }
     default:
       const source = operation.sender;

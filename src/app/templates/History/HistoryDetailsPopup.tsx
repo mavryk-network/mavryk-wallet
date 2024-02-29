@@ -108,7 +108,6 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <CardContainer className="mb-6 text-base-plus text-white">
           <span className="mb-2">
             <T id="receivedFrom" />
-            {/* {HistoryItemOpTypeTexts[historyItem.type].concat(` ${getOperationTypeI18nKeyVerb(historyItem.type)}`)} */}
           </span>
           <div className="flex items-center gap-3">
             <Identicon

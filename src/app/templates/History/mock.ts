@@ -273,3 +273,104 @@ export const txMocked = {
     type: 3
   }
 };
+
+export const StakedMock = {
+  type: 2,
+  hash: 'oo5jjXuiVYBHxUftEzyRMqfGxfXE1UvxTS9PZQFYnPJg2bfjk2m',
+  addedAt: '2024-01-28T22:11:11Z',
+  status: 'applied',
+  operations: [
+    {
+      id: 252062259478528,
+      level: 5272223,
+      source: {
+        address: 'tz1R9sdHVh9kwpuJByDGeAaLxVUqFaV4h1yG'
+      },
+      amountSigned: '-0',
+      status: 'applied',
+      addedAt: '2024-01-28T22:11:11Z',
+      block: 'BLcfn1g2GNv8aLvNMq4iWiUtM5djNx6qQCyHd7qroNvKHMGrj3j',
+      hash: 'oo5jjXuiVYBHxUftEzyRMqfGxfXE1UvxTS9PZQFYnPJg2bfjk2m',
+      isHighlighted: false,
+      opIndex: 0,
+      bakerFee: 471,
+      gasUsed: 100,
+      storageUsed: 0,
+      storageFee: 0,
+      entrypoint: '',
+      type: 2,
+      newDelegate: {
+        alias: 'ECAD Labs Baker',
+        address: 'tz1RuHDSj9P7mNNhfKxsyLGRDahTX5QD1DdP'
+      }
+    },
+    {
+      id: 252062258429952,
+      level: 5272223,
+      source: {
+        address: 'tz1R9sdHVh9kwpuJByDGeAaLxVUqFaV4h1yG'
+      },
+      amountSigned: '-0',
+      status: 'applied',
+      addedAt: '2024-01-28T22:11:11Z',
+      block: 'BLcfn1g2GNv8aLvNMq4iWiUtM5djNx6qQCyHd7qroNvKHMGrj3j',
+      hash: 'oo5jjXuiVYBHxUftEzyRMqfGxfXE1UvxTS9PZQFYnPJg2bfjk2m',
+      isHighlighted: false,
+      opIndex: 1,
+      bakerFee: 374,
+      gasUsed: 171,
+      storageUsed: 0,
+      storageFee: 0,
+      entrypoint: '',
+      type: 5,
+      name: 'reveal'
+    }
+  ],
+  highlightedOperationIndex: 0,
+  isGroupedOp: true,
+  firstOperation: {
+    id: 252062259478528,
+    level: 5272223,
+    source: {
+      address: 'tz1R9sdHVh9kwpuJByDGeAaLxVUqFaV4h1yG'
+    },
+    amountSigned: '-0',
+    status: 'applied',
+    addedAt: '2024-01-28T22:11:11Z',
+    block: 'BLcfn1g2GNv8aLvNMq4iWiUtM5djNx6qQCyHd7qroNvKHMGrj3j',
+    hash: 'oo5jjXuiVYBHxUftEzyRMqfGxfXE1UvxTS9PZQFYnPJg2bfjk2m',
+    isHighlighted: false,
+    opIndex: 0,
+    bakerFee: 471,
+    gasUsed: 100,
+    storageUsed: 0,
+    storageFee: 0,
+    entrypoint: '',
+    type: 2,
+    newDelegate: {
+      alias: 'ECAD Labs Baker',
+      address: 'tz1RuHDSj9P7mNNhfKxsyLGRDahTX5QD1DdP'
+    }
+  },
+  oldestOperation: {
+    id: 252062258429952,
+    level: 5272223,
+    source: {
+      address: 'tz1R9sdHVh9kwpuJByDGeAaLxVUqFaV4h1yG'
+    },
+    amountSigned: '-0',
+    status: 'applied',
+    addedAt: '2024-01-28T22:11:11Z',
+    block: 'BLcfn1g2GNv8aLvNMq4iWiUtM5djNx6qQCyHd7qroNvKHMGrj3j',
+    hash: 'oo5jjXuiVYBHxUftEzyRMqfGxfXE1UvxTS9PZQFYnPJg2bfjk2m',
+    isHighlighted: false,
+    opIndex: 1,
+    bakerFee: 374,
+    gasUsed: 171,
+    storageUsed: 0,
+    storageFee: 0,
+    entrypoint: '',
+    type: 5,
+    name: 'reveal'
+  }
+};

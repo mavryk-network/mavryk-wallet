@@ -1950,6 +1950,14 @@
       }
     }
   },
+  "revealOperationType": {
+    "message": "$receiver$",
+    "placeholders": {
+      "receiver": {
+        "content": "$1"
+      }
+    }
+  },
   "interaction": {
     "message": "Interaction"
   },

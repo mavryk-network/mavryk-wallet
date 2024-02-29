@@ -13,7 +13,7 @@ import useHistory from '../../../lib/temple/history/hook';
 import { PartnersPromotion, PartnersPromotionVariant } from '../../atoms/partners-promotion';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
-// import { txMocked } from './mock';
+// import { txMocked, StakedMock } from './mock';
 
 const INITIAL_NUMBER = 60;
 const LOAD_STEP = 30;
@@ -22,7 +22,7 @@ interface Props {
   assetSlug?: string;
 }
 
-// const userHistory = [txMocked];
+// const userHistory = [StakedMock];
 
 export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);

@@ -70,7 +70,9 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       id: oper.id,
       hash: oper.hash,
       bakerFee: oper.bakerFee,
-      storageFee: oper.storageFee
+      storageFee: oper.storageFee,
+      gasUsed: oper.gasUsed,
+      storageUsed: oper.storageUsed ?? 0
     };
 
     switch (oper.type) {
@@ -144,13 +146,11 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       default:
         const opOther = oper as HistoryItemOtherOp;
 
-        console.log(oper, 'oper');
-
         opStack.push({
           ...basicFields,
           destination: opOther.destination,
           type: HistoryItemOpTypeEnum.Other,
-          name: opOther.type as unknown as string
+          name: opOther.name
         });
         break;
     }

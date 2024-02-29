@@ -99,19 +99,29 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
     // Other
     case HistoryItemOpTypeEnum.Other:
     default:
-      console.log(item.type, 'other ?');
+      console.log(item);
       const opOther = item as HistoryItemOtherOp;
-      const titleNode =
-        item.type === 5
-          ? HistoryItemOpTypeTexts[item.type]
-          : opOther.name
-          ? opOther.name
-              .split('_')
-              .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
-              .join(' ')
-          : 'unknown';
+      const titleNode = opOther.name
+        ? opOther.name
+            .split('_')
+            .map(w => `${w.charAt(0).toUpperCase()}${w.substring(1)}`)
+            .join(' ')
+        : opOther.type === 5
+        ? HistoryItemOpTypeTexts[item.type]
+        : 'unknown';
 
-      return <Component {...componentBaseProps} titleNode={titleNode} />;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={titleNode}
+          argsNode={
+            <StackItemArgs
+              i18nKey="revealOperationType"
+              args={[opOther.destination?.address || opOther.source.address || opOther.hash]}
+            />
+          }
+        />
+      );
   }
 });
 

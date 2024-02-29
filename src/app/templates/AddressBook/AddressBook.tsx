@@ -13,6 +13,7 @@ import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
+import styles from './addressBook.module.css';
 import { AddressBookSelectors } from './AddressBook.selectors';
 
 type ContactActions = {
@@ -76,14 +77,19 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
       </div>
       {isContactsEmpty && (
         <section className="w-full flex-grow flex justify-center items-center">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center text-center">
             <div className="text-base-plus text-white mb-2">
               <T id="noContacts" />
             </div>
-            <div className="text-sm text-secondary-white mb-4">
+            <div className="text-sm text-secondary-white mb-4" style={{ maxWidth: 170 }}>
               <T id="addAddresesDesc" />
             </div>
-            <ButtonRounded size="small" className="self-center rounded-2xl-plus" onClick={handleAddContactClick} fill>
+            <ButtonRounded
+              size="small"
+              className={classNames('self-center rounded-2xl-plus', styles.contactButton)}
+              onClick={handleAddContactClick}
+              fill
+            >
               <T id="addAddress" />
             </ButtonRounded>
           </div>

@@ -14,10 +14,10 @@ const AccountTypeBadge = memo<AccountTypeBadgeProps>(({ account }) => {
 
   return title ? (
     <span
-      className={clsx('p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
-      style={{ fontSize: '0.6rem' }}
+      style={{ padding: '2px 4px' }}
+      className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
     >
-      {title.toUpperCase()}
+      {title}
     </span>
   ) : null;
 });

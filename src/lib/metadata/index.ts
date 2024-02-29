@@ -33,6 +33,16 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   return tokenMetadata;
 };
 
+export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {
+  const tokensMetadata = useTokensMetadataSelector();
+  const gasMetadata = useGasTokenMetadata();
+
+  return slugs.map(s => {
+    if (isTezAsset(s)) return gasMetadata;
+    return tokensMetadata[s];
+  });
+};
+
 export const useTokensMetadataWithPresenceCheck = (slugsToCheck?: string[]) => {
   const allTokensMetadata = useTokensMetadataSelector();
 

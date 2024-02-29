@@ -1,42 +1,46 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
+
+import clsx from 'clsx';
 
 import { ReactComponent as StakeIcon } from 'app/icons/operations/stake.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
 import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg';
 import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
-import { t } from 'lib/i18n';
-import { useAssetMetadata } from 'lib/metadata';
-import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
-import useTippy from 'lib/ui/useTippy';
+import { toTokenSlug } from 'lib/assets';
+import { useMultipleAssetsMetadata } from 'lib/metadata';
+import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
 
-import { alterIpfsUrl } from './utils';
+import { alterIpfsUrl, toHistoryTokenSlug } from './utils';
 
 type HistoryTokenIconProps = {
   onClick?: () => void;
-  transactionType: HistoryItemOpTypeEnum;
-  slug: string;
+  historyItem: UserHistoryItem;
   size?: number;
 };
 
-export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ slug, transactionType, onClick, size = 32 }) => {
-  const tokenMetadata = useAssetMetadata(slug ?? '');
+function getAssetsFromOperations(item: UserHistoryItem | null) {
+  if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
 
-  const tippyProps = useMemo(
-    () => ({
-      trigger: 'mouseenter',
-      hideOnClick: false,
-      content: tokenMetadata?.name ?? t('unknown'),
-      animation: 'shift-away-subtle'
-    }),
-    [tokenMetadata?.name]
-  );
+  const slugs = item.operations.reduce<string[]>((acc, op) => {
+    const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
-  const ref = useTippy<HTMLImageElement>(tippyProps);
+    const assetSlug = op.contractAddress ? toTokenSlug(op.contractAddress, tokenId) : '';
+    acc = [...new Set([...acc, assetSlug].filter(o => Boolean(o)))];
+    return acc;
+  }, []);
+
+  return slugs;
+}
+
+export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onClick, size = 32 }) => {
+  const { type } = historyItem;
+  const slugs = getAssetsFromOperations(historyItem);
+  const tokensMetadata = useMultipleAssetsMetadata(slugs);
 
   const renderOperationIcon = () => {
     // TODO add other icons
-    switch (transactionType) {
+    switch (type) {
       case HistoryItemOpTypeEnum.TransferFrom:
         return <ReceiveIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.TransferTo:
@@ -59,20 +63,29 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ slug, transactionT
   };
 
   return (
-    <div className="w-13 h-12 flex items-center justify-center">
+    <div className="w-13 h-12 flex items-center justify-start">
       <div
         className="bg-primary-bg rounded-full flex items-center justify-center relative"
         style={{ width: size, height: size }}
         onClick={onClick}
       >
         {renderOperationIcon()}
-        <img
-          ref={ref}
-          className="rounded-full overflow-hidden w-6 h-6 absolute left-2/3 top-1/2"
-          src={alterIpfsUrl(tokenMetadata?.thumbnailUri)}
-          alt={tokenMetadata?.name}
-        />
+        {tokensMetadata?.map((token, idx) => (
+          <img
+            key={idx}
+            className={clsx('rounded-full overflow-hidden w-6 h-6 absolute top-1/2')}
+            style={{ left: `${getLeftImagePosition(idx)}%`, zIndex: idx + 1 }}
+            src={alterIpfsUrl(token?.thumbnailUri)}
+            alt={token?.name}
+          />
+        ))}
       </div>
     </div>
   );
 };
+
+function getLeftImagePosition(idx: number) {
+  if (idx === 0) return 60;
+
+  return 60 + idx * 30;
+}

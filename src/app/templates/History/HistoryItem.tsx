@@ -49,7 +49,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
     <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
       <div onClick={() => handleItemClick(hash)} className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <HistoryTokenIcon transactionType={historyItem.type} slug={assetSlug} />
+          <HistoryTokenIcon historyItem={historyItem} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack base={base} />
             <div className="flex items-center">

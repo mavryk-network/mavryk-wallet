@@ -27,6 +27,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
 
   const assetslug = toHistoryTokenSlug(historyItem);
+
   const assetMetadata = useAssetMetadata(assetslug);
   const assetSymbol = getAssetSymbol(assetMetadata);
 
@@ -72,7 +73,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         </div>
       }
       portalClassName="token-details-popup"
-      headerComponent={<HistoryTokenIcon transactionType={historyItem.type} size={44} slug={assetslug} />}
+      headerComponent={<HistoryTokenIcon historyItem={historyItem} size={44} />}
       {...props}
     >
       <div className="px-4">

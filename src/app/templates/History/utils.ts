@@ -1,17 +1,17 @@
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
-import { T, TID, t } from 'lib/i18n';
+import { TEZ_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
+import { t } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
-
-export const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
-  contractAddress === TEZ_TOKEN_SLUG ? contractAddress : `${contractAddress}_${tokenId}`;
+import { HistoryItemOpTypeEnum, HistoryItemTransactionOp } from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null, slug?: string) => {
-  if (!historyItem) return TEZ_TOKEN_SLUG;
+  if (!historyItem || historyItem.operations[0].contractAddress === TEZ_TOKEN_SLUG) return TEZ_TOKEN_SLUG;
 
   return slug || !historyItem.operations[0]?.contractAddress
     ? TEZ_TOKEN_SLUG
-    : toTokenSlug(historyItem.operations[0].contractAddress ?? '', historyItem.operations[0]?.tokenTransfers?.tokenId);
+    : toTokenSlug(
+        historyItem.operations[0].contractAddress ?? '',
+        (historyItem.operations[0] as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
+      );
 };
 
 export const alterIpfsUrl = (url?: string) => {

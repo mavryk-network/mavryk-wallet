@@ -9,6 +9,7 @@ import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
 
+import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OperationStack } from './OperStack';
@@ -40,7 +41,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
 
   return (
-    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer')}>
+    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer', styles.historyItem)}>
       <div onClick={() => handleItemClick(hash)} className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
@@ -68,7 +69,9 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
         <div className="flex flex-col justify-center items-end" style={{ maxWidth: 76 }}>
           {moneyDiffsBase.map(({ assetSlug, diff }, i) => {
             if (isZero(diff)) return null;
-            return <MoneyDiffView key={i} assetId={assetSlug} diff={diff} pending={status === 'pending'} />;
+            return (
+              <MoneyDiffView key={i} className="gap-1" assetId={assetSlug} diff={diff} pending={status === 'pending'} />
+            );
           })}
         </div>
       </div>
@@ -82,7 +85,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           ))}
         </div>
       )}
-      {!last && <ListItemDivider />}
+      {!last && <ListItemDivider className={styles.divider} />}
     </div>
   );
 });

@@ -68,7 +68,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <div className="flex flex-col items-center gap-2">
           <div className="text-sm text-secondary-white">{HistoryItemOpTypeTexts[historyItem.type]}</div>
           <div className="flex flex-col">
-            {moneyDiffs.map(({ assetSlug, diff }, i) => (
+            {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
               <MoneyDiffView
                 key={i}
                 assetId={assetSlug}

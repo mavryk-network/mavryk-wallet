@@ -3497,5 +3497,11 @@
   },
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
+  },
+  "transferFrom": {
+    "message": "Transfer From"
+  },
+  "transferTo": {
+    "message": "Transfer To"
   }
 }

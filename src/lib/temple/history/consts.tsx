@@ -3,7 +3,7 @@ import { t } from 'lib/i18n';
 export const HistoryItemOpTypeTexts = {
   0: 'Sent',
   1: 'Received',
-  2: 'Staked',
+  2: 'Delegated',
   3: 'Interaction',
   4: t('origination'),
   5: 'Other',

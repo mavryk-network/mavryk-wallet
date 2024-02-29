@@ -41,7 +41,12 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
 
   return (
-    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer', styles.historyItem)}>
+    <div
+      className={classNames(
+        'py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer overflow-hidden',
+        styles.historyItem
+      )}
+    >
       <div onClick={() => handleItemClick(hash)} className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />

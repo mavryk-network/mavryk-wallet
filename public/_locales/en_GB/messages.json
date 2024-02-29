@@ -2455,7 +2455,7 @@
     "message": "New contact"
   },
   "addContact": {
-    "message": "Add contact"
+    "message": "Add Contact"
   },
   "newContactPlaceholder": {
     "message": "Enter contact name"
@@ -3256,10 +3256,10 @@
     "message": "Connect your ledger device to access your funds from this wallet application."
   },
   "noContacts": {
-    "message": "You have not got any contacts yet"
+    "message": "No Contacts"
   },
   "addAddress": {
-    "message": "Add address"
+    "message": "Add Address"
   },
   "addAddresesDesc": {
     "message": "Contacts & accounts you’ve added will appear here."

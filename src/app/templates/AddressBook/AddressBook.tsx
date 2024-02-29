@@ -143,7 +143,8 @@ const AddressBookBadge: FC<AddressBookBadgeProps> = ({ own, isCurrent }) => {
   return (
     <div className="flex items-center">
       <span
-        className={classNames('p-1 ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
+        style={{ padding: '2px 4px' }}
+        className={classNames('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
         {...setTestID(AddressBookSelectors.contactOwnLabelText)}
       >
         {isCurrent ? <T id="current" /> : <T id="ownAccount" />}

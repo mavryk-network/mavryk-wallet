@@ -113,7 +113,7 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
   }, [tabSlug, tabs]);
 
   return (
-    <div className={clsx('-mx-4 shadow-top-light', fullPage && 'rounded-t-md', className)}>
+    <div className={clsx('-mx-4 shadow-top-light h-full', fullPage && 'rounded-t-md', className)}>
       {/* TODO change to RWA the last teb when working on this task */}
       <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
 

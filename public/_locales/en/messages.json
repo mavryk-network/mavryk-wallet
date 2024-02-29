@@ -1400,7 +1400,7 @@
     "message": "Continue"
   },
   "noOperationsFound": {
-    "message": "No operations found"
+    "message": "You haven’t done any transactions yet"
   },
   "pending": {
     "message": "pending..."

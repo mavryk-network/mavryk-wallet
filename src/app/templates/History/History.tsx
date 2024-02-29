@@ -52,10 +52,10 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
 
   if (userHistory.length === 0 && !loading && reachedTheEnd) {
     return (
-      <div className={classNames('mt-4 mb-12', 'flex flex-col items-center justify-center', 'text-gray-500')}>
+      <div className={classNames('h-full my-auto mt-14', 'flex flex-col items-center justify-center', 'text-white')}>
         <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
 
-        <h3 className="text-sm font-light text-center" style={{ maxWidth: '20rem' }}>
+        <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
           <T id="noOperationsFound" />
         </h3>
       </div>
@@ -70,7 +70,7 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
   const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
 
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full max-w-sm mx-auto h-full">
       <div className={classNames('my-3 flex flex-col')}>
         <InfiniteScroll
           dataLength={userHistory.length}

@@ -58,5 +58,5 @@ export function useSortededAssetsSlugs(
       sortedAssetSlugs = [...sortedAssetSlugs];
   }
 
-  return [topSlug, ...sortedAssetSlugs];
+  return [...new Set([topSlug, ...sortedAssetSlugs])];
 }

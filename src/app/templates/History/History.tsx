@@ -204,7 +204,7 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
 
   return (
     <div className="w-full max-w-sm mx-auto h-full relative">
-      <div className={classNames('mt-3 w-full mx-4', loading && 'opacity-75 pointer-events-none')}>
+      <div className={classNames('mt-3 w-full mx-4')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
@@ -214,16 +214,20 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
                   onValueChange={setSearchValue}
                   // onFocus={handleSearchFieldFocus}
                   // onBlur={handleSearchFieldBlur}
-                  containerClassName="mr-2"
+                  containerClassName={classNames('mr-2')}
                 />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>
               <div className={classNames('flex justify-end items-center', styles.searchWrapper)}>
-                <SearchExplorerIconBtn />
+                <div className={classNames((loading || !filteredHistory.length) && 'opacity-50 pointer-events-none')}>
+                  <SearchExplorerIconBtn />
+                </div>
 
                 <SortPopup>
-                  <SortButton />
+                  <SortButton
+                    className={classNames((loading || !filteredHistory.length) && 'opacity-50 pointer-events-none')}
+                  />
                   <SortPopupContent items={memoizedSortAssetsOptions} />
                 </SortPopup>
 

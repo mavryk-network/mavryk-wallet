@@ -1,5 +1,7 @@
 import React, { CSSProperties, memo } from 'react';
 
+import clsx from 'clsx';
+
 import { FormField } from 'app/atoms';
 
 type RawPayloadViewProps = {
@@ -23,7 +25,7 @@ const RawPayloadView = memo(
         spellCheck={false}
         readOnly
         fieldWrapperBottomMargin={fieldWrapperBottomMargin}
-        className={className}
+        className={clsx('no-scrollbar', className)}
         style={{
           resize: 'none',
           marginBottom: 0,

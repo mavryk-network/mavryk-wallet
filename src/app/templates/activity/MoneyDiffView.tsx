@@ -22,7 +22,7 @@ export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = 
 
   const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
 
-  const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-base-plus';
+  const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-sm';
   const conditionalDiffClassName = diffBN.gt(0) ? 'text-primary-success' : 'text-primary-error';
   const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
   const showPlus = diffBN.gt(0) ? '+' : '';

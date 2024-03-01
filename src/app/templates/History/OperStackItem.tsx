@@ -86,7 +86,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={
-            <div className="text-base-plus text-white">
+            <div className="text-sm text-white">
               <span className="text-accent-blue">{symbol1}&nbsp;</span>
               to
               <span className="text-accent-blue">&nbsp;{symbol2}</span>
@@ -161,7 +161,7 @@ interface StackItemBaseProps {
 
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
   return (
-    <div className="flex items-center text-white text-base-plus">
+    <div className="flex items-center text-white text-sm">
       <div className="flex items-center">{titleNode}</div>
       <span>&nbsp;</span>
       {argsNode}

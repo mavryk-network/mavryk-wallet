@@ -195,14 +195,15 @@ export const ActionButton: FC<ActionButtonProps> = ({
         <>
           <div
             className={classNames(
-              disabled ? 'bg-gray-10' : 'bg-primary-card-op',
+              disabled && 'opacity-50',
+              'bg-primary-card-op',
               'rounded mb-2 flex items-center text-white',
               'border  p-10 h-full'
             )}
           >
-            <Icon className={classNames('w-6 h-auto', disabled ? 'stroke-gray' : 'stroke-accent-blue')} />
+            <Icon className={classNames('w-6 h-auto', 'stroke-accent-blue')} />
           </div>
-          <span className={classNames('text-center text-xs', disabled ? 'text-gray30' : 'text-white')}>{label}</span>
+          <span className={classNames('text-center text-xs', disabled && 'opacity-50', 'text-white')}>{label}</span>
         </>
       )
     }),

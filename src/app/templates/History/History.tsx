@@ -242,7 +242,7 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug, searchWrappe
       </div>
 
       {!filteredHistory.length && !loading ? (
-        <div className={classNames('h-full my-auto mt-14', 'flex flex-col items-center justify-center', 'text-white')}>
+        <div className={classNames('h-full my-auto py-16', 'flex flex-col items-center justify-center', 'text-white')}>
           <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
 
           <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>

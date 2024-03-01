@@ -3509,6 +3509,9 @@
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
   },
+  "feesBurned": {
+    "message": "Fees Burned 🔥"
+  },
   "transferFrom": {
     "message": "Transfer From"
   },

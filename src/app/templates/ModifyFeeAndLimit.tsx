@@ -50,6 +50,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
     let defaultGasFeeMutez = new BigNumber(0);
     let storageFeeMutez = new BigNumber(0);
+    let burnedFee = 0;
     if (estimates) {
       try {
         let i = 0;
@@ -63,6 +64,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
           );
           i++;
         }
+        // @ts-expect-error
+        burnedFee = estimates[0].burnFeeMutez + estimates[0]?.baseFeeMutez ?? 0 + storageFeeMutez;
       } catch {
         return null;
       }
@@ -86,6 +89,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
             title: t('storageFeeMax'),
             value: storageFee
           },
+
           ...(modifyFeeAndLimit.storageLimit !== null
             ? [
                 {
@@ -95,13 +99,17 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   onChange: modifyFeeAndLimit.onStorageLimitChange
                 }
               ]
-            : [])
+            : []),
+          {
+            key: 'feesBurned',
+            title: t('feesBurned'),
+            value: mutezToTz(burnedFee)
+          }
         ].map(({ key, title, value, onChange }) => (
           <div key={key} className={classNames('w-full flex items-center')}>
             <div className="whitespace-nowrap overflow-x-auto no-scrollbar opacity-90" style={{ maxWidth: '45%' }}>
               {title}
             </div>
-            <div className="mr-1">:</div>
 
             <div className="flex-1" />
 

@@ -64,7 +64,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     <div className="flex flex-col h-full">
       <div className="w-full max-w-sm mx-auto -mt-3">
         <CustomSelect
-          className="mb-6 p-0"
+          className={classNames('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
           getItemId={getContactKey}
           items={allContacts}
           OptionIcon={ContactIcon}

@@ -28,3 +28,7 @@
   top: -45px;
   z-index: 2;
 }
+
+.inputBgDarkLight {
+  background-color: #171717 !important;
+}

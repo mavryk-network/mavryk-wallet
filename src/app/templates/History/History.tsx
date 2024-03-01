@@ -4,8 +4,10 @@ import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
+import { DARK_LIGHT_THEME, DARK_THEME } from 'app/consts/appTheme';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
+import { ComponentTheme } from 'app/types/appTheme.types';
 import { T } from 'lib/i18n/react';
 import { useAccount } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
@@ -26,18 +28,20 @@ import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 // import { txMocked, StakedMock } from './mock';
 
-const INITIAL_NUMBER = 60;
+const INITIAL_NUMBER = 30;
 const LOAD_STEP = 30;
 
 const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
 
 interface Props {
   assetSlug?: string;
+  searchWrapperClassname?: string;
+  theme?: ComponentTheme;
 }
 
 // const userHistory = [StakedMock];
 
-export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
+export const HistoryComponent: React.FC<Props> = memo(({ assetSlug, searchWrapperClassname, theme = DARK_THEME }) => {
   const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
   // console.log('Logging user history in the HistoryComponent:', userHistory);
@@ -172,9 +176,6 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
 
-  // const handleSearchFieldFocus = useCallback(() => void setSearchFocused(true), [setSearchFocused]);
-  // const handleSearchFieldBlur = useCallback(() => void setSearchFocused(false), [setSearchFocused]);
-
   const filteredBySearchHistory = useMemo(
     () => (userHistory ? userHistory.filter(op => op.hash.includes(searchValue)) : []),
     [searchValue, userHistory]
@@ -202,32 +203,34 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug }) => {
 
   const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
 
+  const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
+  console.log(searchbtnStyles);
   return (
     <div className="w-full max-w-sm mx-auto h-full relative">
       <div className={classNames('mt-3 w-full mx-4')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
-              <div className={classNames('w-full flex justify-end', styles.searchWrapper)}>
+              <div className={classNames('w-full flex justify-end', styles.searchWrapper, searchWrapperClassname)}>
                 <SearchExplorerFinder
                   value={searchValue}
                   onValueChange={setSearchValue}
-                  // onFocus={handleSearchFieldFocus}
-                  // onBlur={handleSearchFieldBlur}
-                  containerClassName={classNames('mr-2')}
+                  containerClassName="mr-2"
+                  className={classNames(theme === DARK_LIGHT_THEME && styles.inputBgDarkLight)}
+                  cleanButtonStyle={searchbtnStyles}
                 />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>
-              <div className={classNames('flex justify-end items-center', styles.searchWrapper)}>
-                <div className={classNames((loading || !filteredHistory.length) && 'opacity-50 pointer-events-none')}>
+              <div
+                className={classNames('flex justify-end items-center', styles.searchWrapper, searchWrapperClassname)}
+              >
+                <div className={classNames(loading && 'opacity-50 pointer-events-none')}>
                   <SearchExplorerIconBtn />
                 </div>
 
                 <SortPopup>
-                  <SortButton
-                    className={classNames((loading || !filteredHistory.length) && 'opacity-50 pointer-events-none')}
-                  />
+                  <SortButton className={classNames(loading && 'opacity-50 pointer-events-none')} />
                   <SortPopupContent items={memoizedSortAssetsOptions} />
                 </SortPopup>
 

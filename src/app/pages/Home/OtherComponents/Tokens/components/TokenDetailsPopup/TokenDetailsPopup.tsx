@@ -3,6 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 
 import { Alert, HashChip, Money } from 'app/atoms';
+import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ConfirmedIcon } from 'app/icons/confirmed.svg';
@@ -16,6 +17,7 @@ import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
+import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
@@ -26,8 +28,8 @@ import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
+import styles from '../../Tokens.module.css';
 import { FiatBalance } from '../Balance';
-import { TransactionHistory } from './components/TransactionHistory';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
@@ -161,7 +163,14 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         ) : null}
       </div>
-      <TransactionHistory assetSlug={assetSlug} />
+      <div className="text-base-plus text-white w-full px-4">
+        <T id="history" />
+      </div>
+      <HistoryComponent
+        assetSlug={assetSlug}
+        searchWrapperClassname={styles.searchWrapperPopup}
+        theme={DARK_LIGHT_THEME}
+      />
     </section>
   );
 };

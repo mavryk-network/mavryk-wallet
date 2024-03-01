@@ -7,10 +7,11 @@ import { T } from 'lib/i18n';
 interface Props {
   disabled: boolean;
   percentage: number;
+  selectedPercentage: number;
   onClick: (percentage: number) => void;
 }
 
-export const PercentageButton: FC<Props> = ({ percentage, onClick, disabled }) => {
+export const PercentageButton: FC<Props> = ({ percentage, selectedPercentage, onClick, disabled }) => {
   const handleClick = () => onClick(percentage);
 
   return (
@@ -18,8 +19,10 @@ export const PercentageButton: FC<Props> = ({ percentage, onClick, disabled }) =
       disabled={disabled}
       type="button"
       className={classNames(
-        'border border-divider text-secondary-white rounded-md ml-1',
-        'text-xs p-0.5 flex justify-center items-center'
+        'border rounded-md ml-1',
+        'transition duration-200 ease-in-out',
+        'text-xs p-0.5 flex justify-center items-center',
+        percentage === selectedPercentage ? 'border-accent-blue text-white' : 'border-divider text-secondary-white '
       )}
       onClick={handleClick}
     >

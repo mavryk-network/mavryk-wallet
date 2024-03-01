@@ -1085,7 +1085,7 @@
     "message": "Routing Fee"
   },
   "routingFeeTooltip": {
-    "message": "For choosing the most profitable exchange route among Tezos DEXes. \n\nDEXes commissions are not included."
+    "message": "For choosing the most profitable exchange route among Tezos DEXes. \nDEXes commissions are not included."
   },
   "space": {
     "message": "Space"

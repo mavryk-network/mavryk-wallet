@@ -16,8 +16,8 @@ export const successContentData = {
           lastCharsCount={7}
           showIcon={false}
           key="hash"
-          className="ml-2 mr-1 bg-primary-card px-1 rounded"
-          style={{ paddingBlock: 3 }}
+          className="ml-2 mr-1 bg-primary-card px-1 rounded text-xs"
+          style={{ paddingBlock: 3, fontSize: 12 }}
         />
         <OpenInExplorerChip hash={hash} small />
       </div>

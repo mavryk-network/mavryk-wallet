@@ -467,7 +467,7 @@ export const SwapForm: FC = () => {
               <span ref={feeInfoIconRef} className="flex w-fit items-center text-white">
                 <T id="routingFee" />
                 &nbsp;
-                <InfoIcon className="w-3 h-auto stroke-2 stroke-white" />
+                <InfoIcon className="w-3 h-auto stroke-2 stroke-white mt-1" />
               </span>
             </div>
             <div className="text-right text-white">{ROUTING_FEE_PERCENT}%</div>
@@ -515,7 +515,7 @@ export const SwapForm: FC = () => {
               <span ref={cashbackInfoIconRef} className="flex w-fit items-center text-white">
                 <T id="swapCashback" />
                 &nbsp;
-                <InfoIcon className="w-3 h-auto stroke-2 stroke-white" />
+                <InfoIcon className="w-3 h-auto stroke-2 stroke-white mt-1" />
               </span>
             </div>
             <div className="text-right text-white">{SWAP_CASHBACK_PERCENT}%</div>

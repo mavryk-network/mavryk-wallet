@@ -1,15 +1,13 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import { Name, Button, HashShortView, Money, Identicon } from 'app/atoms';
+import { Name, Button, HashShortView, Identicon } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import Balance from 'app/templates/Balance';
-import { t } from 'lib/i18n';
 import { TempleAccount } from 'lib/temple/types';
 import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
-import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 
 import { setAnotherSelector, setTestID } from '../../../../../lib/analytics';
 import { AccountDropdownSelectors } from '../selectors';

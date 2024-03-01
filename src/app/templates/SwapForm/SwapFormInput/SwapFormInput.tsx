@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useMemo } from 'react';
+import React, { FC, ReactNode, useCallback, useMemo, useState } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
@@ -47,6 +47,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
   const { assetSlug, amount } = value;
   const isTezosSlug = assetSlug === 'tez';
   const assetSlugWithFallback = assetSlug ?? 'tez';
+  const isAssestSelected = Boolean(assetSlug);
 
   const assetMetadataWithFallback = useAssetMetadata(assetSlugWithFallback)!;
   const assetMetadata = useMemo(
@@ -66,6 +67,8 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
     LEADING_ASSETS
   );
 
+  const [selectedPercentage, setSelectedPercentage] = useState(PERCENTAGE_BUTTONS[0]);
+
   const maxAmount = useMemo(() => {
     if (!assetSlug) {
       return new BigNumber(0);
@@ -81,7 +84,6 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
       assetSlug,
       amount: newAmount
     });
-
   const handlePercentageClick = (percentage: number) => {
     if (!assetSlug) {
       return;
@@ -92,6 +94,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
       .decimalPlaces(assetMetadata.decimals, BigNumber.ROUND_DOWN);
 
     handleAmountChange(newAmount);
+    setSelectedPercentage(percentage);
   };
 
   const handleSelectedAssetChange = (newAssetSlug: string) => {
@@ -133,6 +136,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
             label={label}
             selectedAssetSlug={assetSlugWithFallback}
             selectedAssetSymbol={assetMetadataWithFallback.symbol}
+            isAssestSelected={isAssestSelected}
           />
         }
         footer={
@@ -142,6 +146,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
               amountInputDisabled={Boolean(amountInputDisabled)}
               selectedAssetSlug={assetSlugWithFallback}
               handlePercentageClick={handlePercentageClick}
+              selectedPercentage={selectedPercentage}
             />
           </div>
         }
@@ -270,11 +275,12 @@ const SwapInput: FC<SwapInputProps> = ({
   );
 };
 
-const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selectedAssetSymbol: string }> = ({
-  selectedAssetSlug,
-  selectedAssetSymbol,
-  label
-}) => {
+const SwapInputHeader: FC<{
+  label: ReactNode;
+  selectedAssetSlug: string;
+  selectedAssetSymbol: string;
+  isAssestSelected: boolean;
+}> = ({ selectedAssetSlug, selectedAssetSymbol, label, isAssestSelected }) => {
   const account = useAccount();
   const balance = useBalance(selectedAssetSlug, account.publicKeyHash, { suspense: false });
   useOnBlock(_ => balance.mutate());
@@ -283,7 +289,7 @@ const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selecte
     <div className="w-full flex items-center justify-between mb-3">
       <span className="text-base-plus text-white">{label}</span>
 
-      {selectedAssetSlug && (
+      {isAssestSelected && (
         <span className="text-sm text-secondary-white flex items-baseline">
           <span className="mr-1">
             <T id="balance" />:
@@ -304,9 +310,10 @@ const SwapInputHeader: FC<{ label: ReactNode; selectedAssetSlug: string; selecte
 
 const SwapFooter: FC<{
   amountInputDisabled: boolean;
+  selectedPercentage: number;
   selectedAssetSlug: string;
   handlePercentageClick: (percentage: number) => void;
-}> = ({ amountInputDisabled, selectedAssetSlug, handlePercentageClick }) => {
+}> = ({ amountInputDisabled, selectedPercentage, selectedAssetSlug, handlePercentageClick }) => {
   const account = useAccount();
   const balance = useBalance(selectedAssetSlug, account.publicKeyHash, { suspense: false });
   useOnBlock(_ => balance.mutate());
@@ -318,6 +325,7 @@ const SwapFooter: FC<{
           disabled={!balance.data}
           key={percentage}
           percentage={percentage}
+          selectedPercentage={selectedPercentage}
           onClick={handlePercentageClick}
         />
       ))}

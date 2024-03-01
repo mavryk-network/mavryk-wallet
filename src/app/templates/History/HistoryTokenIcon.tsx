@@ -52,7 +52,8 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
       className={clsx(
         'h-12 flex items-center justify-start',
         slugs.length === 1 && 'w-11',
-        slugs.length === 2 && 'w-13'
+        slugs.length === 2 && 'w-13',
+        slugs.length === 3 && 'w-14'
       )}
     >
       <div

@@ -141,7 +141,6 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug, searchWrappe
         id: HistoryItemOpTypeEnum.TransferTo.toString(),
         selected: filterOptions.includes(HistoryItemOpTypeEnum.TransferTo),
         onClick: () => {
-          console.log('clicked');
           const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.TransferTo);
           const newFllteredOptions = isSelected
             ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.TransferTo)
@@ -204,7 +203,6 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug, searchWrappe
   const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
 
   const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
-  console.log(searchbtnStyles);
   return (
     <div className="w-full max-w-sm mx-auto h-full relative">
       <div className={classNames('mt-3 w-full mx-4')}>

@@ -291,6 +291,5 @@ const buildOnScroll =
   };
 
 const filterTransactionHistory = (history: UserHistoryItem[], options: HistoryItemOpTypeEnum[]) => {
-  console.log(options);
   return !options.length ? history : history.filter(op => options.includes(op.type));
 };

@@ -4,6 +4,7 @@ import clsx from 'clsx';
 
 import { ReactComponent as InteractIcon } from 'app/icons/operations/interact.svg';
 import { ReactComponent as OriginateIcon } from 'app/icons/operations/originate.svg';
+import { ReactComponent as OtherIcon } from 'app/icons/operations/other.svg';
 import { ReactComponent as StakeIcon } from 'app/icons/operations/stake.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
@@ -26,6 +27,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
 
   const renderOperationIcon = () => {
+    // TODO add withdraw. new stake, vote yay, buy
     switch (type) {
       case HistoryItemOpTypeEnum.TransferFrom:
         return <ReceiveIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
@@ -41,7 +43,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
         return <InteractIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Reveal:
       case HistoryItemOpTypeEnum.Other:
-        return <InteractIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
+        return <OtherIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
 
       default:
         return (

@@ -50,7 +50,7 @@ const OperationsBanner = memo<OperationsBannerProps>(
           <div
             className={classNames(
               'block w-full max-w-full p-2',
-              'rounded-2xl',
+              'rounded-2xl no-scrollbar',
               'bg-gray-910',
               'text-base-plus text-white',
               typeof opParams === 'string' ? 'break-all' : 'whitespace-nowrap overflow-auto'

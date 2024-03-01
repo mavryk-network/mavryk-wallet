@@ -43,7 +43,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
       <>
         {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
         <div className={classNames('w-full max-h-500', styles.container)}>
-          <div className="absolute top-4 px-4 w-full flex justify-end items-center bg-primary-card z-10">
+          <div className="absolute top-4 px-4 w-full flex justify-end items-cente">
             <button onMouseEnter={handleMouseEnter} id="close-icon" className=" ">
               <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
             </button>

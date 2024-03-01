@@ -1961,8 +1961,19 @@
   "interaction": {
     "message": "Interaction"
   },
-  "interactionWithContract": {
-    "message": "with $contract$",
+  "interactionOnContract": {
+    "message": "$noun$ on $contract$",
+    "placeholders": {
+      "noun": {
+        "content": "$1"
+      },
+      "contract": {
+        "content": "$2"
+      }
+    }
+  },
+  "originationOnContract": {
+    "message": "$contract$",
     "placeholders": {
       "contract": {
         "content": "$1"

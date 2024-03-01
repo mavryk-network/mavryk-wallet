@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { ReactNode, memo } from 'react';
 
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
@@ -11,7 +11,8 @@ import {
   HistoryItemDelegationOp,
   HistoryItemTransactionOp,
   HistoryItemOtherOp,
-  UserHistoryItem
+  UserHistoryItem,
+  HistoryItemOriginationOp
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
@@ -47,7 +48,19 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
       );
 
     case HistoryItemOpTypeEnum.Origination:
-      return <Component {...componentBaseProps} titleNode={HistoryItemOpTypeTexts[item.type]} />;
+      const opOriginate = item as HistoryItemOriginationOp;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={HistoryItemOpTypeTexts[item.type]}
+          argsNode={
+            <StackItemArgs
+              i18nKey="originationOnContract"
+              args={[opOriginate.originatedContract?.address ?? opOriginate.hash]}
+            />
+          }
+        />
+      );
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
@@ -55,7 +68,12 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[opInteract.destination.address]} />}
+          argsNode={
+            <StackItemArgs
+              i18nKey="interactionOnContract"
+              args={[<span className="text-accent-blue">updateConfig</span>, opInteract.destination.address]}
+            />
+          }
         />
       );
     case HistoryItemOpTypeEnum.Swap:
@@ -175,7 +193,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
 
 interface StackItemArgsProps {
   i18nKey: TID;
-  args: string[];
+  args: (string | ReactNode | Element)[];
 }
 
 const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
@@ -187,19 +205,23 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
     <span className="text-white">
       <T
         id={i18nKey}
-        substitutions={args.map((value, index) => (
-          <span key={index} onClick={handleHashClick}>
-            <HashChip
-              className="text-blue-200"
-              firstCharsCount={5}
-              key={index}
-              hash={value}
-              type="link"
-              showIcon={false}
-            />
-            {index === args.length - 1 ? null : ', '}
-          </span>
-        ))}
+        substitutions={args.map((value, index) => {
+          return typeof value === 'string' ? (
+            <span key={index} onClick={handleHashClick}>
+              <HashChip
+                className="text-blue-200"
+                firstCharsCount={5}
+                key={index}
+                hash={value}
+                type="link"
+                showIcon={false}
+              />
+              {index === args.length - 1 ? null : ', '}
+            </span>
+          ) : (
+            value
+          );
+        })}
       />
     </span>
   );

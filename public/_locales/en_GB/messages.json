@@ -1400,7 +1400,7 @@
     "message": "Continue"
   },
   "noOperationsFound": {
-    "message": "No operations found"
+    "message": "You haven’t done any transactions yet"
   },
   "pending": {
     "message": "pending..."
@@ -1741,7 +1741,7 @@
   "activity": {
     "message": "Activity"
   },
-  "History": {
+  "history": {
     "message": "History"
   },
   "manage": { "message": "Manage" },
@@ -1950,17 +1950,45 @@
       }
     }
   },
+  "revealOperationType": {
+    "message": "$receiver$",
+    "placeholders": {
+      "receiver": {
+        "content": "$1"
+      }
+    }
+  },
   "interaction": {
     "message": "Interaction"
   },
   "interactionWithContract": {
-    "message": "with $contract$",
+    "message": "$noun$ on $contract$",
+    "placeholders": {
+      "noun": {
+        "content": "$1"
+      },
+      "contract": {
+        "content": "$2"
+      }
+    }
+  },
+  "originationOnContract": {
+    "message": "$contract$",
     "placeholders": {
       "contract": {
         "content": "$1"
       }
     }
   },
+  "swappedContract": {
+    "message": "$contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
+
   "delegationToSmb": {
     "message": "to $delegate$",
     "placeholders": {
@@ -2416,8 +2444,16 @@
     "message": "more",
     "description": "Show more"
   },
+  "showMore": {
+    "message": "Show More",
+    "description": "Show more"
+  },
   "less": {
     "message": "less",
+    "description": "Show less"
+  },
+  "showLess": {
+    "message": "Show Less",
     "description": "Show less"
   },
   "showInfo": { "message": "Show info" },
@@ -2882,7 +2918,7 @@
     "message": "Fixed rate:"
   },
   "transactionId": {
-    "message": "Transaction ID:"
+    "message": "Transaction ID"
   },
   "atomDepositMemo": {
     "message": "Atom Deposit Memo"
@@ -3463,5 +3499,20 @@
   },
   "useMax": {
     "message": "Use Max"
+  },
+  "receivedFrom": {
+    "message": "Received from"
+  },
+  "networkFees": {
+    "message": "Network Fees"
+  },
+  "burnedFromFees": {
+    "message": "Burned From Fees 🔥"
+  },
+  "transferFrom": {
+    "message": "Transfer From"
+  },
+  "transferTo": {
+    "message": "Transfer To"
   }
 }

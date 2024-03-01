@@ -87,6 +87,10 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle 
 const SortListItem: FC<{ item: SortListItemType }> = ({ item }) => {
   const { nameI18nKey, selected, disabled = false, onClick, id } = item;
 
+  const handleRadioClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  }, []);
+
   return (
     <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
       <div className="flex items-center">
@@ -94,7 +98,7 @@ const SortListItem: FC<{ item: SortListItemType }> = ({ item }) => {
           <T id={nameI18nKey} />
         </span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} />
+      <RadioButton id={id} checked={selected} disabled={disabled} onClick={handleRadioClick} />
     </div>
   );
 };

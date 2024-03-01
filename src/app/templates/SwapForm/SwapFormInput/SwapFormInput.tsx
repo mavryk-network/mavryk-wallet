@@ -84,6 +84,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
       assetSlug,
       amount: newAmount
     });
+
   const handlePercentageClick = (percentage: number) => {
     if (!assetSlug) {
       return;
@@ -140,8 +141,8 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
           />
         }
         footer={
-          <div className={classNames('w-full flex items-center', prettyError ? 'justify-between' : 'justify-end')}>
-            {prettyError && <div className="text-primary-error text-xs">{prettyError}</div>}
+          <div className={classNames('flex flex-col items-end justify-end text-right')}>
+            {prettyError && <div className="text-primary-error text-sm w-full mt-1">{prettyError}</div>}
             <SwapFooter
               amountInputDisabled={Boolean(amountInputDisabled)}
               selectedAssetSlug={assetSlugWithFallback}
@@ -155,7 +156,10 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
           testIds={{
             dropdownTestId: testIDs?.dropdown
           }}
-          fontContentWrapperClassname="bg-primary-card max-h-66px border border-transparent rounded-xl"
+          fontContentWrapperClassname={classNames(
+            'bg-primary-card max-h-66px border border-transparent rounded-xl border',
+            prettyError ? 'border-primary-error' : 'border-transparent'
+          )}
           dropdownButtonClassName={classNames(
             'p-0 m-4 min-h-9 min-w-85 flex justify-between pr-4',
             styles.extraFaceContentWrapper

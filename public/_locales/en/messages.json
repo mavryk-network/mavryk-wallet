@@ -3517,5 +3517,8 @@
   },
   "transferTo": {
     "message": "Transfer To"
+  },
+  "maxAmountErrorMsg": {
+    "message": "The sum you entered exceeds your available balance"
   }
 }

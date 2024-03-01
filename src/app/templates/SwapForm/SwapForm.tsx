@@ -38,7 +38,7 @@ import { getPercentageRatio } from 'lib/route3/utils/get-percentage-ratio';
 import { getRoute3TokenBySlug } from 'lib/route3/utils/get-route3-token-by-slug';
 import { getRoutingFeeTransferParams } from 'lib/route3/utils/get-routing-fee-transfer-params';
 import { ROUTING_FEE_PERCENT, SWAP_CASHBACK_PERCENT } from 'lib/swap-router/config';
-import { useAccount, useGetTokenMetadata, useTezos } from 'lib/temple/front';
+import { useAccount, useBalance, useGetTokenMetadata, useTezos } from 'lib/temple/front';
 import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
 import useTippy from 'lib/ui/useTippy';
 import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-params';
@@ -54,6 +54,8 @@ import { SwapFormInput } from './SwapFormInput/SwapFormInput';
 import { SwapMinimumReceived } from './SwapMinimumReceived/SwapMinimumReceived';
 import { SwapRoute } from './SwapRoute/SwapRoute';
 
+const EXCHANGE_XTZ_RESERVE = new BigNumber('0.3');
+
 export const SwapForm: FC = () => {
   const dispatch = useDispatch();
   const tezos = useTezos();
@@ -64,6 +66,7 @@ export const SwapForm: FC = () => {
   const swapParams = useSwapParamsSelector();
   const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
   const getTokenMetadata = useGetTokenMetadata();
+  const account = useAccount();
 
   const formAnalytics = useFormAnalytics('SwapForm');
 
@@ -72,15 +75,39 @@ export const SwapForm: FC = () => {
 
   const defaultValues = useSwapFormDefaultValue();
   const { handleSubmit, errors, watch, setValue, control, register, triggerValidation } = useForm<SwapFormValue>({
-    defaultValues
+    defaultValues,
+    mode: 'onChange',
+    validateCriteriaMode: 'firstError'
   });
 
   const inputValue = watch('input') ?? { assetSlug: undefined, amount: 0 };
   const outputValue = watch('output') ?? { assetSlug: undefined, amount: 0 };
   const slippageTolerance = watch('slippageTolerance');
 
+  const balance = useBalance(inputValue.assetSlug ?? 'tez', account.publicKeyHash, { suspense: false });
+
+  const maxAmount = useMemo(() => {
+    if (!inputValue.assetSlug) {
+      return new BigNumber(0);
+    }
+
+    const maxSendAmount =
+      inputValue.assetSlug === TEZ_TOKEN_SLUG ? balance.data?.minus(EXCHANGE_XTZ_RESERVE) : balance.data;
+
+    return maxSendAmount ?? new BigNumber(0);
+  }, [inputValue.assetSlug, balance.data]);
+
+  const exceededMaxAmount = useMemo(
+    () => (inputValue.amount ?? new BigNumber(0)).isGreaterThanOrEqualTo(maxAmount),
+    [inputValue.amount, maxAmount]
+  );
+
   const isFormBtnDisabled =
-    !inputValue?.assetSlug || !outputValue?.assetSlug || !inputValue?.amount || !outputValue.amount;
+    !inputValue?.assetSlug ||
+    !outputValue?.assetSlug ||
+    !inputValue?.amount ||
+    !outputValue.amount ||
+    exceededMaxAmount;
 
   const fromRoute3Token = useSwapTokenSelector(inputValue.assetSlug ?? '');
   const toRoute3Token = useSwapTokenSelector(outputValue.assetSlug ?? '');
@@ -158,7 +185,7 @@ export const SwapForm: FC = () => {
         if (!amount || amount.isLessThanOrEqualTo(0)) {
           return t('amountMustBePositive');
         }
-
+        if (exceededMaxAmount) return t('maxAmountErrorMsg');
         return true;
       }
     });
@@ -175,7 +202,7 @@ export const SwapForm: FC = () => {
         return true;
       }
     });
-  }, [register]);
+  }, [exceededMaxAmount, register]);
 
   const successScreenProps = useMemo(
     () => ({
@@ -384,7 +411,9 @@ export const SwapForm: FC = () => {
     dispatchLoadSwapParams(inputValue, newOutputValue);
   };
 
-  const handleSubmitButtonClick = () => (isSubmitButtonPressedRef.current = true);
+  useEffect(() => {
+    isSubmitButtonPressedRef.current = true;
+  }, []);
 
   const handleCloseAlert = () => setIsAlertVisible(false);
 
@@ -454,7 +483,6 @@ export const SwapForm: FC = () => {
         loading={isSubmitting || swapParams.isLoading}
         disabled={isFormBtnDisabled || isSubmitting || swapParams.isLoading}
         keepChildrenWhenLoading={swapParams.isLoading}
-        onClick={handleSubmitButtonClick}
         testID={SwapFormSelectors.swapButton}
       >
         <T id={swapParams.isLoading ? 'searchingTheBestRoute' : 'swap'} />

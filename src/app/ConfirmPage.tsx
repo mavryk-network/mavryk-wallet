@@ -30,7 +30,10 @@ import { delay } from 'lib/utils';
 import { useLocation } from 'lib/woozie';
 
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
+import { confirmOperationsMock } from './mocks/confirmPage.mock';
+import { ButtonRounded } from './molecules/ButtonRounded';
 
+const data = confirmOperationsMock as unknown as TempleDAppPayload;
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -121,22 +124,25 @@ const ConfirmDAppForm: FC = () => {
 
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
+  // TODO uncomment this to return pageId
   const loc = useLocation();
   const id = useMemo(() => {
-    const usp = new URLSearchParams(loc.search);
-    const pageId = usp.get('id');
-    if (!pageId) {
-      throw new Error(t('notIdentified'));
-    }
-    return pageId;
+    // const usp = new URLSearchParams(loc.search);
+    // const pageId = usp.get('id');
+    // if (!pageId) {
+    //   throw new Error(t('notIdentified'));
+    // }
+    return '1';
   }, [loc.search]);
 
-  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  // TODO replace mocked data with the actual one
+  // const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
+  //   suspense: true,
+  //   shouldRetryOnError: false,
+  //   revalidateOnFocus: false,
+  //   revalidateOnReconnect: false
+  // });
+
   const payload = data!;
   const payloadError = data!.error;
 
@@ -257,7 +263,7 @@ const ConfirmDAppForm: FC = () => {
             ? ConfirmPageSelectors.ConfirmOperationsAction_RetryButton
             : ConfirmPageSelectors.ConfirmOperationsAction_ConfirmButton,
           want: (
-            <div className="mb-2 text-sm text-center text-gray-700 flex flex-col items-center">
+            <div className="mb-2 text-sm text-center text-white flex flex-col items-center">
               <div className="flex items-center justify-center">
                 <DAppLogo icon={payload.appMeta.icon} origin={payload.origin} size={16} className="mr-1" />
                 <Name className="font-semibold" style={{ maxWidth: '10rem' }}>
@@ -329,7 +335,7 @@ const ConfirmDAppForm: FC = () => {
   return (
     <CustomRpcContext.Provider value={payload.networkRpc}>
       <div
-        className="relative bg-white rounded-md shadow-md overflow-y-auto flex flex-col"
+        className="relative bg-primary-bg rounded-md shadow-md overflow-y-auto flex flex-col no-scrollbar"
         style={{
           width: 380,
           height: 610
@@ -385,21 +391,23 @@ const ConfirmDAppForm: FC = () => {
             </>
           )}
         </div>
-
         <div className="flex-1" />
 
-        <div className="sticky bottom-0 w-full bg-white shadow-md flex items-stretch px-4 pt-2 pb-4">
+        <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch p-4 border-t border-divider">
           <div className="w-1/2 pr-2">
-            <FormSecondaryButton
+            <ButtonRounded
               type="button"
+              size="big"
               className="w-full"
-              loading={declining}
+              isLoading={declining}
+              disabled={declining}
+              fill={false}
               onClick={handleDeclineClick}
               testID={content.declineActionTestID}
               testIDProperties={{ operationType: payload.type }}
             >
-              {content.declineActionTitle}
-            </FormSecondaryButton>
+              <T id="cancel" />
+            </ButtonRounded>
           </div>
 
           <div className="w-1/2 pl-2">
@@ -411,11 +419,10 @@ const ConfirmDAppForm: FC = () => {
               testID={content.confirmActionTestID}
               testIDProperties={{ operationType: payload.type }}
             >
-              {content.confirmActionTitle}
+              <T id={error ? 'retry' : 'confirm'} />
             </FormSubmitButton>
           </div>
         </div>
-
         <ConfirmLedgerOverlay displayed={confirming && connectedAccount?.type === TempleAccountType.Ledger} />
       </div>
     </CustomRpcContext.Provider>

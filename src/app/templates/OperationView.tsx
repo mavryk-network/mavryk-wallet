@@ -8,11 +8,18 @@ import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import RawPayloadView from 'app/templates/RawPayloadView';
-import ViewsSwitcher from 'app/templates/ViewsSwitcher/ViewsSwitcher';
 import { TEZ_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { T, t } from 'lib/i18n';
-import { tryParseExpenses } from 'lib/temple/front';
+import { tryParseExpenses, useAccount } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
+
+import AccountBanner from './AccountBanner';
+import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
+import NetworkBanner from './NetworkBanner';
+import TabsSwitcher from './TabsSwicther/TabsSwitcher';
+
+const MIN_GAS_FEE = 0;
+const bytesStyle = { height: 112, background: '#171717', border: 'none' };
 
 type OperationViewProps = {
   payload: TempleDAppOperationsPayload | TempleDAppSignPayload;
@@ -28,6 +35,8 @@ const OperationView: FC<OperationViewProps> = ({
   mainnet = false,
   modifyFeeAndLimit
 }) => {
+  const account = useAccount();
+
   const contentToParse = useMemo(() => {
     switch (payload.type) {
       case 'confirm_operations':
@@ -99,94 +108,72 @@ const OperationView: FC<OperationViewProps> = ({
 
   const [spFormat, setSpFormat] = useState(signPayloadFormats[0]);
 
-  if (payload.type === 'sign' && payload.preview) {
-    return (
-      <div className="flex flex-col w-full">
-        <h2 className="mb-3 leading-tight flex items-center">
-          <span className="mr-2 text-base font-semibold text-gray-700">
-            <T id="payloadToSign" />
+  // derived state for confirm_operations data
+  const estimates = payload.type === 'confirm_operations' ? payload.estimates : undefined;
+  const gasFeeError = useMemo(() => (modifyFeeAndLimit?.totalFee ?? 0) <= MIN_GAS_FEE, [modifyFeeAndLimit]);
+
+  return (
+    <div className="w-full flex flex-col">
+      {signPayloadFormats.length > 1 && (
+        <div className="w-full flex justify-end mb-3">
+          <span className="mr-2 text-base-plus text-white">
+            <T id="operation" />
           </span>
 
           <div className="flex-1" />
 
-          <ViewsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
-        </h2>
-
-        <OperationsBanner
-          opParams={payload.preview}
-          className={classNames(spFormat.key !== 'raw' && 'hidden')}
-          jsonViewStyle={{ height: '11rem', maxHeight: '100%', overflow: 'auto' }}
-        />
-
-        <RawPayloadView
-          payload={payload.payload}
-          className={classNames(spFormat.key !== 'bytes' && 'hidden')}
-          style={{ marginBottom: 0, height: '11rem' }}
-        />
-
-        <div className={classNames(spFormat.key !== 'preview' && 'hidden')}>
-          <ExpensesView error={payloadError} expenses={expensesData} />
+          <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
         </div>
-      </div>
-    );
-  }
+      )}
 
-  if (payload.type === 'sign') {
-    return (
-      <RawPayloadView
-        label={t('payloadToSign')}
-        payload={payload.payload}
-        style={{ marginBottom: 0, height: '11rem' }}
-        fieldWrapperBottomMargin={false}
-      />
-    );
-  }
-
-  if (payload.type === 'confirm_operations') {
-    return (
-      <div className="flex flex-col w-full">
-        <h2 className="mb-3 leading-tight flex items-center">
-          <span className="mr-2 text-base font-semibold text-gray-700">
-            <T id="operations" />
-          </span>
-
-          <div className="flex-1" />
-
-          {signPayloadFormats.length > 1 && (
-            <ViewsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
-          )}
-        </h2>
-
-        {payload.bytesToSign && (
-          <RawPayloadView
-            payload={payload.bytesToSign}
-            className={classNames(spFormat.key !== 'bytes' && 'hidden')}
-            style={{ marginBottom: 0, height: '11rem' }}
-            fieldWrapperBottomMargin={false}
-          />
-        )}
-
+      {payload.type === 'confirm_operations' && spFormat.key === 'raw' && (
         <OperationsBanner
           opParams={payload.rawToSign ?? payload.opParams}
-          className={classNames(spFormat.key !== 'raw' && 'hidden')}
-          jsonViewStyle={signPayloadFormats.length > 1 ? { height: '11rem' } : undefined}
-          label={null}
+          jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
+          modifiedTotalFee={modifyFeeAndLimit?.totalFee}
+          modifiedStorageLimit={modifyFeeAndLimit?.storageLimit ?? 0}
         />
+      )}
 
-        <div className={classNames(spFormat.key !== 'preview' && 'hidden')}>
-          <ExpensesView
-            expenses={expensesData}
-            estimates={payload.estimates}
-            modifyFeeAndLimit={modifyFeeAndLimit}
-            mainnet={mainnet}
-            error={payloadError}
+      {payload.type === 'sign' && spFormat.key === 'bytes' && (
+        <>
+          <RawPayloadView
+            label={t('payloadToSign')}
+            payload={payload.payload}
+            className="mb-4 px-4 py-4"
+            style={bytesStyle}
           />
-        </div>
-      </div>
-    );
-  }
+        </>
+      )}
 
-  return null;
+      {payload.type === 'confirm_operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
+        <>
+          <RawPayloadView payload={payload.bytesToSign} className="mb-4 px-4 py-4" style={bytesStyle} />
+        </>
+      )}
+
+      {spFormat.key === 'preview' && (
+        <ExpensesView
+          expenses={expensesData}
+          error={payloadError}
+          estimates={payload.type === 'confirm_operations' ? payload.estimates : undefined}
+          modifyFeeAndLimit={modifyFeeAndLimit}
+          mainnet={mainnet}
+          gasFeeError={gasFeeError}
+        />
+      )}
+
+      <ModifyFeeAndLimitComponent
+        expenses={expensesData}
+        estimates={estimates}
+        modifyFeeAndLimit={modifyFeeAndLimit}
+        mainnet={mainnet}
+        gasFeeError={gasFeeError}
+        includeBurnedFee={false}
+        hasStableGasFee={true}
+      />
+    </div>
+  );
 };
 
 export default OperationView;

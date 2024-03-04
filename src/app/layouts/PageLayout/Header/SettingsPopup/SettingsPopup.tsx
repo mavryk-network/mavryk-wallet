@@ -36,7 +36,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     () => [
       {
         key: 'accountDetails',
-        linkTo: null,
+        linkTo: '/temp',
         Icon: BlocksSvgIcon,
         i18nKey: 'accountDetails',
         onClick: closePopup

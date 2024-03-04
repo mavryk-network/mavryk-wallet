@@ -25,6 +25,8 @@ type ModifyFeeAndLimitProps = {
   mainnet?: boolean;
   modifyFeeAndLimit?: ModifyFeeAndLimit;
   gasFeeError?: boolean;
+  includeBurnedFee?: boolean;
+  hasStableGasFee?: boolean;
 };
 
 export interface ModifyFeeAndLimit {
@@ -41,7 +43,9 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   estimates,
   mainnet,
   modifyFeeAndLimit,
-  gasFeeError
+  gasFeeError,
+  includeBurnedFee = true,
+  hasStableGasFee = false
 }) => {
   const { symbol } = useGasToken();
 
@@ -82,7 +86,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
             key: 'totalFee',
             title: t('gasFee'),
             value: gasFee,
-            onChange: modifyFeeAndLimit.onTotalFeeChange
+            onChange: hasStableGasFee ? undefined : modifyFeeAndLimit.onTotalFeeChange
           },
           {
             key: 'storageFeeMax',
@@ -100,11 +104,15 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                 }
               ]
             : []),
-          {
-            key: 'feesBurned',
-            title: t('feesBurned'),
-            value: mutezToTz(burnedFee)
-          }
+          ...(includeBurnedFee
+            ? [
+                includeBurnedFee && {
+                  key: 'feesBurned',
+                  title: t('feesBurned'),
+                  value: mutezToTz(burnedFee)
+                }
+              ]
+            : [])
         ].map(({ key, title, value, onChange }) => (
           <div key={key} className={classNames('w-full flex items-center')}>
             <div className="whitespace-nowrap overflow-x-auto no-scrollbar opacity-90" style={{ maxWidth: '45%' }}>
@@ -195,7 +203,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         ))}
       </div>
     );
-  }, [modifyFeeAndLimit, estimates, gasFeeError, mainnet, symbol]);
+  }, [modifyFeeAndLimit, estimates, includeBurnedFee, gasFeeError, symbol, mainnet]);
 
   if (!expenses) {
     return null;

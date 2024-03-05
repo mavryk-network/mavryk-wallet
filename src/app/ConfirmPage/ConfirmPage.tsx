@@ -22,12 +22,10 @@ import { delay } from 'lib/utils';
 import { Link, useLocation } from 'lib/woozie';
 
 import Divider from '../atoms/Divider';
-import { confirmOperationsMock, connectWalletMock } from '../mocks/confirmPage.mock';
 import { ButtonRounded } from '../molecules/ButtonRounded';
 import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
 
-const data = confirmOperationsMock as unknown as TempleDAppPayload;
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -101,24 +99,22 @@ const ConfirmDAppForm: FC = () => {
 
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
-  // TODO uncomment this to return pageId
   const loc = useLocation();
   const id = useMemo(() => {
-    // const usp = new URLSearchParams(loc.search);
-    // const pageId = usp.get('id');
-    // if (!pageId) {
-    //   throw new Error(t('notIdentified'));
-    // }
-    return '1';
+    const usp = new URLSearchParams(loc.search);
+    const pageId = usp.get('id');
+    if (!pageId) {
+      throw new Error(t('notIdentified'));
+    }
+    return pageId;
   }, [loc.search]);
 
-  // TODO replace mocked data with the actual one
-  // const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-  //   suspense: true,
-  //   shouldRetryOnError: false,
-  //   revalidateOnFocus: false,
-  //   revalidateOnReconnect: false
-  // });
+  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
+    suspense: true,
+    shouldRetryOnError: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
 
   const payload = data!;
   const payloadError = data!.error;
@@ -301,16 +297,16 @@ const ConfirmDAppForm: FC = () => {
   return (
     <CustomRpcContext.Provider value={payload.networkRpc}>
       <div
-        className="relative bg-primary-bg rounded-md shadow-md overflow-y-auto flex flex-col no-scrollbar"
+        className="relative h-full bg-primary-bg rounded-md shadow-md overflow-y-auto flex flex-col no-scrollbar"
         style={{
-          width: 375,
-          height: 600
+          width: 400,
+          height: 604
         }}
       >
         <div className="bg-primary-card text-lg text-white p-4 flex items-center justify-center w-full">
           {content.title}
         </div>
-        <div className="flex flex-col items-center px-4 w-full relative">
+        <div className="flex flex-col items-center px-8 w-full relative pb-8">
           {content.want}
 
           {payload.type === 'connect' && (
@@ -373,7 +369,7 @@ const ConfirmDAppForm: FC = () => {
         </div>
         <div className="flex-1" />
 
-        <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch p-4 border-t border-divider">
+        <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch py-4 px-8 border-t border-divider">
           <div className="w-1/2 pr-2">
             <ButtonRounded
               type="button"

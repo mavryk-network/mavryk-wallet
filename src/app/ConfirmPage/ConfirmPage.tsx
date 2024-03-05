@@ -81,13 +81,9 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
 
   return payload.type === 'connect' ? (
     <div className="w-full flex flex-col">
-      <h2 className="mb-2 leading-tight flex flex-col">
-        <span className="text-base font-semibold text-gray-700">
-          <T id="account" />
-        </span>
-
-        <span className="mt-px text-xs font-light text-gray-600 max-w-9/10">
-          <T id="toBeConnectedWithDApp" />
+      <h2 className="mb-3 flex flex-col">
+        <span className="mt-px text-base-plus text-white max-w-9/10">
+          <T id="chooseAccToConnectMsg" />
         </span>
       </h2>
 
@@ -348,7 +344,7 @@ const ConfirmDAppForm: FC = () => {
           ) : (
             <>
               <Divider color="bg-divider" className="mb-4" />
-              <NetworkBanner rpc={payload.networkRpc} narrow={payload.type === 'connect'} />
+              <NetworkBanner rpc={payload.networkRpc} />
               {payload.type !== 'connect' && connectedAccount && (
                 <AccountBanner
                   account={connectedAccount}

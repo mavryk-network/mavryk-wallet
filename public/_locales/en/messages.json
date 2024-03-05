@@ -1741,9 +1741,6 @@
   "activity": {
     "message": "Activity"
   },
-  "history": {
-    "message": "History"
-  },
   "manage": { "message": "Manage" },
   "manageTokens": { "message": "Manage Tokens" },
   "manageAssets": { "message": "Manage Assets" },
@@ -3520,5 +3517,8 @@
   },
   "maxAmountErrorMsg": {
     "message": "The sum you entered exceeds your available balance"
+  },
+  "chooseAccToConnectMsg": {
+    "message": "Choose account to be connected"
   }
 }

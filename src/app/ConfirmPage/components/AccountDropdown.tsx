@@ -32,9 +32,9 @@ export const AccountDropdown: FC<AccountDropdownProps> = ({ payload, accountPkhT
 
   return (
     <DropdownSelect
-      DropdownFaceContent={<AccountOptionContent item={selectedAcc} selected={false} />}
-      dropdownButtonClassName="p-4 bg-primary-card h-66px"
-      fontContentWrapperClassname="border border-transparent rounded-xl"
+      DropdownFaceContent={<AccountOptionContent item={selectedAcc} selected={false} isFaceContent />}
+      dropdownButtonClassName="py-4 pr-4 bg-primary-card h-66px bg-primary-bg"
+      fontContentWrapperClassname="border border-divider rounded-xl"
       dropdownWrapperClassName="border-none rounded-2xl-plus max-h-60"
       optionsListClassName="bg-primary-card"
       optionsProps={
@@ -50,46 +50,54 @@ export const AccountDropdown: FC<AccountDropdownProps> = ({ payload, accountPkhT
   );
 };
 
-const AccountOptionContent = memo<{ item: TempleAccount; selected: boolean }>(({ item: acc, selected }) => {
-  return (
-    <div
-      className={clsx(
-        'flex items-center justify-between w-full',
-        'text-white overflow-hidden p-4',
-        'transition duration-200 ease-in-out',
-        'hover:bg-primary-card-hover',
-        selected ? 'bg-primary-card-hover' : 'bg-primary-card'
-      )}
-    >
-      <Identicon
-        type="bottts"
-        hash={acc.publicKeyHash}
-        size={32}
-        className="flex-shrink-0 shadow-xs-white rounded-full overflow-hidden"
-      />
+const AccountOptionContent = memo<{ item: TempleAccount; selected: boolean; isFaceContent?: boolean }>(
+  ({ item: acc, selected, isFaceContent = false }) => {
+    return (
+      <div
+        className={clsx(
+          'flex items-center justify-between w-full',
+          'text-white overflow-hidden p-4',
+          'transition duration-200 ease-in-out',
+          !isFaceContent && 'hover:bg-primary-card-hover',
+          selected
+            ? isFaceContent
+              ? 'bg-primary-bg'
+              : 'bg-primary-card-hover'
+            : isFaceContent
+            ? 'bg-primary-bg'
+            : 'bg-primary-card'
+        )}
+      >
+        <Identicon
+          type="bottts"
+          hash={acc.publicKeyHash}
+          size={32}
+          className="flex-shrink-0 shadow-xs-white rounded-full overflow-hidden"
+        />
 
-      <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
-        <div className="flex items-center gap-1">
-          <Name className="text-base">{acc.name}</Name>
-          <AccountTypeBadge account={acc} />
+        <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
+          <div className="flex items-center gap-1">
+            <Name className="text-base">{acc.name}</Name>
+            <AccountTypeBadge account={acc} />
+          </div>
+
+          <div className="text-sm text-blue-200 mt-1">
+            <HashShortView hash={acc.publicKeyHash} />
+          </div>
         </div>
-
-        <div className="text-sm text-blue-200 mt-1">
-          <HashShortView hash={acc.publicKeyHash} />
+        <div className="flex flex-col flex-wrap items-end justify-end ml-auto">
+          <Balance address={acc.publicKeyHash}>
+            {bal => (
+              <span className="text-base leading-tight flex items-baseline">
+                <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
+              </span>
+            )}
+          </Balance>
         </div>
       </div>
-      <div className="flex flex-col flex-wrap items-end justify-end ml-auto">
-        <Balance address={acc.publicKeyHash}>
-          {bal => (
-            <span className="text-base leading-tight flex items-baseline">
-              <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
-            </span>
-          )}
-        </Balance>
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 const renderOptionContent = (item: TempleAccount, selected: boolean) => (
   <AccountOptionContent item={item} selected={selected} />

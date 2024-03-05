@@ -29,10 +29,11 @@ import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { Link, useLocation } from 'lib/woozie';
 
-import Divider from './atoms/Divider';
+import Divider from '../atoms/Divider';
+import { confirmOperationsMock, connectWalletMock } from '../mocks/confirmPage.mock';
+import { ButtonRounded } from '../molecules/ButtonRounded';
+import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
-import { confirmOperationsMock, connectWalletMock } from './mocks/confirmPage.mock';
-import { ButtonRounded } from './molecules/ButtonRounded';
 
 const data = connectWalletMock as unknown as TempleDAppPayload;
 const ConfirmPage: FC = () => {
@@ -75,8 +76,6 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
   error,
   modifyFeeAndLimit
 }) => {
-  const allAccounts = useRelevantAccounts(false);
-  const AccountOptionContent = useMemo(() => AccountOptionContentHOC(payload.networkRpc), [payload.networkRpc]);
   const chainId = useCustomChainId(payload.networkRpc, true)!;
   const mainnet = chainId === TempleChainId.Mainnet;
 
@@ -92,15 +91,10 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
         </span>
       </h2>
 
-      <CustomSelect<TempleAccount, string>
-        activeItemId={accountPkhToConnect}
-        getItemId={getPkh}
-        items={allAccounts}
-        maxHeight="8rem"
-        onSelect={setAccountPkhToConnect}
-        OptionIcon={AccountIcon}
-        OptionContent={AccountOptionContent}
-        autoFocus
+      <AccountDropdown
+        payload={payload}
+        accountPkhToConnect={accountPkhToConnect}
+        setAccountPkhToConnect={setAccountPkhToConnect}
       />
     </div>
   ) : (
@@ -115,8 +109,6 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
 };
 
 export default ConfirmPage;
-
-const getPkh = (account: TempleAccount) => account.publicKeyHash;
 
 const ConfirmDAppForm: FC = () => {
   const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useTempleClient();
@@ -414,38 +406,3 @@ const ConfirmDAppForm: FC = () => {
     </CustomRpcContext.Provider>
   );
 };
-
-const AccountIcon: FC<OptionRenderProps<TempleAccount>> = ({ item }) => (
-  <Identicon type="bottts" hash={item.publicKeyHash} size={32} className="flex-shrink-0 shadow-xs" />
-);
-
-const AccountOptionContentHOC = (networkRpc: string) =>
-  memo<OptionRenderProps<TempleAccount>>(({ item: acc }) => {
-    const { assetName } = useGasToken();
-
-    return (
-      <>
-        <div className="flex flex-wrap items-center">
-          <Name className="text-sm font-medium leading-tight">{acc.name}</Name>
-          <AccountTypeBadge account={acc} />
-        </div>
-
-        <div className="flex flex-wrap items-center mt-1">
-          <div className="text-xs leading-none text-gray-700">
-            <HashShortView hash={acc.publicKeyHash} />
-          </div>
-
-          <Balance address={acc.publicKeyHash} networkRpc={networkRpc}>
-            {bal => (
-              <div className="ml-2 text-xs leading-none flex items-baseline text-gray-600">
-                <Money>{bal}</Money>
-                <span className="ml-1" style={{ fontSize: '0.75em' }}>
-                  {assetName}
-                </span>
-              </div>
-            )}
-          </Balance>
-        </div>
-      </>
-    );
-  });

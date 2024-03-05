@@ -104,7 +104,7 @@ export const DropdownSelect = <T extends unknown>({
     </Popper>
   );
 };
-interface SelectOptionsPropsBase<Type> {
+export interface SelectOptionsPropsBase<Type> {
   options: Array<Type>;
   noItemsText: ReactNode;
   isLoading?: boolean;

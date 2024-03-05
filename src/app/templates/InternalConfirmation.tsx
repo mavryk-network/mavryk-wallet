@@ -264,7 +264,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
                   narrow={false}
                 />
-                <AccountBanner showDropDownIcon={false} account={account} labelIndent="sm" className="w-full mb-4" />
+                <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" restrictAccountSelect />
 
                 {signPayloadFormats.length > 1 && (
                   <div className="w-full flex justify-end mb-3">

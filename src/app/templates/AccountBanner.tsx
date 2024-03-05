@@ -15,11 +15,11 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
   label?: ReactNode;
   labelDescription?: ReactNode;
   labelIndent?: 'sm' | 'md';
-  showDropDownIcon?: boolean;
+  restrictAccountSelect?: boolean;
 };
 
 const AccountBanner = memo<AccountBannerProps>(
-  ({ account, displayBalance = true, showDropDownIcon = true, networkRpc, className }) => {
+  ({ account, displayBalance = true, restrictAccountSelect = false, networkRpc, className }) => {
     return (
       <div className={classNames('flex flex-col', className)}>
         <div className="w-full flex items-center justify-between pb-4 border-b bordeer-divider">
@@ -28,7 +28,7 @@ const AccountBanner = memo<AccountBannerProps>(
               account={account}
               iconSize={32}
               onlyAccSelect
-              showDropDownIcon={showDropDownIcon}
+              restrictAccountSelect={restrictAccountSelect}
               child={
                 <div className="flex items-center mt-1">
                   <div className="text-xs leading-none text-gray-700">

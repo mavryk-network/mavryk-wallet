@@ -25,7 +25,7 @@ export type AccountButtonProps = {
   iconSize?: number;
   account: TempleAccount;
   onlyAccSelect?: boolean;
-  showDropDownIcon?: boolean;
+  restrictAccountSelect?: boolean;
 };
 
 export enum AccountSelectors {
@@ -38,13 +38,18 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   child,
   iconSize = 24,
   onlyAccSelect = false,
-  showDropDownIcon = true
+  restrictAccountSelect = false
 }) => {
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
-  const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {
-    popupFunction(popupValue);
-  }, []);
+  const handlePopupToggle = useCallback(
+    (popupFunction: (v: boolean) => void, popupValue: boolean) => {
+      if (!restrictAccountSelect) {
+        popupFunction(popupValue);
+      }
+    },
+    [restrictAccountSelect]
+  );
 
   const handleMouseEnter = useTippyById('#manageAddressesBtn', tippyProps);
 
@@ -69,7 +74,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
           onClick={handlePopupToggle.bind(null, setShowAccountsPopup, true)}
         >
           <Name className="text-primary-white text-base-plus">{account.name}</Name>
-          {showDropDownIcon && <ArrowDownicon className="stroke stroke-2 stroke-white w-4 h-auto ml-1" />}
+          {!restrictAccountSelect && <ArrowDownicon className="stroke stroke-2 stroke-white w-4 h-auto ml-1" />}
         </div>
         {child && child}
       </div>

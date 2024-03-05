@@ -337,15 +337,14 @@ const ConfirmDAppForm: FC = () => {
       <div
         className="relative bg-primary-bg rounded-md shadow-md overflow-y-auto flex flex-col no-scrollbar"
         style={{
-          width: 380,
-          height: 610
+          width: 375,
+          height: 600
         }}
       >
-        <div className="flex flex-col items-center px-4 py-2">
-          <SubTitle small className={payload.type === 'connect' ? 'mt-4 mb-6' : 'mt-4 mb-2'}>
-            {content.title}
-          </SubTitle>
-
+        <div className="bg-primary-card text-lg text-white p-4 flex items-center justify-center w-full">
+          {content.title}
+        </div>
+        <div className="flex flex-col items-center px-4 w-full relative">
           {payload.type === 'connect' && (
             <ConnectBanner type={payload.type} origin={payload.origin} appMeta={payload.appMeta} className="mb-4" />
           )}
@@ -376,6 +375,7 @@ const ConfirmDAppForm: FC = () => {
                   networkRpc={payload.networkRpc}
                   labelIndent="sm"
                   className="w-full mb-4"
+                  restrictAccountSelect
                 />
               )}
 

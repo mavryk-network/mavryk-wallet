@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 
-import { Alert } from 'app/atoms/Alert';
+import { Alert } from 'app/atoms/Alert/Alert';
 import { ReadOnlySecretField } from 'app/atoms/ReadOnlySecretField';
 import { ButtonNavigate } from 'app/molecules/ButtonNavigate';
 import { TID, T } from 'lib/i18n';

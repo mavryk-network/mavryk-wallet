@@ -6,6 +6,7 @@ import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
+import { AlertWithCollapse } from 'app/atoms/Alert';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
@@ -266,6 +267,23 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 />
                 <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" restrictAccountSelect />
 
+                {payloadError && (
+                  <AlertWithCollapse
+                    title={
+                      <span>
+                        <T id="attention" />!
+                      </span>
+                    }
+                    description={
+                      <span>
+                        <T id="txIsLikelyToFail" />
+                      </span>
+                    }
+                  >
+                    <OperationsBanner className="mb-0" copyButtonClassName="p-2" opParams={payloadError ?? {}} />
+                  </AlertWithCollapse>
+                )}
+
                 {signPayloadFormats.length > 1 && (
                   <div className="w-full flex justify-end mb-3">
                     <span className="mr-2 text-base-plus text-white">
@@ -307,7 +325,6 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 {spFormat.key === 'preview' && (
                   <ExpensesView
                     expenses={expensesData}
-                    error={payloadError}
                     estimates={payload.type === 'operations' ? payload.estimates : undefined}
                     modifyFeeAndLimit={modifyFeeAndLimit}
                     mainnet={mainnet}

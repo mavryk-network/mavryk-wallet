@@ -1,24 +1,21 @@
-import React, { FC, memo, useMemo, useState } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 
 import clsx from 'clsx';
 
-import { HashShortView, Identicon, Money, Name } from 'app/atoms';
+import { HashShortView, Identicon, Name } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import Balance from 'app/templates/Balance';
-import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { DropdownSelect, SelectOptionsPropsBase } from 'app/templates/DropdownSelect/DropdownSelect';
-import { t } from 'lib/i18n';
-import { useGasToken, useRelevantAccounts } from 'lib/temple/front';
-import { TempleAccount, TempleDAppPayload } from 'lib/temple/types';
+import { useRelevantAccounts } from 'lib/temple/front';
+import { TempleAccount } from 'lib/temple/types';
 
 type AccountDropdownProps = {
-  payload: TempleDAppPayload;
   accountPkhToConnect: string;
   setAccountPkhToConnect: (item: string) => void;
 };
 
-export const AccountDropdown: FC<AccountDropdownProps> = ({ payload, accountPkhToConnect, setAccountPkhToConnect }) => {
+export const AccountDropdown: FC<AccountDropdownProps> = ({ accountPkhToConnect, setAccountPkhToConnect }) => {
   const allAccounts = useRelevantAccounts(false);
 
   const selectedAcc = useMemo(

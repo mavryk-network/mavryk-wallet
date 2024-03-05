@@ -1,30 +1,22 @@
-import React, { FC, Fragment, memo, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
 
-import { Alert, FormSubmitButton, FormSecondaryButton } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+import { Alert, FormSubmitButton } from 'app/atoms';
+import { AlertWithCollapse } from 'app/atoms/Alert';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
-import HashShortView from 'app/atoms/HashShortView';
-import Identicon from 'app/atoms/Identicon';
-import Money from 'app/atoms/Money';
-import Name from 'app/atoms/Name';
 import Spinner from 'app/atoms/Spinner/Spinner';
-import SubTitle from 'app/atoms/SubTitle';
 import ErrorBoundary from 'app/ErrorBoundary';
 import ContentContainer from 'app/layouts/ContentContainer';
 import Unlock from 'app/pages/Unlock/Unlock';
 import AccountBanner from 'app/templates/AccountBanner';
-import Balance from 'app/templates/Balance';
-import ConnectBanner from 'app/templates/ConnectBanner';
-import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
-import DAppLogo from 'app/templates/DAppLogo';
 import { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import NetworkBanner from 'app/templates/NetworkBanner';
+import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
-import { useTempleClient, useAccount, useRelevantAccounts, useCustomChainId, useGasToken } from 'lib/temple/front';
-import { TempleAccountType, TempleDAppPayload, TempleAccount, TempleChainId } from 'lib/temple/types';
+import { useTempleClient, useAccount, useRelevantAccounts, useCustomChainId } from 'lib/temple/front';
+import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { Link, useLocation } from 'lib/woozie';
@@ -35,7 +27,7 @@ import { ButtonRounded } from '../molecules/ButtonRounded';
 import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
 
-const data = connectWalletMock as unknown as TempleDAppPayload;
+const data = confirmOperationsMock as unknown as TempleDAppPayload;
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -87,11 +79,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
         </span>
       </h2>
 
-      <AccountDropdown
-        payload={payload}
-        accountPkhToConnect={accountPkhToConnect}
-        setAccountPkhToConnect={setAccountPkhToConnect}
-      />
+      <AccountDropdown accountPkhToConnect={accountPkhToConnect} setAccountPkhToConnect={setAccountPkhToConnect} />
     </div>
   ) : (
     <OperationView
@@ -353,6 +341,24 @@ const ConfirmDAppForm: FC = () => {
                   className="w-full mb-4"
                   restrictAccountSelect
                 />
+              )}
+
+              {true && (
+                <AlertWithCollapse
+                  wrapperClassName="w-full mb-4 mt-0"
+                  title={
+                    <span>
+                      <T id="attention" />!
+                    </span>
+                  }
+                  description={
+                    <span>
+                      <T id="txIsLikelyToFail" />
+                    </span>
+                  }
+                >
+                  <OperationsBanner className="mb-0" copyButtonClassName="p-2" opParams={payloadError ?? {}} />
+                </AlertWithCollapse>
               )}
 
               <PayloadContent

@@ -1,6 +1,6 @@
 export { default as Divider } from './Divider';
 
-export { Alert } from './Alert';
+export { Alert } from './Alert/Alert';
 
 export { Anchor } from './Anchor';
 

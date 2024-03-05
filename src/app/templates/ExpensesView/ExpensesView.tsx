@@ -3,21 +3,14 @@ import React, { FC, memo, useCallback, useMemo, useState } from 'react';
 import { Estimate } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
-import { Collapse } from 'react-collapse';
 
 import { HashChip, Money, Identicon } from 'app/atoms';
-import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import InFiat from 'app/templates/InFiat';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
-
-import { setTestID } from '../../../lib/analytics';
-import OperationsBanner from '../OperationsBanner/OperationsBanner';
-import { OperationsBannerSelectors } from '../OperationsBanner/OperationsBanner.selectors';
-import styles from './ExpensesView.module.css';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
@@ -33,7 +26,6 @@ type ExpensesViewProps = {
   mainnet?: boolean;
   modifyFeeAndLimit?: ModifyFeeAndLimit;
   gasFeeError?: boolean;
-  error?: any;
 };
 
 export interface ModifyFeeAndLimit {
@@ -43,11 +35,7 @@ export interface ModifyFeeAndLimit {
   onStorageLimitChange: (storageLimit: number) => void;
 }
 
-const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError, error }) => {
-  const [showDetails, setShowDetails] = useState(false);
-
-  const toggleShowDetails = useCallback(() => setShowDetails(prevValue => !prevValue), []);
-
+const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError }) => {
   if (!expenses) {
     return null;
   }
@@ -65,35 +53,6 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError, e
         <p className="text-xs text-primary-error pt-1 h-4">
           <T id="gasFeeMustBePositive" />
         </p>
-      )}
-      {error && (
-        <div className="rounded-lg flex flex-col border border-primary-error my-2 py-2 px-4 justify-center">
-          <div className="relative flex justify-center">
-            <span className="text-primary-error text-center" {...setTestID(OperationsBannerSelectors.errorText)}>
-              <T id="txIsLikelyToFail" />
-            </span>
-            <button
-              className={classNames(
-                'absolute right-0 top-0 flex items-center justify-center w-4 h-4 rounded',
-                'text-white transform transition-transform duration-500',
-                showDetails && 'rotate-180'
-              )}
-              onClick={toggleShowDetails}
-              {...setTestID(OperationsBannerSelectors.errorDropDownButton)}
-            >
-              <ChevronDownIcon className="w-4 h-4 stroke-2 stroke-white" />
-            </button>
-          </div>
-          <Collapse
-            theme={{ collapse: styles.ReactCollapse }}
-            isOpened={showDetails}
-            initialStyle={{ height: '0px', overflow: 'hidden' }}
-          >
-            <div className="flex flex-col mt-2">
-              <OperationsBanner copyButtonClassName="p-2" opParams={error ?? {}} />
-            </div>
-          </Collapse>
-        </div>
       )}
     </>
   );

@@ -8,6 +8,7 @@ import { ReactComponent as CopyIcon } from 'app/icons/copy-square.svg';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
+import { merge } from 'lib/utils/merge';
 
 import { OperationsBannerSelectors } from './OperationsBanner.selectors';
 
@@ -46,7 +47,7 @@ const OperationsBanner = memo<OperationsBannerProps>(
       <>
         {label && <h2 className={classNames('w-full mb-2', 'text-base-plus leading-tight', 'text-white')}>{label}</h2>}
 
-        <div className={classNames('relative mb-2', className)}>
+        <div className={merge('relative mb-2', className)}>
           <div
             className={classNames(
               'block w-full max-w-full p-2',

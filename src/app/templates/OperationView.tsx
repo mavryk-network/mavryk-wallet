@@ -155,7 +155,6 @@ const OperationView: FC<OperationViewProps> = ({
       {spFormat.key === 'preview' && (
         <ExpensesView
           expenses={expensesData}
-          error={payloadError}
           estimates={payload.type === 'confirm_operations' ? payload.estimates : undefined}
           modifyFeeAndLimit={modifyFeeAndLimit}
           mainnet={mainnet}

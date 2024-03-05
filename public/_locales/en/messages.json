@@ -2422,11 +2422,19 @@
   "storageFeeMax": {
     "message": "Storage fee (max)"
   },
+  "interactionWithContract": {
+    "message": "with $contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
   "storageLimit": {
     "message": "Adjust storage limit"
   },
   "txIsLikelyToFail": {
-    "message": "Warning! Transaction is likely to fail"
+    "message": "Warning! Transaction is likely to fail."
   },
   "copyErrorLogs": {
     "message": "Copy Error Logs"

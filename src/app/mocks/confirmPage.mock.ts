@@ -66,3 +66,13 @@ export const confirmOperationsMock = {
     }
   ]
 };
+
+export const connectWalletMock = {
+  type: 'connect',
+  origin: 'https://front-dev.mavryk-finance-dapp-frontend.pages.dev',
+  networkRpc: 'https://ghostnet.smartpy.io/',
+  appMeta: {
+    senderId: '46NbQhSejLd4y',
+    name: 'Maven'
+  }
+};

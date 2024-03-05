@@ -31,10 +31,10 @@ import { Link, useLocation } from 'lib/woozie';
 
 import Divider from './atoms/Divider';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
-import { confirmOperationsMock } from './mocks/confirmPage.mock';
+import { confirmOperationsMock, connectWalletMock } from './mocks/confirmPage.mock';
 import { ButtonRounded } from './molecules/ButtonRounded';
 
-const data = confirmOperationsMock as unknown as TempleDAppPayload;
+const data = connectWalletMock as unknown as TempleDAppPayload;
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -240,17 +240,18 @@ const ConfirmDAppForm: FC = () => {
             ? ConfirmPageSelectors.ConnectAction_RetryButton
             : ConfirmPageSelectors.ConnectAction_ConnectButton,
           want: (
-            <p className="mb-2 text-sm text-center text-gray-700">
+            <div className="w-full px-4 pt-4 pb-2 text-base-plus text-center text-white flex flex-col items-center">
               <T
                 id="appWouldLikeToConnectToYourWallet"
                 substitutions={[
                   <Fragment key="appName">
-                    <span className="font-semibold">{payload.origin}</span>
-                    <br />
+                    <Link to={payload.origin} className="max-w-80 text-blue-200 overflow-x-auto truncate" key="origin">
+                      {payload.origin}
+                    </Link>
                   </Fragment>
                 ]}
               />
-            </p>
+            </div>
           )
         };
 
@@ -268,7 +269,7 @@ const ConfirmDAppForm: FC = () => {
               <T
                 id="appRequestOperationToYou"
                 substitutions={[
-                  <Link to={payload.origin} className="max-w-60 text-blue-200 overflow-x-auto truncate" key="origin">
+                  <Link to={payload.origin} className="max-w-80 text-blue-200 overflow-x-auto truncate" key="origin">
                     {payload.origin}
                   </Link>
                 ]}
@@ -285,26 +286,20 @@ const ConfirmDAppForm: FC = () => {
           confirmActionTitle: t('signAction'),
           confirmActionTestID: ConfirmPageSelectors.SignAction_SignButton,
           want: (
-            <div className="mb-2 text-sm text-center text-gray-700 flex flex-col items-center">
-              <div className="flex items-center justify-center">
-                <DAppLogo icon={payload.appMeta.icon} origin={payload.origin} size={16} className="mr-1" />
-                <Name className="font-semibold" style={{ maxWidth: '10rem' }}>
-                  {payload.appMeta.name}
-                </Name>
-              </div>
+            <div className="p-4 text-base-plus text-center text-white flex flex-col items-center">
               <T
                 id="appRequestsToSign"
                 substitutions={[
-                  <Name className="max-w-full text-xs italic" key="origin">
+                  <Link to={payload.origin} className="max-w-80 text-blue-200 overflow-x-auto truncate" key="origin">
                     {payload.origin}
-                  </Name>
+                  </Link>
                 ]}
               />
             </div>
           )
         };
     }
-  }, [payload.type, payload.origin, payload.appMeta.name, payload.appMeta.icon, error]);
+  }, [payload.type, payload.origin, error]);
 
   const modifiedStorageLimitDisplayed = useMemo(
     () => payload.type === 'confirm_operations' && payload.opParams.length < 2,
@@ -340,14 +335,10 @@ const ConfirmDAppForm: FC = () => {
           {content.title}
         </div>
         <div className="flex flex-col items-center px-4 w-full relative">
-          {payload.type === 'connect' && (
-            <ConnectBanner type={payload.type} origin={payload.origin} appMeta={payload.appMeta} className="mb-4" />
-          )}
-
           {content.want}
 
           {payload.type === 'connect' && (
-            <p className="mb-4 text-xs font-light text-center text-gray-700">
+            <p className="mb-4 text-sm text-center text-secondary-white max-w-80">
               <T id="viewAccountAddressWarning" />
             </p>
           )}

@@ -269,6 +269,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
                 {payloadError && (
                   <AlertWithCollapse
+                    wrapperClassName="mb-4"
                     title={
                       <span>
                         <T id="attention" />!

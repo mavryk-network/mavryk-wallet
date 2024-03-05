@@ -115,7 +115,7 @@ export const AlertWithCollapse: FC<AlertWithCollapseProps> = ({ wrapperClassName
         <Alert {...rest} />
         <button
           className={classNames(
-            'absolute right-0 top-0 flex items-center justify-center w-6 h-6 rounded',
+            'absolute right-4 top-4 flex items-center justify-center w-6 h-6 rounded',
             'text-white transform transition-transform duration-500',
             showDetails && 'rotate-180'
           )}

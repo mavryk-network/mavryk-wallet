@@ -343,7 +343,7 @@ const ConfirmDAppForm: FC = () => {
                 />
               )}
 
-              {true && (
+              {payloadError && (
                 <AlertWithCollapse
                   wrapperClassName="w-full mb-4 mt-0"
                   title={

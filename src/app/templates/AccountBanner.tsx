@@ -22,7 +22,7 @@ const AccountBanner = memo<AccountBannerProps>(
   ({ account, displayBalance = true, restrictAccountSelect = false, networkRpc, className }) => {
     return (
       <div className={classNames('flex flex-col', className)}>
-        <div className="w-full flex items-center justify-between pb-4 border-b bordeer-divider">
+        <div className="w-full flex items-center justify-between pb-4 border-b border-divider">
           <div className=" flex items-center">
             <AccountPopupButton
               account={account}

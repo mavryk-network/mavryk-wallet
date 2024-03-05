@@ -27,8 +27,9 @@ import { useTempleClient, useAccount, useRelevantAccounts, useCustomChainId, use
 import { TempleAccountType, TempleDAppPayload, TempleAccount, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { useLocation } from 'lib/woozie';
+import { Link, useLocation } from 'lib/woozie';
 
+import Divider from './atoms/Divider';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
 import { confirmOperationsMock } from './mocks/confirmPage.mock';
 import { ButtonRounded } from './molecules/ButtonRounded';
@@ -263,19 +264,13 @@ const ConfirmDAppForm: FC = () => {
             ? ConfirmPageSelectors.ConfirmOperationsAction_RetryButton
             : ConfirmPageSelectors.ConfirmOperationsAction_ConfirmButton,
           want: (
-            <div className="mb-2 text-sm text-center text-white flex flex-col items-center">
-              <div className="flex items-center justify-center">
-                <DAppLogo icon={payload.appMeta.icon} origin={payload.origin} size={16} className="mr-1" />
-                <Name className="font-semibold" style={{ maxWidth: '10rem' }}>
-                  {payload.appMeta.name}
-                </Name>
-              </div>
+            <div className="p-4 text-base-plus text-center text-white flex flex-col items-center">
               <T
                 id="appRequestOperationToYou"
                 substitutions={[
-                  <Name className="max-w-full text-xs italic" key="origin">
+                  <Link to={payload.origin} className="max-w-60 text-blue-200 overflow-x-auto truncate" key="origin">
                     {payload.origin}
-                  </Name>
+                  </Link>
                 ]}
               />
             </div>
@@ -369,6 +364,8 @@ const ConfirmDAppForm: FC = () => {
             />
           ) : (
             <>
+              <Divider color="bg-divider" className="mb-4" />
+              <NetworkBanner rpc={payload.networkRpc} narrow={payload.type === 'connect'} />
               {payload.type !== 'connect' && connectedAccount && (
                 <AccountBanner
                   account={connectedAccount}
@@ -378,8 +375,6 @@ const ConfirmDAppForm: FC = () => {
                   restrictAccountSelect
                 />
               )}
-
-              <NetworkBanner rpc={payload.networkRpc} narrow={payload.type === 'connect'} />
 
               <PayloadContent
                 error={payloadError}

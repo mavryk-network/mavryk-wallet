@@ -81,7 +81,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
             <div className="text-base-plus text-white mb-2">
               <T id="noContacts" />
             </div>
-            <div className="text-sm text-secondary-white mb-4" style={{ maxWidth: 170 }}>
+            <div className="text-sm text-secondary-white mb-4 text-center">
               <T id="addAddresesDesc" />
             </div>
             <ButtonRounded
@@ -90,7 +90,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
               onClick={handleAddContactClick}
               fill
             >
-              <T id="addAddress" />
+              <T id="addContact" />
             </ButtonRounded>
           </div>
         </section>

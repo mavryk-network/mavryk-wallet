@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { openInFullPage, useAppEnv } from 'app/env';
 import { ReactComponent as BlocksSvgIcon } from 'app/icons/blocks.svg';
@@ -8,7 +8,10 @@ import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
+import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useAccount, useTempleClient } from 'lib/temple/front';
+
+import { AccountDetails, AccountDetailsPopup } from './components/AccountDetails';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -18,6 +21,12 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   const appEnv = useAppEnv();
   const { publicKeyHash } = useAccount();
   const { lock } = useTempleClient();
+
+  const [showAccountsPopup, setShowAccountsPopup] = useState(false);
+
+  const toggleAccountPopup = useCallback(() => {
+    setShowAccountsPopup(!showAccountsPopup);
+  }, [showAccountsPopup]);
 
   const handleLogoutClick = useCallback(() => {
     lock();
@@ -36,10 +45,10 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
     () => [
       {
         key: 'accountDetails',
-        linkTo: '/temp',
+        linkTo: null,
         Icon: BlocksSvgIcon,
         i18nKey: 'accountDetails',
-        onClick: closePopup
+        onClick: toggleAccountPopup
       },
       {
         key: 'viewOnBlockExplorer',
@@ -79,13 +88,22 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         showDivider: false
       }
     ],
-    [closePopup, handleLogoutClick, handleMaximiseViewClick, publicKeyHash]
+    [closePopup, handleLogoutClick, handleMaximiseViewClick, publicKeyHash, toggleAccountPopup]
   );
   return (
     <div className="text-white mt-6 flex flex-col">
       {settingsListData.map(item => (
         <ListItemWithNavigate {...item} />
       ))}
+      {/* Popup modal for account details list item */}
+      <PopupModalWithTitle
+        isOpen={showAccountsPopup}
+        onRequestClose={toggleAccountPopup}
+        title="selectAccount"
+        portalClassName="accounts-popup"
+      >
+        <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
+      </PopupModalWithTitle>
     </div>
   );
 };

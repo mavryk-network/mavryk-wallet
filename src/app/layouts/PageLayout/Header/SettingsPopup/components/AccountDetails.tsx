@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { QRCode } from 'react-qr-svg';
 
@@ -37,13 +37,24 @@ type AccountDetailsProps = {
 };
 
 export const AccountDetails: FC<AccountDetailsProps> = ({ account }) => {
+  const hashChipProps = useMemo(
+    () =>
+      account.publicKeyHash.length > 35
+        ? {
+            firstCharsCount: 15,
+            lastCharsCount: 17
+          }
+        : { trim: false },
+    [account.publicKeyHash]
+  );
+
   return (
     <div className="px-4 pt-2 text-base-plus text-white flex flex-col items-center">
       <div className="p-6 bg-white rounded-2xl self-center">
-        <QRCode value={account.publicKeyHash} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 196 }} />
+        <QRCode value={account.publicKeyHash} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 152 }} />
       </div>
-      <div className="mt-6 bg-gray-710 rounded-xl px-4 py-2 w-full self-stretch">
-        <HashChip hash={account.publicKeyHash} small={false} trim={false} />
+      <div className="mt-6 bg-gray-710 rounded-xl px-4 py-2 w-full self-stretch flex items-center justify-center">
+        <HashChip hash={account.publicKeyHash} small={false} {...hashChipProps} />
       </div>
     </div>
   );

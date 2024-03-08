@@ -1,8 +1,10 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 
 import { QRCode } from 'react-qr-svg';
 
-import { HashChip, Identicon, Name } from 'app/atoms';
+import { HashShortView, Identicon, Name } from 'app/atoms';
+import CopyButton from 'app/atoms/CopyButton';
+import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useAccount } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
@@ -37,24 +39,21 @@ type AccountDetailsProps = {
 };
 
 export const AccountDetails: FC<AccountDetailsProps> = ({ account }) => {
-  const hashChipProps = useMemo(
-    () =>
-      account.publicKeyHash.length > 35
-        ? {
-            firstCharsCount: 15,
-            lastCharsCount: 17
-          }
-        : { trim: false },
-    [account.publicKeyHash]
-  );
-
   return (
     <div className="px-4 pt-2 text-base-plus text-white flex flex-col items-center">
       <div className="p-6 bg-white rounded-2xl self-center">
         <QRCode value={account.publicKeyHash} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 152 }} />
       </div>
-      <div className="mt-6 bg-gray-710 rounded-xl px-4 py-2 w-full self-stretch flex items-center justify-center">
-        <HashChip hash={account.publicKeyHash} small={false} {...hashChipProps} />
+
+      <div className="rounded-2xl-plus bg-gray-710 relative mt-6 w-full p-4">
+        <CopyButton type="button" text={account.publicKeyHash}>
+          <div className="w-11 absolute top-4 right-4 bg-transparent flex justify-end items-center">
+            <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />
+          </div>
+          <div className="break-all text-left text-base-plus" style={{ maxWidth: 271 }}>
+            <HashShortView hash={account.publicKeyHash} trim={false} />
+          </div>
+        </CopyButton>
       </div>
     </div>
   );

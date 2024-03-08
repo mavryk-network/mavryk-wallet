@@ -98,7 +98,7 @@ export const SwapForm: FC = () => {
   }, [inputValue.assetSlug, balance.data]);
 
   const exceededMaxAmount = useMemo(
-    () => (inputValue.amount ?? new BigNumber(0)).isGreaterThanOrEqualTo(maxAmount),
+    () => (inputValue.amount ?? new BigNumber(0)).isGreaterThan(maxAmount),
     [inputValue.amount, maxAmount]
   );
 
@@ -182,7 +182,7 @@ export const SwapForm: FC = () => {
         if (!assetSlug) {
           return t('assetMustBeSelected');
         }
-        if (!amount || amount.isLessThanOrEqualTo(0)) {
+        if (!amount || amount.isLessThan(0)) {
           return t('amountMustBePositive');
         }
         if (exceededMaxAmount) return t('maxAmountErrorMsg');

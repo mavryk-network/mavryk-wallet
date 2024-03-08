@@ -124,6 +124,8 @@
 .tippy-box[data-theme~='maven'] {
   background-color: #373479;
   color: #f4f4f4;
+  font-size: 12px;
+  /* letter-spacing: -0.24px; */
 }
 
 /* Right placement tooltip arrow (arrow will be on left side of tooltip) */

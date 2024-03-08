@@ -1085,7 +1085,7 @@
     "message": "Routing Fee"
   },
   "routingFeeTooltip": {
-    "message": "For choosing the most profitable exchange route among Tezos DEXes. \n\nDEXes commissions are not included."
+    "message": "For choosing the most profitable exchange route among Tezos DEXes. DEXes commissions are not included."
   },
   "space": {
     "message": "Space"
@@ -1741,9 +1741,6 @@
   "activity": {
     "message": "Activity"
   },
-  "history": {
-    "message": "History"
-  },
   "manage": { "message": "Manage" },
   "manageTokens": { "message": "Manage Tokens" },
   "manageAssets": { "message": "Manage Assets" },
@@ -1961,7 +1958,7 @@
   "interaction": {
     "message": "Interaction"
   },
-  "interactionWithContract": {
+  "interactionOnContract": {
     "message": "$noun$ on $contract$",
     "placeholders": {
       "noun": {
@@ -2425,11 +2422,19 @@
   "storageFeeMax": {
     "message": "Storage fee (max)"
   },
+  "interactionWithContract": {
+    "message": "with $contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
   "storageLimit": {
     "message": "Adjust storage limit"
   },
   "txIsLikelyToFail": {
-    "message": "Warning! Transaction is likely to fail"
+    "message": "Warning! Transaction is likely to fail."
   },
   "copyErrorLogs": {
     "message": "Copy Error Logs"
@@ -3509,10 +3514,19 @@
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
   },
+  "feesBurned": {
+    "message": "Fees Burned 🔥"
+  },
   "transferFrom": {
     "message": "Transfer From"
   },
   "transferTo": {
     "message": "Transfer To"
+  },
+  "maxAmountErrorMsg": {
+    "message": "The sum you entered exceeds your available balance"
+  },
+  "chooseAccToConnectMsg": {
+    "message": "Choose account to be connected"
   }
 }

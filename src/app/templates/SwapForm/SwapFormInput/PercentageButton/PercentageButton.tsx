@@ -22,7 +22,7 @@ export const PercentageButton: FC<Props> = ({ percentage, selectedPercentage, on
         'border rounded-md ml-1',
         'transition duration-200 ease-in-out',
         'text-xs p-0.5 flex justify-center items-center',
-        percentage === selectedPercentage ? 'border-accent-blue text-white' : 'border-divider text-secondary-white '
+        'border-divider text-secondary-white '
       )}
       onClick={handleClick}
     >

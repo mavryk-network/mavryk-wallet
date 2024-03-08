@@ -74,7 +74,16 @@ export const SwapForm: FC = () => {
   const cashbackInfoIconRef = useTippy<HTMLSpanElement>(cashbackInfoTippyProps);
 
   const defaultValues = useSwapFormDefaultValue();
-  const { handleSubmit, errors, watch, setValue, control, register, triggerValidation } = useForm<SwapFormValue>({
+  const {
+    handleSubmit,
+    errors,
+    watch,
+    setValue,
+    control,
+    register,
+    triggerValidation,
+    formState: { dirtyFields }
+  } = useForm<SwapFormValue>({
     defaultValues,
     mode: 'onChange',
     validateCriteriaMode: 'firstError'
@@ -174,11 +183,13 @@ export const SwapForm: FC = () => {
     if (isSubmitButtonPressedRef.current) {
       triggerValidation();
     }
-  }, [swapParams.data.output, setValue, triggerValidation]);
+  }, [swapParams.data.output, setValue, triggerValidation, outputValue.assetSlug]);
 
   useEffect(() => {
     register('input', {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
+        if (!dirtyFields.has('input')) return true;
+
         if (!assetSlug) {
           return t('assetMustBeSelected');
         }
@@ -192,6 +203,8 @@ export const SwapForm: FC = () => {
 
     register('output', {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
+        if (!dirtyFields.has('output')) return true;
+
         if (!assetSlug) {
           return t('assetMustBeSelected');
         }
@@ -202,7 +215,7 @@ export const SwapForm: FC = () => {
         return true;
       }
     });
-  }, [exceededMaxAmount, register]);
+  }, [exceededMaxAmount, register, dirtyFields]);
 
   const successScreenProps = useMemo(
     () => ({

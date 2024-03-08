@@ -28,7 +28,7 @@ export const SwapRoute: FC<Props> = ({ className }) => {
   return (
     <div className={className}>
       <p
-        className="flex justify-between items-center text-base-plus text-white cursor-pointer mb-4"
+        className="flex justify-between items-center text-base-plus text-white cursor-pointer"
         onClick={hadleToggleVisible}
       >
         <T id="swapRoute" />

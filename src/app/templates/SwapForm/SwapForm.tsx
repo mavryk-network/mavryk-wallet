@@ -175,14 +175,16 @@ export const SwapForm: FC = () => {
   );
 
   useEffect(() => {
+    if (isSubmitButtonPressedRef.current) {
+      triggerValidation(['input', 'output'], true);
+    }
+  }, [triggerValidation, inputValue.amount, swapParams.data.output, outputValue.assetSlug]);
+
+  useEffect(() => {
     setValue('output', {
       assetSlug: outputValue.assetSlug,
       amount: isDefined(swapParams.data.output) ? new BigNumber(swapParams.data.output) : undefined
     });
-
-    if (isSubmitButtonPressedRef.current) {
-      triggerValidation();
-    }
   }, [swapParams.data.output, setValue, triggerValidation, outputValue.assetSlug]);
 
   useEffect(() => {
@@ -196,7 +198,7 @@ export const SwapForm: FC = () => {
         if (!amount || amount.isLessThan(0)) {
           return t('amountMustBePositive');
         }
-        if (exceededMaxAmount) return t('maxAmountErrorMsg');
+        if (amount.isGreaterThan(maxAmount)) return t('maxAmountErrorMsg');
         return true;
       }
     });
@@ -208,14 +210,18 @@ export const SwapForm: FC = () => {
         if (!assetSlug) {
           return t('assetMustBeSelected');
         }
-        if (!amount || amount.isLessThanOrEqualTo(0)) {
+
+        // Do NOT show err msg if no amount
+        if (!amount) return true;
+
+        if (amount.isLessThanOrEqualTo(0)) {
           return t('amountMustBePositive');
         }
 
         return true;
       }
     });
-  }, [exceededMaxAmount, register, dirtyFields]);
+  }, [register, dirtyFields, maxAmount]);
 
   const successScreenProps = useMemo(
     () => ({

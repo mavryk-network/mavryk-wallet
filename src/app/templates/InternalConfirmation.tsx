@@ -66,7 +66,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 
   const chainId = useChainIdValue(networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Basenet;
+  const mainnet = chainId === TempleChainId.Atlas;
 
   const allAccounts = useRelevantAccounts();
   const account = useMemo(
@@ -157,7 +157,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
       payload.estimates &&
       payload.estimates.length === payload.opParams.length + 1
     ) {
-      return payload.estimates[0].suggestedFeeMutez;
+      return payload.estimates[0].suggestedFeeMumav;
     }
 
     return 0;

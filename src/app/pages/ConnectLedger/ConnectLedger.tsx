@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { DerivationType } from '@taquito/ledger-signer';
+import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import classNames from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 

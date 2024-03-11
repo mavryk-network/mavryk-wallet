@@ -24,7 +24,7 @@ inputs:
   TEMPLE_FIREBASE_CONFIG:
     required: true
   TEMPLE_FIREBASE_MESSAGING_VAPID_KEY:
-      required: true
+    required: true
   TEMPLE_WALLET_ROUTE3_AUTH_TOKEN:
     required: true
   TEMPLE_WALLET_MOONPAY_API_KEY:
@@ -43,7 +43,7 @@ inputs:
     required: true
   HYPELAB_ADS_WINDOW_URL:
     required: true
-# [e2e]
+  # [e2e]
   DEFAULT_HD_ACCOUNT_SEED_PHRASE:
     required: false
   DEFAULT_HD_ACCOUNT_FIRST_PRIVATE_KEY:

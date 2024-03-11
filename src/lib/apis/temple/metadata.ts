@@ -10,11 +10,10 @@ const LOCAL_METADATA_API_URL = process.env.LOCAL_METADATA_API_URL;
 if (LOCAL_METADATA_API_URL) console.warn(`process.env.LOCAL_METADATA_API_URL found. Will use it for metadata loading.`);
 
 const API_CHAIN_NAMES = {
-  [TempleChainId.Basenet]: 'basenet',
   [TempleChainId.Mainnet]: 'mainnet',
-  [TempleChainId.Ghostnet]: 'ghostnet',
-  [TempleChainId.Dcp]: 'dcp',
-  [TempleChainId.DcpTest]: 'dcptest'
+  [TempleChainId.Basenet]: 'basenet',
+  [TempleChainId.Atlas]: 'atlasnet',
+  [TempleChainId.Weekly]: 'weeklynet'
 };
 
 type MetadataApiChainId = keyof typeof API_CHAIN_NAMES;

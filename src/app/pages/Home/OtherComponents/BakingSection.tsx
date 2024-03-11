@@ -32,7 +32,6 @@ import { Link } from 'lib/woozie';
 
 import styles from './BakingSection.module.css';
 import { BakingSectionSelectors } from './BakingSection.selectors';
-import { useAppEnv } from '../../../env';
 
 type RewardsPerEventHistoryItem = Partial<
   Record<

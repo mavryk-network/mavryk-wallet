@@ -6,7 +6,6 @@ import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 
 import { sendPageEvent, sendTrackEvent } from './send-events.utils';
 import { useAnalyticsNetwork } from './use-analytics-network.hook';
-import { useUserTestingGroupNameSelector } from '../../app/store/ab-testing/selectors';
 
 export const useAnalytics = () => {
   const analyticsEnabled = useAnalyticsEnabledSelector();

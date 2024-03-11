@@ -11,7 +11,6 @@ import { useSafeState } from 'lib/ui/hooks';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 import { OperationStatusSelectors } from './OperationStatus.selectors';
-import { setTestID } from '../../lib/analytics';
 
 type OperationStatusProps = {
   className?: string;

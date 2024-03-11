@@ -1,4 +1,4 @@
-import { EntrypointsResponse, RpcClient, RPCOptions } from '@taquito/rpc';
+import { EntrypointsResponse, RpcClient, RPCOptions } from '@mavrykdynamics/taquito-rpc';
 import memoizee from 'memoizee';
 
 import { makeCachedChainIdKey, getCachedChainId, setCachedChainId } from './chain-ids-cache';

@@ -16,7 +16,7 @@ import { useGasToken } from 'lib/assets/hooks';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
-import { mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 
 import OperationsBanner from '../OperationsBanner/OperationsBanner';
 import { OperationsBannerSelectors } from '../OperationsBanner/OperationsBanner.selectors';
@@ -64,17 +64,17 @@ const ExpensesView: FC<ExpensesViewProps> = ({
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
 
-    let defaultGasFeeMutez = new BigNumber(0);
-    let storageFeeMutez = new BigNumber(0);
+    let defaultGasFeeMumav = new BigNumber(0);
+    let storageFeeMumav = new BigNumber(0);
     if (estimates) {
       try {
         let i = 0;
         for (const e of estimates) {
-          defaultGasFeeMutez = defaultGasFeeMutez.plus(e.suggestedFeeMutez);
-          storageFeeMutez = storageFeeMutez.plus(
+          defaultGasFeeMumav = defaultGasFeeMumav.plus(e.suggestedFeeMumav);
+          storageFeeMumav = storageFeeMumav.plus(
             Math.ceil(
               (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *
-                (e as any).minimalFeePerStorageByteMutez
+                (e as any).minimalFeePerStorageByteMumav
             )
           );
           i++;
@@ -84,9 +84,9 @@ const ExpensesView: FC<ExpensesViewProps> = ({
       }
     }
 
-    const gasFee = mutezToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mutezToTz(defaultGasFeeMutez);
-    const storageFee = mutezToTz(storageFeeMutez);
+    const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
+    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
+    const storageFee = mumavToTz(storageFeeMumav);
 
     return (
       <div className="w-full flex flex-col">
@@ -129,7 +129,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({
                       <PlainAssetInput
                         value={value.toFixed()}
                         onChange={val => {
-                          onChange?.(tzToMutez(val ?? defaultGasFee).toNumber());
+                          onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
                         }}
                         max={MAX_GAS_FEE}
                         placeholder={defaultGasFee.toFixed()}

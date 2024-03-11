@@ -65,8 +65,8 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
         payCryptoAddress,
         fromAmount
       );
-      const { suggestedFeeMutez } = await tezos.estimate.transfer(transferParams);
-      await tezos.wallet.transfer({ ...transferParams, fee: suggestedFeeMutez }).send();
+      const { suggestedFeeMumav } = await tezos.estimate.transfer(transferParams);
+      await tezos.wallet.transfer({ ...transferParams, fee: suggestedFeeMumav }).send();
 
       formAnalytics.trackSubmitSuccess();
 

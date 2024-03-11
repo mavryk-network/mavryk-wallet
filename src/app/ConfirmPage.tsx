@@ -75,7 +75,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
   const allAccounts = useRelevantAccounts(false);
   const AccountOptionContent = useMemo(() => AccountOptionContentHOC(payload.networkRpc), [payload.networkRpc]);
   const chainId = useChainIdValue(payload.networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Basenet;
+  const mainnet = chainId === TempleChainId.Atlas;
 
   return payload.type === 'connect' ? (
     <div className="w-full flex flex-col">
@@ -173,7 +173,7 @@ const ConfirmDAppForm: FC = () => {
       payload.estimates &&
       payload.estimates.length === payload.opParams.length + 1
     ) {
-      return payload.estimates[0].suggestedFeeMutez;
+      return payload.estimates[0].suggestedFeeMumav;
     }
 
     return 0;

@@ -631,7 +631,7 @@
     "message": "Failed to get baker's address. Please, check your internet connection and try again."
   },
   "tezosMainnet": {
-    "message": "Mavryk Basenet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {

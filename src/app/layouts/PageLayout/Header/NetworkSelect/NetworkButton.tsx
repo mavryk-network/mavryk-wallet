@@ -8,7 +8,6 @@ import { t } from 'lib/i18n';
 import { TempleNetwork } from 'lib/temple/types';
 
 import { NetworkSelectSelectors } from './selectors';
-import { setAnotherSelector } from '../../../../../lib/analytics';
 
 interface Props {
   network: TempleNetwork;

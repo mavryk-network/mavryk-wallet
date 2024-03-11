@@ -35,14 +35,14 @@ export function usdToAssetAmount(
     : usd.div(assetUsdPrice).decimalPlaces(assetDecimals || 0, roundingMode ?? BigNumber.ROUND_DOWN);
 }
 
-export function tzToMutez(tz: BigNumber.Value) {
+export function tzToMumav(tz: BigNumber.Value) {
   const bigNum = new BigNumber(tz);
   if (bigNum.isNaN()) return bigNum;
   return bigNum.times(10 ** 6).integerValue();
 }
 
-export function mutezToTz(mutez: BigNumber.Value) {
-  const bigNum = new BigNumber(mutez);
+export function mumavToTz(mumav: BigNumber.Value) {
+  const bigNum = new BigNumber(mumav);
   if (bigNum.isNaN()) return bigNum;
   return bigNum.integerValue().div(10 ** 6);
 }

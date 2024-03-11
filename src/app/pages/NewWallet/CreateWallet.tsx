@@ -11,7 +11,6 @@ import { NewSeedVerify } from './create/NewSeedVerify/NewSeedVerify';
 import { LockedWalletExists } from './LockedWalletExists';
 import { SetWalletPassword } from './setWalletPassword/SetWalletPassword';
 import { Template } from './Template';
-import { useTempleClient } from '../../../lib/temple/front';
 
 export const CreateWallet: FC = () => {
   const { locked } = useTempleClient();

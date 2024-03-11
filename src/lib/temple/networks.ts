@@ -11,11 +11,10 @@ import { TempleChainId, TempleNetwork } from 'lib/temple/types';
 // };
 
 export const NETWORK_IDS = new Map<string, string>([
-  [TempleChainId.Basenet, 'basenet'],
   [TempleChainId.Mainnet, 'mainnet'],
-  [TempleChainId.Ghostnet, 'ghostnet'],
-  [TempleChainId.Mumbai, 'mumbainet'],
-  [TempleChainId.Nairobi, 'nairobinet']
+  [TempleChainId.Basenet, 'basenet'],
+  [TempleChainId.Atlas, 'atlasnet'],
+  [TempleChainId.Weekly, 'weeklynet']
 ]);
 
 // const DCP_NETWORKS: TempleNetwork[] = [
@@ -40,70 +39,87 @@ export const NETWORK_IDS = new Map<string, string>([
 // ];
 
 export const NETWORKS: TempleNetwork[] = [
+  // {
+  //   id: 'mainnet',
+  //   nameI18nKey: 'tezosMainnet',
+  //   description: 'Mavryk mainnet',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://rpc.mavryk.network/mainnet',
+  //   color: '#83b300',
+  //   disabled: false
+  // },
   {
     id: 'mainnet',
-    nameI18nKey: 'tezosMainnet',
-    description: 'Mavryk basenet',
+    name: 'Mavryk Atlasnet',
+    description: 'Mavryk Atlasnet',
     type: 'main',
-    rpcBaseURL: 'https://basenet-baking-node.mavryk.network',
+    rpcBaseURL: 'https://rpc.mavryk.network/atlasnet',
     color: '#83b300',
     disabled: false
   },
+  // {
+  //   id: 'marigold-mainnet',
+  //   nameI18nKey: 'marigoldMainnet',
+  //   description: 'Marigold mainnet',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://mainnet.tezos.marigold.dev',
+  //   color: '#48bb78',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'smartpy-mainnet',
+  //   name: 'SmartPy Mainnet',
+  //   description: 'SmartPy Mainnet',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://mainnet.smartpy.io',
+  //   color: '#34D399',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'tezie-mainnet',
+  //   name: 'ECAD Labs Mainnet',
+  //   description: 'Highly available Tezos Mainnet nodes operated by ECAD Labs',
+  //   type: 'main',
+  //   rpcBaseURL: 'https://mainnet.api.tez.ie',
+  //   color: '#047857',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'basenet',
+  //   name: 'Basenet Testnet',
+  //   description: 'Basenet testnet',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://rpc.mavryk.network/basenet',
+  //   color: '#131380',
+  //   disabled: false
+  // },
   {
-    id: 'marigold-mainnet',
-    nameI18nKey: 'marigoldMainnet',
-    description: 'Marigold mainnet',
-    type: 'main',
-    rpcBaseURL: 'https://mainnet.tezos.marigold.dev',
-    color: '#48bb78',
-    disabled: false
-  },
-  {
-    id: 'smartpy-mainnet',
-    name: 'SmartPy Mainnet',
-    description: 'SmartPy Mainnet',
-    type: 'main',
-    rpcBaseURL: 'https://mainnet.smartpy.io',
-    color: '#34D399',
-    disabled: false
-  },
-  {
-    id: 'tezie-mainnet',
-    name: 'ECAD Labs Mainnet',
-    description: 'Highly available Tezos Mainnet nodes operated by ECAD Labs',
-    type: 'main',
-    rpcBaseURL: 'https://mainnet.api.tez.ie',
-    color: '#047857',
-    disabled: false
-  },
-  ...DCP_NETWORKS,
-  {
-    id: 'ghostnet',
-    name: 'Ghostnet Testnet',
-    description: 'Ghostnet testnet',
+    id: 'weekly',
+    name: 'WeeklyNet Testnet',
+    description: `WeeklyNet`,
     type: 'test',
-    rpcBaseURL: 'https://rpc.ghostnet.teztnets.com',
-    color: '#131380',
-    disabled: false
-  },
-  {
-    id: 'monday',
-    name: 'MondayNet Testnet',
-    description: `MondayNet ${getLastMonday()}`,
-    type: 'test',
-    rpcBaseURL: `https://rpc.mondaynet-${getLastMonday()}.teztnets.xyz/`,
+    rpcBaseURL: `https://rpc.mavryk.network/weeklynet`,
     color: '#FBBF24',
     disabled: false
   },
-  {
-    id: 'daily',
-    name: 'DailyNet Testnet',
-    description: 'DailyNet',
-    type: 'test',
-    rpcBaseURL: `https://rpc.dailynet-${formatDateToRPCFormat(new Date())}.teztnets.xyz/`,
-    color: '#FBBF24',
-    disabled: false
-  },
+  // {
+  //   id: 'monday',
+  //   name: 'MondayNet Testnet',
+  //   description: `MondayNet ${getLastMonday()}`,
+  //   type: 'test',
+  //   rpcBaseURL: `https://rpc.mondaynet-${getLastMonday()}.teztnets.xyz/`,
+  //   color: '#FBBF24',
+  //   disabled: false
+  // },
+  // {
+  //   id: 'daily',
+  //   name: 'DailyNet Testnet',
+  //   description: 'DailyNet',
+  //   type: 'test',
+  //   rpcBaseURL: `https://rpc.dailynet-${formatDateToRPCFormat(new Date())}.teztnets.xyz/`,
+  //   color: '#FBBF24',
+  //   disabled: false
+  // },
   {
     id: 'sandbox',
     name: 'localhost:8732',

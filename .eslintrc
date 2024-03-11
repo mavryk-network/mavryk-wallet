@@ -1,10 +1,5 @@
 {
-  "extends": [
-    "react-app",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:import/typescript"
-  ],
+  "extends": ["react-app", "plugin:import/errors", "plugin:import/warnings", "plugin:import/typescript"],
   "plugins": ["import", "prettier", "no-type-assertion"],
   "parser": "@typescript-eslint/parser",
   "overrides": [
@@ -58,8 +53,11 @@
     "@typescript-eslint/no-non-null-assertion": "warn",
     "@typescript-eslint/prefer-ts-expect-error": "error",
     "react-hooks/rules-of-hooks": "warn",
-    "react-hooks/exhaustive-deps": ["warn", {
-      "additionalHooks": "(useMemoWithCompare|useDidUpdate)"
-    }]
+    "react-hooks/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "(useMemoWithCompare|useDidUpdate)"
+      }
+    ]
   }
 }

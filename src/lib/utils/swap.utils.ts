@@ -1,4 +1,4 @@
-import { ContractMethod, ContractProvider, TezosToolkit, TransferParams, Wallet } from '@taquito/taquito';
+import { ContractMethod, ContractProvider, TezosToolkit, TransferParams, Wallet } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
 
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
@@ -67,7 +67,7 @@ export const getSwapTransferParams = async (
     resultParams.push(
       swapMethod.toTransferParams({
         amount: inputAmountAtomic.toNumber(),
-        mutez: true
+        mumav: true
       })
     );
   } else {
@@ -123,7 +123,7 @@ export const getRoutingFeeTransferParams = async (
       {
         amount: feeAmountAtomic.toNumber(),
         to: routingFeeAddress,
-        mutez: true
+        mumav: true
       }
     ];
   }
@@ -134,7 +134,7 @@ export const getRoutingFeeTransferParams = async (
     return [
       assetContract.methods
         .transfer(senderPublicKeyHash, routingFeeAddress, feeAmountAtomic.toNumber())
-        .toTransferParams({ mutez: true })
+        .toTransferParams({ mumav: true })
     ];
   }
   if (token.standard === 'fa2') {
@@ -152,7 +152,7 @@ export const getRoutingFeeTransferParams = async (
             ]
           }
         ])
-        .toTransferParams({ mutez: true })
+        .toTransferParams({ mumav: true })
     ];
   }
 

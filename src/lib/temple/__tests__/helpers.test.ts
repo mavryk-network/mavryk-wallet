@@ -82,9 +82,9 @@ describe('Helpers', () => {
     expect(FrontHelpers.validateContractAddress(address)).toBeTruthy();
   });
 
-  it('mutezToTz & tzToMutez', async () => {
-    expect(Helpers.mutezToTz(1_000_000).toFixed()).toBe('1');
-    expect(Helpers.tzToMutez(1).toFixed()).toBe('1000000');
+  it('mumavToTz & tzToMumav', async () => {
+    expect(Helpers.mumavToTz(1_000_000).toFixed()).toBe('1');
+    expect(Helpers.tzToMumav(1).toFixed()).toBe('1000000');
   });
 
   it('usdToAssetAmount', async () => {

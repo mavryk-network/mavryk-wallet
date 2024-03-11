@@ -1,6 +1,6 @@
 import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } from 'react';
 
-import { ContractAbstraction, ContractProvider, Wallet } from '@taquito/taquito';
+import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/taquito';
 import classNames from 'clsx';
 import { FormContextValues, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';

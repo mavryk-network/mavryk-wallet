@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { Alert, HashChip, Money } from 'app/atoms';
+import { Alert, Anchor, HashChip, Money } from 'app/atoms';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
@@ -223,9 +223,11 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       <div className="text-white text-base-plus flex items-center justify-between">
         <T id="staking" />
         {myBakerPkh && (
-          <ButtonRounded fill={false} size="xs" onClick={handleButtonClick}>
-            <T id="reStake" />
-          </ButtonRounded>
+          <Anchor href="https://tezos-nodes.com/">
+            <ButtonRounded fill={false} size="xs">
+              <T id="validators" />
+            </ButtonRounded>
+          </Anchor>
         )}
       </div>
       {myBakerPkh ? StakedBanner : NotStakedBanner}

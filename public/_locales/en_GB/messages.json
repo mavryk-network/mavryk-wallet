@@ -3534,5 +3534,8 @@
   },
   "filterBy": {
     "message": "Filter by"
+  },
+  "validators": {
+    "message": "Validators"
   }
 }

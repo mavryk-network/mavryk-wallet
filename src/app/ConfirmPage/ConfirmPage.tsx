@@ -1,10 +1,13 @@
 import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
 
+import clsx from 'clsx';
+
 import { Alert, FormSubmitButton } from 'app/atoms';
 import { AlertWithCollapse } from 'app/atoms/Alert';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import ErrorBoundary from 'app/ErrorBoundary';
+import { useWindowDimensions } from 'app/hooks/use-window-dimensions';
 import ContentContainer from 'app/layouts/ContentContainer';
 import Unlock from 'app/pages/Unlock/Unlock';
 import AccountBanner from 'app/templates/AccountBanner';
@@ -25,6 +28,10 @@ import Divider from '../atoms/Divider';
 import { ButtonRounded } from '../molecules/ButtonRounded';
 import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
+
+const APP_POPUP_LIMIT = 604;
+const APP_POPUP_WIDTH_LIMIT = 400;
+const APP_POPUP_VALUE_WITH_TOPBAR = 576;
 
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
@@ -96,6 +103,8 @@ const ConfirmDAppForm: FC = () => {
   const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useTempleClient();
   const allAccounts = useRelevantAccounts(false);
   const account = useAccount();
+
+  const { height } = useWindowDimensions();
 
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
@@ -297,10 +306,13 @@ const ConfirmDAppForm: FC = () => {
   return (
     <CustomRpcContext.Provider value={payload.networkRpc}>
       <div
-        className="relative h-full bg-primary-bg rounded-md shadow-md overflow-y-auto flex flex-col no-scrollbar"
+        className={clsx(
+          'relative h-full bg-primary-bg shadow-md overflow-y-auto flex flex-col no-scrollbar',
+          height > APP_POPUP_LIMIT && 'border border-divider'
+        )}
         style={{
-          width: 400,
-          height: 604
+          width: APP_POPUP_WIDTH_LIMIT,
+          height: height < APP_POPUP_LIMIT ? APP_POPUP_VALUE_WITH_TOPBAR : APP_POPUP_LIMIT
         }}
       >
         <div className="bg-primary-card text-xl leading-6 tracking-tight text-white p-4 flex items-center justify-center w-full capitalize">

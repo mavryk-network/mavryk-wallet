@@ -14,6 +14,7 @@ type SortPopupContentProps = {
   items: SortListItemType[];
   on?: boolean;
   toggle?: () => void;
+  title?: ReactNode;
 };
 
 type SortPopupProps = { children: ReactNode; isOpened?: boolean };
@@ -57,11 +58,11 @@ export const useSortPopup = () => {
 };
 
 // Popup content
-export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle }) => {
+export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle, title = <T id="sortBy" /> }) => {
   const { opened, close } = useSortPopup();
 
   return (
-    <PopupModalWithTitle isOpen={opened} onRequestClose={close} title={<T id="sortBy" />}>
+    <PopupModalWithTitle isOpen={opened} onRequestClose={close} title={title}>
       <div className="flex flex-col mt-2">
         <ul className="flex flex-col px-4">
           {items.map(item => (

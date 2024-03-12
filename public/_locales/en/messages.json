@@ -3528,5 +3528,11 @@
   },
   "chooseAccToConnectMsg": {
     "message": "Choose account to be connected"
+  },
+  "noTransactionsFound": {
+    "message": "No transaction found"
+  },
+  "filterBy": {
+    "message": "Filter by"
   }
 }

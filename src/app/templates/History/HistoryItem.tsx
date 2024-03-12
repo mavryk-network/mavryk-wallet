@@ -41,7 +41,13 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
 
   return (
-    <div className={classNames('py-3 px-4 hover:bg-primary-card-hover relative cursor-pointer', styles.historyItem)}>
+    <div
+      className={classNames(
+        'py-3 px-4  relative cursor-pointer',
+        styles.historyItem,
+        !expanded && 'hover:bg-primary-card-hover'
+      )}
+    >
       <div onClick={() => handleItemClick(hash)} className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
@@ -76,7 +82,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
         </div>
       </div>
       {expanded && (
-        <div className="p-4 mt-4 bg-primary-card flex flex-col rounded-2xl-plus">
+        <div className="p-4 mt-4 bg-gray-910 flex flex-col rounded-2xl-plus">
           {rest.map((item, i) => (
             <div key={i}>
               <OpertionStackItem item={item} moneyDiff={moneyDiffsRest[i]} isTiny />

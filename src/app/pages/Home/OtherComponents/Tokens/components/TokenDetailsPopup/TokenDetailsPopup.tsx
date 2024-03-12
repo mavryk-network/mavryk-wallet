@@ -165,13 +165,14 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         ) : null}
       </div>
-      <div className="text-base-plus text-white w-full px-4">
+      <div className="text-base-plus text-white w-full px-4 mt-3">
         <T id="history" />
       </div>
       <HistoryComponent
         assetSlug={assetSlug}
         searchWrapperClassname={styles.searchWrapperPopup}
         theme={DARK_LIGHT_THEME}
+        showRestOfSearchSectionOptions={false}
       />
     </section>
   );

@@ -1,7 +1,7 @@
 export const darkJSONTheme = {
   base00: '#171717',
   base01: '#f4f4f4',
-  base02: '#171717',
+  base02: '#f4f4f4',
   base03: '#f4f4f4',
   base04: '#f4f4f4',
   base05: '#f4f4f4',

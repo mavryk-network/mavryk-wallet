@@ -25,7 +25,7 @@ const RawPayloadView = memo(
         spellCheck={false}
         readOnly
         fieldWrapperBottomMargin={fieldWrapperBottomMargin}
-        className={clsx('no-scrollbar', className)}
+        className={clsx('scrollbar', className)}
         style={{
           resize: 'none',
           marginBottom: 0,

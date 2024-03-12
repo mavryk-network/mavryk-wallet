@@ -128,6 +128,12 @@
   /* letter-spacing: -0.24px; */
 }
 
+.scrollbar {
+  overflow: scroll;
+  scrollbar-color: #333;
+  scrollbar-width: thin;
+}
+
 /* Right placement tooltip arrow (arrow will be on left side of tooltip) */
 .tippy-box[data-theme~='maven'][data-placement^='right'] > .tippy-arrow::before {
   border-right-color: #373479;

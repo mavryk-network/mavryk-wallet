@@ -125,13 +125,23 @@
   background-color: #373479;
   color: #f4f4f4;
   font-size: 12px;
-  /* letter-spacing: -0.24px; */
 }
 
 .scrollbar {
   overflow: scroll;
-  scrollbar-color: #333;
-  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 7px;
 }
 
 /* Right placement tooltip arrow (arrow will be on left side of tooltip) */

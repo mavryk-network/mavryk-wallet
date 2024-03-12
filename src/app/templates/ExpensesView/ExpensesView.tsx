@@ -46,7 +46,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError })
         className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm')}
         style={{ maxHeight: gasFeeError ? '14.5rem' : '15.5rem' }}
       >
-        <div className="no-scrollbar h-full">
+        <div className="h-full">
           {expenses.map((item, index, arr) => (
             <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
           ))}

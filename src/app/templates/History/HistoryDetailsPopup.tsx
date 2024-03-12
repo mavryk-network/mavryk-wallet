@@ -93,7 +93,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         </div>
       }
       portalClassName="token-details-popup"
-      headerComponent={<HistoryTokenIcon historyItem={historyItem} size={44} />}
+      headerComponent={<HistoryTokenIcon historyItem={historyItem} size={44} fullSizeAssets />}
       {...props}
     >
       <div className="px-4">

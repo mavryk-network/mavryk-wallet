@@ -53,12 +53,12 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           <HistoryTokenIcon historyItem={historyItem} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack historyItem={historyItem} base={base} />
-            <div className="flex items-center">
+            <div className="flex items-center flex-wrap gap-1">
               <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
               {rest.length > 0 && (
                 <div className={classNames('flex items-center')}>
                   <button
-                    className={classNames('flex items-center ml-1', 'text-accent-blue hover:underline')}
+                    className={classNames('flex items-center', 'text-accent-blue hover:underline')}
                     onClick={e => {
                       e.stopPropagation();
                       setExpanded(e => !e);

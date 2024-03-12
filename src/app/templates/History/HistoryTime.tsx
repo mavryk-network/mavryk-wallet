@@ -11,7 +11,7 @@ export const HistoryTime: FC<HistoryTimeProps> = ({ addedAt }) => {
   return (
     <Time
       children={() => (
-        <span className="text-sm text-secondary-white">{format(new Date(addedAt), 'd MMMM yyyy, HH:mm')}</span>
+        <span className="text-sm text-secondary-white">{format(new Date(addedAt), 'd MMMM yyyy, HH:mm a')}</span>
       )}
     />
   );

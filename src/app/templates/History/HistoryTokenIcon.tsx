@@ -26,9 +26,16 @@ type HistoryTokenIconProps = {
   historyItem: UserHistoryItem;
   size?: number;
   limit?: number;
+  fullSizeAssets?: boolean;
 };
 
-export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onClick, size = 32, limit = 2 }) => {
+export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
+  historyItem,
+  onClick,
+  size = 32,
+  limit = 2,
+  fullSizeAssets = false
+}) => {
   const { type } = historyItem;
   const slugs = getAssetsFromOperations(historyItem);
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
@@ -63,13 +70,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
   };
 
   return (
-    <div
-      className={clsx(
-        'h-12 flex items-center justify-start',
-        slugs.length === 1 && 'w-11',
-        limit === 2 && slugs.length > 1 && 'w-13'
-      )}
-    >
+    <div className={clsx('h-12 flex items-center justify-start', 'w-11')}>
       <div
         className="bg-primary-bg rounded-full flex items-center justify-center relative"
         style={{ width: size, height: size }}
@@ -79,7 +80,10 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({ historyItem, onCli
         {tokensMetadata?.slice(0, limit)?.map((token, idx, arr) => (
           <img
             key={idx}
-            className={clsx('rounded-full overflow-hidden w-6 h-6 absolute top-1/2 bg-white')}
+            className={clsx(
+              'rounded-full overflow-hidden absolute top-1/2 bg-white',
+              slugs.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
+            )}
             style={{
               left: `${getLeftImagePosition(idx)}%`,
               zIndex: arr.length - idx

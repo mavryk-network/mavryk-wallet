@@ -260,14 +260,14 @@ export const HistoryComponent: React.FC<Props> = memo(
               loader={loading && <SyncSpinner className="mt-4" />}
               onScroll={onScroll}
             >
-              {filteredHistory.map((historyItem, index, arr) => (
+              {filteredHistory.map((historyItem, index) => (
                 <Fragment key={historyItem.hash}>
                   <HistoryItem
                     address={accountAddress}
                     historyItem={historyItem}
                     slug={assetSlug}
                     handleItemClick={handleItemClick}
-                    last={index === arr.length - 1}
+                    last={false}
                   />
                   {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
                 </Fragment>

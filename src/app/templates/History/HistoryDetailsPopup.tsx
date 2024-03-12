@@ -75,7 +75,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 diff={diff}
                 pending={status === 'pending'}
                 className="flex flex-col items-center"
-                moneyClassname="text-lg"
+                moneyClassname="text-xl leading-6 tracking-tight"
+                isColored={false}
               />
             ))}
           </div>

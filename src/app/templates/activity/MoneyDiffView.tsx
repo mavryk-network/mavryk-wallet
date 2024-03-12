@@ -14,39 +14,46 @@ interface Props {
   pending?: boolean;
   className?: string;
   moneyClassname?: string;
+  isColored?: boolean;
 }
 
-export const MoneyDiffView = memo<Props>(({ assetId: assetSlug, diff, pending = false, className, moneyClassname }) => {
-  const { popup } = useAppEnv();
-  const metadata = useAssetMetadata(assetSlug);
+export const MoneyDiffView = memo<Props>(
+  ({ assetId: assetSlug, diff, pending = false, isColored = true, className, moneyClassname }) => {
+    const { popup } = useAppEnv();
+    const metadata = useAssetMetadata(assetSlug);
 
-  const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
+    const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
 
-  const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-sm';
-  const conditionalDiffClassName = diffBN.gt(0) ? 'text-primary-success' : 'text-primary-error';
-  const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
-  const showPlus = diffBN.gt(0) ? '+' : '';
+    const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-sm';
+    const conditionalDiffClassName = isColored
+      ? diffBN.gt(0)
+        ? 'text-primary-success'
+        : 'text-primary-error'
+      : 'text-white';
+    const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
+    const showPlus = diffBN.gt(0) ? '+' : '';
 
-  return metadata ? (
-    <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
-      <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
-        <span>{showPlus}</span>
-        <Money smallFractionFont={false}>{diffBN}</Money>
-        <span>&nbsp;</span>
-        <span>{getAssetSymbol(metadata, true)}</span>
+    return metadata ? (
+      <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
+        <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
+          <span>{showPlus}</span>
+          <Money smallFractionFont={false}>{diffBN}</Money>
+          <span>&nbsp;</span>
+          <span>{getAssetSymbol(metadata, true)}</span>
+        </div>
+
+        {assetSlug && (
+          <InFiat volume={diffBN.abs()} assetSlug={assetSlug} smallFractionFont={false}>
+            {({ balance, symbol }) => (
+              <div className="text-sm tracking-normal text-secondary-white flex">
+                <span>{showPlus ? showPlus : '-'}</span>
+                <span className="mr-px">{symbol}</span>
+                {balance}
+              </div>
+            )}
+          </InFiat>
+        )}
       </div>
-
-      {assetSlug && (
-        <InFiat volume={diffBN.abs()} assetSlug={assetSlug} smallFractionFont={false}>
-          {({ balance, symbol }) => (
-            <div className="text-sm tracking-normal text-secondary-white flex">
-              <span>{showPlus ? showPlus : '-'}</span>
-              <span className="mr-px">{symbol}</span>
-              {balance}
-            </div>
-          )}
-        </InFiat>
-      )}
-    </div>
-  ) : null;
-});
+    ) : null;
+  }
+);

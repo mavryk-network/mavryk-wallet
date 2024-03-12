@@ -1,8 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 
-import { formatDistanceToNow } from 'date-fns';
-
-import { getDateFnsLocale } from 'lib/i18n';
+import { format } from 'date-fns';
 
 type HistoryTimeProps = {
   addedAt?: string;
@@ -13,13 +11,7 @@ export const HistoryTime: FC<HistoryTimeProps> = ({ addedAt }) => {
   return (
     <Time
       children={() => (
-        <span className="text-sm text-secondary-white">
-          {formatDistanceToNow(new Date(addedAt), {
-            includeSeconds: true,
-            addSuffix: true,
-            locale: getDateFnsLocale()
-          })}
-        </span>
+        <span className="text-sm text-secondary-white">{format(new Date(addedAt), 'd MMMM yyyy, HH:mm')}</span>
       )}
     />
   );

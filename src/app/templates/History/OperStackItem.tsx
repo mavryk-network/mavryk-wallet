@@ -171,7 +171,7 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
 
 const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status }) => {
   return (
-    <div className="flex items-center justify-between text-white text-xs h-12 border-b border-divider">
+    <div className="flex items-start justify-between text-white text-xs h-12 border-b border-divider py-2">
       <div className="flex items-center">
         <div className="flex items-center">{titleNode}</div>
         <span>&nbsp;</span>
@@ -183,7 +183,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
           assetId={moneyDiff.assetSlug}
           diff={moneyDiff.diff}
           pending={status === 'pending'}
-          className="flex flex-col"
+          className="flex flex-col -mt-2px"
           moneyClassname="text-sm"
         />
       )}

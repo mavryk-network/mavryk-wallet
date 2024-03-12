@@ -135,7 +135,6 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <CardContainer className={clsx('text-sm text-white flex flex-col', showFeeDetails ? 'gap-2' : 'gap-0')}>
           <div className="flex justify-between items-start text-base-plus">
             <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
-              *
               <T id="networkFees" />
               <ArrowIcon
                 className={clsx(

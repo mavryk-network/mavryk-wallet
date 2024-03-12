@@ -110,9 +110,9 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <span>
               <T id="transactionId" />
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               <HashChip hash={hash} small showIcon={false} />
-              <OpenInExplorerChip hash={hash} alternativeDesign />
+              <OpenInExplorerChip hash={hash} alternativeDesign small />
             </div>
           </div>
         </CardContainer>

@@ -45,7 +45,7 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
   const linkClassnames = useMemo(
     () =>
       alternativeDesign
-        ? clsx('')
+        ? clsx('p-1 bg-transparent')
         : clsx(
             'flex items-center justify-center rounded select-none p-1',
             'bg-primary-card transition ease-in-out duration-300',
@@ -63,7 +63,7 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
       testID={testID}
       testIDProperties={testIDProperties}
     >
-      <SvgIcon className={clsx('stroke-cyan', small ? 'h-3 w-3' : 'h-4 w-4')} />
+      <SvgIcon className={clsx('stroke-cyan stroke-1', small ? 'h-3 w-3' : 'h-4 w-4')} />
     </Anchor>
   );
 };

@@ -221,7 +221,7 @@ const BakerBanner = memo<BakerBannerProps>(
 
     return (
       <div
-        className={classNames('w-full', 'py-14px px-4', displayBg && 'bg-gray-920 rounded-2xl-plus', className)}
+        className={classNames('w-full', 'py-14px px-4', displayBg && 'bg-gray-910 rounded-2xl-plus', className)}
         style={{
           maxWidth: undefined,
           ...style

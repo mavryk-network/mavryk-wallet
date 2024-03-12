@@ -19,13 +19,11 @@ import { alterIpfsUrl, getAssetsFromOperations } from './utils';
  * onClick - open modal for tx item
  * historyitem - the actual histiry item
  * size - icon size
- * limit - nunmber of assets to show if it's swap
  */
 type HistoryTokenIconProps = {
   onClick?: () => void;
   historyItem: UserHistoryItem;
   size?: number;
-  limit?: number;
   fullSizeAssets?: boolean;
 };
 
@@ -33,12 +31,13 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
   historyItem,
   onClick,
   size = 32,
-  limit = 2,
   fullSizeAssets = false
 }) => {
   const { type } = historyItem;
   const slugs = getAssetsFromOperations(historyItem);
-  const tokensMetadata = useMultipleAssetsMetadata(slugs);
+  const tokensMetadata = useMultipleAssetsMetadata(
+    [slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)).reverse()
+  );
 
   const renderOperationIcon = () => {
     // TODO add withdraw. new stake, vote yay, buy
@@ -77,12 +76,12 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
         onClick={onClick}
       >
         {renderOperationIcon()}
-        {tokensMetadata?.slice(0, limit)?.map((token, idx, arr) => (
+        {tokensMetadata?.map((token, idx, arr) => (
           <img
             key={idx}
             className={clsx(
               'rounded-full overflow-hidden absolute top-1/2 bg-white',
-              slugs.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
+              arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
             )}
             style={{
               left: `${getLeftImagePosition(idx)}%`,

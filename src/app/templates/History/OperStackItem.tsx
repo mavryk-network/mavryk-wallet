@@ -78,8 +78,8 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
       );
     case HistoryItemOpTypeEnum.Swap:
       // const opSwap = item as HistoryItemTransactionOp;
-      const symbol1 = (tokensMetadata && tokensMetadata[0]?.symbol) ?? '?';
-      const symbol2 = (tokensMetadata && tokensMetadata[1]?.symbol) ?? '?';
+      const symbol1 = (tokensMetadata && tokensMetadata[tokensMetadata.length - 1]?.symbol) ?? '?';
+      const symbol2 = (tokensMetadata && tokensMetadata[0]?.symbol) ?? '?';
 
       return (
         <Component

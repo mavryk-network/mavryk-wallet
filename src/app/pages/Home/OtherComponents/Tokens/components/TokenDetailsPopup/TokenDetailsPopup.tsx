@@ -159,7 +159,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         ) : tokenMetadata?.address ? (
           <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
             <T id="tokenAddress" />
-            <div className="p-4 bg-gray-920 text-left rounded-2xl-plus">
+            <div className="p-4 bg-gray-910 text-left rounded-2xl-plus">
               <HashChip hash={tokenMetadata.address} small />
             </div>
           </div>

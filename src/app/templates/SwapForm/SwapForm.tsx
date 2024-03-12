@@ -192,9 +192,9 @@ export const SwapForm: FC = () => {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
         if (!dirtyFields.has('input')) return true;
 
-        if (!assetSlug) {
-          return t('assetMustBeSelected');
-        }
+        // if (!assetSlug) {
+        //   return t('assetMustBeSelected');
+        // }
         if (!amount || amount.isLessThan(0)) {
           return t('amountMustBePositive');
         }
@@ -207,9 +207,9 @@ export const SwapForm: FC = () => {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
         if (!dirtyFields.has('output')) return true;
 
-        if (!assetSlug) {
-          return t('assetMustBeSelected');
-        }
+        // if (!assetSlug) {
+        //   return t('assetMustBeSelected');
+        // }
 
         // Do NOT show err msg if no amount
         if (!amount) return true;

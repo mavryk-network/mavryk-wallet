@@ -82,7 +82,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
         </div>
       </div>
       {expanded && (
-        <div className="p-4 mt-4 bg-gray-910 flex flex-col rounded-2xl-plus">
+        <div className="p-4 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">
           {rest.map((item, i) => (
             <div key={i}>
               <OpertionStackItem item={item} moneyDiff={moneyDiffsRest[i]} isTiny />

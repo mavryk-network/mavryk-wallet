@@ -160,9 +160,9 @@ function reduceOneTzktTransactionOperation(
       const { sender, tokenContractAddress, tokenId } = tokenTransfers;
 
       historyTxOp.assetSlug = toTokenSlug(tokenContractAddress, tokenId);
-      if (sender.address === address && !historyTxOp.entrypoint?.includes('swap')) {
+      if (sender.address === address && !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.TransferTo;
-      } else if (historyTxOp.entrypoint?.includes('swap')) {
+      } else if (historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.Swap;
       } else historyTxOp.type = HistoryItemOpTypeEnum.TransferFrom;
     }
@@ -346,7 +346,7 @@ function deriveHistoryItemType(
     type = HistoryItemOpTypeEnum.Origination;
     return type;
   } else {
-    if (items.some(item => item?.entrypoint === 'swap')) {
+    if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       type = HistoryItemOpTypeEnum.Swap;
     } else {
       for (const item of items) {

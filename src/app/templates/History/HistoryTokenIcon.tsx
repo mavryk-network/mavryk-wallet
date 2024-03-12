@@ -70,7 +70,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
   };
 
   return (
-    <div className={clsx('h-12 flex items-center justify-start', 'w-11')}>
+    <div className={clsx('h-12 flex items-center justify-start', 'w-11 max-w-11 min-w-11')}>
       <div
         className="bg-primary-bg rounded-full flex items-center justify-center relative"
         style={{ width: size, height: size }}

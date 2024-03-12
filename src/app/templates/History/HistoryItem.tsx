@@ -43,7 +43,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   return (
     <div
       className={classNames(
-        'py-3 px-4  relative cursor-pointer',
+        'py-3 px-4 relative cursor-pointer overflow-hidden',
         styles.historyItem,
         !expanded && 'hover:bg-primary-card-hover'
       )}

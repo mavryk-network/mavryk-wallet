@@ -303,7 +303,7 @@ const ConfirmDAppForm: FC = () => {
           height: 604
         }}
       >
-        <div className="bg-primary-card text-xl leading-6 tracking-tight text-white p-4 flex items-center justify-center w-full">
+        <div className="bg-primary-card text-xl leading-6 tracking-tight text-white p-4 flex items-center justify-center w-full capitalize">
           {content.title}
         </div>
         <div className="flex flex-col items-center px-8 w-full relative pb-4">

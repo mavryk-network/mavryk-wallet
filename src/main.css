@@ -145,6 +145,15 @@
   border-radius: 7px;
 }
 
+::-webkit-scrollbar-corner {
+  background: transparent;
+  color: transparent;
+}
+
+::-webkit-resizer {
+  background: transparent;
+}
+
 /* Right placement tooltip arrow (arrow will be on left side of tooltip) */
 .tippy-box[data-theme~='maven'][data-placement^='right'] > .tippy-arrow::before {
   border-right-color: #373479;
@@ -232,10 +241,10 @@ button,
  */
 
 .no-scrollbar {
-  scrollbar-width: none;
+  /* scrollbar-width: none; */
 }
 .no-scrollbar::-webkit-scrollbar {
-  display: none;
+  /* display: none; */
 }
 
 /**

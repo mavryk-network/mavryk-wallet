@@ -2,6 +2,10 @@
   outline: 1px solid #333;
 }
 
+.historyItem {
+  /* border-bottom: 1px solid transparent; */
+}
+
 .moneyDiff #token-money {
   font-size: 20px;
   color: #f4f4f4;

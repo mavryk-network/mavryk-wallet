@@ -38,8 +38,8 @@ import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
 
-const CONFIRM_WINDOW_WIDTH = 380;
-const CONFIRM_WINDOW_HEIGHT = 632;
+const CONFIRM_WINDOW_WIDTH = 400;
+const CONFIRM_WINDOW_HEIGHT = 604;
 const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;

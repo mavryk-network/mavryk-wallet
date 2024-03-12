@@ -229,7 +229,7 @@ const ConfirmDAppForm: FC = () => {
 
       case 'confirm_operations':
         return {
-          title: t('confirmAction', t('operations').toLowerCase()),
+          title: t('confirmAction', t('operation').toLowerCase()),
           declineActionTitle: t('reject'),
           declineActionTestID: ConfirmPageSelectors.ConfirmOperationsAction_RejectButton,
           confirmActionTitle: error ? t('retry') : t('confirm'),
@@ -303,10 +303,10 @@ const ConfirmDAppForm: FC = () => {
           height: 604
         }}
       >
-        <div className="bg-primary-card text-lg text-white p-4 flex items-center justify-center w-full">
+        <div className="bg-primary-card text-xl leading-6 tracking-tight text-white p-4 flex items-center justify-center w-full">
           {content.title}
         </div>
-        <div className="flex flex-col items-center px-8 w-full relative pb-8">
+        <div className="flex flex-col items-center px-8 w-full relative pb-4">
           {content.want}
 
           {payload.type === 'connect' && (

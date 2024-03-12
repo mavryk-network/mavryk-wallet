@@ -48,7 +48,9 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
         </div>
       }
       portalClassName="token-details-popup"
-      headerComponent={<AssetIcon assetSlug={assetSlug} className="rounded-full" style={{ width: 44, height: 44 }} />}
+      headerComponent={
+        <AssetIcon assetSlug={assetSlug} className="rounded-full" size={44} style={{ width: 44, height: 44 }} />
+      }
       {...rest}
     >
       <TokenDetailsPopupContent assetSlug={assetSlug} assetMetadata={assetMetadata} />
@@ -99,8 +101,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         </div>
         {/* send swap receive withdraw - section */}
-        <div className="text-base-plus text-white mb-6">
-          <div className="flex justify-between mx-auto w-full max-w-sm pb-4">
+        <div className="text-base-plus text-white mb-2">
+          <div className="flex justify-between mx-auto w-full max-w-sm pb-4 px-2">
             <ActionButton
               label={<T id="receive" />}
               Icon={ReceiveIcon}
@@ -147,7 +149,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         {/* market price section */}
         <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
           <T id="marketPrice" />
-          <div className="p-4 bg-gray-920 text-left rounded-2xl-plus">
+          <div className="p-4 bg-gray-910 text-left rounded-2xl-plus">
             <FiatBalance value={price} assetSlug={assetSlug} className="text-white text-base-plus" />
           </div>
         </div>

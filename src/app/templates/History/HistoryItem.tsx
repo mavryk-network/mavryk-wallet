@@ -25,6 +25,7 @@ interface Props {
 
 export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const { hash, addedAt, status } = historyItem;
 
@@ -42,6 +43,8 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
 
   return (
     <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={classNames(
         'py-3 px-4 relative cursor-pointer overflow-hidden',
         styles.historyItem,
@@ -91,7 +94,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           ))}
         </div>
       )}
-      {!last && <ListItemDivider className={styles.divider} />}
+      {!last && !isHovered && <ListItemDivider className={styles.divider} />}
     </div>
   );
 });

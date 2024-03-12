@@ -57,8 +57,8 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // Sort popup options
     // in this case we will filter history by selected option
-    // the filter option array will lokk like this -> [0, 3, 5, 7] etc.
-    // it will filter history based on type
+    // the filter option array looks like this -> [0, 3, 5, 7] etc.
+    // it filters history based on type
     const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
       () => [
         {

@@ -16,6 +16,7 @@ import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
+import { OpenInExplorerChip } from '../OpenInExplorerChip';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { toHistoryTokenSlug } from './utils';
@@ -109,7 +110,10 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <span>
               <T id="transactionId" />
             </span>
-            <HashChip hash={hash} small />
+            <div className="flex items-center gap-1">
+              <HashChip hash={hash} small showIcon={false} />
+              <OpenInExplorerChip hash={hash} alternativeDesign />
+            </div>
           </div>
         </CardContainer>
 
@@ -168,13 +172,13 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <span>
                 <T id="gasFee" />
               </span>
-              <span className="text-secondary-white flex items-center">
+              <span className="text-secondary-white flex items-center capitalize">
                 <span>{mutezToTz(fees?.gasFee).toFixed()}</span>
                 &nbsp;
                 <span>{assetSymbol}</span>
               </span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center capitalize">
               <span>
                 <T id="storageFee" />
               </span>

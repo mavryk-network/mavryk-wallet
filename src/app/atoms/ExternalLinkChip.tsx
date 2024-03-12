@@ -42,15 +42,23 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
 
   const SvgIcon = arrowIcon ? ArrowTopRightSvgIcon : LinkSvgIcon;
 
+  const linkClassnames = useMemo(
+    () =>
+      alternativeDesign
+        ? clsx('')
+        : clsx(
+            'flex items-center justify-center rounded select-none p-1',
+            'bg-primary-card transition ease-in-out duration-300',
+            className
+          ),
+    [alternativeDesign, className]
+  );
+
   return (
     <Anchor
       ref={tooltip ? ref : undefined}
       href={href}
-      className={clsx(
-        'flex items-center justify-center rounded select-none p-1',
-        'bg-primary-card transition ease-in-out duration-300',
-        className
-      )}
+      className={linkClassnames}
       treatAsButton={true}
       testID={testID}
       testIDProperties={testIDProperties}

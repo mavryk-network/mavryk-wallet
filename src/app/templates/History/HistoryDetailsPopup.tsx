@@ -1,10 +1,11 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import { HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
+import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
@@ -32,6 +33,12 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const assetSymbol = getAssetSymbol(assetMetadata);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
+
+  const [showFeeDetails, setShowFeedetails] = useState(true);
+
+  const toggleFeesDropdown = useCallback(() => {
+    setShowFeedetails(!showFeeDetails);
+  }, [showFeeDetails]);
 
   const fees = useMemo(
     () =>
@@ -117,15 +124,23 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               hash={historyItem.operations[0]?.source.address ?? ''}
               className="flex-shrink-0 shadow-xs rounded-full"
             />
-            <HashChip hash={historyItem.operations[0]?.source.address ?? ''} small />
+            <HashChip hash={historyItem.operations[0]?.source.address ?? ''} small className="text-sm" />
           </div>
         </CardContainer>
 
-        <CardContainer className="text-sm text-white flex flex-col gap-2">
+        <CardContainer className={clsx('text-sm text-white flex flex-col', showFeeDetails ? 'gap-2' : 'gap-0')}>
           <div className="flex justify-between items-start text-base-plus">
-            <div>
+            <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
+              *
               <T id="networkFees" />
+              <ArrowIcon
+                className={clsx(
+                  'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
+                  showFeeDetails && 'transform rotate-180'
+                )}
+              />
             </div>
+
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={assetslug}
@@ -142,38 +157,45 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               </div>
             </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span>
-              <T id="gasFee" />
-            </span>
-            <span className="text-secondary-white flex items-center">
-              <span>{mutezToTz(fees?.gasFee).toFixed()}</span>
-              &nbsp;
-              <span>{assetSymbol}</span>
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>
-              <T id="storageFee" />
-            </span>
-            <span className="text-secondary-white">
+          <div
+            className={clsx(
+              'flex flex-col gap-2',
+              'transition ease-in-out duration-200',
+              showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
+            )}
+          >
+            <div className="flex justify-between items-center">
+              <span>
+                <T id="gasFee" />
+              </span>
               <span className="text-secondary-white flex items-center">
-                <span>{mutezToTz(fees?.storageFee).toFixed()}</span>
+                <span>{mutezToTz(fees?.gasFee).toFixed()}</span>
                 &nbsp;
                 <span>{assetSymbol}</span>
               </span>
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>
-              <T id="burnedFromFees" />
-            </span>
-            {/* TODO calculate Burned fees */}
-            <span className="text-secondary-white">
-              <span>{mutezToTz(burnedFee).toFixed()}</span>
-              &nbsp;
-              <span>{assetSymbol}</span>
-            </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>
+                <T id="storageFee" />
+              </span>
+              <span className="text-secondary-white">
+                <span className="text-secondary-white flex items-center">
+                  <span>{mutezToTz(fees?.storageFee).toFixed()}</span>
+                  &nbsp;
+                  <span>{assetSymbol}</span>
+                </span>
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>
+                <T id="burnedFromFees" />
+              </span>
+              <span className="text-secondary-white">
+                <span>{mutezToTz(burnedFee).toFixed()}</span>
+                &nbsp;
+                <span>{assetSymbol}</span>
+              </span>
+            </div>
           </div>
         </CardContainer>
       </div>

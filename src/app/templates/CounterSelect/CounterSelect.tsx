@@ -91,7 +91,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
         <p className="text-white text-sm capitalize">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(
-            'w-6 h-auto stroke-white stroke-2 transition ease-in-out duration-200 cursor-pointer',
+            'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
             opened && 'transform rotate-180'
           )}
         />

@@ -256,14 +256,14 @@ export const HistoryComponent: React.FC<Props> = memo(({ assetSlug, searchWrappe
             loader={loading && <SyncSpinner className="mt-4" />}
             onScroll={onScroll}
           >
-            {filteredHistory.map((historyItem, index) => (
+            {filteredHistory.map((historyItem, index, arr) => (
               <Fragment key={historyItem.hash}>
-                {/* I want to render the list of userHistory here in flex box items */}
                 <HistoryItem
                   address={accountAddress}
                   historyItem={historyItem}
                   slug={assetSlug}
                   handleItemClick={handleItemClick}
+                  last={index === arr.length - 1}
                 />
                 {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
               </Fragment>

@@ -9,6 +9,7 @@
 
 .headerComponent {
   position: absolute;
+  z-index: 30;
   top: -16px;
   left: 50%;
 

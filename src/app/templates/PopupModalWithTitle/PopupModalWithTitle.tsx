@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, SyntheticEvent, memo, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -8,6 +8,8 @@ import { t } from 'lib/i18n';
 import { useTippyById } from 'lib/ui/useTippy';
 
 import styles from './PopupModalWithTitle.module.css';
+
+const SCROLL_INDEX_POS = 35;
 
 const tippyProps = {
   trigger: 'mouseenter',
@@ -30,6 +32,19 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
   ...restProps
 }) => {
   const handleMouseEnter = useTippyById('#close-icon', tippyProps);
+  const [animateCloseIcon, setAnimateCloseIcon] = useState(false);
+
+  const scrollEvent = (e: SyntheticEvent) => {
+    const target = e.target as HTMLTextAreaElement;
+
+    if (target.scrollTop > SCROLL_INDEX_POS && !animateCloseIcon) {
+      setAnimateCloseIcon(true);
+    }
+
+    if (target.scrollTop < SCROLL_INDEX_POS && animateCloseIcon) {
+      setAnimateCloseIcon(false);
+    }
+  };
 
   return (
     <CustomPopup
@@ -42,8 +57,14 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
     >
       <>
         {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
-        <div className={classNames('w-full max-h-500', styles.container)}>
-          <div className="absolute top-4 px-4 w-full flex justify-end items-cente">
+        <div onScroll={scrollEvent} className={classNames('w-full max-h-500', styles.container)}>
+          <div
+            className={classNames(
+              'absolute top-4 px-4 w-full flex justify-end items-center',
+              'transition duration-300 ease-in-out',
+              animateCloseIcon && 'bg-primary-card pb-4 z-10'
+            )}
+          >
             <button onMouseEnter={handleMouseEnter} id="close-icon" className=" ">
               <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
             </button>
@@ -61,9 +82,13 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
               </div>
             )}
           </div>
-          <div className="h-full no-scrollbar">{children}</div>
+          <ChildComponent children={children} />
         </div>
       </>
     </CustomPopup>
   );
 };
+
+const ChildComponent = memo(({ children }: { children: ReactNode }) => {
+  return <div className="h-full no-scrollbar">{children}</div>;
+});

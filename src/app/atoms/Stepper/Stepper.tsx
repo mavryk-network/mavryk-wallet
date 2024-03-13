@@ -6,32 +6,35 @@ import styles from 'app/atoms/Stepper/Stepper.module.css';
 import { ReactComponent as OkIcon } from 'app/icons/ok.svg';
 
 interface Props {
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   steps: string[];
   currentStep: number;
   completed?: boolean;
 }
 
-export const Stepper: FC<Props> = ({ style, steps, currentStep, completed = false }) => (
-  <div className={classNames(styles['stepperWrapper'])} style={style}>
-    {steps.map((stepItem, index) => (
-      <div className="stepBlock" key={stepItem}>
-        <p>{stepItem}</p>
-        <div className={styles['stepWrapper']}>
-          <div
-            className={classNames(
-              styles['circle'],
-              (completed || currentStep) === index && styles['circle-active'],
-              (completed || currentStep > index) && styles['circle-passed']
+export const Stepper: FC<Props> = ({ style, steps, currentStep, completed = false }) => {
+  console.log(currentStep, 'ds');
+  return (
+    <div className={classNames(styles['stepperWrapper'])} style={style}>
+      {steps.map((stepItem, index) => (
+        <div className="stepBlock" key={stepItem}>
+          <div className={styles['stepWrapper']}>
+            <div
+              className={classNames(
+                'text-white text-base-plus flex items-center justify-center',
+                styles['circle'],
+                (completed || currentStep) === index && styles['circle-active'],
+                (completed || currentStep > index) && styles['circle-passed']
+              )}
+            >
+              {completed || currentStep > index ? <OkIcon style={{ width: '16px', height: '16px' }} /> : index + 1}
+            </div>
+            {index !== steps.length - 1 && (
+              <div className={classNames(styles['line'], currentStep > index && styles['line-active'])} />
             )}
-          >
-            {(completed || currentStep > index) && <OkIcon style={{ width: '14px', height: '14px' }} />}
           </div>
-          {index !== steps.length - 1 && (
-            <div className={classNames(styles['line'], currentStep > index && styles['line-active'])} />
-          )}
         </div>
-      </div>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
+};

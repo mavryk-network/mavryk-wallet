@@ -16,7 +16,6 @@ const Onboarding: FC = () => {
   const [step, setStep] = useState<number>(0);
 
   const steps = (stepWord => [`${stepWord} 1`, `${stepWord} 2`, `${stepWord} 3`, `${stepWord} 4`])(t('step'));
-
   return (
     <PageLayout
       isTopbarVisible={false}
@@ -30,7 +29,7 @@ const Onboarding: FC = () => {
       skip={step < 4}
     >
       <div style={{ maxWidth: '360px', margin: 'auto' }} className="pb-8 text-center">
-        {step < 4 && <Stepper style={{ marginTop: '40px' }} steps={steps} currentStep={step} />}
+        {step < 4 && <Stepper steps={steps} currentStep={step} />}
         {step === 0 && <FirstStep setStep={setStep} />}
         {step === 1 && <SecondStep setStep={setStep} />}
         {step === 2 && <ThirdStep setStep={setStep} />}

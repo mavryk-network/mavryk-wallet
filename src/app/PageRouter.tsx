@@ -33,6 +33,7 @@ import * as Woozie from 'lib/woozie';
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
 import { EditAccount } from './pages/EditAccount';
+import Onboarding from './pages/Onboarding/Onboarding';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
@@ -103,6 +104,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/withdraw', onlyReady(onlyInFullPage(() => <Withdraw />))],
   ['/withdraw/debit/alice-bob', onlyReady(onlyInFullPage(() => <AliceBobWithdraw />))],
   ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
+  ['/onboarding', onlyReady(onlyInFullPage(() => <Onboarding />))],
   ['/notifications', onlyReady(() => <Notifications />)],
   ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
   ['/success', onlyReady(() => <SuccessScreen />)],

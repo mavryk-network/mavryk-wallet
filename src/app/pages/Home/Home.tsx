@@ -79,7 +79,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const canSend = account.type !== TempleAccountType.WatchOnly;
   const sendLink = assetSlug ? `/send/${assetSlug}` : '/send';
 
-  return onboardingCompleted ? (
+  return (
     <PageLayout
       pageTitle={
         <>
@@ -157,8 +157,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <Divider ignoreParent className="mb-4" />
       <ContentSection assetSlug={assetSlug} />
     </PageLayout>
-  ) : (
-    <Onboarding />
   );
 };
 

@@ -15,6 +15,7 @@ const AttentionPage: FC = () => {
 
   return (
     <PageLayout
+      isTopbarVisible={false}
       pageTitle={
         <>
           <T id="onboarding" />

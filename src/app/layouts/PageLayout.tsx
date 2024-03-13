@@ -19,15 +19,17 @@ import { useAppEnv } from 'app/env';
 import ErrorBoundary from 'app/ErrorBoundary';
 import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
+import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { T } from 'lib/i18n';
-import { NotificationsBell } from 'lib/notifications';
+// import { NotificationsBell } from 'lib/notifications';
 import { useTempleClient } from 'lib/temple/front';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
-import { DonationBanner } from '../atoms/DonationBanner/DonationBanner';
+// import { DonationBanner } from '../atoms/DonationBanner/DonationBanner';
 import { useOnboardingProgress } from '../pages/Onboarding/hooks/useOnboardingProgress.hook';
-import { AdvertisingBanner } from '../templates/advertising/advertising-banner/advertising-banner';
+// import { AdvertisingBanner } from '../templates/advertising/advertising-banner/advertising-banner';
 import { AdvertisingOverlay } from '../templates/advertising/advertising-overlay/advertising-overlay';
+import styles from './pageLayout.module.css';
 import { PageLayoutSelectors } from './PageLayout.selectors';
 import { ChangelogOverlay } from './PageLayout/ChangelogOverlay/ChangelogOverlay';
 import ConfirmationOverlay from './PageLayout/ConfirmationOverlay';
@@ -48,23 +50,36 @@ const PageLayout: FC<PageLayoutProps> = ({
   removePaddings = false,
   ...toolbarProps
 }) => {
-  const { fullPage } = useAppEnv();
+  const { fullPage, popup } = useAppEnv();
 
   const style = useMemo(
-    () => (!isTopbarVisible ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle),
-    [contentContainerStyle, isTopbarVisible]
+    () =>
+      !isTopbarVisible && popup ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle,
+    [contentContainerStyle, fullPage, isTopbarVisible]
   );
 
   return (
     <>
-      <DocBg bgClassName="bg-primary-bg" />
+      <DocBg bgClassName={classNames(fullPage ? styles.fullpageBg : 'bg-primary-bg')} />
+
+      {fullPage && (
+        <div className="my-9 flex justify-center">
+          <LogoDesktopIcon />
+        </div>
+      )}
 
       <div className={classNames(fullPage && 'pb-20', 'relative')}>
         {isTopbarVisible && <Header />}
         <ContentPaper>
           <Toolbar {...toolbarProps} />
 
-          <div className={classNames('no-scrollbar overflow-x-hidden', !removePaddings && 'px-4 pt-4')} style={style}>
+          <div
+            className={classNames(
+              'no-scrollbar overflow-x-hidden',
+              !removePaddings ? (fullPage ? 'px-20 pt-8 pb-11' : 'px-4 pt-4') : ''
+            )}
+            style={style}
+          >
             <ErrorBoundary whileMessage="displaying this page">
               <Suspense fallback={<SpinnerSection />}>{children}</Suspense>
             </ErrorBoundary>
@@ -247,12 +262,7 @@ export const Toolbar: FC<ToolbarProps> = ({
       {skip && (
         <div className="flex content-end">
           <Button
-            className={classNames(
-              'flex items-center px-4 py-2 rounded',
-              'text-sm font-semibold leading-none text-gray-600 text-shadow-black',
-              'opacity-90 hover:opacity-100 hover:bg-black hover:bg-opacity-5',
-              'transition duration-300 ease-in-out'
-            )}
+            className={classNames('flex items-center px-4 py-2 rounded', 'text-base-plus text-white')}
             onClick={() => setOnboardingCompleted(true)}
             testID={PageLayoutSelectors.skipButton}
           >

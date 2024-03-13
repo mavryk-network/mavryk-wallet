@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { Stepper } from 'app/atoms';
 import PageLayout from 'app/layouts/PageLayout';
@@ -12,15 +12,17 @@ import SecondStep from './steps/SecondStep';
 import ThirdStep from './steps/ThirdStep';
 
 const Onboarding: FC = () => {
-  const [step, setStep] = useStorage<number>(`onboarding_step_state`, 0);
+  // const [step, setStep] = useStorage<number>(`onboarding_step_state`, 0);
+  const [step, setStep] = useState<number>(0);
 
   const steps = (stepWord => [`${stepWord} 1`, `${stepWord} 2`, `${stepWord} 3`, `${stepWord} 4`])(t('step'));
 
   return (
     <PageLayout
+      isTopbarVisible={false}
       pageTitle={
-        <span style={step !== 4 ? { marginLeft: 62 } : {}}>
-          {step >= 1 ? <T id="onboarding" /> : <T id="welcomeToOnboarding" />}
+        <span>
+          <T id="onboarding" />
         </span>
       }
       step={step}

@@ -1,20 +1,23 @@
 .title {
   font-family: 'Aeonik', sans-serif;
+  font-size: 20px;
   font-weight: 400;
-  font-size: 23px;
+  line-height: 24px;
+  letter-spacing: -0.02em;
   text-align: center;
-  margin: 40px 0 24px 0;
-  color: #1b262c;
+  color: #f4f4f4;
 }
 
 .description {
   font-family: 'Aeonik', sans-serif;
-  font-weight: 400;
   font-size: 14px;
+  font-weight: 400;
   line-height: 17px;
-  text-align: center;
-  margin: 40px 0 40px 0;
-  color: #4a5568;
+  letter-spacing: -0.02em;
+  text-align: left;
+
+  margin: 16px 0 16px 0;
+  color: #f4f4f4;
 }
 
 .listContainer {

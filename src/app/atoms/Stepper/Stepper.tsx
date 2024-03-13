@@ -13,7 +13,6 @@ interface Props {
 }
 
 export const Stepper: FC<Props> = ({ style, steps, currentStep, completed = false }) => {
-  console.log(currentStep, 'ds');
   return (
     <div className={classNames(styles['stepperWrapper'])} style={style}>
       {steps.map((stepItem, index) => (

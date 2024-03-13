@@ -1,10 +1,11 @@
 import React, { FC } from 'react';
 
-import { Button } from 'app/atoms/Button';
+import { Anchor } from 'app/atoms';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import { ReactComponent as BalancesIcon } from '../assets/first.svg';
+import AddressBalancesImg from '../assets/first.png';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
@@ -21,24 +22,28 @@ const FirstStep: FC<Props> = ({ setStep }) => {
       <p className={styles['description']}>
         <T id={'addressBalanceDescription'} />
       </p>
-      <BalancesIcon />
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'addressBalanceHint'} />
+      <div style={{ height: 324 }} className="my-8">
+        <img src={AddressBalancesImg} alt="AddressBalancesImg" />
+      </div>
+      <p className={styles['description']}>
+        <T
+          id={'addressBalanceHint'}
+          substitutions={[
+            <Anchor href="https://mavryk.org/domains" className="text-accent-blue">
+              Mavryk Domains
+            </Anchor>
+          ]}
+        />
       </p>
-      <Button
-        className="w-full justify-center border-none"
-        style={{
-          padding: '10px 2rem',
-          background: '#4198e0',
-          color: '#ffffff',
-          marginTop: '40px',
-          borderRadius: 4
-        }}
+      <ButtonRounded
+        fill
+        className="w-full mt-4"
+        size="big"
         onClick={() => setStep(1)}
         testID={OnboardingSelectors.firstStepNextButton}
       >
         <T id={'next'} />
-      </Button>
+      </ButtonRounded>
     </>
   );
 };

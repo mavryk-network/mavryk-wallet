@@ -11,6 +11,10 @@ import FourthStep from './steps/FourthStep';
 import SecondStep from './steps/SecondStep';
 import ThirdStep from './steps/ThirdStep';
 
+const style = {
+  marginBottom: 32
+};
+
 const Onboarding: FC = () => {
   // const [step, setStep] = useStorage<number>(`onboarding_step_state`, 0);
   const [step, setStep] = useState<number>(0);
@@ -28,8 +32,8 @@ const Onboarding: FC = () => {
       setStep={setStep}
       skip={step < 4}
     >
-      <div style={{ maxWidth: '360px', margin: 'auto' }} className="pb-8 text-center">
-        {step < 4 && <Stepper steps={steps} currentStep={step} />}
+      <div style={{ margin: 'auto' }} className="pb-8 text-center">
+        {step < 4 && <Stepper style={style} steps={steps} currentStep={step} />}
         {step === 0 && <FirstStep setStep={setStep} />}
         {step === 1 && <SecondStep setStep={setStep} />}
         {step === 2 && <ThirdStep setStep={setStep} />}

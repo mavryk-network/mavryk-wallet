@@ -3545,5 +3545,14 @@
   },
   "tokensRwasCollectibles": {
     "message": "Tokens, RWAs, & Collectibles"
+  },
+  "tokensDescPart1": {
+    "message": "Your portfolio of tokens is displayed on the ”Tokens” tab. "
+  },
+  "tokensDescPart2": {
+    "message": "You can send, check balances, buy more, or view a token’s details by clicking on it in this section."
+  },
+  "tokensHint": {
+    "message": "Your Non-Fungible Tokens (NFTs) are displayed on the “Collectibles” tab. Here you can also interact with your NFTs, see their full view, ID, and token details."
   }
 }

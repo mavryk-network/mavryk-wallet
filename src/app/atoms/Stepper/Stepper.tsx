@@ -26,7 +26,7 @@ export const Stepper: FC<Props> = ({ style, steps, currentStep, completed = fals
                 (completed || currentStep > index) && styles['circle-passed']
               )}
             >
-              {completed || currentStep > index ? <OkIcon style={{ width: '16px', height: '16px' }} /> : index + 1}
+              {completed || currentStep > index ? <OkIcon className="w-4 h-4 stroke-2" /> : index + 1}
             </div>
             {index !== steps.length - 1 && (
               <div className={classNames(styles['line'], currentStep > index && styles['line-active'])} />

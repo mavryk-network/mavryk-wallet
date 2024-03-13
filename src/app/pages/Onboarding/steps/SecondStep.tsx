@@ -1,12 +1,16 @@
 import React, { FC } from 'react';
 
-import { Button } from 'app/atoms/Button';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import { ReactComponent as ButtonsIcon } from '../assets/second.svg';
+import TokensImg from '../assets/second.png';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
+
+const style = {
+  height: 379
+};
 
 interface Props {
   setStep: (step: number) => void;
@@ -16,32 +20,30 @@ const SecondStep: FC<Props> = ({ setStep }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.secondStepText)}>
-        <T id={'howToStartDetails'} />
+        <T id={'tokensRwasCollectibles'} />
       </p>
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'howToStartDescription1'} />
+      <p className={styles['description']}>
+        <T id={'tokensDescPart1'} />
       </p>
-      <p className={styles['description']} style={{ marginTop: 20 }}>
-        <T id={'howToStartDescription2'} />
+      <p className={styles['description']}>
+        <T id={'tokensDescPart2'} />
       </p>
-      <ButtonsIcon />
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'howToStartHint'} />
+      <div className="my-8" style={style}>
+        <img src={TokensImg} alt="TokensImg" />
+      </div>
+      <p className={styles['description']}>
+        <T id={'tokensHint'} />
       </p>
-      <Button
-        className="w-full justify-center border-none"
-        style={{
-          padding: '10px 2rem',
-          background: '#4198e0',
-          color: '#ffffff',
-          marginTop: '40px',
-          borderRadius: 4
-        }}
+
+      <ButtonRounded
+        fill
+        className="w-full mt-4"
+        size="big"
         onClick={() => setStep(2)}
         testID={OnboardingSelectors.secondStepNextButton}
       >
         <T id={'next'} />
-      </Button>
+      </ButtonRounded>
     </>
   );
 };

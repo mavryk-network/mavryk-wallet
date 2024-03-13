@@ -2583,13 +2583,18 @@
     "message": "Stand with Ukraine"
   },
   "addressBalanceDetails": {
-    "message": "Your address and balance"
+    "message": "Your address, balance and domain"
   },
   "addressBalanceDescription": {
-    "message": "After creating an account, you’ll get a unique address — your personal identifier in the Tezos blockchain. If you would like to receive and use TEZ or Tezos-built tokens in Temple, you should use this address."
+    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. If you would like to receive and use MVRK or tokens built on Mavryk, you should use this address."
   },
   "addressBalanceHint": {
-    "message": "Your total balance is displayed near the public address."
+    "message": "You may also use a custom wallet address name from $link$ like alice.mav instead of the alphanumeric wallet address.",
+    "placeholders": {
+      "link": {
+        "content": "$1"
+      }
+    }
   },
   "howToStartDetails": {
     "message": "How to start"
@@ -3537,5 +3542,17 @@
   },
   "validators": {
     "message": "Validators"
+  },
+  "tokensRwasCollectibles": {
+    "message": "Tokens, RWAs, & Collectibles"
+  },
+  "tokensDescPart1": {
+    "message": "Your portfolio of tokens is displayed on the ”Tokens” tab. "
+  },
+  "tokensDescPart2": {
+    "message": "You can send, check balances, buy more, or view a token’s details by clicking on it in this section."
+  },
+  "tokensHint": {
+    "message": "Your Non-Fungible Tokens (NFTs) are displayed on the “Collectibles” tab. Here you can also interact with your NFTs, see their full view, ID, and token details."
   }
 }

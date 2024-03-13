@@ -19,6 +19,7 @@ import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useNetwork } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
+import * as Woozie from 'lib/woozie';
 import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/woozie';
 import { createLocationState } from 'lib/woozie/location';
 
@@ -48,7 +49,7 @@ export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { fullPage, registerBackHandler } = useAppEnv();
-  const { onboardingCompleted } = useOnboardingProgress();
+  // const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();
   const network = useNetwork();
@@ -79,7 +80,9 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const canSend = account.type !== TempleAccountType.WatchOnly;
   const sendLink = assetSlug ? `/send/${assetSlug}` : '/send';
 
-  return (
+  const onboardingCompleted = false;
+
+  return onboardingCompleted ? (
     <PageLayout
       pageTitle={
         <>
@@ -157,6 +160,8 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <Divider ignoreParent className="mb-4" />
       <ContentSection assetSlug={assetSlug} />
     </PageLayout>
+  ) : (
+    <Woozie.Redirect to="/onboarding" />
   );
 };
 

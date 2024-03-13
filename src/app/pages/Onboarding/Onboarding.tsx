@@ -32,7 +32,7 @@ const Onboarding: FC = () => {
       setStep={setStep}
       skip={step < 4}
     >
-      <div style={{ margin: 'auto' }} className="pb-8 text-center">
+      <div style={{ margin: 'auto' }} className="text-center">
         {step < 4 && <Stepper style={style} steps={steps} currentStep={step} />}
         {step === 0 && <FirstStep setStep={setStep} />}
         {step === 1 && <SecondStep setStep={setStep} />}

@@ -3554,5 +3554,20 @@
   },
   "tokensHint": {
     "message": "Your Non-Fungible Tokens (NFTs) are displayed on the “Collectibles” tab. Here you can also interact with your NFTs, see their full view, ID, and token details."
+  },
+  "profileAndAccounts": {
+    "message": "Profile and multiple accounts"
+  },
+  "profileAndAccountsDesc": {
+    "message": "You can have multiple accounts within one wallet! At the top of the screen, you can see your account icon. By clicking on it, you will see your other accounts connected to this wallet."
+  },
+  "profileAndAccountsHintPart1": {
+    "message": "On the top right you can see the settings button, network selector, and connected sites icon. The network selector allows you to select a node to which Mavryk wallet will be connected."
+  },
+  "profileAndAccountsHintPart2": {
+    "message": "If your balance is not displayed, try changing the node. "
+  },
+  "profileAndAccountsHintPart3": {
+    "message": "You can choose from the default list or add a custom RPC manually by following the instructions."
   }
 }

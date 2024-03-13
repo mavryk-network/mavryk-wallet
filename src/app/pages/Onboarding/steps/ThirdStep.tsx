@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
 
-import { Button } from 'app/atoms/Button';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import TokensCollectibleImg from '../assets/tokens-collectible.png';
+import AddressesImg from '../assets/third.png';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
@@ -12,36 +12,42 @@ interface Props {
   setStep: (step: number) => void;
 }
 
+const style = {
+  height: 404
+};
+
 const ThirdStep: FC<Props> = ({ setStep }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.thirdStepText)}>
-        <T id={'tokensCollectibleDetails'} />
+        <T id={'profileAndAccounts'} />
       </p>
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'tokensCollectibleDescription1'} />
+      <p className={styles['description']}>
+        <T id={'profileAndAccountsDesc'} />
       </p>
-      <p className={styles['description']} style={{ marginTop: 20 }}>
-        <T id={'tokensCollectibleDescription2'} />
+
+      <div className="my-8 flex justify-center" style={style}>
+        <img src={AddressesImg} alt="ProfileAddressesImg" />
+      </div>
+      <p className={styles['description']}>
+        <T id={'profileAndAccountsHintPart1'} />
       </p>
-      <img src={TokensCollectibleImg} alt="TokensCollectibleImg" />
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'tokensCollectibleHint'} />
+      <p className={styles['description']}>
+        <T id={'profileAndAccountsHintPart2'} />
       </p>
-      <Button
-        className="w-full justify-center border-none"
-        style={{
-          padding: '10px 2rem',
-          background: '#4198e0',
-          color: '#ffffff',
-          marginTop: '40px',
-          borderRadius: 4
-        }}
+      <p className={styles['description']}>
+        <T id={'profileAndAccountsHintPart3'} />
+      </p>
+
+      <ButtonRounded
+        fill
+        className="w-full mt-4"
+        size="big"
         onClick={() => setStep(3)}
         testID={OnboardingSelectors.thirdStepNextButton}
       >
         <T id={'next'} />
-      </Button>
+      </ButtonRounded>
     </>
   );
 };

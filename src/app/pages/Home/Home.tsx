@@ -201,7 +201,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
               'border  p-10 h-full'
             )}
           >
-            <Icon className={classNames('w-6 h-auto', 'stroke-accent-blue')} />
+            <Icon className={classNames('w-6 h-auto')} />
           </div>
           <span className={classNames('text-center text-xs', disabled && 'opacity-50', 'text-white')}>{label}</span>
         </>

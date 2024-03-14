@@ -15,19 +15,12 @@ type ImportTabSwitcherProps = {
   tabs: ImportTabDescriptor[];
   activeTabSlug: string;
   urlPrefix: string;
-  fullPage: boolean;
 };
 
-const ImportTabSwitcher: React.FC<ImportTabSwitcherProps> = ({
-  className,
-  fullPage,
-  tabs,
-  activeTabSlug,
-  urlPrefix
-}) => {
+const ImportTabSwitcher: React.FC<ImportTabSwitcherProps> = ({ className, tabs, activeTabSlug, urlPrefix }) => {
   return (
     <div className={classNames('w-full text-base-plus', className)}>
-      <div className={classNames(fullPage ? 'flex items-center justify-between px-25' : 'grid grid-cols-2 gap-x-6')}>
+      <div className={classNames('grid grid-cols-2 gap-x-6')}>
         {tabs.map(({ slug, i18nKey }) => {
           const active = slug === activeTabSlug;
 
@@ -36,7 +29,7 @@ const ImportTabSwitcher: React.FC<ImportTabSwitcherProps> = ({
               <div
                 className={classNames(
                   'text-center cursor-pointer border-b-2',
-                  fullPage ? 'pb-1 pt-2 px-4' : ' pb-2 pt-4 px-4',
+                  ' pb-2 pt-4 px-4',
                   'text-white truncate',
                   'transition ease-in-out duration-300',
                   active ? 'border-accent-blue text-white' : 'border-transparent text-secondary-white hover:text-white'

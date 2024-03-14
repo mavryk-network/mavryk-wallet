@@ -39,7 +39,7 @@ export const ImportFromSeedPhrase: FC<ImportFromSeedPhraseProps> = ({
 
   return (
     <form
-      className={classNames('w-full mx-auto ', fullPage ? 'my-8 px-12 pb-8' : 'mt-4 pb-8')}
+      className={classNames('w-full mx-auto ', 'mt-4', fullPage ? 'pb-11' : 'pb-8')}
       onSubmit={handleSubmit(onSubmit)}
     >
       <SeedPhraseInput

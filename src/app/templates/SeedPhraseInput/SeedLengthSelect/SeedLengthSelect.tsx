@@ -2,7 +2,6 @@ import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
-import { useAppEnv } from 'app/env';
 import { ReactComponent as SelectArrowDownIcon } from 'app/icons/chevron-down.svg';
 import { ImportAccountSelectors } from 'app/pages/ImportAccount/selectors';
 import { setTestID } from 'lib/analytics';
@@ -20,7 +19,6 @@ interface SeedLengthSelectProps {
 export const SeedLengthSelect: FC<SeedLengthSelectProps> = ({ options, currentOption, defaultOption, onChange }) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption ?? '');
   const [isOpen, setIsOpen] = useState(false);
-  const { fullPage } = useAppEnv();
 
   const selectRef = useRef<HTMLDivElement>(null);
 
@@ -69,17 +67,23 @@ export const SeedLengthSelect: FC<SeedLengthSelectProps> = ({ options, currentOp
           {...setTestID(ImportAccountSelectors.mnemonicDropDownButton)}
           className="text-base-plus"
         >
-          {fullPage ? t('seedInputNumberOfWords', [`${selectedOption}`]) : t('words', [`${selectedOption}`])}{' '}
+          {t('words', [`${selectedOption}`])}{' '}
         </span>
         <SelectArrowDownIcon
           className={classNames(
             'stroke-white stroke-2',
-            'opacity-1 w-4 h-4 transition ease-in-out duration-75',
+            'opacity-1 w-4 h-4 transition ease-in-out duration-300',
             isOpen && 'transform rotate-180'
           )}
         />
       </div>
-      <ul className={classNames(!isOpen && 'hidden')}>
+      <ul
+        className={classNames(
+          'absolute w-full top-8 left-0 rounded-2xl-plus overflow-hidden',
+          'transition-height duration-300 ease-in-out',
+          isOpen ? 'max-h-500' : 'max-h-0 invisible'
+        )}
+      >
         {options.map(option => {
           return (
             <SeedLengthOption

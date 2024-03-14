@@ -5,8 +5,7 @@ import classNames from 'clsx';
 
 import { ImportAccountSelectors } from 'app/pages/ImportAccount/selectors';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
-
-import styles from './seedLengthOption.module.css';
+import { t } from 'lib/i18n';
 
 interface Props {
   option: string;
@@ -17,7 +16,6 @@ interface Props {
 
 export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onClick = emptyFn, onChange = emptyFn }) => {
   const handleClick = useCallback(() => onClick(option), [onClick, option]);
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value), [onChange]);
 
   return (
     <li
@@ -25,10 +23,9 @@ export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onCli
       onClick={handleClick}
       className={classNames(
         selectedOption === option ? 'bg-primary-card-hover' : 'hover:bg-primary-card-hover',
-        'py-2',
+        'p-4 bg-primary-card',
         'text-white',
-        'flex justify-start px-3 m-2 rounded-md',
-        'text-lg'
+        'flex justify-start'
       )}
     >
       <label
@@ -37,15 +34,7 @@ export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onCli
         {...setTestID(ImportAccountSelectors.mnemonicWordsRadioButton)}
         {...setAnotherSelector('words', option)}
       >
-        <input
-          type="radio"
-          id={option}
-          value={option}
-          checked={selectedOption === option}
-          onChange={handleChange}
-          className={styles.input}
-        />
-        <span className="text-sm">{option}</span>
+        <span className="text-base-plus">{option.concat(t('words'))}</span>
       </label>
     </li>
   );

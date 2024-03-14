@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -40,19 +40,22 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
 
   const isImportFromSeedPhrase = tabSlug === 'seed-phrase';
 
+  const memoizedContainerStyle = useMemo(
+    () => ({
+      paddingInline: fullPage ? 80 : 16,
+      paddingTop: fullPage ? 16 : 0
+    }),
+    [fullPage]
+  );
+
   return (
     <PageLayout
       pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
-      isTopbarVisible={fullPage}
+      isTopbarVisible={false}
       removePaddings
-      contentContainerStyle={{ paddingInline: 16 }}
+      contentContainerStyle={memoizedContainerStyle}
     >
-      <ImportTabSwitcher
-        tabs={importWalletOptions}
-        activeTabSlug={tabSlug}
-        urlPrefix="/import-wallet"
-        fullPage={fullPage}
-      />
+      <ImportTabSwitcher tabs={importWalletOptions} activeTabSlug={tabSlug} urlPrefix="/import-wallet" />
 
       <LockedWalletExists locked={locked} />
       {isImportFromSeedPhrase ? (

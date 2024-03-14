@@ -162,7 +162,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
           <T id="seedPhrase" />
         </h1>
 
-        <div className={classNames('relative', popup ? 'w-40 h-12' : 'w-64 h-10')}>
+        <div className={classNames('relative', 'w-40 h-12')}>
           <SeedLengthSelect
             options={numberOfWordsOptions}
             currentOption={draftSeed.length.toString()}

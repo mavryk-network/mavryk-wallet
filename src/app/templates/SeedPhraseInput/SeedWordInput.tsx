@@ -214,7 +214,7 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
         smallPaddings
         fieldWrapperBottomMargin={false}
         testID={testID}
-        errorCaption={errorCaption}
+        errorCaption={errorCaption ? t('spellingError') : false}
         onKeyDown={handleInputKeyDown}
         placeholder={t('enterTheWord')}
         className="py-14px pl-4"

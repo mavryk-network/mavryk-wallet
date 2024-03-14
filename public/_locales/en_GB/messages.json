@@ -608,7 +608,7 @@
     }
   },
   "justValidPreGeneratedMnemonic": {
-    "message": "Invalid Seed Phrase"
+    "message": "Seed phrase doesn't match any existing account. Please verify you entered the seed phrase correctly."
   },
   "seedPasteFailedTooManyWords": {
     "message": "Paste failed because it contained over 24 words."
@@ -3614,5 +3614,8 @@
   },
   "createNewAccountDescription": {
     "message": "New to Mavryk? Let's set it up! Create a new account and private Seed Phrase"
+  },
+  "spellingError": {
+    "message": "Spelling error"
   }
 }

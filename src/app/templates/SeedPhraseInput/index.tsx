@@ -216,8 +216,11 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       </div>
 
       {hasError && (
-        <div className="mt-4 text-xs text-red-700" {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}>
-          {submitted && seedError && <div>{seedError}</div>}
+        <div
+          className="mt-4 text-sm text-primary-error"
+          {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
+        >
+          {seedError && <div>{seedError}</div>}
 
           {wordSpellingErrorsCount > 0 && (
             <div>

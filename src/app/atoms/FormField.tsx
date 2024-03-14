@@ -284,7 +284,7 @@ const ErrorCaption: React.FC<ErrorCaptionProps> = ({ errorCaption }) => {
   const isPasswordStrengthIndicator = errorCaption === PASSWORD_ERROR_CAPTION;
 
   return errorCaption && !isPasswordStrengthIndicator ? (
-    <div className="text-xs text-primary-error" {...setTestID(ErrorCaptionSelectors.inputError)}>
+    <div className="text-sm text-primary-error mt-1" {...setTestID(ErrorCaptionSelectors.inputError)}>
       {errorCaption}
     </div>
   ) : null;

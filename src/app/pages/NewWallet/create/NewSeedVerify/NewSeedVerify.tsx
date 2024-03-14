@@ -153,7 +153,7 @@ const WordsRow = memo<WordsRowProps>(({ allWords, indexToFill, onFill }) => {
               <FormField value={fillValue} onChange={handleChange} testID={NewSeedVerifySelectors.mnemonicWordInput} />
             ) : (
               <div
-                className={clsx(FORM_FIELD_CLASS_NAME, 'py-3 px-4')}
+                className={clsx(FORM_FIELD_CLASS_NAME, 'py-14px px-4')}
                 {...setTestID(NewSeedVerifySelectors.mnemonicWordInput)}
               >
                 {allWords[i]}

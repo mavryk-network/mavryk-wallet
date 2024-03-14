@@ -217,7 +217,7 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
         errorCaption={errorCaption}
         onKeyDown={handleInputKeyDown}
         placeholder={t('enterTheWord')}
-        className="py-14px"
+        className="py-14px pl-4"
       />
       {showAutoComplete && autoCompleteVariants && autoCompleteVariants.length > 0 && (
         <div className="w-full rounded-md bg-primary-bg text-gray-700 text-lg leading-tight absolute left-0 z-50 px-2 pb-2 top-18 shadow-lg flex flex-col">

@@ -105,7 +105,7 @@ export const NewSeedVerify: FC<NewSeedVerifyProps> = ({ seedPhrase, onVerificati
           ))}
         </div>
 
-        <FormSubmitButton disabled={!filled} className="w-96 my-2 mx-auto" testID={NewSeedVerifySelectors.nextButton}>
+        <FormSubmitButton disabled={!filled} className="w-full mx-auto mt-4" testID={NewSeedVerifySelectors.nextButton}>
           <T id="next" />
         </FormSubmitButton>
       </form>
@@ -134,7 +134,7 @@ const WordsRow = memo<WordsRowProps>(({ allWords, indexToFill, onFill }) => {
   );
 
   return (
-    <div className="flex items-stretch gap-x-4 mb-6">
+    <div className="flex items-start gap-x-4 mb-4">
       {indexes.map(i => {
         const toFill = i === indexToFill;
 
@@ -146,11 +146,17 @@ const WordsRow = memo<WordsRowProps>(({ allWords, indexToFill, onFill }) => {
                   <T id="word" substitutions={i + 1} />
                 </span>
               }
-              className="mb-4"
+              className="mb-3"
             />
 
             {toFill ? (
-              <FormField value={fillValue} onChange={handleChange} testID={NewSeedVerifySelectors.mnemonicWordInput} />
+              <FormField
+                value={fillValue}
+                onChange={handleChange}
+                className="py-14px px-4 mb-0"
+                fieldWrapperBottomMargin={false}
+                testID={NewSeedVerifySelectors.mnemonicWordInput}
+              />
             ) : (
               <div
                 className={clsx(FORM_FIELD_CLASS_NAME, 'py-14px px-4')}

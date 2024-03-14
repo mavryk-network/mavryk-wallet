@@ -46,7 +46,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
   return (
     <form
-      className={classNames('w-full max-w-sm mx-auto flex flex-col no-scrollbar', !fullPage && 'pt-4 pb-8')}
+      className={classNames('w-full mx-auto flex flex-col no-scrollbar', !fullPage && 'pt-4 pb-8')}
       onSubmit={handleSubmit(onSubmit)}
     >
       {(!shouldUseKeystorePassword || !isImportFromKeystoreFile) && (
@@ -111,7 +111,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         className={classNames('w-full', fullPage ? 'mt-8' : 'mt-13')}
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >
-        <T id={ownMnemonic ? 'restore' : 'create'} />
+        <T id={ownMnemonic ? 'restore' : 'import'} />
       </FormSubmitButton>
     </form>
   );

@@ -1,5 +1,7 @@
 import React, { FC, useMemo, useState } from 'react';
 
+import clsx from 'clsx';
+
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { TID, t } from 'lib/i18n';
@@ -52,7 +54,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
     <PageLayout
       pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
       isTopbarVisible={false}
-      removePaddings
+      removePaddings={true}
       contentContainerStyle={memoizedContainerStyle}
     >
       <ImportTabSwitcher tabs={importWalletOptions} activeTabSlug={tabSlug} urlPrefix="/import-wallet" />
@@ -60,7 +62,9 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
       <LockedWalletExists locked={locked} />
       {isImportFromSeedPhrase ? (
         isSeedEntered ? (
-          <SetWalletPassword ownMnemonic seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+          <div className={clsx(fullPage && 'mt-8 mb-11')}>
+            <SetWalletPassword ownMnemonic={!fullPage} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+          </div>
         ) : (
           <ImportFromSeedPhrase
             seedPhrase={seedPhrase}
@@ -69,7 +73,9 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
           />
         )
       ) : isSeedEntered && isFromKeystoreFileWithUpdatedPassword ? (
-        <SetWalletPassword ownMnemonic seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+        <div className={clsx(fullPage && 'mt-8 mb-11')}>
+          <SetWalletPassword ownMnemonic={!fullPage} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+        </div>
       ) : (
         <ImportFromKeystoreFile
           setSeedPhrase={setSeedPhrase}

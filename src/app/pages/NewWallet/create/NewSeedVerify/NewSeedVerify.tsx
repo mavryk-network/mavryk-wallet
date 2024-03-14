@@ -88,9 +88,9 @@ export const NewSeedVerify: FC<NewSeedVerifyProps> = ({ seedPhrase, onVerificati
   );
 
   return (
-    <div className="w-full max-w-md mx-auto my-8">
-      <form className="w-full mt-8" onSubmit={handleSubmit(onVerificationComplete)}>
-        <h3 className="mt-2 mb-8 text-gray-600 text-xl font-light text-center">
+    <div className="w-full max-w-md mx-auto">
+      <form className="w-full mt-4" onSubmit={handleSubmit(onVerificationComplete)}>
+        <h3 className="mb-8 text-white text-sm text-center">
           <T id="verifySeedPhraseDescription" />
         </h3>
 

@@ -55,7 +55,7 @@ export const ImportFromSeedPhrase: FC<ImportFromSeedPhraseProps> = ({
       />
 
       <FormSubmitButton
-        className="w-96 mx-auto mt-6"
+        className="w-96 mx-auto mt-8"
         testID={ImportFromSeedPhraseSelectors.nextButton}
         disabled={btnDisabled}
       >

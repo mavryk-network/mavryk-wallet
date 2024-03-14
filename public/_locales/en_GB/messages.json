@@ -2888,7 +2888,7 @@
     "message": "Sell TEZ to fiat. Get fiat to Visa, Mastercard cards."
   },
   "privacyAndPolicyLinks": {
-    "message": "By clicking $buttonContent$ you agree with \n$termsOfUse$ and $privacyPolicy$",
+    "message": "By clicking $buttonContent$ you agree with $termsOfUse$ and $privacyPolicy$",
     "placeholders": {
       "buttonContent": {
         "content": "$1"

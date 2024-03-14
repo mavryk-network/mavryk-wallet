@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import { FormField, FormSubmitButton, PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import { PASSWORD_PATTERN } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
 import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
@@ -23,6 +24,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   seedPhrase,
   keystorePassword
 }) => {
+  const { fullPage } = useAppEnv();
   const [focused, setFocused] = useState(false);
   const {
     control,
@@ -40,9 +42,11 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     disabled
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
+  console.log(fullPage);
+
   return (
     <form
-      className={classNames('w-full h-full max-w-sm mx-auto flex flex-col pt-4 pb-8 no-scrollbar')}
+      className={classNames('w-full max-w-sm mx-auto flex flex-col no-scrollbar', !fullPage && 'pt-4 pb-8')}
       onSubmit={handleSubmit(onSubmit)}
     >
       {(!shouldUseKeystorePassword || !isImportFromKeystoreFile) && (
@@ -56,7 +60,8 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
               }
             })}
             label={t('password')}
-            labelDescription={t('unlockPasswordInputDescription')}
+            labelDescription={fullPage ? undefined : t('unlockPasswordInputDescription')}
+            labelClassname={classNames(fullPage && 'mb-2')}
             id="newwallet-password"
             type="password"
             name="password"
@@ -84,13 +89,15 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
               validate: val => val === passwordValue || t('mustBeEqualToPasswordAbove')
             })}
             label={t('confirmPassword')}
-            labelDescription={t('repeatPasswordInputDescription')}
+            labelDescription={fullPage ? undefined : t('repeatPasswordInputDescription')}
+            labelClassname={classNames(fullPage && 'mb-2')}
+            fieldWrapperBottomMargin={!fullPage}
             id="newwallet-repassword"
             type="password"
             name="repeatPassword"
             placeholder={t('confirmWalletPassword')}
             errorCaption={errors.repeatPassword?.message}
-            containerClassName="mt-6 mb-1"
+            containerClassName={classNames(fullPage ? 'mt-2 mb-6' : 'mt-6 mb-1')}
             testID={setWalletPasswordSelectors.repeatPasswordField}
           />
         </>
@@ -101,7 +108,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
       <FormSubmitButton
         loading={submitting}
         disabled={disabled}
-        className="w-full mt-8"
+        className={classNames('w-full', fullPage ? 'mt-8' : 'mt-13')}
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >
         <T id={ownMnemonic ? 'restore' : 'create'} />

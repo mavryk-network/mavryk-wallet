@@ -15,9 +15,10 @@ import { Template } from './Template';
 export const CreateWallet: FC = () => {
   const { locked } = useTempleClient();
 
-  const seedPhrase = useMemo(() => generateMnemonic(128), []);
-  const [backupCompleted, setBackupCompleted] = useState(false);
-  const [verificationCompleted, setVerificationCompleted] = useState(false);
+  // const seedPhrase = useMemo(() => generateMnemonic(128), []);
+  const seedPhrase = 'note rice try demise stem behind squeeze warrior boil country fan grant';
+  const [backupCompleted, setBackupCompleted] = useState(true);
+  const [verificationCompleted, setVerificationCompleted] = useState(true);
 
   return (
     <PageLayout pageTitle={t('createWallet')} isTopbarVisible={false}>

@@ -20,6 +20,7 @@ import { blurHandler, focusHandler, inputChangeHandler } from 'lib/ui/inputHandl
 import { useBlurElementOnTimeout } from 'lib/ui/use-blur-on-timeout';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 import { combineRefs } from 'lib/ui/utils';
+import { merge } from 'lib/utils/merge';
 
 import { ErrorCaptionSelectors } from './ErrorCaption.selectors';
 import { FieldLabel } from './FieldLabel';
@@ -59,6 +60,7 @@ export interface FormFieldProps extends TestIDProperty, Omit<FormFieldAttrs, 'ty
   onBlur?: React.FocusEventHandler;
   smallPaddings?: boolean;
   fieldWrapperBottomMargin?: boolean;
+  labelClassname?: string;
   copyable?: boolean;
   testIDs?: {
     inputSection?: string;
@@ -104,6 +106,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
       testID,
       testIDs,
       childForInputWrapper,
+      labelClassname,
       ...rest
     },
     ref
@@ -154,7 +157,13 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
         {...setTestID(testIDs?.inputSection)}
       >
         {label && (
-          <FieldLabel label={label} warning={labelWarning} description={labelDescription} className="mb-3" id={id} />
+          <FieldLabel
+            label={label}
+            warning={labelWarning}
+            description={labelDescription}
+            className={merge('mb-3', labelClassname)}
+            id={id}
+          />
         )}
 
         {extraSection}

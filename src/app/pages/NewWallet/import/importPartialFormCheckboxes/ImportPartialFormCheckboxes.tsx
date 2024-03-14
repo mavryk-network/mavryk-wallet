@@ -84,7 +84,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
             ]}
           />
         }
-        containerClassName="flex-grow"
+        containerClassName="flex-1"
       />
     </>
   );

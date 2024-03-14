@@ -20,7 +20,7 @@ const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({
   validation: { minChar, cases, number, specialChar },
   isPasswordError = false
 }) => (
-  <div className={'text-xs font-medium text-gray-600'}>
+  <div className={'text-xs font-medium text-secondary-white'}>
     <T id="requirements">
       {message => (
         <PasswordStrengthIndicatorItem
@@ -31,7 +31,8 @@ const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({
         />
       )}
     </T>
-    <ul className="list-disc list-inside">
+    <br />
+    <ul className="list-disc list-inside flex flex-col gap-1">
       <T id="atLeast8Characters">
         {message => <PasswordStrengthIndicatorItem isValid={minChar} message={message} noColor={!isPasswordError} />}
       </T>
@@ -41,9 +42,11 @@ const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({
       <T id="mixtureOfLettersAndNumbers">
         {message => <PasswordStrengthIndicatorItem isValid={number} message={message} noColor={!isPasswordError} />}
       </T>
-      <T id="atLeast1SpecialCharacter">
-        {message => <PasswordStrengthIndicatorItem isValid={specialChar} message={message} noColor />}
-      </T>
+      <span style={{ maxWidth: 343 }}>
+        <T id="atLeast1SpecialCharacter">
+          {message => <PasswordStrengthIndicatorItem isValid={specialChar} message={message} noColor />}
+        </T>
+      </span>
     </ul>
   </div>
 );

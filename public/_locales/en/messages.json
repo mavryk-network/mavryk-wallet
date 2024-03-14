@@ -1379,10 +1379,10 @@
     "message": "Import"
   },
   "revealNewSeedPhrase": {
-    "message": "<b>Click on area below</b> to reveal your new Seed Phrase.\nThen, write this phrase on a piece of paper and <b>store in a secure location</b>. Or you can memorize it."
+    "message": "<b>Click on</b> area below to reveal your new Seed Phrase. Then, write down this phrase and store in a secure location."
   },
   "doNotSharePhrase": {
-    "message": "<b>DO NOT share</b> this phrase with anyone! It can be used to steal all your accounts."
+    "message": "<b>DO NOT</b> share this phrase with anyone! It can be used to steal all your accounts."
   },
   "youWillNeedThisSeedPhrase": {
     "message": "If you ever switch between browsers or devices, you will need this seed phrase to access your accounts."
@@ -1391,7 +1391,7 @@
     "message": "Unable to continue without confirming"
   },
   "backupedInputLabel": {
-    "message": "I made Seed Phrase backup"
+    "message": "I have securely saved my Seed Phrase and I accept the risks that if I lose the phrase, my funds will be lost."
   },
   "backupedInputDescription": {
     "message": "And accept the risks that if I lose the phrase,\nmy funds may be lost."

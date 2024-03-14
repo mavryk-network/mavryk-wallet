@@ -56,15 +56,15 @@ const PageLayout: FC<PageLayoutProps> = ({
   const style = useMemo(
     () =>
       !isTopbarVisible && popup ? { height: 'calc(100vh - 56px)', ...contentContainerStyle } : contentContainerStyle,
-    [contentContainerStyle, fullPage, isTopbarVisible]
+    [contentContainerStyle, isTopbarVisible, popup]
   );
 
   return (
-    <>
+    <div className={classNames(fullPage && 'min-h-screen')}>
       <DocBg bgClassName={classNames(fullPage ? styles.fullpageBg : 'bg-primary-bg')} />
 
       {fullPage && (
-        <div className="my-9 flex justify-center">
+        <div className="py-9 flex justify-center">
           <LogoDesktopIcon />
         </div>
       )}
@@ -93,7 +93,7 @@ const PageLayout: FC<PageLayoutProps> = ({
       <ChangelogOverlay />
       <OnRampOverlay />
       <NewsletterOverlay />
-    </>
+    </div>
   );
 };
 

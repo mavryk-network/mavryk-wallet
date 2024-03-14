@@ -18,13 +18,15 @@ interface NewSeedBackupProps {
 }
 
 export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComplete }) => {
-  const { register, handleSubmit, errors, formState } = useForm<BackupFormData>();
+  const { register, handleSubmit, errors, formState, watch } = useForm<BackupFormData>();
   const submitting = formState.isSubmitting;
 
+  const backuped = watch('backuped') ?? false;
+
   return (
-    <div className="w-full max-w-sm mx-auto my-8">
+    <div className="w-full mt-6">
       <Alert
-        title={''}
+        title={`${t('attention')}!`}
         description={
           <>
             <p>
@@ -36,18 +38,17 @@ export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComp
             </p>
           </>
         }
-        className="mt-4 mb-8"
+        className="mt-4 mb-8 pr-6"
       />
 
       <ReadOnlySecretField
         value={seedPhrase}
         label={'mnemonicInputLabel'}
-        description={t('youWillNeedThisSeedPhrase')}
         testID={NewSeedBackupSelectors.seedPhraseValue}
         secretCoverTestId={NewSeedBackupSelectors.protectedMask}
       />
 
-      <form className="w-full mt-8" onSubmit={handleSubmit(onBackupComplete)}>
+      <form className="w-full mt-4" onSubmit={handleSubmit(onBackupComplete)}>
         <FormCheckbox
           ref={register({
             validate: val => val || t('unableToContinueWithoutConfirming')
@@ -55,12 +56,16 @@ export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComp
           errorCaption={errors.backuped?.message}
           name="backuped"
           label={t('backupedInputLabel')}
-          labelDescription={<T id="backupedInputDescription" />}
-          containerClassName="mb-6"
           testID={NewSeedBackupSelectors.iMadeSeedPhraseBackupCheckBox}
+          labelClassName="py-0"
         />
 
-        <FormSubmitButton loading={submitting} className="w-full mt-8" testID={NewSeedBackupSelectors.nextButton}>
+        <FormSubmitButton
+          disabled={!backuped}
+          loading={submitting}
+          className="w-full mt-8"
+          testID={NewSeedBackupSelectors.nextButton}
+        >
           <T id="next" />
         </FormSubmitButton>
       </form>

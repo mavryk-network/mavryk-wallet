@@ -54,7 +54,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
 
           {label && (
             <div className="ml-2 flex flex-col">
-              <span className="text-sm font-semibold text-white">{label}</span>
+              <span className="text-sm text-white">{label}</span>
 
               {labelDescription && (
                 <span className="mt-1 text-xs font-light text-secondary-white">{labelDescription}</span>

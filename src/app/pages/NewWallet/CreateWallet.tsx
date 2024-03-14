@@ -20,7 +20,7 @@ export const CreateWallet: FC = () => {
   const [verificationCompleted, setVerificationCompleted] = useState(false);
 
   return (
-    <PageLayout pageTitle={t('createWallet')}>
+    <PageLayout pageTitle={t('createWallet')} isTopbarVisible={false}>
       <LockedWalletExists locked={locked} />
       {!backupCompleted && (
         <Template title={t('backupNewSeedPhrase')}>

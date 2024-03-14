@@ -12,7 +12,7 @@ import { SecretCover } from './SecretCover';
 
 interface ReadOnlySecretFieldProps extends TestIDProperty {
   label: TID;
-  description: React.ReactNode;
+  description?: React.ReactNode;
   value: string;
   secretCoverTestId?: string;
 }

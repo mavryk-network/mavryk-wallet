@@ -232,6 +232,7 @@ module.exports = {
       xl: '0.625rem',
       '2xl': '0.75rem',
       '2xl-plus': '1rem',
+      '3xl': '1.5rem',
       full: '9999px',
       circle: '50%'
     },
@@ -672,6 +673,7 @@ module.exports = {
         13: '3.25rem',
         15: '3.75rem',
         18: '4.5rem',
+        21: '5.25rem',
         25: '6.25rem',
         26.5: '6.625rem',
         29: '7.25rem',

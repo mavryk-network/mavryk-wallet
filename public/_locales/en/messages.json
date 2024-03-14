@@ -3605,5 +3605,14 @@
   },
   "getStarted": {
     "message": "Get Started"
+  },
+  "welcome": {
+    "message": "Welcome to the Mavryk Wallet!"
+  },
+  "createNewAccount": {
+    "message": "Create a new Account"
+  },
+  "createNewAccountDescription": {
+    "message": "New to Mavryk? Let's set it up! Create a new account and private Seed Phrase"
   }
 }

@@ -150,6 +150,8 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
     const handleSecretBannerClick = () => void spareRef.current?.focus();
     const handleCleanClick = useCallback(() => void onClean?.(), [onClean]);
 
+    const showIcon = isPasswordInput && !revealForbidden && localValue !== '';
+
     return (
       <div
         className={classNames('w-full flex flex-col', containerClassName)}
@@ -177,7 +179,8 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
               buildPaddingRightClassName(
                 isPasswordInput,
                 extraInnerWrapper === 'unset' ? false : Boolean(extraInner),
-                smallPaddings
+                smallPaddings,
+                showIcon
               ),
               errorCaption ? 'border-primary-error' : 'border-primary-border',
               className
@@ -195,7 +198,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
             {...setTestID(testIDs?.input || testID)}
           />
 
-          {isPasswordInput && !revealForbidden && localValue !== '' && RevealPasswordIcon}
+          {showIcon && RevealPasswordIcon}
 
           <ExtraInner innerComponent={extraInner} useDefaultWrapper={extraInnerWrapper === 'default'} />
           {childForInputWrapper}
@@ -287,8 +290,15 @@ const ErrorCaption: React.FC<ErrorCaptionProps> = ({ errorCaption }) => {
   ) : null;
 };
 
-const buildPaddingRightClassName = (isPasswordInput: boolean, withExtraInner: boolean, smallPaddings: boolean) => {
+const buildPaddingRightClassName = (
+  isPasswordInput: boolean,
+  withExtraInner: boolean,
+  smallPaddings: boolean,
+  showIcon = false
+) => {
   if (withExtraInner) return 'pr-32';
+
+  if (!showIcon) return 'pr-4';
 
   if (isPasswordInput) return smallPaddings ? 'pr-9' : 'pr-12';
 

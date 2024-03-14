@@ -186,7 +186,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
 
       {labelWarning && <Alert title={t('attention')} description={labelWarning} className="mb-4" />}
 
-      <div className={classNames('grid', 'grid-cols-2 gap-4')}>
+      <div className={classNames('grid gap-4', popup ? 'grid-cols-2' : 'grid-cols-3')}>
         {[...Array(numberOfWords).keys()].map(index => {
           const key = `import-seed-word-${index}`;
 

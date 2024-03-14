@@ -195,7 +195,7 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
 
   return (
     <div className="flex flex-col relative">
-      <label htmlFor={id.toString()} className="self-left text-base-plus text-white mb-2">
+      <label htmlFor={id.toString()} className="self-left text-base-plus text-white mb-3">
         <p>{t('word', [`${id + 1}`])}</p>
       </label>
 
@@ -220,17 +220,17 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
         className="py-14px pl-4"
       />
       {showAutoComplete && autoCompleteVariants && autoCompleteVariants.length > 0 && (
-        <div className="w-full rounded-md bg-primary-bg text-gray-700 text-lg leading-tight absolute left-0 z-50 px-2 pb-2 top-18 shadow-lg flex flex-col">
+        <div className="w-full rounded-2xl-plus bg-primary-card text-white text-lg leading-tight absolute left-0 z-50 top-18 shadow-lg flex flex-col overflow-hidden">
           {autoCompleteVariants.map((variant, index) => (
             <button
               key={variant}
               id="autoCompleteVariant"
               ref={el => (variantsRef.current[index] = el)}
               className={classNames(
-                'mt-2 px-3 py-2 w-full text-left rounded text-gray-600',
-                'hover:text-gray-910 hover:bg-gray-200',
-                'focus:text-gray-910 focus:bg-gray-200 focus:outline-none',
-                index === 0 && focusedVariantIndex === -1 && 'text-gray-910 bg-gray-200'
+                'p-4 w-full text-left rounded text-white',
+                'hover:text-white hover:bg-primary-card-hover',
+                'focus:text-white focus:bg-primary-card-hover focus:outline-none',
+                index === 0 && focusedVariantIndex === -1 && 'text-white bg-primary-card-hover'
               )}
               onClick={e => handleVariantClick(e, variant)}
               onBlur={handleBlur}

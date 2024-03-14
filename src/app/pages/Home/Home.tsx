@@ -26,7 +26,6 @@ import { createLocationState } from 'lib/woozie/location';
 import { togglePartnersPromotionAction } from '../../store/partners-promotion/actions';
 import { useIsEnabledAdsBannerSelector } from '../../store/settings/selectors';
 import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress.hook';
-import Onboarding from '../Onboarding/Onboarding';
 import { ContentSection } from './ContentSection';
 import styles from './Home.module.css';
 import { HomeSelectors } from './Home.selectors';
@@ -49,7 +48,7 @@ export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { fullPage, registerBackHandler } = useAppEnv();
-  // const { onboardingCompleted } = useOnboardingProgress();
+  const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();
   const network = useNetwork();
@@ -79,8 +78,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const accountPkh = account.publicKeyHash;
   const canSend = account.type !== TempleAccountType.WatchOnly;
   const sendLink = assetSlug ? `/send/${assetSlug}` : '/send';
-
-  const onboardingCompleted = false;
 
   return onboardingCompleted ? (
     <PageLayout

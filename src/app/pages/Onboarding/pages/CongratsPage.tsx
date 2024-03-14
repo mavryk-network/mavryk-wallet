@@ -1,18 +1,15 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import clsx from 'clsx';
 
 import { Anchor } from 'app/atoms';
-import { ReactComponent as DiscordIcon } from 'app/icons/discord.svg';
-import { ReactComponent as RedditIcon } from 'app/icons/reddit.svg';
-import { ReactComponent as TelegramIcon } from 'app/icons/telegram.svg';
-import { ReactComponent as TwitterIcon } from 'app/icons/twitter.svg';
-import { ReactComponent as YoutubeIcon } from 'app/icons/youtube.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AboutFooterLinkItemType } from 'app/templates/Socials/social.types';
 import { FOOTER_LINKS } from 'app/templates/Socials/socials.consts';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
+import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
 
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress.hook';
 import styles from '../Onboarding.module.css';
@@ -20,6 +17,13 @@ import { OnboardingSelectors } from '../Onboarding.selectors';
 
 const CongratsPage: FC = () => {
   const { setOnboardingCompleted } = useOnboardingProgress();
+
+  const handleGetStartedClick = useCallback(() => {
+    setOnboardingCompleted(true);
+    // human delay
+    delay();
+    navigate('/');
+  }, [setOnboardingCompleted]);
 
   return (
     <>
@@ -52,7 +56,7 @@ const CongratsPage: FC = () => {
         fill
         className="w-full mt-4"
         size="big"
-        onClick={() => setOnboardingCompleted(true)}
+        onClick={handleGetStartedClick}
         testID={OnboardingSelectors.congratsStartButton}
       >
         <T id={'getStarted'} />

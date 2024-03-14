@@ -23,6 +23,7 @@ import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { T } from 'lib/i18n';
 // import { NotificationsBell } from 'lib/notifications';
 import { useTempleClient } from 'lib/temple/front';
+import { delay } from 'lib/utils';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
 // import { DonationBanner } from '../atoms/DonationBanner/DonationBanner';
@@ -146,8 +147,7 @@ export const Toolbar: FC<ToolbarProps> = ({
   setStep,
   adShow = false,
   RightSidedComponent = null,
-  skip,
-  attention
+  skip
 }) => {
   const { historyPosition, pathname } = useLocation();
   const { fullPage } = useAppEnv();
@@ -202,6 +202,14 @@ export const Toolbar: FC<ToolbarProps> = ({
     rootRef.current = elem;
     ToolbarElement = elem;
   }, []);
+
+  const handleSkipClick = () => {
+    setOnboardingCompleted(true);
+
+    delay();
+
+    navigate('/');
+  };
 
   return inHome ? null : (
     <div
@@ -263,7 +271,7 @@ export const Toolbar: FC<ToolbarProps> = ({
         <div className="flex content-end">
           <Button
             className={classNames('flex items-center px-4 py-2 rounded', 'text-base-plus text-white')}
-            onClick={() => setOnboardingCompleted(true)}
+            onClick={handleSkipClick}
             testID={PageLayoutSelectors.skipButton}
           >
             <T id="skip" />

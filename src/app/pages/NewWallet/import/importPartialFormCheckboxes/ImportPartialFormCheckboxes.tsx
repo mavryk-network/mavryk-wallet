@@ -1,12 +1,15 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
 import { Control, Controller, FieldError, NestDataObject } from 'react-hook-form';
 
 import { FormCheckbox } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
 
 import { setWalletPasswordSelectors } from '../../setWalletPassword/SetWalletPassword.selectors';
 import { FormData } from '../useCreareOrRestorePassword';
+import styles from './importPartialFromCheckboxes.module.css';
 
 type ImportPartialFormCheckboxesProps = {
   control: Control<FormData>;
@@ -15,6 +18,8 @@ type ImportPartialFormCheckboxesProps = {
 };
 
 export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> = ({ control, register, errors }) => {
+  const { popup } = useAppEnv();
+
   return (
     <>
       <Controller
@@ -61,6 +66,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
         errorCaption={errors.termsAccepted?.message}
         name="termsAccepted"
         testID={setWalletPasswordSelectors.acceptTermsCheckbox}
+        labelClassName={clsx(popup && styles['max-w-295'])}
         label={
           <T
             id="acceptTermsInputDescription"

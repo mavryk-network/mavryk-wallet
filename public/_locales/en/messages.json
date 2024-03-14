@@ -277,7 +277,7 @@
     }
   },
   "acceptTermsInputDescription": {
-    "message": "I have read and agree to $termsOfUsageLink$ and\n $privacyPolicyLink$",
+    "message": "I have read and agree to $termsOfUsageLink$ and $privacyPolicyLink$",
     "placeholders": {
       "termsOfUsageLink": {
         "content": "$1"

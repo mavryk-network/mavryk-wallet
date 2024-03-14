@@ -1,11 +1,16 @@
 import React, { FC } from 'react';
 
-import { Button } from 'app/atoms/Button';
+import clsx from 'clsx';
+
+import { Anchor } from 'app/atoms';
 import { ReactComponent as DiscordIcon } from 'app/icons/discord.svg';
 import { ReactComponent as RedditIcon } from 'app/icons/reddit.svg';
 import { ReactComponent as TelegramIcon } from 'app/icons/telegram.svg';
 import { ReactComponent as TwitterIcon } from 'app/icons/twitter.svg';
 import { ReactComponent as YoutubeIcon } from 'app/icons/youtube.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { AboutFooterLinkItemType } from 'app/templates/Socials/social.types';
+import { FOOTER_LINKS } from 'app/templates/Socials/socials.consts';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
@@ -13,96 +18,69 @@ import { useOnboardingProgress } from '../hooks/useOnboardingProgress.hook';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
-const links = [
-  {
-    href: 'https://www.madfish.solutions/discord',
-    background: '#7289DA',
-    Icon: DiscordIcon
-  },
-  {
-    href: 'https://t.me/MadFishCommunity',
-    background: '#26A5E4',
-    Icon: TelegramIcon
-  },
-  {
-    href: 'https://twitter.com/madfishofficial',
-    background: '#1DA1F2',
-    Icon: TwitterIcon
-  },
-  {
-    href: 'https://www.youtube.com/channel/UCUp80EXfJEigks3xU5hiwyA',
-    background: '#FF0000',
-    Icon: YoutubeIcon
-  },
-  {
-    href: 'https://www.reddit.com/r/MadFishCommunity',
-    background: '#FF4500',
-    Icon: RedditIcon
-  }
-];
-
 const CongratsPage: FC = () => {
   const { setOnboardingCompleted } = useOnboardingProgress();
 
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.congratsText)}>
-        <T id={'congrats'} />
+        <T id={'welcomeOnboard'} />
       </p>
-      <p className={styles['description']} style={{ marginBottom: 20 }}>
-        <T id={'congratsDescription1'} />
+      <p className={styles['description']}>
+        <T id={'welcomeOnboardDetailsPart1'} />
       </p>
-      <p className={styles['description']} style={{ marginTop: 20, marginBottom: 0 }}>
-        <T id={'congratsDescription2'} />
+      <p className={styles['description']}>
+        <T id={'welcomeOnboardDetailsPart2'} />
       </p>
-      <p className={styles['description']} style={{ marginTop: 20, marginBottom: 0 }}>
-        <T id={'congratsDescription3'} />
+      <p className={styles['description']}>
+        <T id={'welcomeOnboardDetailsPart3'} />
       </p>
-      <a
-        href={'https://www.youtube.com/playlist?list=PLVfSwYHwGJ2Gyyf16LEIgvkNoC1YtgjX1'}
-        target="_blank"
-        rel="noreferrer"
-        className={styles['link']}
-      >
-        https://www.youtube.com/playlist?list=PLVfSwYHwGJ2Gyyf16LEIgvkNoC1YtgjX1
-      </a>
-      <p className={styles['description']} style={{ marginTop: 20, marginBottom: 0 }}>
-        <T id={'congratsDescription4'} />
-      </p>
-      <a href={'https://madfish.crunch.help/temple-wallet'} target="_blank" rel="noreferrer" className={styles['link']}>
-        https://madfish.crunch.help/temple-wallet
-      </a>
-      <p className={styles['description']} style={{ marginTop: 20, marginBottom: 10, fontWeight: 'bold' }}>
-        <T id={'congratsDescription5'} />
-      </p>
-      <div className={styles['linksList']}>
-        {links.map(({ href, background, Icon }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="py-1">
-            <div className="w-8 h-8 rounded-md" style={{ background, padding: background ? '0.375rem' : 0 }}>
-              <Icon className="h-full w-auto" />
-            </div>
-          </a>
-        ))}
+
+      <div className="my-6">
+        <p className={clsx(styles['description'], 'text-center flex justify-center')}>
+          <T id={'joinCommunity'} />
+        </p>
+        <div className="flex justify-center">
+          <CongratsSocials />
+        </div>
       </div>
-      <p className={styles['description']} style={{ marginBottom: 0 }}>
-        <T id={'congratsDescription6'} />
+      <p className={clsx(styles['description'], 'text-center flex justify-center mt-6')}>
+        <T id={'goodLuckMsg'} />
       </p>
-      <Button
-        className="w-full justify-center border-none"
-        style={{
-          padding: '10px 2rem',
-          background: '#4198e0',
-          color: '#ffffff',
-          marginTop: '20px',
-          borderRadius: 4
-        }}
+
+      <ButtonRounded
+        fill
+        className="w-full mt-4"
+        size="big"
         onClick={() => setOnboardingCompleted(true)}
         testID={OnboardingSelectors.congratsStartButton}
       >
-        <T id={'start'} />
-      </Button>
+        <T id={'getStarted'} />
+      </ButtonRounded>
     </>
   );
 };
 
 export default CongratsPage;
+
+const CongratsSocials: FC = () => {
+  return (
+    <div className={clsx('flex items-center gap-6 w-fit')}>
+      {FOOTER_LINKS.map(link => (
+        <Socialitem {...link} />
+      ))}
+    </div>
+  );
+};
+
+const Socialitem: FC<AboutFooterLinkItemType> = ({ Icon, link, testID }) => {
+  return (
+    <Anchor
+      testID={testID}
+      href={link}
+      className="bg-accent-blue flex items-center justify-center no-underline rounded-md w-8 h-8"
+    >
+      <Icon className="w-full h-full" />
+    </Anchor>
+  );
+};

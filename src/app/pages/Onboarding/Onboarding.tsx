@@ -17,7 +17,7 @@ const style = {
 
 const Onboarding: FC = () => {
   // const [step, setStep] = useStorage<number>(`onboarding_step_state`, 0);
-  const [step, setStep] = useState<number>(0);
+  const [step, setStep] = useState<number>(4);
 
   const steps = (stepWord => [`${stepWord} 1`, `${stepWord} 2`, `${stepWord} 3`, `${stepWord} 4`])(t('step'));
   return (

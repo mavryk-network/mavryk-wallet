@@ -3569,5 +3569,41 @@
   },
   "profileAndAccountsHintPart3": {
     "message": "You can choose from the default list or add a custom RPC manually by following the instructions."
+  },
+  "txActionsTitle": {
+    "message": "Search, Sort, & View Transaction History"
+  },
+  "txActionsDetailsPart1": {
+    "message": "Use the three icons on the right to find specific information."
+  },
+  "txActionsDetailsPart2": {
+    "message": "Magnifying Glass - Search specific details."
+  },
+  "txActionsDetailsPart3": {
+    "message": "Drop Down - Sort your tokens and viewing arrangement"
+  },
+  "txActionsDetailsPart4": {
+    "message": "Rewind Icon - Search your transaction history."
+  },
+  "welcomeOnboard": {
+    "message": "Welcome on board! 👋"
+  },
+  "welcomeOnboardDetailsPart1": {
+    "message": "Now you know the basic & most important functions of the Mavryk wallet."
+  },
+  "welcomeOnboardDetailsPart2": {
+    "message": "You can learn all features of the Mavryk Wallet by following our explainer posts on social media."
+  },
+  "welcomeOnboardDetailsPart3": {
+    "message": "Also, all instructions and guides are available in our documentation."
+  },
+  "joinCommunity": {
+    "message": "Join our community!"
+  },
+  "goodLuckMsg": {
+    "message": "Good luck exploring the Mavryk Ecosystem!"
+  },
+  "getStarted": {
+    "message": "Get Started"
   }
 }

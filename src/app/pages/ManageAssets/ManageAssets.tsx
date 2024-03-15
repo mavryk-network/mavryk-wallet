@@ -191,6 +191,20 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [filteredAssets.length, hiddenAssets.length, selectAll, selectAllHidden, selectedOption]
   );
 
+  const sortedAssets = useMemo(
+    () =>
+      filteredAssets.sort((a, b) => {
+        if (assetsStatuses[a]?.displayed === assetsStatuses[b]?.displayed) {
+          return 0;
+        } else if (assetsStatuses[a]?.displayed) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }),
+    [assetsStatuses, filteredAssets]
+  );
+
   const noItemsSelected = !selectedAssets.length;
 
   return (
@@ -221,9 +235,9 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         <Divider ignoreParent color="bg-divider" className="mt-4" />
       </div>
 
-      {filteredAssets.length > 0 ? (
+      {sortedAssets.length > 0 ? (
         <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-base-plus">
-          {filteredAssets.map((slug, i, arr) => {
+          {sortedAssets.map((slug, i, arr) => {
             const last = i === arr.length - 1;
 
             return (

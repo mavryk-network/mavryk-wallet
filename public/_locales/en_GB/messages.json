@@ -1786,7 +1786,7 @@
     "message": "Managed KT"
   },
   "watchOnlyAccount": {
-    "message": "Watch-only"
+    "message": "Watch-Only"
   },
   "disabledForWatchOnlyAccount": {
     "message": "Disabled for watch-only account"

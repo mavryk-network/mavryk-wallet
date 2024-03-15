@@ -8,6 +8,7 @@ import { CardContainer } from 'app/atoms/CardContainer';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
+import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { mutezToTz } from 'lib/temple/helpers';
@@ -19,7 +20,7 @@ import { MoneyDiffView } from '../activity/MoneyDiffView';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
-import { toHistoryTokenSlug } from './utils';
+// import { toHistoryTokenSlug } from './utils';
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
@@ -28,10 +29,8 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
 
-  const assetslug = toHistoryTokenSlug(historyItem);
-
-  const assetMetadata = useAssetMetadata(assetslug);
-  const assetSymbol = getAssetSymbol(assetMetadata);
+  const mainAssetMetadata = useAssetMetadata(TEZ_TOKEN_SLUG);
+  const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
 
@@ -89,7 +88,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             ))}
           </div>
 
-          <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} />
+          <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} showFullDate />
         </div>
       }
       portalClassName="token-details-popup"
@@ -146,7 +145,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
             <div className="flex flex-col items-end">
               <FiatBalance
-                assetSlug={assetslug}
+                assetSlug={TEZ_TOKEN_SLUG}
                 value={`${mutezToTz(fees?.networkFee) ?? 0}`}
                 showEqualSymbol={false}
                 className="text-base-plus"
@@ -157,7 +156,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <div className="text-sm text-secondary-white">
                 <span>-{mutezToTz(fees?.networkFee).toFixed()}</span>
                 &nbsp;
-                <span>{assetSymbol}</span>
+                <span>{mainAssetSymbol}</span>
               </div>
             </div>
           </div>
@@ -175,7 +174,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <span className="text-secondary-white flex items-center capitalize">
                 <span>-{mutezToTz(fees?.gasFee).toFixed()}</span>
                 &nbsp;
-                <span>{assetSymbol}</span>
+                <span>{mainAssetSymbol}</span>
               </span>
             </div>
             <div className="flex justify-between items-center capitalize">
@@ -186,7 +185,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <span className="text-secondary-white flex items-center">
                   <span>-{mutezToTz(fees?.storageFee).toFixed()}</span>
                   &nbsp;
-                  <span>{assetSymbol}</span>
+                  <span>{mainAssetSymbol}</span>
                 </span>
               </span>
             </div>
@@ -197,7 +196,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <span className="text-secondary-white">
                 <span>-{mutezToTz(burnedFee).toFixed()}</span>
                 &nbsp;
-                <span>{assetSymbol}</span>
+                <span>{mainAssetSymbol}</span>
               </span>
             </div>
           </div>

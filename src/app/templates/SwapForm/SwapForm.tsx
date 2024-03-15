@@ -557,7 +557,7 @@ export const SwapForm: FC = () => {
               />
             </div>
           </div>
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div>
               <span ref={cashbackInfoIconRef} className="flex w-fit items-center text-white">
                 <T id="swapCashback" />
@@ -566,7 +566,7 @@ export const SwapForm: FC = () => {
               </span>
             </div>
             <div className="text-right text-white">{SWAP_CASHBACK_PERCENT}%</div>
-          </div>
+          </div> */}
         </section>
       </div>
 

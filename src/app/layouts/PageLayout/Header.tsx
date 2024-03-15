@@ -49,33 +49,6 @@ const Control: FC = () => {
 
   return (
     <DappsContext>
-      {/* TODO DO NOT REMOVE THIS CODE FOR NOW */}
-      {/* <Popper
-        placement="left-start"
-        strategy="fixed"
-        style={{ pointerEvents: 'none' }}
-        popup={props => <AccountDropdown {...props} />}
-      >
-        {({ ref, opened, toggleOpened }) => (
-          <Button
-            ref={ref}
-            className={classNames(
-              'flex-shrink-0 flex p-px',
-              'rounded-full',
-              'bg-primary-bg bg-opacity-10 cursor-pointer',
-              'transition ease-in-out duration-200',
-              opened
-                ? 'shadow-md opacity-100'
-                : 'shadow hover:shadow-md focus:shadow-md opacity-90 hover:opacity-100 focus:opacity-100'
-            )}
-            onClick={toggleOpened}
-            testID={HeaderSelectors.accountIcon}
-          >
-            <Identicon type="bottts" hash={account.publicKeyHash} size={48} />
-          </Button>
-        )}
-      </Popper> */}
-
       <AccountPopupButton iconSize={34} account={account} child={<GetProlabel />} />
 
       <div className="ml-2 flex-1 flex items-start">

@@ -23,7 +23,7 @@ export const AccountDetailsPopup: FC<AccountDetailsPopupProps> = ({ showAccounts
       onRequestClose={toggleAccountPopup}
       title={
         <div className="flex items-center gap-2">
-          <Identicon hash={account.name} type="bottts" size={24} className="rounded-full overflow-hidden" />
+          <Identicon hash={account.publicKeyHash} type="bottts" size={24} className="rounded-full overflow-hidden" />
           <Name className="text-base-plus text-white">{account.name}</Name>
         </div>
       }

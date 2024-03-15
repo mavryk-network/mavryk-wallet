@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { HashChip, Identicon } from 'app/atoms';
+import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
@@ -131,7 +131,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        <CardContainer className={clsx('text-sm text-white flex flex-col', showFeeDetails ? 'gap-2' : 'gap-0')}>
+        <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">
             <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
               <T id="networkFees" />
@@ -167,6 +167,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
             )}
           >
+            {showFeeDetails && <Divider color="bg-divider" className="mt-2" />}
             <div className="flex justify-between items-center">
               <span>
                 <T id="gasFee" />

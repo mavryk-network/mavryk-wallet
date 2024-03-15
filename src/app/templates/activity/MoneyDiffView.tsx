@@ -15,11 +15,19 @@ interface Props {
   className?: string;
   moneyClassname?: string;
   isColored?: boolean;
+  showFiatBalance?: boolean;
 }
 
 export const MoneyDiffView = memo<Props>(
-  ({ assetId: assetSlug, diff, pending = false, isColored = true, className, moneyClassname }) => {
-    const { popup } = useAppEnv();
+  ({
+    assetId: assetSlug,
+    diff,
+    pending = false,
+    isColored = true,
+    showFiatBalance = true,
+    className,
+    moneyClassname
+  }) => {
     const metadata = useAssetMetadata(assetSlug);
 
     const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
@@ -42,7 +50,7 @@ export const MoneyDiffView = memo<Props>(
           <span>{getAssetSymbol(metadata, true)}</span>
         </div>
 
-        {assetSlug && (
+        {assetSlug && showFiatBalance && (
           <InFiat volume={diffBN.abs()} assetSlug={assetSlug} smallFractionFont={false}>
             {({ balance, symbol }) => (
               <div className="text-sm tracking-normal text-secondary-white flex">

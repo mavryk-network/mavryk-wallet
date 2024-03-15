@@ -8,12 +8,14 @@ import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
+import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
+import { getMoneyDiffsForSwap } from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -36,10 +38,23 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
     () => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE).map(op => ({ ...op, type: Number(historyItem.type) })),
     [historyItem.type, operStack]
   );
-  const rest = useMemo(() => operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [operStack]);
+  const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
 
-  const moneyDiffsBase = useMemo(() => moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
-  const moneyDiffsRest = useMemo(() => moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE), [moneyDiffs]);
+  const rest = useMemo(
+    () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
+    [isSwapOperation, operStack]
+  );
+
+  const moneyDiffsBase = useMemo(
+    () => (isSwapOperation ? getMoneyDiffsForSwap(moneyDiffs) : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE)),
+    [isSwapOperation, moneyDiffs]
+  );
+  const moneyDiffsRest = useMemo(
+    () => (isSwapOperation ? moneyDiffs : moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
+    [moneyDiffs, isSwapOperation]
+  );
+
+  console.log(historyItem);
 
   return (
     <div
@@ -56,7 +71,7 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           <HistoryTokenIcon historyItem={historyItem} />
           <div className="flex flex-col gap-1 items-start justify-center">
             <OperationStack historyItem={historyItem} base={base} />
-            <div className="flex items-start flex-col gap-1">
+            <div className="flex items-start gap-x-1">
               <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
               {rest.length > 0 && (
                 <div className={classNames('flex items-center')}>
@@ -75,11 +90,18 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-end" style={{ maxWidth: 76 }}>
+        <div className="flex flex-col justify-center items-end gap-1" style={{ maxWidth: 76 }}>
           {moneyDiffsBase.map(({ assetSlug, diff }, i) => {
             if (isZero(diff)) return null;
             return (
-              <MoneyDiffView key={i} className="gap-1" assetId={assetSlug} diff={diff} pending={status === 'pending'} />
+              <MoneyDiffView
+                key={i}
+                className="gap-1"
+                assetId={assetSlug}
+                diff={diff}
+                pending={status === 'pending'}
+                showFiatBalance={!isSwapOperation}
+              />
             );
           })}
         </div>

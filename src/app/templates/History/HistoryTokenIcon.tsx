@@ -35,9 +35,9 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
 }) => {
   const { type } = historyItem;
   const slugs = getAssetsFromOperations(historyItem);
-  const tokensMetadata = useMultipleAssetsMetadata(
-    [slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)).reverse()
-  );
+  const tokensMetadata = useMultipleAssetsMetadata([
+    ...new Set([slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)).reverse())
+  ]);
 
   const renderOperationIcon = () => {
     // TODO add withdraw. new stake, vote yay, buy

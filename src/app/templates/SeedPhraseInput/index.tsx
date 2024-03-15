@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 
 import { validateMnemonic } from 'bip39';
 import classNames from 'clsx';
@@ -13,6 +13,7 @@ import { clearClipboard } from 'lib/ui/utils';
 
 import { ImportAccountSelectors } from '../../pages/ImportAccount/selectors';
 import { SeedLengthSelect } from './SeedLengthSelect/SeedLengthSelect';
+import { numberOfWordsOptions } from './SeedLengthSelect/utils';
 import { SeedWordInput, SeedWordInputProps } from './SeedWordInput';
 import { useRevealRef } from './use-reveal-ref.hook';
 
@@ -137,14 +138,6 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
     [onSeedPaste]
   );
 
-  const numberOfWordsOptions = useMemo(() => {
-    const result = [];
-    for (let i = 12; i <= 24; i += 3) {
-      result.push(`${i}`);
-    }
-    return result;
-  }, []);
-
   const hasError = Boolean(seedError) || Boolean(wordSpellingErrorsCount) || pasteFailed;
 
   return (
@@ -210,6 +203,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
               onPaste={onSeedWordPaste}
               setWordSpellingErrorsCount={setWordSpellingErrorsCount}
               onSeedWordChange={onSeedWordChange}
+              seedError={seedError}
             />
           );
         })}
@@ -220,7 +214,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
           className="mt-4 text-sm text-primary-error"
           {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
         >
-          {seedError && <div>{seedError}</div>}
+          {submitted && seedError && <div>{seedError}</div>}
 
           {wordSpellingErrorsCount > 0 && (
             <div>

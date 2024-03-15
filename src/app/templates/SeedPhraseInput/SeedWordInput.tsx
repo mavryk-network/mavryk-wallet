@@ -1,4 +1,14 @@
-import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  FC,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import { emptyFn } from '@rnw-community/shared';
 import bip39WordList from 'bip39/src/wordlists/english.json';
@@ -21,6 +31,7 @@ export interface SeedWordInputProps extends TestIDProperty {
   value?: string;
   onChange?: (e: React.ChangeEvent<FormFieldElement>) => void;
   onPaste?: (e: React.ClipboardEvent<FormFieldElement>) => void;
+  seedError: ReactNode;
 }
 
 export const SeedWordInput: FC<SeedWordInputProps> = ({
@@ -35,6 +46,7 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
   value,
   onChange = emptyFn,
   onPaste = emptyFn,
+  seedError,
   testID
 }) => {
   const variantsRef = useRef<Array<HTMLButtonElement | null>>([]);
@@ -214,7 +226,7 @@ export const SeedWordInput: FC<SeedWordInputProps> = ({
         smallPaddings
         fieldWrapperBottomMargin={false}
         testID={testID}
-        errorCaption={errorCaption ? t('spellingError') : false}
+        errorCaption={errorCaption ? t('spellingError') : seedError && submitted ? true : false}
         onKeyDown={handleInputKeyDown}
         placeholder={t('enterTheWord')}
         className="py-14px pl-4"

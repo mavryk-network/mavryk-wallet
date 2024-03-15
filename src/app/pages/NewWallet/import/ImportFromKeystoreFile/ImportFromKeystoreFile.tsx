@@ -5,6 +5,7 @@ import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
 import { ToggleButton, Toggle, ToggleOn, useToggle } from 'app/compound/Toggle';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as FileIcon } from 'app/icons/file.svg';
 import { T, t } from 'lib/i18n';
@@ -52,6 +53,8 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     submitting: secondarySubmitting
   } = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
 
+  const { fullPage } = useAppEnv();
+
   const customAlert = useAlert();
   const { setValue, control, register, watch, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
     mode: 'onChange'
@@ -96,7 +99,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
 
   return (
     <form
-      className="w-full h-auto max-w-sm mx-auto pt-4 pb-8 flex flex-col no-scrollbar"
+      className={classNames('w-full h-auto mx-auto flex flex-col no-scrollbar', fullPage ? 'pt-8 pb-11' : 'pt-4 pb-8')}
       style={{ height: 'calc(100% - 48px)' }}
       onSubmit={handleFinalSubmit}
     >
@@ -106,7 +109,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
         </span>
       </label>
 
-      <div className="w-full mb-4">
+      <div className={classNames('w-full', fullPage ? 'mb-8' : 'mb-4')}>
         <Controller
           control={control}
           name="keystoreFile"
@@ -129,6 +132,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
         id="keystore-password"
         type="password"
         name="keystorePassword"
+        fieldWrapperBottomMargin={false}
         errorCaption={errors.keystorePassword?.message}
         testID={ImportFromKeystoreFileSelectors.filePasswordInput}
       />
@@ -180,6 +184,7 @@ type KeystoreFileInputProps = Pick<FileInputProps, 'value' | 'onChange' | 'name'
 
 const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clearKeystoreFileInput, onChange }) => {
   const keystoreFile = value?.item?.(0);
+  const { fullPage } = useAppEnv();
 
   const restoreFileInputText = () => (
     <span>
@@ -195,7 +200,8 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
         className={classNames(
           'w-full bg-primary-card',
           keystoreFile ? 'p-4 flex items-center' : 'px-8 pt-6 pb-8 flex flex-col items-center',
-          keystoreFile ? 'border-none rounded-md' : 'border-2 border-dashed border-divider rounded-md',
+          keystoreFile ? 'border-none rounded-md' : 'border-2 border-dashed border-divider',
+          !keystoreFile && fullPage ? 'rounded-3xl' : 'rounded-2xl-plus',
           'focus:border-accent-blue',
           'transition ease-in-out duration-200',
           'text-white text-base-plus leading-tight',

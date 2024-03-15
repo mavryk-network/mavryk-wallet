@@ -42,8 +42,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     disabled
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
-  console.log(fullPage);
-
   return (
     <form
       className={classNames('w-full mx-auto flex flex-col no-scrollbar', !fullPage && 'pt-4 pb-8')}

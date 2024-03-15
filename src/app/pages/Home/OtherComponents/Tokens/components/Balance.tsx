@@ -12,7 +12,7 @@ interface CryptoBalanceProps extends TestIDProps {
 }
 
 export const CryptoBalance = memo<CryptoBalanceProps>(({ value, testID, testIDProperties }) => (
-  <div className="truncate text-base-plus font-medium text-white text-right ml-4 flex-1 flex justify-end">
+  <div className="truncate text-base-plus text-white text-right ml-4 flex-1 flex justify-end">
     <Money smallFractionFont={false} testID={testID} testIDProperties={testIDProperties}>
       {value}
     </Money>

@@ -54,8 +54,6 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
     [moneyDiffs, isSwapOperation]
   );
 
-  console.log(historyItem);
-
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}

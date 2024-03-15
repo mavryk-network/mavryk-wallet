@@ -21,7 +21,7 @@ import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
-import { useAssetFiatCurrencyPrice } from 'lib/fiat-currency';
+import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
@@ -29,7 +29,7 @@ import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
-import { FiatBalance } from '../Balance';
+import { CryptoBalance, FiatBalance } from '../Balance';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
@@ -70,6 +70,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const balance = useMemo(() => balances[assetSlug] ?? new BigNumber(0), [assetSlug, balances]);
   const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
   const tokenMetadata = useTokenMetadataSelector(assetSlug);
+  const { selectedFiatCurrency } = useFiatCurrency();
 
   const assetSymbol = getAssetSymbol(assetMetadata);
   const isMainToken = assetSlug === TEZ_TOKEN_SLUG;
@@ -94,6 +95,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               </div>
             )}
           </InFiat>
+
           <div className="text-white text-sm flex items-center">
             <Money smallFractionFont={false}>{balance}</Money>
             <span>&nbsp;</span>
@@ -149,8 +151,10 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         {/* market price section */}
         <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
           <T id="marketPrice" />
-          <div className="p-4 bg-gray-910 text-left rounded-2xl-plus">
-            <FiatBalance value={price} assetSlug={assetSlug} className="text-white text-base-plus" />
+          <div className="p-4 bg-gray-910 text-left flex items-center rounded-2xl-plus text-white text-base-plus">
+            <span className="mr-1">≈</span>
+            {selectedFiatCurrency.symbol}
+            <Money smallFractionFont={false}>{price}</Money>
           </div>
         </div>
         {/* staking section */}

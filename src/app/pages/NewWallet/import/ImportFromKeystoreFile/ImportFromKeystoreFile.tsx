@@ -138,7 +138,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
       />
       {isSeedEntered && !isFromKeystoreFileWithUpdatedPassword && (
         <>
-          <div className=" w-full flex justify-between items-center mb-2 mt-2">
+          <div className=" w-full flex justify-between items-center mb-2 mt-4">
             <div className="text-base-plus text-white">
               <T id="useSamePassword" />
             </div>
@@ -146,11 +146,13 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
           </div>
           <>
             <ToggleOn>
-              <ImportPartialFormCheckboxes
-                control={secondaryControl}
-                errors={secondaryErrors}
-                register={secondaryRegister}
-              />
+              <div className={classNames(fullPage && 'mt-6')}>
+                <ImportPartialFormCheckboxes
+                  control={secondaryControl}
+                  errors={secondaryErrors}
+                  register={secondaryRegister}
+                />
+              </div>
             </ToggleOn>
           </>
         </>

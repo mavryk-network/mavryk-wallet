@@ -64,8 +64,8 @@ if (window.frameElement === null) {
 
 const SENDER = {
   id: browser.runtime.id,
-  name: 'Temple - Tezos Wallet',
-  iconUrl: 'https://templewallet.com/logo.png'
+  name: 'Mavryk Wallet',
+  iconUrl: 'https://stage.mavryk-network.pages.dev/logo.pnglogo.png'
 };
 
 window.addEventListener(

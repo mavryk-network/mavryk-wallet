@@ -228,8 +228,8 @@ export function formatOpParams(op: any) {
  */
 export const PAIRING_RESPONSE_BASE: Partial<PostMessagePairingResponse> = {
   type: MessageType.HandshakeResponse,
-  name: 'Temple - Tezos Wallet',
-  icon: 'https://templewallet.com/logo.png',
+  name: 'Mavryk Wallet',
+  icon: 'https://stage.mavryk-network.pages.dev/logo.png',
   appUrl: browser.runtime.getURL('fullpage.html')
 };
 

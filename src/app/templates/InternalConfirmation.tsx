@@ -339,6 +339,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   modifyFeeAndLimit={modifyFeeAndLimit}
                   mainnet={mainnet}
                   gasFeeError={gasFeeError}
+                  includeBurnedFee
                 />
               </div>
             )}

@@ -54,7 +54,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
     let defaultGasFeeMutez = new BigNumber(0);
     let storageFeeMutez = new BigNumber(0);
-    let burnedFee = 0;
+    let burnedFee = new BigNumber(0);
+
     if (estimates) {
       try {
         let i = 0;
@@ -68,8 +69,9 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
           );
           i++;
         }
+
         // @ts-expect-error
-        burnedFee = estimates[0].burnFeeMutez + estimates[0]?.baseFeeMutez ?? 0 + storageFeeMutez;
+        burnedFee = new BigNumber(estimates[0].burnFeeMutez + estimates[0]?.baseFeeMutez ?? 0).plus(storageFeeMutez);
       } catch {
         return null;
       }

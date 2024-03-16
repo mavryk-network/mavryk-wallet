@@ -42,7 +42,7 @@ export const SwapRoute: FC<Props> = ({ className }) => {
         </span>
       </p>
       {isVisible && chains.length > 0 && (
-        <div className="flex flex-col gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-4 mt-3">
           {chains.map((chain, index) => (
             <SwapRouteItem key={index} chain={chain} baseInput={input} baseOutput={output} />
           ))}

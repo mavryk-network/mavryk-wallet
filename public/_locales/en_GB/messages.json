@@ -2158,19 +2158,19 @@
     "message": "Via"
   },
   "swapRoute": {
-    "message": "Swap route"
+    "message": "Swap Route"
   },
   "exchangeRate": {
-    "message": "Exchange rate"
+    "message": "Exchange Rate"
   },
   "priceImpact": {
     "message": "Price impact"
   },
   "slippageTolerance": {
-    "message": "Slippage tolerance"
+    "message": "Slippage Tolerance"
   },
   "minimumReceived": {
-    "message": "Minimum received"
+    "message": "Minimum Received"
   },
   "inputOutputAssetsCannotBeSame": {
     "message": "Input and output assets cannot be the same"
@@ -2420,7 +2420,7 @@
     }
   },
   "storageFeeMax": {
-    "message": "Storage fee (max)"
+    "message": "Storage Fee (max)"
   },
   "interactionWithContract": {
     "message": "with $contract$",
@@ -2431,7 +2431,7 @@
     }
   },
   "storageLimit": {
-    "message": "Adjust storage limit"
+    "message": "Adjust Storage Limit"
   },
   "txIsLikelyToFail": {
     "message": "Warning! Transaction is likely to fail."

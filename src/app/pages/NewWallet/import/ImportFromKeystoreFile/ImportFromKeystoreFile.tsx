@@ -189,7 +189,7 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
   const { fullPage } = useAppEnv();
 
   const restoreFileInputText = () => (
-    <span>
+    <span className={classNames(fullPage && 'text-xl leading-6 tracking-tight')}>
       {t('fileInputPromptPart1')}
       <span className="text-accent-blue">{t('fileInputPromptPart2')}</span>
       {t('fileInputPromptPart3')}
@@ -227,7 +227,9 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
             <CloseIcon className="w-4 h-auto stroke-white" />
           </span>
         ) : (
-          <span className="text-xs font-light text-secondary-white max-w-9/10">(*.tez)</span>
+          <span className={classNames('font-light text-secondary-white max-w-9/10', fullPage ? 'text-sm' : 'text-xs')}>
+            (*.tez)
+          </span>
         )}
       </div>
     </FileInput>

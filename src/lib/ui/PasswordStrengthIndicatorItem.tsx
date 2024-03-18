@@ -13,7 +13,7 @@ const PasswordStrengthIndicatorItem: FC<PasswordStrengthIndicatorItemProps> = ({
   title = false,
   noColor = false
 }) => {
-  const style = isValid ? { color: '#48bb78' } : noColor ? {} : { color: '#e53e3e' };
+  const style = isValid ? { color: '#00B71D' } : noColor ? {} : { color: '#DB0505' };
 
   return title ? <p style={style}>{message}</p> : <li style={style}>{message}</li>;
 };

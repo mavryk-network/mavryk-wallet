@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from 'react';
+import React, { FC, ReactNode, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -46,6 +46,11 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     disabled
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
+  console.log(Object.keys(errors).length);
+  const hasErrors = Object.keys(errors).length > 0;
+
+  console.log(hasErrors);
+  const internalDisabledBtnStatus = disabled || hasErrors || !passwordValue?.length;
   return (
     <form
       className={classNames('w-full mx-auto flex flex-col no-scrollbar', !fullPage && 'pt-4 pb-8')}
@@ -109,7 +114,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
       <FormSubmitButton
         loading={submitting}
-        disabled={disabled}
+        disabled={internalDisabledBtnStatus}
         className={classNames('w-full', fullPage ? 'mt-8' : 'mt-13')}
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >

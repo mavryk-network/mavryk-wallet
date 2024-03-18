@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -17,13 +17,15 @@ interface SetWalletPasswordProps {
   ownMnemonic?: boolean;
   seedPhrase: string;
   keystorePassword?: string;
+  submitBtnLabel?: ReactNode;
   testID?: string;
 }
 
 export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   ownMnemonic = false,
   seedPhrase,
-  keystorePassword
+  keystorePassword,
+  submitBtnLabel
 }) => {
   const { fullPage } = useAppEnv();
   const { ready } = useTempleClient();
@@ -111,7 +113,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
         className={classNames('w-full', fullPage ? 'mt-8' : 'mt-13')}
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >
-        <T id={ready ? 'restore' : 'import'} />
+        {submitBtnLabel ? submitBtnLabel : <T id={ready ? 'restore' : 'import'} />}
       </FormSubmitButton>
     </form>
   );

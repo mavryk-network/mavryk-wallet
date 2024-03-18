@@ -3,7 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { generateMnemonic } from 'bip39';
 
 import PageLayout from 'app/layouts/PageLayout';
-import { t } from 'lib/i18n';
+import { T, t } from 'lib/i18n';
 
 import { useTempleClient } from '../../../lib/temple/front';
 import { NewSeedBackup } from './create/NewSeedBackup/NewSeedBackup';
@@ -32,7 +32,9 @@ export const CreateWallet: FC = () => {
           <NewSeedVerify seedPhrase={seedPhrase} onVerificationComplete={() => setVerificationCompleted(true)} />
         </Template>
       )}
-      {backupCompleted && verificationCompleted && <SetWalletPassword seedPhrase={seedPhrase} />}
+      {backupCompleted && verificationCompleted && (
+        <SetWalletPassword seedPhrase={seedPhrase} submitBtnLabel={<T id="create" />} />
+      )}
     </PageLayout>
   );
 };

@@ -288,7 +288,7 @@
     }
   },
   "skipOnboarding": {
-    "message": "Skip Onboarding"
+    "message": "Skip onboarding"
   },
   "advancedUser": {
     "message": "I'm an advanced user"

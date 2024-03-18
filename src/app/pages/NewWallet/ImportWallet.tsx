@@ -15,6 +15,7 @@ import { SetWalletPassword } from './setWalletPassword/SetWalletPassword';
 
 interface ImportWalletProps {
   tabSlug?: string;
+  ownMnemonic: boolean;
 }
 
 const importWalletOptions: {
@@ -31,8 +32,8 @@ const importWalletOptions: {
   }
 ];
 
-export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' }) => {
-  const { locked } = useTempleClient();
+export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', ownMnemonic }) => {
+  const { locked, ready } = useTempleClient();
   const { fullPage } = useAppEnv();
 
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -52,7 +53,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
 
   return (
     <PageLayout
-      pageTitle={fullPage ? t('importWallet') : t('restoreAccount')}
+      pageTitle={!ready ? t('importWallet') : t('restoreAccount')}
       isTopbarVisible={false}
       removePaddings={true}
       contentContainerStyle={memoizedContainerStyle}
@@ -63,7 +64,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
       {isImportFromSeedPhrase ? (
         isSeedEntered ? (
           <div className={clsx(fullPage && 'mt-8 mb-11')}>
-            <SetWalletPassword ownMnemonic={!fullPage} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+            <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
           </div>
         ) : (
           <ImportFromSeedPhrase
@@ -74,7 +75,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase' })
         )
       ) : isSeedEntered && isFromKeystoreFileWithUpdatedPassword ? (
         <div className={clsx(fullPage && 'mt-8 mb-11')}>
-          <SetWalletPassword ownMnemonic={!fullPage} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+          <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
         </div>
       ) : (
         <ImportFromKeystoreFile

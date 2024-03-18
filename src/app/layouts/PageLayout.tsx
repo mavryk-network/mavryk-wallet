@@ -91,7 +91,7 @@ const PageLayout: FC<PageLayoutProps> = ({
       {/* <AdvertisingOverlay /> */}
       <ConfirmationOverlay />
       <ChangelogOverlay />
-      <OnRampOverlay />
+      {/* <OnRampOverlay /> */}
       {/* <NewsletterOverlay /> */}
     </div>
   );

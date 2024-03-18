@@ -148,8 +148,8 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       <div className="flex justify-between mb-4">
         <h1
           className={classNames(
-            'font-aeonik flex self-center text-white text-base-plus'
-            // isFirstAccount ? 'text-2xl' : 'text-base font-semibold text-gray-500'
+            'font-aeonik flex self-center text-white',
+            popup ? 'text-base-plus' : 'text-xl leading-6 tracking-tight'
           )}
         >
           <T id="seedPhrase" />
@@ -211,16 +211,10 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
 
       {hasError && (
         <div
-          className="mt-4 text-sm text-primary-error"
+          className={classNames('mt-4 text-primary-error', popup ? 'text-sm' : 'text-base-plus')}
           {...setTestID(ImportAccountSelectors.mnemonicValidationErrorText)}
         >
           {submitted && seedError && <div>{seedError}</div>}
-
-          {wordSpellingErrorsCount > 0 && (
-            <div>
-              <T id="mnemonicWordsError" />
-            </div>
-          )}
 
           {pasteFailed && (
             <div>

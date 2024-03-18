@@ -333,8 +333,5 @@ span:has(> span.array-key) {
 }
 
 .fullPageBg {
-  background: linear-gradient(0deg, rgba(1, 1, 1, 1), rgba(1, 1, 1, 0)),
-    linear-gradient(180deg, rgba(95, 88, 255, 1) 0%, rgba(0, 0, 0, 0) 263.1%);
-
-  background-color: #010101;
+  background: linear-gradient(180deg, rgba(95, 88, 255, 0.25) 0%, rgba(0, 0, 0, 0) 263.1%), #010101;
 }

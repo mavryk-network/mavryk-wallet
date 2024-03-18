@@ -58,18 +58,19 @@ const Welcome: FC = () => {
           'px-20 pt-11 pb-21 bg-primary-bg',
           'flex flex-col items-center justify-center'
         )}
+        style={{ maxWidth: 600 }}
       >
-        <p className="text-xl leading-5 tracking-tight">
+        <p className="text-xl leading-6 tracking-tight text-white mb-8">
           <T id="welcome" />
         </p>
         <div className={classNames('w-full', 'flex flex-col items-center gap-4')}>
-          {SIGNS.map(({ key, linkTo, filled, Icon, titleI18nKey, descriptionI18nKey, testID }) => (
+          {SIGNS.map(({ key, linkTo, filled, Icon, titleI18nKey, descriptionI18nKey, testID }, idx) => (
             <div key={key} className={classNames('w-full')}>
               <Link
                 to={linkTo}
                 className={classNames(
                   'relative block',
-                  'w-full pb-1/3',
+                  'w-full h-154px',
                   'bg-accent-blue',
                   'overflow-hidden rounded-3xl',
                   'transition duration-300 ease-in-out',
@@ -97,7 +98,7 @@ const Welcome: FC = () => {
                       {message => <h1 className="text-xl leading-6 tracking-tight text-center">{message}</h1>}
                     </T>
 
-                    <div className="mt-2">
+                    <div className="mt-2" style={{ width: idx === 0 ? 340 : 352 }}>
                       <T id={descriptionI18nKey}>
                         {message => <p className={classNames('text-center', 'text-sm', 'text-white')}>{message}</p>}
                       </T>

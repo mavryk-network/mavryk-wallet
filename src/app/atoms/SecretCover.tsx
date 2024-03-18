@@ -28,7 +28,7 @@ export const SecretCover: React.FC<Props> = ({ onClick, singleRow, testID }) => 
       </p>
     ) : (
       <>
-        <p className="flex items-center mb-1 uppercase text-white text-xl font-normal leading-5 tracking-tight">
+        <p className="flex items-center mb-1 text-white text-xl font-normal leading-5 tracking-tight">
           {/* <LockAltIcon className="-ml-2 mr-1 h-6 w-auto stroke-current stroke-2" /> */}
           <span>
             <T id="protectedFormField" />!

@@ -221,6 +221,12 @@ export const FORM_FIELD_CLASS_NAME = classNames(
   'transition ease-in-out duration-200',
   'text-white text-base-plus placeholder-secondary-white'
 );
+export const FORM_FIELD_CLASS_NAME_SECONDARY = classNames(
+  'appearance-none w-full border rounded-md bg-primary-card',
+  'focus:border-accent-blue focus:bg-primary-card focus:outline-none',
+  'transition ease-in-out duration-200',
+  'text-white text-base-plus placeholder-secondary-white'
+);
 
 interface ExtraInnerProps {
   innerComponent: React.ReactNode;

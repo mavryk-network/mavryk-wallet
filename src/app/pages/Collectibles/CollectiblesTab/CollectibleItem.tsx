@@ -55,13 +55,12 @@ export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsS
   const assetName = getAssetName(metadata);
 
   return (
-    <Link to={`/collectible/${assetSlug}`} className="flex flex-col border border-gray-300 rounded-lg">
+    <Link to={`/collectible/${assetSlug}`} className="flex flex-col rounded-2xl">
       <div
         ref={toDisplayRef}
         className={clsx(
-          'relative flex items-center justify-center bg-blue-50 rounded-lg overflow-hidden hover:opacity-70',
-          areDetailsShown && 'border-b border-gray-300',
-          popup ? 'h-26.5' : 'h-31.25'
+          'relative flex items-center justify-center bg-primary-card rounded-lg overflow-hidden hover:opacity-70',
+          popup ? 'h-163px' : 'h-31.25'
         )}
         title={assetName}
       >
@@ -82,22 +81,24 @@ export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsS
       </div>
 
       {areDetailsShown && (
-        <div className="mt-1 mb-2 mx-1.5">
-          <h5 className="text-sm leading-5 text-gray-910 truncate">{assetName}</h5>
-          <div className="text-xxxs leading-3 text-gray-600">
-            <span>
+        <div className="mt-2 mb-2 flex flex-col items-start">
+          <div className="text-base-plus text-white overflow-x-auto truncate w-full">{assetName}</div>
+          <div className="text-sm leading-3 text-white">
+            <div className="mb-1 text-secondary-white mt-1">
               <T id="floorPrice" />:{' '}
-            </span>
-            {isDefined(listing) ? (
-              <>
-                <Money shortened smallFractionFont={false} tooltip={true}>
-                  {atomsToTokens(listing.floorPrice, listing.decimals)}
-                </Money>
-                <span> {listing.symbol}</span>
-              </>
-            ) : (
-              '-'
-            )}
+            </div>
+            <div>
+              {isDefined(listing) ? (
+                <>
+                  <Money shortened smallFractionFont={false} tooltip={true}>
+                    {atomsToTokens(listing.floorPrice, listing.decimals)}
+                  </Money>
+                  <span> {listing.symbol}</span>
+                </>
+              ) : (
+                '-'
+              )}
+            </div>
           </div>
         </div>
       )}

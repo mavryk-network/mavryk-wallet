@@ -29,7 +29,7 @@ export const Stepper: FC<Props> = ({ style, steps, currentStep, completed = fals
               {completed || currentStep > index ? <OkIcon className="w-4 h-4 stroke-2" /> : index + 1}
             </div>
             {index !== steps.length - 1 && (
-              <div className={classNames(styles['line'], currentStep > index && styles['line-active'])} />
+              <div className={classNames(styles['line'], currentStep >= index && styles['line-active'])} />
             )}
           </div>
         </div>

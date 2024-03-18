@@ -67,7 +67,7 @@ export const FOOTER_LINKS: AboutFooterLinkItemType[] = [
   },
   {
     key: 'discord',
-    link: 'https://discord.com/invite/BDBYA4ASf2',
+    link: 'https://discord.gg/FXYQyVf6fE',
     testID: AboutSelectors.discordLink,
     Icon: Discordicon
   },

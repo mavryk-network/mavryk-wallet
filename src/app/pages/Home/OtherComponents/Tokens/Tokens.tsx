@@ -130,11 +130,11 @@ export const TokensTab: FC = () => {
       />
     ));
 
-    if (sortedSlugs.length < 5) {
-      tokensJsx.push(<PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
-    } else {
-      tokensJsx.splice(1, 0, <PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
-    }
+    // if (sortedSlugs.length < 5) {
+    //   tokensJsx.push(<PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
+    // } else {
+    //   tokensJsx.splice(1, 0, <PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
+    // }
 
     return tokensJsx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,7 +211,7 @@ export const TokensTab: FC = () => {
         </SearchExplorer>
       </div>
 
-      {isEnabledAdsBanner && <AcceptAdsBanner />}
+      {/* {isEnabledAdsBanner && <AcceptAdsBanner />} */}
       <div className="px-4 mb-4">
         <StakeTezosTag />
       </div>

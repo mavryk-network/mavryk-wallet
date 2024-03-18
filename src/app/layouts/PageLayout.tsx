@@ -88,11 +88,11 @@ const PageLayout: FC<PageLayoutProps> = ({
         </ContentPaper>
       </div>
 
-      <AdvertisingOverlay />
+      {/* <AdvertisingOverlay /> */}
       <ConfirmationOverlay />
       <ChangelogOverlay />
       <OnRampOverlay />
-      <NewsletterOverlay />
+      {/* <NewsletterOverlay /> */}
     </div>
   );
 };

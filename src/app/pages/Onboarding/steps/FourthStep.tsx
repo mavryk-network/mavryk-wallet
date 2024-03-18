@@ -4,7 +4,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import TxActionsImg from '../assets/fourth.png';
+import TxActionsImg from '../assets/fourth.svg';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 

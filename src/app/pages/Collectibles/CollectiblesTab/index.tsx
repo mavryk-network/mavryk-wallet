@@ -31,9 +31,10 @@ import { useAccount, useChainId, useCollectibleTokens } from 'lib/temple/front';
 import { useSyncTokens } from 'lib/temple/front/sync-tokens';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 import { useLocalStorage } from 'lib/ui/local-storage';
-import Popper, { PopperRenderProps } from 'lib/ui/Popper';
+import { PopperRenderProps } from 'lib/ui/Popper';
 import { Link } from 'lib/woozie';
 
+import { useSortededNFTsSlugs } from '../hooks/use-nfts-sorted.hook';
 import { CollectibleItem } from './CollectibleItem';
 import styles from './NFTs.module.css';
 
@@ -100,6 +101,8 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
     [sortOption]
   );
 
+  const sortedAssets = useSortededNFTsSlugs(sortOption, filteredAssets);
+
   return (
     <div className="w-full max-w-sm mx-auto relative">
       <div className={clsx('my-3', popup && 'mx-4')}>
@@ -161,12 +164,12 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
           </Popper>
         </div> */}
 
-        {filteredAssets.length === 0 ? (
+        {sortedAssets.length === 0 ? (
           buildEmptySection(isSyncing)
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4">
-              {filteredAssets.map(slug => (
+              {sortedAssets.map(slug => (
                 <CollectibleItem
                   key={slug}
                   assetSlug={slug}

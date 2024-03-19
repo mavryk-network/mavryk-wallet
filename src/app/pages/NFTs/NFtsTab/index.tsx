@@ -1,20 +1,14 @@
-import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 import { isEqual } from 'lodash';
 
 import { SyncSpinner } from 'app/atoms';
-import Checkbox from 'app/atoms/Checkbox';
-import Divider from 'app/atoms/Divider';
-import DropdownWrapper from 'app/atoms/DropdownWrapper';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as EditingIcon } from 'app/icons/editing.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { useTokensMetadataLoadingSelector } from 'app/store/tokens-metadata/selectors';
-import { ButtonForManageDropdown } from 'app/templates/ManageDropdown';
-import SearchAssetField from 'app/templates/SearchAssetField';
 import {
   SearchExplorer,
   SearchExplorerClosed,
@@ -26,35 +20,30 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/t
 import { AssetTypesEnum } from 'lib/assets/types';
 import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { SortOptions } from 'lib/assets/use-sorted';
-import { T, t } from 'lib/i18n';
+import { T } from 'lib/i18n';
 import { useAccount, useChainId, useCollectibleTokens } from 'lib/temple/front';
 import { useSyncTokens } from 'lib/temple/front/sync-tokens';
 import { useMemoWithCompare } from 'lib/ui/hooks';
-import { useLocalStorage } from 'lib/ui/local-storage';
-import { PopperRenderProps } from 'lib/ui/Popper';
-import { Link } from 'lib/woozie';
 
 import { useSortededNFTsSlugs } from '../hooks/use-nfts-sorted.hook';
-import { CollectibleItem } from './CollectibleItem';
+import { NFTItem } from './NFTItem';
 import styles from './NFTs.module.css';
-
-const LOCAL_STORAGE_TOGGLE_KEY = 'collectibles-grid:show-items-details';
 
 interface Props {
   scrollToTheTabsBar: EmptyFn;
 }
 
-export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
+// show NFts details from metadata
+const areDetailsShown = true;
+
+export const NFTsTab = memo<Props>(({ scrollToTheTabsBar }) => {
   const chainId = useChainId(true)!;
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
   const { isSyncing: tokensAreSyncing } = useSyncTokens();
   const metadatasLoading = useTokensMetadataLoadingSelector();
 
-  const [areDetailsShown, setDetailsShown] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, true);
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
-
-  const toggleDetailsShown = useCallback(() => void setDetailsShown(val => !val), [setDetailsShown]);
 
   const { data: collectibles = [], isValidating: readingCollectibles } = useCollectibleTokens(
     chainId,
@@ -139,12 +128,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
           <>
             <div className="grid grid-cols-2 gap-4">
               {sortedAssets.map(slug => (
-                <CollectibleItem
-                  key={slug}
-                  assetSlug={slug}
-                  accountPkh={publicKeyHash}
-                  areDetailsShown={areDetailsShown}
-                />
+                <NFTItem key={slug} assetSlug={slug} accountPkh={publicKeyHash} areDetailsShown={areDetailsShown} />
               ))}
             </div>
 

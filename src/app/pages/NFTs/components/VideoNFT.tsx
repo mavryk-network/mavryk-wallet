@@ -11,7 +11,7 @@ interface Props {
   onError?: EmptyFn;
 }
 
-export const VideoCollectible: FC<Props> = ({ uri, loader, className, style, onError = emptyFn }) => {
+export const VideoNFT: FC<Props> = ({ uri, loader, className, style, onError = emptyFn }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleLoaded = useCallback(() => setIsLoading(false), []);

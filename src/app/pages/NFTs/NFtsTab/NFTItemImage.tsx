@@ -6,7 +6,7 @@ import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors'
 import { AssetImage } from 'app/templates/AssetImage';
 import type { TokenMetadata } from 'lib/metadata';
 
-import { CollectibleBlur } from '../components/CollectibleBlur';
+import { NFTBlur } from '../components/NFTBlur';
 import { NFTImageFallback } from '../components/NFTImageFallback';
 import { NFTImageLoader } from '../components/NFTImageLoader';
 
@@ -28,7 +28,7 @@ export const NFTItemImage = memo<Props>(({ assetSlug, metadata, areDetailsLoadin
   }
 
   if (isAdultContent) {
-    return <CollectibleBlur />;
+    return <NFTBlur />;
   }
 
   return (

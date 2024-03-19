@@ -7,10 +7,10 @@ import { isSvgDataUriInUtf8Encoding, buildObjktCollectibleArtifactUri } from 'li
 import { Image } from 'lib/ui/Image';
 
 import { AudioNFT } from '../components/AudioNFT';
-import { CollectibleBlur } from '../components/CollectibleBlur';
+import { NFTBlur } from '../components/NFTBlur';
 import { NFTImageFallback } from '../components/NFTImageFallback';
 import { NFTImageLoader } from '../components/NFTImageLoader';
-import { VideoCollectible } from '../components/VideoCollectible';
+import { VideoNFT } from '../components/VideoNFT';
 
 interface Props {
   metadata?: TokenMetadata;
@@ -37,7 +37,7 @@ export const NFTPageImage = memo<Props>(
     }
 
     if (shouldShowBlur) {
-      return <CollectibleBlur onClick={handleBlurClick} />;
+      return <NFTBlur onClick={handleBlurClick} />;
     }
 
     if (objktArtifactUri && !isRenderFailedOnce) {
@@ -66,7 +66,7 @@ export const NFTPageImage = memo<Props>(
 
         if (mime.startsWith('video')) {
           return (
-            <VideoCollectible
+            <VideoNFT
               uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
               loader={<NFTImageLoader large />}
               className={className}

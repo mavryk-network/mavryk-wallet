@@ -14,7 +14,7 @@ import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { isTezAsset } from 'lib/assets';
 import { t, TID } from 'lib/i18n';
 
-import { CollectiblesTab } from '../Collectibles/CollectiblesTab';
+import { NFTsTab } from '../NFTs/NFtsTab';
 import { HomeSelectors } from './Home.selectors';
 import BakingSection from './OtherComponents/BakingSection';
 import { TokensTab } from './OtherComponents/Tokens/Tokens';
@@ -63,8 +63,8 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
         {
           name: 'NFTs',
           titleI18nKey: 'NFTs',
-          Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
-          testID: HomeSelectors.collectiblesTab
+          Component: () => <NFTsTab scrollToTheTabsBar={scrollToTheTabsBar} />,
+          testID: HomeSelectors.NFTsTab
         },
         {
           name: 'history',

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { useAnalytics } from './use-analytics.hook';
 
-const pageRoutesWithToken = ['/explore', '/send', '/collectible'];
+const pageRoutesWithToken = ['/explore', '/send', '/nft'];
 const pageRoutesWithQueryParams = ['/swap'];
 
 export const usePageRouterAnalytics = (pathname: string, search: string, isContextReady: boolean) => {

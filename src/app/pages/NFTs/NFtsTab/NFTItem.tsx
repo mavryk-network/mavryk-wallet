@@ -26,7 +26,7 @@ interface Props {
   areDetailsShown: boolean;
 }
 
-export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) => {
+export const NFTItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) => {
   const { popup } = useAppEnv();
   const metadata = useTokenMetadataSelector(assetSlug);
   const toDisplayRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsS
   const assetName = getAssetName(metadata);
 
   return (
-    <Link to={`/collectible/${assetSlug}`} className="flex flex-col rounded-2xl">
+    <Link to={`/nft/${assetSlug}`} className="flex flex-col rounded-2xl">
       <div
         ref={toDisplayRef}
         className={clsx(

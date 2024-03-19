@@ -24,7 +24,7 @@ import { TempleAccountType } from 'lib/temple/types';
 import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
-import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
+import { useNFTSelling } from '../hooks/use-nfts-selling.hook';
 import { CollectiblesSelectors } from '../selectors';
 import { getListingDetails } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
@@ -37,7 +37,7 @@ interface Props {
   assetSlug: string;
 }
 
-const CollectiblePage = memo<Props>(({ assetSlug }) => {
+const NFTsPage = memo<Props>(({ assetSlug }) => {
   const metadata = useTokenMetadataSelector(assetSlug);
   const details = useCollectibleDetailsSelector(assetSlug);
   const areAnyCollectiblesDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
@@ -63,7 +63,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
     initiateSelling: onSellButtonClick,
     operation,
     operationError
-  } = useCollectibleSelling(assetSlug, takableOffer);
+  } = useNFTSelling(assetSlug, takableOffer);
 
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
@@ -200,4 +200,4 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   );
 });
 
-export default CollectiblePage;
+export default NFTsPage;

@@ -6,7 +6,7 @@ import { COLLECTIBLES_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
 import { useAccount, useChainId, useCollectibleTokens } from 'lib/temple/front';
 import { useInterval, useMemoWithCompare } from 'lib/ui/hooks';
 
-export const useCollectiblesDetailsLoading = () => {
+export const useNFTssDetailsLoading = () => {
   const chainId = useChainId()!;
   const { publicKeyHash } = useAccount();
   const { data: collectibles } = useCollectibleTokens(chainId, publicKeyHash);

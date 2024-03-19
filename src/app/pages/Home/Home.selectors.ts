@@ -8,7 +8,7 @@ export enum HomeSelectors {
   delegationTab = 'Home/Delegation Tab',
   activityTab = 'Home/Activity Tab',
   infoTab = 'Home/Info Tab',
-  collectiblesTab = 'Home/Collectibles Tab',
+  NFTsTab = 'Home/NFTs Tab',
   publicAddressButton = 'Home/Public Address Button',
   fiatTezSwitchButton = 'Home/Fiat-Tez Switch Button',
   fiatTezSwitchText = 'Home/Fiat-Tez Switch Text',

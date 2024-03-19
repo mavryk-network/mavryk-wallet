@@ -10,7 +10,7 @@ interface Props {
   onClick?: EmptyFn;
 }
 
-export const CollectibleBlur: FC<Props> = ({ onClick }) => {
+export const NFTBlur: FC<Props> = ({ onClick }) => {
   return (
     <div
       onClick={onClick}

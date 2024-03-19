@@ -257,4 +257,4 @@ interface ErrorKeystoreComponentProps {
 }
 
 const ErrorKeystoreComponent: React.FC<ErrorKeystoreComponentProps> = ({ errors }) =>
-  errors.keystoreFile ? <div className="text-xs text-primary-error mt-1">{errors.keystoreFile.message}</div> : null;
+  errors.keystoreFile ? <div className="text-sm text-primary-error mt-1">{errors.keystoreFile.message}</div> : null;

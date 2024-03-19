@@ -34,7 +34,7 @@ export const EnablingSetting = ({
         <span className="text-xs text-secondary-white">
           <T id={descriptionI18nKey} />
         </span>
-        {errorCaption && <div className="text-xs text-primary-error">{errorCaption}</div>}
+        {errorCaption && <div className="text-sm text-primary-error">{errorCaption}</div>}
       </div>
       <div className="w-auto">
         <Switcher on={enabled} onChange={handleChange} />

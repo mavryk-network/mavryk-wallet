@@ -20,7 +20,7 @@ const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({
   validation: { minChar, cases, number, specialChar },
   isPasswordError = false
 }) => (
-  <div className={'text-xs font-medium text-secondary-white'}>
+  <div className={'text-sm font-medium text-secondary-white'}>
     <T id="requirements">
       {message => (
         <PasswordStrengthIndicatorItem

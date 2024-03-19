@@ -63,7 +63,7 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
           )}
         </label>
 
-        {errorCaption && <div className="text-xs text-primary-error">{errorCaption}</div>}
+        {errorCaption && <div className="text-sm text-primary-error">{errorCaption}</div>}
       </div>
     );
   }

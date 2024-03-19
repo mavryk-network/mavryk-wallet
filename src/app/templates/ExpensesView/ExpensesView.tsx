@@ -53,7 +53,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError })
         </div>
       </div>
       {gasFeeError && (
-        <p className="text-xs text-primary-error pt-1 h-4">
+        <p className="text-sm text-primary-error pt-1 h-4">
           <T id="gasFeeMustBePositive" />
         </p>
       )}

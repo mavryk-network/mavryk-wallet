@@ -47,9 +47,6 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const details = useCollectibleDetailsSelector(assetSlug);
   const areAnyCollectiblesDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
 
-  console.log(metadata, 'metadata');
-  console.log(details, 'details');
-
   const account = useAccount();
 
   const { publicKeyHash } = account;
@@ -208,7 +205,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
                   <div className="flex flex-wrap gap-1">
                     {creators.map((creator, idx) => (
                       <div key={creator.address} className="w-full">
-                        <AvatarBlock hash={creator.address} name={'name'} />
+                        <AvatarBlock hash={creator.address} />
                         {creators.length > 1 && idx < creators.length - 1 && (
                           <Divider color="bg-divider" className="my-2" />
                         )}

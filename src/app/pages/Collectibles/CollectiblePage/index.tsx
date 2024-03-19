@@ -152,7 +152,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
             <CopyButton
               text={collectibleName}
               type={'block'}
-              className={'text-white text-xl leading-6 tracking-tight truncate mb-2'}
+              className={'text-white text-left text-xl leading-6 tracking-tight truncate mb-2'}
             >
               {collectibleName}
             </CopyButton>

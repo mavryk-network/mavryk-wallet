@@ -127,42 +127,11 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   <SortPopupContent items={memoizedSortAssetsOptions} />
                 </SortPopup>
 
-                <ManageAssetsButton />
+                <ManageAssetsButton assetSlug={AssetTypesEnum.Collectibles} />
               </div>
             </SearchExplorerClosed>
           </>
         </SearchExplorer>
-        {/* <div className="mb-4 w-full flex items-strech">
-          <SearchAssetField
-            value={searchValue}
-            onValueChange={setSearchValue}
-            containerClassName="mr-2"
-            testID={AssetsSelectors.searchAssetsInputCollectibles}
-          />
-
-          <Popper
-            placement="bottom-end"
-            strategy="fixed"
-            popup={props => (
-              <ManageButtonDropdown
-                {...props}
-                areDetailsShown={areDetailsShown}
-                toggleDetailsShown={toggleDetailsShown}
-              />
-            )}
-          >
-            {({ ref, opened, toggleOpened }) => (
-              <ButtonForManageDropdown
-                ref={ref}
-                opened={opened}
-                tooltip={t('manageAssetsList')}
-                onClick={toggleOpened}
-                testID={AssetsSelectors.manageButton}
-                testIDProperties={{ listOf: 'Collectibles' }}
-              />
-            )}
-          </Popper>
-        </div> */}
 
         {sortedAssets.length === 0 ? (
           buildEmptySection(isSyncing)
@@ -200,46 +169,3 @@ const buildEmptySection = (isSyncing: boolean) =>
       </ButtonRounded>
     </div>
   );
-
-interface ManageButtonDropdownProps extends PopperRenderProps {
-  areDetailsShown: boolean;
-  toggleDetailsShown: EmptyFn;
-}
-
-const ManageButtonDropdown: FC<ManageButtonDropdownProps> = ({ opened, areDetailsShown, toggleDetailsShown }) => {
-  const buttonClassName = 'flex items-center px-3 py-2.5 rounded hover:bg-gray-200 cursor-pointer';
-
-  return (
-    <DropdownWrapper
-      opened={opened}
-      className="origin-top-right p-2 flex flex-col min-w-40"
-      style={{ border: 'unset', marginTop: '0.25rem' }}
-    >
-      <Link
-        to={`/manage-assets/${AssetTypesEnum.Collectibles}`}
-        className={buttonClassName}
-        testID={AssetsSelectors.dropdownManageButton}
-        testIDProperties={{ listOf: 'Collectibles' }}
-      >
-        <EditingIcon className="w-4 h-4 stroke-current fill-current text-gray-600" />
-        <span className="text-sm text-gray-600 ml-2 leading-5">
-          <T id="manage" />
-        </span>
-      </Link>
-
-      <Divider className="my-2" />
-
-      <label className={buttonClassName}>
-        <Checkbox
-          overrideClassNames="h-4 w-4 rounded"
-          checked={areDetailsShown}
-          onChange={toggleDetailsShown}
-          testID={AssetsSelectors.dropdownShowInfoCheckbox}
-        />
-        <span className="text-sm text-gray-600 ml-2 leading-5">
-          <T id="showInfo" />
-        </span>
-      </label>
-    </DropdownWrapper>
-  );
-};

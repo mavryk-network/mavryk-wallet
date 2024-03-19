@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, memo, useCallback, useMemo, useState } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -41,7 +41,7 @@ const ManageAssets: FC<Props> = ({ assetType }) => (
     RightSidedComponent={<TopbarRightText linkTo="/add-asset" label={t('add')} />}
     pageTitle={
       <>
-        <T id="manageAssets" />
+        <T id={assetType === AssetTypesEnum.Collectibles ? 'manageCollectibles' : 'manageAssets'} />
       </>
     }
   >
@@ -94,7 +94,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
-      title: t('deleteAssets'),
+      title: assetType === AssetTypesEnum.Collectibles ? t('deleteCollectibleConfirm') : t('deleteAssets'),
       children: (
         <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: 270 }}>
           <div>

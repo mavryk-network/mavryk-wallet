@@ -32,6 +32,7 @@ import { navigate } from 'lib/woozie';
 
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { CollectiblesSelectors } from '../selectors';
+import { getListingDetails } from '../utils';
 import { AttributesItems } from './AttributesItems';
 import { CollectiblePageImage } from './CollectiblePageImage';
 import { PropertiesItems } from './PropertiesItems';
@@ -129,6 +130,8 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
     return tab ?? tabs[0]!;
   }, [tabs, tabNameInUrl]);
 
+  const listing = useMemo(() => getListingDetails(details), [details]);
+
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
       <div className="flex flex-col max-w-sm w-full mx-auto">
@@ -194,14 +197,14 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
               {collectibleName}
             </CopyButton>
 
-            <div className="text-base-plus text-white break-words">{details?.description ?? ''}</div>
+            <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
 
             {creators.length > 0 && (
               <>
-                <div className="self-start text-white text-base-plus mt-4 mb-3">
+                <div className="self-start text-white text-base-plus mb-3">
                   <T id={creators.length > 1 ? 'creators' : 'creator'} />
                 </div>
-                <CardContainer className="flex flex-col items-start">
+                <CardContainer className="flex flex-col items-start mb-4">
                   <div className="flex flex-wrap gap-1">
                     {creators.map((creator, idx) => (
                       <div key={creator.address} className="w-full">
@@ -215,6 +218,25 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
                 </CardContainer>
               </>
             )}
+
+            <div className="text-white text-base-plus mb-3">
+              <T id={'floorPrice'} />
+            </div>
+
+            <CardContainer className="text-white text-base-plus">
+              {isDefined(listing) ? (
+                <div className="flex items-center gap-x-1">
+                  <Money shortened smallFractionFont={false} tooltip={true}>
+                    {atomsToTokens(listing.floorPrice, listing.decimals)}
+                  </Money>
+                  <span> {listing.symbol}</span>
+                </div>
+              ) : (
+                '-'
+              )}
+            </CardContainer>
+
+            <Divider className="my-6" color="bg-divider" />
 
             <TabsBar tabs={tabs} activeTabName={activeTabName} withOutline />
 

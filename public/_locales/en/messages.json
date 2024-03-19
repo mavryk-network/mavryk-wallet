@@ -737,7 +737,7 @@
   "send": {
     "message": "Send"
   },
-  "floorPrice": { "message": "Floor" },
+  "floorPrice": { "message": "Floor Price" },
   "sellFor": { "message": "Sell for" },
   "noOffersYet": { "message": "No offers yet" },
   "get": {

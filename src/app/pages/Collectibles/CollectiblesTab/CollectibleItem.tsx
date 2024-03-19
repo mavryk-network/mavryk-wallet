@@ -19,6 +19,7 @@ import { useIntersectionDetection } from 'lib/ui/use-intersection-detection';
 import { Link } from 'lib/woozie';
 
 import { CollectibleItemImage } from './CollectibleItemImage';
+import { getListingDetails } from '../utils';
 
 interface Props {
   assetSlug: string;
@@ -36,17 +37,7 @@ export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsS
   const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
   const details = useCollectibleDetailsSelector(assetSlug);
 
-  const listing = useMemo(() => {
-    if (!details?.listing) return null;
-
-    const { floorPrice, currencyId } = details.listing;
-
-    const currency = objktCurrencies[currencyId];
-
-    if (!isDefined(currency)) return null;
-
-    return { floorPrice, decimals: currency.decimals, symbol: currency.symbol };
-  }, [details]);
+  const listing = useMemo(() => getListingDetails(details), [details]);
 
   const handleIntersection = useCallback(() => void setDisplayed(true), []);
 

@@ -65,7 +65,7 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
         </CardWithLabel>
       </section>
 
-      <CardWithLabel label={'Contract'}>
+      <CardWithLabel label={'Contract'} className="mb-3">
         <div className="flex items-center">
           <HashChip
             hash={contract}

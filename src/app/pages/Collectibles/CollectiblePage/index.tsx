@@ -103,7 +103,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
-      <div className="flex flex-col max-w-sm w-full mx-auto pb-6">
+      <div className="flex flex-col w-full pb-6">
         {operationError ? (
           <Alert
             type="error"
@@ -159,38 +159,40 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
             <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
 
-            {creators.length > 0 && (
-              <>
-                <CardWithLabel label={<T id={creators.length > 1 ? 'creators' : 'creator'} />} className="mb-3">
-                  <div className="flex flex-wrap gap-1">
-                    {creators.map((creator, idx) => (
-                      <div key={creator.address} className="w-full">
-                        <AvatarBlock hash={creator.address} />
-                        {creators.length > 1 && idx < creators.length - 1 && (
-                          <Divider color="bg-divider" className="my-2" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardWithLabel>
-              </>
-            )}
-
-            <CardWithLabel label={<T id={'floorPrice'} />}>
-              {isDefined(listing) ? (
-                <div className="flex items-center gap-x-1">
-                  <Money shortened smallFractionFont={false} tooltip={true}>
-                    {atomsToTokens(listing.floorPrice, listing.decimals)}
-                  </Money>
-                  <span> {listing.symbol}</span>
-                </div>
-              ) : (
-                '-'
+            <div>
+              {creators.length > 0 && (
+                <>
+                  <CardWithLabel label={<T id={creators.length > 1 ? 'creators' : 'creator'} />} className="mb-3">
+                    <div className="flex flex-wrap gap-1">
+                      {creators.map((creator, idx) => (
+                        <div key={creator.address} className="w-full">
+                          <AvatarBlock hash={creator.address} />
+                          {creators.length > 1 && idx < creators.length - 1 && (
+                            <Divider color="bg-divider" className="my-2" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardWithLabel>
+                </>
               )}
-            </CardWithLabel>
 
-            <Divider className="my-6" color="bg-divider" />
-            <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
+              <CardWithLabel label={<T id={'floorPrice'} />}>
+                {isDefined(listing) ? (
+                  <div className="flex items-center gap-x-1">
+                    <Money shortened smallFractionFont={false} tooltip={true}>
+                      {atomsToTokens(listing.floorPrice, listing.decimals)}
+                    </Money>
+                    <span> {listing.symbol}</span>
+                  </div>
+                ) : (
+                  '-'
+                )}
+              </CardWithLabel>
+
+              <Divider className="my-6" color="bg-divider" />
+              <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
+            </div>
           </>
         )}
       </div>

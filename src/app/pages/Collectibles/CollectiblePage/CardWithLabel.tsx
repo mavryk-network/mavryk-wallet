@@ -10,9 +10,9 @@ type CardWithLabelProps = {
   className?: string;
 };
 
-export const CardWithLabel: FC<CardWithLabelProps> = ({ label, children, className }) => {
+export const CardWithLabel: FC<CardWithLabelProps> = ({ label, children, className = '' }) => {
   return (
-    <div className={clsx(className)}>
+    <div className={clsx('overflow-hidden relative', className)}>
       <div className="text-white text-base-plus mb-3">{label}</div>
 
       <CardContainer className="text-white text-base-plus">{children}</CardContainer>

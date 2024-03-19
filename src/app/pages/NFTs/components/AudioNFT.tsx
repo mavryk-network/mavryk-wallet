@@ -38,7 +38,7 @@ export const AudioNFT: FC<Props> = ({ uri, metadata, className, style, loader, o
 
       <AssetImage
         metadata={metadata}
-        fullViewCollectible
+        fullViewNFT
         fallback={<NFTImageFallback large isAudioNFT />}
         className={className}
         style={style}

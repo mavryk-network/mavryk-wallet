@@ -4,17 +4,17 @@ import storage from 'redux-persist/lib/storage';
 
 import { createEntity } from 'lib/store';
 
-import { loadCollectiblesDetailsActions } from './actions';
-import { collectiblesInitialState, CollectiblesState } from './state';
+import { loadNFTsDetailsActions } from './actions';
+import { nftsInitialState, NFTsState } from './state';
 
 /** In seconds // TTL = Time To Live */
 const ADULT_FLAG_TTL = 3 * 60 * 60;
 
-const collectiblesReducer = createReducer<CollectiblesState>(collectiblesInitialState, builder => {
-  builder.addCase(loadCollectiblesDetailsActions.submit, state => {
+const nftsReducer = createReducer<NFTsState>(nftsInitialState, builder => {
+  builder.addCase(loadNFTsDetailsActions.submit, state => {
     state.details.isLoading = true;
   });
-  builder.addCase(loadCollectiblesDetailsActions.success, (state, { payload }) => {
+  builder.addCase(loadNFTsDetailsActions.success, (state, { payload }) => {
     const { details: detailsRecord, timestamp } = payload;
 
     const adultFlags = { ...state.adultFlags };
@@ -37,17 +37,17 @@ const collectiblesReducer = createReducer<CollectiblesState>(collectiblesInitial
       adultFlags
     };
   });
-  builder.addCase(loadCollectiblesDetailsActions.fail, (state, { payload }) => {
+  builder.addCase(loadNFTsDetailsActions.fail, (state, { payload }) => {
     state.details.isLoading = false;
     state.details.error = payload;
   });
 });
 
-export const collectiblesPersistedReducer = persistReducer(
+export const nftsPersistedReducer = persistReducer(
   {
-    key: 'root.collectibles',
+    key: 'root.nfts',
     storage,
-    whitelist: ['adultFlags'] as (keyof CollectiblesState)[]
+    whitelist: ['adultFlags'] as (keyof NFTsState)[]
   },
-  collectiblesReducer
+  nftsReducer
 );

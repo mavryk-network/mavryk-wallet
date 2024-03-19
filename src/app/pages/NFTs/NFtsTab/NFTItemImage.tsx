@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors';
+import { useNFTIsAdultSelector } from 'app/store/nfts/selectors';
 import { AssetImage } from 'app/templates/AssetImage';
 import type { TokenMetadata } from 'lib/metadata';
 
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const NFTItemImage = memo<Props>(({ assetSlug, metadata, areDetailsLoading, mime }) => {
-  const isAdultContent = useCollectibleIsAdultSelector(assetSlug);
+  const isAdultContent = useNFTIsAdultSelector(assetSlug);
   const isAdultFlagLoading = areDetailsLoading && !isDefined(isAdultContent);
 
   const isAudioNFT = useMemo(() => Boolean(mime && mime.startsWith('audio')), [mime]);

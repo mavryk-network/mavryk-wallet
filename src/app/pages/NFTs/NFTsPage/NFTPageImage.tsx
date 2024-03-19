@@ -3,7 +3,7 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Model3DViewer } from 'app/atoms/Model3DViewer';
 import { AssetImage } from 'app/templates/AssetImage';
 import { TokenMetadata } from 'lib/metadata';
-import { isSvgDataUriInUtf8Encoding, buildObjktCollectibleArtifactUri } from 'lib/temple/front';
+import { isSvgDataUriInUtf8Encoding, buildObjktNFTArtifactUri } from 'lib/temple/front';
 import { Image } from 'lib/ui/Image';
 
 import { AudioNFT } from '../components/AudioNFT';
@@ -57,7 +57,7 @@ export const NFTPageImage = memo<Props>(
         if (mime.startsWith('model')) {
           return (
             <Model3DViewer
-              uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
+              uri={buildObjktNFTArtifactUri(objktArtifactUri)}
               alt={metadata?.name}
               onError={handleError}
             />
@@ -67,7 +67,7 @@ export const NFTPageImage = memo<Props>(
         if (mime.startsWith('video')) {
           return (
             <VideoNFT
-              uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
+              uri={buildObjktNFTArtifactUri(objktArtifactUri)}
               loader={<NFTImageLoader large />}
               className={className}
               onError={handleError}
@@ -78,7 +78,7 @@ export const NFTPageImage = memo<Props>(
         if (mime.startsWith('audio')) {
           return (
             <AudioNFT
-              uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
+              uri={buildObjktNFTArtifactUri(objktArtifactUri)}
               metadata={metadata}
               loader={<NFTImageLoader large />}
               className={className}
@@ -92,7 +92,7 @@ export const NFTPageImage = memo<Props>(
     return (
       <AssetImage
         metadata={metadata}
-        fullViewCollectible
+        fullViewNFT
         loader={<NFTImageLoader large />}
         fallback={<NFTImageFallback large />}
         className={className}

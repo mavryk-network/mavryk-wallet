@@ -20,7 +20,7 @@ const SecondStep: FC<Props> = ({ setStep }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.secondStepText)}>
-        <T id={'tokensRwasCollectibles'} />
+        <T id={'tokensRwasNFTs'} />
       </p>
       <p className={styles['description']}>
         <T id={'tokensDescPart1'} />

@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
 
-import type { CollectibleDetails } from 'app/store/collectibles/state';
+import type { NFTDetails } from 'app/store/nfts/state';
 
 interface AttributesItemsProps {
-  details?: CollectibleDetails | null;
+  details?: NFTDetails | null;
 }
 
 export const AttributesItems = memo<AttributesItemsProps>(({ details }) => {

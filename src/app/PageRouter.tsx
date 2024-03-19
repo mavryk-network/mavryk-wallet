@@ -6,7 +6,6 @@ import AddAsset from 'app/pages/AddAsset/AddAsset';
 import { Buy } from 'app/pages/Buy/Buy';
 import Exolix from 'app/pages/Buy/Crypto/Exolix/Exolix';
 import { BuyWithCreditCard } from 'app/pages/BuyWithCreditCard/BuyWithCreditCard';
-import CollectiblePage from 'app/pages/NFTs/NFTsPage';
 import ConnectLedger from 'app/pages/ConnectLedger/ConnectLedger';
 import CreateAccount from 'app/pages/CreateAccount/CreateAccount';
 import DApps from 'app/pages/DApps';
@@ -16,6 +15,7 @@ import ImportAccount from 'app/pages/ImportAccount';
 import ManageAssets from 'app/pages/ManageAssets/ManageAssets';
 import { CreateWallet } from 'app/pages/NewWallet/CreateWallet';
 import { ImportWallet } from 'app/pages/NewWallet/ImportWallet';
+import NFTsPage from 'app/pages/NFTs/NFTsPage';
 import AttentionPage from 'app/pages/Onboarding/pages/AttentionPage';
 import Receive from 'app/pages/Receive/Receive';
 import Send from 'app/pages/Send';
@@ -94,7 +94,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],
-  ['/nft/:assetSlug?', onlyReady(({ assetSlug }) => <CollectiblePage assetSlug={assetSlug!} />)],
+  ['/nft/:assetSlug?', onlyReady(({ assetSlug }) => <NFTsPage assetSlug={assetSlug!} />)],
   ['/add-asset', onlyReady(() => <AddAsset />)],
   ['/settings/:tabSlug?', onlyReady(({ tabSlug }) => <Settings tabSlug={tabSlug} />)],
   ['/add-network', onlyReady(() => <AddNetworkScreen />)],

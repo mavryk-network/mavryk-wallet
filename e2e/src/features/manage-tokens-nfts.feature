@@ -1,7 +1,7 @@
-Feature: Manage tokens + collectibles
+Feature: Manage tokens + NFTs
 @manage_assets
 
-  Scenario: As a user, I'd like to add tokens and collectibles to my wallet [Positive]
+  Scenario: As a user, I'd like to add tokens and NFTs to my wallet [Positive]
     Given I have imported an existing account
     And I press Manage Dropdown Button on the Assets page
     And I press Manage Button on the Assets (Manage Dropdown) page

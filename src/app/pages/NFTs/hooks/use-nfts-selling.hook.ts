@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import type { WalletOperation } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import type { CollectibleDetails } from 'app/store/collectibles/state';
+import type { NFTDetails } from 'app/store/nfts/state';
 import { useFormAnalytics } from 'lib/analytics';
 import { getObjktMarketplaceContract } from 'lib/apis/objkt';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
@@ -13,13 +13,13 @@ import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-pa
 
 const DEFAULT_OBJKT_STORAGE_LIMIT = 350;
 
-export const useNFTSelling = (assetSlug: string, offer?: CollectibleDetails['offers'][number]) => {
+export const useNFTSelling = (assetSlug: string, offer?: NFTDetails['offers'][number]) => {
   const tezos = useTezos();
   const { publicKeyHash } = useAccount();
   const [isSelling, setIsSelling] = useState(false);
   const [operation, setOperation] = useState<WalletOperation | nullish>();
   const [operationError, setOperationError] = useState<unknown>();
-  const formAnalytics = useFormAnalytics('Collectible Page/Sell By Best Offer Form');
+  const formAnalytics = useFormAnalytics('NFT Page/Sell By Best Offer Form');
 
   const initiateSelling = useCallback(async () => {
     if (!offer || isSelling) return;

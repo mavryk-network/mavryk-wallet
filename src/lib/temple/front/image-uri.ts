@@ -34,7 +34,7 @@ const formatAssetUriToAllSizes = (url?: string, includeLarge = false) => {
 
 export { formatAssetUriToAllSizes as buildTokenIconURLs };
 
-export const buildCollectibleImageURLs = (
+export const builNFTImageURLs = (
   { address, id, artifactUri, displayUri, thumbnailUri }: TokenMetadata,
   fullView = false
 ) => {
@@ -78,7 +78,7 @@ export const formatTcInfraImgUri = (url?: string, size: TcInfraMediaSize = DEFAU
   return;
 };
 
-export const buildObjktCollectibleArtifactUri = (artifactUri: string) =>
+export const buildObjktNFTArtifactUri = (artifactUri: string) =>
   buildObjktMediaURI(artifactUri, 'artifact') || artifactUri;
 
 /** Black circle in `thumbnailUri`

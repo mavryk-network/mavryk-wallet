@@ -7,7 +7,7 @@ import { useTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { isTezAsset, TEMPLE_TOKEN_SLUG } from 'lib/assets';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { TOKENS_SYNC_INTERVAL } from 'lib/fixed-times';
-import { isCollectible } from 'lib/metadata';
+import { isNFT } from 'lib/metadata';
 import { FILM_METADATA, TEZOS_METADATA } from 'lib/metadata/defaults';
 import type { AssetMetadataBase } from 'lib/metadata/types';
 import { useRetryableSWR } from 'lib/swr';
@@ -37,9 +37,9 @@ const useKnownTokens = (chainId: string, account: string, fungible = true, onlyD
         const metadata = tokensMetadata[token.tokenSlug];
         if (!isDefined(metadata)) return false;
 
-        const itIsCollectible = isCollectible(metadata);
+        const itIsNFT = isNFT(metadata);
 
-        return fungible ? !itIsCollectible : itIsCollectible;
+        return fungible ? !itIsNFT : itIsNFT;
       }) ?? [],
     [tokens, tokensMetadata, fungible]
   );
@@ -55,7 +55,7 @@ export const useDisplayedFungibleTokens = (chainId: string, account: string) =>
 
 const useFungibleTokens = (chainId: string, account: string) => useKnownTokens(chainId, account, true, false);
 
-export const useCollectibleTokens = (chainId: string, account: string, onlyDisplayed: boolean = false) =>
+export const useNFTTokens = (chainId: string, account: string, onlyDisplayed: boolean = false) =>
   useKnownTokens(chainId, account, false, onlyDisplayed);
 
 export const useAllStoredTokensSlugs = (chainId: string) =>
@@ -110,14 +110,13 @@ export const useAvailableAssetsSlugs = (assetType: AssetTypesEnum) => {
   const { publicKeyHash } = useAccount();
   const allTokensMetadata = useTokensMetadataSelector();
 
-  const { data: allCollectiblesSlugs = [], isValidating: allKnownCollectiblesTokenSlugsLoading } =
-    useAllKnownCollectibleTokenSlugs(chainId);
+  const { data: allNFTsSlugs = [], isValidating: allKnownNFTsTokenSlugsLoading } = useAllKnownNFTTokenSlugs(chainId);
 
   const {
-    data: collectibles = [],
-    mutate: mutateCollectibles,
-    isValidating: collectibleTokensLoading
-  } = useCollectibleTokens(chainId, publicKeyHash, false);
+    data: nfts = [],
+    mutate: mutateNFTs,
+    isValidating: nftTokensLoading
+  } = useNFTTokens(chainId, publicKeyHash, false);
 
   const { data: allTokenSlugs = [], isValidating: allKnownFungibleTokenSlugsLoading } =
     useAllKnownFungibleTokenSlugs(chainId);
@@ -128,16 +127,13 @@ export const useAvailableAssetsSlugs = (assetType: AssetTypesEnum) => {
     isValidating: fungibleTokensLoading
   } = useFungibleTokens(chainId, publicKeyHash);
 
-  const isCollectibles = assetType === AssetTypesEnum.Collectibles;
-  const assets = isCollectibles ? collectibles : tokens;
-  const slugs = isCollectibles ? allCollectiblesSlugs : allTokenSlugs;
-  const mutate = isCollectibles ? mutateCollectibles : mutateTokens;
+  const isNFTs = assetType === AssetTypesEnum.NFTs;
+  const assets = isNFTs ? nfts : tokens;
+  const slugs = isNFTs ? allNFTsSlugs : allTokenSlugs;
+  const mutate = isNFTs ? mutateNFTs : mutateTokens;
 
   const isLoading =
-    allKnownFungibleTokenSlugsLoading ||
-    fungibleTokensLoading ||
-    allKnownCollectiblesTokenSlugsLoading ||
-    collectibleTokensLoading;
+    allKnownFungibleTokenSlugsLoading || fungibleTokensLoading || allKnownNFTsTokenSlugsLoading || nftTokensLoading;
 
   const assetsStatuses = useMemo(() => {
     const statuses: TokenStatuses = {};
@@ -161,7 +157,7 @@ export const useAvailableAssetsSlugs = (assetType: AssetTypesEnum) => {
 
 const useAllKnownFungibleTokenSlugs = (chainId: string) => useAllKnownTokensSlugs(chainId, true);
 
-const useAllKnownCollectibleTokenSlugs = (chainId: string) => useAllKnownTokensSlugs(chainId, false);
+const useAllKnownNFTTokenSlugs = (chainId: string) => useAllKnownTokensSlugs(chainId, false);
 
 const useAllKnownTokensSlugs = (chainId: string, fungible = true) => {
   const swrResponse = useAllStoredTokensSlugs(chainId);
@@ -175,9 +171,9 @@ const useAllKnownTokensSlugs = (chainId: string, fungible = true) => {
         const metadata = tokensMetadata[slug];
         if (!isDefined(metadata)) return false;
 
-        const itIsCollectible = isCollectible(metadata);
+        const itIsNFT = isNFT(metadata);
 
-        return fungible ? !itIsCollectible : itIsCollectible;
+        return fungible ? !itIsNFT : itIsNFT;
       }) ?? [],
     [slugs, tokensMetadata, fungible]
   );

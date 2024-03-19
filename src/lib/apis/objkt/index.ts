@@ -10,22 +10,20 @@ import { forkJoin, map, of, switchMap } from 'rxjs';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 
 import { apolloObjktClient, MAX_OBJKT_QUERY_RESPONSE_ITEMS, OBJKT_CONTRACT } from './constants';
-import { buildGetCollectiblesQuery, buildGetGalleriesAttributesCountsQuery } from './queries';
+import { buildGetNFTsQuery, buildGetGalleriesAttributesCountsQuery } from './queries';
 import type {
   FxHashContractInterface,
-  UserObjktCollectible,
+  UserObjktNFT,
   ObjktGalleryAttributeCount,
   ObjktContractInterface
 } from './types';
 
-export type { UserObjktCollectible, ObjktGalleryAttributeCount } from './types';
+export type { UserObjktNFT, ObjktGalleryAttributeCount } from './types';
 export { objktCurrencies } from './constants';
 
-export const fetchObjktCollectibles$ = (slugs: string[]) =>
-  forkJoin(
-    chunk(slugs, MAX_OBJKT_QUERY_RESPONSE_ITEMS).map(slugsChunk => fetchObjktCollectiblesChunk$(slugsChunk))
-  ).pipe(
-    map(res => res.reduce<UserObjktCollectible[]>((acc, curr) => acc.concat(curr.token), [])),
+export const fetchObjktNFTs$ = (slugs: string[]) =>
+  forkJoin(chunk(slugs, MAX_OBJKT_QUERY_RESPONSE_ITEMS).map(slugsChunk => fetchObjktNFTsChunk$(slugsChunk))).pipe(
+    map(res => res.reduce<UserObjktNFT[]>((acc, curr) => acc.concat(curr.token), [])),
     // Now, getting tokens' attributes counts, that are assigned to galleries
     switchMap(tokens => {
       const attributesToGet: GetAttribute[] = [];
@@ -50,8 +48,8 @@ export const fetchObjktCollectibles$ = (slugs: string[]) =>
     })
   );
 
-const fetchObjktCollectiblesChunk$ = (slugs: string[]) =>
-  apolloObjktClient.query<{ token: UserObjktCollectible[] }>(buildGetCollectiblesQuery(), {
+const fetchObjktNFTsChunk$ = (slugs: string[]) =>
+  apolloObjktClient.query<{ token: UserObjktNFT[] }>(buildGetNFTsQuery(), {
     where: {
       _or: slugs.map(slug => {
         const { contract, id } = fromFa2TokenSlug(slug);

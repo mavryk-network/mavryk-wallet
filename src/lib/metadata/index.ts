@@ -75,5 +75,5 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
   return metadata ? metadata.name : 'Unknown Token';
 }
 
-export const isCollectible = (metadata: AssetMetadataBase): metadata is TokenMetadata =>
+export const isNFT = (metadata: AssetMetadataBase): metadata is TokenMetadata =>
   'artifactUri' in metadata && Boolean((metadata as TokenMetadata).artifactUri);

@@ -5,7 +5,7 @@ export enum OnboardingSelectors {
   secondStepText = 'Onboarding (Second Step)/`How to start` Text',
   secondStepNextButton = 'Onboarding (Second Step)/Next Button',
 
-  thirdStepText = 'Onboarding (Third Step)/`Tokens & Collectible` Text',
+  thirdStepText = 'Onboarding (Third Step)/`Tokens & NFTs` Text',
   thirdStepNextButton = 'Onboarding (Third Step)/Next Button',
 
   fourthStepText = 'Onboarding (Fourth Step)/`Profile & RPC` Text',

@@ -9,7 +9,7 @@ import { getSlug } from 'app/templates/AssetSelect/utils';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useAssetsSortPredicate } from 'lib/assets/use-filtered';
-import { useAccount, useChainId, useTezos, useCollectibleTokens, useDisplayedFungibleTokens } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos, useNFTTokens, useDisplayedFungibleTokens } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { HistoryAction, navigate } from 'lib/woozie';
 
@@ -27,12 +27,12 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
   const account = useAccount();
 
   const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, account.publicKeyHash);
-  const { data: collectibles = [] } = useCollectibleTokens(chainId, account.publicKeyHash, true);
+  const { data: nfts = [] } = useNFTTokens(chainId, account.publicKeyHash, true);
   const assetsSortPredicate = useAssetsSortPredicate();
 
   const assets = useMemo<IAsset[]>(
-    () => [TEZ_TOKEN_SLUG, ...tokens, ...collectibles].sort((a, b) => assetsSortPredicate(getSlug(a), getSlug(b))),
-    [tokens, collectibles, assetsSortPredicate]
+    () => [TEZ_TOKEN_SLUG, ...tokens, ...nfts].sort((a, b) => assetsSortPredicate(getSlug(a), getSlug(b))),
+    [tokens, nfts, assetsSortPredicate]
   );
   const selectedAsset = useMemo(
     () => assets.find(a => getSlug(a) === assetSlug) ?? TEZ_TOKEN_SLUG,

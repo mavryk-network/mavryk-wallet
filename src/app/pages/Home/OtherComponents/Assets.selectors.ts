@@ -9,7 +9,7 @@ export enum AssetsSelectors {
   assetItemFiatBalanceButton = 'Assets/Asset Item Fiat Balance Button',
   assetItemDelegateButton = 'Assets/Asset Item Delegate Button',
   searchAssetsInputTokens = 'Assets/Search Assets Input (Tokens)',
-  searchAssetsInputCollectibles = 'Assets/Search Assets Input (Collectibles)',
+  searchAssetsInputNFTs = 'Assets/Search Assets Input (NFTs)',
   acceptAdsBannerEnableButton = 'Assets (Accept Ads Banner)/Enable Button',
   acceptAdsBannerDisableButton = 'Assets (Accept Ads Banner)/Disable Button'
 }

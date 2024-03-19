@@ -21,7 +21,7 @@ import { AssetTypesEnum } from 'lib/assets/types';
 import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
-import { useAccount, useChainId, useCollectibleTokens } from 'lib/temple/front';
+import { useAccount, useChainId, useNFTTokens } from 'lib/temple/front';
 import { useSyncTokens } from 'lib/temple/front/sync-tokens';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 
@@ -45,24 +45,16 @@ export const NFTsTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 
-  const { data: collectibles = [], isValidating: readingCollectibles } = useCollectibleTokens(
-    chainId,
-    publicKeyHash,
-    true
-  );
+  const { data: nfts = [], isValidating: readingNFTs } = useNFTTokens(chainId, publicKeyHash, true);
 
-  const collectiblesSlugs = useMemoWithCompare(
-    () => collectibles.map(collectible => collectible.tokenSlug).sort(),
-    [collectibles],
-    isEqual
-  );
+  const nftsSlugs = useMemoWithCompare(() => nfts.map(nft => nft.tokenSlug).sort(), [nfts], isEqual);
 
-  const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(collectiblesSlugs, false);
+  const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(nftsSlugs, false);
 
-  const shouldScrollToTheTabsBar = collectibles.length > 0;
+  const shouldScrollToTheTabsBar = nfts.length > 0;
   useEffect(() => void scrollToTheTabsBar(), [shouldScrollToTheTabsBar, scrollToTheTabsBar]);
 
-  const isSyncing = tokensAreSyncing || metadatasLoading || readingCollectibles;
+  const isSyncing = tokensAreSyncing || metadatasLoading || readingNFTs;
 
   const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
     () => [
@@ -116,7 +108,7 @@ export const NFTsTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   <SortPopupContent items={memoizedSortAssetsOptions} />
                 </SortPopup>
 
-                <ManageAssetsButton assetSlug={AssetTypesEnum.Collectibles} />
+                <ManageAssetsButton assetSlug={AssetTypesEnum.NFTs} />
               </div>
             </SearchExplorerClosed>
           </>

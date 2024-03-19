@@ -15,7 +15,7 @@ export class HomePage extends Page {
   SwapButton = createPageElement(HomeSelectors.swapButton);
   AssetsTab = createPageElement(HomeSelectors.assetsTab);
   ActivityTab = createPageElement(HomeSelectors.activityTab);
-  CollectiblesTab = createPageElement(HomeSelectors.collectiblesTab);
+  NFTsTab = createPageElement(HomeSelectors.NFTsTab);
   PublicAddressButton = createPageElement(HomeSelectors.publicAddressButton);
   accountNameText = createPageElement(HomeSelectors.accountNameText);
 
@@ -27,7 +27,7 @@ export class HomePage extends Page {
     await this.SwapButton.waitForDisplayed();
     await this.AssetsTab.waitForDisplayed();
     await this.ActivityTab.waitForDisplayed();
-    await this.CollectiblesTab.waitForDisplayed();
+    await this.NFTsTab.waitForDisplayed();
     await this.PublicAddressButton.waitForDisplayed();
     await this.accountNameText.waitForDisplayed();
   }

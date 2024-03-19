@@ -1,4 +1,4 @@
-export enum CollectiblesSelectors {
-  sendButton = 'Collectible Page/Send Button',
-  sellButton = 'Collectible Page/Sell Button'
+export enum NFTsSelectors {
+  sendButton = 'NFT Page/Send Button',
+  sellButton = 'NFT Page/Sell Button'
 }

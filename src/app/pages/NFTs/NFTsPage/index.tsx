@@ -7,11 +7,8 @@ import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
+import { loadNFTsDetailsActions } from 'app/store/nfts/actions';
+import { useAllNFTsDetailsLoadingSelector, useNFTDetailsSelector } from 'app/store/nfts/selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import OperationStatus from 'app/templates/OperationStatus';
 import { objktCurrencies } from 'lib/apis/objkt';
@@ -25,7 +22,7 @@ import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
 import { useNFTSelling } from '../hooks/use-nfts-selling.hook';
-import { CollectiblesSelectors } from '../selectors';
+import { NFTsSelectors } from '../selectors';
 import { getListingDetails } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
 import { NFTPageImage } from './NFTPageImage';
@@ -39,17 +36,17 @@ interface Props {
 
 const NFTsPage = memo<Props>(({ assetSlug }) => {
   const metadata = useTokenMetadataSelector(assetSlug);
-  const details = useCollectibleDetailsSelector(assetSlug);
-  const areAnyCollectiblesDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const details = useNFTDetailsSelector(assetSlug);
+  const areAnyNFTsDetailsLoading = useAllNFTsDetailsLoadingSelector();
 
   const account = useAccount();
 
   const { publicKeyHash } = account;
   const accountCanSign = account.type !== TempleAccountType.WatchOnly;
 
-  const areDetailsLoading = areAnyCollectiblesDetailsLoading && details === undefined;
+  const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
 
-  const collectibleName = getAssetName(metadata);
+  const nftName = getAssetName(metadata);
 
   const creators = details?.creators ?? [];
 
@@ -68,7 +65,7 @@ const NFTsPage = memo<Props>(({ assetSlug }) => {
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
   const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
+  useInterval(() => void dispatch(loadNFTsDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
     dispatch,
     assetSlug
   ]);
@@ -102,7 +99,7 @@ const NFTsPage = memo<Props>(({ assetSlug }) => {
   const listing = useMemo(() => getListingDetails(details), [details]);
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{nftName}</span>}>
       <div className="flex flex-col w-full pb-6">
         {operationError ? (
           <Alert
@@ -135,26 +132,22 @@ const NFTsPage = memo<Props>(({ assetSlug }) => {
                 disabled={!displayedOffer || displayedOffer.buyerIsMe || isSelling || !accountCanSign}
                 title={sellButtonTooltipStr}
                 onClick={onSellButtonClick}
-                testID={CollectiblesSelectors.sellButton}
+                testID={NFTsSelectors.sellButton}
               >
                 {displayedOffer ? <T id="sell" /> : <T id="noOffersYet" />}
               </FormSubmitButton>
 
-              <FormSubmitButton
-                disabled={isSelling}
-                onClick={onSendButtonClick}
-                testID={CollectiblesSelectors.sendButton}
-              >
+              <FormSubmitButton disabled={isSelling} onClick={onSendButtonClick} testID={NFTsSelectors.sendButton}>
                 <T id="send" />
               </FormSubmitButton>
             </div>
 
             <CopyButton
-              text={collectibleName}
+              text={nftName}
               type={'block'}
               className={'text-white text-left text-xl leading-6 tracking-tight truncate mb-2'}
             >
-              {collectibleName}
+              {nftName}
             </CopyButton>
 
             <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>

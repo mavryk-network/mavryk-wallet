@@ -20,7 +20,7 @@ export {
 } from './ready';
 
 export {
-  useCollectibleTokens,
+  useNFTTokens,
   useDisplayedFungibleTokens,
   useGetTokenMetadata,
   useGasToken,
@@ -61,6 +61,6 @@ export { decryptKukaiSeedPhrase } from './kukai';
 export {
   isSvgDataUriInUtf8Encoding,
   buildTokenIconURLs,
-  buildCollectibleImageURLs,
-  buildObjktCollectibleArtifactUri
+  builNFTImageURLs,
+  buildObjktNFTArtifactUri
 } from './image-uri';

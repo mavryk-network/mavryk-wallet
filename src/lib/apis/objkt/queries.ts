@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export const buildGetCollectiblesQuery = () => gql`
+export const buildGetNFTsQuery = () => gql`
   query MyQuery($where: token_bool_exp) {
     token(where: $where) {
       fa_contract

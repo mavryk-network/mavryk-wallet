@@ -41,7 +41,7 @@ const ManageAssets: FC<Props> = ({ assetType }) => (
     RightSidedComponent={<TopbarRightText linkTo="/add-asset" label={t('add')} />}
     pageTitle={
       <>
-        <T id={assetType === AssetTypesEnum.Collectibles ? 'manageCollectibles' : 'manageAssets'} />
+        <T id={assetType === AssetTypesEnum.NFTs ? 'manageNFTs' : 'manageAssets'} />
       </>
     }
   >
@@ -67,7 +67,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const address = account.publicKeyHash;
 
   const { availableAssets, assetsStatuses, isLoading, mutate } = useAvailableAssetsSlugs(
-    assetType === AssetTypesEnum.Collectibles ? AssetTypesEnum.Collectibles : AssetTypesEnum.Tokens
+    assetType === AssetTypesEnum.NFTs ? AssetTypesEnum.NFTs : AssetTypesEnum.Tokens
   );
   const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(availableAssets, false);
 
@@ -94,7 +94,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
-      title: assetType === AssetTypesEnum.Collectibles ? t('deleteCollectibleConfirm') : t('deleteAssets'),
+      title: assetType === AssetTypesEnum.NFTs ? t('deleteNFTConfirm') : t('deleteAssets'),
       children: (
         <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: 270 }}>
           <div>

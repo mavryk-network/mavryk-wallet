@@ -1,11 +1,11 @@
 import { pick } from 'lodash';
 
-import type { UserObjktCollectible, ObjktGalleryAttributeCount } from 'lib/apis/objkt';
+import type { UserObjktNFT, ObjktGalleryAttributeCount } from 'lib/apis/objkt';
 import { ADULT_CONTENT_TAGS } from 'lib/apis/objkt/adult-tags';
 import type { ObjktAttribute, ObjktTag } from 'lib/apis/objkt/types';
 import { atomsToTokens } from 'lib/temple/helpers';
 
-import type { CollectibleDetails } from './state';
+import type { NFTDetails } from './state';
 
 const ADULT_ATTRIBUTE_NAME = '__nsfw_';
 const checkForAdultery = (attributes: ObjktAttribute[], tags: ObjktTag[]) =>
@@ -16,10 +16,10 @@ const checkForAdultery = (attributes: ObjktAttribute[], tags: ObjktTag[]) =>
 
 const TECHNICAL_ATTRIBUTES = ['__nsfw_', '__hazards_'];
 
-export const convertCollectibleObjktInfoToStateDetailsType = (
-  info: UserObjktCollectible,
+export const convertNFTObjktInfoToStateDetailsType = (
+  info: UserObjktNFT,
   galleryAttributeCounts: ObjktGalleryAttributeCount[]
-): CollectibleDetails => {
+): NFTDetails => {
   const cheepestListing = info.listings_active[0];
   const listing = cheepestListing
     ? {
@@ -62,8 +62,8 @@ const parseRoyalties = (royalties: { amount: number; decimals: number }[]) => {
 };
 
 const parseAttributeRarity = (
-  attribute: UserObjktCollectible['attributes'][number]['attribute'],
-  info: UserObjktCollectible,
+  attribute: UserObjktNFT['attributes'][number]['attribute'],
+  info: UserObjktNFT,
   galleryAttributeCounts: ObjktGalleryAttributeCount[]
 ) => {
   const editions = (() => {

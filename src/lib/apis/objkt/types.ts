@@ -24,7 +24,7 @@ interface ObjktListing {
   price: number;
 }
 
-export interface UserObjktCollectible {
+export interface UserObjktNFT {
   /** Contract address */
   fa_contract: string;
   token_id: string;

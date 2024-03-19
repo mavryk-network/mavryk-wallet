@@ -7,8 +7,8 @@ import { abTestingEpics } from './ab-testing/epics';
 import { advertisingEpics } from './advertising/epics';
 import { balancesEpics } from './balances/epics';
 import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
-import { collectiblesEpics } from './collectibles/epics';
 import { currencyEpics } from './currency/epics';
+import { nftsEpics } from './nfts/epics';
 import { partnersPromotionEpics } from './partners-promotion/epics';
 import { swapEpics } from './swap/epics';
 import { tokensMetadataEpics } from './tokens-metadata/epics';
@@ -23,7 +23,7 @@ const allEpics = combineEpics(
   tokensMetadataEpics,
   abTestingEpics,
   buyWithCreditCardEpics,
-  collectiblesEpics
+  nftsEpics
 );
 
 export const epicMiddleware = createEpicMiddleware();

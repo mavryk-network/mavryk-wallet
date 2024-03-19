@@ -5,10 +5,7 @@ import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
+import { useAllNFTsDetailsLoadingSelector, useNFTDetailsSelector } from 'app/store/nfts/selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
@@ -33,8 +30,8 @@ export const NFTItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) 
   const [displayed, setDisplayed] = useState(true);
   const { data: balance } = useBalance(assetSlug, accountPkh, { displayed, suspense: false });
 
-  const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-  const details = useCollectibleDetailsSelector(assetSlug);
+  const areDetailsLoading = useAllNFTsDetailsLoadingSelector();
+  const details = useNFTDetailsSelector(assetSlug);
 
   const listing = useMemo(() => getListingDetails(details), [details]);
 

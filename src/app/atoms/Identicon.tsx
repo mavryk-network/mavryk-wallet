@@ -7,8 +7,10 @@ import classNames from 'clsx';
 
 import initialsSprites from 'lib/avatars-initials-sprites';
 
+export type IdeniconType = 'jdenticon' | 'bottts' | 'initials';
+
 type IdenticonProps = HTMLAttributes<HTMLDivElement> & {
-  type?: 'jdenticon' | 'bottts' | 'initials';
+  type?: IdeniconType;
   hash: string;
   size?: number;
 };

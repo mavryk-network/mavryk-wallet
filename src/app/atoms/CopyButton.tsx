@@ -24,7 +24,7 @@ export type CopyButtonProps = HTMLAttributes<HTMLButtonElement> &
     rounded?: 'sm' | 'base';
     text: string;
     small?: boolean;
-    type?: 'button' | 'link';
+    type?: 'button' | 'link' | 'block';
     textShade?: 500 | 600 | 700;
   };
 
@@ -75,6 +75,8 @@ const CopyButton: FC<CopyButtonProps> = ({
             small ? 'text-xs' : 'text-sm',
             className
           )
+        : type === 'block'
+        ? classNames(className)
         : classNames('hover:underline', className),
     [type, className, rounded, small]
   );

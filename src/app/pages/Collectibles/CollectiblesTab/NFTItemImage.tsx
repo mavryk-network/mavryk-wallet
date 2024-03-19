@@ -7,8 +7,8 @@ import { AssetImage } from 'app/templates/AssetImage';
 import type { TokenMetadata } from 'lib/metadata';
 
 import { CollectibleBlur } from '../components/CollectibleBlur';
-import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
-import { CollectibleImageLoader } from '../components/CollectibleImageLoader';
+import { NFTImageFallback } from '../components/NFTImageFallback';
+import { NFTImageLoader } from '../components/NFTImageLoader';
 
 interface Props {
   assetSlug: string;
@@ -17,14 +17,14 @@ interface Props {
   mime?: string | null;
 }
 
-export const CollectibleItemImage = memo<Props>(({ assetSlug, metadata, areDetailsLoading, mime }) => {
+export const NFTItemImage = memo<Props>(({ assetSlug, metadata, areDetailsLoading, mime }) => {
   const isAdultContent = useCollectibleIsAdultSelector(assetSlug);
   const isAdultFlagLoading = areDetailsLoading && !isDefined(isAdultContent);
 
-  const isAudioCollectible = useMemo(() => Boolean(mime && mime.startsWith('audio')), [mime]);
+  const isAudioNFT = useMemo(() => Boolean(mime && mime.startsWith('audio')), [mime]);
 
   if (isAdultFlagLoading) {
-    return <CollectibleImageLoader />;
+    return <NFTImageLoader />;
   }
 
   if (isAdultContent) {
@@ -34,8 +34,8 @@ export const CollectibleItemImage = memo<Props>(({ assetSlug, metadata, areDetai
   return (
     <AssetImage
       metadata={metadata}
-      loader={<CollectibleImageLoader />}
-      fallback={<CollectibleImageFallback isAudioCollectible={isAudioCollectible} />}
+      loader={<NFTImageLoader />}
+      fallback={<NFTImageFallback isAudioNFT={isAudioNFT} />}
     />
   );
 });

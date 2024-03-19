@@ -28,7 +28,7 @@ import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { CollectiblesSelectors } from '../selectors';
 import { getListingDetails } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
-import { CollectiblePageImage } from './CollectiblePageImage';
+import { NFTPageImage } from './NFTPageImage';
 import { PropertiesItems } from './PropertiesItems';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
@@ -116,7 +116,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
         )}
 
         <div className="rounded-2xl mb-6 bg-primary-card overflow-hidden" style={{ aspectRatio: '1/1' }}>
-          <CollectiblePageImage
+          <NFTPageImage
             metadata={metadata}
             areDetailsLoading={areDetailsLoading}
             objktArtifactUri={details?.objktArtifactUri}

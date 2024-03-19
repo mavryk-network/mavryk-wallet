@@ -10,7 +10,6 @@ import {
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
-import { objktCurrencies } from 'lib/apis/objkt';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { useBalance } from 'lib/temple/front';
@@ -18,8 +17,8 @@ import { atomsToTokens } from 'lib/temple/helpers';
 import { useIntersectionDetection } from 'lib/ui/use-intersection-detection';
 import { Link } from 'lib/woozie';
 
-import { CollectibleItemImage } from './CollectibleItemImage';
 import { getListingDetails } from '../utils';
+import { NFTItemImage } from './NFTItemImage';
 
 interface Props {
   assetSlug: string;
@@ -56,7 +55,7 @@ export const CollectibleItem = memo<Props>(({ assetSlug, accountPkh, areDetailsS
         title={assetName}
       >
         {displayed && (
-          <CollectibleItemImage
+          <NFTItemImage
             assetSlug={assetSlug}
             metadata={metadata}
             areDetailsLoading={areDetailsLoading && details === undefined}

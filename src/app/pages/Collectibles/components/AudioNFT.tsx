@@ -5,7 +5,7 @@ import { emptyFn } from '@rnw-community/shared';
 import { AssetImage } from 'app/templates/AssetImage';
 import { AssetMetadataBase } from 'lib/metadata';
 
-import { CollectibleImageFallback } from './CollectibleImageFallback';
+import { NFTImageFallback } from './NFTImageFallback';
 
 interface Props {
   uri: string;
@@ -16,7 +16,7 @@ interface Props {
   onAudioError?: EmptyFn;
 }
 
-export const AudioCollectible: FC<Props> = ({ uri, metadata, className, style, loader, onAudioError = emptyFn }) => {
+export const AudioNFT: FC<Props> = ({ uri, metadata, className, style, loader, onAudioError = emptyFn }) => {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isAudioLoading, setIsAudioLoading] = useState(true);
   const [isImageLoading, setIsImageLoading] = useState(true);
@@ -39,7 +39,7 @@ export const AudioCollectible: FC<Props> = ({ uri, metadata, className, style, l
       <AssetImage
         metadata={metadata}
         fullViewCollectible
-        fallback={<CollectibleImageFallback large isAudioCollectible />}
+        fallback={<NFTImageFallback large isAudioNFT />}
         className={className}
         style={style}
         onLoad={handleImageLoaded}

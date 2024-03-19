@@ -6,10 +6,10 @@ import { TokenMetadata } from 'lib/metadata';
 import { isSvgDataUriInUtf8Encoding, buildObjktCollectibleArtifactUri } from 'lib/temple/front';
 import { Image } from 'lib/ui/Image';
 
-import { AudioCollectible } from '../components/AudioCollectible';
+import { AudioNFT } from '../components/AudioNFT';
 import { CollectibleBlur } from '../components/CollectibleBlur';
-import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
-import { CollectibleImageLoader } from '../components/CollectibleImageLoader';
+import { NFTImageFallback } from '../components/NFTImageFallback';
+import { NFTImageLoader } from '../components/NFTImageLoader';
 import { VideoCollectible } from '../components/VideoCollectible';
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
   className?: string;
 }
 
-export const CollectiblePageImage = memo<Props>(
+export const NFTPageImage = memo<Props>(
   ({ metadata, mime, objktArtifactUri, className, areDetailsLoading, isAdultContent = false }) => {
     const [isRenderFailedOnce, setIsRenderFailedOnce] = useState(false);
 
@@ -33,7 +33,7 @@ export const CollectiblePageImage = memo<Props>(
     const handleError = useCallback(() => setIsRenderFailedOnce(true), []);
 
     if (areDetailsLoading) {
-      return <CollectibleImageLoader large />;
+      return <NFTImageLoader large />;
     }
 
     if (shouldShowBlur) {
@@ -46,7 +46,7 @@ export const CollectiblePageImage = memo<Props>(
           <Image
             src={objktArtifactUri}
             alt={metadata?.name}
-            loader={<CollectibleImageLoader large />}
+            loader={<NFTImageLoader large />}
             onError={handleError}
             className={className}
           />
@@ -68,7 +68,7 @@ export const CollectiblePageImage = memo<Props>(
           return (
             <VideoCollectible
               uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
-              loader={<CollectibleImageLoader large />}
+              loader={<NFTImageLoader large />}
               className={className}
               onError={handleError}
             />
@@ -77,10 +77,10 @@ export const CollectiblePageImage = memo<Props>(
 
         if (mime.startsWith('audio')) {
           return (
-            <AudioCollectible
+            <AudioNFT
               uri={buildObjktCollectibleArtifactUri(objktArtifactUri)}
               metadata={metadata}
-              loader={<CollectibleImageLoader large />}
+              loader={<NFTImageLoader large />}
               className={className}
               onAudioError={handleError}
             />
@@ -93,8 +93,8 @@ export const CollectiblePageImage = memo<Props>(
       <AssetImage
         metadata={metadata}
         fullViewCollectible
-        loader={<CollectibleImageLoader large />}
-        fallback={<CollectibleImageFallback large />}
+        loader={<NFTImageLoader large />}
+        fallback={<NFTImageFallback large />}
         className={className}
       />
     );

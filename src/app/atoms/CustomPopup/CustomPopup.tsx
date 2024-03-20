@@ -4,6 +4,7 @@ import classNames from 'clsx';
 import Modal from 'react-modal';
 
 import './customPopup.css';
+import { merge } from 'lib/utils/merge';
 
 export type CustomPopupProps = Modal.Props & React.PropsWithChildren;
 
@@ -21,7 +22,7 @@ const CustomPopup: FC<CustomPopupProps> = props => {
   return (
     <Modal
       {...restProps}
-      className={classNames('bg-primary-card rounded z-30 shadow-2xl pt-6 pb-8', className)}
+      className={merge('bg-primary-card rounded z-30 shadow-2xl pt-6 pb-8', className as string)}
       appElement={document.getElementById('root')!}
       closeTimeoutMS={200}
       overlayClassName={classNames(

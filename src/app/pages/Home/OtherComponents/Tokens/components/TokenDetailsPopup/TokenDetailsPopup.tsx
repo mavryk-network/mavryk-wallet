@@ -48,6 +48,7 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
         </div>
       }
       portalClassName="token-details-popup"
+      className={'pb-0'}
       headerComponent={
         <AssetIcon assetSlug={assetSlug} className="rounded-full" size={44} style={{ width: 44, height: 44 }} />
       }
@@ -84,7 +85,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
 
   return (
     <section>
-      <div className="px-4">
+      <div className="px-4 max-h-auto">
         {/* balances section */}
         <div className="flex flex-col items-center gap-1 mt-2 mb-6">
           <InFiat assetSlug={assetSlug} volume={balance} smallFractionFont={false}>
@@ -172,13 +173,15 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
       <div className="text-base-plus text-white w-full px-4 mt-3">
         <T id="history" />
       </div>
-      <HistoryComponent
-        assetSlug={assetSlug}
-        searchWrapperClassname={styles.searchWrapperPopup}
-        theme={DARK_LIGHT_THEME}
-        showRestOfSearchSectionOptions={false}
-        lastItemDividerClassName="mt-6"
-      />
+      <div className="pb-8">
+        <HistoryComponent
+          assetSlug={assetSlug}
+          searchWrapperClassname={styles.searchWrapperPopup}
+          theme={DARK_LIGHT_THEME}
+          showRestOfSearchSectionOptions={false}
+          lastItemDividerClassName="mt-6"
+        />
+      </div>
     </section>
   );
 };

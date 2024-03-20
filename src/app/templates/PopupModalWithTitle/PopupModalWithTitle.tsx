@@ -90,5 +90,5 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
 };
 
 const ChildComponent = memo(({ children }: { children: ReactNode }) => {
-  return <div className="h-full no-scrollbar">{children}</div>;
+  return <div className="h-full no-scrollbar max-h-auto">{children}</div>;
 });

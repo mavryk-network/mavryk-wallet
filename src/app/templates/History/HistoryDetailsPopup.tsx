@@ -216,32 +216,36 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        <h4 className="text-base-plus text-white mt-6 mb-4">
-          <T id="transactionDetails" />
-        </h4>
+        {operStack.length > 1 && (
+          <>
+            <h4 className="text-base-plus text-white mt-6 mb-4">
+              <T id="transactionDetails" />
+            </h4>
 
-        <CardContainer className="text-white flex flex-col">
-          {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i) => {
-            return (
-              <div key={i}>
-                <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny />
-                <ListItemDivider />
+            <CardContainer className="text-white flex flex-col">
+              {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i) => {
+                return (
+                  <div key={i}>
+                    <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny />
+                    <ListItemDivider />
+                  </div>
+                );
+              })}
+
+              <div className={clsx('flex items-start w-full text-cleft mt-3')}>
+                <button
+                  className={clsx('flex items-center', 'text-accent-blue hover:underline')}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toggleExpandedTxHistory();
+                  }}
+                >
+                  <T id={expandedTxHistory ? 'showLess' : 'showMore'} />
+                </button>
               </div>
-            );
-          })}
-
-          <div className={clsx('flex items-start w-full text-cleft mt-3')}>
-            <button
-              className={clsx('flex items-center', 'text-accent-blue hover:underline')}
-              onClick={e => {
-                e.stopPropagation();
-                toggleExpandedTxHistory();
-              }}
-            >
-              <T id={expandedTxHistory ? 'showLess' : 'showMore'} />
-            </button>
-          </div>
-        </CardContainer>
+            </CardContainer>
+          </>
+        )}
       </div>
     </PopupModalWithTitle>
   );

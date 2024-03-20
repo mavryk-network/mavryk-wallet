@@ -5,6 +5,7 @@ import clsx from 'clsx';
 
 import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
+import { ListItemDivider } from 'app/atoms/Divider';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
@@ -14,13 +15,18 @@ import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { mutezToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
-import { buildHistoryMoneyDiffs } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
+import { IndividualHistoryItem } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
+import { OpertionStackItem } from './OperStackItem';
+
 // import { toHistoryTokenSlug } from './utils';
+
+const TX_HISTORY_PREVIEW_IDX = 2;
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
@@ -32,13 +38,18 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const mainAssetMetadata = useAssetMetadata(TEZ_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
-  const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem), [historyItem]);
+  const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
   const [showFeeDetails, setShowFeedetails] = useState(true);
+  const [expandedTxHistory, setExpandedtxHistory] = useState(false);
 
   const toggleFeesDropdown = useCallback(() => {
     setShowFeedetails(!showFeeDetails);
   }, [showFeeDetails]);
+
+  const toggleExpandedTxHistory = useCallback(() => {
+    setExpandedtxHistory(!expandedTxHistory);
+  }, [expandedTxHistory]);
 
   const fees = useMemo(
     () =>
@@ -65,6 +76,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   );
 
   const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.gasUsed + fees?.storageUsed) * 0.5 : 0), [fees]);
+
+  const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 
   if (!historyItem) return null;
 
@@ -202,7 +215,42 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </div>
           </div>
         </CardContainer>
+
+        <h4 className="text-base-plus text-white mt-6 mb-4">
+          <T id="transactionDetails" />
+        </h4>
+
+        <CardContainer className="text-white flex flex-col">
+          {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i) => {
+            return (
+              <div key={i}>
+                <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny />
+                <ListItemDivider />
+              </div>
+            );
+          })}
+
+          <div className={clsx('flex items-start w-full text-cleft mt-3')}>
+            <button
+              className={clsx('flex items-center', 'text-accent-blue hover:underline')}
+              onClick={e => {
+                e.stopPropagation();
+                toggleExpandedTxHistory();
+              }}
+            >
+              <T id={expandedTxHistory ? 'showLess' : 'showMore'} />
+            </button>
+          </div>
+        </CardContainer>
       </div>
     </PopupModalWithTitle>
   );
 };
+
+function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly: boolean) {
+  if (previewOnly) {
+    return operStack.slice(0, TX_HISTORY_PREVIEW_IDX);
+  }
+
+  return operStack;
+}

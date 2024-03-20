@@ -3608,5 +3608,8 @@
   },
   "spellingError": {
     "message": "Spelling error"
+  },
+  "transactionDetails": {
+    "message": "Transaction Details"
   }
 }

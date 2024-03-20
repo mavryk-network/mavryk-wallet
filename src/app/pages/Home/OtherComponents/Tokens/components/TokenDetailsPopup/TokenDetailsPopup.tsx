@@ -50,7 +50,12 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
       portalClassName="token-details-popup"
       className={'pb-0'}
       headerComponent={
-        <AssetIcon assetSlug={assetSlug} className="rounded-full" size={44} style={{ width: 44, height: 44 }} />
+        <AssetIcon
+          assetSlug={assetSlug}
+          className="rounded-full overflow-hiddent bg-primary-bg"
+          size={44}
+          style={{ width: 44, height: 44 }}
+        />
       }
       {...rest}
     >
@@ -84,7 +89,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const { data: myBakerPkh } = useDelegate(accountPkh);
 
   return (
-    <section>
+    <section className="h-full">
       <div className="px-4 max-h-auto">
         {/* balances section */}
         <div className="flex flex-col items-center gap-1 mt-2 mb-6">
@@ -173,7 +178,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
       <div className="text-base-plus text-white w-full px-4 mt-3">
         <T id="history" />
       </div>
-      <div className="pb-8">
+      <div className="pb-8 h-full">
         <HistoryComponent
           assetSlug={assetSlug}
           searchWrapperClassname={styles.searchWrapperPopup}

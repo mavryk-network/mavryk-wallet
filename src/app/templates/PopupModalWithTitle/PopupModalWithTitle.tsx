@@ -57,7 +57,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
     >
       <>
         {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
-        <div onScroll={scrollEvent} className={classNames('w-full max-h-500', styles.container)}>
+        <div onScroll={scrollEvent} className={classNames('w-full max-h-500 no-scrollbar', styles.container)}>
           <div
             className={classNames(
               'absolute top-4 px-4 w-full flex justify-end items-center',
@@ -90,5 +90,5 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
 };
 
 const ChildComponent = memo(({ children }: { children: ReactNode }) => {
-  return <div className="h-full no-scrollbar max-h-auto">{children}</div>;
+  return <div className="no-scrollbar h-full">{children}</div>;
 });

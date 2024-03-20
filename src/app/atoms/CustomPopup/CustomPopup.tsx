@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 
 import classNames from 'clsx';
 import Modal from 'react-modal';
@@ -10,14 +10,6 @@ export type CustomPopupProps = Modal.Props & React.PropsWithChildren;
 
 const CustomPopup: FC<CustomPopupProps> = props => {
   const { className, overlayClassName, ...restProps } = props;
-
-  useEffect(() => {
-    if (props.isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [props.isOpen]);
 
   return (
     <Modal
@@ -31,6 +23,7 @@ const CustomPopup: FC<CustomPopupProps> = props => {
         'flex items-end justify-center',
         overlayClassName
       )}
+      preventScroll
       onAfterOpen={() => {
         document.body.classList.add('overscroll-y-none');
       }}

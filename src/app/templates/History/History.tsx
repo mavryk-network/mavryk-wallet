@@ -4,7 +4,7 @@ import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
-import { DARK_LIGHT_THEME, DARK_THEME } from 'app/consts/appTheme';
+import { DARK_LIGHT_THEME, DARK_THEME, LIGHT_THEME } from 'app/consts/appTheme';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
@@ -38,12 +38,19 @@ interface Props {
   searchWrapperClassname?: string;
   theme?: ComponentTheme;
   showRestOfSearchSectionOptions?: boolean;
+  lastItemDividerClassName?: string;
 }
 
 // const userHistory = [StakedMock];
 
 export const HistoryComponent: React.FC<Props> = memo(
-  ({ assetSlug, searchWrapperClassname, theme = DARK_THEME, showRestOfSearchSectionOptions = true }) => {
+  ({
+    assetSlug,
+    searchWrapperClassname,
+    theme = DARK_THEME,
+    showRestOfSearchSectionOptions = true,
+    lastItemDividerClassName = 'my-6'
+  }) => {
     const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
     console.log('Logging user history in the HistoryComponent:', userHistory);
@@ -252,13 +259,22 @@ export const HistoryComponent: React.FC<Props> = memo(
             </h3>
           </div>
         ) : (
-          <div className={classNames('my-3 flex flex-col')}>
+          <div className={classNames('flex flex-col')}>
             <InfiniteScroll
               dataLength={userHistory.length}
               hasMore={reachedTheEnd === false}
               next={loadNext}
               loader={loading && <SyncSpinner className="mt-4" />}
               onScroll={onScroll}
+              endMessage={
+                <div
+                  className={classNames(
+                    'mx-auto h-1 w-32 rounded-full',
+                    lastItemDividerClassName,
+                    theme === DARK_LIGHT_THEME ? 'bg-gray-910' : 'bg-primary-card'
+                  )}
+                />
+              }
             >
               {filteredHistory.map((historyItem, index) => (
                 <Fragment key={historyItem.hash}>

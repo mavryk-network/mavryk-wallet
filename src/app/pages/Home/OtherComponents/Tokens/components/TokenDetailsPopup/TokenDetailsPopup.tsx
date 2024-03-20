@@ -177,6 +177,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         searchWrapperClassname={styles.searchWrapperPopup}
         theme={DARK_LIGHT_THEME}
         showRestOfSearchSectionOptions={false}
+        lastItemDividerClassName="mt-6"
       />
     </section>
   );

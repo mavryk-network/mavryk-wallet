@@ -1,10 +1,10 @@
-import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, memo, ReactNode, useCallback, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
-import { DARK_LIGHT_THEME, DARK_THEME, LIGHT_THEME } from 'app/consts/appTheme';
+import { DARK_LIGHT_THEME, DARK_THEME } from 'app/consts/appTheme';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
@@ -39,6 +39,7 @@ interface Props {
   theme?: ComponentTheme;
   showRestOfSearchSectionOptions?: boolean;
   lastItemDividerClassName?: string;
+  scrollableTarget?: string;
 }
 
 // const userHistory = [StakedMock];
@@ -49,11 +50,12 @@ export const HistoryComponent: React.FC<Props> = memo(
     searchWrapperClassname,
     theme = DARK_THEME,
     showRestOfSearchSectionOptions = true,
-    lastItemDividerClassName = 'my-6'
+    lastItemDividerClassName = 'my-6',
+    scrollableTarget
   }) => {
     const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
-    console.log('Logging user history in the HistoryComponent:', userHistory);
+    // console.log('Logging user history in the HistoryComponent:', userHistory);
 
     const { publicKeyHash: accountAddress } = useAccount();
 
@@ -266,14 +268,11 @@ export const HistoryComponent: React.FC<Props> = memo(
               next={loadNext}
               loader={loading && <SyncSpinner className="mt-4" />}
               onScroll={onScroll}
+              scrollableTarget={scrollableTarget}
               endMessage={
-                <div
-                  className={classNames(
-                    'mx-auto h-1 w-32 rounded-full',
-                    lastItemDividerClassName,
-                    theme === DARK_LIGHT_THEME ? 'bg-gray-910' : 'bg-primary-card'
-                  )}
-                />
+                <div className={classNames('mx-auto text-center text-sm text-white', lastItemDividerClassName)}>
+                  <T id="txHistoryendMsg" />
+                </div>
               }
             >
               {filteredHistory.map((historyItem, index) => (
@@ -305,6 +304,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 const buildOnScroll =
   (next: EmptyFn) =>
   ({ target }: { target: EventTarget | null }) => {
+    console.log(target, 'target');
     const elem: HTMLElement =
       target instanceof Document ? (target.scrollingElement! as HTMLElement) : (target as HTMLElement);
     const atBottom = 0 === elem.offsetHeight - elem.clientHeight - elem.scrollTop;

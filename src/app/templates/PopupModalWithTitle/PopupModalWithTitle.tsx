@@ -57,7 +57,12 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
     >
       <>
         {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
-        <div onScroll={scrollEvent} className={classNames('w-full max-h-500 no-scrollbar', styles.container)}>
+        <div
+          // used for infinite scrol lib to load more stuff while scrolled to the end
+          id="popupModalScrollable"
+          onScroll={scrollEvent}
+          className={classNames('w-full max-h-500 no-scrollbar', styles.container)}
+        >
           <div
             className={classNames(
               'absolute top-4 px-4 w-full flex justify-end items-center',

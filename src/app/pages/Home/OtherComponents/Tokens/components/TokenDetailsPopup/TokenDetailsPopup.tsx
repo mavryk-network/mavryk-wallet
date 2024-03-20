@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useRef } from 'react';
 
 import BigNumber from 'bignumber.js';
 
@@ -89,7 +89,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const { data: myBakerPkh } = useDelegate(accountPkh);
 
   return (
-    <section className="h-full">
+    <section className="h-full no-scrollbar">
       <div className="px-4 max-h-auto">
         {/* balances section */}
         <div className="flex flex-col items-center gap-1 mt-2 mb-6">
@@ -185,6 +185,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           theme={DARK_LIGHT_THEME}
           showRestOfSearchSectionOptions={false}
           lastItemDividerClassName="mt-6"
+          scrollableTarget={'popupModalScrollable'}
         />
       </div>
     </section>

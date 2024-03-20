@@ -3611,5 +3611,8 @@
   },
   "transactionDetails": {
     "message": "Transaction Details"
+  },
+  "txHistoryendMsg": {
+    "message": "🤩 Hooray! You've reached everything!"
   }
 }

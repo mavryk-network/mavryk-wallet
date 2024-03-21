@@ -169,7 +169,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        <TxAddressBlock historyItem={historyItem} />
+        {!isSwapOperation && <TxAddressBlock historyItem={historyItem} />}
 
         <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">

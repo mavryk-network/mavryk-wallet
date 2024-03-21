@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import { Name, Button, HashShortView, Identicon } from 'app/atoms';
+import { Name, Button, HashShortView, Identicon, Money } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
-import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
-import Balance from 'app/templates/Balance';
+import { useFiatCurrency } from 'lib/fiat-currency';
+import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
 import { TempleAccount } from 'lib/temple/types';
 import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
 
@@ -22,6 +22,11 @@ interface AccountItemProps {
 
 export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gasTokenName, attractSelf, onClick }) => {
   const { name, publicKeyHash, type } = account;
+  const { totalBalanceInFiat } = useTotalBalance(publicKeyHash);
+
+  const {
+    selectedFiatCurrency: { symbol: fiatSymbol }
+  } = useFiatCurrency();
 
   const elemRef = useScrollIntoViewOnMount<HTMLButtonElement>(selected && attractSelf);
 
@@ -65,14 +70,11 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
           <HashShortView hash={publicKeyHash} />
         </div>
       </div>
-      <div className="flex flex-col flex-wrap items-end justify-end ml-auto">
-        <Balance address={publicKeyHash}>
-          {bal => (
-            <span className="text-base leading-tight flex items-baseline">
-              <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
-            </span>
-          )}
-        </Balance>
+      <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus">
+        <span className="ml-1">{fiatSymbol}</span>
+        <Money smallFractionFont={false} fiat>
+          {totalBalanceInFiat}
+        </Money>
       </div>
     </Button>
   );

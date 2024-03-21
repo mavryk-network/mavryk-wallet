@@ -44,7 +44,6 @@ const BalanceInfo: FC = () => {
   const { totalBalanceInFiat } = useTotalBalance();
 
   const {
-    // selectedFiatCurrency: { name: fiatName, symbol: fiatSymbol }
     selectedFiatCurrency: { symbol: fiatSymbol }
   } = useFiatCurrency();
 

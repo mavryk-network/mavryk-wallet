@@ -8,9 +8,11 @@ import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useAccount, useChainId, useGasToken } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 
-export const useBalancesWithDecimals = () => {
-  const { publicKeyHash } = useAccount();
+export const useBalancesWithDecimals = (accountPkh?: string) => {
+  const { publicKeyHash: activeAccPublicKeyHash } = useAccount();
   const chainId = useChainId(true)!;
+
+  const publicKeyHash = accountPkh ? accountPkh : activeAccPublicKeyHash;
 
   const balancesRaw = useBalancesSelector(publicKeyHash, chainId);
   const allTokensMetadata = useTokensMetadataSelector();

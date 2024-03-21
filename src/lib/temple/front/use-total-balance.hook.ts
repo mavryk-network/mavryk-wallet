@@ -13,13 +13,15 @@ import { useDisplayedFungibleTokens, useGasToken } from './assets';
 import { useAccount, useChainId } from './ready';
 
 /** Total fiat volume of displayed tokens */
-export const useTotalBalance = () => {
+export const useTotalBalance = (accountPkh?: string) => {
   const chainId = useChainId(true)!;
-  const { publicKeyHash } = useAccount();
+  const { publicKeyHash: activeAccPublicKeyHash } = useAccount();
+
+  const publicKeyHash = accountPkh ? accountPkh : activeAccPublicKeyHash;
   const { data: tokens } = useDisplayedFungibleTokens(chainId, publicKeyHash);
   const gasToken = useGasToken();
 
-  const tokensBalances = useBalancesWithDecimals();
+  const tokensBalances = useBalancesWithDecimals(publicKeyHash);
   const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
 
   const fiatToUsdRate = useFiatToUsdRate();

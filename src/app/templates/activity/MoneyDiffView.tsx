@@ -4,8 +4,8 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import Money from 'app/atoms/Money';
-import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
+import { isTzbtcAsset } from 'lib/assets';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 
 interface Props {
@@ -45,7 +45,9 @@ export const MoneyDiffView = memo<Props>(
       <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
         <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
           <span>{showPlus}</span>
-          <Money smallFractionFont={false}>{diffBN}</Money>
+          <Money smallFractionFont={false} cryptoDecimals={isTzbtcAsset(assetSlug) ? metadata.decimals : undefined}>
+            {diffBN}
+          </Money>
           <span>&nbsp;</span>
           <span>{getAssetSymbol(metadata, true)}</span>
         </div>

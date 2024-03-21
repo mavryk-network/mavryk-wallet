@@ -257,6 +257,7 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
 
 const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {
   const item = historyItem.operations[0];
+  const swappedOpItem = historyItem.operations[historyItem.operations.length - 1];
 
   const getTxOpLabelAndAddress = useMemo(() => {
     switch (historyItem.type) {
@@ -281,7 +282,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
           address: opInteract.destination.address
         };
       case HistoryItemOpTypeEnum.Swap:
-        const opSwap = item as HistoryItemTransactionOp;
+        const opSwap = swappedOpItem as HistoryItemTransactionOp;
 
         return {
           label: HistoryItemTypeLabels[historyItem.type],

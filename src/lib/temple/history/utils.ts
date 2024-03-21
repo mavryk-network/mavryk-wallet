@@ -144,17 +144,9 @@ function reduceOneTzktTransactionOperation(
       symbol: ''
     };
 
-    // set the end destination address based on diffs if it exists
-    // f.e. JPD 200 -> SIRS -> MAvryk Finance
-    // we wend to SIRS but the end address is Mavryk Financem so we show that address instead of SIRS address
-    const destination =
-      operation.diffs && operation.diffs.length > 1 && operation.diffs[0]
-        ? { address: operation.diffs[0].content.key }
-        : operation.target;
-
     const historyTxOp: HistoryItemTransactionOp = {
       ...HistoryOpBase,
-      destination,
+      destination: getDestinationAddress(operation),
       assetSlug: '',
       assetMetadata: metadata,
       type: HistoryItemOpTypeEnum.TransferTo
@@ -461,5 +453,17 @@ function transformToHistoryMember(address: string, alias: string = ''): TzktAlia
 //     isGroupedOp: ops.length > 0
 //   }));
 // }
+
+// set the end destination address based on diffs if it exists
+// f.e. JPD 200 -> SIRS -> MAvryk Finance
+// we wend to SIRS but the end address is Mavryk Financem so we show that address instead of SIRS address
+// NOTE - It doesn't apply to simple transfers where we have amount
+function getDestinationAddress(operation: TzktTransactionOperation) {
+  const diff = operation.diffs ? operation.diffs[0] : null;
+
+  return diff && !isZero(new BigNumber(diff.content.value)) && typeof diff.content.key === 'string'
+    ? { address: diff.content.key }
+    : operation.target;
+}
 
 const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();

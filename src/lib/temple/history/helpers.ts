@@ -9,7 +9,6 @@ import {
   HistoryItemOperationBase,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
-  HistoryItemSwapOp,
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from './types';
@@ -22,7 +21,6 @@ function fillTokenMetadata(userHistoryItem: UserHistoryItem): UserHistoryItem {
   if (!txHasToken(userHistoryItem.type)) return userHistoryItem;
   const filledOperations = userHistoryItem.operations.map(op => {
     const metadata = useAssetMetadata(op.assetSlug ?? '');
-    console.log(metadata);
     if (metadata !== null) {
       op.assetMetadata = metadata;
     }

@@ -9,11 +9,17 @@ import { merge } from 'lib/utils/merge';
 
 interface CryptoBalanceProps extends TestIDProps {
   value: BigNumber;
+  cryptoDecimals?: number;
 }
 
-export const CryptoBalance = memo<CryptoBalanceProps>(({ value, testID, testIDProperties }) => (
+export const CryptoBalance = memo<CryptoBalanceProps>(({ value, cryptoDecimals, testID, testIDProperties }) => (
   <div className="truncate text-base-plus text-white text-right ml-4 flex-1 flex justify-end">
-    <Money smallFractionFont={false} testID={testID} testIDProperties={testIDProperties}>
+    <Money
+      smallFractionFont={false}
+      cryptoDecimals={cryptoDecimals}
+      testID={testID}
+      testIDProperties={testIDProperties}
+    >
       {value}
     </Money>
   </div>
@@ -27,7 +33,6 @@ interface FiatBalanceProps extends TestIDProps {
   value: BigNumber | string | number;
   roundingMode?: BigNumber.RoundingMode;
 }
-
 export const FiatBalance = memo<FiatBalanceProps>(
   ({ assetSlug, value, testID, testIDProperties, className, roundingMode, customSymbol, showEqualSymbol = true }) => (
     <InFiat

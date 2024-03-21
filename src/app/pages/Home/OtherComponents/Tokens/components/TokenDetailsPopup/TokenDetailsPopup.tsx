@@ -20,7 +20,7 @@ import BakerBanner from 'app/templates/BakerBanner';
 import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { isTzbtcAsset, TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
@@ -87,6 +87,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
 
   const { data: myBakerPkh } = useDelegate(accountPkh);
 
+  const isTzBTC = isTzbtcAsset(assetSlug);
+
   return (
     <section className="h-full no-scrollbar">
       <div className="px-4 max-h-auto">
@@ -102,7 +104,9 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </InFiat>
 
           <div className="text-white text-sm flex items-center">
-            <Money smallFractionFont={false}>{balance}</Money>
+            <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? tokenMetadata?.decimals : undefined}>
+              {balance}
+            </Money>
             <span>&nbsp;</span>
             <span>{assetSymbol}</span>
           </div>

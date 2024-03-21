@@ -5,6 +5,7 @@ import classNames from 'clsx';
 
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
+import { isTzbtcAsset } from 'lib/assets';
 import { useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
 
 import { AssetsSelectors } from '../../Assets.selectors';
@@ -22,8 +23,6 @@ export const ListItem = memo<Props>(
   ({ active, assetSlug, balance, onClick }) => {
     const metadata = useAssetMetadata(assetSlug);
 
-    // const apyInfo = useTokenApyInfo(assetSlug);
-
     const classNameMemo = useMemo(
       () =>
         classNames(
@@ -39,26 +38,20 @@ export const ListItem = memo<Props>(
 
     const assetSymbol = getAssetSymbol(metadata);
     const assetName = getAssetName(metadata);
+    const isTzBTC = isTzbtcAsset(assetSlug);
 
     return (
-      <div
-        // to={toExploreAssetLink(assetSlug)}
-        className={classNameMemo}
-        // testID={AssetsSelectors.assetItemButton}
-        // testIDProperties={{ key: assetSlug }}
-        {...setAnotherSelector('name', assetName)}
-        onClick={() => onClick(assetSlug)}
-      >
+      <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>
         <AssetIcon assetSlug={assetSlug} size={44} className="mr-2 flex-shrink-0" />
 
         <div className={classNames('w-full', styles.tokenInfoWidth)}>
           <div className="flex justify-between w-full mb-1">
             <div className="flex items-center flex-initial">
               <div className={styles['tokenSymbol']}>{assetSymbol}</div>
-              {/* <TokenTag assetSlug={assetSlug} assetSymbol={assetSymbol} apyInfo={apyInfo} /> */}
             </div>
             <CryptoBalance
               value={balance}
+              cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
               testID={AssetsSelectors.assetItemCryptoBalanceButton}
               testIDProperties={{ assetSlug }}
             />

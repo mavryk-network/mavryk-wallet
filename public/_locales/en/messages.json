@@ -3614,5 +3614,8 @@
   },
   "txHistoryendMsg": {
     "message": "🤩 Hooray! You've reached everything!"
+  },
+  "rwas": {
+    "message": "RWAs"
   }
 }

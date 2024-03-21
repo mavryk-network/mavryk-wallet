@@ -24,7 +24,7 @@ type Props = {
   className?: string;
 };
 
-type TabName = 'tokens' | 'NFTs' | 'activity' | 'delegation' | 'info' | 'history';
+type TabName = 'tokens' | 'NFTs' | 'RWAs' | 'delegation' | 'info' | 'history';
 
 interface TabData {
   name: TabName;
@@ -32,6 +32,7 @@ interface TabData {
   Component: FC;
   testID: string;
   whileMessageI18nKey?: TID;
+  disabled?: boolean;
 }
 
 export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
@@ -72,6 +73,13 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
           Component: HistoryComponent,
           testID: HomeSelectors.activityTab,
           whileMessageI18nKey: 'operationHistoryWhileMessage'
+        },
+        {
+          name: 'RWAs',
+          titleI18nKey: 'rwas',
+          Component: HistoryComponent,
+          testID: HomeSelectors.rwasTab,
+          disabled: true
         }
       ];
     }

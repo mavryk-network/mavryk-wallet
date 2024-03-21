@@ -32,21 +32,30 @@ interface TabButtonProps extends TestIDProps {
   titleI18nKey: TID;
   active: boolean;
   withOutline?: boolean;
+  disabled?: boolean;
 }
 
-const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, testID, testIDProperties }) => (
-  <Link
-    to={lctn => ({ ...lctn, search: `?tab=${name}` })}
-    replace
-    className={clsx(
+const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, testID, testIDProperties, disabled = false }) => {
+  const baseProps = {
+    className: clsx(
       'flex1 w-full text-center cursor-pointer pb-2',
       'text-base-plus truncate',
       'transition ease-in-out duration-300',
-      active ? clsx('text-white', styles.tab) : 'text-secondary-white'
-    )}
-    testID={testID}
-    testIDProperties={testIDProperties}
-  >
-    <T id={titleI18nKey} />
-  </Link>
-);
+      active ? clsx('text-white', styles.tab) : 'text-secondary-white',
+      disabled && 'opacity-75 pointer-events-none'
+    ),
+    children: (
+      <>
+        <T id={titleI18nKey} />
+      </>
+    ),
+    testID,
+    testIDProperties
+  };
+
+  return disabled ? (
+    <div {...baseProps} />
+  ) : (
+    <Link to={lctn => ({ ...lctn, search: `?tab=${name}` })} replace {...baseProps} />
+  );
+};

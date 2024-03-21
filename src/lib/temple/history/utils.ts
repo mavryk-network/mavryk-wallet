@@ -143,9 +143,18 @@ function reduceOneTzktTransactionOperation(
       name: '',
       symbol: ''
     };
+
+    // set the end destination address based on diffs if it exists
+    // f.e. JPD 200 -> SIRS -> MAvryk Finance
+    // we wend to SIRS but the end address is Mavryk Financem so we show that address instead of SIRS address
+    const destination =
+      operation.diffs && operation.diffs.length > 1 && operation.diffs[0]
+        ? { address: operation.diffs[0].content.key }
+        : operation.target;
+
     const historyTxOp: HistoryItemTransactionOp = {
       ...HistoryOpBase,
-      destination: operation.target,
+      destination,
       assetSlug: '',
       assetMetadata: metadata,
       type: HistoryItemOpTypeEnum.TransferTo

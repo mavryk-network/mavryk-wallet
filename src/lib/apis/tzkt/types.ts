@@ -14,6 +14,17 @@ export interface TzktAlias {
   address: string;
 }
 
+export interface TxktDiffs {
+  bigmap: number;
+  path: string;
+  action: string;
+  content: {
+    hash: string;
+    key: string;
+    value: string;
+  };
+}
+
 interface TzktOperationError {
   type: string;
 }
@@ -64,6 +75,7 @@ export interface TzktTransactionOperation extends TzktOperationBase {
   parameter?: any;
   entrypoint?: string;
   hasInternals: boolean;
+  diffs?: TxktDiffs[];
 }
 
 export interface TzktOriginationOperation extends TzktOperationBase {

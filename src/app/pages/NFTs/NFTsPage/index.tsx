@@ -112,7 +112,7 @@ const NFTsPage = memo<Props>(({ assetSlug }) => {
           operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-4" />
         )}
 
-        <div className="rounded-2xl mb-6 bg-primary-card overflow-hidden" style={{ aspectRatio: '1/1' }}>
+        <div className="rounded-2xl mb-6 bg-gray-405 overflow-hidden" style={{ aspectRatio: '1/1' }}>
           <NFTPageImage
             metadata={metadata}
             areDetailsLoading={areDetailsLoading}

@@ -46,7 +46,7 @@ export const NFTItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) 
       <div
         ref={toDisplayRef}
         className={clsx(
-          'relative flex items-center justify-center bg-primary-card rounded-lg overflow-hidden hover:opacity-70',
+          'relative flex items-center justify-center bg-gray-405 rounded-lg overflow-hidden hover:opacity-70',
           popup ? 'h-163px' : 'h-31.25'
         )}
         title={assetName}

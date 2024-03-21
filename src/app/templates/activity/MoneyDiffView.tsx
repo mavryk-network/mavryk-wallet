@@ -16,6 +16,7 @@ interface Props {
   moneyClassname?: string;
   isColored?: boolean;
   showFiatBalance?: boolean;
+  showAssetSymbol?: boolean;
 }
 
 export const MoneyDiffView = memo<Props>(
@@ -25,6 +26,7 @@ export const MoneyDiffView = memo<Props>(
     pending = false,
     isColored = true,
     showFiatBalance = true,
+    showAssetSymbol = true,
     className,
     moneyClassname
   }) => {
@@ -48,8 +50,12 @@ export const MoneyDiffView = memo<Props>(
           <Money smallFractionFont={false} cryptoDecimals={isTzbtcAsset(assetSlug) ? metadata.decimals : undefined}>
             {diffBN}
           </Money>
-          <span>&nbsp;</span>
-          <span>{getAssetSymbol(metadata, true)}</span>
+          {showAssetSymbol && (
+            <>
+              <span>&nbsp;</span>
+              <span>{getAssetSymbol(metadata, true)}</span>
+            </>
+          )}
         </div>
 
         {assetSlug && showFiatBalance && (

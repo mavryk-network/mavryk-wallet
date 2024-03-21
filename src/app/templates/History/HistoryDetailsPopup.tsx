@@ -391,6 +391,7 @@ const IconForSwap: FC<{ token: AssetMetadataBase; diff: MoneyDiff; status: Histo
           moneyClassname="text-base-plus text-white"
           isColored={false}
           showFiatBalance={false}
+          showAssetSymbol={false}
         />
       </div>
     </div>

@@ -8,12 +8,12 @@ type HistoryTimeProps = {
 };
 
 export const HistoryTime: FC<HistoryTimeProps> = ({ addedAt = Date.now(), showFullDate = false }) => {
-  const dateFormatType = useMemo(() => (showFullDate ? 'd MMMM yyyy, HH:mm a' : 'd MMMM yyyy'), [showFullDate]);
+  const dateFormatType = useMemo(() => (showFullDate ? 'd MMMM yyyy, h:mm aaa' : 'd MMMM yyyy'), [showFullDate]);
 
   const dateToreturn = useMemo(
     () =>
       isToday(new Date(addedAt))
-        ? `Today at ${format(new Date(addedAt), 'HH:mm a')}`
+        ? `Today at ${format(new Date(addedAt), 'h:mm aaa')}`
         : format(new Date(addedAt), dateFormatType),
     [addedAt, dateFormatType]
   );

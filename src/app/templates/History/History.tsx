@@ -1,4 +1,4 @@
-import React, { Fragment, memo, ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 import InfiniteScroll from 'react-infinite-scroll-component';

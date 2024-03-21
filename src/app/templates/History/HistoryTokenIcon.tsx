@@ -80,7 +80,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
           <img
             key={idx}
             className={clsx(
-              'rounded-full overflow-hidden absolute top-1/2 bg-white',
+              'rounded-full overflow-hidden absolute top-1/2 bg-gray-405',
               arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
             )}
             style={{

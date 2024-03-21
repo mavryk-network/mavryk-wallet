@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
@@ -29,7 +29,6 @@ import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
-import { CryptoBalance, FiatBalance } from '../Balance';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
@@ -52,7 +51,7 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
       headerComponent={
         <AssetIcon
           assetSlug={assetSlug}
-          className="rounded-full overflow-hiddent bg-primary-bg"
+          className="rounded-full overflow-hiddent bg-gray-405"
           size={44}
           style={{ width: 44, height: 44 }}
         />

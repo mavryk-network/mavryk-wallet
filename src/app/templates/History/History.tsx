@@ -304,7 +304,6 @@ export const HistoryComponent: React.FC<Props> = memo(
 const buildOnScroll =
   (next: EmptyFn) =>
   ({ target }: { target: EventTarget | null }) => {
-    console.log(target, 'target');
     const elem: HTMLElement =
       target instanceof Document ? (target.scrollingElement! as HTMLElement) : (target as HTMLElement);
     const atBottom = 0 === elem.offsetHeight - elem.clientHeight - elem.scrollTop;

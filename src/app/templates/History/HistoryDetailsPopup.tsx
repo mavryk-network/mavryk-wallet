@@ -14,9 +14,16 @@ import { T } from 'lib/i18n';
 import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
 import { mutezToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
-import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
+import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
-import { IndividualHistoryItem } from 'lib/temple/history/types';
+import {
+  HistoryItemDelegationOp,
+  HistoryItemOpTypeEnum,
+  HistoryItemOriginationOp,
+  HistoryItemOtherOp,
+  HistoryItemTransactionOp,
+  IndividualHistoryItem
+} from 'lib/temple/history/types';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
@@ -34,6 +41,8 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
+
+  console.log(historyItem);
 
   const mainAssetMetadata = useAssetMetadata(TEZ_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
@@ -129,20 +138,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        <CardContainer className="mb-6 text-base-plus text-white">
-          <span className="mb-2">
-            <T id="receivedFrom" />
-          </span>
-          <div className="flex items-center gap-3">
-            <Identicon
-              type="bottts"
-              size={24}
-              hash={historyItem.operations[0]?.source.address ?? ''}
-              className="flex-shrink-0 shadow-xs rounded-full"
-            />
-            <HashChip hash={historyItem.operations[0]?.source.address ?? ''} small className="text-sm" />
-          </div>
-        </CardContainer>
+        <TxAddressBlock historyItem={historyItem} />
 
         <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">
@@ -258,3 +254,82 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
 
   return operStack;
 }
+
+const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {
+  const item = historyItem.operations[0];
+
+  const getTxOpLabelAndAddress = useMemo(() => {
+    switch (historyItem.type) {
+      case HistoryItemOpTypeEnum.Delegation:
+        const opDelegate = item as HistoryItemDelegationOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opDelegate.newDelegate?.address
+        };
+
+      case HistoryItemOpTypeEnum.Origination:
+        const opOriginate = item as HistoryItemOriginationOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opOriginate.originatedContract?.address
+        };
+
+      case HistoryItemOpTypeEnum.Interaction:
+        const opInteract = item as HistoryItemTransactionOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opInteract.destination.address
+        };
+      case HistoryItemOpTypeEnum.Swap:
+        const opSwap = item as HistoryItemTransactionOp;
+
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opSwap.destination.address
+        };
+
+      case HistoryItemOpTypeEnum.TransferFrom:
+        const opFrom = item as HistoryItemTransactionOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opFrom.source.address
+        };
+
+      case HistoryItemOpTypeEnum.TransferTo:
+        const opTo = item as HistoryItemTransactionOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opTo.destination.address
+        };
+      case HistoryItemOpTypeEnum.Reveal:
+        const opReveal = item as HistoryItemTransactionOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opReveal.destination.address
+        };
+
+      // Other
+      default:
+        const opOther = item as HistoryItemOtherOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opOther.destination?.address || opOther.source.address || opOther.hash
+        };
+    }
+  }, [historyItem.type, item]);
+
+  return (
+    <CardContainer className="mb-6 text-base-plus text-white">
+      <span className="mb-2">{getTxOpLabelAndAddress.label}</span>
+      <div className="flex items-center gap-3">
+        <Identicon
+          type="bottts"
+          size={24}
+          hash={getTxOpLabelAndAddress.address ?? ''}
+          className="flex-shrink-0 shadow-xs rounded-full"
+        />
+        <HashChip hash={getTxOpLabelAndAddress.address ?? ''} small className="text-sm" />
+      </div>
+    </CardContainer>
+  );
+};

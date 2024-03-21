@@ -10,3 +10,14 @@ export const HistoryItemOpTypeTexts = {
   6: 'Swapped',
   7: 'Revealed'
 };
+
+export const HistoryItemTypeLabels = {
+  0: 'Sent to',
+  1: 'Received from',
+  2: 'Delegated to',
+  3: 'Interaction with',
+  4: 'Originated to',
+  5: 'Other',
+  6: 'Transfered to',
+  7: 'Revealed'
+};

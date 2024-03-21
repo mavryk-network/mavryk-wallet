@@ -31,26 +31,6 @@ function fillTokenMetadata(userHistoryItem: UserHistoryItem): UserHistoryItem {
   return userHistoryItem;
 }
 
-// function pickHistoryitemType(item: IndividualHistoryItem) {
-//   switch (item.type) {
-//     case HistoryItemOpTypeEnum.TransferTo:
-//       return item as unknown as HistoryItemTransactionOp;
-//     case HistoryItemOpTypeEnum.TransferFrom:
-//       return item as unknown as HistoryItemTransactionOp;
-//     case HistoryItemOpTypeEnum.Swap:
-//     case HistoryItemOpTypeEnum.Interaction:
-//       return item as unknown as HistoryItemTransactionOp;
-//     case HistoryItemOpTypeEnum.Delegation:
-//       return item as unknown as HistoryItemDelegationOp;
-//     case HistoryItemOpTypeEnum.Reveal:
-//       return item as unknown as HistoryItemOpReveal;
-//     case HistoryItemOpTypeEnum.Origination:
-//       return item as unknown as HistoryItemOriginationOp;
-//     default:
-//       return item as unknown as HistoryItemOtherOp;
-//   }
-// }
-
 export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   const opStack: IndividualHistoryItem[] = [];
 

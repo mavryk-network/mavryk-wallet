@@ -7,20 +7,22 @@ import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { ListItemDivider } from 'app/atoms/Divider';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
+import { ReactComponent as ParallelArrowsIcon } from 'app/icons/parallel-opposing-arrows.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
-import { getAssetSymbol, useAssetMetadata } from 'lib/metadata';
+import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
 import { mutezToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import {
   HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemStatus,
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from 'lib/temple/history/types';
@@ -30,6 +32,7 @@ import { OpenInExplorerChip } from '../OpenInExplorerChip';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { OpertionStackItem } from './OperStackItem';
+import { alterIpfsUrl, getAssetsFromOperations, getMoneyDiffsForSwap } from './utils';
 
 // import { toHistoryTokenSlug } from './utils';
 
@@ -42,10 +45,13 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
 
-  console.log(historyItem);
-
   const mainAssetMetadata = useAssetMetadata(TEZ_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
+
+  const slugs = getAssetsFromOperations(historyItem);
+  const tokensMetadata = useMultipleAssetsMetadata([
+    ...new Set([slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)))
+  ]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
@@ -88,6 +94,13 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 
+  const isSwapOperation = historyItem?.type === HistoryItemOpTypeEnum.Swap;
+
+  const moneyDiffForSwap = useMemo(
+    () => (isSwapOperation ? getMoneyDiffsForSwap(moneyDiffs) : []),
+    [isSwapOperation, moneyDiffs]
+  );
+
   if (!historyItem) return null;
 
   return (
@@ -95,20 +108,29 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
       isOpen={isOpen}
       title={
         <div className="flex flex-col items-center gap-2">
-          <div className="text-sm text-secondary-white">{HistoryItemOpTypeTexts[historyItem.type]}</div>
-          <div className="flex flex-col">
-            {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
-              <MoneyDiffView
-                key={i}
-                assetId={assetSlug}
-                diff={diff}
-                pending={status === 'pending'}
-                className="flex flex-col items-center"
-                moneyClassname="text-xl leading-6 tracking-tight"
-                isColored={false}
-              />
-            ))}
+          <div
+            className={clsx(
+              'mt-2',
+              isSwapOperation ? 'text-xl leading-6 tracking-tight mb-1 text-white' : 'text-sm text-secondary-white'
+            )}
+          >
+            {HistoryItemOpTypeTexts[historyItem.type]}
           </div>
+          {!isSwapOperation && (
+            <div className="flex flex-col">
+              {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
+                <MoneyDiffView
+                  key={i}
+                  assetId={assetSlug}
+                  diff={diff}
+                  pending={status === 'pending'}
+                  className="flex flex-col items-center"
+                  moneyClassname="text-xl leading-6 tracking-tight"
+                  isColored={false}
+                />
+              ))}
+            </div>
+          )}
 
           <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} showFullDate />
         </div>
@@ -118,6 +140,15 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
       {...props}
     >
       <div className="px-4">
+        {isSwapOperation && tokensMetadata && (
+          <CardContainer className="mb-6">
+            <div className="flex items-center justify-between">
+              <IconForSwap token={tokensMetadata[0]} diff={moneyDiffForSwap[0]} status={status} />
+              <ParallelArrowsIcon className="w-6 h-6" />
+              <IconForSwap token={tokensMetadata[1]} diff={moneyDiffForSwap[1]} status={status} />
+            </div>
+          </CardContainer>
+        )}
         <CardContainer className="text-base-plus mb-6 text-white">
           <div className="flex items-center justify-between">
             <T id="status" />
@@ -247,6 +278,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   );
 };
 
+// helper functions
 function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly: boolean) {
   if (previewOnly) {
     return operStack.slice(0, TX_HISTORY_PREVIEW_IDX);
@@ -255,6 +287,7 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
   return operStack;
 }
 
+// helper components
 const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {
   const item = historyItem.operations[0];
   const swappedOpItem = historyItem.operations[historyItem.operations.length - 1];
@@ -332,5 +365,34 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         <HashChip hash={getTxOpLabelAndAddress.address ?? ''} small className="text-sm" />
       </div>
     </CardContainer>
+  );
+};
+
+const IconForSwap: FC<{ token: AssetMetadataBase; diff: MoneyDiff; status: HistoryItemStatus }> = ({
+  token,
+  diff,
+  status
+}) => {
+  return (
+    <div className="flex items-center gap-x-2">
+      <img
+        className={clsx('rounded-full overflow-hidden bg-white w-8 h-8')}
+        src={alterIpfsUrl(token?.thumbnailUri)}
+        alt={token?.name}
+      />
+
+      <div className="flex flex-col justify-center gap-y-2px">
+        <div className="text-white text-base-plus">{token.symbol}</div>
+        <MoneyDiffView
+          diff={diff.diff}
+          assetId={diff.assetSlug}
+          pending={status === 'pending'}
+          className="flex flex-col items-center"
+          moneyClassname="text-base-plus text-white"
+          isColored={false}
+          showFiatBalance={false}
+        />
+      </div>
+    </div>
   );
 };

@@ -63,7 +63,7 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
       testID={testID}
       testIDProperties={testIDProperties}
     >
-      <SvgIcon className={clsx('text-blue-200 fill-current', small ? 'h-3 w-3' : 'h-4 w-4')} />
+      <SvgIcon className={clsx('text-blue-200 stroke-current', small ? 'h-3 w-3' : 'h-4 w-4')} />
     </Anchor>
   );
 };

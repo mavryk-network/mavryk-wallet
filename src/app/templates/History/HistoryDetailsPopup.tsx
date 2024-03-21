@@ -143,9 +143,9 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         {isSwapOperation && tokensMetadata && (
           <CardContainer className="mb-6">
             <div className="flex items-center justify-between">
-              <IconForSwap token={tokensMetadata[0]} diff={moneyDiffForSwap[0]} status={status} />
-              <ParallelArrowsIcon className="w-6 h-6" />
               <IconForSwap token={tokensMetadata[1]} diff={moneyDiffForSwap[1]} status={status} />
+              <ParallelArrowsIcon className="w-6 h-6" />
+              <IconForSwap token={tokensMetadata[0]} diff={moneyDiffForSwap[0]} status={status} />
             </div>
           </CardContainer>
         )}

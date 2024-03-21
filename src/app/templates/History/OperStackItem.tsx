@@ -71,7 +71,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           argsNode={
             <StackItemArgs
               i18nKey="interactionOnContract"
-              args={[<span className="text-accent-blue">updateConfig</span>, opInteract.destination.address]}
+              args={[<span className="text-accent-blue">{opInteract.entrypoint}</span>, opInteract.destination.address]}
             />
           }
         />

@@ -9,6 +9,7 @@ import {
   HistoryItemOperationBase,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemSwapOp,
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from './types';
@@ -43,7 +44,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
-      type: oper.type ?? 'unknown',
+      type: oper.type,
       assetSlug: oper.assetSlug,
       assetMetadata: oper.assetMetadata,
       amountDiff: oper.amountDiff,
@@ -56,6 +57,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
     };
 
     switch (oper.type) {
+      case HistoryItemOpTypeEnum.Swap:
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = oper as HistoryItemTransactionOp;
 
@@ -79,8 +81,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           entrypoint: opFrom.entrypoint
         });
         break;
-      // TODO add swap
-      case HistoryItemOpTypeEnum.Swap:
+
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = oper as HistoryItemTransactionOp;
 
@@ -136,7 +137,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
     }
   }
 
-  return opStack.sort((a, b) => a.type - b.type);
+  return opStack;
 }
 
 export interface MoneyDiff {

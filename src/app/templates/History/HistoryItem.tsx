@@ -32,12 +32,14 @@ export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, hand
   const { hash, addedAt, status } = historyItem;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
+
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
   const base = useMemo(
     () => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE).map(op => ({ ...op, type: Number(historyItem.type) })),
     [historyItem.type, operStack]
   );
+
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
 
   const rest = useMemo(

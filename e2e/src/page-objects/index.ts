@@ -77,7 +77,7 @@ export const Pages = {
   AddressBook: new AddressBookPage(),
   ConfirmationModal: new ConfirmationModalPage(),
   Networks: new NetworksPage(),
-  ManageAssetsNFTs: new ManageAssetsNFTsPage(),
+  ManageAssetsCollectibles: new ManageAssetsCollectiblesPage(),
   ManageAssetsTokens: new ManageAssetsTokensPage(),
   AddAsset: new AddAssetPage(),
   Token: new TokenPage(),

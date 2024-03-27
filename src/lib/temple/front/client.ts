@@ -223,12 +223,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
   }, []);
 
-  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, accName?: string) => {
+  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string) => {
     const res = await request({
       type: TempleMessageType.ImportWatchOnlyAccountRequest,
       address,
-      chainId,
-      accName
+      chainId
     });
     assertResponse(res.type === TempleMessageType.ImportWatchOnlyAccountResponse);
   }, []);
@@ -337,15 +336,6 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     return res.sessions;
   }, []);
 
-  const removeAllDAppSessions = useCallback(async (origins: string[]) => {
-    const res = await request({
-      type: TempleMessageType.DAppRemoveAllSessionsRequest,
-      origins
-    });
-    assertResponse(res.type === TempleMessageType.DAppRemoveAllSessionsResponse);
-    return res.sessions;
-  }, []);
-
   const removeDAppSession = useCallback(async (origin: string) => {
     const res = await request({
       type: TempleMessageType.DAppRemoveSessionRequest,
@@ -398,7 +388,6 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     createTaquitoWallet,
     createTaquitoSigner,
     getAllDAppSessions,
-    removeAllDAppSessions,
     removeDAppSession
   };
 });

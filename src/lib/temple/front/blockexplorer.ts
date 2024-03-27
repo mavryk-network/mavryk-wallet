@@ -110,7 +110,7 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
 const BLOCK_EXPLORER_STORAGE_KEY = 'block_explorer';
 
 export function useBlockExplorer() {
-  const [explorerId, setExplorerId] = useStorage<BlockExplorerId>(BLOCK_EXPLORER_STORAGE_KEY, 'tzkt', false);
+  const [explorerId, setExplorerId] = useStorage<BlockExplorerId>(BLOCK_EXPLORER_STORAGE_KEY, 'tzkt');
   const explorer = useMemo(() => BLOCK_EXPLORERS.find(({ id }) => id === explorerId)!, [explorerId]);
 
   return {

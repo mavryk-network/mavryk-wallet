@@ -31,23 +31,6 @@ export function useContactsActions() {
     [contacts, updateSettings]
   );
 
-  const editContact = useCallback(
-    (address: string, updatedFields: Partial<TempleContact>) =>
-      updateSettings({
-        contacts: contacts.map(c => {
-          if (c.address === address) {
-            return {
-              ...c,
-              ...updatedFields
-            };
-          }
-
-          return c;
-        })
-      }),
-    [contacts, updateSettings]
-  );
-
   const getContact = useCallback(
     (address: string) => allContacts.find(c => c.address === address) ?? null,
     [allContacts]
@@ -56,8 +39,7 @@ export function useContactsActions() {
   return {
     addContact,
     removeContact,
-    getContact,
-    editContact
+    getContact
   };
 }
 

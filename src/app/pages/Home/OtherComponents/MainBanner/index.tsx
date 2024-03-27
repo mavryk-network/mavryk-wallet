@@ -1,22 +1,10 @@
-import React, { memo, FC } from 'react';
+import React, { memo, FC, useMemo } from 'react';
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-import BigNumber from 'bignumber.js';
-import classNames from 'clsx';
-=======
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
 
+import { Button } from 'app/atoms';
 import Money from 'app/atoms/Money';
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-import AddressChip from 'app/templates/AddressChip';
-import { useFiatCurrency } from 'lib/fiat-currency';
-import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
-
-import { HomeSelectors } from '../Home.selectors';
-import styles from './MainBanner.module.css';
-=======
 import { useTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
 import { toggleBalanceModeAction } from 'app/store/settings/actions';
 import { useBalanceModeSelector } from 'app/store/settings/selectors';
@@ -39,18 +27,12 @@ import { TokenPageSelectors } from '../TokenPage.selectors';
 
 import { BalanceFiat } from './BalanceFiat';
 import { BalanceGas } from './BalanceGas';
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
 
 interface Props {
   assetSlug?: string | null;
   accountPkh: string;
 }
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-const MainBanner = memo<Props>(({ accountPkh }) => {
-  return <TotalVolumeBanner accountPkh={accountPkh} />;
-});
-=======
 const MainBanner: FC<Props> = ({ assetSlug, accountPkh }) => {
   return assetSlug ? (
     <AssetBanner assetSlug={assetSlug ?? 'tez'} accountPkh={accountPkh} />
@@ -58,7 +40,6 @@ const MainBanner: FC<Props> = ({ assetSlug, accountPkh }) => {
     <TotalVolumeBanner accountPkh={accountPkh} />
   );
 };
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
 
 export default MainBanner;
 
@@ -66,48 +47,23 @@ interface TotalVolumeBannerProps {
   accountPkh: string;
 }
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
-  <div
-    className={classNames(
-      styles.banner,
-      'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto mb-4'
-    )}
-  >
-    <BalanceInfo />
-    <div className="flex justify-between items-center w-full">
-      <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
-    </div>
-=======
 const TotalVolumeBanner = memo<TotalVolumeBannerProps>(({ accountPkh }) => (
   <div className="flex items-start justify-between w-full max-w-sm mx-auto mb-4">
     <BalanceInfo accountPkh={accountPkh} />
     <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
   </div>
 ));
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-const BalanceInfo: FC = () => {
-  const { totalBalanceInFiat } = useTotalBalance();
-=======
 const BalanceInfo: FC<{ accountPkh: string }> = ({ accountPkh }) => {
   const dispatch = useDispatch();
   const network = useNetwork();
   const totalBalanceInDollar = useTotalBalance();
   const balanceMode = useBalanceModeSelector();
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
 
   const {
-    selectedFiatCurrency: { symbol: fiatSymbol }
+    selectedFiatCurrency: { name: fiatName, symbol: fiatSymbol }
   } = useFiatCurrency();
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-  return (
-    <div className="flex flex-col justify-between items-start">
-      <div className="flex items-center text-3xl-plus">
-        <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
-=======
   const {
     metadata: { name: gasTokenName, symbol: gasTokenSymbol }
   } = useGasToken();
@@ -173,27 +129,11 @@ const BalanceInfo: FC<{ accountPkh: string }> = ({ accountPkh }) => {
         ) : (
           <BalanceGas totalBalanceInDollar={totalBalanceInDollar} currency={gasTokenSymbol} accountPkh={accountPkh} />
         )}
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx
       </div>
     </div>
   );
 };
 
-<<<<<<< HEAD:src/app/pages/Home/OtherComponents/MainBanner.tsx
-interface BalanceProps {
-  volume: number | string | BigNumber;
-  currency: string;
-}
-const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
-  <>
-    <span className="mr-1">≈</span>
-    <span className="ml-1">{currency}</span>
-    <Money smallFractionFont={false} fiat>
-      {volume}
-    </Money>
-  </>
-);
-=======
 interface AssetBannerProps {
   assetSlug: string;
   accountPkh: string;
@@ -249,4 +189,3 @@ const AssetBanner = memo<AssetBannerProps>(({ assetSlug, accountPkh }) => {
     </div>
   );
 });
->>>>>>> master:src/app/pages/Home/OtherComponents/MainBanner/index.tsx

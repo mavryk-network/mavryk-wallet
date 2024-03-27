@@ -2,8 +2,6 @@ import React, { FC, HTMLAttributes } from 'react';
 
 import classNames from 'clsx';
 
-import { ReactComponent as ComponentIcon } from 'app/icons/component.svg';
-
 type SubTitleProps = HTMLAttributes<HTMLHeadingElement> & {
   uppercase?: boolean;
   small?: boolean;

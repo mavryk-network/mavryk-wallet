@@ -3,39 +3,35 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import { useDispatch } from 'react-redux';
 
-import { FormSubmitButton, FormSecondaryButton, Spinner, Money, Alert } from 'app/atoms';
-import { useTabSlug } from 'app/atoms/useTabSlug';
+import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
+import CopyButton from 'app/atoms/CopyButton';
 import PageLayout from 'app/layouts/PageLayout';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
+import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
+import { loadNFTsDetailsActions } from 'app/store/nfts/actions';
+import OperationStatus from 'app/templates/OperationStatus';
+import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
+import { BLOCK_DURATION } from 'lib/fixed-times';
+import { t, T } from 'lib/i18n';
+import { getAssetName } from 'lib/metadata';
+import { useAccount } from 'lib/temple/front';
+import { atomsToTokens } from 'lib/temple/helpers';
+import { TempleAccountType } from 'lib/temple/types';
+import { useInterval } from 'lib/ui/hooks';
+import { navigate } from 'lib/woozie';
+
+import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
+import { CollectibleSelectors } from '../selectors';
+import { getDetailsListing } from '../utils';
+import { CardWithLabel } from './CardWithLabel';
+import { CollectiblePageImage } from './CollectiblePageImage';
+import { PropertiesItems } from './PropertiesItems';
+import { useRetryableSWR } from 'lib/swr';
+import { fromAssetSlug } from 'lib/assets/utils';
 import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
-import AddressChip from 'app/templates/AddressChip';
-import OperationStatus from 'app/templates/OperationStatus';
-import { TabsBar } from 'app/templates/TabBar';
-import { setTestID } from 'lib/analytics';
-import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
-import { fromAssetSlug } from 'lib/assets';
-import { BLOCK_DURATION } from 'lib/fixed-times';
-import { t, T } from 'lib/i18n';
-import { buildTokenImagesStack } from 'lib/images-uri';
-import { getAssetName } from 'lib/metadata';
-import { useRetryableSWR } from 'lib/swr';
-import { useAccount } from 'lib/temple/front';
-import { atomsToTokens } from 'lib/temple/helpers';
-import { TempleAccountType } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
-import { ImageStacked } from 'lib/ui/ImageStacked';
-import { navigate } from 'lib/woozie';
-
-import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
-
-import { AttributesItems } from './AttributesItems';
-import { CollectiblePageImage } from './CollectiblePageImage';
-import { PropertiesItems } from './PropertiesItems';
-import { CollectiblesSelectors } from './selectors';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -44,11 +40,9 @@ interface Props {
 }
 
 const CollectiblePage = memo<Props>(({ assetSlug }) => {
-  const metadata = useCollectibleMetadataSelector(assetSlug); // Loaded only, if shown in grid for now
+  const metadata = useCollectibleMetadataSelector(assetSlug);
   const details = useCollectibleDetailsSelector(assetSlug);
-  const areAnyCollectiblesDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-
-  const account = useAccount();
+  const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
@@ -59,29 +53,23 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
       refreshInterval: DETAILS_SYNC_INTERVAL
     }
   );
+
+  const account = useAccount();
+
   const offers = extraDetails?.offers_active;
 
   const { publicKeyHash } = account;
   const accountCanSign = account.type !== TempleAccountType.WatchOnly;
 
-  const areDetailsLoading = areAnyCollectiblesDetailsLoading && details === undefined;
+  const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
 
-  const collectibleName = getAssetName(metadata);
-
-  const collection = useMemo(
-    () =>
-      details && {
-        title: details.galleries[0]?.title ?? details.fa.name,
-        logo: buildTokenImagesStack(details.fa.logo)
-      },
-    [details]
-  );
+  const nftName = getAssetName(metadata);
 
   const creators = details?.creators ?? [];
 
   const takableOffer = useMemo(
     () => offers?.find(({ buyer_address }) => buyer_address !== publicKeyHash),
-    [offers, publicKeyHash]
+    [details, publicKeyHash]
   );
 
   const {
@@ -94,7 +82,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
   const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
+  useInterval(() => void dispatch(loadNFTsDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
     dispatch,
     assetSlug
   ]);
@@ -125,31 +113,11 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
     return value;
   }, [displayedOffer, accountCanSign]);
 
-  const tabNameInUrl = useTabSlug();
-
-  const tabs = useMemo(() => {
-    const propertiesTab = { name: 'properties', titleI18nKey: 'properties' } as const;
-
-    if (!details?.attributes.length) return [propertiesTab];
-
-    return [{ name: 'attributes', titleI18nKey: 'attributes' } as const, propertiesTab];
-  }, [details]);
-
-  const { name: activeTabName } = useMemo(() => {
-    const tab = tabNameInUrl ? tabs.find(({ name }) => name === tabNameInUrl) : null;
-
-    return tab ?? tabs[0]!;
-  }, [tabs, tabNameInUrl]);
+  const listing = getDetailsListing(details);
 
   return (
-    <PageLayout
-      pageTitle={
-        <span className="truncate" {...setTestID(CollectiblesSelectors.collectibleTitle)}>
-          {collectibleName}
-        </span>
-      }
-    >
-      <div className="flex flex-col gap-y-3 max-w-sm w-full mx-auto pt-2 pb-4">
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{nftName}</span>}>
+      <div className="flex flex-col w-full pb-6">
         {operationError ? (
           <Alert
             type="error"
@@ -161,10 +129,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
           operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-4" />
         )}
 
-        <div
-          className="rounded-lg mb-2 border border-gray-300 bg-blue-50 overflow-hidden"
-          style={{ aspectRatio: '1/1' }}
-        >
+        <div className="rounded-2xl mb-6 bg-gray-405 overflow-hidden" style={{ aspectRatio: '1/1' }}>
           <CollectiblePageImage
             metadata={metadata}
             areDetailsLoading={areDetailsLoading}
@@ -179,72 +144,68 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
           <Spinner className="self-center w-20" />
         ) : (
           <>
-            {collection && (
-              <div className="flex justify-between items-center">
-                <div className="flex items-center justify-center rounded">
-                  <ImageStacked sources={collection.logo} className="w-6 h-6 rounded border border-gray-300" />
-                  <div className="content-center ml-2 text-gray-910 text-sm">{collection?.title ?? ''}</div>
-                </div>
-              </div>
-            )}
-
-            <div className="text-gray-910 text-2xl truncate">{collectibleName}</div>
-
-            <div className="text-xs text-gray-910 break-words">{details?.description ?? ''}</div>
-
-            {creators.length > 0 && (
-              <div className="flex items-center">
-                <div className="self-start leading-6 text-gray-600 text-xs mr-1">
-                  <T id={creators.length > 1 ? 'creators' : 'creator'} />
-                </div>
-
-                <div className="flex flex-wrap gap-1">
-                  {creators.map(creator => (
-                    <AddressChip key={creator.address} pkh={creator.address} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-col p-4 gap-y-2 mt-1 mb-3 rounded-lg border border-gray-300">
-              <FormSecondaryButton
+            <div className="flex gap-x-4 items-center w-full mb-4">
+              <FormSubmitButton
                 disabled={!displayedOffer || displayedOffer.buyerIsMe || isSelling || !accountCanSign}
                 title={sellButtonTooltipStr}
                 onClick={onSellButtonClick}
-                testID={CollectiblesSelectors.sellButton}
+                testID={CollectibleSelectors.sellButton}
               >
-                {displayedOffer ? (
-                  <div>
-                    <span>
-                      <T id="sellFor" />{' '}
-                    </span>
-                    <Money shortened smallFractionFont={false} tooltip={false}>
-                      {displayedOffer.price}
-                    </Money>
-                    <span> {displayedOffer.symbol}</span>
-                  </div>
-                ) : (
-                  <T id="noOffersYet" />
-                )}
-              </FormSecondaryButton>
+                {displayedOffer ? <T id="sell" /> : <T id="noOffersYet" />}
+              </FormSubmitButton>
 
               <FormSubmitButton
                 disabled={isSelling}
                 onClick={onSendButtonClick}
-                testID={CollectiblesSelectors.sendButton}
+                testID={CollectibleSelectors.sendButton}
               >
                 <T id="send" />
               </FormSubmitButton>
             </div>
 
-            <TabsBar tabs={tabs} activeTabName={activeTabName} withOutline />
+            <CopyButton
+              text={nftName}
+              type={'block'}
+              className={'text-white text-left text-xl leading-6 tracking-tight truncate mb-2'}
+            >
+              {nftName}
+            </CopyButton>
 
-            <div className="grid grid-cols-2 gap-2 text-gray-910">
-              {activeTabName === 'attributes' ? (
-                <AttributesItems details={details} />
-              ) : (
-                <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
+            <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
+
+            <div>
+              {creators.length > 0 && (
+                <>
+                  <CardWithLabel label={<T id={creators.length > 1 ? 'creators' : 'creator'} />} className="mb-3">
+                    <div className="flex flex-wrap gap-1">
+                      {creators.map((creator, idx) => (
+                        <div key={creator.address} className="w-full">
+                          <AvatarBlock hash={creator.address} />
+                          {creators.length > 1 && idx < creators.length - 1 && (
+                            <Divider color="bg-divider" className="my-2" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardWithLabel>
+                </>
               )}
+
+              <CardWithLabel label={<T id={'floorPrice'} />}>
+                {isDefined(listing) ? (
+                  <div className="flex items-center gap-x-1">
+                    <Money shortened smallFractionFont={false} tooltip={true}>
+                      {atomsToTokens(listing.floorPrice, listing.decimals)}
+                    </Money>
+                    <span> {listing.symbol}</span>
+                  </div>
+                ) : (
+                  '-'
+                )}
+              </CardWithLabel>
+
+              <Divider className="my-6" color="bg-divider" />
+              <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
             </div>
           </>
         )}

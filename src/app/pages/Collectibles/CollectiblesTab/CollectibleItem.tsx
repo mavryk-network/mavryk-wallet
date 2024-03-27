@@ -5,35 +5,47 @@ import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
-import { useAllNFTsDetailsLoadingSelector, useNFTDetailsSelector } from 'app/store/nfts/selectors';
+import {
+  useAllCollectiblesDetailsLoadingSelector,
+  useCollectibleDetailsSelector
+} from 'app/store/collectibles/selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
-import { useBalance } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { useIntersectionDetection } from 'lib/ui/use-intersection-detection';
 import { Link } from 'lib/woozie';
 
-import { getListingDetails } from '../utils';
-import { NFTItemImage } from './NFTItemImage';
+import { getDetailsListing } from '../utils';
+import { CollectibleItemImage } from './CollectibleItemImage';
+import { useBalanceSelector } from 'app/store/balances/selectors';
 
 interface Props {
   assetSlug: string;
   accountPkh: string;
   areDetailsShown: boolean;
+  chainId: string;
 }
 
-export const NFTItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) => {
+export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, areDetailsShown }) => {
   const { popup } = useAppEnv();
   const metadata = useTokenMetadataSelector(assetSlug);
   const toDisplayRef = useRef<HTMLDivElement>(null);
   const [displayed, setDisplayed] = useState(true);
-  const { data: balance } = useBalance(assetSlug, accountPkh, { displayed, suspense: false });
+  const balanceAtomic = useBalanceSelector(accountPkh, chainId, assetSlug);
+  // const { data: balance } = useBalance(assetSlug, accountPkh, { displayed, suspense: false });
 
-  const areDetailsLoading = useAllNFTsDetailsLoadingSelector();
-  const details = useNFTDetailsSelector(assetSlug);
+  const decimals = metadata?.decimals;
 
-  const listing = useMemo(() => getListingDetails(details), [details]);
+  const balance = useMemo(
+    () => (isDefined(decimals) && balanceAtomic ? atomsToTokens(balanceAtomic, decimals) : null),
+    [balanceAtomic, decimals]
+  );
+
+  const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const details = useCollectibleDetailsSelector(assetSlug);
+
+  const listing = useMemo(() => getDetailsListing(details), [details]);
 
   const handleIntersection = useCallback(() => void setDisplayed(true), []);
 
@@ -52,7 +64,7 @@ export const NFTItem = memo<Props>(({ assetSlug, accountPkh, areDetailsShown }) 
         title={assetName}
       >
         {displayed && (
-          <NFTItemImage
+          <CollectibleItemImage
             assetSlug={assetSlug}
             metadata={metadata}
             areDetailsLoading={areDetailsLoading && details === undefined}

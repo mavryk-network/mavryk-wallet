@@ -7,7 +7,7 @@ import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as AlertIcon } from 'app/icons/warning.svg';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
-import { T, t } from 'lib/i18n';
+import { t } from 'lib/i18n';
 import { merge } from 'lib/utils/merge';
 
 import styles from './alert.module.css';
@@ -42,7 +42,7 @@ export const Alert: FC<AlertProps> = ({
     }
   }, [autoFocus]);
 
-  const [bgColorClassName, borderColorClassName, textColorClassName, titleColorClassName] = getColorsByType(type);
+  const [bgColorClassName, _, textColorClassName, titleColorClassName] = getColorsByType(type);
 
   return (
     <div
@@ -51,8 +51,6 @@ export const Alert: FC<AlertProps> = ({
         'relative w-full px-3 pb-3 pt-2',
         'flex items-center gap-3',
         bgColorClassName,
-        // 'border',
-        // borderColorClassName,
         'rounded-md',
         className
       )}
@@ -101,7 +99,7 @@ export const AlertWithCollapse: FC<AlertWithCollapseProps> = ({ wrapperClassName
 
   const toggleShowDetails = useCallback(() => setShowDetails(prevValue => !prevValue), []);
 
-  const [bgColorClassName, borderColorClassName] = getColorsByType(rest.type ?? 'warning');
+  const [_, borderColorClassName] = getColorsByType(rest.type ?? 'warning');
 
   return (
     <div

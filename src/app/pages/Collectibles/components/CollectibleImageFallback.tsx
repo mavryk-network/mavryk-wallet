@@ -1,19 +1,19 @@
-import React, { FC } from 'react';
+import React, { memo } from 'react';
 
 import { ReactComponent as BrokenImageSvg } from 'app/icons/broken-image.svg';
 import { ReactComponent as MusicSvg } from 'app/icons/music.svg';
 
-interface NFTImageFallbackProps {
+interface Props {
   large?: boolean;
-  isAudioNFT?: boolean;
+  isAudioCollectible?: boolean;
 }
 
-export const NFTImageFallback: FC<NFTImageFallbackProps> = ({ large = false, isAudioNFT = false }) => {
+export const CollectibleImageFallback = memo<Props>(({ large = false, isAudioCollectible = false }) => {
   const height = large ? '23%' : '32%';
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      {isAudioNFT ? <MusicSvg height={height} /> : <BrokenImageSvg height={height} />}
+      {isAudioCollectible ? <MusicSvg height={height} /> : <BrokenImageSvg height={height} />}
     </div>
   );
-};
+});

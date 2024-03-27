@@ -1,9 +1,9 @@
 import { isDefined } from '@rnw-community/shared';
 
-import { NFTDetails } from 'app/store/nfts/state';
+import { CollectibleDetails } from 'app/store/collectibles/state';
 import { objktCurrencies } from 'lib/apis/objkt';
 
-export function getListingDetails(details: NFTDetails | nullish) {
+export function getDetailsListing(details: CollectibleDetails | nullish) {
   if (!details?.listing) return null;
 
   const { floorPrice, currencyId } = details.listing;

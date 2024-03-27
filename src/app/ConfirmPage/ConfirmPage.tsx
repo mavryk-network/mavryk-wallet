@@ -18,7 +18,7 @@ import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
-import { useTempleClient, useAccount, useRelevantAccounts, useCustomChainId } from 'lib/temple/front';
+import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
 import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -73,7 +73,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
   error,
   modifyFeeAndLimit
 }) => {
-  const chainId = useCustomChainId(payload.networkRpc, true)!;
+  const chainId = useChainIdValue(payload.networkRpc, true)!;
   const mainnet = chainId === TempleChainId.Mainnet;
 
   return payload.type === 'connect' ? (

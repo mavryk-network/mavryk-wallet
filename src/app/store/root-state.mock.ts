@@ -2,12 +2,14 @@ import { mockNotificationsState } from 'lib/notifications';
 
 import { mockABTestingState } from './ab-testing/state.mock';
 import { mockAdvertisingState } from './advertising/state.mock';
+import { mockAssetsState } from './assets/state.mock';
 import { mockBalancesState } from './balances/state.mock';
 import { mockBuyWithCreditCardState } from './buy-with-credit-card/state.mock';
+import { mockCollectiblesState } from './collectibles/state.mock';
+import { mockCollectiblesMetadataState } from './collectibles-metadata/state.mock';
 import { mockCurrencyState } from './currency/state.mock';
 import { mockDAppsState } from './d-apps/state.mock';
 import { mockNewsletterState } from './newsletter/newsletter-state.mock';
-import { mockNFTsState } from './nfts/state.mock';
 import { mockPartnersPromotionState } from './partners-promotion/state.mock';
 import type { RootState } from './root-state.type';
 import { mockSettingsState } from './settings/state.mock';
@@ -24,9 +26,11 @@ export const mockRootState: RootState = {
   swap: mockSwapState,
   partnersPromotion: mockPartnersPromotionState,
   balances: mockBalancesState,
+  assets: mockAssetsState,
   tokensMetadata: mockTokensMetadataState,
+  collectiblesMetadata: mockCollectiblesMetadataState,
   abTesting: mockABTestingState,
   buyWithCreditCard: mockBuyWithCreditCardState,
-  nfts: mockNFTsState,
+  collectibles: mockCollectiblesState,
   newsletter: mockNewsletterState
 };

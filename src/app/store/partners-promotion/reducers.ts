@@ -1,11 +1,19 @@
 import { createReducer } from '@reduxjs/toolkit';
+import { persistReducer } from 'redux-persist';
+import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 
-import { createEntity } from 'lib/store';
+import { AD_HIDING_TIMEOUT } from 'lib/constants';
+import { createEntity, storageConfig } from 'lib/store';
 
-import { loadPartnersPromoAction, togglePartnersPromotionAction } from './actions';
-import { partnersPromotionInitialState } from './state';
+import {
+  hidePromotionAction,
+  loadPartnersPromoAction,
+  setLastReportedPageNameAction,
+  togglePartnersPromotionAction
+} from './actions';
+import { partnersPromotionInitialState, PartnersPromotionState } from './state';
 
-export const partnersPromotionRucer = createReducer(partnersPromotionInitialState, builder => {
+const partnersPromotionReducer = createReducer(partnersPromotionInitialState, builder => {
   builder.addCase(loadPartnersPromoAction.submit, state => ({
     ...state,
     promotion: createEntity(state.promotion.data, true)
@@ -20,6 +28,33 @@ export const partnersPromotionRucer = createReducer(partnersPromotionInitialStat
   }));
   builder.addCase(togglePartnersPromotionAction, (state, { payload }) => ({
     ...state,
-    shouldShowPromotion: payload
+    shouldShowPromotion: payload,
+    promotionHidingTimestamps: {}
   }));
+
+  builder.addCase(hidePromotionAction, (state, { payload: { id: pathname, timestamp } }) => {
+    const { promotionHidingTimestamps } = state;
+
+    for (const promotionId in promotionHidingTimestamps) {
+      if (promotionHidingTimestamps[promotionId] < timestamp - AD_HIDING_TIMEOUT * 2) {
+        delete promotionHidingTimestamps[promotionId];
+      }
+    }
+
+    promotionHidingTimestamps[pathname] = timestamp;
+  });
+
+  builder.addCase(setLastReportedPageNameAction, (state, { payload }) => {
+    state.lastReportedPageName = payload;
+  });
 });
+
+export const partnersPromotionPersistedReducer = persistReducer<PartnersPromotionState>(
+  {
+    key: 'root.partnersPromotion',
+    ...storageConfig,
+    stateReconciler: hardSet,
+    blacklist: ['lastReportedPageName']
+  },
+  partnersPromotionReducer
+);

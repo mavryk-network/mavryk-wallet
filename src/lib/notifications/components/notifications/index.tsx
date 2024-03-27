@@ -3,17 +3,17 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { DataPlaceholder } from 'app/atoms';
-import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import PageLayout from 'app/layouts/PageLayout';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
-import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
+import { PartnersPromotion, PartnersPromotionVariant } from 'app/templates/partners-promotion';
 import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
 import { useTimeout } from 'lib/ui/hooks';
 
 import { viewAllNotificationsAction } from '../../store/actions';
 import { useNotificationsSelector } from '../../store/selectors';
+
 import { NotificationPreviewItem } from './preview-item';
 
 const VIEW_ALL_NOTIFICATIONS_TIMEOUT = 5 * 1000;
@@ -21,7 +21,6 @@ const VIEW_ALL_NOTIFICATIONS_TIMEOUT = 5 * 1000;
 export const Notifications = () => {
   const dispatch = useDispatch();
   const notifications = useNotificationsSelector();
-  const isEnabledAdsBanner = useIsEnabledAdsBannerSelector();
   const shouldShowPartnersPromoState = useShouldShowPartnersPromoSelector();
 
   const viewAllNotifications = useCallback(() => void dispatch(viewAllNotificationsAction()), [dispatch]);
@@ -40,9 +39,13 @@ export const Notifications = () => {
       contentContainerStyle={{ padding: 0 }}
     >
       <div className="max-w-sm mx-auto pb-15">
-        {shouldShowPartnersPromoState && !isEnabledAdsBanner && (
+        {shouldShowPartnersPromoState && (
           <div className="pt-6 pb-4 flex justify-center">
-            <PartnersPromotion variant={PartnersPromotionVariant.Image} />
+            <PartnersPromotion
+              id="promo-notifications-item"
+              variant={PartnersPromotionVariant.Image}
+              pageName="Notifications"
+            />
           </div>
         )}
         {notifications.length === 0 ? (

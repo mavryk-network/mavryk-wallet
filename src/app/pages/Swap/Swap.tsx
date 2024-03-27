@@ -13,6 +13,8 @@ export const Swap: FC = () => {
 
   const network = useNetwork();
 
+  const showTKeyAd = useTKeyAd();
+
   useEffect(() => {
     dispatch(resetSwapParamsAction());
   }, []);
@@ -23,7 +25,10 @@ export const Swap: FC = () => {
         <div className="w-full max-w-sm mx-auto">
           <Suspense fallback={null}>
             {network.type === 'main' ? (
-              <SwapForm />
+              <>
+                {showTKeyAd && <img src={TkeyAd} alt="Tkey Ad" className="h-full w-full mb-6" />}
+                <SwapForm />
+              </>
             ) : (
               <p className="text-center text-base-plus text-white">
                 <T id="noExchangersAvailable" />

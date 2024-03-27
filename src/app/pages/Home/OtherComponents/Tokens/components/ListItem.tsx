@@ -17,6 +17,7 @@ interface Props {
   assetSlug: string;
   balance: BigNumber;
   onClick: (assetSlug: string) => void;
+  scam?: boolean;
 }
 
 export const ListItem = memo<Props>(
@@ -48,6 +49,7 @@ export const ListItem = memo<Props>(
           <div className="flex justify-between w-full mb-1">
             <div className="flex items-center flex-initial">
               <div className={styles['tokenSymbol']}>{assetSymbol}</div>
+              <TokenTag assetSlug={assetSlug} assetSymbol={assetSymbol} apyInfo={apyInfo} scam={scam} />
             </div>
             <CryptoBalance
               value={balance}

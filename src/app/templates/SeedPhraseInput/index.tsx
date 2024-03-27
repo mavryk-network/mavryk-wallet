@@ -12,6 +12,7 @@ import { T, t } from 'lib/i18n';
 import { clearClipboard } from 'lib/ui/utils';
 
 import { ImportAccountSelectors } from '../../pages/ImportAccount/selectors';
+
 import { SeedLengthSelect } from './SeedLengthSelect/SeedLengthSelect';
 import { numberOfWordsOptions } from './SeedLengthSelect/utils';
 import { SeedWordInput, SeedWordInputProps } from './SeedWordInput';

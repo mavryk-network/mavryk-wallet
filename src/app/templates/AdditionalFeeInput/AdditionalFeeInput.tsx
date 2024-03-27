@@ -24,8 +24,8 @@ import { ReactComponent as CupIcon } from 'app/icons/cup.svg';
 import { ReactComponent as RocketIcon } from 'app/icons/rocket.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
+import { useGasToken } from 'lib/assets/hooks';
 import { TID, toLocalFixed, T, t } from 'lib/i18n';
-import { useGasToken } from 'lib/temple/front';
 
 import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
 import { AdditionalFeeInputSelectors } from './AdditionalFeeInput.selectors';

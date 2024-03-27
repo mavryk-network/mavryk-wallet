@@ -40,6 +40,7 @@ import { TokenDetailsPopup } from './components/TokenDetailsPopup';
 import { StakeTezosTag } from './components/TokenTag/DelegateTag';
 import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
+import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
@@ -49,10 +50,11 @@ export const TokensTab: FC = () => {
   const balances = useBalancesWithDecimals();
 
   const { publicKeyHash } = useAccount();
-  const { isSyncing } = useSyncTokens();
+  const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
 
   const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, publicKeyHash);
+  const slugs = useEnabledAccountTokensSlugs();
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
@@ -71,11 +73,12 @@ export const TokensTab: FC = () => {
     [setIsZeroBalancesHidden]
   );
 
-  const slugs = useMemoWithCompare(() => tokens.map(({ tokenSlug }) => tokenSlug).sort(), [tokens], isEqual);
+  // const slugs = useMemoWithCompare(() => tokens.map(({ tokenSlug }) => tokenSlug).sort(), [tokens], isEqual);
+  const mainnetTokensScamSlugsRecord = useMainnetTokensScamlistSelector();
 
   const leadingAssets = useMemo(() => (chainId === ChainIds.MAINNET ? [TEZ_TOKEN_SLUG] : [TEZ_TOKEN_SLUG]), [chainId]);
 
-  const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(
+  const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(
     slugs,
     isZeroBalancesHidden,
     leadingAssets
@@ -126,6 +129,7 @@ export const TokensTab: FC = () => {
         assetSlug={assetSlug}
         active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
         balance={balances[assetSlug] ?? new BigNumber(0)}
+        scam={mainnetTokensScamSlugsRecord[assetSlug]}
         onClick={handleAssetOpen}
       />
     ));

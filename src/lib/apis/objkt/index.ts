@@ -10,20 +10,27 @@ import { forkJoin, map, of, switchMap } from 'rxjs';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 
 import { apolloObjktClient, MAX_OBJKT_QUERY_RESPONSE_ITEMS, OBJKT_CONTRACT } from './constants';
-import { buildGetNFTsQuery, buildGetGalleriesAttributesCountsQuery } from './queries';
+import {
+  buildGetCollectibleExtraQuery,
+  buildGetCollectiblesQuery,
+  buildGetGalleriesAttributesCountsQuery
+} from './queries';
 import type {
   FxHashContractInterface,
-  UserObjktNFT,
+  UserObjktCollectible,
   ObjktGalleryAttributeCount,
-  ObjktContractInterface
+  ObjktContractInterface,
+  ObjktCollectibleExtra
 } from './types';
 
-export type { UserObjktNFT, ObjktGalleryAttributeCount } from './types';
+export type { UserObjktCollectible, ObjktGalleryAttributeCount } from './types';
 export { objktCurrencies } from './constants';
 
-export const fetchObjktNFTs$ = (slugs: string[]) =>
-  forkJoin(chunk(slugs, MAX_OBJKT_QUERY_RESPONSE_ITEMS).map(slugsChunk => fetchObjktNFTsChunk$(slugsChunk))).pipe(
-    map(res => res.reduce<UserObjktNFT[]>((acc, curr) => acc.concat(curr.token), [])),
+export const fetchObjktCollectibles$ = (slugs: string[]) =>
+  forkJoin(
+    chunk(slugs, MAX_OBJKT_QUERY_RESPONSE_ITEMS).map(slugsChunk => fetchObjktCollectiblesChunk$(slugsChunk))
+  ).pipe(
+    map(res => res.reduce<UserObjktCollectible[]>((acc, curr) => acc.concat(curr.token), [])),
     // Now, getting tokens' attributes counts, that are assigned to galleries
     switchMap(tokens => {
       const attributesToGet: GetAttribute[] = [];
@@ -48,8 +55,8 @@ export const fetchObjktNFTs$ = (slugs: string[]) =>
     })
   );
 
-const fetchObjktNFTsChunk$ = (slugs: string[]) =>
-  apolloObjktClient.query<{ token: UserObjktNFT[] }>(buildGetNFTsQuery(), {
+const fetchObjktCollectiblesChunk$ = (slugs: string[]) =>
+  apolloObjktClient.fetch$<{ token: UserObjktCollectible[] }>(buildGetCollectiblesQuery(), {
     where: {
       _or: slugs.map(slug => {
         const { contract, id } = fromFa2TokenSlug(slug);
@@ -78,7 +85,7 @@ const fetchObjktGalleriesAttributesCounts$ = (attributes: GetAttribute[]) =>
     : of([]);
 
 const fetchObjktGalleriesAttributesCountsChunk$ = (attributes: GetAttribute[]) =>
-  apolloObjktClient.query<{ gallery_attribute_count: ObjktGalleryAttributeCount[] }>(
+  apolloObjktClient.fetch$<{ gallery_attribute_count: ObjktGalleryAttributeCount[] }>(
     buildGetGalleriesAttributesCountsQuery(),
     {
       where: {
@@ -89,6 +96,13 @@ const fetchObjktGalleriesAttributesCountsChunk$ = (attributes: GetAttribute[]) =
       }
     }
   );
+
+export const fetchCollectibleExtraDetails = (contract: string, id: string) =>
+  apolloObjktClient
+    .fetch<{ token: [ObjktCollectibleExtra] | [] }>(buildGetCollectibleExtraQuery(), {
+      where: { fa_contract: { _eq: contract }, token_id: { _eq: id } }
+    })
+    .then(data => data?.token[0] ?? null);
 
 export const getObjktMarketplaceContract = (tezos: TezosToolkit, address?: string) =>
   tezos.contract.at<ObjktContractInterface | FxHashContractInterface>(address ?? OBJKT_CONTRACT);

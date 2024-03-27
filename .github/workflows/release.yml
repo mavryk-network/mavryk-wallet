@@ -12,26 +12,12 @@ jobs:
     environment: production
     steps:
       - name: Clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: master
 
-      - name: Use Node 16.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v2
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+      - name: Repo setup
+        uses: ./.github/workflows/repo-setup
 
       - name: Secrets setup
         uses: ./.github/workflows/secrets-setup
@@ -49,6 +35,13 @@ jobs:
           TEMPLE_WALLET_MOONPAY_API_KEY: ${{ secrets.TEMPLE_WALLET_MOONPAY_API_KEY }}
           TEMPLE_FIREBASE_CONFIG: ${{ secrets.TEMPLE_FIREBASE_CONFIG }}
           TEMPLE_FIREBASE_MESSAGING_VAPID_KEY: ${{ secrets.TEMPLE_FIREBASE_MESSAGING_VAPID_KEY }}
+          HYPELAB_API_URL: ${{ vars.HYPELAB_API_URL }}
+          HYPELAB_SMALL_PLACEMENT_SLUG: ${{ vars.HYPELAB_SMALL_PLACEMENT_SLUG }}
+          HYPELAB_HIGH_PLACEMENT_SLUG: ${{ vars.HYPELAB_HIGH_PLACEMENT_SLUG }}
+          HYPELAB_WIDE_PLACEMENT_SLUG: ${{ vars.HYPELAB_WIDE_PLACEMENT_SLUG }}
+          HYPELAB_NATIVE_PLACEMENT_SLUG: ${{ vars.HYPELAB_NATIVE_PLACEMENT_SLUG }}
+          HYPELAB_PROPERTY_SLUG: ${{ vars.HYPELAB_PROPERTY_SLUG }}
+          HYPELAB_ADS_WINDOW_URL: ${{ vars.HYPELAB_ADS_WINDOW_URL }}
 
       - name: Install dependencies and code quality
         uses: ./.github/workflows/code-quality-check

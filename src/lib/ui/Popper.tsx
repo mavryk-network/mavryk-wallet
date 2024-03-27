@@ -29,9 +29,12 @@ interface PopperAnchorProps extends PopperRenderProps {
   ref: RefObject<HTMLButtonElement>;
 }
 
+export type PopperPopup = RenderProp<PopperRenderProps>;
+export type PopperChildren = RenderProp<PopperAnchorProps>;
+
 type PopperProps = Partial<Options> & {
-  popup: RenderProp<PopperRenderProps>;
-  children: RenderProp<PopperAnchorProps>;
+  popup: PopperPopup;
+  children: PopperChildren;
   fallbackPlacementsEnabled?: boolean;
   style?: React.CSSProperties;
 };
@@ -51,7 +54,7 @@ const Popper = memo<PopperProps>(({ popup, children, fallbackPlacementsEnabled =
     popupRef,
     opened
       ? evt => {
-          // @ts-ignore
+          // @ts-expect-error
           if (!(triggerRef.current && triggerRef.current.contains(evt.target))) {
             setOpened(false);
           }

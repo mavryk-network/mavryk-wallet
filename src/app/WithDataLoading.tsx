@@ -1,38 +1,43 @@
 import React, { FC, useEffect } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { useAdvertisingLoading } from 'app/hooks/use-advertising.hook';
-import { useTokensApyLoading } from 'app/hooks/use-load-tokens-apy.hook';
-import { useLongRefreshLoading } from 'app/hooks/use-long-refresh-loading.hook';
-import { useMetadataLoading } from 'app/hooks/use-metadata-loading';
-import { useNFTssDetailsLoading } from 'app/hooks/use-nfts-details-loading';
-import { useStorageAnalytics } from 'app/hooks/use-storage-analytics';
-import { useTokensLoading } from 'app/hooks/use-tokens-loading';
+import { dispatch } from 'app/store';
+import { loadTokensScamlistActions } from 'app/store/assets/actions';
 import { loadSwapDexesAction, loadSwapTokensAction } from 'app/store/swap/actions';
-import { useBalancesLoading } from 'lib/temple/front/load-balances';
 
+import { useAdvertisingLoading } from './hooks/use-advertising.hook';
+import { useAssetsLoading } from './hooks/use-assets-loading';
+import { useAssetsMigrations } from './hooks/use-assets-migrations';
+import { useBalancesLoading } from './hooks/use-balances-loading';
+import { useCollectiblesDetailsLoading } from './hooks/use-collectibles-details-loading';
+import { useTokensApyLoading } from './hooks/use-load-tokens-apy.hook';
+import { useLongRefreshLoading } from './hooks/use-long-refresh-loading.hook';
+import { useMetadataLoading } from './hooks/use-metadata-loading';
 import { useMetadataRefresh } from './hooks/use-metadata-refresh';
+import { useStorageAnalytics } from './hooks/use-storage-analytics';
+import { useUserIdSync } from './hooks/use-user-id-sync';
 
 export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
-  useTokensLoading();
+  useAssetsMigrations();
+
+  useEffect(() => void dispatch(loadTokensScamlistActions.submit()), []);
+
+  useAssetsLoading();
   useMetadataLoading();
   useMetadataRefresh();
   useBalancesLoading();
-  useNFTssDetailsLoading();
+  useCollectiblesDetailsLoading();
 
   useLongRefreshLoading();
   useAdvertisingLoading();
   useTokensApyLoading();
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     dispatch(loadSwapDexesAction.submit());
     dispatch(loadSwapTokensAction.submit());
-  }, [dispatch]);
+  }, []);
 
   useStorageAnalytics();
+  useUserIdSync();
 
   return <>{children}</>;
 };

@@ -93,15 +93,15 @@ export const NETWORKS: TempleNetwork[] = [
   //   color: '#131380',
   //   disabled: false
   // },
-  {
-    id: 'weekly',
-    name: 'WeeklyNet Testnet',
-    description: `WeeklyNet`,
-    type: 'test',
-    rpcBaseURL: `https://rpc.mavryk.network/weeklynet`,
-    color: '#FBBF24',
-    disabled: false
-  },
+  // {
+  //   id: 'weekly',
+  //   name: 'WeeklyNet Testnet',
+  //   description: `WeeklyNet`,
+  //   type: 'test',
+  //   rpcBaseURL: `https://rpc.mavryk.network/weeklynet`,
+  //   color: '#FBBF24',
+  //   disabled: false
+  // },
   // {
   //   id: 'monday',
   //   name: 'MondayNet Testnet',

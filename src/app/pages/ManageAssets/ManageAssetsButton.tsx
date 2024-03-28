@@ -9,7 +9,7 @@ type ManageAssetsButtonProps = {
 };
 
 //*
-//  assetSlug -  enum(Tokens | NFTs),  by default redirects to tokens asset page
+//  assetSlug -  enum(Tokens | Collectibles),  by default redirects to tokens asset page
 //
 export const ManageAssetsButton: FC<ManageAssetsButtonProps> = ({ assetSlug = AssetTypesEnum.Tokens }) => {
   return (

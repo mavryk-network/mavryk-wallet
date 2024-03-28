@@ -3,7 +3,10 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { SyncSpinner } from 'app/atoms';
+import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
+import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
 import { useAppEnv } from 'app/env';
+import { useCollectiblesListingLogic } from 'app/hooks/use-collectibles-listing-logic';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
@@ -15,18 +18,16 @@ import {
   SearchExplorerOpened
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
+import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
 
 import { useSortededNFTsSlugs } from '../hooks/use-collectible-sorted.hook';
-import { CollectibleItem } from './CollectibleItem';
+
 import styles from './Collectible.module.css';
-import { useCollectiblesListingLogic } from 'app/hooks/use-collectibles-listing-logic';
-import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
-import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
-import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
+import { CollectibleItem } from './CollectibleItem';
 
 interface Props {
   scrollToTheTabsBar: EmptyFn;
@@ -121,7 +122,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   <SortPopupContent items={memoizedSortAssetsOptions} />
                 </SortPopup>
 
-                <ManageAssetsButton assetSlug={AssetTypesEnum.NFTs} />
+                <ManageAssetsButton assetSlug={AssetTypesEnum.Collectibles} />
               </div>
             </SearchExplorerClosed>
           </>

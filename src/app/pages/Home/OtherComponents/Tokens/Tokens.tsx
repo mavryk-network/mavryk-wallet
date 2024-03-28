@@ -10,7 +10,6 @@ import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
-import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,
@@ -26,7 +25,7 @@ import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
-import { useAccount, useChainIds } from 'lib/temple/front';
+import { useAccount, useChainId } from 'lib/temple/front';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -108,8 +107,6 @@ export const TokensTab: FC = () => {
     [sortOption]
   );
 
-  const isEnabledAdsBanner = useIsEnabledAdsBannerSelector();
-
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const searchValueExist = useMemo(() => Boolean(searchValue), [searchValue]);
@@ -124,7 +121,7 @@ export const TokensTab: FC = () => {
         key={assetSlug}
         assetSlug={assetSlug}
         active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
-        balance={balances[assetSlug] ?? new BigNumber(0)}
+        balance={new BigNumber(balances[assetSlug] ?? 0)}
         scam={mainnetTokensScamSlugsRecord[assetSlug]}
         onClick={handleAssetOpen}
       />

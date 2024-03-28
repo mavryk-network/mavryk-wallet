@@ -5,6 +5,7 @@ import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
+import { useBalanceSelector } from 'app/store/balances/selectors';
 import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
@@ -17,8 +18,8 @@ import { useIntersectionDetection } from 'lib/ui/use-intersection-detection';
 import { Link } from 'lib/woozie';
 
 import { getDetailsListing } from '../utils';
+
 import { CollectibleItemImage } from './CollectibleItemImage';
-import { useBalanceSelector } from 'app/store/balances/selectors';
 
 interface Props {
   assetSlug: string;

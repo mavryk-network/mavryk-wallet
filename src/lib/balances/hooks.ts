@@ -29,8 +29,28 @@ export const useCurrentAccountBalances = () => {
   return useAllAccountBalancesSelector(publicKeyHash, chainId);
 };
 
+export const useOtherAccountBalances = (accountPkh: string) => {
+  const chainId = useChainId(true)!;
+
+  return useAllAccountBalancesSelector(accountPkh, chainId);
+};
+
 export const useGetCurrentAccountTokenOrGasBalanceWithDecimals = () => {
   const rawBalances = useCurrentAccountBalances();
+  const getMetadata = useGetTokenOrGasMetadata();
+
+  return useCallback(
+    (slug: string) => {
+      const rawBalance = rawBalances[slug] as string | undefined;
+      const metadata = getMetadata(slug);
+
+      return rawBalance && metadata ? atomsToTokens(new BigNumber(rawBalance), metadata.decimals) : undefined;
+    },
+    [rawBalances, getMetadata]
+  );
+};
+export const useGetOtherAccountTokenOrGasBalanceWithDecimals = (accountPkh: string) => {
+  const rawBalances = useOtherAccountBalances(accountPkh);
   const getMetadata = useGetTokenOrGasMetadata();
 
   return useCallback(

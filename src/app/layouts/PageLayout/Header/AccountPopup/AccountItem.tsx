@@ -4,8 +4,8 @@ import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Identicon, Money } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+import { useOtherAccountTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
 import { useFiatCurrency } from 'lib/fiat-currency';
-import { useTotalBalance } from 'lib/temple/front/use-total-balance.hook';
 import { TempleAccount } from 'lib/temple/types';
 import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
 
@@ -22,7 +22,7 @@ interface AccountItemProps {
 
 export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gasTokenName, attractSelf, onClick }) => {
   const { name, publicKeyHash, type } = account;
-  const { totalBalanceInFiat } = useTotalBalance(publicKeyHash);
+  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash);
 
   const {
     selectedFiatCurrency: { symbol: fiatSymbol }
@@ -73,7 +73,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gas
       <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus">
         <span className="ml-1">{fiatSymbol}</span>
         <Money smallFractionFont={false} fiat>
-          {totalBalanceInFiat}
+          {totalBalanceInDollar}
         </Money>
       </div>
     </Button>

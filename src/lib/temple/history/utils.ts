@@ -13,6 +13,7 @@ import { isTruthy } from 'lib/utils';
 import { toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 import { OperationsGroup } from '../activity-new/types';
+
 import { getMoneyDiff } from './helpers';
 import {
   Fa2TransferSummaryArray,

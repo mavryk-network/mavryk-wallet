@@ -3,6 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import type { UserHistoryItem } from 'lib/temple/history';
 
 import { useAssetMetadata } from '../../metadata';
+
 import {
   HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
@@ -152,7 +153,7 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
     if (isZero(oper.amountSigned) && !allowZero) continue;
 
     const assetSlug =
-      // @ts-ignore
+      // @ts-expect-error
       oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });

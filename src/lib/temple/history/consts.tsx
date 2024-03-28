@@ -1,5 +1,3 @@
-import { t } from 'lib/i18n';
-
 export const HistoryItemOpTypeTexts = {
   0: 'Sent',
   1: 'Received',

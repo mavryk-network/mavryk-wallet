@@ -13,7 +13,7 @@ export enum SortOptions {
 export function useSortededAssetsSlugs(
   sortOption: SortOptions | null,
   assetsSlugs: string[],
-  balances: Record<string, BigNumber>,
+  balances: StringRecord<string>,
   topSlug = 'tez'
 ) {
   const tokensMetadata = useAllTokensMetadataSelector();
@@ -38,8 +38,8 @@ export function useSortededAssetsSlugs(
 
     case SortOptions.HIGH_TO_LOW:
       sortedAssetSlugs = sortedAssetSlugs.sort((a, b) => {
-        const tokenABalance = balances[a] ?? new BigNumber(0);
-        const tokenBBalance = balances[b] ?? new BigNumber(0);
+        const tokenABalance = new BigNumber(balances[a]) ?? new BigNumber(0);
+        const tokenBBalance = new BigNumber(balances[b]) ?? new BigNumber(0);
 
         return tokenBBalance.comparedTo(tokenABalance);
       });
@@ -47,8 +47,8 @@ export function useSortededAssetsSlugs(
 
     case SortOptions.LOW_TO_HIGH:
       sortedAssetSlugs = sortedAssetSlugs.sort((a, b) => {
-        const tokenABalance = balances[a] ?? new BigNumber(0);
-        const tokenBBalance = balances[b] ?? new BigNumber(0);
+        const tokenABalance = new BigNumber(balances[a]) ?? new BigNumber(0);
+        const tokenBBalance = new BigNumber(balances[b]) ?? new BigNumber(0);
 
         return tokenABalance.comparedTo(tokenBBalance);
       });

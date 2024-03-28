@@ -1,35 +1,36 @@
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
 
+import { ManageAssetsSelectors } from 'app/pages/ManageAssets/ManageAssets.selectors';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
+import { setTokenStatus } from 'lib/temple/assets';
 
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
+import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
-import { ManageAssetsSelectors } from 'app/pages/ManageAssets/ManageAssets.selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSelect';
 import SearchAssetField from 'app/templates/SearchAssetField';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { AssetTypesEnum } from 'lib/assets/types';
-import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
+import { useCurrentAccountBalances } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
-import { setTokenStatus } from 'lib/temple/assets';
 import { useAccount, useChainId, useAvailableAssetsSlugs } from 'lib/temple/front';
 import { ITokenStatus } from 'lib/temple/repo';
 import { useConfirm } from 'lib/ui/dialog';
 import useTippy from 'lib/ui/useTippy';
 
 import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance';
+
 import { SELECT_ALL_ASSETS, SELECT_HIDDEN_ASSETS } from './manageAssets.const';
 import styles from './ManageAssets.module.css';
 import { ManageAssetsSelectOptionType } from './manageAssets.types';
-import { useCurrentAccountBalances } from 'lib/balances';
 
 interface Props {
   assetType: string;
@@ -67,9 +68,9 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const address = account.publicKeyHash;
 
   const { availableAssets, assetsStatuses, isLoading, mutate } = useAvailableAssetsSlugs(
-    assetType === AssetTypesEnum.NFTs ? AssetTypesEnum.NFTs : AssetTypesEnum.Tokens
+    assetType === AssetTypesEnum.Collectibles ? AssetTypesEnum.Collectibles : AssetTypesEnum.Tokens
   );
-  const { filteredAssets, searchValue, setSearchValue } = useFilteredAssetsSlugs(availableAssets, false);
+  const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(availableAssets, false);
 
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<ManageAssetsSelectOptionType | null>(null);

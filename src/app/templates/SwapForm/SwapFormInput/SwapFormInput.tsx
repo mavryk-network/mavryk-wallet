@@ -12,7 +12,6 @@ import InFiat from 'app/templates/InFiat';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
 import { setTestID, useFormAnalytics } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
-import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { T, t, toLocalFormat } from 'lib/i18n';
 import { EMPTY_BASE_METADATA, useAssetMetadata, AssetMetadataBase } from 'lib/metadata';
 import { useAvailableRoute3TokensSlugs } from 'lib/route3/assets';
@@ -22,6 +21,7 @@ import { AssetOption } from './AssetsMenu/AssetOption';
 import { PercentageButton } from './PercentageButton/PercentageButton';
 import styles from './SwapFormInput.module.css';
 import { SwapFormInputProps } from './SwapFormInput.props';
+import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 
 const EXCHANGE_XTZ_RESERVE = new BigNumber('0.3');
 const PERCENTAGE_BUTTONS = [25, 50, 75, 100];
@@ -61,7 +61,7 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
   useOnBlock(_ => balance.mutate());
 
   const { isLoading, route3tokensSlugs } = useAvailableRoute3TokensSlugs();
-  const { filteredAssets, setSearchValue, setTokenId } = useFilteredAssetsSlugs(
+  const { filteredAssets, setSearchValue, setTokenId } = useTokensListingLogic(
     route3tokensSlugs,
     name === 'input',
     LEADING_ASSETS

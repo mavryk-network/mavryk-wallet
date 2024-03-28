@@ -21,6 +21,6 @@ export type Asset = Token | typeof TEZ_TOKEN_SLUG;
 export type TokenStandardType = 'fa1.2' | 'fa2';
 
 export enum AssetTypesEnum {
-  NFTs = 'nfts',
+  Collectibles = 'collectibles',
   Tokens = 'tokens'
 }

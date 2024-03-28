@@ -65,7 +65,6 @@ const AssetSelect = memo<Props>(({ value, slugs, onChange, className, testIDs })
           searchValue: searchString,
           onSearchChange: event => setSearchString(event.target.value)
         }}
-        testID={testIDs?.main}
         dropdownButtonClassName="p-2 h-18"
         optionsProps={{
           options: searchedOptions,

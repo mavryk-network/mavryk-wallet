@@ -3,15 +3,15 @@ import React, { FC, Suspense, useCallback, useMemo, useState } from 'react';
 import type { WalletOperation } from '@taquito/taquito';
 
 import { useOperationStatus } from 'app/hooks/use-operation-status';
-import AssetSelect from 'app/templates/AssetSelect/AssetSelect';
-import { IAsset } from 'app/templates/AssetSelect/interfaces';
-import { getSlug } from 'app/templates/AssetSelect/utils';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useAssetsSortPredicate } from 'lib/assets/use-filtered';
-import { useAccount, useChainId, useTezos, useNFTTokens, useDisplayedFungibleTokens } from 'lib/temple/front';
+import { useTezos } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { HistoryAction, navigate } from 'lib/woozie';
+
+import AssetSelect from '../AssetSelect';
 
 import AddContactModal from './AddContactModal';
 import { Form } from './Form';
@@ -23,21 +23,14 @@ type SendFormProps = {
 };
 
 const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
-  const chainId = useChainId(true)!;
-  const account = useAccount();
-
-  const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, account.publicKeyHash);
-  const { data: nfts = [] } = useNFTTokens(chainId, account.publicKeyHash, true);
+  const tokensSlugs = useEnabledAccountTokensSlugs();
   const assetsSortPredicate = useAssetsSortPredicate();
 
-  const assets = useMemo<IAsset[]>(
-    () => [TEZ_TOKEN_SLUG, ...tokens, ...nfts].sort((a, b) => assetsSortPredicate(getSlug(a), getSlug(b))),
-    [tokens, nfts, assetsSortPredicate]
+  const assets = useMemo<string[]>(
+    () => [TEZ_TOKEN_SLUG, ...tokensSlugs].sort((a, b) => assetsSortPredicate(a, b)),
+    [tokensSlugs, assetsSortPredicate]
   );
-  const selectedAsset = useMemo(
-    () => assets.find(a => getSlug(a) === assetSlug) ?? TEZ_TOKEN_SLUG,
-    [assets, assetSlug]
-  );
+  const selectedAsset = useMemo(() => assets.find(a => a === assetSlug) ?? TEZ_TOKEN_SLUG, [assets, assetSlug]);
 
   const tezos = useTezos();
   const [operation, setOperation] = useSafeState<WalletOperation | null>(null, tezos.checksum);
@@ -83,23 +76,10 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
     <>
       {/* {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />} */}
 
-      <AssetSelect
-        value={selectedAsset}
-        assets={assets}
-        onChange={handleAssetChange}
-        className="mb-6 no-scrollbar"
-        testIDs={{
-          main: SendFormSelectors.assetDropDown,
-          searchInput: SendFormSelectors.assetDropDownSearchInput
-        }}
-      />
+      <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-6 no-scrollbar" />
 
       <Suspense fallback={<SpinnerSection />}>
-        <Form
-          assetSlug={getSlug(selectedAsset)}
-          setOperation={setOperation}
-          onAddContactRequested={handleAddContactRequested}
-        />
+        <Form assetSlug={selectedAsset} setOperation={setOperation} onAddContactRequested={handleAddContactRequested} />
       </Suspense>
 
       <AddContactModal address={addContactModalAddress} onClose={closeContactModal} />

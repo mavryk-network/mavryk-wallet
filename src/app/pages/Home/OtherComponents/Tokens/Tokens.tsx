@@ -1,11 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ChainIds } from '@taquito/taquito';
-import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { BigNumber } from 'bignumber.js';
 import clsx from 'clsx';
-import { useSyncTokens } from 'lib/temple/front/sync-tokens';
-import { isEqual } from 'lodash';
 
 import { SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -26,23 +23,21 @@ import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
-import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
-import { T, t } from 'lib/i18n';
-import { useAccount, useChainId, useDisplayedFungibleTokens } from 'lib/temple/front';
+import { useCurrentAccountBalances } from 'lib/balances';
+import { T } from 'lib/i18n';
+import { useAccount, useChainIds } from 'lib/temple/front';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
 import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
 
-import { AcceptAdsBanner } from './AcceptAdsBanner';
 import { ListItem } from './components/ListItem';
 import { TokenDetailsPopup } from './components/TokenDetailsPopup';
 import { StakeTezosTag } from './components/TokenTag/DelegateTag';
 import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
-import { useCurrentAccountBalances } from 'lib/balances';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
@@ -55,7 +50,6 @@ export const TokensTab: FC = () => {
   const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
 
-  const { data: tokens = [] } = useDisplayedFungibleTokens(chainId, publicKeyHash);
   const slugs = useEnabledAccountTokensSlugs();
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);

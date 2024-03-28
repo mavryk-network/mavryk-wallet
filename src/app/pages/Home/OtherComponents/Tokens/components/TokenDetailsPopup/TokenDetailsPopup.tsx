@@ -1,10 +1,10 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
+import { ActionButton, NETWORK_TYPES_WITH_BUY_BUTTON, tippyPropsMock } from 'app/pages/Home';
 import BigNumber from 'bignumber.js';
 
 import { Alert, Anchor, HashChip, Money } from 'app/atoms';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
-import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ConfirmedIcon } from 'app/icons/confirmed.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
@@ -12,7 +12,6 @@ import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
 import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { ActionButton, NETWORK_TYPES_WITH_BUY_BUTTON, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
@@ -21,6 +20,7 @@ import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { isTzbtcAsset, TEZ_TOKEN_SLUG } from 'lib/assets';
+import { useCurrentAccountBalances } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
@@ -71,7 +71,7 @@ type TokenDetailsPopupContentProps = {
 const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug, assetMetadata }) => {
   const account = useAccount();
   const network = useNetwork();
-  const balances = useBalancesWithDecimals();
+  const balances = useCurrentAccountBalances();
   const balance = useMemo(() => balances[assetSlug] ?? new BigNumber(0), [assetSlug, balances]);
   const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
   const tokenMetadata = useTokenMetadataSelector(assetSlug);

@@ -49,6 +49,7 @@ export const useGetCurrentAccountTokenOrGasBalanceWithDecimals = () => {
     [rawBalances, getMetadata]
   );
 };
+
 export const useGetOtherAccountTokenOrGasBalanceWithDecimals = (accountPkh: string) => {
   const rawBalances = useOtherAccountBalances(accountPkh);
   const getMetadata = useGetTokenOrGasMetadata();

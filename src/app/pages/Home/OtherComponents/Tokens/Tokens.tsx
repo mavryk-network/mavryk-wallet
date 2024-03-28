@@ -1,16 +1,18 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ChainIds } from '@taquito/taquito';
+import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { BigNumber } from 'bignumber.js';
 import clsx from 'clsx';
+import { useSyncTokens } from 'lib/temple/front/sync-tokens';
 import { isEqual } from 'lodash';
 
 import { SyncSpinner } from 'app/atoms';
-import { PartnersPromotion, PartnersPromotionVariant } from 'app/atoms/partners-promotion';
 import { useAppEnv } from 'app/env';
-import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
+import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
+import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
 import { useIsEnabledAdsBannerSelector } from 'app/store/settings/selectors';
 import {
   SearchExplorerClosed,
@@ -23,31 +25,31 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/t
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useFilteredAssetsSlugs } from 'lib/assets/use-filtered';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { T, t } from 'lib/i18n';
 import { useAccount, useChainId, useDisplayedFungibleTokens } from 'lib/temple/front';
-import { useSyncTokens } from 'lib/temple/front/sync-tokens';
-import { useMemoWithCompare } from 'lib/ui/hooks';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
 import { HomeSelectors } from '../../Home.selectors';
 import { AssetsSelectors } from '../Assets.selectors';
+
 import { AcceptAdsBanner } from './AcceptAdsBanner';
 import { ListItem } from './components/ListItem';
 import { TokenDetailsPopup } from './components/TokenDetailsPopup';
 import { StakeTezosTag } from './components/TokenTag/DelegateTag';
 import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
-import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
+import { useCurrentAccountBalances } from 'lib/balances';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
 export const TokensTab: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const chainId = useChainId(true)!;
-  const balances = useBalancesWithDecimals();
+  const balances = useCurrentAccountBalances();
 
   const { publicKeyHash } = useAccount();
   const isSyncing = useAreAssetsLoading('tokens');

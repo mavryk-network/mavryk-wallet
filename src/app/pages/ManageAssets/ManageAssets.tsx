@@ -5,7 +5,6 @@ import classNames from 'clsx';
 
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
-import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
@@ -30,6 +29,7 @@ import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance
 import { SELECT_ALL_ASSETS, SELECT_HIDDEN_ASSETS } from './manageAssets.const';
 import styles from './ManageAssets.module.css';
 import { ManageAssetsSelectOptionType } from './manageAssets.types';
+import { useCurrentAccountBalances } from 'lib/balances';
 
 interface Props {
   assetType: string;
@@ -63,7 +63,7 @@ const tippyPropsHideBtn = { ...tippyPropsDeleteBtn, content: t('hideUnhide') };
 const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const chainId = useChainId(true)!;
   const account = useAccount();
-  const balances = useBalancesWithDecimals();
+  const balances = useCurrentAccountBalances();
   const address = account.publicKeyHash;
 
   const { availableAssets, assetsStatuses, isLoading, mutate } = useAvailableAssetsSlugs(

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { BigNumber } from 'bignumber.js';
 
-import { useTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 
 export enum SortOptions {
   HIGH_TO_LOW = 'highToLow',
@@ -16,7 +16,7 @@ export function useSortededAssetsSlugs(
   balances: Record<string, BigNumber>,
   topSlug = 'tez'
 ) {
-  const tokensMetadata = useTokensMetadataSelector();
+  const tokensMetadata = useAllTokensMetadataSelector();
 
   const assetsSlugNames = useMemo(
     () =>

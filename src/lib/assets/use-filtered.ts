@@ -4,9 +4,8 @@ import { isDefined } from '@rnw-community/shared';
 import { BigNumber } from 'bignumber.js';
 import { useDebounce } from 'use-debounce';
 
-import { useBalancesWithDecimals } from 'app/hooks/use-balances-with-decimals.hook';
 import { toTokenSlug } from 'lib/assets';
-import { useAccountBalances } from 'lib/balances';
+import { useAccountBalances, useCurrentAccountBalances } from 'lib/balances';
 import { useUsdToTokenRates } from 'lib/fiat-currency/core';
 import { useTokensMetadataWithPresenceCheck } from 'lib/metadata';
 
@@ -82,13 +81,13 @@ export function useFilteredAssetsSlugs(
 }
 
 export function useAssetsSortPredicate() {
-  const balances = useBalancesWithDecimals();
+  const balances = useCurrentAccountBalances();
   const usdToTokenRates = useUsdToTokenRates();
 
   return useCallback(
     (tokenASlug: string, tokenBSlug: string) => {
-      const tokenABalance = balances[tokenASlug] ?? new BigNumber(0);
-      const tokenBBalance = balances[tokenBSlug] ?? new BigNumber(0);
+      const tokenABalance = new BigNumber(balances[tokenASlug]) ?? new BigNumber(0);
+      const tokenBBalance = new BigNumber(balances[tokenBSlug]) ?? new BigNumber(0);
       const tokenAEquity = tokenABalance.multipliedBy(usdToTokenRates[tokenASlug] ?? 0);
       const tokenBEquity = tokenBBalance.multipliedBy(usdToTokenRates[tokenBSlug] ?? 0);
 

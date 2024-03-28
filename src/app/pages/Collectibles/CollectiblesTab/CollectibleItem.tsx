@@ -34,7 +34,6 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
   const toDisplayRef = useRef<HTMLDivElement>(null);
   const [displayed, setDisplayed] = useState(true);
   const balanceAtomic = useBalanceSelector(accountPkh, chainId, assetSlug);
-  // const { data: balance } = useBalance(assetSlug, accountPkh, { displayed, suspense: false });
 
   const decimals = metadata?.decimals;
 

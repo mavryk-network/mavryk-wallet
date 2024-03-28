@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Alert, Divider, FormSubmitButton } from 'app/atoms';
 import { useBlockLevel } from 'app/hooks/use-block-level.hook';
 import { useOperationStatus } from 'app/hooks/use-operation-status';
-import { useRoute3 } from 'app/hooks/use-route3.hook';
+import { useSwap } from 'app/hooks/use-swap';
 import { ReactComponent as InfoIcon } from 'app/icons/info.svg';
 import { ReactComponent as ToggleIcon } from 'app/icons/toggle.svg';
 import { buildSwapPageUrlQuery } from 'app/pages/Swap/utils/build-url-query';
@@ -23,22 +23,22 @@ import { setTestID, useFormAnalytics } from 'lib/analytics';
 import { fetchRoute3SwapParams } from 'lib/apis/route3/fetch-route3-swap-params';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { KNOWN_TOKENS_SLUGS } from 'lib/assets/known-tokens';
+import { useBalance } from 'lib/balances/hooks';
 import { T, t } from 'lib/i18n';
-import { useAssetMetadata, useGetAssetMetadata } from 'lib/metadata';
+import { useAssetMetadata, useGetTokenMetadata } from 'lib/metadata';
 import {
   BURN_ADDREESS,
   MAX_ROUTING_FEE_CHAINS,
   ROUTING_FEE_ADDRESS,
   ROUTING_FEE_SLIPPAGE_RATIO,
   SWAP_THRESHOLD_TO_GET_CASHBACK,
-  TEMPLE_TOKEN,
-  ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT
+  TEMPLE_TOKEN
 } from 'lib/route3/constants';
 import { isLiquidityBakingParamsResponse } from 'lib/route3/interfaces';
 import { getPercentageRatio } from 'lib/route3/utils/get-percentage-ratio';
 import { getRoute3TokenBySlug } from 'lib/route3/utils/get-route3-token-by-slug';
-import { ROUTING_FEE_PERCENT, SWAP_CASHBACK_PERCENT } from 'lib/swap-router/config';
-import { useAccount, useBalance, useGetTokenMetadata, useTezos } from 'lib/temple/front';
+import { ROUTING_FEE_PERCENT } from 'lib/swap-router/config';
+import { useAccount, useTezos } from 'lib/temple/front';
 import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
 import useTippy from 'lib/ui/useTippy';
 import { ZERO } from 'lib/utils/numbers';
@@ -77,7 +77,6 @@ export const SwapForm: FC = () => {
   const formAnalytics = useFormAnalytics('SwapForm');
 
   const feeInfoIconRef = useTippy<HTMLSpanElement>(feeInfoTippyProps);
-  const cashbackInfoIconRef = useTippy<HTMLSpanElement>(cashbackInfoTippyProps);
 
   const defaultValues = useSwapFormDefaultValue();
   const {
@@ -99,18 +98,17 @@ export const SwapForm: FC = () => {
   const outputValue = watch('output') ?? { assetSlug: undefined, amount: 0 };
   const slippageTolerance = watch('slippageTolerance');
 
-  const balance = useBalance(inputValue.assetSlug ?? 'tez', account.publicKeyHash, { suspense: false });
+  const { value: balance } = useBalance(inputValue.assetSlug ?? 'tez', account.publicKeyHash);
 
   const maxAmount = useMemo(() => {
     if (!inputValue.assetSlug) {
       return new BigNumber(0);
     }
 
-    const maxSendAmount =
-      inputValue.assetSlug === TEZ_TOKEN_SLUG ? balance.data?.minus(EXCHANGE_XTZ_RESERVE) : balance.data;
+    const maxSendAmount = inputValue.assetSlug === TEZ_TOKEN_SLUG ? balance?.minus(EXCHANGE_XTZ_RESERVE) : balance;
 
     return maxSendAmount ?? new BigNumber(0);
-  }, [inputValue.assetSlug, balance.data]);
+  }, [inputValue.assetSlug, balance]);
 
   const exceededMaxAmount = useMemo(
     () => (inputValue.amount ?? new BigNumber(0)).isGreaterThan(maxAmount),
@@ -155,7 +153,6 @@ export const SwapForm: FC = () => {
     () => tokensToAtoms(inputValue.amount ?? ZERO, inputAssetMetadata.decimals),
     [inputAssetMetadata.decimals, inputValue.amount]
   );
-  const routingFeeIsTakenFromOutput = atomsInputValue.lt(ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT) ?? false;
 
   useEffect(() => {
     const { swapInputMinusFeeAtomic } = calculateRoutingInputAndFeeFromInput(
@@ -208,9 +205,6 @@ export const SwapForm: FC = () => {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
         if (!dirtyFields.has('input')) return true;
 
-        // if (!assetSlug) {
-        //   return t('assetMustBeSelected');
-        // }
         if (!amount || amount.isLessThan(0)) {
           return t('amountMustBePositive');
         }
@@ -222,10 +216,6 @@ export const SwapForm: FC = () => {
     register('output', {
       validate: ({ assetSlug, amount }: SwapInputValue) => {
         if (!dirtyFields.has('output')) return true;
-
-        // if (!assetSlug) {
-        //   return t('assetMustBeSelected');
-        // }
 
         // Do NOT show err msg if no amount
         if (!amount) return true;
@@ -598,16 +588,6 @@ export const SwapForm: FC = () => {
               />
             </div>
           </div>
-          {/* <div className="flex items-center justify-between">
-            <div>
-              <span ref={cashbackInfoIconRef} className="flex w-fit items-center text-white">
-                <T id="swapCashback" />
-                &nbsp;
-                <InfoIcon className="w-3 h-auto stroke-2 stroke-white mt-1" />
-              </span>
-            </div>
-            <div className="text-right text-white">{SWAP_CASHBACK_PERCENT}%</div>
-          </div> */}
         </section>
       </div>
 

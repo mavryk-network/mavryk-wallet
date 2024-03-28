@@ -4,7 +4,7 @@ import { BigNumber } from 'bignumber.js';
 
 import { ReactComponent as Separator } from 'app/icons/separator.svg';
 import { useSwapDexesSelector } from 'app/store/swap/selectors';
-import { Route3Chain } from 'lib/apis/route3/fetch-route3-swap-params';
+import { Route3Chain } from 'lib/route3/interfaces';
 
 import { HopItem } from './hop-item';
 

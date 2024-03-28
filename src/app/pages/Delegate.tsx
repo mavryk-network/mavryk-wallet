@@ -2,8 +2,9 @@ import React, { memo } from 'react';
 
 import { ErrorBoundaryContent } from 'app/ErrorBoundary';
 import { ReactComponent as DiamondIcon } from 'app/icons/diamond.svg';
-import PageLayout, { SpinnerSection } from 'app/layouts/PageLayout';
+import PageLayout from 'app/layouts/PageLayout';
 import DelegateForm from 'app/templates/DelegateForm';
+import { SpinnerSection } from 'app/templates/SendForm/SpinnerSection';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';

@@ -295,7 +295,7 @@ const SwapInputHeader: FC<{
           {balance && (
             <span className={classNames('text-sm mr-1 text-secondary-white')}>
               <Money smallFractionFont={false} fiat={false}>
-                {balance.rawValue ?? 0}
+                {balance.value ?? 0}
               </Money>
             </span>
           )}
@@ -319,7 +319,7 @@ const SwapFooter: FC<{
     <div className="flex mt-2">
       {PERCENTAGE_BUTTONS.map(percentage => (
         <PercentageButton
-          disabled={!balance.rawValue}
+          disabled={!balance.value}
           key={percentage}
           percentage={percentage}
           selectedPercentage={selectedPercentage}

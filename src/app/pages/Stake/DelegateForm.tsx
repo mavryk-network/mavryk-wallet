@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { DEFAULT_FEE, WalletOperation } from '@taquito/taquito';
+import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
@@ -18,7 +18,8 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/t
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
-import { fetchTezosBalance } from 'lib/balances';
+import { useGasToken } from 'lib/assets/hooks';
+import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { TID, T, t } from 'lib/i18n';
 import { setDelegate } from 'lib/michelson';
@@ -28,8 +29,6 @@ import {
   Baker,
   isDomainNameValid,
   useAccount,
-  useBalance,
-  useGasToken,
   useKnownBaker,
   useKnownBakers,
   useNetwork,
@@ -46,6 +45,7 @@ import { navigate, useLocation } from 'lib/woozie';
 
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
+
 import { DelegateFormSelectors } from './delegateForm.selectors';
 
 const PENNY = 0.000001;
@@ -75,7 +75,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
 
   const accountPkh = acc.publicKeyHash;
 
-  const { data: balanceData, mutate: mutateBalance } = useBalance('tez', accountPkh);
+  const { value: balanceData } = useBalance('tez', accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const domainsClient = useTezosDomainsClient();
@@ -164,19 +164,20 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
 
   const estimateBaseFee = useCallback(async () => {
     try {
-      const balanceBN = (await mutateBalance(fetchTezosBalance(tezos, accountPkh)))!;
-      if (balanceBN.isZero()) {
+      if (balance.isZero()) {
         throw new ZeroBalanceError();
       }
 
       const estmtn = await getEstimation();
-      const manager = await tezos.rpc.getManagerKey(acc.type === TempleAccountType.ManagedKT ? acc.owner : accountPkh);
+      const manager = await tezos.rpc.getManagerKey(
+        acc.type === TempleAccountType.ManagedKT ? acc.publicKeyHash : accountPkh
+      );
       let baseFee = mutezToTz(estmtn.burnFeeMutez + estmtn.suggestedFeeMutez);
       if (!hasManager(manager) && acc.type !== TempleAccountType.ManagedKT) {
         baseFee = baseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
       }
 
-      if (baseFee.isGreaterThanOrEqualTo(balanceBN)) {
+      if (baseFee.isGreaterThanOrEqualTo(balance)) {
         throw new NotEnoughFundsError();
       }
 
@@ -202,7 +203,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
           throw err;
       }
     }
-  }, [tezos, accountPkh, mutateBalance, getEstimation, acc]);
+  }, [balance, getEstimation, tezos.rpc, acc.type, acc.publicKeyHash, accountPkh]);
 
   const {
     data: baseFee,
@@ -272,7 +273,8 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
         const estmtn = await getEstimation();
         const addFee = tzToMutez(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMutez).toNumber();
-        let op: WalletOperation;
+        let op: WalletOperation | TransactionOperation;
+        let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
           const contract = await loadContract(tezos, acc.publicKeyHash);
           op = await contract.methods.do(setDelegate(to)).send({ amount: 0 });
@@ -284,13 +286,15 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
               fee
             } as any)
             .send();
+
+          opHash = op.opHash;
         }
 
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
-        if (to === RECOMMENDED_BAKER_ADDRESS) {
-          submitDelegation(op.opHash);
+        if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {
+          submitDelegation(opHash);
         }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
@@ -502,7 +506,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
-  const { data: balanceData } = useBalance('tez', accountPkh);
+  const { value: balanceData } = useBalance('tez', accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const net = useNetwork();

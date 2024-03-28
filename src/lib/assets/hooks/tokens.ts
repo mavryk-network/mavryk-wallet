@@ -19,7 +19,7 @@ import { tokenToSlug } from '../utils';
 
 import { isAssetStatusIdle, getAssetStatus } from './utils';
 
-interface AccountToken extends AccountAsset {
+export interface AccountToken extends AccountAsset {
   predefined?: boolean;
 }
 

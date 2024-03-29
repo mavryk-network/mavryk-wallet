@@ -6,7 +6,7 @@ import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
-import { useAssetsSortPredicate } from 'lib/assets/use-filtered';
+import { useTokensSortPredicate } from 'lib/assets/use-sorting';
 import { useTezos } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { HistoryAction, navigate } from 'lib/woozie';
@@ -24,7 +24,7 @@ type SendFormProps = {
 
 const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
   const tokensSlugs = useEnabledAccountTokensSlugs();
-  const assetsSortPredicate = useAssetsSortPredicate();
+  const assetsSortPredicate = useTokensSortPredicate();
 
   const assets = useMemo<string[]>(
     () => [TEZ_TOKEN_SLUG, ...tokensSlugs].sort((a, b) => assetsSortPredicate(a, b)),

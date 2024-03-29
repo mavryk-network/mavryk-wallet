@@ -4,7 +4,6 @@ import { Alert } from 'app/atoms/Alert/Alert';
 import { ReadOnlySecretField } from 'app/atoms/ReadOnlySecretField';
 import { ButtonNavigate } from 'app/molecules/ButtonNavigate';
 import { TID, T } from 'lib/i18n';
-import { SPACE_CHAR } from 'lib/ui/utils';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 

@@ -11,7 +11,14 @@ import React, {
 } from 'react';
 
 import { ManagerKeyResponse } from '@taquito/rpc';
-import { DEFAULT_FEE, TransferParams, WalletOperation, Estimate } from '@taquito/taquito';
+import {
+  DEFAULT_FEE,
+  TransferParams,
+  WalletOperation,
+  Estimate,
+  TransactionWalletOperation,
+  TransactionOperation
+} from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
@@ -25,8 +32,8 @@ import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
 import { isTezAsset, toPenny } from 'lib/assets';
-import { toTransferParams } from 'lib/assets/utils';
-import { fetchBalance, fetchTezosBalance } from 'lib/balances';
+import { toTransferParams } from 'lib/assets/contract.utils';
+import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
@@ -38,7 +45,6 @@ import {
   ReactiveTezosToolkit,
   isDomainNameValid,
   useAccount,
-  useBalance,
   useNetwork,
   useTezos,
   useTezosDomainsClient,
@@ -97,10 +103,10 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const canUseDomainNames = domainsClient.isSupported;
   const accountPkh = acc.publicKeyHash;
 
-  const { data: balanceData, mutate: mutateBalance } = useBalance(assetSlug, accountPkh);
+  const { value: balanceData } = useBalance(assetSlug, accountPkh);
   const balance = balanceData!;
 
-  const { data: tezBalanceData, mutate: mutateTezBalance } = useBalance('tez', accountPkh);
+  const { value: tezBalanceData } = useBalance('tez', accountPkh);
   const tezBalance = tezBalanceData!;
 
   const [shoudUseFiat, setShouldUseFiat] = useSafeState(false);
@@ -207,15 +213,12 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       const to = toResolved;
       const tez = isTezAsset(assetSlug);
 
-      const balanceBN = (await mutateBalance(fetchBalance(tezos, assetSlug, accountPkh, assetMetadata)))!;
-      if (balanceBN.isZero()) {
+      if (balance.isZero()) {
         throw new ZeroBalanceError();
       }
 
-      let tezBalanceBN: BigNumber;
       if (!tez) {
-        tezBalanceBN = (await mutateTezBalance(fetchTezosBalance(tezos, accountPkh)))!;
-        if (tezBalanceBN.isZero()) {
+        if (tezBalance.isZero()) {
           throw new ZeroTEZBalanceError();
         }
       }
@@ -225,14 +228,14 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         tezos.rpc.getManagerKey(acc.type === TempleAccountType.ManagedKT ? acc.owner : accountPkh)
       ]);
 
-      const estmtnMax = await estimateMaxFee(acc, tez, tezos, to, balanceBN, transferParams, manager);
+      const estmtnMax = await estimateMaxFee(acc, tez, tezos, to, balance, transferParams, manager);
 
       let estimatedBaseFee = mutezToTz(estmtnMax.burnFeeMutez + estmtnMax.suggestedFeeMutez);
       if (!hasManager(manager)) {
         estimatedBaseFee = estimatedBaseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
       }
 
-      if (tez ? estimatedBaseFee.isGreaterThanOrEqualTo(balanceBN) : estimatedBaseFee.isGreaterThan(tezBalanceBN!)) {
+      if (tez ? estimatedBaseFee.isGreaterThanOrEqualTo(balance) : estimatedBaseFee.isGreaterThan(tezBalance!)) {
         throw new NotEnoughFundsError();
       }
 
@@ -247,7 +250,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       console.error(err);
       throw err;
     }
-  }, [acc, tezos, assetSlug, assetMetadata, accountPkh, toResolved, mutateBalance, mutateTezBalance]);
+  }, [assetMetadata, toResolved, assetSlug, balance, tezos, accountPkh, acc, tezBalance]);
 
   const {
     data: baseFee,
@@ -343,7 +346,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
-        let op: WalletOperation;
+        let op: TransactionWalletOperation | TransactionOperation;
         if (isKTAddress(acc.publicKeyHash)) {
           const michelsonLambda = isKTAddress(toResolved) ? transferToContract : transferImplicit;
 
@@ -362,7 +365,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           const estmtn = await tezos.estimate.transfer(transferParams);
           const addFee = tzToMutez(feeVal ?? 0);
           const fee = addFee.plus(estmtn.suggestedFeeMutez).toNumber();
-          op = await tezos.wallet.transfer({ ...transferParams, fee } as any).send();
+          op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
         }
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
@@ -430,7 +433,6 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const { selectedFiatCurrency } = useFiatCurrency();
 
   const visibleAssetSymbol = shoudUseFiat ? selectedFiatCurrency.symbol : assetSymbol;
-  const assetDomainName = getAssetDomainName(canUseDomainNames);
 
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 

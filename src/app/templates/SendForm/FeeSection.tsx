@@ -3,13 +3,12 @@ import React from 'react';
 import BigNumber from 'bignumber.js';
 import { FieldError } from 'react-hook-form';
 
-import { Alert, FormSubmitButton } from 'app/atoms';
+import { Alert } from 'app/atoms';
 import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import { useGasToken } from 'lib/assets/hooks';
 import { t, T } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';
 
-import { SendFormSelectors } from './selectors';
 import SendErrorAlert from './SendErrorAlert';
 
 interface FeeComponentProps extends FeeAlertPropsBase {

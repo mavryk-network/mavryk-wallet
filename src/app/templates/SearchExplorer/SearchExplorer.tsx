@@ -6,6 +6,7 @@ import { useInitialOffAnimation } from 'app/hooks/use-initial-off-animation';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 
 import SearchAssetField, { SearchAssetFieldProps } from '../SearchAssetField';
+
 import styles from './SearchExplorer.module.css';
 
 export type SearchExplorerProps = {

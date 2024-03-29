@@ -7,12 +7,19 @@ import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
+import {
+  useAllCollectiblesDetailsLoadingSelector,
+  useCollectibleDetailsSelector
+} from 'app/store/collectibles/selectors';
+import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 import { loadNFTsDetailsActions } from 'app/store/nfts/actions';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
+import { fromAssetSlug } from 'lib/assets/utils';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
+import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
@@ -22,16 +29,10 @@ import { navigate } from 'lib/woozie';
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { CollectibleSelectors } from '../selectors';
 import { getDetailsListing } from '../utils';
+
 import { CardWithLabel } from './CardWithLabel';
 import { CollectiblePageImage } from './CollectiblePageImage';
 import { PropertiesItems } from './PropertiesItems';
-import { useRetryableSWR } from 'lib/swr';
-import { fromAssetSlug } from 'lib/assets/utils';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 

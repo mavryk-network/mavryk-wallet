@@ -3,7 +3,8 @@ import { enableMapSet } from 'immer';
 import { persistReducer } from 'redux-persist';
 import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 
-import { tokenToSlug, fromAssetSlug } from 'lib/assets';
+import { tokenToSlug } from 'lib/assets';
+import { fromAssetSlug } from 'lib/assets/utils';
 import { TokenMetadata } from 'lib/metadata';
 import { buildTokenMetadataFromFetched } from 'lib/metadata/utils';
 import { storageConfig, createTransformsBeforePersist, createTransformsBeforeHydrate } from 'lib/store';

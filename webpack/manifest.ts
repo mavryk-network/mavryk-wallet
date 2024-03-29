@@ -7,7 +7,9 @@ import type { Manifest } from 'webextension-polyfill';
 
 import packageJSON from '../package.json';
 
+import { envFilesData } from './dotenv';
 import { Vendor, ALL_VENDORS, getManifestVersion } from './env';
+import { IFRAMES } from './paths';
 
 const WEB_ACCCESSIBLE_RESOURSES = [
   // For dynamic imports
@@ -17,7 +19,9 @@ const WEB_ACCCESSIBLE_RESOURSES = [
   // For triggering extension page open from scripts
   'fullpage.html',
   // For ads' images
-  'misc/ad-banners/*'
+  'misc/ad-banners/*',
+  // For iFrames access
+  ...Object.keys(IFRAMES).map(name => `iframes/${name}.html`)
 ];
 
 const isKnownVendor = (vendor: string): vendor is Vendor => ALL_VENDORS.includes(vendor as Vendor);
@@ -112,7 +116,7 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
   };
 };
 
-const AUTHOR_URL = 'https://mavryk.org';
+const AUTHOR_URL = 'https://madfish.solutions';
 
 const PERMISSIONS = ['storage', 'unlimitedStorage', 'clipboardWrite', 'activeTab'];
 
@@ -129,8 +133,12 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
   return {
     version: packageJSON.version,
 
-    name: 'Mavryk Wallet',
-    short_name: 'Mavryk Wallet',
+    // @ts-expect-error
+    // Public key to fixate extension ID
+    key: envFilesData._MANIFEST_KEY_,
+
+    name: 'Temple - Tezos Wallet',
+    short_name: 'Temple - Tezos Wallet',
 
     icons: {
       '16': 'misc/icon-16.png',
@@ -193,7 +201,7 @@ const buildBrowserAction = (vendor: string) => {
   const withVendors = makeWithVendors(vendor);
 
   return {
-    default_title: 'Mavryk Wallet',
+    default_title: 'Temple - Tezos Wallet',
     ...withVendors('chrome', 'firefox', 'opera')({ default_popup: 'popup.html' }),
     default_icon: {
       '16': 'misc/icon-16.png',

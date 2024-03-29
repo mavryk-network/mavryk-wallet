@@ -3617,5 +3617,8 @@
   },
   "rwas": {
     "message": "RWAs"
+  },
+  "marigoldMainnet": {
+    "message": "Marigold Mainnet"
   }
 }

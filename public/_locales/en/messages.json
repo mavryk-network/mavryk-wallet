@@ -3617,5 +3617,11 @@
   },
   "rwas": {
     "message": "RWAs"
+  },
+  "marigoldMainnet": {
+    "message": "Marigold Mainnet"
+  },
+  "dropdownNoItems": {
+    "message": "No items"
   }
 }

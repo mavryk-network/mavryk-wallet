@@ -3,13 +3,24 @@ import { HubConnection } from '@microsoft/signalr';
 /**
  * Actually, there is a bunch of other types but only these will be used for now
  */
-export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination';
+export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination' | 'other';
 
 export type TzktQuoteCurrency = 'None' | 'Btc' | 'Eur' | 'Usd' | 'Cny' | 'Jpy' | 'Krw';
 
 type TzktOperationStatus = 'applied' | 'failed' | 'backtracked' | 'skipped';
 
 type TzktContractType = 'delegator_contract' | 'smart_contract';
+
+export interface TxktDiffs {
+  bigmap: number;
+  path: string;
+  action: string;
+  content: {
+    hash: string;
+    key: string;
+    value: string;
+  };
+}
 
 export interface TzktAlias {
   alias?: string;
@@ -23,7 +34,7 @@ interface TzktOperationError {
 /**
  * To be reviewed if a new operation type is added
  */
-interface TzktOperationBase {
+export interface TzktOperationBase {
   type: TzktOperationType;
   id: number;
   level?: number;
@@ -35,6 +46,8 @@ interface TzktOperationBase {
   sender: TzktAlias;
   gasLimit: number;
   gasUsed: number;
+  storageUsed?: number;
+  storageFee?: number;
   bakerFee: number;
   quote?: TzktQuote;
   errors?: TzktOperationError[] | null;
@@ -62,18 +75,23 @@ export interface TzktTransactionOperation extends TzktOperationBase {
   allocationFee: number;
   target: TzktAlias;
   amount: number;
-  parameter?: unknown;
+  parameter?: any;
+  diffs?: TxktDiffs[];
   entrypoint?: string;
   hasInternals: boolean;
 }
 
-interface TzktOriginationOperation extends TzktOperationBase {
+export interface TzktOriginationOperation extends TzktOperationBase {
   type: 'origination';
   originatedContract?: TzktAlias;
   contractBalance?: string;
 }
 
-interface TzktRevealOperation extends TzktOperationBase {
+export interface TzkOtherOperation extends TzktOperationBase {
+  type: 'other';
+}
+
+export interface TzktRevealOperation extends TzktOperationBase {
   type: 'reveal';
 }
 
@@ -81,7 +99,8 @@ export type TzktOperation =
   | TzktDelegationOperation
   | TzktTransactionOperation
   | TzktRevealOperation
-  | TzktOriginationOperation;
+  | TzktOriginationOperation
+  | TzkOtherOperation;
 
 type TzktDelegateInfo = {
   alias?: string;

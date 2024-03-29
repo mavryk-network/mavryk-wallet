@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef, useState, useMemo } from 'react';
+import React, { memo, useRef, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
@@ -14,7 +14,6 @@ import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { atomsToTokens } from 'lib/temple/helpers';
-import { useIntersectionDetection } from 'lib/ui/use-intersection-detection';
 import { Link } from 'lib/woozie';
 
 import { getDetailsListing } from '../utils';
@@ -32,7 +31,6 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
   const { popup } = useAppEnv();
   const metadata = useTokenMetadataSelector(assetSlug);
   const toDisplayRef = useRef<HTMLDivElement>(null);
-  const [displayed, setDisplayed] = useState(true);
   const balanceAtomic = useBalanceSelector(accountPkh, chainId, assetSlug);
 
   const decimals = metadata?.decimals;
@@ -47,10 +45,6 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
 
   const listing = useMemo(() => getDetailsListing(details), [details]);
 
-  const handleIntersection = useCallback(() => void setDisplayed(true), []);
-
-  useIntersectionDetection(toDisplayRef, handleIntersection, !displayed);
-
   const assetName = getAssetName(metadata);
 
   return (
@@ -63,14 +57,12 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
         )}
         title={assetName}
       >
-        {displayed && (
-          <CollectibleItemImage
-            assetSlug={assetSlug}
-            metadata={metadata}
-            areDetailsLoading={areDetailsLoading && details === undefined}
-            mime={details?.mime}
-          />
-        )}
+        <CollectibleItemImage
+          assetSlug={assetSlug}
+          metadata={metadata}
+          areDetailsLoading={areDetailsLoading && details === undefined}
+          mime={details?.mime}
+        />
 
         {areDetailsShown && balance ? (
           <div className="absolute bottom-1.5 left-1.5 text-xxxs text-white leading-none p-1 bg-black bg-opacity-60 rounded">

@@ -9,8 +9,6 @@ export const ScamTokenAlert = memo(() => (
     style={{ backgroundColor: '#FFEFEF' }}
   >
     <AlertTriangleIcon className="h-4 w-4 stroke-current text-red-700" />
-    <p className="ml-2 text-red-700 font-normal text-xs">
-      <T id="scamTokenAlert" />
-    </p>
+    <p className="ml-2 text-red-700 font-normal text-xs">scamTokenAlert</p>
   </div>
 ));

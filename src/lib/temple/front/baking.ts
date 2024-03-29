@@ -12,7 +12,6 @@ import {
   getAllBakersBakingBad
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
-import { t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
 import type { ReactiveTezosToolkit } from 'lib/temple/front';
 import { getOnlineStatus } from 'lib/ui/get-online-status';

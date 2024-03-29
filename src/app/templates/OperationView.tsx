@@ -8,7 +8,7 @@ import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import RawPayloadView from 'app/templates/RawPayloadView';
 import { TEZ_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { T, t } from 'lib/i18n';
-import { tryParseExpenses, useAccount } from 'lib/temple/front';
+import { tryParseExpenses } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
 
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
@@ -27,7 +27,7 @@ type OperationViewProps = {
 
 const OperationView: FC<OperationViewProps> = ({
   payload,
-  error: payloadError,
+  // error: payloadError,
   mainnet = false,
   modifyFeeAndLimit
 }) => {

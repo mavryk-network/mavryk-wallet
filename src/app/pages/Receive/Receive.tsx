@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import { QRCode } from 'react-qr-svg';
 
@@ -8,7 +8,6 @@ import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
 import { ReactComponent as GlobeIcon } from 'app/icons/globe.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import ViewsSwitcher, { ViewsSwitcherProps } from 'app/templates/ViewsSwitcher/ViewsSwitcher';
 import { T, t } from 'lib/i18n';
 import { useAccount, useTezosDomainsClient } from 'lib/temple/front';
 import { useTezosDomainNameByAddress } from 'lib/temple/front/tzdns';
@@ -80,17 +79,17 @@ const Receive: FC = () => {
 
 export default Receive;
 
-type AddressFieldExtraSectionProps = {
-  activeView: ViewsSwitcherProps['activeItem'];
-  onSwitch: ViewsSwitcherProps['onChange'];
-};
+// type AddressFieldExtraSectionProps = {
+//   activeView: ViewsSwitcherProps['activeItem'];
+//   onSwitch: ViewsSwitcherProps['onChange'];
+// };
 
-const AddressFieldExtraSection = memo<AddressFieldExtraSectionProps>(props => {
-  const { activeView, onSwitch } = props;
+// const AddressFieldExtraSection = memo<AddressFieldExtraSectionProps>(props => {
+//   const { activeView, onSwitch } = props;
 
-  return (
-    <div className="mb-2 flex justify-end">
-      <ViewsSwitcher activeItem={activeView} items={ADDRESS_FIELD_VIEWS} onChange={onSwitch} />
-    </div>
-  );
-});
+//   return (
+//     <div className="mb-2 flex justify-end">
+//       <ViewsSwitcher activeItem={activeView} items={ADDRESS_FIELD_VIEWS} onChange={onSwitch} />
+//     </div>
+//   );
+// });

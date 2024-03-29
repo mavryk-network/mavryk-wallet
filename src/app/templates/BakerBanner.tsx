@@ -1,11 +1,10 @@
-import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
+import React, { HTMLAttributes, memo, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 
-import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
-import { useAppEnv } from 'app/env';
+import { Identicon, Name, Money, HashChip } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
@@ -137,7 +136,6 @@ const BakerBanner = memo<BakerBannerProps>(
   }) => {
     const allAccounts = useRelevantAccounts();
     const account = useAccount();
-    const { popup } = useAppEnv();
     const { data: baker } = useKnownBaker(bakerPkh);
 
     const bakerAcc = useMemo(
@@ -346,19 +344,19 @@ const BakerAccount: React.FC<{
   );
 };
 
-const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-  <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
-    style={{ borderRadius: '10px' }}
-  >
-    <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
-  </div>
-);
-const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-  <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
-    style={{ borderRadius: '10px' }}
-  >
-    <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
-  </div>
-);
+// const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
+//   <div
+//     className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+//     style={{ borderRadius: '10px' }}
+//   >
+//     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
+//   </div>
+// );
+// const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
+//   <div
+//     className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+//     style={{ borderRadius: '10px' }}
+//   >
+//     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
+//   </div>
+// );

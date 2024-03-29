@@ -14,7 +14,6 @@ import { ManagerKeyResponse } from '@taquito/rpc';
 import {
   DEFAULT_FEE,
   TransferParams,
-  WalletOperation,
   Estimate,
   TransactionWalletOperation,
   TransactionOperation
@@ -100,7 +99,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
   const formAnalytics = useFormAnalytics('SendForm');
 
-  const canUseDomainNames = domainsClient.isSupported;
+  // const canUseDomainNames = domainsClient.isSupported;
   const accountPkh = acc.publicKeyHash;
 
   const { value: balanceData } = useBalance(assetSlug, accountPkh);
@@ -731,8 +730,8 @@ const InnerDropDownComponentGuard: React.FC<ContactsDropdownProps> = ({ contacts
 
 const getFilled = (toFilled: boolean | '', toFieldFocused: boolean) => (!toFilled ? toFieldFocused : false);
 
-const getDomainTextError = (canUseDomainNames: boolean) =>
-  canUseDomainNames ? 'recipientInputPlaceholderWithDomain' : 'recipientInputPlaceholder';
+// const getDomainTextError = (canUseDomainNames: boolean) =>
+//   canUseDomainNames ? 'recipientInputPlaceholderWithDomain' : 'recipientInputPlaceholder';
 
-const getAssetDomainName = (canUseDomainNames: boolean) =>
-  canUseDomainNames ? 'tokensRecepientInputDescriptionWithDomain' : 'tokensRecepientInputDescription';
+// const getAssetDomainName = (canUseDomainNames: boolean) =>
+//   canUseDomainNames ? 'tokensRecepientInputDescriptionWithDomain' : 'tokensRecepientInputDescription';

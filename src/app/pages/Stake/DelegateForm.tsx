@@ -31,7 +31,6 @@ import {
   useAccount,
   useKnownBaker,
   useKnownBakers,
-  useNetwork,
   useTezos,
   useTezosDomainsClient,
   validateDelegate
@@ -66,7 +65,7 @@ type DelegateFormProps = {
 const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
-  const { symbol, isDcpNetwork, logo } = useGasToken();
+  const { isDcpNetwork } = useGasToken();
 
   const { pathname } = useLocation();
 
@@ -509,7 +508,6 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const { value: balanceData } = useBalance('tez', accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
-  const net = useNetwork();
   const { symbol } = useGasToken();
   return baker ? (
     <>

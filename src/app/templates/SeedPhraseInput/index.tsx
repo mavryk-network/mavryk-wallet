@@ -33,7 +33,6 @@ interface SeedPhraseInputProps extends TestIDProperty {
 const defaultNumberOfWords = 12;
 
 export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
-  isFirstAccount,
   submitted,
   seedError,
   labelWarning,
@@ -67,7 +66,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
       }
 
       if (newDraftSeed.some(word => word === '')) {
-        newSeedError = t('mnemonicWordsAmountConstraint', [numberOfWords]) as string;
+        newSeedError = t('mnemonicWordsAmountConstraint', [numberOfWords]) as unknown as string;
       }
 
       if (!validateMnemonic(formatMnemonic(joinedDraftSeed))) {

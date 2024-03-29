@@ -54,7 +54,7 @@ import { HistoryAction, navigate } from 'lib/woozie';
 import { SwapExchangeRate } from './SwapExchangeRate/SwapExchangeRate';
 import { SwapFormValue, SwapInputValue, useSwapFormDefaultValue } from './SwapForm.form';
 import { SwapFormSelectors, SwapFormFromInputSelectors, SwapFormToInputSelectors } from './SwapForm.selectors';
-import { cashbackInfoTippyProps, feeInfoTippyProps } from './SwapForm.tippy';
+import { feeInfoTippyProps } from './SwapForm.tippy';
 import { SlippageToleranceInput } from './SwapFormInput/SlippageToleranceInput/SlippageToleranceInput';
 import { slippageToleranceInputValidationFn } from './SwapFormInput/SlippageToleranceInput/SlippageToleranceInput.validation';
 import { SwapFormInput } from './SwapFormInput/SwapFormInput';
@@ -203,7 +203,7 @@ export const SwapForm: FC = () => {
 
   useEffect(() => {
     register('input', {
-      validate: ({ assetSlug, amount }: SwapInputValue) => {
+      validate: ({ amount }: SwapInputValue) => {
         if (!dirtyFields.has('input')) return true;
 
         if (!amount || amount.isLessThan(0)) {
@@ -215,7 +215,7 @@ export const SwapForm: FC = () => {
     });
 
     register('output', {
-      validate: ({ assetSlug, amount }: SwapInputValue) => {
+      validate: ({ amount }: SwapInputValue) => {
         if (!dirtyFields.has('output')) return true;
 
         // Do NOT show err msg if no amount

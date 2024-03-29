@@ -3,7 +3,7 @@ import React, { FC, useCallback, useState } from 'react';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
-import { T, TID, t } from 'lib/i18n';
+import { T, TID } from 'lib/i18n';
 
 import DelegateForm from './DelegateForm';
 import { useBakingHistory } from './hooks/use-baking-history';

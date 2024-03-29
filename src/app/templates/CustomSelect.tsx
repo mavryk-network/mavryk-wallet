@@ -106,12 +106,9 @@ const CustomSelectItem = <T extends {}, K extends string | number, A extends Act
     itemId,
     item,
     index,
-    last,
     onSelect,
     padding,
     autoFocus,
-    light,
-    hoverable,
     OptionIcon,
     OptionContent,
     itemWithBorder

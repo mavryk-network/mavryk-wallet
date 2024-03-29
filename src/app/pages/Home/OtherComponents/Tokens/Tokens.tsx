@@ -25,7 +25,7 @@ import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
-import { useAccount, useChainId } from 'lib/temple/front';
+import { useChainId } from 'lib/temple/front';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -45,7 +45,6 @@ export const TokensTab: FC = () => {
   const chainId = useChainId(true)!;
   const balances = useCurrentAccountBalances();
 
-  const { publicKeyHash } = useAccount();
   const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
 

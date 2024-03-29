@@ -27,8 +27,7 @@ export const PaymentProviderInput: FC<PaymentProviderInputProps> = ({
   options,
   isLoading,
   onChange,
-  headerTestID,
-  testID
+  headerTestID
 }) => {
   const [searchValue, setSearchValue] = useState<string>('');
 

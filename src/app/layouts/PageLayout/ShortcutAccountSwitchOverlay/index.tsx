@@ -10,8 +10,6 @@ import { useModalScrollLock } from 'app/hooks/use-modal-scroll-lock';
 import { ReactComponent as SadSearchIcon } from 'app/icons/sad-search.svg';
 import SearchField from 'app/templates/SearchField';
 import { useGasToken } from 'lib/assets/hooks';
-import { searchHotkey } from 'lib/constants';
-import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
 import Portal from 'lib/ui/Portal';
 import { searchAndFilterItems } from 'lib/utils/search-items';
@@ -64,11 +62,11 @@ export const ShortcutAccountSwitchOverlay = memo(() => {
     [account, setAccountPkh, setOpened]
   );
 
-  const handleCleanButtonClick = useCallback(() => {
-    if (!searchValue) {
-      accountSwitchRef.current?.focus();
-    }
-  }, [searchValue]);
+  // const handleCleanButtonClick = useCallback(() => {
+  //   if (!searchValue) {
+  //     accountSwitchRef.current?.focus();
+  //   }
+  // }, [searchValue]);
 
   const handleSearchValueChange = useCallback((value: string) => {
     setSearchValue(value);

@@ -206,9 +206,9 @@ export function importManagedKTAccount(address: string, chainId: string, owner: 
   });
 }
 
-export function importWatchOnlyAccount(address: string, chainId?: string, accName?: string) {
+export function importWatchOnlyAccount(address: string, chainId?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importWatchOnlyAccount(address, chainId, accName);
+    const updatedAccounts = await vault.importWatchOnlyAccount(address, chainId);
     accountsUpdated(updatedAccounts);
   });
 }

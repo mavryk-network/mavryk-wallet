@@ -6,8 +6,7 @@ import { useForm } from 'react-hook-form';
 import { FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { defaultNumberOfWords } from 'app/pages/ImportAccount/constants';
-import { SeedPhraseInput, isSeedPhraseFilled } from 'app/templates/SeedPhraseInput';
-import { numberOfWordsOptions } from 'app/templates/SeedPhraseInput/SeedLengthSelect/utils';
+import { SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { T, t } from 'lib/i18n';
 
 import { ImportFromSeedPhraseSelectors } from './ImportFromSeedPhrase.selectors';

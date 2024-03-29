@@ -11,7 +11,7 @@ import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/L
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 
-import { AccountDetails, AccountDetailsPopup } from './components/AccountDetails';
+import { AccountDetailsPopup } from './components/AccountDetails';
 
 type SettingsPopupProps = {
   closePopup: () => void;

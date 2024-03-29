@@ -11,7 +11,7 @@ interface Props {
   onClick: (percentage: number) => void;
 }
 
-export const PercentageButton: FC<Props> = ({ percentage, selectedPercentage, onClick, disabled }) => {
+export const PercentageButton: FC<Props> = ({ percentage, onClick, disabled }) => {
   const handleClick = () => onClick(percentage);
 
   return (

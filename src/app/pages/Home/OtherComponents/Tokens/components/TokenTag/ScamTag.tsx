@@ -6,7 +6,7 @@ import { Button } from 'app/atoms/Button';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { dispatch } from 'app/store';
 import { setTokenStatusAction } from 'app/store/assets/actions';
-import { t, T } from 'lib/i18n';
+import { t } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useConfirm } from 'lib/ui/dialog';
 

@@ -20,7 +20,7 @@ interface AccountItemProps {
   onClick: () => void;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, gasTokenName, attractSelf, onClick }) => {
+export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick }) => {
   const { name, publicKeyHash, type } = account;
   const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash);
 

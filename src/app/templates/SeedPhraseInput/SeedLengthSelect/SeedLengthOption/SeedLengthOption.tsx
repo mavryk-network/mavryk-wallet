@@ -14,7 +14,7 @@ interface Props {
   onChange?: (option: string) => void;
 }
 
-export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onClick = emptyFn, onChange = emptyFn }) => {
+export const SeedLengthOption: FC<Props> = memo(({ option, selectedOption, onClick = emptyFn }) => {
   const handleClick = useCallback(() => onClick(option), [onClick, option]);
 
   return (

@@ -363,7 +363,7 @@ type BottomSectionProps = Pick<FormContextValues, 'register' | 'errors' | 'formS
 };
 
 const BottomSection: FC<BottomSectionProps> = props => {
-  const { register, errors, formState, submitError } = props;
+  const { register, errors, submitError } = props;
 
   return (
     <>

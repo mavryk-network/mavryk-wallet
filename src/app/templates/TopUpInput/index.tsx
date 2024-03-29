@@ -18,7 +18,7 @@ import { getProperNetworkFullName, useFilteredCurrencies } from './utils';
 
 export type { CurrencyToken } from './types';
 
-const TWO_TOKENS_LENGTH = 2;
+// const TWO_TOKENS_LENGTH = 2;
 
 const renderOptionContent = (currency: CurrencyBase, isSelected: boolean) => (
   <CurrencyOption currency={currency} isSelected={isSelected} />
@@ -32,7 +32,7 @@ export const TopUpInput = <C extends CurrencyBase>(_props: TopUpInputPropsGeneri
     isCurrenciesLoading,
     fitIcons,
     className,
-    testID,
+    // testID,
     amountInputDisabled,
     emptyListPlaceholder,
     amount,
@@ -50,7 +50,7 @@ export const TopUpInput = <C extends CurrencyBase>(_props: TopUpInputPropsGeneri
   const fitIconsValue = typeof fitIcons === 'function' ? fitIcons(currency) : Boolean(fitIcons);
 
   const { filteredCurrencies, searchValue, setSearchValue } = useFilteredCurrencies(currenciesList);
-  const singleToken = currenciesList.length < TWO_TOKENS_LENGTH;
+  // const singleToken = currenciesList.length < TWO_TOKENS_LENGTH;
   const minAmountErrorClassName = getBigErrorText(isMinAmountError);
 
   const handleAmountChange = (newInputValue?: string) => {
@@ -83,7 +83,7 @@ export const TopUpInput = <C extends CurrencyBase>(_props: TopUpInputPropsGeneri
       >
         <DropdownSelect<CurrencyBase>
           dropdownButtonClassName="pl-4 pr-3 py-5"
-          singleToken={singleToken}
+          // singleToken={singleToken}
           DropdownFaceContent={<TopUpMainContent isFiat={isFiat} fitIconsValue={fitIconsValue} currency={currency} />}
           Input={
             <div

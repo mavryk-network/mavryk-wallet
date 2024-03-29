@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
 
-import { T } from 'lib/i18n';
 import { AlertTriangleIcon } from 'lib/icons';
 
 export const ScamTokenAlert = memo(() => (

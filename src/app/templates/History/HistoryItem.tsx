@@ -25,7 +25,7 @@ interface Props {
   handleItemClick: (hash: string) => void;
 }
 
-export const HistoryItem = memo<Props>(({ historyItem, address, last, slug, handleItemClick }) => {
+export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) => {
   const [expanded, setExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 

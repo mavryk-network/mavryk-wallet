@@ -4,7 +4,6 @@ import clsx from 'clsx';
 
 import { ReactComponent as CloseAltIcon } from 'app/icons/close-alt.svg';
 import { ReactComponent as CloseBoldIcon } from 'app/icons/close-bold.svg';
-import { t } from 'lib/i18n';
 
 import { PartnersPromotionVariant } from '../types';
 

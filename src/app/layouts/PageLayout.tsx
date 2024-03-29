@@ -140,7 +140,6 @@ export const Toolbar: FC<ToolbarProps> = ({
   hasBackAction = true,
   step,
   setStep,
-  adShow = false,
   RightSidedComponent = null,
   skip
 }) => {
@@ -210,7 +209,7 @@ export const Toolbar: FC<ToolbarProps> = ({
     <div
       ref={updateRootRef}
       className={classNames(
-        'sticky z-20 flex items-center justify-center py-4 px-4 relative',
+        'z-20 flex items-center justify-center py-4 px-4 relative',
         fullPage && !sticked && 'rounded-t',
         sticked ? 'shadow' : 'shadow-sm',
         'bg-primary-card overflow-hidden transition ease-in-out duration-300'

@@ -275,7 +275,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                 </div>
               }
             >
-              {filteredHistory.map((historyItem, index) => (
+              {filteredHistory.map(historyItem => (
                 <Fragment key={historyItem.hash}>
                   <HistoryItem
                     address={accountAddress}

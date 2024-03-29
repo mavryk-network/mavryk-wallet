@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import Identicon from 'app/atoms/Identicon';
 import { ReactComponent as NFTsPlacehonder } from 'app/icons/nft-placeholder.svg';
-import { AssetMetadataBase, getAssetSymbol, isNFT, useAssetMetadata } from 'lib/metadata';
+import { AssetMetadataBase, getAssetSymbol, isCollectible, useAssetMetadata } from 'lib/metadata';
 
 import { AssetImage, AssetImageProps } from './AssetImage';
 
@@ -33,7 +33,7 @@ interface PlaceholderProps {
 }
 
 const AssetIconPlaceholder: FC<PlaceholderProps> = ({ metadata, size }) => {
-  return metadata && isNFT(metadata) ? (
+  return metadata && isCollectible(metadata) ? (
     <NFTsPlacehonder style={{ maxWidth: `${size}px`, width: '100%', height: '100%' }} />
   ) : (
     <Identicon type="initials" hash={getAssetSymbol(metadata)} size={size} />

@@ -13,7 +13,6 @@ import { toLocalFormat, T, getDateFnsLocale } from 'lib/i18n';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
-import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from './DelegateForm';
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 
 // const mockedBaker: any = {
@@ -146,8 +145,8 @@ const BakerBanner = memo<BakerBannerProps>(
       [allAccounts, bakerPkh]
     );
 
-    const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
-    const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
+    // const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
+    // const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
     const feeTableItem: BakerTableData = useMemo(
       () => ({
@@ -254,19 +253,19 @@ const BakerBanner = memo<BakerBannerProps>(
                 >
                   <Name
                     style={{
-                      maxWidth: isHelpUkraineBaker ? (popup ? '5rem' : '8rem') : '12rem'
+                      maxWidth: '12rem'
                     }}
                     testID={BakingSectionSelectors.delegatedBakerName}
                   >
                     {baker.name}
                   </Name>
 
-                  {(isRecommendedBaker || isHelpUkraineBaker) && (
+                  {/* {(isRecommendedBaker || isHelpUkraineBaker) && (
                     <ABContainer
                       groupAComponent={<SponsoredBaker isRecommendedBaker={isRecommendedBaker} />}
                       groupBComponent={<PromotedBaker isRecommendedBaker={isRecommendedBaker} />}
                     />
-                  )}
+                  )} */}
 
                   {displayAddress && (
                     <div className="ml-2 flex flex-wrap items-center">

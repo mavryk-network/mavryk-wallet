@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 
-import { FormSubmitButton } from 'app/atoms';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import ModalWithTitle, { ModalWithTitleProps } from 'app/templates/ModalWithTitle';
 import { t } from 'lib/i18n';

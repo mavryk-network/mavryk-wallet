@@ -99,7 +99,7 @@ type RewardConfig = Record<
 >;
 export type Baker = Pick<
   BakingBadBaker,
-  'address' | 'name' | 'fee' | 'freeSpace' | 'minDelegation' | 'stakingBalance'
+  'address' | 'name' | 'fee' | 'freeSpace' | 'minDelegation' | 'stakingBalance' | 'estimatedRoi'
 > & {
   logo?: string;
   feeHistory?: BakingBadBakerValueHistoryItem<number>[];
@@ -145,6 +145,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
           stakingBalance: bakingBadBaker.stakingBalance,
           feeHistory: bakingBadBaker.config?.fee,
           minDelegation: bakingBadBaker.minDelegation,
+          estimatedRoi: bakingBadBaker.estimatedRoi,
           rewardConfigHistory:
             bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
               cycle,

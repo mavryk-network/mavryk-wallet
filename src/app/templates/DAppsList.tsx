@@ -24,6 +24,7 @@ const DAppsList = () => {
     return data!.dApps.map(({ categories: rawCategories, ...restProps }) => {
       const categories = rawCategories.filter(name => name !== DappEnum.Other);
       if (categories.length !== rawCategories.length) {
+        //@ts-expect-error
         categories.push(DappEnum.Other);
       }
       return {
@@ -59,6 +60,7 @@ const DAppsList = () => {
     return dApps.filter(
       ({ name, categories }) =>
         name.toLowerCase().includes(searchString.toLowerCase()) &&
+        // @ts-expect-error
         selectedTags.every(selectedTag => categories.includes(selectedTag))
     );
   }, [dApps, searchString, selectedTags]);

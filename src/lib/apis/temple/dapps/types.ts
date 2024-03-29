@@ -3,7 +3,7 @@ export enum DappEnum {
   Marketplaces = 'Marketplaces',
   Games = 'Games',
   DeFi = 'DeFi',
-  NFTs = 'NFTs',
+  Collectibles = 'Collectibles',
   Other = 'Other'
 }
 

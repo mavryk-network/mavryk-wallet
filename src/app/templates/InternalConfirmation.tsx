@@ -21,8 +21,8 @@ import NetworkBanner from 'app/templates/NetworkBanner';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import RawPayloadView from 'app/templates/RawPayloadView';
 import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitcherItem';
-import { TEZ_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
-import { useRawBalance } from 'lib/balances';
+import { toTokenSlug } from 'lib/assets';
+import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
@@ -92,7 +92,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
   const estimates = payload.type === 'operations' ? payload.estimates : undefined;
 
-  const { data: tezBalanceData } = useBalance('tez', account.publicKeyHash);
+  const { value: tezBalanceData } = useBalance('tez', account.publicKeyHash);
   const tezBalance = tezBalanceData!;
 
   const totalTransactionCost = useMemo(() => {

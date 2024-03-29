@@ -1,4 +1,4 @@
-import { AlertSelectors } from 'src/app/atoms/Alert.selectors';
+import { AlertSelectors } from 'src/app/atoms/Alert/Alert.selectors';
 import { RemoveAccountSelectors } from 'src/app/templates/RemoveAccount/RemoveAccount.selectors';
 
 import { Page } from '../../classes/page.class';

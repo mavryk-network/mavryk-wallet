@@ -1,5 +1,5 @@
 import retry from 'async-retry';
-import { AlertSelectors } from 'src/app/atoms/Alert.selectors';
+import { AlertSelectors } from 'src/app/atoms/Alert/Alert.selectors';
 import { UnlockSelectors } from 'src/app/pages/Unlock/Unlock.selectors';
 
 import { VERY_SHORT_TIMEOUT } from 'e2e/src/utils/timing.utils';

@@ -9,7 +9,6 @@ export class setWalletPage extends Page {
   analyticsCheckbox = createPageElement(setWalletPasswordSelectors.analyticsCheckBox);
   skipOnboarding = createPageElement(setWalletPasswordSelectors.skipOnboardingCheckbox);
   acceptTerms = createPageElement(setWalletPasswordSelectors.acceptTermsCheckbox);
-  importButton = createPageElement(setWalletPasswordSelectors.importButton);
 
   async isVisible() {
     await this.passwordField.waitForDisplayed();

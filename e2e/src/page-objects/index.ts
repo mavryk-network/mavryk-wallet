@@ -6,7 +6,6 @@ import { ConfirmationModalPage } from 'e2e/src/page-objects/pages/confirmation-m
 import { NetworksDropDown } from 'e2e/src/page-objects/pages/drop-down-lists/networks.drop-down';
 // eslint-disable-next-line import/namespace
 import { GeneralSettingsPage } from 'e2e/src/page-objects/pages/general-settings.page';
-import { ManageAssetsCollectiblesPage } from 'e2e/src/page-objects/pages/manage-assets-collectibles.page';
 import { ManageAssetsTokensPage } from 'e2e/src/page-objects/pages/manage-assets-tokens.page';
 import { NetworksPage } from 'e2e/src/page-objects/pages/networks.page';
 import { NewsletterModalPage } from 'e2e/src/page-objects/pages/newsletter-modal.page';
@@ -77,7 +76,6 @@ export const Pages = {
   AddressBook: new AddressBookPage(),
   ConfirmationModal: new ConfirmationModalPage(),
   Networks: new NetworksPage(),
-  ManageAssetsCollectibles: new ManageAssetsCollectiblesPage(),
   ManageAssetsTokens: new ManageAssetsTokensPage(),
   AddAsset: new AddAssetPage(),
   Token: new TokenPage(),

@@ -3,6 +3,7 @@ import React, { memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
+import { useTokenApyInfo } from 'app/hooks/use-token-apy.hook';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
 import { isTzbtcAsset } from 'lib/assets';
@@ -10,7 +11,9 @@ import { useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
 
 import { AssetsSelectors } from '../../Assets.selectors';
 import styles from '../Tokens.module.css';
+
 import { CryptoBalance, FiatBalance } from './Balance';
+import { TokenTag } from './TokenTag';
 
 interface Props {
   active: boolean;
@@ -21,8 +24,9 @@ interface Props {
 }
 
 export const ListItem = memo<Props>(
-  ({ active, assetSlug, balance, onClick }) => {
+  ({ active, assetSlug, balance, onClick, scam }) => {
     const metadata = useAssetMetadata(assetSlug);
+    const apyInfo = useTokenApyInfo(assetSlug);
 
     const classNameMemo = useMemo(
       () =>

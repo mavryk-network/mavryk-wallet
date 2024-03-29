@@ -13,6 +13,7 @@ import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
+
 import { CreateAccountSelectors } from './CreateAccount.selectors';
 
 type FormData = {

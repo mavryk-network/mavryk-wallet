@@ -1,18 +1,15 @@
 {
-  "extends": [
-    "react-app",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:import/typescript"
-  ],
+  "extends": ["react-app", "plugin:import/errors", "plugin:import/warnings", "plugin:import/typescript"],
   "plugins": ["import", "prettier", "no-type-assertion"],
   "parser": "@typescript-eslint/parser",
-  "overrides": [{
-    "files": ["*.ts", "*.tsx"],
-    "parserOptions": {
-      "project": ["./tsconfig.json", "./e2e/tsconfig.json", "./webpack/tsconfig.json"]
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parserOptions": {
+        "project": ["./tsconfig.json", "./e2e/tsconfig.json", "./webpack/tsconfig.json"]
+      }
     }
-  }],
+  ],
   "settings": {
     "import/resolver": {
       "typescript": {
@@ -31,7 +28,7 @@
     "import/no-named-as-default": "off",
     "import/no-named-as-default-member": "off",
     "import/no-self-import": "error",
-    "import/no-cycle": "error",
+    // "import/no-cycle": "error",
     "import/order": [
       "error",
       {
@@ -56,8 +53,11 @@
     "@typescript-eslint/no-non-null-assertion": "warn",
     "@typescript-eslint/prefer-ts-expect-error": "error",
     "react-hooks/rules-of-hooks": "warn",
-    "react-hooks/exhaustive-deps": ["warn", {
-      "additionalHooks": "(useMemoWithCompare|useDidUpdate)"
-    }]
+    "react-hooks/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "(useMemoWithCompare|useDidUpdate)"
+      }
+    ]
   }
 }

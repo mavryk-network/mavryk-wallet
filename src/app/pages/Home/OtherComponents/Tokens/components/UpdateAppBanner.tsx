@@ -4,11 +4,11 @@ import clsx from 'clsx';
 import browser from 'webextension-polyfill';
 
 import { FormSubmitButton } from 'app/atoms';
-import { TOOLBAR_IS_STICKY } from 'app/layouts/PageLayout';
 import { AppUpdateDetails, useStoredAppUpdateDetails } from 'app/storage/app-update/use-value.hook';
 import { EmojiInlineIcon } from 'lib/icons/emoji';
 import { useDidMount } from 'lib/ui/hooks';
 
+const TOOLBAR_IS_STICKY = true;
 interface Props {
   popup?: boolean;
 }
@@ -59,7 +59,7 @@ export const UpdateAppBanner = memo<Props>(({ popup }) => {
         Wallet is available in the store. Please, update your extension to unlock all the latest improvements.
       </p>
 
-      <FormSubmitButton slim className="mt-3" onClick={onUpdateButtonPress ?? undefined}>
+      <FormSubmitButton className="mt-3" onClick={onUpdateButtonPress ?? undefined}>
         Update now
       </FormSubmitButton>
     </div>

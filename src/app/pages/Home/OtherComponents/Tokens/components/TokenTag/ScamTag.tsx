@@ -27,8 +27,7 @@ export const ScamTag = memo<Props>(({ assetSlug }) => {
       try {
         const confirmed = await confirm({
           title: t('deleteScamTokenConfirmTitle'),
-          titleClassName: 'font-bold',
-          description: t('deleteScamTokenConfirmDescription'),
+          children: t('deleteScamTokenConfirmDescription'),
           comfirmButtonText: t('delete')
         });
 
@@ -64,7 +63,7 @@ export const ScamTag = memo<Props>(({ assetSlug }) => {
       className={clsx('uppercase ml-2 px-2 py-1', modStyles.tagBase, modStyles.scamTag)}
       testID={AssetsSelectors.assetItemScamButton}
     >
-      <T id="scam" />
+      Scam
     </Button>
   );
 });

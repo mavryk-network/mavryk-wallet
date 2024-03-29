@@ -12,6 +12,7 @@ import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
 import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
@@ -24,8 +25,8 @@ import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/w
 import { createLocationState } from 'lib/woozie/location';
 
 import { togglePartnersPromotionAction } from '../../store/partners-promotion/actions';
-import { useIsEnabledAdsBannerSelector } from '../../store/settings/selectors';
 import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress.hook';
+
 import { ContentSection } from './ContentSection';
 import styles from './Home.module.css';
 import { HomeSelectors } from './Home.selectors';
@@ -54,7 +55,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const network = useNetwork();
   const dispatch = useDispatch();
 
-  const isEnabledAdsBanner = useIsEnabledAdsBannerSelector();
+  const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
 
   const assetMetadata = useAssetMetadata(assetSlug || TEZ_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
@@ -70,10 +71,10 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   }, [registerBackHandler, assetSlug, search]);
 
   useEffect(() => {
-    if (isEnabledAdsBanner) {
+    if (shouldShowPartnersPromo) {
       dispatch(togglePartnersPromotionAction(false));
     }
-  }, [isEnabledAdsBanner, dispatch]);
+  }, [shouldShowPartnersPromo, dispatch]);
 
   const accountPkh = account.publicKeyHash;
   const canSend = account.type !== TempleAccountType.WatchOnly;

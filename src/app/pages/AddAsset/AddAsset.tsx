@@ -34,6 +34,7 @@ import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
+
 import { AddAssetSelectors } from './AddAsset.selectors';
 
 const AddAsset: FC = () => (

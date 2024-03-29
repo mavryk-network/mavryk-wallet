@@ -15,11 +15,7 @@ import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
-import {
-  setAdsBannerVisibilityAction,
-  setIsAnalyticsEnabledAction,
-  setOnRampPossibilityAction
-} from 'app/store/settings/actions';
+import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
@@ -61,10 +57,10 @@ export const useCreareOrRestorePassword = (
   const setAdsViewEnabled = useCallback(
     (adsViewEnabled: boolean) => {
       if (adsViewEnabled) {
-        dispatch(setAdsBannerVisibilityAction(false));
+        // dispatch(setAdsBannerVisibilityAction(false));
         dispatch(togglePartnersPromotionAction(true));
       } else {
-        dispatch(setAdsBannerVisibilityAction(true));
+        // dispatch(setAdsBannerVisibilityAction(true));
         dispatch(togglePartnersPromotionAction(false));
       }
     },

@@ -8,6 +8,7 @@ import { TID, t } from 'lib/i18n';
 
 import { useTempleClient } from '../../../lib/temple/front';
 import ImportTabSwitcher from '../../atoms/ImportTabSwitcher';
+
 import { ImportFromKeystoreFile } from './import/ImportFromKeystoreFile/ImportFromKeystoreFile';
 import { ImportFromSeedPhrase } from './import/ImportSeedPhrase/ImportFromSeedPhrase';
 import { LockedWalletExists } from './LockedWalletExists';

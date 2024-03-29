@@ -9,6 +9,7 @@ import { T, t } from 'lib/i18n';
 
 import { setWalletPasswordSelectors } from '../../setWalletPassword/SetWalletPassword.selectors';
 import { FormData } from '../useCreareOrRestorePassword';
+
 import styles from './importPartialFromCheckboxes.module.css';
 
 type ImportPartialFormCheckboxesProps = {

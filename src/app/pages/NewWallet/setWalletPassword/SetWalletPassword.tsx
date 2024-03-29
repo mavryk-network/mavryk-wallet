@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useMemo, useState } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -11,6 +11,7 @@ import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
 import { ImportPartialFormCheckboxes } from '../import/importPartialFormCheckboxes/ImportPartialFormCheckboxes';
 import { useCreareOrRestorePassword } from '../import/useCreareOrRestorePassword';
+
 import { setWalletPasswordSelectors } from './SetWalletPassword.selectors';
 
 interface SetWalletPasswordProps {

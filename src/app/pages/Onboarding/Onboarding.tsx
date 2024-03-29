@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 
 import { Stepper } from 'app/atoms';
 import PageLayout from 'app/layouts/PageLayout';

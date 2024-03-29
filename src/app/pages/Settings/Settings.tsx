@@ -26,6 +26,7 @@ import SyncSettings from 'app/templates/Synchronization/SyncSettings';
 import { T } from 'lib/i18n';
 
 import ConnectLedger from '../ConnectLedger/ConnectLedger';
+
 // import ImportAccount from '../ImportAccount';
 import { SettingsSelectors } from './Settings.selectors';
 

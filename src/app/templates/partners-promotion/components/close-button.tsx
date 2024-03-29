@@ -25,7 +25,7 @@ export const CloseButton = memo<CloseButtonProps>(({ className, onClick, variant
         className
       )}
       onClick={onClick}
-      title={t('hideAd')}
+      title={'hideAd'}
     >
       {isImageAd ? (
         <CloseBoldIcon className="w-auto h-4 fill-current text-white" />

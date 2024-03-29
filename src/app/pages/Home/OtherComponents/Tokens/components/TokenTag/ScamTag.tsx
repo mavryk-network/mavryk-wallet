@@ -26,8 +26,8 @@ export const ScamTag = memo<Props>(({ assetSlug }) => {
     async (slug: string) => {
       try {
         const confirmed = await confirm({
-          title: t('deleteScamTokenConfirmTitle'),
-          children: t('deleteScamTokenConfirmDescription'),
+          title: 'deleteScamTokenConfirmTitle',
+          children: 'deleteScamTokenConfirmDescription',
           comfirmButtonText: t('delete')
         });
 

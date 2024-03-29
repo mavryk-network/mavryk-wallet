@@ -160,7 +160,7 @@ export const ShortcutAccountSwitchOverlay = memo(() => {
                 'rounded-md rounded-b-none',
                 'text-gray-500 placeholder-gray-600 text-sm leading-tight'
               )}
-              placeholder={t('searchAccount', [searchHotkey])}
+              placeholder={'searchAccount'}
               searchIconClassName="h-5 w-auto text-gray-600 stroke-current"
               searchIconWrapperClassName="px-2"
               cleanButtonStyle={{ backgroundColor: 'transparent' }}
@@ -196,7 +196,7 @@ export const ShortcutAccountSwitchOverlay = memo(() => {
             <Divider className="bg-gray-700 mb-2 -mx-2" />
 
             <p className="text-center text-gray-500 text-xs font-normal font-inter">
-              <T id="shortcutSwitchAccountOverlayNavigation" />
+              shortcutSwitchAccountOverlayNavigation
             </p>
           </div>
         </div>

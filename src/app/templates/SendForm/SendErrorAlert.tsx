@@ -42,7 +42,7 @@ const SendErrorAlert = memo<Props>(({ type, error }) => {
             return t('minimalFeeGreaterThanBalanceVerbose');
 
           case isCounterError(error):
-            return t('counterIsOffOperationError');
+            return 'counterIsOffOperationError';
 
           default:
             return (

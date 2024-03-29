@@ -68,7 +68,7 @@ export function useDelegate(address: string, suspense = true, shouldPreventError
       }
 
       throw new BoundaryError(
-        getOnlineStatus() ? t('errorGettingBakerAddressMessageOnline') : t('errorGettingBakerAddressMessage'),
+        getOnlineStatus() ? 'errorGettingBakerAddressMessageOnline' : 'errorGettingBakerAddressMessage',
         resetDelegateCache
       );
     }

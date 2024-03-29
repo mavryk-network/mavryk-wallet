@@ -21,22 +21,17 @@ import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { T } from 'lib/i18n';
-// import { NotificationsBell } from 'lib/notifications';
 import { useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
-// import { DonationBanner } from '../atoms/DonationBanner/DonationBanner';
 import { useOnboardingProgress } from '../pages/Onboarding/hooks/useOnboardingProgress.hook';
-// import { AdvertisingBanner } from '../templates/advertising/advertising-banner/advertising-banner';
-import { AdvertisingOverlay } from '../templates/advertising/advertising-overlay/advertising-overlay';
-import styles from './pageLayout.module.css';
-import { PageLayoutSelectors } from './PageLayout.selectors';
+
 import { ChangelogOverlay } from './PageLayout/ChangelogOverlay/ChangelogOverlay';
 import ConfirmationOverlay from './PageLayout/ConfirmationOverlay';
 import Header from './PageLayout/Header';
-import { NewsletterOverlay } from './PageLayout/NewsletterOverlay/NewsletterOverlay';
-import { OnRampOverlay } from './PageLayout/OnRampOverlay/OnRampOverlay';
+import styles from './pageLayout.module.css';
+import { PageLayoutSelectors } from './PageLayout.selectors';
 
 interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentContainerStyle?: React.CSSProperties;

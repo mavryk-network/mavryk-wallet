@@ -5,10 +5,12 @@ import classNames from 'clsx';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField/SearchField';
+import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
-import { useAccount, useRelevantAccounts, useSetAccountPkh, useGasToken } from 'lib/temple/front';
+import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
 
 import { AccountDropdownSelectors } from '../selectors';
+
 import { AccountItem } from './AccountItem';
 
 type AccountPopupProps = {

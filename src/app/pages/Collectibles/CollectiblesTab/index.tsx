@@ -24,7 +24,7 @@ import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
 
-import { useSortededNFTsSlugs } from '../hooks/use-collectible-sorted.hook';
+import { useSortededCollectiblesSlugs } from '../hooks/use-collectible-sorted.hook';
 
 import styles from './Collectible.module.css';
 import { CollectibleItem } from './CollectibleItem';
@@ -70,7 +70,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
     [sortOption]
   );
 
-  const sortedAssets = useSortededNFTsSlugs(sortOption, allSlugs);
+  const sortedAssets = useSortededCollectiblesSlugs(sortOption, allSlugs);
 
   const { isInSearchMode, displayedSlugs, paginatedSlugs, isSyncing, loadNext, searchValue, setSearchValue } =
     useCollectiblesListingLogic(sortedAssets);

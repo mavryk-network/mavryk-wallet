@@ -2,14 +2,15 @@ import { useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { useAllNFTDetailsSelector } from 'app/store/nfts/selectors';
+import { useAllCollectibleDetailsSelector } from 'app/store/collectibles/selectors';
 import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { objktCurrencies } from 'lib/apis/objkt';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { atomsToTokens } from 'lib/temple/helpers';
 
-export function useSortededNFTsSlugs(sortOption: SortOptions | null, assetsSlugs: string[]) {
-  const assetsDetails = useAllNFTDetailsSelector();
+export function useSortededCollectiblesSlugs(sortOption: SortOptions | null, assetsSlugs: string[]) {
+  const assetsDetails = useAllCollectibleDetailsSelector();
+
   const assetsMetadatas = useAllTokensMetadataSelector();
 
   const assetsSlugNames = useMemo(

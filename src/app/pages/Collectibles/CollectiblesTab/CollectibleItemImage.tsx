@@ -5,6 +5,7 @@ import { isDefined } from '@rnw-community/shared';
 
 import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors';
 // import { buildCollectibleImagesStack } from 'lib/images-uri';
+import { AssetImage } from 'app/templates/AssetImage';
 import type { TokenMetadata } from 'lib/metadata';
 // import { ImageStacked } from 'lib/ui/ImageStacked';
 // import { useIntersectionByOffsetObserver } from 'lib/ui/use-intersection-observer';
@@ -12,7 +13,6 @@ import type { TokenMetadata } from 'lib/metadata';
 import { CollectibleBlur } from '../components/CollectibleBlur';
 import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
 import { CollectibleImageLoader } from '../components/CollectibleImageLoader';
-import { AssetImage } from 'app/templates/AssetImage';
 
 interface Props {
   assetSlug: string;

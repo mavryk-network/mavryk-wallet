@@ -1872,5 +1872,8 @@
   "creators": { "message": "Автори:" },
   "unknownError": {
     "message": "Невідома помилка"
+  },
+  "dropdownNoItems": {
+    "message": "Нічого не знайдено"
   }
 }

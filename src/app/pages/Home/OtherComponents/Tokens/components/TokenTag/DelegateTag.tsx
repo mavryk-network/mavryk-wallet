@@ -34,7 +34,7 @@ export const DelegateTezosTag: FC = () => {
     () => (
       <Button
         onClick={handleTagClick}
-        className={classNames('uppercase ml-2 px-1.5 py-1', modStyles['apyTag'])}
+        className={classNames('uppercase ml-2 px-1.5 py-1', modStyles.tagBase, modStyles.delegateTag)}
         testID={AssetsSelectors.assetItemDelegateButton}
       >
         <T id="notDelegated" />

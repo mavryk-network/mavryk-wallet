@@ -7,8 +7,9 @@ import classNames from 'clsx';
 import { Money } from 'app/atoms';
 import PlainAssetInput from 'app/atoms/PlainAssetInput';
 import InFiat from 'app/templates/InFiat';
+import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
-import { RawOperationAssetExpense, RawOperationExpenses, useGasToken } from 'lib/temple/front';
+import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 import { mutezToTz, tzToMutez } from 'lib/temple/helpers';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {

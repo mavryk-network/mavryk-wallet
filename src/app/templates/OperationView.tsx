@@ -1,7 +1,5 @@
 import React, { FC, useMemo, useState } from 'react';
 
-import classNames from 'clsx';
-
 import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
@@ -13,9 +11,7 @@ import { T, t } from 'lib/i18n';
 import { tryParseExpenses, useAccount } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
 
-import AccountBanner from './AccountBanner';
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
-import NetworkBanner from './NetworkBanner';
 import TabsSwitcher from './TabsSwicther/TabsSwitcher';
 
 const MIN_GAS_FEE = 0;
@@ -35,8 +31,6 @@ const OperationView: FC<OperationViewProps> = ({
   mainnet = false,
   modifyFeeAndLimit
 }) => {
-  const account = useAccount();
-
   const contentToParse = useMemo(() => {
     switch (payload.type) {
       case 'confirm_operations':

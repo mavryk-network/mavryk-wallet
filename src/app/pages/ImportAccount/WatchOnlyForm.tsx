@@ -43,9 +43,6 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
     [resolvedAddress, addressValue]
   );
 
-  const accName = watch('accName') ?? '';
-  const finalAccName = accName?.trim() !== '' ? accName : undefined;
-
   const cleanAddressField = useCallback(() => {
     setValue('address', '');
     triggerValidation('address');
@@ -74,7 +71,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         chainId = await tezos.rpc.getChainId();
       }
 
-      await importWatchOnlyAccount(finalAddress, chainId, finalAccName);
+      await importWatchOnlyAccount(finalAddress, chainId);
 
       formAnalytics.trackSubmitSuccess();
     } catch (err: any) {
@@ -86,15 +83,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       await delay();
       setError(err.message);
     }
-  }, [
-    formState.isSubmitting,
-    formAnalytics,
-    finalAddress,
-    importWatchOnlyAccount,
-    finalAccName,
-    tezos.rpc,
-    tezos.contract
-  ]);
+  }, [formState.isSubmitting, formAnalytics, finalAddress, importWatchOnlyAccount, tezos.rpc, tezos.contract]);
 
   return (
     <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>

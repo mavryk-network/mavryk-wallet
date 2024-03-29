@@ -8,6 +8,7 @@ import { isTruthy } from 'lib/utils';
 import { HistoryAction, navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
+
 import { ByFundraiserForm } from './ByFundraiserForm';
 import { ByMnemonicForm } from './ByMnemonicForm';
 import { ByPrivateKeyForm } from './ByPrivateKeyForm';

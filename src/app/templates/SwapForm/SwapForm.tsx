@@ -27,6 +27,7 @@ import { useBalance } from 'lib/balances/hooks';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, useGetTokenMetadata } from 'lib/metadata';
 import {
+  ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT,
   BURN_ADDREESS,
   MAX_ROUTING_FEE_CHAINS,
   ROUTING_FEE_ADDRESS,
@@ -467,6 +468,8 @@ export const SwapForm: FC = () => {
 
   const handleCloseAlert = () => setIsAlertVisible(false);
 
+  const routingFeeIsTakenFromOutput = atomsInputValue.lt(ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT) ?? false;
+
   return (
     <form className="mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isAlertVisible && (
@@ -604,7 +607,13 @@ export const SwapForm: FC = () => {
 
       <Divider className="my-6" color="bg-divider" />
 
-      <SwapRoute className="mb-8" />
+      <SwapRoute
+        className="mb-8"
+        isLbInput={isDefined(inputValue.assetSlug) && inputValue.assetSlug === KNOWN_TOKENS_SLUGS.SIRS}
+        isLbOutput={isDefined(outputValue.assetSlug) && outputValue.assetSlug === KNOWN_TOKENS_SLUGS.SIRS}
+        routingFeeIsTakenFromOutput={routingFeeIsTakenFromOutput}
+        outputToken={outputAssetMetadata}
+      />
     </form>
   );
 };

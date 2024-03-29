@@ -8,6 +8,7 @@ import { ReactComponent as SortIcon } from 'app/icons/sort.svg';
 import { T } from 'lib/i18n';
 
 import { PopupModalWithTitle } from '../PopupModalWithTitle';
+
 import { SortListItemType, SortPopupContext } from './SortPopup.types';
 
 type SortPopupContentProps = {

@@ -6437,9 +6437,9 @@ effector@21.2.0:
   integrity sha512-au0EgLnAeuSvJ/PnWP6rZ/nfP/5Phn9rRwN0RK6GgU9zmXKcXKVSpu2zj1VE9ha9oCpAh4yeScBMNdwc2NNYDQ==
 
 electron-to-chromium@^1.4.668:
-  version "1.4.720"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.720.tgz#7cbe32a4ceb0650d2fbc16886440949cf07610e8"
-  integrity sha512-5zwcKNkOj3GN0jBzpcpGonNPkn667VJpQwRYWdo/TiJEHTQswZyA/vALhZFiAXgL5NuK9UarX1tbdvXu3hG6Yw==
+  version "1.4.721"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.721.tgz#a9ee55ba7e54d9ecbcc19825116f3752e7d60ef2"
+  integrity sha512-k1x2r6foI8iJOp+1qTxbbrrWMsOiHkzGBYwYigaq+apO1FSqtn44KTo3Sy69qt7CRr7149zTcsDvH7MUKsOuIQ==
 
 elliptic@^6.5.3, elliptic@^6.5.4, elliptic@^6.5.5:
   version "6.5.5"

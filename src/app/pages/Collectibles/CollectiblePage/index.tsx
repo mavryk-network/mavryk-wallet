@@ -7,12 +7,12 @@ import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
+import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
 import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
-import { loadNFTsDetailsActions } from 'app/store/nfts/actions';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
@@ -83,7 +83,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
   const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadNFTsDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
+  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
     dispatch,
     assetSlug
   ]);

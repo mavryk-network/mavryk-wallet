@@ -8,15 +8,11 @@ import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion
 import { T, t } from 'lib/i18n';
 import { useConfirm } from 'lib/ui/dialog';
 
-import { setAdsBannerVisibilityAction } from '../../../store/settings/actions';
-import { useIsEnabledAdsBannerSelector } from '../../../store/settings/selectors';
-
 export const PartnersPromotionSettings: FC = () => {
   const dispatch = useDispatch();
   const confirm = useConfirm();
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
-  const isEnableAdsBanner = useIsEnabledAdsBannerSelector();
 
   const handleHidePromotion = async (toChecked: boolean) => {
     const confirmed = await confirm({
@@ -27,9 +23,6 @@ export const PartnersPromotionSettings: FC = () => {
 
     if (confirmed) {
       dispatch(togglePartnersPromotionAction(toChecked));
-    }
-    if (isEnableAdsBanner) {
-      dispatch(setAdsBannerVisibilityAction(false));
     }
   };
 
@@ -42,9 +35,6 @@ export const PartnersPromotionSettings: FC = () => {
 
     if (confirmed) {
       dispatch(togglePartnersPromotionAction(toChecked));
-    }
-    if (isEnableAdsBanner) {
-      dispatch(setAdsBannerVisibilityAction(false));
     }
   };
 

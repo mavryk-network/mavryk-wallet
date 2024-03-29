@@ -14,7 +14,6 @@ import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import useHistory from '../../../lib/temple/history/hook';
-import { PartnersPromotion, PartnersPromotionVariant } from '../../atoms/partners-promotion';
 import {
   SearchExplorer,
   SearchExplorerClosed,
@@ -23,6 +22,7 @@ import {
   SearchExplorerOpened
 } from '../SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from '../SortPopup';
+
 import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
@@ -284,7 +284,6 @@ export const HistoryComponent: React.FC<Props> = memo(
                     handleItemClick={handleItemClick}
                     last={false}
                   />
-                  {index === 0 && <PartnersPromotion variant={PartnersPromotionVariant.Image} />}
                 </Fragment>
               ))}
             </InfiniteScroll>

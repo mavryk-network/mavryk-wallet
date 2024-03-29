@@ -16,6 +16,7 @@ import {
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from '../activity/MoneyDiffView';
+
 import { getAssetsFromOperations } from './utils';
 
 interface Props {

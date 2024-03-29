@@ -13,7 +13,9 @@ import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeEnum, UserHistoryItem } from 'lib/temple/history/types';
 
-import { alterIpfsUrl, getAssetsFromOperations } from './utils';
+import { AssetImage } from '../AssetImage';
+
+import { getAssetsFromOperations } from './utils';
 
 /**
  * onClick - open modal for tx item
@@ -77,7 +79,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
       >
         {renderOperationIcon()}
         {tokensMetadata?.map((token, idx, arr) => (
-          <img
+          <AssetImage
             key={idx}
             className={clsx(
               'rounded-full overflow-hidden absolute top-1/2 bg-gray-405',
@@ -87,8 +89,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
               left: `${getLeftImagePosition(idx)}%`,
               zIndex: arr.length - idx
             }}
-            src={alterIpfsUrl(token?.thumbnailUri)}
-            alt={token?.name}
+            metadata={{ ...token }}
           />
         ))}
       </div>

@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 
 import { Estimate } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
@@ -7,9 +7,7 @@ import classNames from 'clsx';
 import { HashChip, Money, Identicon } from 'app/atoms';
 import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
 import InFiat from 'app/templates/InFiat';
-import { setTestID } from 'lib/analytics';
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
-import { useGasToken } from 'lib/assets/hooks';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';

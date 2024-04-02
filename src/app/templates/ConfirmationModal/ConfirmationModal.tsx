@@ -23,7 +23,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
   } = props;
 
   return (
-    <PopupModalWithTitle {...restProps} onRequestClose={onRequestClose}>
+    <PopupModalWithTitle {...restProps} onRequestClose={onRequestClose} portalClassName="confirmation-modal">
       <div className="px-4">
         <div className="mb-11 mt-7 text-white text-sm text-center">{children}</div>
         <div className="grid grid-cols-2 gap-x-3">

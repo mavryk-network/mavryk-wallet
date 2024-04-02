@@ -23,9 +23,9 @@ const RootSuspenseFallback: FC = () => {
   }, [forceUpdate]);
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen bg-primary-bg">
       <div>
-        <Spinner theme="gray" className="w-20" />
+        <Spinner theme="primary" className="w-20" />
       </div>
     </div>
   );

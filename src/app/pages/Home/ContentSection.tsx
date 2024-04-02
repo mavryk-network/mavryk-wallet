@@ -147,6 +147,6 @@ const SuspenseContainer: FC<SuspenseContainerProps> = ({ whileMessage, fallback 
 
 const SpinnerSection: FC = () => (
   <div className="flex justify-center my-12">
-    <Spinner theme="gray" className="w-20" />
+    <Spinner className="w-20" />
   </div>
 );

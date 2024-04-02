@@ -10,6 +10,6 @@ interface Props {
 
 export const SyncSpinner: React.FC<Props> = ({ className }) => (
   <div className={clsx('w-full', className)}>
-    <Spinner theme="gray" className="w-16 m-auto" />
+    <Spinner className="w-16 m-auto" />
   </div>
 );

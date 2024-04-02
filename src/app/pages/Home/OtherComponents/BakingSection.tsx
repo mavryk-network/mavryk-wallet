@@ -282,7 +282,7 @@ const BakingSection = memo(() => {
           )}
           {loadingBakingHistory && (
             <div className="flex flex-row justify-center items-center h-10 mt-4">
-              <Spinner theme="gray" className="w-16" />
+              <Spinner className="w-16" />
             </div>
           )}
           {bakingHistory && bakingHistory.length > 0 && (

@@ -136,7 +136,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} showFullDate />
         </div>
       }
-      portalClassName="token-details-popup"
+      portalClassName="history-details-popup"
       headerComponent={<HistoryTokenIcon historyItem={historyItem} size={44} fullSizeAssets />}
       {...props}
     >

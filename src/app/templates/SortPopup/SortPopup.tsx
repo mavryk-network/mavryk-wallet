@@ -63,7 +63,7 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle,
   const { opened, close } = useSortPopup();
 
   return (
-    <PopupModalWithTitle isOpen={opened} onRequestClose={close} title={title}>
+    <PopupModalWithTitle isOpen={opened} onRequestClose={close} title={title} portalClassName="sort-popup">
       <div className="flex flex-col mt-2">
         <ul className="flex flex-col px-4">
           {items.map(item => (

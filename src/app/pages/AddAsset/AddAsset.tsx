@@ -341,7 +341,7 @@ const Form = memo(() => {
       {processing && (
         <div className="my-4 w-full flex items-center justify-center pb-4">
           <div>
-            <Spinner theme="gray" className="w-20" />
+            <Spinner className="w-20" />
           </div>
         </div>
       )}

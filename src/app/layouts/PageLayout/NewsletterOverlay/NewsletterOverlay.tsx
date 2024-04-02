@@ -81,7 +81,7 @@ export const NewsletterOverlay: FC = () => {
     }
 
     if (isLoading) {
-      return <Spinner theme="white" className="w-8" />;
+      return <Spinner className="w-8" />;
     }
 
     return 'Subscribe';

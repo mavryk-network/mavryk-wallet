@@ -25,11 +25,10 @@ const Spinner = memo<SpinnerProps>(({ theme = 'primary', className, ...rest }) =
                 return 'bg-white shadow-sm';
 
               case 'dark-gray':
-                return 'bg-gray-600';
+                return 'bg-gray-920';
 
-              case 'gray':
               default:
-                return 'bg-gray-400';
+                return 'bg-gray-920';
             }
           })(),
           styles['bounce'],

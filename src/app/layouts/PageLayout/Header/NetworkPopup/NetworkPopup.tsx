@@ -6,8 +6,8 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
 import {
   BLOCK_EXPLORERS,
-  useBlockExplorer,
   useAllNetworks,
+  useBlockExplorer,
   useChainId,
   useNetwork,
   useSetNetworkId
@@ -18,11 +18,11 @@ import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
 import { NetworkSelectors } from './NetworkPoopup.selectors';
 
 type NetworkPopupProps = {
-  opened: boolean;
   setOpened: (v: boolean) => void;
 };
 
 export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
+  // return <div className="text-white">dsadasdas</div>;
   const allNetworks = useAllNetworks();
   const currentNetwork = useNetwork();
   const setNetworkId = useSetNetworkId();
@@ -56,7 +56,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
 
       setNetworkId(netId);
     },
-    [setNetworkId, setExplorerId, chainId]
+    [setExplorerId, setNetworkId, chainId]
   );
 
   const action = useMemo(
@@ -70,30 +70,28 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   );
 
   return (
-    <>
-      <div className="px-4 flex flex-col">
-        <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 380 }}>
-          {filteredNetworks.map(network => {
-            const { id, rpcBaseURL } = network;
-            const selected = id === currentNetwork.id;
+    <div className="px-4 flex flex-col">
+      <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 380 }}>
+        {filteredNetworks.map(network => {
+          const { id, rpcBaseURL } = network;
+          const selected = id === currentNetwork.id;
 
-            return (
-              <NetworkListItem
-                key={id}
-                network={network}
-                selected={selected}
-                onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
-              />
-            );
-          })}
-        </div>
-        <ButtonLink {...action}>
-          <ButtonRounded size="big" fill={false} className="w-full mt-6">
-            <T id="addNetwork" />
-          </ButtonRounded>
-        </ButtonLink>
+          return (
+            <NetworkListItem
+              key={id}
+              network={network}
+              selected={selected}
+              onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
+            />
+          );
+        })}
       </div>
-    </>
+      <ButtonLink {...action}>
+        <ButtonRounded size="big" fill={false} className="w-full mt-6">
+          <T id="addNetwork" />
+        </ButtonRounded>
+      </ButtonLink>
+    </div>
   );
 };
 

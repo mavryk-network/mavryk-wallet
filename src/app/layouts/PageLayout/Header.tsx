@@ -75,9 +75,9 @@ const Control: FC = () => {
         isOpen={showNetworkPopup}
         onRequestClose={handlePopupToggle.bind(null, setShowNetworkPopup, false)}
         title={<T id="networkSelect" />}
-        portalClassName="network-popup"
+        portalClassName="networks-popup"
       >
-        <NetworkPopup opened={showNetworkPopup} setOpened={setShowNetworkPopup} />
+        <NetworkPopup setOpened={setShowNetworkPopup} />
       </PopupModalWithTitle>
 
       <PopupModalWithTitle

@@ -176,7 +176,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   );
 
   const hiddenAssets = useMemo(
-    () => filteredAssets.filter(slug => !tokensRecord[slug]?.status),
+    () => filteredAssets.filter(slug => tokensRecord[slug]?.status === 'disabled'),
     [tokensRecord, filteredAssets]
   );
 
@@ -225,10 +225,10 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
       filteredAssets.sort((a, b) => {
         if (tokensRecord[a]?.status === tokensRecord[b]?.status) {
           return 0;
-        } else if (tokensRecord[a]?.status) {
-          return -1;
-        } else {
+        } else if (tokensRecord[a]?.status === 'disabled') {
           return 1;
+        } else {
+          return -1;
         }
       }),
     [tokensRecord, filteredAssets]
@@ -275,7 +275,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
                 assetSlug={slug}
                 last={last}
                 checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
-                hidden={!tokensRecord[slug]?.status ?? false}
+                hidden={tokensRecord[slug]?.status === 'disabled' ?? false}
                 assetType={assetType}
                 balance={new BigNumber(balances[assetType] ?? 0)}
                 address={address}
@@ -386,7 +386,7 @@ const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValu
   ) : (
     <div className="my-8 flex flex-col items-center justify-center text-white">
       <p className="mb-2 flex items-center justify-center text-white text-base-plus">
-        {Boolean(searchValue) && <SearchIcon className="w-5 h-auto mr-1 stroke-current" />}
+        {Boolean(searchValue) && <SearchIcon className="w-5 h-auto mr-1 stroke-1 fill-current" />}
 
         <span {...setTestID(ManageAssetsSelectors.emptyStateText)}>
           <T id="noAssetsFound" />
@@ -402,6 +402,6 @@ const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValu
 
 const RenderAssetComponent: React.FC = () => (
   <b>
-    <T id={'addAsset'} />
+    <T id={'add'} />
   </b>
 );

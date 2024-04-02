@@ -31,7 +31,7 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
   const mintedTimestamp = useMemo(() => {
     const value = details?.mintedTimestamp;
 
-    return value ? formatDate(value, 'PP') : '-';
+    return value ? formatDate(value, 'd MMMM, yyyy') : '-';
   }, [details?.mintedTimestamp]);
 
   const royaltiesStr = useMemo(() => {

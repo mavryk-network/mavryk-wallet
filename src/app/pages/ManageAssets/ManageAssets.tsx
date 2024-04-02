@@ -87,7 +87,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [tokens]
   );
 
-  const assetsAreLoading = useAreAssetsLoading('tokens');
+  const assetsAreLoading = useAreAssetsLoading(assetType === AssetTypesEnum.Collectibles ? 'collectibles' : 'tokens');
   const metadatasLoading = useTokensMetadataLoadingSelector();
   const isSyncing = assetsAreLoading || metadatasLoading;
 
@@ -144,10 +144,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   }, [assetType, confirm, handleAssetUpdate, selectedAssets]);
 
   const handleHideSelectedTokens = useCallback(async () => {
-    // const status = selectedAssets.some(slug => tokensRecord[slug]?.displayed)
-    const status = selectedAssets.some(slug => ({ slug, status: tokens.find(t => t.slug === slug)!.status }))
-      ? 'disabled'
-      : 'enabled';
+    const status = selectedAssets.some(slug => tokensRecord[slug]?.status !== 'disabled') ? 'disabled' : 'enabled';
 
     const promises = selectedAssets.map(async slug => {
       return await handleAssetUpdate(slug, status);
@@ -156,7 +153,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     await Promise.all(promises);
     setSelectedAssets([]);
     setSelectedOption(null);
-  }, [tokens, handleAssetUpdate, selectedAssets]);
+  }, [selectedAssets, tokensRecord, handleAssetUpdate]);
 
   const unselectAll = useCallback(() => {
     setSelectedAssets([]);

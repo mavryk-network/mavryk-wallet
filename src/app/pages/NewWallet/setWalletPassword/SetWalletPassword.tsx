@@ -116,7 +116,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
       <FormSubmitButton
         loading={submitting}
         disabled={internalDisabledBtnStatus}
-        className={classNames('w-full', fullPage ? 'mt-8' : 'mt-13')}
+        className={classNames('w-full', fullPage ? 'mt-8' : 'mt-6')}
         testID={ownMnemonic ? setWalletPasswordSelectors.restoreButton : setWalletPasswordSelectors.createButton}
       >
         {submitBtnLabel ? submitBtnLabel : <T id={ready ? 'restore' : 'import'} />}

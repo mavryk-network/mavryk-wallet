@@ -64,7 +64,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
 
-  const nftName = getAssetName(metadata);
+  const collectibleName = getAssetName(metadata);
 
   const creators = details?.creators ?? [];
 
@@ -117,7 +117,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const listing = getDetailsListing(details);
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{nftName}</span>}>
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
       <div className="flex flex-col w-full pb-6">
         {operationError ? (
           <Alert
@@ -130,7 +130,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
           operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-4" />
         )}
 
-        <div className="rounded-2xl mb-6 bg-gray-405 overflow-hidden" style={{ aspectRatio: '1/1' }}>
+        <div className="rounded-2xl mb-6 bg-primary-card overflow-hidden" style={{ aspectRatio: '1/1' }}>
           <CollectiblePageImage
             metadata={metadata}
             areDetailsLoading={areDetailsLoading}
@@ -165,11 +165,11 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
             </div>
 
             <CopyButton
-              text={nftName}
+              text={collectibleName}
               type={'block'}
-              className={'text-white text-left text-xl leading-6 tracking-tight truncate mb-2'}
+              className={'text-white text-xl leading-6 tracking-tight truncate mb-2'}
             >
-              {nftName}
+              {collectibleName}
             </CopyButton>
 
             <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>

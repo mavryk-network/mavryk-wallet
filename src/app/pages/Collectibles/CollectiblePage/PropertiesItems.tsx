@@ -9,6 +9,8 @@ import { useBalance } from 'lib/balances';
 import { formatDate } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
+import { CardWithLabel } from './CardWithLabel';
+
 interface PropertiesItemsProps {
   assetSlug: string;
   accountPkh: string;
@@ -40,62 +42,58 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
     return `${royalties.toString()}%`;
   }, [details]);
 
-  const itemClassName = 'flex flex-col gap-y-2 p-3 border border-gray-300 rounded-md';
-  const itemTitleClassName = 'text-xs text-gray-600 leading-5';
-  const itemValueClassName = 'text-base font-semibold leading-5 break-words';
+  const itemValueClassName = 'text-base-plus text-white break-words';
 
   return (
     <>
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Editions</h6>
-        <span className={itemValueClassName}>{details?.supply ?? '-'}</span>
-      </div>
+      <section className="w-full grid grid-cols-2 gap-x-4 gap-y-6 mb-6">
+        <CardWithLabel label={'Editions'}>
+          <span className={itemValueClassName}>{details?.supply ?? '-'}</span>
+        </CardWithLabel>
 
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Owned</h6>
-        <span className={itemValueClassName}>{balance?.toString() ?? '-'}</span>
-      </div>
+        <CardWithLabel label={'Owned'}>
+          <span className={itemValueClassName}>{balance?.toString() ?? '-'}</span>
+        </CardWithLabel>
 
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Minted</h6>
-        <span className={itemValueClassName}>{mintedTimestamp}</span>
-      </div>
+        <CardWithLabel label={'Minted'}>
+          <span className={itemValueClassName}>{mintedTimestamp}</span>
+        </CardWithLabel>
 
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Royalties</h6>
-        <span className={itemValueClassName}>{royaltiesStr}</span>
-      </div>
+        <CardWithLabel label={'Royalties'}>
+          <span className={itemValueClassName}>{royaltiesStr}</span>
+        </CardWithLabel>
+      </section>
 
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Contract</h6>
-        <div className="flex gap-x-1.5">
+      <CardWithLabel label={'Contract'} className="mb-3">
+        <div className="flex items-center">
           <HashChip
             hash={contract}
             firstCharsCount={5}
             lastCharsCount={5}
             className="tracking-tighter"
             rounded="base"
+            showIcon={false}
           />
-          {exploreContractUrl && <ExternalLinkChip href={exploreContractUrl} tooltip="Explore contract" />}
+          {exploreContractUrl && (
+            <ExternalLinkChip href={exploreContractUrl} alternativeDesign tooltip="Explore contract" />
+          )}
         </div>
-      </div>
+      </CardWithLabel>
 
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Metadata</h6>
+      <CardWithLabel label={'Metadata'}>
         {details?.metadataHash ? (
-          <div className="flex gap-x-1.5">
-            <span className="rounded p-1 text-sm leading-4 text-gray-600 bg-gray-100">IPFS</span>
-            <ExternalLinkChip href={`https://ipfs.io/ipfs/${details.metadataHash}`} tooltip="Open metadata" />
+          <div className="flex items-center">
+            <span className="text-base-plus text-blue-200">IPFS</span>
+            <ExternalLinkChip
+              alternativeDesign
+              href={`https://ipfs.io/ipfs/${details.metadataHash}`}
+              tooltip="Open metadata"
+            />
           </div>
         ) : (
           <span className={itemValueClassName}>-</span>
         )}
-      </div>
-
-      <div className={itemClassName}>
-        <h6 className={itemTitleClassName}>Token id</h6>
-        <span className={itemValueClassName}>{id.toString()}</span>
-      </div>
+      </CardWithLabel>
     </>
   );
 });

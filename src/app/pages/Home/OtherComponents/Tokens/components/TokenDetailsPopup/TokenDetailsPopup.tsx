@@ -20,22 +20,29 @@ import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { isTzbtcAsset, TEZ_TOKEN_SLUG } from 'lib/assets';
-import { useCurrentAccountBalances } from 'lib/balances';
+import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
-import { AssetMetadataBase, getAssetSymbol, useAssetMetadata } from 'lib/metadata';
+import { AssetMetadataBase, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
+import { ZERO } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
+  publicKeyHash: string;
 } & PopupModalWithTitlePropsProps;
 
-export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpen, ...rest }) => {
-  const assetMetadata = useAssetMetadata(assetSlug || TEZ_TOKEN_SLUG);
+export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({
+  assetSlug = TEZ_TOKEN_SLUG,
+  publicKeyHash,
+  isOpen,
+  ...rest
+}) => {
+  const { value: balance = ZERO, assetMetadata } = useBalance(assetSlug, publicKeyHash);
 
   return (
     <PopupModalWithTitle
@@ -58,7 +65,7 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
       }
       {...rest}
     >
-      <TokenDetailsPopupContent assetSlug={assetSlug} assetMetadata={assetMetadata} />
+      <TokenDetailsPopupContent balance={balance} assetSlug={assetSlug} assetMetadata={assetMetadata} />
     </PopupModalWithTitle>
   );
 };
@@ -66,13 +73,12 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({ assetSlug, isOpe
 type TokenDetailsPopupContentProps = {
   assetSlug: string;
   assetMetadata: AssetMetadataBase | undefined;
+  balance: BigNumber;
 };
 
-const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug, assetMetadata }) => {
+const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug, assetMetadata, balance }) => {
   const account = useAccount();
   const network = useNetwork();
-  const balances = useCurrentAccountBalances();
-  const balance = useMemo(() => balances[assetSlug] ?? new BigNumber(0), [assetSlug, balances]);
   const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
   const tokenMetadata = useTokenMetadataSelector(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();

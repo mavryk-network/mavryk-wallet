@@ -25,7 +25,7 @@ import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
-import { useChainId } from 'lib/temple/front';
+import { useAccount, useChainId } from 'lib/temple/front';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -44,6 +44,7 @@ export const TokensTab: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const chainId = useChainId(true)!;
   const balances = useCurrentAccountBalances();
+  const { publicKeyHash } = useAccount();
 
   const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
@@ -118,10 +119,10 @@ export const TokensTab: FC = () => {
     const tokensJsx = sortedSlugs.map(assetSlug => (
       <ListItem
         key={assetSlug}
+        publicKeyHash={publicKeyHash}
         assetSlug={assetSlug}
-        active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
-        balance={new BigNumber(balances[assetSlug] ?? 0)}
         scam={mainnetTokensScamSlugsRecord[assetSlug]}
+        active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
         onClick={handleAssetOpen}
       />
     ));
@@ -223,7 +224,12 @@ export const TokensTab: FC = () => {
       ) : (
         <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-sm leading-tight">
           {tokensView}
-          <TokenDetailsPopup assetSlug={assetSlug} isOpen={assetSlug.length > 0} onRequestClose={handleAssetClose} />
+          <TokenDetailsPopup
+            publicKeyHash={publicKeyHash}
+            assetSlug={assetSlug}
+            isOpen={assetSlug.length > 0}
+            onRequestClose={handleAssetClose}
+          />
         </div>
       )}
 

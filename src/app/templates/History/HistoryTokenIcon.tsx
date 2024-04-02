@@ -78,20 +78,21 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
         onClick={onClick}
       >
         {renderOperationIcon()}
-        {tokensMetadata?.map((token, idx, arr) => (
-          <AssetImage
-            key={idx}
-            className={clsx(
-              'rounded-full overflow-hidden absolute top-1/2 bg-gray-405',
-              arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
-            )}
-            style={{
-              left: `${getLeftImagePosition(idx)}%`,
-              zIndex: arr.length - idx
-            }}
-            metadata={{ ...token }}
-          />
-        ))}
+        {tokensMetadata &&
+          tokensMetadata.map((token, idx, arr) => (
+            <AssetImage
+              key={idx}
+              className={clsx(
+                'rounded-full overflow-hidden absolute top-1/2 bg-gray-405',
+                arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
+              )}
+              style={{
+                left: `${getLeftImagePosition(idx)}%`,
+                zIndex: arr.length - idx
+              }}
+              metadata={token}
+            />
+          ))}
       </div>
     </div>
   );

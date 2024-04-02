@@ -10,7 +10,7 @@ import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -29,7 +29,7 @@ interface Props {
 
 export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, areDetailsShown }) => {
   const { popup } = useAppEnv();
-  const metadata = useTokenMetadataSelector(assetSlug);
+  const metadata = useCollectibleMetadataSelector(assetSlug);
   const toDisplayRef = useRef<HTMLDivElement>(null);
   const balanceAtomic = useBalanceSelector(accountPkh, chainId, assetSlug);
 
@@ -62,6 +62,9 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
           metadata={metadata}
           areDetailsLoading={areDetailsLoading && details === undefined}
           mime={details?.mime}
+          // TODO add adult blur logic
+          adultBlur={false}
+          containerElemRef={toDisplayRef}
         />
 
         {areDetailsShown && balance ? (

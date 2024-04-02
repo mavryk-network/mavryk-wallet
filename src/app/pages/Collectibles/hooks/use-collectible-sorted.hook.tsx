@@ -22,7 +22,7 @@ export function useSortededCollectiblesSlugs(sortOption: SortOptions | null, ass
     [assetsSlugs, assetsMetadatas]
   );
 
-  let sortedAssetSlugs = [...assetsSlugs];
+  let sortedAssetSlugs = useMemo(() => [...assetsSlugs], [assetsSlugs]);
 
   switch (sortOption) {
     case SortOptions.BY_NAME:
@@ -56,5 +56,7 @@ export function useSortededCollectiblesSlugs(sortOption: SortOptions | null, ass
       sortedAssetSlugs = [...sortedAssetSlugs];
   }
 
-  return [...new Set([...sortedAssetSlugs])];
+  const memoizedSortedSlugs = useMemo(() => [...new Set([...sortedAssetSlugs])], [sortedAssetSlugs]);
+
+  return memoizedSortedSlugs;
 }

@@ -95,7 +95,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
         ))}
       </div>
     ),
-    [displayedSlugs, publicKeyHash, chainId, areDetailsShown, isInSearchMode]
+    [displayedSlugs, publicKeyHash, chainId]
   );
 
   return (

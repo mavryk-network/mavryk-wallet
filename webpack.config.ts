@@ -75,7 +75,7 @@ const mainConfig = (() => {
   config.plugins!.push(
     ...[
       new WebpackBar({
-        name: 'Temple Wallet | Main',
+        name: 'Mavryk Wallet | Main',
         color: '#ed8936'
       }),
 
@@ -193,7 +193,7 @@ const scriptsConfig = (() => {
   config.plugins!.push(
     ...[
       new WebpackBar({
-        name: 'Temple Wallet | Scripts',
+        name: 'Mavryk Wallet | Scripts',
         color: '#ed8936'
       }),
 
@@ -226,7 +226,7 @@ const backgroundConfig = (() => {
   config.plugins!.push(
     ...[
       new WebpackBar({
-        name: 'Temple Wallet | Background',
+        name: 'Mavryk Wallet | Background',
         color: '#ed8936'
       }),
 

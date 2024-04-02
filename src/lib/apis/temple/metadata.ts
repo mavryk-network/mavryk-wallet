@@ -77,7 +77,7 @@ const buildApiUrl = (chainId: string) => {
 
   const chainName = API_CHAIN_NAMES[chainId as MetadataApiChainId];
 
-  if (!chainName) throw new Error('Unknown Chain ID to Temple Metadata service');
+  if (!chainName) throw new Error('Unknown Chain ID to Mavryk Metadata service');
 
   if (IS_STAGE_ENV) return `https://metadata-api-${chainName}.stage.madfish.xyz`;
 

@@ -213,6 +213,6 @@ export class ReactiveTezosToolkit extends TezosToolkit {
 
 function assertReady(state: TempleState): asserts state is ReadyTempleState {
   if (state.status !== TempleStatus.Ready) {
-    throw new Error('Temple not ready');
+    throw new Error('Mavryk not ready');
   }
 }

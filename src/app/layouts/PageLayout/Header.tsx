@@ -8,13 +8,13 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 
-import styles from './Header.module.css';
 import { AccountPopupButton, GetProlabel } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
 import { SettingButton, SettingsPopup } from './Header/SettingsPopup';
+import styles from './Header.module.css';
 
 const Header: FC = () => {
   const appEnv = useAppEnv();

@@ -27,7 +27,7 @@ export namespace KNOWN_TOKENS_SLUGS {
 const DEPRECATED_TKEY_METADATA: TokenMetadata = {
   id: '0',
   address: 'KT1WihWRnmzhfebi6zqQ4tvNGiPeVxiGwTi2',
-  name: 'Deprecated Temple Key',
+  name: 'Deprecated Mavryk Key',
   symbol: 'TKEY_OLD',
   decimals: 18,
   standard: TokenStandardsEnum.Fa2

@@ -108,10 +108,9 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
       </div>
       {expanded && (
         <div className="px-4 pt-2 pb-2 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">
-          {rest.map((item, i) => (
+          {rest.map((item, i, arr) => (
             <div key={i}>
-              <OpertionStackItem item={item} moneyDiff={moneyDiffsRest[i]} isTiny />
-              <ListItemDivider />
+              <OpertionStackItem item={item} moneyDiff={moneyDiffsRest[i]} last={arr.length - 1 === i} isTiny />
             </div>
           ))}
         </div>

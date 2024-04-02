@@ -1,5 +1,7 @@
 import React, { ReactNode, memo } from 'react';
 
+import clsx from 'clsx';
+
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
@@ -24,14 +26,16 @@ interface Props {
   isTiny?: boolean;
   moneyDiff?: MoneyDiff;
   originalHistoryItem?: UserHistoryItem;
+  last?: boolean;
 }
 
-export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, originalHistoryItem }) => {
+export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, originalHistoryItem, last }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
   const componentBaseProps = {
     status: item.status,
-    moneyDiff
+    moneyDiff,
+    last
   };
 
   const slugs = getAssetsFromOperations(originalHistoryItem);
@@ -158,6 +162,7 @@ interface StackItemBaseProps {
   argsNode?: React.ReactNode;
   moneyDiff?: MoneyDiff;
   status?: string;
+  last?: boolean;
 }
 
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
@@ -170,9 +175,14 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
   );
 };
 
-const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status }) => {
+const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status, last = false }) => {
   return (
-    <div className="flex items-start justify-between text-white text-xs h-12 border-b border-divider py-2">
+    <div
+      className={clsx(
+        'flex items-start justify-between text-white text-xs h-12 py-2',
+        !last && ' border-b border-divider'
+      )}
+    >
       <div className="flex items-center">
         <div className="flex items-center">{titleNode}</div>
         <span>&nbsp;</span>

@@ -2,10 +2,10 @@ import React, { HTMLAttributes, memo, ReactNode } from 'react';
 
 import classNames from 'clsx';
 
-import { HashChip } from 'app/atoms';
+import { HashChip, Money } from 'app/atoms';
 import { AccountPopupButton } from 'app/layouts/PageLayout/Header/AccountPopup/AccountPopupButton';
-import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
-import Balance from 'app/templates/Balance';
+import { useTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
+import { useFiatCurrency } from 'lib/fiat-currency';
 import { TempleAccount } from 'lib/temple/types';
 
 type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
@@ -20,6 +20,12 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
 
 const AccountBanner = memo<AccountBannerProps>(
   ({ account, displayBalance = true, restrictAccountSelect = false, networkRpc, className }) => {
+    const totalBalanceInFiat = useTotalBalance();
+
+    const {
+      selectedFiatCurrency: { symbol: fiatSymbol }
+    } = useFiatCurrency();
+
     return (
       <div className={classNames('flex flex-col', className)}>
         <div className="w-full flex items-center justify-between pb-4 border-b border-divider">
@@ -40,15 +46,12 @@ const AccountBanner = memo<AccountBannerProps>(
           </div>
 
           {displayBalance && (
-            <>
-              <Balance address={account.publicKeyHash} networkRpc={networkRpc}>
-                {bal => (
-                  <div className="ml-2 text-base-plus flex items-baseline text-white">
-                    <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
-                  </div>
-                )}
-              </Balance>
-            </>
+            <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus text-white">
+              <span className="ml-1">{fiatSymbol}</span>
+              <Money smallFractionFont={false} fiat>
+                {totalBalanceInFiat}
+              </Money>
+            </div>
           )}
         </div>
       </div>

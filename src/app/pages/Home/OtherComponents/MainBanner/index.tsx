@@ -61,7 +61,8 @@ interface BalanceProps {
   volume: number | string | BigNumber;
   currency: string;
 }
-const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
+
+export const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
   <>
     <span className="mr-1">≈</span>
     <span className="ml-1">{currency}</span>

@@ -19,7 +19,7 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 const AccountBanner = memo<AccountBannerProps>(
-  ({ account, displayBalance = true, restrictAccountSelect = false, networkRpc, className }) => {
+  ({ account, displayBalance = true, restrictAccountSelect = false, className }) => {
     const totalBalanceInFiat = useTotalBalance();
 
     const {

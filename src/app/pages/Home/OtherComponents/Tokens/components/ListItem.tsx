@@ -1,6 +1,5 @@
 import React, { memo, useMemo } from 'react';
 
-import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import { AssetIcon } from 'app/templates/AssetIcon';

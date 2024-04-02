@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ChainIds } from '@taquito/taquito';
-import { BigNumber } from 'bignumber.js';
 import clsx from 'clsx';
 
 import { SyncSpinner } from 'app/atoms';

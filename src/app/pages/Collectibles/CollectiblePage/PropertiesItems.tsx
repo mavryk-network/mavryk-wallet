@@ -18,7 +18,7 @@ interface PropertiesItemsProps {
 }
 
 export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountPkh, details }) => {
-  const { contract, id } = fromFa2TokenSlug(assetSlug);
+  const { contract } = fromFa2TokenSlug(assetSlug);
 
   const { value: balance } = useBalance(assetSlug, accountPkh);
 

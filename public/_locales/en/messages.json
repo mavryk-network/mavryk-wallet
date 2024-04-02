@@ -1682,10 +1682,10 @@
     "message": "Upload"
   },
   "languageAndCountry": {
-    "message": "Current language"
+    "message": "Current Language"
   },
   "fiatCurrency": {
-    "message": "Currency conversion"
+    "message": "Currency Conversion"
   },
   "generalSettings": {
     "message": "General"
@@ -1850,7 +1850,7 @@
   },
 
   "fullScreenSettings": {
-    "message": "Fullscreen mode"
+    "message": "Fullscreen Mode"
   },
   "fullScreenSettingsDescription": {
     "message": "Wallet appears as a new browser tab rather than web browser popup"
@@ -2196,7 +2196,7 @@
     "message": "Feel free to join and ask your questions 😊"
   },
   "blockExplorer": {
-    "message": "Blockchain explorer"
+    "message": "Blockchain Explorer"
   },
   "viewOnBlockExplorer": { "message": "View on block explorer" },
   "specifyTokenId": {

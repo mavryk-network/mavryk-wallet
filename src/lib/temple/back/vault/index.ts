@@ -424,15 +424,17 @@ export class Vault {
     });
   }
 
-  async importWatchOnlyAccount(accPublicKeyHash: string, chainId?: string) {
+  async importWatchOnlyAccount(accPublicKeyHash: string, chainId?: string, accName?: string) {
     return withError('Failed to import Watch Only account', async () => {
       const allAccounts = await this.fetchAccounts();
       const newAccount: TempleAccount = {
         type: TempleAccountType.WatchOnly,
-        name: await fetchNewAccountName(
-          allAccounts.filter(({ type }) => type === TempleAccountType.WatchOnly),
-          'defaultWatchOnlyAccountName'
-        ),
+        name: accName
+          ? accName
+          : await fetchNewAccountName(
+              allAccounts.filter(({ type }) => type === TempleAccountType.WatchOnly),
+              'defaultWatchOnlyAccountName'
+            ),
         publicKeyHash: accPublicKeyHash,
         chainId
       };

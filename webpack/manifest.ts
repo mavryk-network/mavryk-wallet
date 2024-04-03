@@ -156,7 +156,7 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
       'firefox',
       'opera'
     )({
-      homepage_url: 'https://github.com/madfish-solutions/templewallet-extension'
+      homepage_url: 'https://github.com/mavryk-network/mavryk-wallet'
     }),
 
     ...withVendors('chrome', 'firefox')({ author: AUTHOR_URL }),

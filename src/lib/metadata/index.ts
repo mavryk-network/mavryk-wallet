@@ -144,7 +144,7 @@ const useAssetsMetadataPresenceCheck = (
 export function getAssetSymbol(metadata: AssetMetadataBase | nullish, short = false) {
   if (!metadata) return '???';
   if (!short) return metadata.symbol;
-  return metadata.symbol === 'tez' ? 'ꜩ' : metadata.symbol.substring(0, 5);
+  return metadata.symbol === 'mav' ? 'ꝳ' : metadata.symbol.substring(0, 5);
 }
 
 export function getAssetName(metadata: AssetMetadataBase | nullish) {

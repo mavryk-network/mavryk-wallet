@@ -36,7 +36,7 @@ const InFiat: FC<InFiatProps> = ({
   testID,
   testIDProperties
 }) => {
-  const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
+  const price = useAssetFiatCurrencyPrice(assetSlug ?? 'mav');
   const { selectedFiatCurrency } = useFiatCurrency();
   const walletNetwork = useNetwork();
 

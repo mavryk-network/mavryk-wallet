@@ -20,7 +20,7 @@ import { TzktRewardsEntry } from 'lib/apis/tzkt';
 import { useGasToken } from 'lib/assets/hooks';
 import { getPluralKey, toLocalFormat, T } from 'lib/i18n';
 import { getRewardsStats, useKnownBaker } from 'lib/temple/front';
-import { mutezToTz } from 'lib/temple/helpers';
+import { mumavToTz } from 'lib/temple/helpers';
 
 import styles from './BakingHistoryItem.module.css';
 
@@ -115,9 +115,9 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
           return 'text-gray-500';
       }
     })();
-    const normalizedBalance = mutezToTz(balance);
-    const normalizedRewards = mutezToTz(rewards);
-    const normalizedBakerFee = mutezToTz(bakerFee);
+    const normalizedBalance = mumavToTz(balance);
+    const normalizedRewards = mumavToTz(rewards);
+    const normalizedBakerFee = mumavToTz(bakerFee);
     const efficiencyPercentage = efficiency.multipliedBy(100);
     const efficiencyClassName = (() => {
       switch (true) {
@@ -144,7 +144,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
               {normalizedBalance.lt(1) ? (
                 '<1'
               ) : (
-                <Money smallFractionFont={false}>{mutezToTz(balance).decimalPlaces(0, BigNumber.ROUND_FLOOR)}</Money>
+                <Money smallFractionFont={false}>{mumavToTz(balance).decimalPlaces(0, BigNumber.ROUND_FLOOR)}</Money>
               )}
               <span>{symbol}</span>
             </span>
@@ -223,7 +223,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
               id="rewardsForBlocks"
               substitutions={[
                 <span key={0} className="text-green-500 flex">
-                  +<Money smallFractionFont={false}>{mutezToTz(ownBlockRewards)}</Money>
+                  +<Money smallFractionFont={false}>{mumavToTz(ownBlockRewards)}</Money>
                   <span>{symbol}</span>
                 </span>,
                 <span key={1} className="text-blue-600">
@@ -231,7 +231,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
                 </span>,
                 <T id={getPluralKey('blocks', ownBlocks)} />,
                 <span key={2} className="text-gray-600 flex">
-                  +<Money smallFractionFont={false}>{mutezToTz(ownBlockFees)}</Money>
+                  +<Money smallFractionFont={false}>{mumavToTz(ownBlockFees)}</Money>
                   <span>{symbol}</span>
                 </span>
               ]}
@@ -247,7 +247,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
               id="rewardsForSlots"
               substitutions={[
                 <span key={0} className="text-green-500 flex">
-                  +<Money smallFractionFont={false}>{mutezToTz(endorsementRewards)}</Money>
+                  +<Money smallFractionFont={false}>{mumavToTz(endorsementRewards)}</Money>
                   <span>{symbol}</span>
                 </span>,
                 <span key={1} className="text-blue-600 flex">
@@ -273,7 +273,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
               id="rewardsForBlocks"
               substitutions={[
                 <span key={0} className="text-orange-500 flex">
-                  -<Money smallFractionFont={false}>{mutezToTz(missedOwnBlockRewards)}</Money>
+                  -<Money smallFractionFont={false}>{mumavToTz(missedOwnBlockRewards)}</Money>
                   <span>{symbol}</span>
                 </span>,
                 <span key={1} className="text-blue-600 flex">
@@ -281,7 +281,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
                 </span>,
                 <T id={getPluralKey('blocks', missedOwnBlocks)} />,
                 <span key={2} className="text-gray-600 flex">
-                  -<Money smallFractionFont={false}>{mutezToTz(missedOwnBlockFees)}</Money>
+                  -<Money smallFractionFont={false}>{mumavToTz(missedOwnBlockFees)}</Money>
                   <span>{symbol}</span>
                 </span>
               ]}
@@ -297,7 +297,7 @@ const BakingHistoryItem: FC<BakingHistoryItemProps> = ({
               id="rewardsForSlots"
               substitutions={[
                 <span key={0} className="text-orange-500 flex">
-                  -<Money smallFractionFont={false}>{mutezToTz(missedEndorsementRewards)}</Money>
+                  -<Money smallFractionFont={false}>{mumavToTz(missedEndorsementRewards)}</Money>
                   <span>{symbol}</span>
                 </span>,
                 <span key={1} className="text-blue-600 flex">

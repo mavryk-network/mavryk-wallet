@@ -64,7 +64,7 @@ const transformTzktUrl = (url: string) => {
   const indexOfParamToCheck = 3;
   const checkedParam = splittedUrl[indexOfParamToCheck];
 
-  if (checkedParam.startsWith('tz')) {
+  if (checkedParam.startsWith('mv')) {
     return `https://tzkt.io/address/`;
   } else if (checkedParam.startsWith('KT')) {
     return `https://tzkt.io/token/`;

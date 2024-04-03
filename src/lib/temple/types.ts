@@ -1,6 +1,6 @@
-import type { DerivationType } from '@taquito/ledger-signer';
-import type { Estimate } from '@taquito/taquito';
-import type { TempleDAppMetadata, TempleDAppNetwork } from '@temple-wallet/dapp/dist/types';
+import type { MavrykWalletDAppMetadata, MavrykWalletDAppNetwork } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
+import type { Estimate } from '@mavrykdynamics/taquito';
+import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 
 import type { TID } from 'lib/i18n/types';
 
@@ -23,8 +23,8 @@ export interface ReadyTempleState extends TempleState {
 }
 
 export interface TempleDAppSession {
-  network: TempleDAppNetwork;
-  appMeta: TempleDAppMetadata;
+  network: MavrykWalletDAppNetwork;
+  appMeta: MavrykWalletDAppMetadata;
   pkh: string;
   publicKey: string;
 }
@@ -38,13 +38,9 @@ export interface TempleState {
 
 export enum TempleChainId {
   Mainnet = 'NetXdQprcVkpaWU',
-  Ghostnet = 'NetXnHfVqm9iesp',
-  Monday = 'NetXaqtQ8b5nihx',
-  Mumbai = 'NetXgbcrNtXD2yA',
-  Nairobi = 'NetXyuzvDo2Ugzb',
-  Daily = 'NetXxkAx4woPLyu',
-  Dcp = 'NetXooyhiru73tk',
-  DcpTest = 'NetXX7Tz1sK8JTa'
+  Basenet = 'NetXJMfAoC7pZSW',
+  Weekly = 'NetXRp4kyGKJTuB',
+  Atlas = 'NetXvyTAafh8goH'
 }
 
 export function isKnownChainId(chainId: string): chainId is TempleChainId {
@@ -181,7 +177,7 @@ export type TempleConfirmationPayload = TempleSignConfirmationPayload | TempleOp
  * DApp confirmation payloads
  */
 
-export type DappMetadata = TempleDAppMetadata & {
+export type DappMetadata = MavrykWalletDAppMetadata & {
   icon?: string;
 };
 

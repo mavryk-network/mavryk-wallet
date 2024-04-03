@@ -20,12 +20,10 @@ import {
 import { calcTzktAccountSpendableTezBalance } from './utils';
 
 const TZKT_API_BASE_URLS = {
-  [TempleChainId.Mainnet]: 'https://api.tzkt.io/v1',
-  [TempleChainId.Mumbai]: 'https://api.mumbainet.tzkt.io/v1',
-  [TempleChainId.Nairobi]: 'https://api.nairobinet.tzkt.io/v1',
-  [TempleChainId.Ghostnet]: 'https://api.ghostnet.tzkt.io/v1',
-  [TempleChainId.Dcp]: 'https://explorer-api.tlnt.net/v1',
-  [TempleChainId.DcpTest]: 'https://explorer-api.test.tlnt.net/v1'
+  [TempleChainId.Mainnet]: 'https://api.mavryk.network/mainnet/v1',
+  [TempleChainId.Atlas]: 'https://api.mavryk.network/atlasnet/v1',
+  [TempleChainId.Basenet]: 'https://api.mavryk.network/basenet/v1',
+  [TempleChainId.Weekly]: 'https://api.mavryk.network/weeklynet/v1'
 };
 
 export type TzktApiChainId = keyof typeof TZKT_API_BASE_URLS;

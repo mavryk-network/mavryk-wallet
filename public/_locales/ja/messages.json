@@ -848,7 +848,7 @@
     "message": "登録したベーカーのアドレス"
   },
   "bakerInputPlaceholder": {
-    "message": "例: tz1a9w1S7hN5s..."
+    "message": "例: mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "最少委任額"
@@ -1111,10 +1111,10 @@
     "message": "アカウントまたはスマートコントラクトのアドレスまたはテゾスドメイン。"
   },
   "recipientInputPlaceholder": {
-    "message": "例: tz1a9w1S7hN5s..."
+    "message": "例: mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "例: alice.tez、または tz1a9w1S7hN5s...",
+    "message": "例: alice.tez、または mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {

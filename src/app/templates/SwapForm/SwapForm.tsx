@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { TransferParams } from '@mavrykdynamics/taquito';
+import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
 import { isDefined } from '@rnw-community/shared';
-import { TransferParams } from '@taquito/taquito';
-import { BatchWalletOperation } from '@taquito/taquito/dist/types/wallet/batch-operation';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, useForm } from 'react-hook-form';

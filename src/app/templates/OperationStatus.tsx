@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useEffect, useMemo } from 'react';
 
-import type { WalletOperation } from '@taquito/taquito';
+import type { WalletOperation } from '@mavrykdynamics/taquito';
 
 import { HashChip, Alert } from 'app/atoms';
 import { setTestID } from 'lib/analytics';

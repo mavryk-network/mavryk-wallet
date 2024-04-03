@@ -1,23 +1,23 @@
-import { localForger } from '@taquito/local-forging';
-import { valueDecoder } from '@taquito/local-forging/dist/lib/michelson/codec';
-import { Uint8ArrayConsumer } from '@taquito/local-forging/dist/lib/uint8array-consumer';
-import { emitMicheline } from '@taquito/michel-codec';
-import { RpcClient } from '@taquito/rpc';
-import { TezosOperationError } from '@taquito/taquito';
 import {
-  TempleDAppMessageType,
-  TempleDAppErrorType,
-  TempleDAppGetCurrentPermissionResponse,
-  TempleDAppPermissionRequest,
-  TempleDAppPermissionResponse,
-  TempleDAppOperationRequest,
-  TempleDAppOperationResponse,
-  TempleDAppSignRequest,
-  TempleDAppSignResponse,
-  TempleDAppBroadcastRequest,
-  TempleDAppBroadcastResponse,
-  TempleDAppNetwork
-} from '@temple-wallet/dapp/dist/types';
+  MavrykWalletDAppMessageType,
+  MavrykWalletDAppErrorType,
+  MavrykWalletDAppGetCurrentPermissionResponse,
+  MavrykWalletDAppPermissionRequest,
+  MavrykWalletDAppPermissionResponse,
+  MavrykWalletDAppOperationRequest,
+  MavrykWalletDAppOperationResponse,
+  MavrykWalletDAppSignRequest,
+  MavrykWalletDAppSignResponse,
+  MavrykWalletDAppBroadcastRequest,
+  MavrykWalletDAppBroadcastResponse,
+  MavrykWalletDAppNetwork
+} from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
+import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
+import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
+import { emitMicheline } from '@mavrykdynamics/taquito-michel-codec';
+import { RpcClient } from '@mavrykdynamics/taquito-rpc';
 import { nanoid } from 'nanoid';
 import browser, { Runtime } from 'webextension-polyfill';
 
@@ -45,7 +45,7 @@ const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;
 const TEZ_MSG_SIGN_PATTERN = /^0501[a-f0-9]{8}54657a6f73205369676e6564204d6573736167653a20[a-f0-9]*$/;
 
-export async function getCurrentPermission(origin: string): Promise<TempleDAppGetCurrentPermissionResponse> {
+export async function getCurrentPermission(origin: string): Promise<MavrykWalletDAppGetCurrentPermissionResponse> {
   const dApp = await getDApp(origin);
   const permission = dApp
     ? {
@@ -55,17 +55,17 @@ export async function getCurrentPermission(origin: string): Promise<TempleDAppGe
       }
     : null;
   return {
-    type: TempleDAppMessageType.GetCurrentPermissionResponse,
+    type: MavrykWalletDAppMessageType.GetCurrentPermissionResponse,
     permission
   };
 }
 
 export async function requestPermission(
   origin: string,
-  req: TempleDAppPermissionRequest
-): Promise<TempleDAppPermissionResponse> {
+  req: MavrykWalletDAppPermissionRequest
+): Promise<MavrykWalletDAppPermissionResponse> {
   if (![isAllowedNetwork(req?.network), typeof req?.appMeta?.name === 'string'].every(Boolean)) {
-    throw new Error(TempleDAppErrorType.InvalidParams);
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
   const networkRpc = await getNetworkRPC(req.network);
@@ -73,7 +73,7 @@ export async function requestPermission(
 
   if (!req.force && dApp && isNetworkEquals(req.network, dApp.network) && req.appMeta.name === dApp.appMeta.name) {
     return {
-      type: TempleDAppMessageType.PermissionResponse,
+      type: MavrykWalletDAppMessageType.PermissionResponse,
       rpc: networkRpc,
       pkh: dApp.pkh,
       publicKey: dApp.publicKey
@@ -92,7 +92,7 @@ export async function requestPermission(
         appMeta: req.appMeta
       },
       onDecline: () => {
-        reject(new Error(TempleDAppErrorType.NotGranted));
+        reject(new Error(MavrykWalletDAppErrorType.NotGranted));
       },
       handleIntercomRequest: async (confirmReq, decline) => {
         if (confirmReq?.type === TempleMessageType.DAppPermConfirmationRequest && confirmReq?.id === id) {
@@ -105,7 +105,7 @@ export async function requestPermission(
               publicKey: accountPublicKey
             });
             resolve({
-              type: TempleDAppMessageType.PermissionResponse,
+              type: MavrykWalletDAppMessageType.PermissionResponse,
               pkh: accountPublicKeyHash,
               publicKey: accountPublicKey,
               rpc: networkRpc
@@ -131,8 +131,8 @@ export async function requestPermission(
 
 export async function requestOperation(
   origin: string,
-  req: TempleDAppOperationRequest
-): Promise<TempleDAppOperationResponse> {
+  req: MavrykWalletDAppOperationRequest
+): Promise<MavrykWalletDAppOperationResponse> {
   if (
     ![
       isAddressValid(req?.sourcePkh),
@@ -140,17 +140,17 @@ export async function requestOperation(
       req?.opParams?.every(op => typeof op.kind === 'string')
     ].every(Boolean)
   ) {
-    throw new Error(TempleDAppErrorType.InvalidParams);
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
   const dApp = await getDApp(origin);
 
   if (!dApp) {
-    throw new Error(TempleDAppErrorType.NotGranted);
+    throw new Error(MavrykWalletDAppErrorType.NotGranted);
   }
 
   if (req.sourcePkh !== dApp.pkh) {
-    throw new Error(TempleDAppErrorType.NotFound);
+    throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
   return new Promise(async (resolve, reject) => {
@@ -169,7 +169,7 @@ export async function requestOperation(
         opParams: req.opParams
       },
       onDecline: () => {
-        reject(new Error(TempleDAppErrorType.NotGranted));
+        reject(new Error(MavrykWalletDAppErrorType.NotGranted));
       },
       handleIntercomRequest: (confirmReq, decline) =>
         handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject)
@@ -183,7 +183,7 @@ const handleIntercomRequest = async (
   id: string,
   dApp: TempleDAppSession,
   networkRpc: string,
-  req: TempleDAppOperationRequest,
+  req: MavrykWalletDAppOperationRequest,
   resolve: any,
   reject: any
 ) => {
@@ -201,12 +201,12 @@ const handleIntercomRequest = async (
         safeGetChain(networkRpc, op);
 
         resolve({
-          type: TempleDAppMessageType.OperationResponse,
+          type: MavrykWalletDAppMessageType.OperationResponse,
           opHash: op.hash
         });
       } catch (err: any) {
         if (err instanceof TezosOperationError) {
-          err.message = TempleDAppErrorType.TezosOperation;
+          err.message = MavrykWalletDAppErrorType.TezosOperation;
           reject(err);
         } else {
           throw err;
@@ -230,23 +230,26 @@ const safeGetChain = async (networkRpc: string, op: any) => {
   } catch {}
 };
 
-export async function requestSign(origin: string, req: TempleDAppSignRequest): Promise<TempleDAppSignResponse> {
+export async function requestSign(
+  origin: string,
+  req: MavrykWalletDAppSignRequest
+): Promise<MavrykWalletDAppSignResponse> {
   if (req?.payload?.startsWith('0x')) {
     req = { ...req, payload: req.payload.substring(2) };
   }
 
   if (![isAddressValid(req?.sourcePkh), HEX_PATTERN.test(req?.payload)].every(Boolean)) {
-    throw new Error(TempleDAppErrorType.InvalidParams);
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
   const dApp = await getDApp(origin);
 
   if (!dApp) {
-    throw new Error(TempleDAppErrorType.NotGranted);
+    throw new Error(MavrykWalletDAppErrorType.NotGranted);
   }
 
   if (req.sourcePkh !== dApp.pkh) {
-    throw new Error(TempleDAppErrorType.NotFound);
+    throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
   return new Promise((resolve, reject) => generatePromisifySign(resolve, reject, dApp, req));
@@ -256,7 +259,7 @@ const generatePromisifySign = async (
   resolve: any,
   reject: any,
   dApp: TempleDAppSession,
-  req: TempleDAppSignRequest
+  req: MavrykWalletDAppSignRequest
 ) => {
   const id = nanoid();
   const networkRpc = await getNetworkRPC(dApp.network);
@@ -297,14 +300,14 @@ const generatePromisifySign = async (
       preview
     },
     onDecline: () => {
-      reject(new Error(TempleDAppErrorType.NotGranted));
+      reject(new Error(MavrykWalletDAppErrorType.NotGranted));
     },
     handleIntercomRequest: async (confirmReq, decline) => {
       if (confirmReq?.type === TempleMessageType.DAppSignConfirmationRequest && confirmReq?.id === id) {
         if (confirmReq.confirmed) {
           const { prefixSig: signature } = await withUnlocked(({ vault }) => vault.sign(dApp.pkh, req.payload));
           resolve({
-            type: TempleDAppMessageType.SignResponse,
+            type: MavrykWalletDAppMessageType.SignResponse,
             signature
           });
         } else {
@@ -322,29 +325,29 @@ const generatePromisifySign = async (
 
 export async function requestBroadcast(
   origin: string,
-  req: TempleDAppBroadcastRequest
-): Promise<TempleDAppBroadcastResponse> {
+  req: MavrykWalletDAppBroadcastRequest
+): Promise<MavrykWalletDAppBroadcastResponse> {
   if (![req?.signedOpBytes?.length > 0].every(Boolean)) {
-    throw new Error(TempleDAppErrorType.InvalidParams);
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
   const dApp = await getDApp(origin);
 
   if (!dApp) {
-    throw new Error(TempleDAppErrorType.NotGranted);
+    throw new Error(MavrykWalletDAppErrorType.NotGranted);
   }
 
   try {
     const rpc = new RpcClient(await getNetworkRPC(dApp.network));
     const opHash = await rpc.injectOperation(req.signedOpBytes);
     return {
-      type: TempleDAppMessageType.BroadcastResponse,
+      type: MavrykWalletDAppMessageType.BroadcastResponse,
       opHash
     };
   } catch (err: any) {
     throw err instanceof TezosOperationError
       ? (() => {
-          err.message = TempleDAppErrorType.TezosOperation;
+          err.message = MavrykWalletDAppErrorType.TezosOperation;
           return err;
         })()
       : new Error('Failed to broadcast');
@@ -479,7 +482,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
   const stopTimeout = () => clearTimeout(t);
 }
 
-async function getNetworkRPC(net: TempleDAppNetwork) {
+async function getNetworkRPC(net: MavrykWalletDAppNetwork) {
   const targetRpc = typeof net === 'string' ? NETWORKS.find(n => n.id === net)!.rpcBaseURL : removeLastSlash(net.rpc);
 
   if (typeof net === 'string') {
@@ -508,11 +511,11 @@ async function getCurrentTempleNetwork() {
   return [...NETWORKS, ...(customNetworksSnapshot ?? [])].find(n => n.id === networkId) ?? NETWORKS[0];
 }
 
-function isAllowedNetwork(net: TempleDAppNetwork) {
+function isAllowedNetwork(net: MavrykWalletDAppNetwork) {
   return typeof net === 'string' ? NETWORKS.some(n => !n.disabled && n.id === net) : Boolean(net?.rpc);
 }
 
-function isNetworkEquals(fNet: TempleDAppNetwork, sNet: TempleDAppNetwork) {
+function isNetworkEquals(fNet: MavrykWalletDAppNetwork, sNet: MavrykWalletDAppNetwork) {
   return typeof fNet !== 'string' && typeof sNet !== 'string'
     ? removeLastSlash(fNet.rpc) === removeLastSlash(sNet.rpc)
     : fNet === sNet;

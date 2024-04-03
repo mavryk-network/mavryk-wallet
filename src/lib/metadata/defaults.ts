@@ -4,9 +4,9 @@ import type { AssetMetadataBase } from './types';
 
 export const TEZOS_METADATA: AssetMetadataBase = {
   decimals: 6,
-  symbol: 'TEZ',
-  name: 'Tezos',
-  thumbnailUri: browser.runtime.getURL('misc/token-logos/tez.svg')
+  symbol: 'MVRK',
+  name: 'Mavryk',
+  thumbnailUri: browser.runtime.getURL('misc/token-logos/mvrk.svg')
 };
 
 export const FILM_METADATA: AssetMetadataBase = {

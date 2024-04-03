@@ -264,7 +264,7 @@ describe('Beacon', () => {
       const req: Request = decodeMessage<OperationRequest>(msg);
       const message = req.operationDetails.map(formatOpParams);
       expect(message).toStrictEqual([
-        { amount: 8, fee: 2, gasLimit: 4, kind: 'transaction', mutez: true, parameter: 9, storageLimit: 5, to: 6 }
+        { amount: 8, fee: 2, gasLimit: 4, kind: 'transaction', mumav: true, parameter: 9, storageLimit: 5, to: 6 }
       ]);
     });
     it('To be valid payload for origination', async () => {
@@ -275,7 +275,7 @@ describe('Beacon', () => {
       expect(message).toStrictEqual([
         {
           kind: 'origination',
-          mutez: true
+          mumav: true
         }
       ]);
     });

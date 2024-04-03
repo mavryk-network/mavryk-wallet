@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
-import { TezosToolkit } from '@taquito/taquito';
-import { DomainNameValidationResult, isTezosDomainsSupportedNetwork } from '@tezos-domains/core';
-import { TaquitoTezosDomainsClient } from '@tezos-domains/taquito-client';
+import { DomainNameValidationResult, isMavrykDomainsSupportedNetwork } from '@mavrykdynamics/mavryk-domains-core';
+import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 
 import { useTypedSWR } from 'lib/swr';
 import { NETWORK_IDS } from 'lib/temple/networks';
@@ -10,12 +10,12 @@ import { NETWORK_IDS } from 'lib/temple/networks';
 import { useTezos, useChainId } from './ready';
 
 function getClient(networkId: 'mainnet' | 'custom', tezos: TezosToolkit) {
-  return isTezosDomainsSupportedNetwork(networkId)
-    ? new TaquitoTezosDomainsClient({ network: networkId, tezos })
-    : TaquitoTezosDomainsClient.Unsupported;
+  return isMavrykDomainsSupportedNetwork(networkId)
+    ? new TaquitoMavrykDomainsClient({ network: networkId, tezos })
+    : TaquitoMavrykDomainsClient.Unsupported;
 }
 
-export function isDomainNameValid(name: string, client: TaquitoTezosDomainsClient) {
+export function isDomainNameValid(name: string, client: TaquitoMavrykDomainsClient) {
   return client.validator.validateDomainName(name, { minLevel: 2 }) === DomainNameValidationResult.VALID;
 }
 

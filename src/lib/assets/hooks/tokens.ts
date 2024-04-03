@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ChainIds } from '@taquito/taquito';
+import { ChainIds } from '@mavrykdynamics/taquito';
 import { isEqual, sortBy, uniqBy } from 'lodash';
 
 import {

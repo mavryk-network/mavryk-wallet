@@ -4,7 +4,7 @@ import type { AssetMetadataBase } from 'lib/metadata';
 
 import type { Asset, FA2Token } from './types';
 
-export const TEZ_TOKEN_SLUG = 'tez' as const;
+export const TEZ_TOKEN_SLUG = 'mav' as const;
 
 export const toTokenSlug = (contract: string, id: string | number = 0) => `${contract}_${id}`;
 

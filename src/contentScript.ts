@@ -1,4 +1,4 @@
-import { TemplePageMessage, TemplePageMessageType } from '@temple-wallet/dapp/dist/types';
+import { MavrykWalletPageMessage, MavrykWalletPageMessageType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import browser from 'webextension-polyfill';
 
 import { ContentScriptType, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
@@ -75,7 +75,7 @@ window.addEventListener(
     if (evt.source !== window) return;
 
     const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
-    const isTempleRequest = evt.data?.type === TemplePageMessageType.Request || legacyRequest;
+    const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;
     const isBeaconRequest =
       evt.data?.target === BeaconMessageTarget.Extension && (evt.data?.targetId === SENDER.id || !evt.data?.targetId);
 
@@ -91,7 +91,7 @@ window.addEventListener(
 );
 
 function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
-  const { payload, reqId } = evt.data as TemplePageMessage;
+  const { payload, reqId } = evt.data as MavrykWalletPageMessage;
 
   getIntercom()
     .request({
@@ -103,7 +103,7 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
       if (res?.type === TempleMessageType.PageResponse) {
         send(
           {
-            type: isLegacyRequest ? LegacyPageMessageType.Response : TemplePageMessageType.Response,
+            type: isLegacyRequest ? LegacyPageMessageType.Response : MavrykWalletPageMessageType.Response,
             payload: res.payload,
             reqId
           },
@@ -114,7 +114,7 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
     .catch(err => {
       send(
         {
-          type: isLegacyRequest ? LegacyPageMessageType.ErrorResponse : TemplePageMessageType.ErrorResponse,
+          type: isLegacyRequest ? LegacyPageMessageType.ErrorResponse : MavrykWalletPageMessageType.ErrorResponse,
           payload: serealizeError(err),
           reqId
         },
@@ -179,7 +179,7 @@ function beaconRequest(evt: MessageEvent) {
     .catch(err => console.error(err));
 }
 
-function send(msg: TemplePageMessage | LegacyPageMessage | BeaconPageMessage, targetOrigin: string) {
+function send(msg: MavrykWalletPageMessage | LegacyPageMessage | BeaconPageMessage, targetOrigin: string) {
   if (!targetOrigin || targetOrigin === '*') return;
   window.postMessage(msg, targetOrigin);
 }

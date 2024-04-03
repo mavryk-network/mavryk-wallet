@@ -16,7 +16,7 @@ export const fetchUsdToTokenRates = () =>
       if (tokenAddress) {
         prices[toTokenSlug(tokenAddress, tokenId)] = exchangeRate;
       } else {
-        prices.tez = exchangeRate;
+        prices.mav = exchangeRate;
       }
     }
 

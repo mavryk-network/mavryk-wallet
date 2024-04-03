@@ -1,5 +1,13 @@
-import { LedgerSigner, LedgerTransport, DerivationType } from '@taquito/ledger-signer';
-import { b58cdecode, b58cencode, buf2hex, hex2buf, isValidPrefix, mergebuf, prefix } from '@taquito/utils';
+import { LedgerSigner, LedgerTransport, DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import {
+  b58cdecode,
+  b58cencode,
+  buf2hex,
+  hex2buf,
+  isValidPrefix,
+  mergebuf,
+  prefix
+} from '@mavrykdynamics/taquito-utils';
 import * as elliptic from 'elliptic';
 import * as sodium from 'libsodium-wrappers';
 import { crypto_sign_verify_detached, crypto_generichash } from 'libsodium-wrappers';
@@ -76,19 +84,19 @@ export const pref = {
   ed: {
     pk: prefix['edpk'],
     sk: prefix['edsk'],
-    pkh: prefix.tz1,
+    pkh: prefix.mv1,
     sig: prefix.edsig
   },
   p2: {
     pk: prefix['p2pk'],
     sk: prefix['p2sk'],
-    pkh: prefix.tz3,
+    pkh: prefix.mv3,
     sig: prefix.p2sig
   },
   sp: {
     pk: prefix['sppk'],
     sk: prefix['spsk'],
-    pkh: prefix.tz2,
+    pkh: prefix.mv2,
     sig: prefix.spsig
   }
 };

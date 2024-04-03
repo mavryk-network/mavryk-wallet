@@ -1,6 +1,6 @@
 import React, { FC, memo, ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
-import { DEFAULT_FEE, DelegateParams, TransactionOperation, WalletOperation } from '@taquito/taquito';
+import { DEFAULT_FEE, DelegateParams, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
@@ -38,7 +38,7 @@ import {
   validateDelegate
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
@@ -139,9 +139,9 @@ const DelegateForm = memo<Props>(({ balance }) => {
         acc.type === TempleAccountType.ManagedKT ? acc.owner : acc.publicKeyHash
       );
 
-      let baseFee = mutezToTz(estmtn.burnFeeMutez + estmtn.suggestedFeeMutez);
+      let baseFee = mumavToTz(estmtn.burnFeeMumav + estmtn.suggestedFeeMumav);
       if (!hasManager(manager) && acc.type !== TempleAccountType.ManagedKT) {
-        baseFee = baseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
+        baseFee = baseFee.plus(mumavToTz(DEFAULT_FEE.REVEAL));
       }
 
       if (baseFee.isGreaterThanOrEqualTo(balance)) {
@@ -222,8 +222,8 @@ const DelegateForm = memo<Props>(({ balance }) => {
       formAnalytics.trackSubmit(analyticsProperties);
       try {
         const estmtn = await getEstimation();
-        const addFee = tzToMutez(feeVal ?? 0);
-        const fee = addFee.plus(estmtn.suggestedFeeMutez).toNumber();
+        const addFee = tzToMumav(feeVal ?? 0);
+        const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;
         let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
@@ -297,7 +297,7 @@ const DelegateForm = memo<Props>(({ balance }) => {
                       </span>
                     </span>
 
-                    <InFiat assetSlug="tez" volume={balance}>
+                    <InFiat assetSlug="mav" volume={balance}>
                       {({ balance, symbol }) => (
                         <div className="mt-1 text-sm text-gray-500 flex items-baseline">
                           {balance}
@@ -406,7 +406,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   formState
 }) => {
   const testGroupName = useUserTestingGroupNameSelector();
-  const assetSymbol = 'ꜩ';
+  const assetSymbol = 'ꝳ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
 
   const bakerTestMessage = useMemo(() => {

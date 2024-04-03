@@ -496,7 +496,7 @@
     "message": "Yeniden dene"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -894,7 +894,7 @@
     "message": "Kayıtlı bir fırıncının adresi ya da etki alanı adı."
   },
   "bakerInputPlaceholder": {
-    "message": "ör. tz1a9w1S7hN5s..."
+    "message": "ör. mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "En düşük delegasyon miktarı"
@@ -1202,10 +1202,10 @@
     "message": "Hesabın ya da akıllı sözleşmenin adresi ya da Tezos etki alanı."
   },
   "recipientInputPlaceholder": {
-    "message": "ör. tz1a9w1S7hN5s..."
+    "message": "ör. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "ör. alice.tez veya tz1a9w1S7hN5s...",
+    "message": "ör. alice.tez veya mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {
@@ -1238,7 +1238,7 @@
     "message": "Fon göndermek istediğiniz Hesaba tıklayın."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Tez (ana varlık) bakiyeniz sıfır. Ücret için ꜩ fonları gereklidir."
+    "message": "Tez (ana varlık) bakiyeniz sıfır. Ücret için ꝳ fonları gereklidir."
   },
   "unableToSendTransactionAction": {
     "message": "İşlem sağlanan Alıcıya gönderilemiyor."

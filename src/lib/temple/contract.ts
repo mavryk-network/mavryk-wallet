@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import memoizee from 'memoizee';
 
 export const loadContract = memoizee(fetchContract, {

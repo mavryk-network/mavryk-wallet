@@ -34,7 +34,7 @@ export const objktCurrencies: Record<number, ObjktCurrencyInfo> = {
     id: '0'
   },
   1: {
-    symbol: 'TEZ',
+    symbol: 'MAV',
     decimals: 6,
     contract: null,
     id: null

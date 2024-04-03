@@ -1,4 +1,4 @@
-import type { DerivationType } from '@taquito/ledger-signer';
+import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 
 export { TransportType } from './transport/types';
 

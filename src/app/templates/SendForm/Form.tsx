@@ -10,14 +10,14 @@ import React, {
   useState
 } from 'react';
 
-import { ManagerKeyResponse } from '@taquito/rpc';
 import {
   DEFAULT_FEE,
   TransferParams,
   Estimate,
   TransactionWalletOperation,
   TransactionOperation
-} from '@taquito/taquito';
+} from '@mavrykdynamics/taquito';
+import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
@@ -51,7 +51,7 @@ import {
   validateRecipient
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
@@ -229,9 +229,9 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
       const estmtnMax = await estimateMaxFee(acc, tez, tezos, to, balance, transferParams, manager);
 
-      let estimatedBaseFee = mutezToTz(estmtnMax.burnFeeMutez + estmtnMax.suggestedFeeMutez);
+      let estimatedBaseFee = mumavToTz(estmtnMax.burnFeeMumav + estmtnMax.suggestedFeeMumav);
       if (!hasManager(manager)) {
-        estimatedBaseFee = estimatedBaseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
+        estimatedBaseFee = estimatedBaseFee.plus(mumavToTz(DEFAULT_FEE.REVEAL));
       }
 
       if (tez ? estimatedBaseFee.isGreaterThanOrEqualTo(balance) : estimatedBaseFee.isGreaterThan(tezBalance!)) {
@@ -350,7 +350,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           const michelsonLambda = isKTAddress(toResolved) ? transferToContract : transferImplicit;
 
           const contract = await loadContract(tezos, acc.publicKeyHash);
-          op = await contract.methods.do(michelsonLambda(toResolved, tzToMutez(amount))).send({ amount: 0 });
+          op = await contract.methods.do(michelsonLambda(toResolved, tzToMumav(amount))).send({ amount: 0 });
         } else {
           const actualAmount = shoudUseFiat ? toAssetAmount(amount) : amount;
           const transferParams = await toTransferParams(
@@ -362,8 +362,8 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
             actualAmount
           );
           const estmtn = await tezos.estimate.transfer(transferParams);
-          const addFee = tzToMutez(feeVal ?? 0);
-          const fee = addFee.plus(estmtn.suggestedFeeMutez).toNumber();
+          const addFee = tzToMumav(feeVal ?? 0);
+          const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
           op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
         }
         setOperation(op);
@@ -691,13 +691,13 @@ const estimateMaxFee = async (
     const michelsonLambda = isKTAddress(to) ? transferToContract : transferImplicit;
 
     const contract = await loadContract(tezos, acc.publicKeyHash);
-    const transferParamsWrapper = contract.methods.do(michelsonLambda(to, tzToMutez(balanceBN))).toTransferParams();
+    const transferParamsWrapper = contract.methods.do(michelsonLambda(to, tzToMumav(balanceBN))).toTransferParams();
     estmtnMax = await tezos.estimate.transfer(transferParamsWrapper);
   } else if (tez) {
     const estmtn = await tezos.estimate.transfer(transferParams);
-    let amountMax = balanceBN.minus(mutezToTz(estmtn.totalCost));
+    let amountMax = balanceBN.minus(mumavToTz(estmtn.totalCost));
     if (!hasManager(manager)) {
-      amountMax = amountMax.minus(mutezToTz(DEFAULT_FEE.REVEAL));
+      amountMax = amountMax.minus(mumavToTz(DEFAULT_FEE.REVEAL));
     }
     estmtnMax = await tezos.estimate.transfer({
       to,

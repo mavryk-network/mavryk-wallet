@@ -60,11 +60,11 @@ export const knownAliceBobFiatCurrencies: Record<string, AliceBobFiatCurrency> =
 };
 
 const aliceBobTezos = {
-  name: 'Tezos',
-  code: 'XTZ',
+  name: 'Mavryk',
+  code: 'MVRK',
   icon: 'https://static.moonpay.com/widget/currencies/xtz.svg',
   precision: 6,
-  slug: 'tez'
+  slug: 'mav'
 };
 
 export const mapMoonPayProviderCurrencies = (currencies: Currency[]) => ({

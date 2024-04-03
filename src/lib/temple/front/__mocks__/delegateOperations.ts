@@ -3,12 +3,12 @@ const DELEGATE_OPERATIONS = {
   contents: [
     {
       kind: 'delegation',
-      source: 'tz3Qth49881bX2dymtRREEKkFnuKzvhBjr6o',
+      source: 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr',
       fee: '396',
       counter: '23381',
       gas_limit: '1100',
       storage_limit: '0',
-      delegate: 'tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9'
+      delegate: 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX'
     }
   ]
 };

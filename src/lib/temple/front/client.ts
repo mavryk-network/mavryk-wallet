@@ -11,8 +11,8 @@ import {
   WalletIncreasePaidStorageParams,
   WalletTransferParams,
   Signer
-} from '@taquito/taquito';
-import { buf2hex } from '@taquito/utils';
+} from '@mavrykdynamics/taquito';
+import { buf2hex } from '@mavrykdynamics/taquito-utils';
 import constate from 'constate';
 import { nanoid } from 'nanoid';
 import toBuffer from 'typedarray-to-buffer';
@@ -410,6 +410,16 @@ type TaquitoWalletOps = {
 class TaquitoWallet implements WalletProvider {
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
 
+  async sign(_bytes: string, _watermark?: Uint8Array | undefined) {
+    throw new Error('Method not implemented.');
+    return '';
+  }
+
+  async getPK() {
+    throw new Error('Method not implemented.');
+    return '';
+  }
+
   async getPKH() {
     return this.pkh;
   }
@@ -496,7 +506,7 @@ function formatOpParams(op: any) {
     case 'origination':
       return {
         ...op,
-        mutez: true // The balance was already converted from Tez (ꜩ) to Mutez (uꜩ)
+        mumav: true // The balance was already converted from Mav (ꝳ) to Mumav (uꝳ)
       };
     case 'transaction':
       const { destination, amount, parameters, ...txRest } = op;
@@ -504,7 +514,7 @@ function formatOpParams(op: any) {
         ...txRest,
         to: destination,
         amount: +amount,
-        mutez: true,
+        mumav: true,
         parameter: parameters
       };
     default:

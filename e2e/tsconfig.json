@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "paths": {
       "e2e/*": ["./*"],
-      "src/*": ["../src/*"],
+      "src/*": ["../src/*"]
     },
     "noEmit": true,
     "esModuleInterop": true,
@@ -17,5 +17,5 @@
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]
-  },
+  }
 }

@@ -1,5 +1,5 @@
-import { InMemorySigner } from '@taquito/signer';
-import * as TaquitoUtils from '@taquito/utils';
+import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
+import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import * as Ed25519 from 'ed25519-hd-key';
 

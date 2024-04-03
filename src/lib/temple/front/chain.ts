@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { Subscription, TezosToolkit } from '@taquito/taquito';
+import { Subscription, TezosToolkit } from '@mavrykdynamics/taquito';
 import constate from 'constate';
 import { useSWRConfig } from 'swr';
 
@@ -19,7 +19,7 @@ function useNewBlockTriggers() {
 
   const triggerNewBlock = useCallback(() => {
     for (const acc of allAccounts) {
-      mutate(getBalanceSWRKey(tezos, 'tez', acc.publicKeyHash));
+      mutate(getBalanceSWRKey(tezos, 'mav', acc.publicKeyHash));
       mutate(['delegate', tezos.checksum, acc.publicKeyHash]);
     }
   }, [allAccounts, mutate, tezos]);

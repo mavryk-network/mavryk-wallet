@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export interface WhitelistResponseToken {
-  contractAddress: 'tez' | string;
+  contractAddress: 'mav' | string;
   fa2TokenId?: number;
   network: 'mainnet' | string;
   metadata: WhitelistResponseMetadata;

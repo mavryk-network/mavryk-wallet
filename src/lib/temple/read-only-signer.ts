@@ -1,4 +1,4 @@
-import { Signer } from '@taquito/taquito';
+import { Signer } from '@mavrykdynamics/taquito';
 
 export class ReadOnlySigner implements Signer {
   constructor(private pkh: string, private pk: string, private onSign?: (digest: string) => void) {}

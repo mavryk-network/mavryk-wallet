@@ -1,6 +1,6 @@
-import { localForger } from '@taquito/local-forging';
-import { ForgeOperationsParams } from '@taquito/rpc';
-import { Estimate, TezosToolkit } from '@taquito/taquito';
+import { Estimate, TezosToolkit } from '@mavrykdynamics/taquito';
+import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import { ForgeOperationsParams } from '@mavrykdynamics/taquito-rpc';
 
 import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import { ReadOnlySigner } from 'lib/temple/read-only-signer';
@@ -59,16 +59,16 @@ export async function dryRunOpParams({
         (e: any, i: number) =>
           ({
             ...e,
-            burnFeeMutez: e.burnFeeMutez,
+            burnFeeMumav: e.burnFeeMumav,
             consumedMilligas: e.consumedMilligas,
             gasLimit: e.gasLimit,
-            minimalFeeMutez: e.minimalFeeMutez,
+            minimalFeeMumav: e.minimalFeeMumav,
             storageLimit: opParams[i]?.storageLimit ? +opParams[i].storageLimit : e.storageLimit,
-            suggestedFeeMutez:
-              e.suggestedFeeMutez +
+            suggestedFeeMumav:
+              e.suggestedFeeMumav +
               (opParams[i]?.gasLimit ? Math.ceil((opParams[i].gasLimit - e.gasLimit) * FEE_PER_GAS_UNIT) : 0),
             totalCost: e.totalCost,
-            usingBaseFeeMutez: e.usingBaseFeeMutez
+            usingBaseFeeMumav: e.usingBaseFeeMumav
           } as Estimate)
       );
     } catch {}
@@ -85,7 +85,7 @@ export async function dryRunOpParams({
             const eIndex = withReveal ? i + 1 : i;
             return {
               ...op,
-              fee: op.fee ?? estimates?.[eIndex].suggestedFeeMutez,
+              fee: op.fee ?? estimates?.[eIndex].suggestedFeeMumav,
               gasLimit: op.gasLimit ?? estimates?.[eIndex].gasLimit,
               storageLimit: op.storageLimit ?? estimates?.[eIndex].storageLimit
             };

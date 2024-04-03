@@ -1,12 +1,12 @@
-import { HttpResponseError } from '@taquito/http-utils';
-import { TezosToolkit, WalletContract, Contract, ChainIds } from '@taquito/taquito';
+import { TezosToolkit, WalletContract, Contract, ChainIds } from '@mavrykdynamics/taquito';
+import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import retry from 'async-retry';
 
 import { getMessage } from 'lib/i18n';
 
 import type { TokenStandardType } from './types';
 
-const NULL_ADDRESS = 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU';
+const NULL_ADDRESS = 'mv1WbZRUmFnpDSjoSfJT5dkvip8SE2NehuNC';
 const RETRY_PARAMS = { retries: 2, minTimeout: 0, maxTimeout: 0 };
 
 const FA1_2_ENTRYPOINTS_SCHEMA = [

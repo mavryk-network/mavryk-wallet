@@ -496,7 +496,7 @@
     "message": "Tente novamente"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {
@@ -894,7 +894,7 @@
     "message": "Endereço ou nome de domínio de um baker registado."
   },
   "bakerInputPlaceholder": {
-    "message": "por exemplo, tz1a9w1S7hN5s..."
+    "message": "por exemplo, mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "Montante mínimo de delegação"
@@ -1202,10 +1202,10 @@
     "message": "Endereço ou domínio Tezos da conta ou contrato inteligente."
   },
   "recipientInputPlaceholder": {
-    "message": "por exemplo, tz1a9w1S7hN5s..."
+    "message": "por exemplo, mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "por exemplo, alice.tez ou tz1a9w1S7hN5s...",
+    "message": "por exemplo, alice.tez ou mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {
@@ -1238,7 +1238,7 @@
     "message": "Clique na Conta para a qual pretende enviar fundos."
   },
   "mainAssetBalanceIsZero": {
-    "message": "O seu saldo tez(ativo principal) é zero. São necessários fundos ꜩ para a taxa."
+    "message": "O seu saldo tez(ativo principal) é zero. São necessários fundos ꝳ para a taxa."
   },
   "unableToSendTransactionAction": {
     "message": "Impossível enviar a transação para o Destinatário fornecido."

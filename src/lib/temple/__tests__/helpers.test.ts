@@ -47,16 +47,16 @@ describe('Helpers', () => {
     address = 'asdasdasd';
     expect(Helpers.isAddressValid(address)).toBeFalsy();
 
-    address = 'tz1asdasd';
+    address = 'mv1asdasd';
     expect(Helpers.isAddressValid(address)).toBeFalsy();
 
-    address = 'tz1ZfrERcALBwmAqwonRXYVQBDT9BjNjBHJu';
+    address = 'mv1N3KY1vXdYX2x568MGmNBRLEK7k7uc2zEM';
     expect(Helpers.isAddressValid(address)).toBeTruthy();
 
-    address = 'tz2Ch1abG7FNiibmV26Uzgdsnfni9XGrk5wD';
+    address = 'mv2SyuY796Nw8hAqYYjQZXax2HQJWQXKbV41';
     expect(Helpers.isAddressValid(address)).toBeTruthy();
 
-    address = 'tz3Lfm6CyfSTZ7EgMckptZZGiPxzs9GK59At';
+    address = 'mv3Gdar2ZruiD7dRGYvPGavek7ZUKcwjqZrW';
     expect(Helpers.isAddressValid(address)).toBeTruthy();
 
     address = 'KT1EyH6KR9STvgiet4ahrtBf7WCnmJovvJa1';
@@ -64,7 +64,7 @@ describe('Helpers', () => {
   });
 
   it('isKTAddress', async () => {
-    address = 'tz3Lfm6CyfSTZ7EgMckptZZGiPxzs9GK59At';
+    address = 'mv3Gdar2ZruiD7dRGYvPGavek7ZUKcwjqZrW';
     expect(Helpers.isKTAddress(address)).toBeFalsy();
 
     address = 'KT1EyH6KR9STvgiet4ahrtBf7WCnmJovvJa1';
@@ -75,16 +75,16 @@ describe('Helpers', () => {
     address = 'asdasd';
     expect(FrontHelpers.validateContractAddress(address)).toBe('Translated<invalidAddress>');
 
-    address = 'tz3Lfm6CyfSTZ7EgMckptZZGiPxzs9GK59At';
+    address = 'mv3Gdar2ZruiD7dRGYvPGavek7ZUKcwjqZrW';
     expect(FrontHelpers.validateContractAddress(address)).toBe('Translated<onlyKTContractAddressAllowed>');
 
     address = 'KT1EyH6KR9STvgiet4ahrtBf7WCnmJovvJa1';
     expect(FrontHelpers.validateContractAddress(address)).toBeTruthy();
   });
 
-  it('mutezToTz & tzToMutez', async () => {
-    expect(Helpers.mutezToTz(1_000_000).toFixed()).toBe('1');
-    expect(Helpers.tzToMutez(1).toFixed()).toBe('1000000');
+  it('mumavToTz & tzToMumav', async () => {
+    expect(Helpers.mumavToTz(1_000_000).toFixed()).toBe('1');
+    expect(Helpers.tzToMumav(1).toFixed()).toBe('1000000');
   });
 
   it('usdToAssetAmount', async () => {

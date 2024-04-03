@@ -27,11 +27,11 @@ const DEFAULT_INPUT_CURRENCY: TopUpInputInterface = {
 };
 
 const DEFAULT_OUTPUT_TOKEN: TopUpOutputInterface = {
-  code: 'XTZ',
-  name: 'Tezos',
+  code: 'MVRK',
+  name: 'Mavryk',
   icon: `${MOONPAY_ASSETS_BASE_URL}/widget/currencies/xtz.svg`,
   precision: 1,
-  slug: 'tez'
+  slug: 'mav'
 };
 
 const defaultValues = {

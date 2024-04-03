@@ -637,7 +637,7 @@
     "message": "Try again"
   },
   "tezosMainnet": {
-    "message": "Tezos Mainnet",
+    "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
   "templeWalletOptions": {
@@ -1163,7 +1163,7 @@
     "message": "Address or domain name of a registered baker."
   },
   "bakerInputPlaceholder": {
-    "message": "e.g. tz1a9w1S7hN5s..."
+    "message": "e.g. mv1V4h45W3p4e..."
   },
   "minDelegationAmountTitle": {
     "message": "Minimal delegation amount"
@@ -1510,10 +1510,10 @@
     "message": "Address or Mavryk domain of the account or smart contract"
   },
   "recipientInputPlaceholder": {
-    "message": "e.g. tz1a9w1S7hN5s..."
+    "message": "e.g. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "e.g. alice.tez or tz1a9w1S7hN5s...",
+    "message": "e.g. alice.tez or mv1V4h45W3p4e...",
     "description": "alice.tez = domain like google.com"
   },
   "tryingToTransferToYourself": {
@@ -1549,7 +1549,7 @@
     "message": "Click on Account you want to send funds to."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Your tez(main asset) balance is zero. ꜩ funds are required for the fee."
+    "message": "Your tez(main asset) balance is zero. ꝳ funds are required for the fee."
   },
   "unableToSendTransactionAction": {
     "message": "Unable to send transaction to provided Recipient."
@@ -3165,7 +3165,7 @@
     "message": "Subscribe to our Newsletter"
   },
   "keepLatestNews": {
-    "message": "Keep up with the latest news from Madfish"
+    "message": "Keep up with the latest news from Mavryk Dynamics"
   },
   "unknownError": {
     "message": "Unknown error"

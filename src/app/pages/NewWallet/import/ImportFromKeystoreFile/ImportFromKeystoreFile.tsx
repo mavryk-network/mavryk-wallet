@@ -198,7 +198,7 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
   );
 
   return (
-    <FileInput name={name} multiple={false} accept=".tez" onChange={onChange} value={value}>
+    <FileInput name={name} multiple={false} accept=".mav" onChange={onChange} value={value}>
       <div
         className={classNames(
           'w-full bg-primary-card',
@@ -240,7 +240,7 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
 const validateKeystoreFile = (value?: FileList) => {
   const file = value?.item(0);
 
-  if (file && !file.name.endsWith('.tez')) {
+  if (file && !file.name.endsWith('.mav')) {
     return t('selectedFileFormatNotSupported');
   }
   return true;

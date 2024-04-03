@@ -24,7 +24,9 @@ enum TOKENS_IDS {
   /** KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o_0 */
   'USDT' = 6,
   /** KT1AafHA1C1vk959wvHWBispY9Y2f3fxBUUo_0 */
-  'SIRS' = 7
+  'SIRS' = 7,
+  /** KT1AafHA1C1vk959wvHWBispY9Y2f3fxBUUo_0 */
+  'MVK' = 8
 }
 
 interface GetApyFromYupanaResponse {

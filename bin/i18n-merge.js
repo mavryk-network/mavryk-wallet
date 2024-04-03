@@ -13,9 +13,9 @@ const mergedMessages = {};
 
 for (const id in enMessages) {
   if (localeMessages[id]) {
-    mergedMessages[id] = localeMessages[id]
+    mergedMessages[id] = localeMessages[id];
   } else {
-    mergedMessages[id] = enMessages[id]
+    mergedMessages[id] = enMessages[id];
   }
 }
 

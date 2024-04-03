@@ -5,10 +5,10 @@ import SWAP_OPERATIONS from '../__mocks__/swapOperations';
 import TEZ_TRANSFER_OPERATIONS from '../__mocks__/tezTransferOperations';
 import { tryParseExpenses } from '../expenses';
 
-const ACCOUNT = 'tz3Qth49881bX2dymtRREEKkFnuKzvhBjr6o';
+const ACCOUNT = 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr';
 
 describe('Expenses', () => {
-  it('tryParseExpenses tez transfer', async () => {
+  it('tryParseExpenses mav transfer', async () => {
     const expenses = tryParseExpenses(TEZ_TRANSFER_OPERATIONS, ACCOUNT);
 
     expect(expenses).toStrictEqual([
@@ -18,7 +18,7 @@ describe('Expenses', () => {
         expenses: [
           {
             amount: new BigNumber('99000000'),
-            to: 'tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9'
+            to: 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX'
           }
         ],
         isEntrypointInteraction: false,
@@ -33,7 +33,7 @@ describe('Expenses', () => {
     expect(expenses).toStrictEqual([
       {
         amount: 0,
-        delegate: 'tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9',
+        delegate: 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX',
         expenses: [],
         isEntrypointInteraction: false,
         type: 'delegation'

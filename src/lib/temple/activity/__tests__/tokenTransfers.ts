@@ -23,8 +23,8 @@ describe('Money diffs', () => {
     expect(transfers).toStrictEqual([
       {
         tokenId: 'KT1NbznEfpxZZyPUNcSWRm9Y8qZkdEgWEFaV_0',
-        from: 'tz3Qth49881bX2dymtRREEKkFnuKzvhBjr6o',
-        to: 'tz1R3sPNAYaH2ZbweLpvvBnnJHHh1Zt68t7D',
+        from: 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr',
+        to: 'mv19wgwgca27Z3yv6siDZ9iDMRy8kGD4Fka5',
         amount: '10000000000000000000'
       }
     ]);
@@ -43,8 +43,8 @@ describe('Money diffs', () => {
     expect(transfers).toStrictEqual([
       {
         tokenId: 'KT1RX7AdYr9hFZPQTZw5Fu8KkMwVtobHpTp6_0',
-        from: 'tz3Qth49881bX2dymtRREEKkFnuKzvhBjr6o',
-        to: 'tz1R3sPNAYaH2ZbweLpvvBnnJHHh1Zt68t7D',
+        from: 'mv3AievfzzVPWoQMkXcZTL1JXBiQwF37JyUr',
+        to: 'mv19wgwgca27Z3yv6siDZ9iDMRy8kGD4Fka5',
         amount: '500'
       }
     ]);

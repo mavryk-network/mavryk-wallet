@@ -8,10 +8,10 @@ import { loadTokensApyActions } from 'app/store/d-apps/actions';
 import {
   fetchKUSDApy$,
   fetchTzBtcApy$,
-  fetchUBTCApr$,
-  fetchUSDTApy$,
-  fetchUUSDCApr$,
-  fetchYOUApr$
+  // fetchUBTCApr$,
+  fetchUSDTApy$
+  // fetchUUSDCApr$,
+  // fetchYOUApr$
 } from 'app/store/d-apps/utils';
 import { useChainId, useTezos } from 'lib/temple/front';
 import { TempleChainId } from 'lib/temple/types';
@@ -29,10 +29,10 @@ export const useTokensApyLoading = () => {
       const subscription = forkJoin([
         fetchTzBtcApy$(),
         fetchKUSDApy$(),
-        fetchUSDTApy$(),
-        fetchUUSDCApr$(tezos),
-        fetchUBTCApr$(tezos),
-        fetchYOUApr$(tezos, usdToTokenRates)
+        fetchUSDTApy$()
+        // fetchUUSDCApr$(tezos),
+        // fetchUBTCApr$(tezos),
+        // fetchYOUApr$(tezos, usdToTokenRates)
       ]).subscribe(responses => {
         setTokensApy(Object.assign({}, ...responses));
       });

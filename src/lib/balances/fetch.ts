@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@taquito/taquito';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 
 import { isFA2Token, TEZ_TOKEN_SLUG } from 'lib/assets';

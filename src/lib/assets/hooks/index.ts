@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { TEZOS_METADATA, FILM_METADATA } from 'lib/metadata/defaults';
 import { useChainIdLoading, useNetwork } from 'lib/temple/front';
+
 import { MAV_TOKEN_SLUG } from '../utils';
 
 export { useAllAvailableTokens, useEnabledAccountTokensSlugs } from './tokens';

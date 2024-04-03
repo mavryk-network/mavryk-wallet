@@ -98,4 +98,4 @@ export const estimateAliceBobOutput = (amount: string, inputAssetCode: string, o
     }
   });
 
-const getFromToParam = (code: string) => (code === 'XTZ' ? 'TEZ' : `CARD${code}`);
+const getFromToParam = (code: string) => (code === 'XTZ' ? 'MAV' : `CARD${code}`);

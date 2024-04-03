@@ -1,6 +1,6 @@
 import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
 import * as TZKT from 'lib/apis/tzkt';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { detectTokenStandard } from 'lib/assets/standards';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
@@ -45,7 +45,7 @@ async function fetchOperations(
   if (assetSlug) {
     const [contractAddress, tokenId] = (assetSlug ?? '').split('_');
 
-    if (assetSlug === TEZ_TOKEN_SLUG) {
+    if (assetSlug === MAV_TOKEN_SLUG) {
       return await fetchOperations_TEZ(chainId, accAddress, pseudoLimit, olderThan);
     } else if (assetSlug === LIQUIDITY_BAKING_DEX_ADDRESS) {
       return await fetchOperations_Contract(chainId, accAddress, pseudoLimit, olderThan);

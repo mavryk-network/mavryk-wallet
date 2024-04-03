@@ -5,7 +5,7 @@ import { ReactComponent as DiamondIcon } from 'app/icons/diamond.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import DelegateForm from 'app/templates/DelegateForm';
 import { SpinnerSection } from 'app/templates/SendForm/SpinnerSection';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';
@@ -14,7 +14,7 @@ import { ZERO } from 'lib/utils/numbers';
 const Delegate = memo(() => {
   const { publicKeyHash } = useAccount();
 
-  const gasBalance = useBalance(TEZ_TOKEN_SLUG, publicKeyHash);
+  const gasBalance = useBalance(MAV_TOKEN_SLUG, publicKeyHash);
 
   const isLoading = !gasBalance.value && gasBalance.isSyncing;
 

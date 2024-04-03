@@ -1,7 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
 
-import { toTokenSlug } from 'lib/assets';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { storageConfig, createTransformsBeforePersist } from 'lib/store';
 
 import {
@@ -134,7 +134,7 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
     delete state.mainnetWhitelist.error;
 
     for (const token of payload) {
-      if (token.contractAddress === 'tez') continue;
+      if (token.contractAddress === MAV_TOKEN_SLUG) continue;
       const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
       if (!state.mainnetWhitelist.data.includes(slug)) state.mainnetWhitelist.data.push(slug);
     }

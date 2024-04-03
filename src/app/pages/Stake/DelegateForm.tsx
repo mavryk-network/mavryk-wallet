@@ -18,6 +18,7 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/t
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
@@ -74,7 +75,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
 
   const accountPkh = acc.publicKeyHash;
 
-  const { value: balanceData } = useBalance('tez', accountPkh);
+  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const domainsClient = useTezosDomainsClient();
@@ -505,7 +506,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
-  const { value: balanceData } = useBalance('tez', accountPkh);
+  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const { symbol } = useGasToken();

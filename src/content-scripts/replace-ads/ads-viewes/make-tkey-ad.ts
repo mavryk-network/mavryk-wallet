@@ -2,13 +2,14 @@ import { nanoid } from 'nanoid';
 import browser from 'webextension-polyfill';
 
 import { buildSwapPageUrlQuery } from 'app/pages/Swap/utils/build-url-query';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 
 import { AdView } from './types';
 
 const TKeyInpageAd = browser.runtime.getURL(`/misc/ad-banners/tkey-inpage-ad.png`);
 
 const swapTKeyUrl = `${browser.runtime.getURL('fullpage.html')}#/swap?${buildSwapPageUrlQuery(
-  'tez',
+  MAV_TOKEN_SLUG,
   'KT1VaEsVNiBoA56eToEK6n6BcPgh1tdx9eXi_0',
   true
 )}`;

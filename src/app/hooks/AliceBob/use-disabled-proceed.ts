@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { useAccount } from 'lib/temple/front';
 
@@ -17,7 +17,7 @@ export const useDisabledProceed = (
     value: tezBalance,
     isSyncing: tezBalanceSyncing,
     error: tezBalanceError
-  } = useBalance(TEZ_TOKEN_SLUG, publicKeyHash);
+  } = useBalance(MAV_TOKEN_SLUG, publicKeyHash);
 
   const tezBalanceLoading = useMemo(() => !tezBalance && tezBalanceSyncing, [tezBalance, tezBalanceSyncing]);
 

@@ -109,8 +109,8 @@ export const InitialStep: FC<Omit<StepProps, 'orderInfo'>> = ({ isApiError, setO
           amountInputDisabled={isCurrenciesLoading}
           amount={inputAmount}
           label={<T id="send" />}
-          currency={{ code: 'TEZ' }}
-          currenciesList={[{ code: 'TEZ' }]}
+          currency={{ code: 'MAV' }}
+          currenciesList={[{ code: 'MAV' }]}
           minAmount={String(outputCurrency?.minAmount ?? '0')}
           maxAmount={String(outputCurrency?.maxAmount ?? '0')}
           isMinAmountError={isMinAmountError}

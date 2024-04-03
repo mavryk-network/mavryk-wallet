@@ -30,7 +30,7 @@ import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
-import { isTezAsset, toPenny } from 'lib/assets';
+import { isTezAsset, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
@@ -105,7 +105,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const { value: balanceData } = useBalance(assetSlug, accountPkh);
   const balance = balanceData!;
 
-  const { value: tezBalanceData } = useBalance('tez', accountPkh);
+  const { value: tezBalanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const tezBalance = tezBalanceData!;
 
   const [shoudUseFiat, setShouldUseFiat] = useSafeState(false);

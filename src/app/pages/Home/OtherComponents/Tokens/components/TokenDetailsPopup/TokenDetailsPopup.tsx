@@ -19,7 +19,7 @@ import BakerBanner from 'app/templates/BakerBanner';
 import { HistoryComponent } from 'app/templates/History/History';
 import InFiat from 'app/templates/InFiat';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
-import { isTzbtcAsset, TEZ_TOKEN_SLUG } from 'lib/assets';
+import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
@@ -37,7 +37,7 @@ type TokenDetailsPopupProps = {
 } & PopupModalWithTitlePropsProps;
 
 export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({
-  assetSlug = TEZ_TOKEN_SLUG,
+  assetSlug = MAV_TOKEN_SLUG,
   publicKeyHash,
   isOpen,
   ...rest
@@ -50,7 +50,7 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({
       title={
         <div className="flex items-center gap-1">
           <span>{assetMetadata?.name ?? t('someUnknownToken')}</span>
-          {assetSlug === 'tez' && <ConfirmedIcon />}
+          {assetSlug === MAV_TOKEN_SLUG && <ConfirmedIcon />}
         </div>
       }
       portalClassName="token-details-popup"
@@ -79,12 +79,12 @@ type TokenDetailsPopupContentProps = {
 const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug, assetMetadata, balance }) => {
   const account = useAccount();
   const network = useNetwork();
-  const price = useAssetFiatCurrencyPrice(assetSlug ?? 'tez');
+  const price = useAssetFiatCurrencyPrice(assetSlug ?? MAV_TOKEN_SLUG);
   const tokenMetadata = useTokenMetadataSelector(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();
 
   const assetSymbol = getAssetSymbol(assetMetadata);
-  const isMainToken = assetSlug === TEZ_TOKEN_SLUG;
+  const isMainToken = assetSlug === MAV_TOKEN_SLUG;
 
   // derived states
   const accountPkh = account.publicKeyHash;

@@ -89,7 +89,7 @@ export const iSelectTokenSlugs = {
 
 export const iSelectTokensNames = {
   TestNFT: 'The perfect NFT!',
-  SecondTestNFT: 'TEZ'
+  SecondTestNFT: 'MAV'
 };
 
 export const clearDataFromCurrentInput = async () => {

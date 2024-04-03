@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import { DeepPartial } from 'react-hook-form';
 
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useLocation } from 'lib/woozie';
 
 export interface SwapInputValue {
@@ -23,7 +23,7 @@ const getValidAssetSlug = (queryAssetSlug: string | null) =>
 const getAssetsSlugsFromUrl = (fromSlug: null | string, toSlug: null | string) => {
   if (!Boolean(fromSlug) && !Boolean(toSlug)) {
     return {
-      fromSlug: TEZ_TOKEN_SLUG,
+      fromSlug: MAV_TOKEN_SLUG,
       toSlug
     };
   }

@@ -1,5 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import type { UserHistoryItem } from 'lib/temple/history';
 
 import { useAssetMetadata } from '../../metadata';
@@ -154,7 +155,7 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
 
     const assetSlug =
       // @ts-expect-error
-      oper.contractAddress == null ? 'tez' : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
+      oper.contractAddress == null ? MAV_TOKEN_SLUG : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }
@@ -165,7 +166,7 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
 export const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
 
 const toTokenSlug = (contractAddress: string, tokenId: string | number = 0) =>
-  contractAddress === 'tez' ? contractAddress : `${contractAddress}_${tokenId}`;
+  contractAddress === MAV_TOKEN_SLUG ? contractAddress : `${contractAddress}_${tokenId}`;
 
 const txHasToken = (txType: HistoryItemOpTypeEnum) => {
   switch (txType) {

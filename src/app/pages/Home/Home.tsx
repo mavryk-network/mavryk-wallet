@@ -14,7 +14,7 @@ import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useNetwork } from 'lib/temple/front';
@@ -57,7 +57,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
 
-  const assetMetadata = useAssetMetadata(assetSlug || TEZ_TOKEN_SLUG);
+  const assetMetadata = useAssetMetadata(assetSlug || MAV_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
 
   useLayoutEffect(() => {

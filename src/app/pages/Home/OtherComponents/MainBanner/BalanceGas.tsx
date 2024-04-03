@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 
 import Money from 'app/atoms/Money';
 import { useSelector } from 'app/store';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { useGasTokenMetadata } from 'lib/metadata';
 import { isTruthy } from 'lib/utils';
@@ -18,8 +18,8 @@ interface Props {
 
 export const BalanceGas = memo<Props>(({ totalBalanceInDollar, currency, accountPkh }) => {
   const { decimals } = useGasTokenMetadata();
-  const tezosToUsdRate = useSelector(state => state.currency.usdToTokenRates.data[TEZ_TOKEN_SLUG]);
-  const { value: gasBalance } = useBalance(TEZ_TOKEN_SLUG, accountPkh);
+  const tezosToUsdRate = useSelector(state => state.currency.usdToTokenRates.data[MAV_TOKEN_SLUG]);
+  const { value: gasBalance } = useBalance(MAV_TOKEN_SLUG, accountPkh);
 
   const volume = useMemo(() => {
     const totalBalanceInDollarBN = new BigNumber(totalBalanceInDollar);

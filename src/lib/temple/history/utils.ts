@@ -10,7 +10,7 @@ import {
 } from 'lib/apis/tzkt/utils';
 import { isTruthy } from 'lib/utils';
 
-import { toTokenSlug } from '../../assets';
+import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 import { OperationsGroup } from '../activity-new/types';
 
@@ -179,14 +179,14 @@ function reduceOneTzktTransactionOperation(
 
     const source = operation.sender;
     const amount = String(operation.amount);
-    const tokenTransfers = buildTokenTransferItem(operation, 'tez', address);
+    const tokenTransfers = buildTokenTransferItem(operation, MAV_TOKEN_SLUG, address);
 
     if (!tokenTransfers) return _buildReturn({ amount, source });
 
     return _buildReturn({
       amount,
       source,
-      contractAddress: 'tez',
+      contractAddress: MAV_TOKEN_SLUG,
       tokenTransfers
     });
   } else if (isTzktOperParam_Fa2(parameter)) {
@@ -424,7 +424,7 @@ function buildTokenTransferItem(
       tokenContractAddress: 'tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg',
       tokenId: 0,
       tokenType: tokenType,
-      assetSlug: 'tez'
+      assetSlug: MAV_TOKEN_SLUG
     };
   }
 }

@@ -7,7 +7,7 @@ import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { Route3Dex } from 'lib/apis/route3/fetch-route3-dexes';
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
-import { toTokenSlug, TEZ_TOKEN_SLUG } from 'lib/assets';
+import { toTokenSlug, MAV_TOKEN_SLUG } from 'lib/assets';
 import { getDexName } from 'lib/route3/utils/get-dex-name';
 import { DexTypeIcon } from 'lib/swap-router';
 import useTippy from 'lib/ui/useTippy';
@@ -74,7 +74,7 @@ export const HopItem: FC<Props> = ({ dex, aToken, bToken, className }) => {
 const toAssetSlugLocal = (asset: Route3Token | nullish) => {
   if (!isDefined(asset)) return '';
 
-  if (!isDefined(asset.contract)) return TEZ_TOKEN_SLUG;
+  if (!isDefined(asset.contract)) return MAV_TOKEN_SLUG;
 
   return toTokenSlug(asset.contract, asset.tokenId ?? undefined);
 };

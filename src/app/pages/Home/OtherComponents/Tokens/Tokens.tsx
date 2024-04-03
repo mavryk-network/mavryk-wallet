@@ -19,7 +19,7 @@ import {
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
@@ -70,7 +70,7 @@ export const TokensTab: FC = () => {
   // const slugs = useMemoWithCompare(() => tokens.map(({ tokenSlug }) => tokenSlug).sort(), [tokens], isEqual);
   const mainnetTokensScamSlugsRecord = useMainnetTokensScamlistSelector();
 
-  const leadingAssets = useMemo(() => (chainId === ChainIds.MAINNET ? [TEZ_TOKEN_SLUG] : [TEZ_TOKEN_SLUG]), [chainId]);
+  const leadingAssets = useMemo(() => (chainId === ChainIds.MAINNET ? [MAV_TOKEN_SLUG] : [MAV_TOKEN_SLUG]), [chainId]);
 
   const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(
     slugs,

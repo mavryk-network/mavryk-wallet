@@ -1,6 +1,6 @@
 import type { StoredAssetStatus } from 'app/store/assets/state';
 
-import type { TEZ_TOKEN_SLUG } from './index';
+import type { MAV_TOKEN_SLUG } from './index';
 
 export interface AccountAsset {
   slug: string;
@@ -16,7 +16,7 @@ export interface FA2Token extends Token {
   id: string;
 }
 
-export type Asset = Token | typeof TEZ_TOKEN_SLUG;
+export type Asset = Token | typeof MAV_TOKEN_SLUG;
 
 export type TokenStandardType = 'fa1.2' | 'fa2';
 

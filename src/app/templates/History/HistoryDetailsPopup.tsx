@@ -10,7 +10,7 @@ import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ParallelArrowsIcon } from 'app/icons/parallel-opposing-arrows.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
 import { mumavToTz } from 'lib/temple/helpers';
@@ -46,7 +46,7 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
 
-  const mainAssetMetadata = useAssetMetadata(TEZ_TOKEN_SLUG);
+  const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
   const slugs = getAssetsFromOperations(historyItem);
@@ -186,7 +186,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
             <div className="flex flex-col items-end">
               <FiatBalance
-                assetSlug={TEZ_TOKEN_SLUG}
+                assetSlug={MAV_TOKEN_SLUG}
                 value={`${mumavToTz(fees?.networkFee ?? 0)}`}
                 showEqualSymbol={false}
                 className="text-base-plus"

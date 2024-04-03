@@ -6,7 +6,7 @@ import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import RawPayloadView from 'app/templates/RawPayloadView';
-import { TEZ_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { T, t } from 'lib/i18n';
 import { tryParseExpenses } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
@@ -50,7 +50,7 @@ const OperationView: FC<OperationViewProps> = ({
   const expensesData = useMemo(() => {
     return rawExpensesData.map(({ expenses, ...restRaw }) => ({
       expenses: expenses.map(({ tokenAddress, tokenId, ...restProps }) => ({
-        assetSlug: tokenAddress ? toTokenSlug(tokenAddress, tokenId) : TEZ_TOKEN_SLUG,
+        assetSlug: tokenAddress ? toTokenSlug(tokenAddress, tokenId) : MAV_TOKEN_SLUG,
         tokenAddress,
         tokenId,
         ...restProps

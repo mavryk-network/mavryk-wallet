@@ -21,7 +21,7 @@ import { useSwapParamsSelector, useSwapTokenSelector, useSwapTokensSelector } fr
 import OperationStatus from 'app/templates/OperationStatus';
 import { setTestID, useFormAnalytics } from 'lib/analytics';
 import { fetchRoute3SwapParams } from 'lib/apis/route3/fetch-route3-swap-params';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { KNOWN_TOKENS_SLUGS } from 'lib/assets/known-tokens';
 import { useBalance } from 'lib/balances/hooks';
 import { T, t } from 'lib/i18n';
@@ -99,14 +99,14 @@ export const SwapForm: FC = () => {
   const outputValue = watch('output') ?? { assetSlug: undefined, amount: 0 };
   const slippageTolerance = watch('slippageTolerance');
 
-  const { value: balance } = useBalance(inputValue.assetSlug ?? 'tez', account.publicKeyHash);
+  const { value: balance } = useBalance(inputValue.assetSlug ?? MAV_TOKEN_SLUG, account.publicKeyHash);
 
   const maxAmount = useMemo(() => {
     if (!inputValue.assetSlug) {
       return new BigNumber(0);
     }
 
-    const maxSendAmount = inputValue.assetSlug === TEZ_TOKEN_SLUG ? balance?.minus(EXCHANGE_XTZ_RESERVE) : balance;
+    const maxSendAmount = inputValue.assetSlug === MAV_TOKEN_SLUG ? balance?.minus(EXCHANGE_XTZ_RESERVE) : balance;
 
     return maxSendAmount ?? new BigNumber(0);
   }, [inputValue.assetSlug, balance]);
@@ -126,8 +126,8 @@ export const SwapForm: FC = () => {
   const fromRoute3Token = useSwapTokenSelector(inputValue.assetSlug ?? '');
   const toRoute3Token = useSwapTokenSelector(outputValue.assetSlug ?? '');
 
-  const inputAssetMetadata = useAssetMetadata(inputValue.assetSlug ?? TEZ_TOKEN_SLUG)!;
-  const outputAssetMetadata = useAssetMetadata(outputValue.assetSlug ?? TEZ_TOKEN_SLUG)!;
+  const inputAssetMetadata = useAssetMetadata(inputValue.assetSlug ?? MAV_TOKEN_SLUG)!;
+  const outputAssetMetadata = useAssetMetadata(outputValue.assetSlug ?? MAV_TOKEN_SLUG)!;
 
   const [error, setError] = useState<Error>();
   const [operation, setOperation] = useState<BatchWalletOperation>();

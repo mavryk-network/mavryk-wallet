@@ -1,16 +1,16 @@
 import BigNumber from 'bignumber.js';
 
-import { TEZ_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
+import { MAV_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum, HistoryItemTransactionOp } from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
-  if (!historyItem || historyItem.operations[0].contractAddress === TEZ_TOKEN_SLUG) return TEZ_TOKEN_SLUG;
+  if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
 
   return slug || !historyItem.operations[0]?.contractAddress
-    ? TEZ_TOKEN_SLUG
+    ? MAV_TOKEN_SLUG
     : toTokenSlug(
         historyItem.operations[0].contractAddress ?? '',
         (historyItem.operations[0] as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
@@ -53,7 +53,7 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
 
     const assetSlug = op.contractAddress
       ? isTezAsset(op.contractAddress)
-        ? TEZ_TOKEN_SLUG
+        ? MAV_TOKEN_SLUG
         : toTokenSlug(op.contractAddress, tokenId)
       : '';
     acc = [...new Set([...acc, assetSlug].filter(o => Boolean(o)))];

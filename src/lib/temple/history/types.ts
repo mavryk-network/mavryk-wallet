@@ -106,7 +106,7 @@ export interface UserHistory {
 
 type PickedPropsFromTzktTokenTransfer = Pick<TzktTokenTransfer, 'id' | 'level'>;
 
-export type TokenType = 'tez' | 'fa12' | 'fa2';
+export type TokenType = 'mav' | 'fa12' | 'fa2';
 
 export interface HistoryItemTokenTransfer extends PickedPropsFromTzktTokenTransfer {
   sender: HistoryMember;

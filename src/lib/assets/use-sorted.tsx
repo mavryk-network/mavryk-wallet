@@ -4,6 +4,8 @@ import { BigNumber } from 'bignumber.js';
 
 import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 
+import { MAV_TOKEN_SLUG } from './utils';
+
 export enum SortOptions {
   HIGH_TO_LOW = 'highToLow',
   LOW_TO_HIGH = 'lowToHigh',
@@ -14,7 +16,7 @@ export function useSortededAssetsSlugs(
   sortOption: SortOptions | null,
   assetsSlugs: string[],
   balances: StringRecord<string>,
-  topSlug = 'tez'
+  topSlug = MAV_TOKEN_SLUG
 ) {
   const tokensMetadata = useAllTokensMetadataSelector();
 

@@ -12,7 +12,7 @@ import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import InFiat from 'app/templates/InFiat';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
 import { setTestID, useFormAnalytics } from 'lib/analytics';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t, toLocalFormat } from 'lib/i18n';
 import { EMPTY_BASE_METADATA, useAssetMetadata, AssetMetadataBase, useGetTokenMetadata } from 'lib/metadata';
@@ -26,7 +26,7 @@ import { SwapFormInputProps } from './SwapFormInput.props';
 
 const EXCHANGE_XTZ_RESERVE = new BigNumber('0.3');
 const PERCENTAGE_BUTTONS = [25, 50, 75, 100];
-const LEADING_ASSETS = [TEZ_TOKEN_SLUG];
+const LEADING_ASSETS = [MAV_TOKEN_SLUG];
 
 const renderOptionContent = (option: string, isSelected: boolean) => (
   <AssetOption assetSlug={option} selected={isSelected} />
@@ -46,8 +46,8 @@ export const SwapFormInput: FC<SwapFormInputProps> = ({
   const { trackChange } = useFormAnalytics('SwapForm');
 
   const { assetSlug, amount } = value;
-  const isTezosSlug = assetSlug === 'tez';
-  const assetSlugWithFallback = assetSlug ?? 'tez';
+  const isTezosSlug = assetSlug === MAV_TOKEN_SLUG;
+  const assetSlugWithFallback = assetSlug ?? MAV_TOKEN_SLUG;
   const isAssestSelected = Boolean(assetSlug);
 
   const assetMetadataWithFallback = useAssetMetadata(assetSlugWithFallback)!;

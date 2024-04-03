@@ -1,7 +1,7 @@
 import { TezosToolkit } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 
-import { isFA2Token, TEZ_TOKEN_SLUG } from 'lib/assets';
+import { isFA2Token, MAV_TOKEN_SLUG } from 'lib/assets';
 import { fromAssetSlugWithStandardDetect } from 'lib/assets/contract.utils';
 import { loadContract } from 'lib/temple/contract';
 import { ZERO } from 'lib/utils/numbers';
@@ -9,7 +9,7 @@ import { ZERO } from 'lib/utils/numbers';
 export const fetchRawBalance = async (tezos: TezosToolkit, assetSlug: string, account: string) => {
   const asset = await fromAssetSlugWithStandardDetect(tezos, assetSlug);
 
-  if (asset === TEZ_TOKEN_SLUG)
+  if (asset === MAV_TOKEN_SLUG)
     return await tezos.tz.getBalance(account).then(toSafeBignum, error => {
       console.error(error);
 

@@ -7,6 +7,7 @@ import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import Balance from 'app/templates/Balance';
 import { DropdownSelect, SelectOptionsPropsBase } from 'app/templates/DropdownSelect/DropdownSelect';
+import { MAV_TOKEN_SLUG } from 'lib/assets/utils';
 import { useRelevantAccounts } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
@@ -86,7 +87,12 @@ const AccountOptionContent = memo<{ item: TempleAccount; selected: boolean; isFa
           <Balance address={acc.publicKeyHash}>
             {bal => (
               <span className="text-base leading-tight flex items-baseline">
-                <FiatBalance assetSlug={'tez'} value={bal} showEqualSymbol={false} className="text-base-plus" />
+                <FiatBalance
+                  assetSlug={MAV_TOKEN_SLUG}
+                  value={bal}
+                  showEqualSymbol={false}
+                  className="text-base-plus"
+                />
               </span>
             )}
           </Balance>

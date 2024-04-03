@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit';
 
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 
 import { loadGasBalanceActions, loadAssetsBalancesActions, putTokensBalancesAction } from './actions';
 import { balancesInitialState } from './state';
@@ -10,7 +10,7 @@ export const balancesReducer = createReducer(balancesInitialState, builder => {
   builder.addCase(loadGasBalanceActions.success, (state, { payload }) => {
     const records = retrieveBalancesRecord(state, payload.publicKeyHash, payload.chainId);
 
-    records.data[TEZ_TOKEN_SLUG] = payload.balance;
+    records.data[MAV_TOKEN_SLUG] = payload.balance;
   });
 
   builder.addCase(loadGasBalanceActions.fail, (state, { payload }) => {

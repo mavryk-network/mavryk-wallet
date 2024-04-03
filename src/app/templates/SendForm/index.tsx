@@ -4,7 +4,7 @@ import type { WalletOperation } from '@mavrykdynamics/taquito';
 
 import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
-import { TEZ_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useTokensSortPredicate } from 'lib/assets/use-sorting';
 import { useTezos } from 'lib/temple/front';
@@ -22,15 +22,15 @@ type SendFormProps = {
   assetSlug?: string | null;
 };
 
-const SendForm: FC<SendFormProps> = ({ assetSlug = TEZ_TOKEN_SLUG }) => {
+const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
   const tokensSlugs = useEnabledAccountTokensSlugs();
   const assetsSortPredicate = useTokensSortPredicate();
 
   const assets = useMemo<string[]>(
-    () => [TEZ_TOKEN_SLUG, ...tokensSlugs].sort((a, b) => assetsSortPredicate(a, b)),
+    () => [MAV_TOKEN_SLUG, ...tokensSlugs].sort((a, b) => assetsSortPredicate(a, b)),
     [tokensSlugs, assetsSortPredicate]
   );
-  const selectedAsset = useMemo(() => assets.find(a => a === assetSlug) ?? TEZ_TOKEN_SLUG, [assets, assetSlug]);
+  const selectedAsset = useMemo(() => assets.find(a => a === assetSlug) ?? MAV_TOKEN_SLUG, [assets, assetSlug]);
 
   const tezos = useTezos();
   const [operation, setOperation] = useSafeState<WalletOperation | null>(null, tezos.checksum);

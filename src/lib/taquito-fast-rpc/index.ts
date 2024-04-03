@@ -1,4 +1,4 @@
-import { EntrypointsResponse, RpcClient, RPCOptions } from '@taquito/rpc';
+import { EntrypointsResponse, RpcClient, RPCOptions } from '@mavrykdynamics/taquito-rpc';
 import retry from 'async-retry';
 import memoizee from 'memoizee';
 

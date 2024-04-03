@@ -1,6 +1,6 @@
 import React, { FC, Suspense, useCallback, useMemo, useState } from 'react';
 
-import type { WalletOperation } from '@taquito/taquito';
+import type { WalletOperation } from '@mavrykdynamics/taquito';
 
 import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';

@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 
-import { Estimate } from '@taquito/taquito';
+import { Estimate } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
@@ -61,7 +61,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       try {
         let i = 0;
         for (const e of estimates) {
-          defaultGasFeeMutez = defaultGasFeeMutez.plus(e.suggestedFeeMutez);
+          defaultGasFeeMutez = defaultGasFeeMutez.plus(e.suggestedFeeMumav);
           storageFeeMutez = storageFeeMutez.plus(
             Math.ceil(
               (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *

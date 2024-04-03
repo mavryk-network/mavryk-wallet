@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@taquito/taquito';
+import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
@@ -171,7 +171,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       const manager = await tezos.rpc.getManagerKey(
         acc.type === TempleAccountType.ManagedKT ? acc.publicKeyHash : accountPkh
       );
-      let baseFee = mutezToTz(estmtn.burnFeeMutez + estmtn.suggestedFeeMutez);
+      let baseFee = mutezToTz(estmtn.burnFeeMumav + estmtn.suggestedFeeMumav);
       if (!hasManager(manager) && acc.type !== TempleAccountType.ManagedKT) {
         baseFee = baseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
       }
@@ -271,7 +271,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       try {
         const estmtn = await getEstimation();
         const addFee = tzToMutez(feeVal ?? 0);
-        const fee = addFee.plus(estmtn.suggestedFeeMutez).toNumber();
+        const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;
         let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {

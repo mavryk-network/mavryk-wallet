@@ -14,7 +14,7 @@ import { T, t } from 'lib/i18n';
 import { useTypedSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 
-import { EXOLIX_PRIVICY_LINK, EXOLIX_TERMS_LINK, INITIAL_COIN_FROM, INITIAL_COIN_TO } from '../config';
+import { EXOLIX_PRIVICY_LINK, EXOLIX_TERMS_LINK, outputTokensList } from '../config';
 import { ExchangeDataInterface, ExchangeDataStatusEnum, OutputCurrencyInterface } from '../exolix.interface';
 import { ExolixSelectors } from '../Exolix.selectors';
 import { getCurrencies, loadMinMaxFields, queryExchange, submitExchange } from '../exolix.util';
@@ -34,8 +34,8 @@ interface Props {
 const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isError, setIsError }) => {
   const { publicKeyHash } = useAccount();
 
-  const [coinFrom, setCoinFrom] = useState<OutputCurrencyInterface>(INITIAL_COIN_FROM);
-  const [coinTo, setCoinTo] = useState<OutputCurrencyInterface>(INITIAL_COIN_TO);
+  const [coinFrom, setCoinFrom] = useState<OutputCurrencyInterface>(outputTokensList[1]);
+  const [coinTo, setCoinTo] = useState<OutputCurrencyInterface>(outputTokensList[0]);
 
   const [amount, setAmount] = useState<number | undefined>();
   const [minAmount, setMinAmount] = useState<number | nullish>();

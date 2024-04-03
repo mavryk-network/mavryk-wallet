@@ -10,7 +10,7 @@ import InFiat from 'app/templates/InFiat';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
-import { mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
@@ -78,9 +78,9 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       }
     }
 
-    const gasFee = mutezToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mutezToTz(defaultGasFeeMutez);
-    const storageFee = mutezToTz(storageFeeMutez);
+    const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
+    const defaultGasFee = mumavToTz(defaultGasFeeMutez);
+    const storageFee = mumavToTz(storageFeeMutez);
 
     return (
       <div className="w-full flex flex-col gap-3">
@@ -112,7 +112,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                 includeBurnedFee && {
                   key: 'feesBurned',
                   title: t('feesBurned'),
-                  value: mutezToTz(burnedFee)
+                  value: mumavToTz(burnedFee)
                 }
               ]
             : [])
@@ -132,7 +132,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                       <PlainAssetInput
                         value={value.toFixed()}
                         onChange={val => {
-                          onChange?.(tzToMutez(val ?? defaultGasFee).toNumber());
+                          onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
                         }}
                         max={MAX_GAS_FEE}
                         placeholder={defaultGasFee.toFixed()}

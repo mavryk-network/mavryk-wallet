@@ -121,27 +121,27 @@ const PREDEFINED_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
   }
 ];
 
-const DCP_TOKENS_METADATA: TokenMetadata[] = [
-  {
-    id: '0',
-    address: 'KT1N7Rh6SgSdExMPxfnYw1tHqrkSm7cm6JDN',
-    decimals: 0,
-    symbol: 'APX',
-    name: 'APXCOIN',
-    thumbnailUri: 'https://loonfilms.com/apx/apx-coin-220px.png',
-    standard: TokenStandardsEnum.Fa2
-  }
-];
+// const DCP_TOKENS_METADATA: TokenMetadata[] = [
+//   {
+//     id: '0',
+//     address: 'KT1N7Rh6SgSdExMPxfnYw1tHqrkSm7cm6JDN',
+//     decimals: 0,
+//     symbol: 'APX',
+//     name: 'APXCOIN',
+//     thumbnailUri: 'https://loonfilms.com/apx/apx-coin-220px.png',
+//     standard: TokenStandardsEnum.Fa2
+//   }
+// ];
 
 export const PREDEFINED_TOKENS_METADATA: Record<string, TokenMetadata[]> = {
-  [TempleChainId.Mainnet]: PREDEFINED_MAINNET_TOKENS_METADATA,
-  [TempleChainId.Dcp]: DCP_TOKENS_METADATA
+  [TempleChainId.Mainnet]: PREDEFINED_MAINNET_TOKENS_METADATA
+  // [TempleChainId.Dcp]: DCP_TOKENS_METADATA
 };
 
 export const ALL_PREDEFINED_METADATAS_RECORD: MetadataRecords = [
   ...PREDEFINED_MAINNET_TOKENS_METADATA,
-  DEPRECATED_TKEY_METADATA,
-  ...DCP_TOKENS_METADATA
+  DEPRECATED_TKEY_METADATA
+  // ...DCP_TOKENS_METADATA
 ].reduce(
   (obj, tokenMetadata) => ({
     ...obj,

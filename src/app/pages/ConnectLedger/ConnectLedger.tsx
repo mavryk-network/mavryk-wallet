@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { DerivationType } from @mavrykdynamics/taquito-ledger-signer';
+import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';

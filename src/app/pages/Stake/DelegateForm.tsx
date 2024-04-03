@@ -36,7 +36,7 @@ import {
   validateDelegate
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mutezToTz, tzToMutez } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
@@ -171,9 +171,9 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       const manager = await tezos.rpc.getManagerKey(
         acc.type === TempleAccountType.ManagedKT ? acc.publicKeyHash : accountPkh
       );
-      let baseFee = mutezToTz(estmtn.burnFeeMumav + estmtn.suggestedFeeMumav);
+      let baseFee = mumavToTz(estmtn.burnFeeMumav + estmtn.suggestedFeeMumav);
       if (!hasManager(manager) && acc.type !== TempleAccountType.ManagedKT) {
-        baseFee = baseFee.plus(mutezToTz(DEFAULT_FEE.REVEAL));
+        baseFee = baseFee.plus(mumavToTz(DEFAULT_FEE.REVEAL));
       }
 
       if (baseFee.isGreaterThanOrEqualTo(balance)) {
@@ -270,7 +270,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
         const estmtn = await getEstimation();
-        const addFee = tzToMutez(feeVal ?? 0);
+        const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;
         let opHash = '';

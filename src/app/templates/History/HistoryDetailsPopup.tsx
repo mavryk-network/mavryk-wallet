@@ -13,7 +13,7 @@ import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/template
 import { TEZ_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
-import { mutezToTz } from 'lib/temple/helpers';
+import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
@@ -187,7 +187,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={TEZ_TOKEN_SLUG}
-                value={`${mutezToTz(fees?.networkFee ?? 0)}`}
+                value={`${mumavToTz(fees?.networkFee ?? 0)}`}
                 showEqualSymbol={false}
                 className="text-base-plus"
                 roundingMode={BigNumber.ROUND_CEIL}
@@ -195,7 +195,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               />
 
               <div className="text-sm text-secondary-white">
-                <span>-{mutezToTz(fees?.networkFee ?? 0).toFixed()}</span>
+                <span>-{mumavToTz(fees?.networkFee ?? 0).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </div>
@@ -214,7 +214,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <T id="gasFee" />
               </span>
               <span className="text-secondary-white flex items-center capitalize">
-                <span>-{mutezToTz(fees?.gasFee ?? 0).toFixed()}</span>
+                <span>-{mumavToTz(fees?.gasFee ?? 0).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </span>
@@ -225,7 +225,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               </span>
               <span className="text-secondary-white">
                 <span className="text-secondary-white flex items-center">
-                  <span>-{mutezToTz(fees?.storageFee ?? 0).toFixed()}</span>
+                  <span>-{mumavToTz(fees?.storageFee ?? 0).toFixed()}</span>
                   &nbsp;
                   <span>{mainAssetSymbol}</span>
                 </span>
@@ -236,7 +236,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <T id="burnedFromFees" />
               </span>
               <span className="text-secondary-white">
-                <span>-{mutezToTz(burnedFee).toFixed()}</span>
+                <span>-{mumavToTz(burnedFee).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </span>

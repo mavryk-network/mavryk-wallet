@@ -162,7 +162,8 @@ function reduceOneTzktTransactionOperation(
       const { sender, tokenContractAddress, tokenId } = tokenTransfers;
 
       historyTxOp.assetSlug = toTokenSlug(tokenContractAddress, tokenId);
-      if (sender.address === address && !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
+
+      if (sender.address === address ?? !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.TransferTo;
       } else if (historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.Swap;
@@ -251,7 +252,7 @@ function buildHistoryItemOpBase(
     gasUsed,
     storageUsed,
     storageFee: storageFee ?? 0, // storage fee
-    entrypoint: (operation as TzktTransactionOperation).entrypoint ?? ''
+    entrypoint: (operation as TzktTransactionOperation).entrypoint
   };
   if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
   return reducedOperation;
@@ -355,7 +356,8 @@ function deriveHistoryItemType(
         // Handle transactions now
         if (isZero(item.amountSigned)) {
           type = HistoryItemOpTypeEnum.Interaction;
-        } else if (item.source.address === address) {
+        }
+        if (item.source.address === address) {
           type = HistoryItemOpTypeEnum.TransferTo;
         } else if ('tokenTransfers' in item && item.tokenTransfers)
           if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {

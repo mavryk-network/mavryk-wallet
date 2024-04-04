@@ -23,7 +23,8 @@ export default async function fetchUserHistory(
   // console.log('Logging operations in the fetchUserHistory function:', operations);
   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
   // console.log('Logging groups in the fetchUserHistory function:', groups);
-  return groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+  const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+  return arr;
 }
 
 /**

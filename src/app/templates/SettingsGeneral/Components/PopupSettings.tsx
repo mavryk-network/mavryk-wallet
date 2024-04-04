@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import { isPopupModeEnabled, setPopupMode } from 'lib/popup-mode';
 

@@ -63,7 +63,8 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         linkTo: null,
         Icon: ExtendSvgIcon,
         i18nKey: 'expandView',
-        onClick: handleMaximiseViewClick
+        onClick: undefined
+        // onClick: handleMaximiseViewClick,
       },
       {
         key: 'support',

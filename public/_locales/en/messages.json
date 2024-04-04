@@ -2075,7 +2075,7 @@
     "description": "RPC = Remote Procedure Call (https://en.wikipedia.org/wiki/Remote_procedure_call)"
   },
   "invalidRpcNotSupported": {
-    "message": "Unsupported RPC: Cannot load data"
+    "message": "Unsupported PRC detected. The wallet functionality may be compromised"
   },
   "contractNotOriginated": {
     "message": "Contract not originated"

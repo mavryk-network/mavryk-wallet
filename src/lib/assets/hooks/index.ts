@@ -32,7 +32,7 @@ export const useGasToken = (networkRpc?: string) => {
           }
         : {
             logo: 'misc/token-logos/mvrk.svg',
-            symbol: 'M',
+            symbol: 'ṁ',
             assetName: MAV_TOKEN_SLUG,
             metadata: MAVEN_METADATA
           },

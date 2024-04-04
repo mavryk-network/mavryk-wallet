@@ -2074,6 +2074,9 @@
     "message": "Invalid RPC: Cannot get chain id",
     "description": "RPC = Remote Procedure Call (https://en.wikipedia.org/wiki/Remote_procedure_call)"
   },
+  "invalidRpcNotSupported": {
+    "message": "Unsupported RPC: Cannot load data"
+  },
   "contractNotOriginated": {
     "message": "Contract not originated"
   },

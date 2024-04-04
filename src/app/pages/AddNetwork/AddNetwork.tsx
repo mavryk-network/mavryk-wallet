@@ -8,7 +8,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
 import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
 import { loadChainId } from 'lib/temple/helpers';
-import { NETWORK_IDS } from 'lib/temple/networks';
+import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
@@ -57,6 +57,12 @@ export const AddNetworkScreen: FC = () => {
   const onNetworkFormSubmit = useCallback(
     async ({ rpcBaseURL, name }: NetworkFormData) => {
       if (submitting) return;
+
+      if (NETWORKS.findIndex(n => n.rpcBaseURL === rpcBaseURL) === -1) {
+        setError('rpcBaseURL', SUBMIT_ERROR_TYPE, t('invalidRpcNotSupported'));
+        return;
+      }
+
       clearError();
 
       let chainId: string = '';

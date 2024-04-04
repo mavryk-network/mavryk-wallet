@@ -8,6 +8,7 @@ interface Props extends Pick<FormCheckboxProps, 'onChange' | 'testID' | 'errorCa
   titleI18nKey: TID;
   descriptionI18nKey: TID;
   enabled?: boolean;
+  disabled?: boolean;
 }
 
 export const EnablingSetting = ({
@@ -15,6 +16,7 @@ export const EnablingSetting = ({
   descriptionI18nKey,
   enabled,
   onChange,
+  disabled,
   // testID,
   errorCaption
 }: Props) => {
@@ -37,7 +39,7 @@ export const EnablingSetting = ({
         {errorCaption && <div className="text-sm text-primary-error">{errorCaption}</div>}
       </div>
       <div className="w-auto">
-        <Switcher on={enabled} onChange={handleChange} />
+        <Switcher on={enabled} onChange={handleChange} disabled={disabled} />
       </div>
     </div>
   );

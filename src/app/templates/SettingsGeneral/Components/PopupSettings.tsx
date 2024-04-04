@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 
 import { isPopupModeEnabled, setPopupMode } from 'lib/popup-mode';
 
@@ -11,18 +11,17 @@ const PopupSettings: FC<{}> = () => {
   const changingRef = useRef(false);
   const [error, setError] = useState<any>(null);
 
-  const handlePopupModeChange = useCallback(
-    (checked: boolean) => {
-      if (changingRef.current) return;
-      changingRef.current = true;
-      setError(null);
+  const handlePopupModeChange = useCallback(() => {
+    // (checked: boolean) => {
+    if (changingRef.current) return;
+    changingRef.current = true;
+    setError(null);
 
-      setPopupMode(!checked);
-      changingRef.current = false;
-      window.location.reload();
-    },
-    [setError]
-  );
+    setPopupMode(true);
+    // setPopupMode(!checked);
+    changingRef.current = false;
+    window.location.reload();
+  }, [setError]);
 
   return (
     <EnablingSetting
@@ -32,6 +31,7 @@ const PopupSettings: FC<{}> = () => {
       onChange={handlePopupModeChange}
       errorCaption={error?.message}
       testID={SettingsGeneralSelectors.popUpCheckBox}
+      disabled
     />
   );
 };

@@ -10,10 +10,11 @@ export type SwitcherProps = {
   on?: boolean;
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
   testId?: string;
+  disabled?: boolean;
 } & Omit<HTMLAttributes<HTMLInputElement>, 'onChange'>;
 
 export const Switcher = forwardRef<HTMLInputElement, SwitcherProps>(
-  ({ on = false, onClick, onChange, ...rest }, ref) => {
+  ({ on = false, onClick, onChange, disabled, ...rest }, ref) => {
     const [localChecked, setLocalChecked] = useState(() => on ?? false);
     const id = useId();
 
@@ -30,7 +31,7 @@ export const Switcher = forwardRef<HTMLInputElement, SwitcherProps>(
     );
 
     return (
-      <div className={classNames(styles['toggle-switch'])}>
+      <div className={classNames(styles['toggle-switch'], disabled && 'opacity-75 pointer-events-none')}>
         <input
           ref={ref}
           type="checkbox"

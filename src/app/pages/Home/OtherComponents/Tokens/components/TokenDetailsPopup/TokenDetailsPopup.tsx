@@ -58,7 +58,7 @@ export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({
       headerComponent={
         <AssetIcon
           assetSlug={assetSlug}
-          className="rounded-full overflow-hiddent bg-gray-405"
+          className="rounded-full overflow-hidden bg-gray-405"
           size={44}
           style={{ width: 44, height: 44 }}
         />

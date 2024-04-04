@@ -6,7 +6,7 @@ export const TEZOS_METADATA: AssetMetadataBase = {
   decimals: 6,
   symbol: 'MVRK',
   name: 'Mavryk',
-  thumbnailUri: browser.runtime.getURL('misc/token-logos/mvrk.svg')
+  thumbnailUri: browser.runtime.getURL('misc/token-logos/mvrk.png')
 };
 
 export const FILM_METADATA: AssetMetadataBase = {

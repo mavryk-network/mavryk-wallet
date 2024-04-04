@@ -16,6 +16,7 @@ const FA1_2_ENTRYPOINTS_SCHEMA = [
   ['getAllowance', 'pair', 'pair', 'contract'],
   ['getBalance', 'pair', 'address', 'contract'],
   ['getTotalSupply', 'pair', 'unit', 'contract']
+  // ['updateGeneralContracts', 'prim', 'pair', 'annots']
 ];
 
 const FA2_ENTRYPOINTS_SCHEMA = [

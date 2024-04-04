@@ -245,7 +245,7 @@ const SwapInput: FC<SwapInputProps> = ({
         <AssetField
           autoFocus
           testID={testId}
-          value={amount?.toString()}
+          value={amount?.toFixed(8).toString()}
           className={classNames(
             'text-base-plus text-right border-none bg-opacity-0 pl-0 focus:shadow-none',
             amount?.isEqualTo(0) ? 'text-secondary-white' : 'text-white'

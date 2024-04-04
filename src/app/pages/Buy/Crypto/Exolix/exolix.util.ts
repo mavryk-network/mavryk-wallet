@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { CurrencyToken } from 'app/templates/TopUpInput';
 import { EnvVars } from 'lib/env';
-import { TEZOS_METADATA } from 'lib/metadata';
+import { MAVEN_METADATA } from 'lib/metadata';
 
 import {
   ExchangeCoin,
@@ -164,4 +164,4 @@ export const getProperNetworkFullName = (currency?: CurrencyToken) => {
 };
 
 export const getCoinCodeToDisplay = (coin: ExchangeCoin) =>
-  coin.coinCode === 'XTZ' ? TEZOS_METADATA.symbol : coin.coinCode;
+  coin.coinCode === 'XTZ' ? MAVEN_METADATA.symbol : coin.coinCode;

@@ -1,4 +1,4 @@
-import { TEZOS_METADATA } from 'lib/metadata';
+import { MAVEN_METADATA } from 'lib/metadata';
 
 interface AssetBase {
   code: string;
@@ -7,7 +7,7 @@ interface AssetBase {
 
 export const getAssetSymbolToDisplay = (asset: AssetBase) => {
   if (asset.code.toLowerCase() === 'xtz') {
-    return TEZOS_METADATA.symbol;
+    return MAVEN_METADATA.symbol;
   }
 
   return asset.codeToDisplay ?? asset.code;

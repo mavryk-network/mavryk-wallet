@@ -53,34 +53,34 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
 
-    let defaultGasFeeMutez = new BigNumber(0);
-    let storageFeeMutez = new BigNumber(0);
+    let defaultGasFeeMumav = new BigNumber(0);
+    let storageFeeMumav = new BigNumber(0);
     let burnedFee = new BigNumber(0);
 
     if (estimates) {
       try {
         let i = 0;
         for (const e of estimates) {
-          defaultGasFeeMutez = defaultGasFeeMutez.plus(e.suggestedFeeMumav);
-          storageFeeMutez = storageFeeMutez.plus(
+          defaultGasFeeMumav = defaultGasFeeMumav.plus(e.suggestedFeeMumav);
+          storageFeeMumav = storageFeeMumav.plus(
             Math.ceil(
               (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *
-                (e as any).minimalFeePerStorageByteMutez
+                (e as any).minimalFeePerStorageByteMumav
             )
           );
           i++;
         }
 
         // @ts-expect-error
-        burnedFee = new BigNumber(estimates[0].burnFeeMutez + estimates[0]?.baseFeeMutez ?? 0).plus(storageFeeMutez);
+        burnedFee = new BigNumber(estimates[0].burnFeeMumav + estimates[0]?.baseFeeMumav ?? 0).plus(storageFeeMumav);
       } catch {
         return null;
       }
     }
 
     const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mumavToTz(defaultGasFeeMutez);
-    const storageFee = mumavToTz(storageFeeMutez);
+    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
+    // const storageFee = mumavToTz(storageFeeMumav);
 
     return (
       <div className="w-full flex flex-col gap-3">
@@ -91,11 +91,11 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
             value: gasFee,
             onChange: hasStableGasFee ? undefined : modifyFeeAndLimit.onTotalFeeChange
           },
-          {
-            key: 'storageFeeMax',
-            title: t('storageFeeMax'),
-            value: storageFee
-          },
+          // {
+          //   key: 'storageFeeMax',
+          //   title: t('storageFeeMax'),
+          //   value: storageFee
+          // },
 
           ...(modifyFeeAndLimit.storageLimit !== null
             ? [
@@ -206,7 +206,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         ))}
       </div>
     );
-  }, [modifyFeeAndLimit, estimates, includeBurnedFee, gasFeeError, symbol, mainnet]);
+  }, [modifyFeeAndLimit, estimates, hasStableGasFee, includeBurnedFee, gasFeeError, symbol, mainnet]);
 
   if (!expenses) {
     return null;

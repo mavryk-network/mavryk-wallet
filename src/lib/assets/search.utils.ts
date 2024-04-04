@@ -1,5 +1,5 @@
 import { isTezAsset } from 'lib/assets';
-import { TEZOS_METADATA } from 'lib/metadata/defaults';
+import { MAVEN_METADATA } from 'lib/metadata/defaults';
 import type { AssetMetadataBase } from 'lib/metadata/types';
 import { searchAndFilterItems } from 'lib/utils/search-items';
 
@@ -33,7 +33,7 @@ export function searchAssetsWithNoMeta<T>(
     asset => {
       const slug = getSlug(asset);
       const [contract, tokenId] = fromAssetSlug(slug);
-      const metadata = isTezAsset(slug) ? TEZOS_METADATA : getMetadata(slug);
+      const metadata = isTezAsset(slug) ? MAVEN_METADATA : getMetadata(slug);
 
       return {
         contract,

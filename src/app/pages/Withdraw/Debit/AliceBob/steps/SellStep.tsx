@@ -10,7 +10,7 @@ import { AnalyticsEventCategory, setTestID, useAnalytics, useFormAnalytics } fro
 import { AliceBobOrderStatus, cancelAliceBobOrder } from 'lib/apis/temple';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { T, TID } from 'lib/i18n';
-import { TEZOS_METADATA } from 'lib/metadata/defaults';
+import { MAVEN_METADATA } from 'lib/metadata/defaults';
 import { useAccount, useTezos } from 'lib/temple/front';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 
@@ -60,7 +60,7 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
       const transferParams = await toTransferParams(
         tezos,
         'mav',
-        TEZOS_METADATA,
+        MAVEN_METADATA,
         publicKeyHash,
         payCryptoAddress,
         fromAmount

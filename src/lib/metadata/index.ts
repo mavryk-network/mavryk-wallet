@@ -20,16 +20,16 @@ import { isTezAsset } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
-import { TEZOS_METADATA, FILM_METADATA } from './defaults';
+import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
 
 export type { AssetMetadataBase, TokenMetadata } from './types';
-export { TEZOS_METADATA, EMPTY_BASE_METADATA } from './defaults';
+export { MAVEN_METADATA, EMPTY_BASE_METADATA } from './defaults';
 
 export const useGasTokenMetadata = () => {
   const network = useNetwork();
 
-  return network.type === 'dcp' ? FILM_METADATA : TEZOS_METADATA;
+  return network.type === 'dcp' ? FILM_METADATA : MAVEN_METADATA;
 };
 
 export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined => {

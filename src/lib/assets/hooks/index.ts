@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { TEZOS_METADATA, FILM_METADATA } from 'lib/metadata/defaults';
+import { MAVEN_METADATA, FILM_METADATA } from 'lib/metadata/defaults';
 import { useChainIdLoading, useNetwork } from 'lib/temple/front';
 
 import { MAV_TOKEN_SLUG } from '../utils';
@@ -31,10 +31,10 @@ export const useGasToken = (networkRpc?: string) => {
             isDcpNetwork: true
           }
         : {
-            logo: 'misc/token-logos/tez.svg',
-            symbol: 'ꜩ',
+            logo: 'misc/token-logos/mvrk.svg',
+            symbol: 'M',
             assetName: MAV_TOKEN_SLUG,
-            metadata: TEZOS_METADATA
+            metadata: MAVEN_METADATA
           },
     [isDcpNetwork]
   );

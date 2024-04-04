@@ -2,7 +2,7 @@ import browser from 'webextension-polyfill';
 
 import type { AssetMetadataBase } from './types';
 
-export const TEZOS_METADATA: AssetMetadataBase = {
+export const MAVEN_METADATA: AssetMetadataBase = {
   decimals: 6,
   symbol: 'MVRK',
   name: 'Mavryk',

@@ -4,7 +4,7 @@ import { BigNumber } from 'bignumber.js';
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
 import { TZBTC_TOKEN_METADATA } from 'lib/assets/known-tokens';
 import { THREE_ROUTE_SIRS_TOKEN } from 'lib/assets/three-route-tokens';
-import { TEZOS_METADATA } from 'lib/metadata';
+import { MAVEN_METADATA } from 'lib/metadata';
 import {
   APP_ID,
   ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT,
@@ -50,7 +50,7 @@ export const getSwapTransferParams = async (
       toRoute3Token.id,
       mapToRoute3ExecuteHops(
         chains.xtzChain.chains,
-        isDivestingFromLb ? TEZOS_METADATA.decimals : fromRoute3Token.decimals
+        isDivestingFromLb ? MAVEN_METADATA.decimals : fromRoute3Token.decimals
       ),
       mapToRoute3ExecuteHops(
         chains.tzbtcChain.chains,

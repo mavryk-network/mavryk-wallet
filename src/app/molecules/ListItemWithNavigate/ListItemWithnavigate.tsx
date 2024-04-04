@@ -19,6 +19,7 @@ export type ListItemWithNavigateprops = {
   fillIcon?: boolean;
   showDivider?: boolean;
   fullWidthDivider?: boolean;
+  disabled?: boolean;
 };
 
 export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
@@ -30,7 +31,8 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
   hasExternalLink = false,
   fillIcon = true,
   showDivider = true,
-  fullWidthDivider = false
+  fullWidthDivider = false,
+  disabled = false
 }) => {
   const baseProps = {
     className: classNames(
@@ -38,6 +40,7 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
       showDivider && 'hover:outline hover:outline-2 hover:outline-offset-2',
       !fullWidthDivider && (showDivider ? styles.listItemBorder : styles.listItemWithoutDivider),
       showDivider && fullWidthDivider && 'border-b border-divider',
+      disabled && 'opacity-50 pointer-events-none',
       className
     ),
     onClick,

@@ -505,28 +505,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           onChange={([v]) => v}
           onFocus={() => amountFieldRef.current?.focus()}
           id="send-amount"
-          assetSymbol={
-            canToggleFiat ? (
-              <button
-                type="button"
-                onClick={handleFiatToggle}
-                className={classNames(
-                  'px-1 rounded-md flex items-center font-light',
-                  'hover:bg-black hover:bg-opacity-5',
-                  'trasition ease-in-out duration-200',
-                  'cursor-pointer pointer-events-auto'
-                )}
-              >
-                {visibleAssetSymbol}
-                <div className="ml-1 h-4 flex flex-col justify-between">
-                  <ChevronUpIcon className="h-2 w-auto stroke-current stroke-2" />
-                  <ChevronDownIcon className="h-2 w-auto stroke-current stroke-2" />
-                </div>
-              </button>
-            ) : (
-              assetSymbol
-            )
-          }
+          assetSymbol={assetSymbol}
           assetDecimals={shoudUseFiat ? 2 : assetMetadata?.decimals ?? 0}
           label={t('amount')}
           labelDescription={
@@ -632,8 +611,8 @@ const TokenToFiat: React.FC<TokenToFiatProps> = ({
             <div className="flex items-baseline text-sm text-secondary-white ">
               <span>≈&nbsp;</span>
               <span className="flex items-baseline">
+                <span className="pr-px">{symbol}</span>
                 {balance}
-                <span className="pr-px">&nbsp;{symbol}</span>
               </span>
             </div>
           )}

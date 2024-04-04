@@ -26,6 +26,7 @@ import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
+import { MAV_RPC_NETWORK } from 'lib/temple/networks';
 import { TempleAccountType, TempleChainId, TempleConfirmationPayload } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { isTruthy } from 'lib/utils';
@@ -112,15 +113,28 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     }
   }, [dispatch, tezBalance, totalTransactionCost]);
 
+  const isStorageDataHidden = useMemo(
+    () =>
+      payload.type === 'operations' &&
+      payload.opParams[0].kind === 'transaction' &&
+      payload.networkRpc === MAV_RPC_NETWORK,
+    [payload]
+  );
+
   const signPayloadFormats: ViewsSwitcherItemProps[] = useMemo(() => {
     if (payload.type === 'operations') {
+      const previewItem = {
+        key: 'preview',
+        name: t('preview'),
+        Icon: EyeIcon,
+        testID: InternalConfirmationSelectors.previewTab
+      };
+
+      if (isStorageDataHidden) {
+        return [previewItem];
+      }
       return [
-        {
-          key: 'preview',
-          name: t('preview'),
-          Icon: EyeIcon,
-          testID: InternalConfirmationSelectors.previewTab
-        },
+        previewItem,
         {
           key: 'raw',
           name: t('raw'),
@@ -339,6 +353,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   modifyFeeAndLimit={modifyFeeAndLimit}
                   mainnet={mainnet}
                   gasFeeError={gasFeeError}
+                  includeStorageData={!isStorageDataHidden}
                   includeBurnedFee
                 />
               </div>

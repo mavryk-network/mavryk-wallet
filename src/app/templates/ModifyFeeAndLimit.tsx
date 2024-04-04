@@ -28,6 +28,7 @@ type ModifyFeeAndLimitProps = {
   gasFeeError?: boolean;
   includeBurnedFee?: boolean;
   hasStableGasFee?: boolean;
+  includeStorageData?: boolean;
 };
 
 export interface ModifyFeeAndLimit {
@@ -46,7 +47,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   modifyFeeAndLimit,
   gasFeeError,
   includeBurnedFee = true,
-  hasStableGasFee = false
+  hasStableGasFee = false,
+  includeStorageData = true
 }) => {
   const { symbol } = useGasToken();
 
@@ -80,7 +82,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
     const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
     const defaultGasFee = mumavToTz(defaultGasFeeMumav);
-    // const storageFee = mumavToTz(storageFeeMumav);
+    const storageFee = mumavToTz(storageFeeMumav);
 
     return (
       <div className="w-full flex flex-col gap-3">
@@ -91,22 +93,26 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
             value: gasFee,
             onChange: hasStableGasFee ? undefined : modifyFeeAndLimit.onTotalFeeChange
           },
-          // {
-          //   key: 'storageFeeMax',
-          //   title: t('storageFeeMax'),
-          //   value: storageFee
-          // },
+          ...(includeStorageData
+            ? [
+                {
+                  key: 'storageFeeMax',
+                  title: t('storageFeeMax'),
+                  value: storageFee
+                }
+              ]
+            : []),
 
-          // ...(modifyFeeAndLimit.storageLimit !== null
-          //   ? [
-          //       {
-          //         key: 'storageLimit',
-          //         title: t('storageLimit'),
-          //         value: modifyFeeAndLimit.storageLimit,
-          //         onChange: modifyFeeAndLimit.onStorageLimitChange
-          //       }
-          //     ]
-          //   : []),
+          ...(modifyFeeAndLimit.storageLimit !== null && includeStorageData
+            ? [
+                {
+                  key: 'storageLimit',
+                  title: t('storageLimit'),
+                  value: modifyFeeAndLimit.storageLimit,
+                  onChange: modifyFeeAndLimit.onStorageLimitChange
+                }
+              ]
+            : []),
           ...(includeBurnedFee
             ? [
                 includeBurnedFee && {

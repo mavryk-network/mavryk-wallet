@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 
 import clsx from 'clsx';
 
@@ -18,12 +18,17 @@ import { OnboardingSelectors } from '../Onboarding.selectors';
 const CongratsPage: FC = () => {
   const { setOnboardingCompleted } = useOnboardingProgress();
 
-  const handleGetStartedClick = useCallback(() => {
-    setOnboardingCompleted(true);
-    // human delay
+  useEffect(() => {
     delay();
-    navigate('/');
-  }, [setOnboardingCompleted]);
+    setOnboardingCompleted(true);
+  }, []);
+
+  // const handleGetStartedClick = useCallback(() => {
+  //   setOnboardingCompleted(true);
+  //   // human delay
+  //   delay();
+  //   navigate('/');
+  // }, [setOnboardingCompleted]);
 
   return (
     <>
@@ -52,7 +57,11 @@ const CongratsPage: FC = () => {
         <T id={'goodLuckMsg'} />
       </p>
 
-      <ButtonRounded
+      <div className="mt-4 text-xl leading-5 tracking-tight text-white">
+        Please open the extension from the browsers bar
+      </div>
+
+      {/* <ButtonRounded
         fill
         className="w-full mt-4"
         size="big"
@@ -60,7 +69,7 @@ const CongratsPage: FC = () => {
         testID={OnboardingSelectors.congratsStartButton}
       >
         <T id={'getStarted'} />
-      </ButtonRounded>
+      </ButtonRounded> */}
     </>
   );
 };

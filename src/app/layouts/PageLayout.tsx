@@ -20,6 +20,7 @@ import ErrorBoundary from 'app/ErrorBoundary';
 import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
+import { browser } from 'lib/browser';
 import { T } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
@@ -39,6 +40,8 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   removePaddings?: boolean;
 }
 
+const TEMPORARY_FULL_SCREEN_ALLOWED_URLS = ['/create-wallet', '/import-wallet', '/onboarding'];
+
 const PageLayout: FC<PageLayoutProps> = ({
   children,
   contentContainerStyle,
@@ -47,6 +50,18 @@ const PageLayout: FC<PageLayoutProps> = ({
   ...toolbarProps
 }) => {
   const { fullPage, popup } = useAppEnv();
+  const { onboardingCompleted } = useOnboardingProgress();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    async function execute() {
+      if (fullPage && onboardingCompleted && !TEMPORARY_FULL_SCREEN_ALLOWED_URLS.includes(pathname)) {
+        navigate('/onboarding');
+      }
+    }
+
+    execute();
+  }, [fullPage, onboardingCompleted, pathname]);
 
   const style = useMemo(
     () =>

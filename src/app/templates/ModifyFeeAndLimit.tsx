@@ -97,16 +97,16 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
           //   value: storageFee
           // },
 
-          ...(modifyFeeAndLimit.storageLimit !== null
-            ? [
-                {
-                  key: 'storageLimit',
-                  title: t('storageLimit'),
-                  value: modifyFeeAndLimit.storageLimit,
-                  onChange: modifyFeeAndLimit.onStorageLimitChange
-                }
-              ]
-            : []),
+          // ...(modifyFeeAndLimit.storageLimit !== null
+          //   ? [
+          //       {
+          //         key: 'storageLimit',
+          //         title: t('storageLimit'),
+          //         value: modifyFeeAndLimit.storageLimit,
+          //         onChange: modifyFeeAndLimit.onStorageLimitChange
+          //       }
+          //     ]
+          //   : []),
           ...(includeBurnedFee
             ? [
                 includeBurnedFee && {

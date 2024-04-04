@@ -11,7 +11,7 @@ function validateAnyAddress(value: string) {
       return true;
 
     case isAddressValid(value):
-      return 'invalidAddress';
+      return t('invalidAddress');
 
     default:
       return true;

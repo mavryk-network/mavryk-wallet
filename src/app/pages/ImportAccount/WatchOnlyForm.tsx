@@ -30,6 +30,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<WatchOnlyFormData>({
     mode: 'onChange'
   });
+
   const [error, setError] = useState<ReactNode>(null);
 
   const addressFieldRef = useRef<HTMLTextAreaElement>(null);
@@ -102,6 +103,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
       <Controller
         name="address"
+        defaultValue={''}
         as={<NoSpaceField ref={addressFieldRef} />}
         control={control}
         rules={{
@@ -133,6 +135,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         as={<FormField />}
         control={control}
         onPaste={clearClipboard}
+        defaultValue={''}
         id="acc-name"
         label={`${t('accountName')} ${t('optionalComment')}`}
         labelDescription={<T id="accountNameAlternativeInputDescription" />}

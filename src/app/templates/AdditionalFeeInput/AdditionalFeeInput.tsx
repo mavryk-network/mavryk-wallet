@@ -211,10 +211,12 @@ const FeeOptionFace: FC<FeeOption> = ({ type, amount }) => {
     <section className="flex items-center justify-between w-full text-base-plus text-white">
       <span className="capitalize">{type}</span>
       <div className="flex items-center text-secondary-white text-sm">
-        {amount && <Money cryptoDecimals={5}>{amount}</Money>}
-        <span className="ml-1" style={{ fontSize: '0.75em' }}>
-          {metadata.symbol}
-        </span>
+        {amount && (
+          <Money cryptoDecimals={5} smallFractionFont={false}>
+            {amount}
+          </Money>
+        )}
+        <span className="ml-1 text-sm">{metadata.symbol}</span>
       </div>
     </section>
   );
@@ -232,10 +234,10 @@ const FeeOptionContent: FC<FeeOption> = ({ descriptionI18nKey, amount }) => {
 
         {amount && (
           <div className="ml-2 text-sm text-secondary-white flex items-baseline">
-            <Money cryptoDecimals={5}>{amount}</Money>{' '}
-            <span className="ml-1" style={{ fontSize: '0.75em' }}>
-              {metadata.symbol}
-            </span>
+            <Money cryptoDecimals={5} smallFractionFont={false}>
+              {amount}
+            </Money>{' '}
+            <span className="ml-1 text-sm">{metadata.symbol}</span>
           </div>
         )}
       </div>

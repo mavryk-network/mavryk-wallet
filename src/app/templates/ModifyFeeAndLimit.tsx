@@ -162,7 +162,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   )}
                 </div>
 
-                <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet}>
+                <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet} smallFractionFont={false}>
                   {({ balance, symbol }) => (
                     <div className="flex">
                       <span className="opacity-75">(</span>

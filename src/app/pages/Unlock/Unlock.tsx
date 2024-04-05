@@ -5,6 +5,7 @@ import { OnSubmit, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { USER_ACTION_TIMEOUT } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
@@ -46,6 +47,7 @@ const getTimeLeft = (start: number, end: number) => {
 const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   const { unlock } = useTempleClient();
   const dispatch = useDispatch();
+  const { popup } = useAppEnv();
   const formAnalytics = useFormAnalytics('UnlockWallet');
 
   const [attempt, setAttempt] = useLocalStorage<number>(TempleSharedStorageKey.PasswordAttempts, 1);
@@ -125,7 +127,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
           className="mt-6"
         />
       )}
-      <form ref={formRef} className="w-full max-w-sm mx-auto my-5" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        ref={formRef}
+        className={classNames('w-full mx-auto my-5', popup ? 'max-w-sm' : 'max-w-screen-xxs')}
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <FormField
           ref={register({ required: t('required') })}
           label={''}

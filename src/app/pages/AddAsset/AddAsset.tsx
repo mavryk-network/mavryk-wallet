@@ -9,6 +9,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
 import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
@@ -83,6 +84,7 @@ const Form = memo(() => {
   const chainId = useChainId(true)!;
   const { publicKeyHash: accountPkh } = useAccount();
   const { cache: swrCache } = useSWRConfig();
+  const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('AddAsset');
   const dispatch = useDispatch();
@@ -269,7 +271,8 @@ const Form = memo(() => {
   return (
     <form
       className={classNames(
-        'w-full max-w-sm mx-auto pb-8 flex flex-col',
+        'w-full mx-auto pb-8 flex flex-col',
+        popup ? 'max-w-sm' : 'max-w-screen-xxs',
         (!bottomSectionVisible || processing) && 'h-full'
       )}
       onSubmit={handleSubmit(onSubmit)}

@@ -1,5 +1,8 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T, TID } from 'lib/i18n';
@@ -26,6 +29,7 @@ const buttonRoutes: BtnRoute[] = [
 ];
 
 export const AddOrImportAccount: FC = () => {
+  const { popup } = useAppEnv();
   return (
     <PageLayout
       pageTitle={
@@ -35,7 +39,12 @@ export const AddOrImportAccount: FC = () => {
       }
       isTopbarVisible={false}
     >
-      <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
+      <div
+        className={clsx(
+          'w-full mx-auto h-full flex flex-col justify-start pb-8',
+          popup ? 'max-w-sm' : 'max-w-screen-xxs'
+        )}
+      >
         <div className="text-sm text-white mb-20">
           <T id="addOrImportAccountDescfiption" />
         </div>

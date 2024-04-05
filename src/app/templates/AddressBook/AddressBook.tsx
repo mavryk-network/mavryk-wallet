@@ -3,6 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import classNames from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
@@ -24,6 +25,7 @@ type ContactActions = {
 export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
   const { allContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   const allContacts = useMemo(
     () =>
@@ -63,7 +65,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
 
   return (
     <div className="flex flex-col h-full">
-      <div className="w-full max-w-sm mx-auto -mt-3">
+      <div className={classNames('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
         <CustomSelect
           className={classNames('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
           getItemId={getContactKey}

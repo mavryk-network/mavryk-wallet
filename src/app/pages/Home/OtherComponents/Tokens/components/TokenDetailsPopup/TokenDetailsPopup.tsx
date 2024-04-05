@@ -1,9 +1,11 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
+import clsx from 'clsx';
 
 import { Alert, Anchor, HashChip, Money } from 'app/atoms';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ConfirmedIcon } from 'app/icons/confirmed.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
@@ -82,6 +84,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const price = useAssetFiatCurrencyPrice(assetSlug ?? MAV_TOKEN_SLUG);
   const tokenMetadata = useTokenMetadataSelector(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();
+  const { popup } = useAppEnv();
 
   const assetSymbol = getAssetSymbol(assetMetadata);
   const isMainToken = assetSlug === MAV_TOKEN_SLUG;
@@ -119,7 +122,9 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         </div>
         {/* send swap receive withdraw - section */}
         <div className="text-base-plus text-white mb-2">
-          <div className="flex justify-between mx-auto w-full max-w-sm pb-4 px-2">
+          <div
+            className={clsx('flex justify-between mx-auto w-full  pb-4 px-2', popup ? 'max-w-sm' : 'max-w-screen-xxs')}
+          >
             <ActionButton
               label={<T id="receive" />}
               Icon={ReceiveIcon}

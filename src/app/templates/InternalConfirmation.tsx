@@ -251,8 +251,9 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   return (
     <div
       className={classNames(
-        'h-full w-full max-w-sm mx-auto flex flex-col relative overflow-x-hidden no-scrollbar',
-        !popup && 'justify-center px-2'
+        'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar',
+        !popup && 'justify-center px-2',
+        popup ? 'max-w-sm' : 'max-w-screen-xxs'
       )}
     >
       <ContentPaper>

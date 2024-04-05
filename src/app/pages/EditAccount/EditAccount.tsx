@@ -1,7 +1,10 @@
 import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import clsx from 'clsx';
+
 import { FormField, HashChip } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
@@ -33,6 +36,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
   const customAlert = useAlert();
   const formAnalytics = useFormAnalytics('ChangeAccountName');
   const confirm = useConfirm();
+  const { popup } = useAppEnv();
 
   const editAccNameFieldRef = useRef<HTMLInputElement>(null);
   const accNamePrevRef = useRef<string>();
@@ -133,7 +137,12 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
         </button>
       }
     >
-      <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
+      <div
+        className={clsx(
+          'w-full mx-auto h-full flex flex-col justify-start pb-8',
+          popup ? 'max-w-sm' : 'max-w-screen-xxs'
+        )}
+      >
         <div className="flex flex-col gap-1 mb-4">
           <div className="text-primary-white text-base-plus">
             <T id="publicAddress" />:

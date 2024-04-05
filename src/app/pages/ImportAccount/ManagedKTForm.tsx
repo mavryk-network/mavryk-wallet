@@ -8,6 +8,7 @@ import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import Identicon from 'app/atoms/Identicon';
 import Money from 'app/atoms/Money';
 import Name from 'app/atoms/Name';
+import { useAppEnv } from 'app/env';
 import Balance from 'app/templates/Balance';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { useFormAnalytics } from 'lib/analytics';
@@ -34,6 +35,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const { importKTManagedAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.ManagedKT);
   const chainId = useChainId(true);
+  const { popup } = useAppEnv();
 
   const [error, setError] = useState<ReactNode>(null);
 
@@ -143,7 +145,10 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   );
 
   return (
-    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={clsx('w-full mx-auto', popup ? ' max-w-sm' : 'max-w-screen-xxs', className)}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {error && <Alert type="error" title="Error" description={error} autoFocus className="mb-6" />}
 
       <Controller

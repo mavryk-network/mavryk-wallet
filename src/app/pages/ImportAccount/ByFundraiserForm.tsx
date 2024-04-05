@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { formatMnemonic } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { t } from 'lib/i18n';
@@ -26,6 +27,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const { register, errors, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
   const [error, setError] = useState<ReactNode>(null);
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Fundraiser);
+  const { popup } = useAppEnv();
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [seedError, setSeedError] = useState('');
@@ -67,7 +69,10 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const isBtnDisabled = !emailKey.length || !passowrdKey.length || !seedPhrase.length;
 
   return (
-    <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={classNames('w-full  mx-auto', popup ? 'max-w-sm' : 'max-w-screen-xxs', className)}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
 
       <FormField

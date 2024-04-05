@@ -4,7 +4,6 @@ import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_SIZE } from 'app/defaults';
-import { MoneyDiffView } from 'app/templates/activity/MoneyDiffView';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
@@ -13,6 +12,7 @@ import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
+import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
 import { getMoneyDiffsForSwap } from './utils';

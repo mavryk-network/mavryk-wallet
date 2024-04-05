@@ -1,9 +1,11 @@
 import React, { FC, useEffect } from 'react';
 
+import clsx from 'clsx';
 import { QRCode } from 'react-qr-svg';
 
 import { Alert, HashShortView } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as CopyIcon } from 'app/icons/copy.svg';
 import { ReactComponent as GlobeIcon } from 'app/icons/globe.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
@@ -30,6 +32,7 @@ const Receive: FC = () => {
   const account = useAccount();
   const { isSupported } = useTezosDomainsClient();
   const address = account.publicKeyHash;
+  const { popup } = useAppEnv();
 
   const [activeView, setActiveView] = useSafeState(ADDRESS_FIELD_VIEWS[1]);
 
@@ -45,8 +48,8 @@ const Receive: FC = () => {
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
-      <div className="">
-        <div className="w-full max-w-sm mx-auto h-full pb-8">
+      <div>
+        <div className={clsx('w-full mx-auto h-full pb-8', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
           <div className="text-primary-white text-base-plus mb-4">
             <T id="myAddress" />
           </div>

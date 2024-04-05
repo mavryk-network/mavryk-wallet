@@ -7,17 +7,13 @@ import { useTabSlug } from 'app/atoms/useTabSlug';
 import { useAppEnv } from 'app/env';
 import ErrorBoundary from 'app/ErrorBoundary';
 import { ToolbarElement } from 'app/layouts/PageLayout';
-import { ActivityComponent } from 'app/templates/activity/Activity';
-import AssetInfo from 'app/templates/AssetInfo';
 import { HistoryComponent } from 'app/templates/History/History';
 import { TabsBar } from 'app/templates/TabBar/TabBar';
-import { isTezAsset } from 'lib/assets';
 import { t, TID } from 'lib/i18n';
 
 import { CollectiblesTab } from '../Collectibles/CollectiblesTab';
 
 import { HomeSelectors } from './Home.selectors';
-import BakingSection from './OtherComponents/BakingSection';
 import { TokensTab } from './OtherComponents/Tokens/Tokens';
 
 type Props = {
@@ -36,7 +32,7 @@ interface TabData {
   disabled?: boolean;
 }
 
-export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
+export const ContentSection: FC<Props> = ({ className }) => {
   const { fullPage } = useAppEnv();
   const tabSlug = useTabSlug();
 
@@ -54,67 +50,35 @@ export const ContentSection: FC<Props> = ({ assetSlug, className }) => {
   }, []);
 
   const tabs = useMemo<TabData[]>(() => {
-    if (!assetSlug) {
-      return [
-        {
-          name: 'tokens',
-          titleI18nKey: 'tokens',
-          Component: TokensTab,
-          testID: HomeSelectors.assetsTab
-        },
-        {
-          name: 'NFTs',
-          titleI18nKey: 'NFTs',
-          Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
-          testID: HomeSelectors.NFTsTab
-        },
-        {
-          name: 'history',
-          titleI18nKey: 'history',
-          Component: HistoryComponent,
-          testID: HomeSelectors.activityTab,
-          whileMessageI18nKey: 'operationHistoryWhileMessage'
-        },
-        {
-          name: 'RWAs',
-          titleI18nKey: 'rwas',
-          Component: HistoryComponent,
-          testID: HomeSelectors.rwasTab,
-          disabled: true
-        }
-      ];
-    }
-
-    const activity: TabData = {
-      name: 'history',
-      titleI18nKey: 'history',
-      Component: () => <ActivityComponent assetSlug={assetSlug} />,
-      testID: HomeSelectors.activityTab
-    };
-
-    if (isTezAsset(assetSlug)) {
-      return [
-        activity,
-        {
-          name: 'delegation',
-          titleI18nKey: 'delegate',
-          Component: BakingSection,
-          testID: HomeSelectors.delegationTab,
-          whileMessageI18nKey: 'delegationInfoWhileMessage'
-        }
-      ];
-    }
-
     return [
-      activity,
       {
-        name: 'info',
-        titleI18nKey: 'info',
-        Component: () => <AssetInfo assetSlug={assetSlug} />,
-        testID: HomeSelectors.infoTab
+        name: 'tokens',
+        titleI18nKey: 'tokens',
+        Component: TokensTab,
+        testID: HomeSelectors.assetsTab
+      },
+      {
+        name: 'NFTs',
+        titleI18nKey: 'NFTs',
+        Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        testID: HomeSelectors.NFTsTab
+      },
+      {
+        name: 'history',
+        titleI18nKey: 'history',
+        Component: HistoryComponent,
+        testID: HomeSelectors.activityTab,
+        whileMessageI18nKey: 'operationHistoryWhileMessage'
+      },
+      {
+        name: 'RWAs',
+        titleI18nKey: 'rwas',
+        Component: HistoryComponent,
+        testID: HomeSelectors.rwasTab,
+        disabled: true
       }
     ];
-  }, [assetSlug, scrollToTheTabsBar]);
+  }, [scrollToTheTabsBar]);
 
   const { name, Component, whileMessageI18nKey } = useMemo(() => {
     const tab = tabSlug ? tabs.find(currentTab => currentTab.name === tabSlug) : null;

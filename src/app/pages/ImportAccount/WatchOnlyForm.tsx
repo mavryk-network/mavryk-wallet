@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient, useTezos, useTezosDomainsClient, validateDelegate } from 'lib/temple/front';
@@ -26,6 +27,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
   const formAnalytics = useFormAnalytics(ImportAccountFormType.WatchOnly);
+  const { popup } = useAppEnv();
 
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<WatchOnlyFormData>({
     mode: 'onChange'
@@ -98,7 +100,10 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   ]);
 
   return (
-    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={clsx('w-full mx-auto', popup ? 'max-w-sm' : 'max-w-screen-xxs', className)}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-4 self-start" />}
 
       <Controller

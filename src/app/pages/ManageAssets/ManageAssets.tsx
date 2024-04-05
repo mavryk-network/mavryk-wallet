@@ -5,6 +5,7 @@ import classNames from 'clsx';
 
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
+import { useAppEnv } from 'app/env';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
@@ -74,6 +75,7 @@ const tokensToRecord = (tokens: AccountToken[]) =>
   }, {});
 
 const ManageAssetsContent: FC<Props> = ({ assetType }) => {
+  const { popup } = useAppEnv();
   const chainId = useChainId(true)!;
   const account = useAccount();
   const balances = useCurrentAccountBalances();
@@ -234,7 +236,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const noItemsSelected = !selectedAssets.length;
 
   return (
-    <div className="w-full max-w-sm mx-auto mb-6 h-full">
+    <div className={classNames('w-full mx-auto mb-6 h-full', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
       <div>
         <SearchAssetField
           value={searchValue}

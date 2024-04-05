@@ -181,7 +181,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
 }
 
 export function useKnownBakers(suspense = true) {
-  const net = useNetwork();
+  // const net = useNetwork();
   // TODO add our baler list
   // const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
   const { data: bakers } = useRetryableSWR(null, getAllBakersBakingBad, {

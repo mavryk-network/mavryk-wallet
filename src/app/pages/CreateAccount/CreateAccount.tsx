@@ -1,9 +1,11 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import clsx from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
@@ -24,6 +26,7 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const CreateAccount: FC = () => {
   const { createAccount } = useTempleClient();
+  const { popup } = useAppEnv();
 
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
@@ -92,7 +95,12 @@ const CreateAccount: FC = () => {
       }
       isTopbarVisible={false}
     >
-      <div className="w-full max-w-sm mx-auto h-full flex flex-col justify-start pb-8">
+      <div
+        className={clsx(
+          'w-full mx-auto h-full flex flex-col justify-start pb-8',
+          popup ? 'max-w-sm' : 'max-w-screen-xxs'
+        )}
+      >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full justify-between">
           <FormField
             ref={register({

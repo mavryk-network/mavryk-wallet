@@ -17,8 +17,7 @@ import {
   HistoryItemOriginationOp
 } from 'lib/temple/history/types';
 
-import { MoneyDiffView } from '../activity/MoneyDiffView';
-
+import { MoneyDiffView } from './MoneyDiffView';
 import { getAssetsFromOperations } from './utils';
 
 interface Props {

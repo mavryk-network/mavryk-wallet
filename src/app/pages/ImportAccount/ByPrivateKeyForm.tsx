@@ -4,6 +4,7 @@ import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
@@ -19,6 +20,7 @@ interface ByPrivateKeyFormData {
 }
 
 export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
+  const { popup } = useAppEnv();
   const { importAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
 
@@ -52,7 +54,10 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const encrypted = useMemo(() => keyValue?.substring(2, 3) === 'e', [keyValue]);
 
   return (
-    <form className={classNames('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={classNames('w-full mx-auto', popup ? 'max-w-sm' : 'max-w-screen-xxs', className)}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <div>
         {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-4" />}
 

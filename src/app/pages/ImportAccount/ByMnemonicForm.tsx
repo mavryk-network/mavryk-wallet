@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { DEFAULT_DERIVATION_PATH, formatMnemonic } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
@@ -34,6 +35,7 @@ interface ByMnemonicFormData {
 }
 
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
+  const { popup } = useAppEnv();
   const { importMnemonicAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
@@ -94,7 +96,10 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   );
 
   return (
-    <form className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={clsx('w-full mx-auto', popup ? 'max-w-sm' : 'max-w-screen-xxs', className)}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
 
       <div>

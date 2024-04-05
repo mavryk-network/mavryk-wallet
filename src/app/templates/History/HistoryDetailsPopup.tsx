@@ -27,11 +27,11 @@ import {
   IndividualHistoryItem
 } from 'lib/temple/history/types';
 
-import { MoneyDiffView } from '../activity/MoneyDiffView';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
 
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
+import { MoneyDiffView } from './MoneyDiffView';
 import { OpertionStackItem } from './OperStackItem';
 import { alterIpfsUrl, getAssetsFromOperations, getMoneyDiffsForSwap } from './utils';
 

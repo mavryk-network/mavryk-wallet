@@ -19,15 +19,12 @@ import {
 } from '@mavrykdynamics/taquito';
 import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
 import BigNumber from 'bignumber.js';
-import classNames from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
 
 import { FormSubmitButton, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
-import { ReactComponent as ChevronUpIcon } from 'app/icons/chevron-up.svg';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
 import { isTezAsset, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
@@ -117,37 +114,36 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation, reset, getValues } =
-    useForm<FormData>({
-      mode: 'onChange',
-      defaultValues: {
-        fee: RECOMMENDED_ADD_FEE
-      }
-    });
+  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation, reset } = useForm<FormData>({
+    mode: 'onChange',
+    defaultValues: {
+      fee: RECOMMENDED_ADD_FEE
+    }
+  });
 
-  const handleFiatToggle = useCallback(
-    (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      evt.preventDefault();
+  // const handleFiatToggle = useCallback(
+  //   (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  //     evt.preventDefault();
 
-      const newShouldUseFiat = !shoudUseFiat;
-      setShouldUseFiat(newShouldUseFiat);
-      if (!getValues().amount) {
-        return;
-      }
-      const amount = new BigNumber(getValues().amount);
-      setValue(
-        'amount',
-        (newShouldUseFiat ? amount.multipliedBy(assetPrice) : amount.div(assetPrice)).toFormat(
-          newShouldUseFiat ? 2 : 6,
-          BigNumber.ROUND_FLOOR,
-          {
-            decimalSeparator: '.'
-          }
-        )
-      );
-    },
-    [setShouldUseFiat, shoudUseFiat, getValues, assetPrice, setValue]
-  );
+  //     const newShouldUseFiat = !shoudUseFiat;
+  //     setShouldUseFiat(newShouldUseFiat);
+  //     if (!getValues().amount) {
+  //       return;
+  //     }
+  //     const amount = new BigNumber(getValues().amount);
+  //     setValue(
+  //       'amount',
+  //       (newShouldUseFiat ? amount.multipliedBy(assetPrice) : amount.div(assetPrice)).toFormat(
+  //         newShouldUseFiat ? 2 : 6,
+  //         BigNumber.ROUND_FLOOR,
+  //         {
+  //           decimalSeparator: '.'
+  //         }
+  //       )
+  //     );
+  //   },
+  //   [setShouldUseFiat, shoudUseFiat, getValues, assetPrice, setValue]
+  // );
 
   useEffect(() => {
     if (!canToggleFiat && prevCanToggleFiat.current && shoudUseFiat) {
@@ -431,7 +427,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
   const { selectedFiatCurrency } = useFiatCurrency();
 
-  const visibleAssetSymbol = shoudUseFiat ? selectedFiatCurrency.symbol : assetSymbol;
+  // const visibleAssetSymbol = shoudUseFiat ? selectedFiatCurrency.symbol : assetSymbol;
 
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 

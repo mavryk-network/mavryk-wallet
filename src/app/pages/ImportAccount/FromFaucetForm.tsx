@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
 
 import { Alert, FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
 import { useTempleClient, useSetAccountPkh, useTezos, activateAccount } from 'lib/temple/front';
@@ -31,6 +32,7 @@ interface FaucetTextInputFormData {
 
 export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useTempleClient();
+  const { popup } = useAppEnv();
   const setAccountPkh = useSetAccountPkh();
   const tezos = useTezos();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
@@ -154,7 +156,11 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
   return (
     <>
-      <form ref={formRef} className={clsx('w-full max-w-sm mx-auto', className)} onSubmit={handleFormSubmit}>
+      <form
+        ref={formRef}
+        className={clsx('w-full mx-auto', popup ? 'max-w-sm' : 'max-w-screen-xxs', className)}
+        onSubmit={handleFormSubmit}
+      >
         {alert && (
           <Alert
             type={alert instanceof Error ? 'error' : 'success'}
@@ -192,7 +198,10 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         </div>
       </form>
 
-      <form className="w-full max-w-sm mx-auto my-8" onSubmit={handleTextFormSubmit(onTextFormSubmit)}>
+      <form
+        className={clsx('w-full mx-auto my-8', popup ? 'max-w-sm' : 'max-w-screen-xxs')}
+        onSubmit={handleTextFormSubmit(onTextFormSubmit)}
+      >
         <Controller
           name="text"
           as={<FormField className="font-mono" ref={textFieldRef} />}

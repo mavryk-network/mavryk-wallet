@@ -99,12 +99,12 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   );
 
   return (
-    <div className="w-full max-w-sm mx-auto relative">
+    <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm ' : 'max-w-screen-xxs')}>
       <div className={clsx('my-3', popup && 'mx-4')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
-              <div className={clsx('w-full flex justify-end pl-4', popup && 'pr-12px', styles.searchWrapper)}>
+              <div className={clsx('w-full flex justify-end', popup && 'pr-12px pl-4', styles.searchWrapper)}>
                 <SearchExplorerFinder
                   value={searchValue}
                   onValueChange={setSearchValue}

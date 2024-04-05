@@ -31,7 +31,6 @@ const PopupSettings: FC<{}> = () => {
       onChange={handlePopupModeChange}
       errorCaption={error?.message}
       testID={SettingsGeneralSelectors.popUpCheckBox}
-      disabled
     />
   );
 };

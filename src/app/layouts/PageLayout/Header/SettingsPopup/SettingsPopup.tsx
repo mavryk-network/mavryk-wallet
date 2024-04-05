@@ -58,15 +58,13 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         i18nKey: 'viewOnBlockExplorer',
         onClick: closePopup
       },
-      // {
-      //   key: 'expandView',
-      //   linkTo: null,
-      //   Icon: ExtendSvgIcon,
-      //   i18nKey: 'expandView',
-      //   onClick: undefined,
-      //   disabled: true
-      //   // onClick: handleMaximiseViewClick,
-      // },
+      {
+        key: 'expandView',
+        linkTo: null,
+        Icon: ExtendSvgIcon,
+        i18nKey: 'expandView',
+        onClick: handleMaximiseViewClick
+      },
       {
         key: 'support',
         linkTo: '/settings/about',

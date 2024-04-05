@@ -40,8 +40,6 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   removePaddings?: boolean;
 }
 
-const TEMPORARY_FULL_SCREEN_ALLOWED_URLS = ['/create-wallet', '/import-wallet', '/onboarding'];
-
 const PageLayout: FC<PageLayoutProps> = ({
   children,
   contentContainerStyle,
@@ -50,18 +48,6 @@ const PageLayout: FC<PageLayoutProps> = ({
   ...toolbarProps
 }) => {
   const { fullPage, popup } = useAppEnv();
-  const { onboardingCompleted } = useOnboardingProgress();
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    async function execute() {
-      if (fullPage && onboardingCompleted && !TEMPORARY_FULL_SCREEN_ALLOWED_URLS.includes(pathname)) {
-        navigate('/onboarding');
-      }
-    }
-
-    execute();
-  }, [fullPage, onboardingCompleted, pathname]);
 
   const style = useMemo(
     () =>

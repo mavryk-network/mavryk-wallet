@@ -106,7 +106,7 @@ export const GetProlabel: FC = () => {
       className="px-2 text-white text-xs leading-3 bg-accent-blue rounded text-center cursor-not-allowed"
       style={{ paddingBlock: 3, marginTop: 1 }}
     >
-      <T id="getPro" />
+      <T id="beta" />
     </div>
   );
 };

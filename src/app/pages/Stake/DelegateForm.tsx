@@ -342,7 +342,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
           onChange={([v]) => v}
           onFocus={() => toFieldRef.current?.focus()}
           textarea
-          rows={1}
+          rows={2}
           cleanable={Boolean(toValue)}
           onClean={cleanToField}
           id="delegate-to"

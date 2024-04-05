@@ -3626,5 +3626,8 @@
   },
   "dropdownNoItems": {
     "message": "No items"
+  },
+  "beta": {
+    "message": "Beta"
   }
 }

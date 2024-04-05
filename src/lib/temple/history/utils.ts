@@ -352,22 +352,24 @@ function deriveHistoryItemType(
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       type = HistoryItemOpTypeEnum.Swap;
     } else {
-      for (const item of items) {
-        // Handle transactions now
-        if (isZero(item.amountSigned)) {
-          type = HistoryItemOpTypeEnum.Interaction;
-        }
-        if (item.source.address === address) {
-          type = HistoryItemOpTypeEnum.TransferTo;
-        } else if ('tokenTransfers' in item && item.tokenTransfers)
-          if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
-            type = HistoryItemOpTypeEnum.TransferFrom;
-          } else {
-            type = HistoryItemOpTypeEnum.TransferTo;
-          }
+      const item = items[0];
+      // Handle transactions now
+      if (isZero(item.amountSigned)) {
+        type = HistoryItemOpTypeEnum.Interaction;
       }
+      if (item.source.address === address) {
+        type = HistoryItemOpTypeEnum.TransferTo;
+      }
+      if ('tokenTransfers' in item && item.tokenTransfers)
+        if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
+          type = HistoryItemOpTypeEnum.TransferFrom;
+        } else {
+          type = HistoryItemOpTypeEnum.TransferTo;
+        }
     }
   }
+
+  console.log(type, 'type from fn');
 
   return type;
 }

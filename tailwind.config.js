@@ -179,7 +179,7 @@ module.exports = {
         'primary-bg': baseColors.gray[920],
         'primary-divider': baseColors.divider,
         'primary-success': baseColors.green[910],
-        'primary-error': baseColors.red[700],
+        'primary-error': '#FF3E3E',
         'accent-orange': baseColors.orange[600],
 
         'list-item-selected': baseColors.gray[710],

@@ -253,7 +253,7 @@ export const Toolbar: FC<ToolbarProps> = ({
       )}
 
       <div className="flex-1" />
-      {RightSidedComponent && RightSidedComponent}
+      {RightSidedComponent && <div className="z-10 relative">{RightSidedComponent}</div>}
 
       {/* {attention && (
         <div className="flex items-center content-end absolute right-0">

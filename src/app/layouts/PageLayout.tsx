@@ -20,7 +20,6 @@ import ErrorBoundary from 'app/ErrorBoundary';
 import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
-import { browser } from 'lib/browser';
 import { T } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';

@@ -17,13 +17,13 @@ import { SettingButton, SettingsPopup } from './Header/SettingsPopup';
 import styles from './Header.module.css';
 
 const Header: FC = () => {
-  const appEnv = useAppEnv();
+  const { fullPage } = useAppEnv();
   const { ready } = useTempleClient();
 
   return (
-    <header className={classNames('bg-primary-card', styles['inner-shadow'], appEnv.fullPage && 'pb-20 -mb-20')}>
-      <ContentContainer className="py-3">
-        <div className={classNames(appEnv.fullPage && 'px-4')}>
+    <header className={classNames(styles['inner-shadow'], fullPage && 'pb-20 -mb-20 max-w-screen-xs mx-auto')}>
+      <ContentContainer className="py-3 bg-primary-card">
+        <div>
           <div className="flex items-center" style={{ maxHeight: 56 }}>
             {ready && <Control />}
           </div>

@@ -30,7 +30,6 @@ import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress
 import { ContentSection } from './ContentSection';
 import styles from './Home.module.css';
 import { HomeSelectors } from './Home.selectors';
-import EditableTitle from './OtherComponents/EditableTitle';
 import MainBanner from './OtherComponents/MainBanner';
 import { TokenPageSelectors } from './OtherComponents/TokenPage.selectors';
 
@@ -100,13 +99,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       attention={true}
       adShow
     >
-      {fullPage && (
-        <div className="w-full max-w-sm mx-auto">
-          <EditableTitle />
-          <hr className="mb-4" />
-        </div>
-      )}
-
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 

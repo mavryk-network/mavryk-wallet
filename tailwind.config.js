@@ -11,6 +11,7 @@ module.exports = {
   separator: ':',
   theme: {
     screens: {
+      xs: '600px',
       sm: '632px',
       md: '768px',
       lg: '1024px',

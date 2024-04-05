@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import Money from 'app/atoms/Money';
+import { useAppEnv } from 'app/env';
 import AddressChip from 'app/templates/AddressChip';
 import { useFiatCurrency } from 'lib/fiat-currency';
 
@@ -27,19 +28,24 @@ interface TotalVolumeBannerProps {
   accountPkh: string;
 }
 
-const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => (
-  <div
-    className={classNames(
-      styles.banner,
-      'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full max-w-sm mx-auto mb-4'
-    )}
-  >
-    <BalanceInfo />
-    <div className="flex justify-between items-center w-full">
-      <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
+const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => {
+  const { popup } = useAppEnv();
+
+  return (
+    <div
+      className={classNames(
+        styles.banner,
+        'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full mx-auto mb-4',
+        popup && 'max-w-sm'
+      )}
+    >
+      <BalanceInfo />
+      <div className="flex justify-between items-center w-full">
+        <AddressChip pkh={accountPkh} testID={HomeSelectors.publicAddressButton} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const BalanceInfo: FC = () => {
   const totalBalanceInFiat = useTotalBalance();

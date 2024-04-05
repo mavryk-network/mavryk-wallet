@@ -171,12 +171,12 @@ export const TokensTab: FC = () => {
   }, [activeAssetSlug, setActiveIndex]);
 
   return (
-    <div className="w-full max-w-sm mx-auto relative">
+    <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
       <div className={clsx('mt-3 w-full', popup && 'mx-4')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
-              <div className={clsx('w-full flex justify-end', styles.searchWrapper)}>
+              <div className={clsx('w-full flex justify-end pl-4', popup && 'pr-12px', styles.searchWrapper)}>
                 <SearchExplorerFinder
                   value={searchValue}
                   onValueChange={setSearchValue}
@@ -188,7 +188,7 @@ export const TokensTab: FC = () => {
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>
-              <div className={clsx('flex justify-end items-center', styles.searchWrapper)}>
+              <div className={clsx('flex justify-end items-center pl-4', popup && 'pr-12px', styles.searchWrapper)}>
                 <SearchExplorerIconBtn />
 
                 <SortPopup>

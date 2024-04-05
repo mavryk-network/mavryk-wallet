@@ -11,6 +11,7 @@ module.exports = {
   separator: ':',
   theme: {
     screens: {
+      xxs: '440px',
       xs: '600px',
       sm: '632px',
       md: '768px',
@@ -669,7 +670,9 @@ module.exports = {
       spacing: {
         '2px': '2px',
         10: '0.625rem',
+        '12px': '12px',
         '14px': '14px',
+        4.5: '18px',
         '40px': '2.5rem',
         '14px': '0.875rem',
         '10px': '0.6rem',

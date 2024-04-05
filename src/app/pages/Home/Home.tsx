@@ -102,7 +102,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
-        <div className="flex justify-between mx-auto w-full max-w-sm pb-4">
+        <div className={classNames('flex justify-between mx-auto w-full pb-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
           <ActionButton
             label={<T id="receive" />}
             Icon={ReceiveIcon}

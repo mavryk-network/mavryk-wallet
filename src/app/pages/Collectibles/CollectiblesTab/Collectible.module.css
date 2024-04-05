@@ -1,7 +1,6 @@
 .searchWrapper {
   position: absolute;
   right: 1px;
-  padding-inline: 16px 12px;
   top: -45px;
   z-index: 2;
 }

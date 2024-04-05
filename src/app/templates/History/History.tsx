@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
 import { DARK_LIGHT_THEME, DARK_THEME } from 'app/consts/appTheme';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
@@ -53,6 +54,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     lastItemDividerClassName = 'my-6',
     scrollableTarget
   }) => {
+    const { popup } = useAppEnv();
     const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
     const { publicKeyHash: accountAddress } = useAccount();
@@ -218,7 +220,14 @@ export const HistoryComponent: React.FC<Props> = memo(
           <SearchExplorer>
             <>
               <SearchExplorerOpened>
-                <div className={classNames('w-full flex justify-end', styles.searchWrapper, searchWrapperClassname)}>
+                <div
+                  className={classNames(
+                    'w-full flex justify-end pl-4',
+                    popup && 'pr-12px',
+                    styles.searchWrapper,
+                    searchWrapperClassname
+                  )}
+                >
                   <SearchExplorerFinder
                     value={searchValue}
                     onValueChange={setSearchValue}
@@ -230,7 +239,12 @@ export const HistoryComponent: React.FC<Props> = memo(
               </SearchExplorerOpened>
               <SearchExplorerClosed>
                 <div
-                  className={classNames('flex justify-end items-center', styles.searchWrapper, searchWrapperClassname)}
+                  className={classNames(
+                    'flex justify-end items-center pl-4',
+                    popup && 'pr-12px',
+                    styles.searchWrapper,
+                    searchWrapperClassname
+                  )}
                 >
                   <div className={classNames(loading && 'opacity-50 pointer-events-none')}>
                     <SearchExplorerIconBtn />

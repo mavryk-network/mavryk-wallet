@@ -215,7 +215,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
     return (
-      <div className="w-full max-w-sm mx-auto h-full relative">
+      <div className={classNames('w-full mx-auto h-full relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
         <div className={classNames('mt-3 w-full mx-4')}>
           <SearchExplorer>
             <>

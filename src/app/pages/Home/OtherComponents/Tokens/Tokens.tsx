@@ -208,7 +208,7 @@ export const TokensTab: FC = () => {
       </div>
 
       {/* {isEnabledAdsBanner && <AcceptAdsBanner />} */}
-      <div className="px-4 mb-4">
+      <div className={clsx('mb-4', popup && 'px-4')}>
         <StakeTezosTag />
       </div>
 

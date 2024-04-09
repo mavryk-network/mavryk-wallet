@@ -15,7 +15,8 @@ import {
   SearchExplorerClosed,
   SearchExplorerFinder,
   SearchExplorerIconBtn,
-  SearchExplorerOpened
+  SearchExplorerOpened,
+  SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
@@ -111,6 +112,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   containerClassName="mr-2"
                   testID={AssetsSelectors.searchAssetsInputTokens}
                 />
+                <SearchExplorerCloseBtn />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>

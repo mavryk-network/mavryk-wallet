@@ -3,7 +3,10 @@ import React, { FC, useCallback, createContext, useState, useMemo, useContext, m
 import classNames from 'clsx';
 
 import { useInitialOffAnimation } from 'app/hooks/use-initial-off-animation';
+import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
+import { t } from 'lib/i18n';
+import useTippy from 'lib/ui/useTippy';
 
 import SearchAssetField, { SearchAssetFieldProps } from '../SearchAssetField';
 
@@ -61,7 +64,7 @@ export const SearchExplorerFinder: FC<SearchAssetFieldProps> = props => {
 
   return (
     <div className={classNames('w-full', explored && allowAnimation && styles.explorerSearch)}>
-      <SearchAssetField {...props} cleanButtonCb={toggleExplorer} searchIconCb={toggleExplorer} showCloseIcon />
+      <SearchAssetField {...props} cleanButtonCb={toggleExplorer} searchIconCb={toggleExplorer} />
     </div>
   );
 };
@@ -76,6 +79,30 @@ export const SearchExplorerIconBtn: FC = () => {
     >
       <SearchIcon className={classNames('w-6 h-auto stroke-secondary-whit cursor-pointer')} />
     </div>
+  );
+};
+
+export const CLOSE_BUTTON_ID = 'CLOSE_BUTTON_ID';
+
+export const SearchExplorerCloseBtn: FC<{ className?: string }> = ({ className = 'ml-2' }) => {
+  const { toggleExplorer } = useSearchExplorer();
+
+  const tippyProps = useMemo(
+    () => ({
+      trigger: 'mouseenter',
+      hideOnClick: false,
+      content: t('close'),
+      animation: 'shift-away-subtle'
+    }),
+    []
+  );
+
+  const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
+
+  return (
+    <button id={CLOSE_BUTTON_ID} ref={buttonRef} onClick={toggleExplorer} className={className}>
+      <CloseIcon className="w-6 h-6 fill-white" />
+    </button>
   );
 };
 

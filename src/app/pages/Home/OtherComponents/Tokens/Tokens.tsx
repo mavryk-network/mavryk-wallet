@@ -14,7 +14,8 @@ import {
   SearchExplorerOpened,
   SearchExplorer,
   SearchExplorerIconBtn,
-  SearchExplorerFinder
+  SearchExplorerFinder,
+  SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
@@ -185,6 +186,7 @@ export const TokensTab: FC = () => {
                   containerClassName="mr-2"
                   testID={AssetsSelectors.searchAssetsInputTokens}
                 />
+                <SearchExplorerCloseBtn />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>

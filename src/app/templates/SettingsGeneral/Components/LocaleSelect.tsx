@@ -36,55 +36,55 @@ const LOCALE_OPTIONS: LocaleOption[] = [
     code: 'fr',
     flagName: 'fr',
     label: 'French (Français)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'de',
     flagName: 'de',
     label: 'German (Deutsch)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'zh_CN',
     flagName: 'cn',
     label: 'Chinese ‒ Simplified (简体中文)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'zh_TW',
     flagName: 'tw',
     label: 'Chinese ‒ Traditional (繁體中文)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'ja',
     flagName: 'jp',
     label: 'Japanese (日本語)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'ko',
     flagName: 'kr',
     label: 'Korean',
-    disabled: false
+    disabled: true
   },
   {
     code: 'uk',
     flagName: 'ua',
     label: 'Ukrainian (Українська)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'tr',
     flagName: 'tr',
     label: 'Turkish (Türk)',
-    disabled: false
+    disabled: true
   },
   {
     code: 'pt',
     flagName: 'pt',
     label: 'Portuguese (Português)',
-    disabled: false
+    disabled: true
   },
   // Disabled
   {
@@ -95,8 +95,10 @@ const LOCALE_OPTIONS: LocaleOption[] = [
   }
 ];
 
+const selectedLocale = 'en';
+
 const LocaleSelect: FC = () => {
-  const selectedLocale = getCurrentLocale();
+  // const selectedLocale = getCurrentLocale();
   const { trackEvent } = useAnalytics();
   const [searchValue, setSearchValue] = useState<string>('');
 
@@ -118,7 +120,8 @@ const LocaleSelect: FC = () => {
   const handleLocaleChange = useCallback(
     ({ code }: LocaleOption) => {
       trackEvent(AnalyticsEventEnum.LanguageChanged, AnalyticsEventCategory.ButtonPress, { code });
-      updateLocale(code);
+      // TODO add code later
+      updateLocale('en');
     },
     [trackEvent]
   );

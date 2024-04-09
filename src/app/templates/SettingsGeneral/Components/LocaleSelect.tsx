@@ -7,7 +7,7 @@ import Flag from 'app/atoms/Flag';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
 import { AnalyticsEventCategory, AnalyticsEventEnum, setTestID, useAnalytics } from 'lib/analytics';
-import { getCurrentLocale, updateLocale, T } from 'lib/i18n';
+import { updateLocale, T } from 'lib/i18n';
 import { searchAndFilterItems } from 'lib/utils/search-items';
 
 import { SettingsGeneralSelectors } from '../selectors';
@@ -112,10 +112,7 @@ const LocaleSelect: FC = () => {
     [searchValue]
   );
 
-  const value = useMemo(
-    () => options.find(({ code }) => code === selectedLocale) ?? LOCALE_OPTIONS[0],
-    [selectedLocale]
-  );
+  const value = useMemo(() => options.find(({ code }) => code === selectedLocale) ?? LOCALE_OPTIONS[0], []);
 
   const handleLocaleChange = useCallback(
     ({ code }: LocaleOption) => {

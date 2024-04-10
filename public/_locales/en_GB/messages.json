@@ -287,6 +287,14 @@
       }
     }
   },
+  "betaAgreementMsg": {
+    "message": "I understand that this web extension is in $beta$ and is only connected to the Testnet. I should not send real funds to this wallet.",
+    "placeholders": {
+      "beta": {
+        "content": "$1"
+      }
+    }
+  },
   "skipOnboarding": {
     "message": "Skip onboarding"
   },
@@ -1346,6 +1354,9 @@
   },
   "confirmTermsError": {
     "message": "Unable to continue without confirming Terms of Usage"
+  },
+  "confirmBetaError": {
+    "message": "Please confirm that you acknowledge the wallet is in BETA and only for Testnet"
   },
   "acceptTerms": {
     "message": "Accept terms"

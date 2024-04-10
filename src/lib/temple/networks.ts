@@ -51,7 +51,7 @@ export const NETWORKS: TempleNetwork[] = [
   //   disabled: false
   // },
   {
-    id: 'mainnet',
+    id: 'atlasnet',
     name: 'Mavryk Atlasnet',
     description: 'Mavryk Atlasnet',
     type: 'main',

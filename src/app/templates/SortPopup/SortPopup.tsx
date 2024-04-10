@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import { RadioButton } from 'app/atoms/RadioButton';
 import { Switcher } from 'app/atoms/Switcher';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as SortIcon } from 'app/icons/sort.svg';
 import { T } from 'lib/i18n';
 
@@ -60,10 +61,17 @@ export const useSortPopup = () => {
 
 // Popup content
 export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle, title = <T id="sortBy" /> }) => {
+  const { popup } = useAppEnv();
   const { opened, close } = useSortPopup();
 
   return (
-    <PopupModalWithTitle isOpen={opened} onRequestClose={close} title={title} portalClassName="sort-popup">
+    <PopupModalWithTitle
+      isOpen={opened}
+      contentPosition={popup ? 'bottom' : 'center'}
+      onRequestClose={close}
+      title={title}
+      portalClassName="sort-popup"
+    >
       <div className="flex flex-col mt-2">
         <ul className="flex flex-col px-4">
           {items.map(item => (

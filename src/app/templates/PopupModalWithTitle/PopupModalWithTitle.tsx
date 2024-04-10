@@ -2,7 +2,7 @@ import React, { FC, ReactNode, SyntheticEvent, memo, useMemo, useState } from 'r
 
 import classNames from 'clsx';
 
-import CustomPopup, { CustomPopupProps } from 'app/atoms/CustomPopup';
+import CustomPopup, { CustomPopupContentPositionType, CustomPopupProps } from 'app/atoms/CustomPopup';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { t } from 'lib/i18n';
@@ -22,6 +22,7 @@ export interface PopupModalWithTitlePropsProps extends CustomPopupProps {
   title?: ReactNode;
   headerComponent?: JSX.Element;
   leftSidedComponent?: JSX.Element;
+  contentPosition?: CustomPopupContentPositionType;
 }
 
 export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
@@ -30,6 +31,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
   className,
   headerComponent,
   leftSidedComponent,
+  contentPosition = 'bottom',
   ...restProps
 }) => {
   const { popup } = useAppEnv();
@@ -62,6 +64,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
         className
       )}
       shouldCloseOnEsc
+      contentPosition={contentPosition}
     >
       <>
         {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}

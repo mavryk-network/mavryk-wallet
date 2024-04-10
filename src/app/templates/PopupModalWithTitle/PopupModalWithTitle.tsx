@@ -1,8 +1,9 @@
-import React, { FC, ReactNode, SyntheticEvent, memo, useState } from 'react';
+import React, { FC, ReactNode, SyntheticEvent, memo, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 
 import CustomPopup, { CustomPopupProps } from 'app/atoms/CustomPopup';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { t } from 'lib/i18n';
 import { useTippyById } from 'lib/ui/useTippy';
@@ -31,6 +32,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
   leftSidedComponent,
   ...restProps
 }) => {
+  const { popup } = useAppEnv();
   const handleMouseEnter = useTippyById('#close-icon', tippyProps);
   const [animateCloseIcon, setAnimateCloseIcon] = useState(false);
 
@@ -46,11 +48,17 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
     }
   };
 
+  const memoizedContentStyle = useMemo(
+    () => (popup ? { maxHeight: 500 } : { maxHeight: 'calc(100vh - 190px' }),
+    [popup]
+  );
+
   return (
     <CustomPopup
       {...restProps}
       className={classNames(
-        'w-full max-w-md relative rounded-tl-2xl-plus rounded-tr-2xl-plus bg-primary-card',
+        'w-full relative rounded-tl-2xl-plus rounded-tr-2xl-plus bg-primary-card',
+        popup ? 'max-w-md' : 'max-w-screen-xs',
         className
       )}
       shouldCloseOnEsc
@@ -60,8 +68,9 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
         <div
           // used for infinite scrol lib to load more stuff while scrolled to the end
           id="popupModalScrollable"
+          style={memoizedContentStyle}
           onScroll={scrollEvent}
-          className={classNames('w-full max-h-500 no-scrollbar', styles.container)}
+          className={classNames('w-full no-scrollbar', styles.container)}
         >
           <div
             className={classNames(

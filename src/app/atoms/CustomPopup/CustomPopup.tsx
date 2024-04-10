@@ -14,7 +14,7 @@ export type CustomPopupProps = Modal.Props &
   };
 
 const CustomPopup: FC<CustomPopupProps> = props => {
-  const { className, overlayClassName, contentPosition = 'bottom', ...restProps } = props;
+  const { className, overlayClassName, contentPosition = 'bottom', portalClassName, ...restProps } = props;
 
   return (
     <Modal
@@ -28,6 +28,7 @@ const CustomPopup: FC<CustomPopupProps> = props => {
         contentPosition === 'bottom' ? 'flex items-end justify-center' : 'flex items-center justify-center',
         overlayClassName
       )}
+      portalClassName={classNames('slideFromBottom', portalClassName)}
       preventScroll
       onAfterOpen={() => {
         document.body.classList.add('overscroll-y-none');

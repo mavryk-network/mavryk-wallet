@@ -59,7 +59,8 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
     <CustomPopup
       {...restProps}
       className={classNames(
-        'w-full relative rounded-tl-2xl-plus rounded-tr-2xl-plus bg-primary-card',
+        'w-full relative  bg-primary-card',
+        contentPosition === 'center' ? 'rounded-2xl-plus' : 'rounded-tl-2xl-plus rounded-tr-2xl-plus',
         popup ? 'max-w-md' : 'max-w-screen-xs',
         className
       )}

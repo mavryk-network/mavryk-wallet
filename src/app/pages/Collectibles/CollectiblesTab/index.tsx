@@ -152,7 +152,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
 const buildEmptySection = (isSyncing: boolean) =>
   isSyncing ? (
-    <SyncSpinner className="mt-23" />
+    <SyncSpinner className="pt-4" />
   ) : (
     <div className="w-full py-23 flex flex-col items-center gap-y-4">
       <p className={'text-white text-base-plus text-center'}>

@@ -75,7 +75,11 @@ export const SearchExplorerIconBtn: FC = () => {
   return (
     <div
       onClick={toggleExplorer}
-      className={classNames('animate-none', !explored && allowAnimation && styles.explorerHideSearch)}
+      className={classNames(
+        styles.searchIcon,
+        'animate-none',
+        !explored && allowAnimation && styles.explorerHideSearch
+      )}
     >
       <SearchIcon className={classNames('w-6 h-auto stroke-secondary-whit cursor-pointer')} />
     </div>
@@ -85,7 +89,7 @@ export const SearchExplorerIconBtn: FC = () => {
 export const CLOSE_BUTTON_ID = 'CLOSE_BUTTON_ID';
 
 export const SearchExplorerCloseBtn: FC<{ className?: string }> = ({ className = 'ml-2' }) => {
-  const { toggleExplorer } = useSearchExplorer();
+  const { toggleExplorer, explored } = useSearchExplorer();
 
   const tippyProps = useMemo(
     () => ({
@@ -99,11 +103,11 @@ export const SearchExplorerCloseBtn: FC<{ className?: string }> = ({ className =
 
   const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
 
-  return (
+  return explored ? (
     <button id={CLOSE_BUTTON_ID} ref={buttonRef} onClick={toggleExplorer} className={className}>
       <CloseIcon className="w-6 h-6 fill-white" />
     </button>
-  );
+  ) : null;
 };
 
 export const SearchExplorerOpened: FC<{ children: JSX.Element }> = ({ children }) => {

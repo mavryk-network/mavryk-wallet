@@ -32,6 +32,7 @@ export interface FormData extends TestIDProps {
   password?: string;
   repeatPassword?: string;
   termsAccepted: boolean;
+  betaAgreement: boolean;
   analytics?: boolean;
   viewAds: boolean;
   skipOnboarding?: boolean;
@@ -89,6 +90,7 @@ export const useCreareOrRestorePassword = (
   const passwordValue = watch('password');
 
   const isTermsAccepted: boolean = control.getValues()?.termsAccepted;
+  const isBetaAccepted: boolean = control.getValues()?.betaAgreement;
 
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
@@ -196,6 +198,6 @@ export const useCreareOrRestorePassword = (
     passwordValue,
     handlePasswordChange,
     onSubmit,
-    disabled: !isTermsAccepted
+    disabled: !isTermsAccepted || !isBetaAccepted
   };
 };

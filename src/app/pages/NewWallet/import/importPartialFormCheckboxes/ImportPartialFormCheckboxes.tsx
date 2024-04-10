@@ -62,6 +62,26 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
 
       <FormCheckbox
         ref={register({
+          validate: (val: unknown) => val || t('confirmBetaError')
+        })}
+        errorCaption={errors.betaAgreement?.message}
+        name="betaAgreement"
+        testID={setWalletPasswordSelectors.betaAgreementCheckbox}
+        label={
+          <T
+            id="betaAgreementMsg"
+            substitutions={[
+              <span className="text-accent-blue capitalize">
+                <T id="beta" key="beta" />
+              </span>
+            ]}
+          />
+        }
+        containerClassName="flex-1"
+      />
+
+      <FormCheckbox
+        ref={register({
           validate: (val: unknown) => val || t('confirmTermsError')
         })}
         errorCaption={errors.termsAccepted?.message}

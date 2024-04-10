@@ -47,7 +47,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
     disabled
   } = useCreareOrRestorePassword(ownMnemonic, seedPhrase, keystorePassword);
 
-  console.log(Object.keys(errors).length);
   const hasErrors = Object.keys(errors).length > 0;
 
   console.log(hasErrors);

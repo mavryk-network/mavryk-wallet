@@ -7,5 +7,6 @@ export enum setWalletPasswordSelectors {
   restoreButton = 'Register Form/Restore Button',
   createButton = 'Register Form/Create Button',
   useFilePasswordCheckBox = 'Register Form/Use File Password Check Box',
-  viewAdsCheckBox = 'Register Form/View Ads Check Box'
+  viewAdsCheckBox = 'Register Form/View Ads Check Box',
+  betaAgreementCheckbox = 'Register Form/ BETA version Check Box'
 }

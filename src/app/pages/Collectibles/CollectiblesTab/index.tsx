@@ -15,7 +15,8 @@ import {
   SearchExplorerClosed,
   SearchExplorerFinder,
   SearchExplorerIconBtn,
-  SearchExplorerOpened
+  SearchExplorerOpened,
+  SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
@@ -111,6 +112,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   containerClassName="mr-2"
                   testID={AssetsSelectors.searchAssetsInputTokens}
                 />
+                <SearchExplorerCloseBtn />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>
@@ -150,7 +152,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
 const buildEmptySection = (isSyncing: boolean) =>
   isSyncing ? (
-    <SyncSpinner className="mt-23" />
+    <SyncSpinner className="pt-4" />
   ) : (
     <div className="w-full py-23 flex flex-col items-center gap-y-4">
       <p className={'text-white text-base-plus text-center'}>

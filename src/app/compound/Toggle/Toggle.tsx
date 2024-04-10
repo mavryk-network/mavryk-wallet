@@ -5,7 +5,7 @@ import { Switcher } from 'app/atoms/Switcher';
 import { Child, ToggleContextType } from './Toggle.types';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const ToggleContext = createContext<ToggleContextType>(undefined!);
+export const ToggleContext = createContext<ToggleContextType>(undefined!);
 ToggleContext.displayName = 'ToggleContext';
 
 export function Toggle({ children, active = false }: Child & { active?: boolean }) {

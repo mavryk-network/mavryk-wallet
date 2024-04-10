@@ -17,6 +17,7 @@ export interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement>,
   cleanButtonCb?: () => void;
   value: string;
   onValueChange: (value: string) => void;
+  showCloseIcon?: boolean;
 }
 
 const SearchField: FC<SearchFieldProps> = ({
@@ -32,6 +33,7 @@ const SearchField: FC<SearchFieldProps> = ({
   cleanButtonIconStyle,
   testID,
   cleanButtonCb,
+  showCloseIcon = false,
   ...rest
 }) => {
   const handleChange = useCallback(
@@ -70,7 +72,7 @@ const SearchField: FC<SearchFieldProps> = ({
           <SearchIcon className={classNames('stroke-1', searchIconClassName)} />
         </div>
 
-        {Boolean(value) && (
+        {(Boolean(value) || showCloseIcon) && (
           <CleanButton
             bottomOffset={bottomOffset}
             style={cleanButtonStyle}

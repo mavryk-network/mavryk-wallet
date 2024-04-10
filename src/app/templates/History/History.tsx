@@ -20,7 +20,8 @@ import {
   SearchExplorerClosed,
   SearchExplorerFinder,
   SearchExplorerIconBtn,
-  SearchExplorerOpened
+  SearchExplorerOpened,
+  SearchExplorerCloseBtn
 } from '../SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from '../SortPopup';
 
@@ -235,6 +236,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                     className={classNames(theme === DARK_LIGHT_THEME && styles.inputBgDarkLight)}
                     cleanButtonStyle={searchbtnStyles}
                   />
+                  <SearchExplorerCloseBtn />
                 </div>
               </SearchExplorerOpened>
               <SearchExplorerClosed>

@@ -3,7 +3,7 @@
 Cryptocurrency wallet for [Mavryk blockchain](https://mavryk.org/) as Web Extension for your Browser.<br>
 Providing ability to manage NFT, tez tokens and interact with dApps.
 
-![Mavryk Wallet](https://user-images.githubusercontent.com/11996139/108867944-64e7fc00-75fe-11eb-975e-87c0fda9bfbe.png)
+![Mavryk Wallet](https://raw.githubusercontent.com/mavryk-network/mavryk-wallet/dev/public/misc/wallet-readme.svg)
 
 <hr />
 
@@ -68,7 +68,7 @@ yarn build-all
 
 ### 5) Load extension to your Browser
 
-![MavrykWallet_Load](https://user-images.githubusercontent.com/11996139/73763346-f8435a80-4779-11ea-9e9d-4c1db9560f64.gif)
+![MavrykWallet_Load](https://raw.githubusercontent.com/mavryk-network/mavryk-wallet/dev/public/misc/install.gif)
 
 ## 🧱 Development
 

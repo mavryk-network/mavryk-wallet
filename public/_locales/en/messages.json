@@ -6,7 +6,7 @@
     "message": "Show Incoming Transactions"
   },
   "appDesc": {
-    "message": "🔐💰Cryptocurrency wallet for Tezos blockchain as Web Extension for your Browser."
+    "message": "🔐💰Web extension ecosystem wallet for the Mavryk Blockchain."
   },
   "createAccount": {
     "message": "Add Account"
@@ -284,6 +284,14 @@
       },
       "privacyPolicyLink": {
         "content": "$2"
+      }
+    }
+  },
+  "betaAgreementMsg": {
+    "message": "I understand that this web extension is in $beta$ and is only connected to the Testnet. I should not send real funds to this wallet.",
+    "placeholders": {
+      "beta": {
+        "content": "$1"
       }
     }
   },
@@ -1346,6 +1354,9 @@
   },
   "confirmTermsError": {
     "message": "Unable to continue without confirming Terms of Usage"
+  },
+  "confirmBetaError": {
+    "message": "Please confirm that you acknowledge the wallet is in BETA and only for Testnet"
   },
   "acceptTerms": {
     "message": "Accept terms"

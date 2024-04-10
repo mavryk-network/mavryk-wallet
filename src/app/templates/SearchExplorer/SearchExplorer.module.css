@@ -5,11 +5,14 @@
 }
 
 .explorerHideSearch {
+  animation: hideSearch ease-in-out 200ms;
+  transition: all ease-in-out 200ms;
+}
+
+.searchIcon {
   width: 32px;
   border-radius: 8px;
   padding: 4px;
-  animation: hideSearch ease-in-out 200ms;
-  transition: all ease-in-out 200ms;
 }
 
 @keyframes revealSearch {

@@ -64,7 +64,7 @@ export const SearchExplorerFinder: FC<SearchAssetFieldProps> = props => {
 
   return (
     <div className={classNames('w-full', explored && allowAnimation && styles.explorerSearch)}>
-      <SearchAssetField {...props} cleanButtonCb={toggleExplorer} searchIconCb={toggleExplorer} />
+      <SearchAssetField {...props} searchIconCb={toggleExplorer} />
     </div>
   );
 };

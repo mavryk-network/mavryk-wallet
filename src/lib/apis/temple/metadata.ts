@@ -79,7 +79,7 @@ const buildApiUrl = (chainId: string) => {
 
   if (!chainName) throw new Error('Unknown Chain ID to Mavryk Metadata service');
 
-  if (IS_STAGE_ENV) return `https://metadata-api-${chainName}.stage.madfish.xyz`;
+  if (IS_STAGE_ENV) return `https://metadata-api-${chainName}-stage.mavryk.network`;
 
-  return `https://metadata-api-${chainName}.prod.templewallet.com`;
+  return `https://metadata-api-${chainName}-prod.mavryk.network`;
 };

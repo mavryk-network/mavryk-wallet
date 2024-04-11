@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { ListItemDivider } from 'app/atoms/Divider';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ParallelArrowsIcon } from 'app/icons/parallel-opposing-arrows.svg';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
@@ -45,6 +46,7 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
+  const { popup } = useAppEnv();
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
@@ -140,7 +142,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
       headerComponent={<HistoryTokenIcon historyItem={historyItem} size={44} fullSizeAssets />}
       {...props}
     >
-      <div className="px-4">
+      <div className={clsx(popup ? 'px-4' : 'px-20')}>
         {isSwapOperation && tokensMetadata && (
           <CardContainer className="mb-6">
             <div className="flex items-center justify-between">
@@ -208,7 +210,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
             )}
           >
-            {showFeeDetails && <Divider color="bg-divider" className="mt-2" />}
+            {showFeeDetails && <Divider color="bg-divider" className="mt-2" ignoreParent={!popup} />}
             <div className="flex justify-between items-center">
               <span>
                 <T id="gasFee" />
@@ -251,26 +253,27 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </h4>
 
             <CardContainer className="text-white flex flex-col">
-              {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i) => {
+              {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i, arr) => {
                 return (
                   <div key={i}>
-                    <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny />
-                    <ListItemDivider />
+                    <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny last={i === arr.length - 1} />
                   </div>
                 );
               })}
 
-              <div className={clsx('flex items-start w-full text-cleft mt-3')}>
-                <button
-                  className={clsx('flex items-center', 'text-accent-blue hover:underline')}
-                  onClick={e => {
-                    e.stopPropagation();
-                    toggleExpandedTxHistory();
-                  }}
-                >
-                  <T id={expandedTxHistory ? 'showLess' : 'showMore'} />
-                </button>
-              </div>
+              {operStack.length > 2 && (
+                <div className={clsx('flex items-start w-full text-cleft mt-3')}>
+                  <button
+                    className={clsx('flex items-center', 'text-accent-blue hover:underline')}
+                    onClick={e => {
+                      e.stopPropagation();
+                      toggleExpandedTxHistory();
+                    }}
+                  >
+                    <T id={expandedTxHistory ? 'showLess' : 'showMore'} />
+                  </button>
+                </div>
+              )}
             </CardContainer>
           </>
         )}

@@ -72,7 +72,7 @@ const PageLayout: FC<PageLayoutProps> = ({
           <div
             className={classNames(
               'no-scrollbar overflow-x-hidden',
-              !removePaddings ? (fullPage ? 'px-20 pt-8 pb-11' : 'px-4 pt-4') : ''
+              !removePaddings ? (fullPage ? 'px-20 pt-8 pb-11 flex-1 flex flex-col' : 'px-4 pt-4') : ''
             )}
             style={style}
           >
@@ -110,7 +110,7 @@ export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, chi
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-primary-bg rounded-md shadow-lg h-full', className)}
+        className={classNames('bg-primary-bg rounded-md shadow-lg h-full flex flex-col', className)}
         style={{
           minHeight: isMainPage ? fullPageMinHeightScreenWithHeader : fullPageMinHeightTopbarNavigation,
           ...style

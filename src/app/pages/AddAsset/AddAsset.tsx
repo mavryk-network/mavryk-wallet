@@ -271,8 +271,8 @@ const Form = memo(() => {
   return (
     <form
       className={classNames(
-        'w-full mx-auto pb-8 flex flex-col',
-        popup ? 'max-w-sm' : 'max-w-screen-xxs',
+        'w-full mx-auto flex flex-col',
+        popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs flex-1',
         (!bottomSectionVisible || processing) && 'h-full'
       )}
       onSubmit={handleSubmit(onSubmit)}

@@ -64,7 +64,7 @@ const PageLayout: FC<PageLayoutProps> = ({
         </div>
       )}
 
-      <div className={classNames(fullPage && 'pb-20', 'relative')}>
+      <div className={classNames(fullPage && 'pb-16', 'relative')}>
         {isTopbarVisible && <Header />}
         <ContentPaper>
           <Toolbar {...toolbarProps} />
@@ -103,7 +103,7 @@ export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, chi
     <ContentContainer>
       <div
         className={classNames('bg-primary-bg rounded-md shadow-lg h-full', className)}
-        style={{ minHeight: '20rem', ...style }}
+        style={{ minHeight: 'calc(100vh - 230px)', ...style }}
         {...rest}
       >
         {children}

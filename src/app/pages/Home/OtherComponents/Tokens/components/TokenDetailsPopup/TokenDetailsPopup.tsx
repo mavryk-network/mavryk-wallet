@@ -100,7 +100,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
 
   return (
     <section className="h-full no-scrollbar">
-      <div className="px-4 max-h-auto">
+      <div className={clsx('max-h-auto', popup ? 'px-4' : 'px-20')}>
         {/* balances section */}
         <div className="flex flex-col items-center gap-1 mt-2 mb-6">
           <InFiat assetSlug={assetSlug} volume={balance} smallFractionFont={false}>
@@ -123,7 +123,10 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         {/* send swap receive withdraw - section */}
         <div className="text-base-plus text-white mb-2">
           <div
-            className={clsx('flex justify-between mx-auto w-full  pb-4 px-2', popup ? 'max-w-sm' : 'max-w-screen-xxs')}
+            className={clsx(
+              'flex justify-between mx-auto w-full pb-4',
+              popup ? 'max-w-sm px-2' : 'max-w-screen-xxs px-14'
+            )}
           >
             <ActionButton
               label={<T id="receive" />}
@@ -189,7 +192,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         ) : null}
       </div>
-      <div className="text-base-plus text-white w-full px-4 mt-3">
+      <div className={clsx('text-base-plus text-white w-full mt-3', popup ? 'px-4' : 'px-20')}>
         <T id="history" />
       </div>
       <div className="pb-8 h-full">

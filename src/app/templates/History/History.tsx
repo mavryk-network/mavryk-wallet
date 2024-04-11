@@ -223,7 +223,7 @@ export const HistoryComponent: React.FC<Props> = memo(
               <SearchExplorerOpened>
                 <div
                   className={classNames(
-                    'w-full flex justify-end pl-4',
+                    'w-full flex justify-end',
                     popup && 'pr-12px pl-4',
                     styles.searchWrapper,
                     searchWrapperClassname

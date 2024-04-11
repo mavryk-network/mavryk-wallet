@@ -369,8 +369,6 @@ function deriveHistoryItemType(
     }
   }
 
-  console.log(type, 'type from fn');
-
   return type;
 }
 

@@ -24,10 +24,10 @@ const ModalWithTitle: FC<ModalWithTitleProps> = ({
   return (
     <CustomModal {...restProps} className={clsx('w-full max-w-md pb-4 pt-5', popup ? 'px-4' : 'px-6', className)}>
       <>
-        {title ? <h1 className={clsx('mb-4 text-lg font-semibold text-gray-700', titleClassName)}>{title}</h1> : null}
-        {description ? <p className="mb-4 text-sm font-normal text-gray-600">{description}</p> : null}
+        {title ? <h1 className={clsx('mb-4 text-lg font-semibold text-white', titleClassName)}>{title}</h1> : null}
+        {description ? <p className="mb-4 text-sm font-normal text-white">{description}</p> : null}
 
-        <div className="text-gray-600 text-sm">{children}</div>
+        <div className="text-white text-sm">{children}</div>
       </>
     </CustomModal>
   );

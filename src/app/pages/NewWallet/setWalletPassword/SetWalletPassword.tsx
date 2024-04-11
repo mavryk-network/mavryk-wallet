@@ -49,7 +49,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
 
   const hasErrors = Object.keys(errors).length > 0;
 
-  console.log(hasErrors);
   const internalDisabledBtnStatus = disabled || hasErrors || !passwordValue?.length;
   return (
     <form

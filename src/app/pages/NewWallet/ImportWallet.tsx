@@ -44,10 +44,14 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', o
 
   const isImportFromSeedPhrase = tabSlug === 'seed-phrase';
 
-  const memoizedContainerStyle = useMemo(
+  const memoizedContainerStyle: React.CSSProperties = useMemo(
     () => ({
       paddingInline: fullPage ? 80 : 16,
-      paddingTop: fullPage ? 16 : 0
+      paddingTop: fullPage ? 16 : 0,
+      height: 'auto',
+      minHeight: 'calc(100vh - 56px)',
+      display: 'flex',
+      flexDirection: 'column'
     }),
     [fullPage]
   );

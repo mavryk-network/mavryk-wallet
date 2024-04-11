@@ -1,5 +1,12 @@
 .banner {
-  background-image: url('/src/app/misc/mavryk/circles.svg');
   background-repeat: no-repeat;
   background-position: right;
+}
+
+.circlesPopup {
+  background-image: url('/src/app/misc/mavryk/circles.svg');
+}
+
+.circlesFullView {
+  background-image: url('/src/app/misc/mavryk/circles-full-view.svg');
 }

@@ -35,6 +35,7 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => {
     <div
       className={classNames(
         styles.banner,
+        popup ? styles.circlesPopup : styles.circlesFullView,
         'bg-primary-card text-primary-white rounded-xl p-4 flex flex-col gap-y-4 items-start justify-between w-full mx-auto mb-4',
         popup && 'max-w-sm'
       )}

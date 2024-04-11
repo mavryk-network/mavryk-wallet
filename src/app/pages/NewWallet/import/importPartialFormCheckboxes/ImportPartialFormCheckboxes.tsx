@@ -71,7 +71,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
           <T
             id="betaAgreementMsg"
             substitutions={[
-              <span className="text-accent-blue capitalize">
+              <span className="text-accent-blue uppercase">
                 <T id="beta" key="beta" />
               </span>
             ]}

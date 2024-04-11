@@ -96,14 +96,25 @@ export default PageLayout;
 
 type ContentPaparProps = ComponentProps<typeof ContentContainer>;
 
+const fullPageMinHeightScreenWithHeader = 'calc(100vh - 230px)';
+const fullPageMinHeightTopbarNavigation = 'calc(100vh - 168px)';
+
+const routesWithheader = ['/'];
+
 export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, ...rest }) => {
+  const { pathname } = useLocation();
+
+  const isMainPage = useMemo(() => routesWithheader.includes(pathname), [pathname]);
   const appEnv = useAppEnv();
 
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
         className={classNames('bg-primary-bg rounded-md shadow-lg h-full', className)}
-        style={{ minHeight: 'calc(100vh - 230px)', ...style }}
+        style={{
+          minHeight: isMainPage ? fullPageMinHeightScreenWithHeader : fullPageMinHeightTopbarNavigation,
+          ...style
+        }}
         {...rest}
       >
         {children}

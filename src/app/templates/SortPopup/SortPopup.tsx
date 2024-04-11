@@ -73,7 +73,7 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle,
       portalClassName="sort-popup"
     >
       <div className="flex flex-col mt-2">
-        <ul className="flex flex-col px-4">
+        <ul className={classNames('flex flex-col', popup ? 'px-4' : 'px-12')}>
           {items.map(item => (
             <SortListItem key={item.id} item={item} />
           ))}

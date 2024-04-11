@@ -107,7 +107,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
       {value => (
         <form
           className={classNames(
-            'w-full h-auto mx-auto flex flex-col no-scrollbar',
+            'w-full h-auto mx-auto flex flex-col no-scrollbar flex-1',
             fullPage ? 'pt-8 pb-11' : 'pt-4 pb-8'
           )}
           style={{ height: 'calc(100% - 48px)' }}

@@ -77,7 +77,6 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
             ]}
           />
         }
-        containerClassName="flex-1"
       />
 
       <FormCheckbox

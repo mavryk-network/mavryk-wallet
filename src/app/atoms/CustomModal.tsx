@@ -11,7 +11,7 @@ const CustomModal: FC<CustomModalProps> = props => {
   return (
     <Modal
       {...restProps}
-      className={classNames('bg-white rounded z-30 shadow-2xl', className)}
+      className={classNames('bg-primary-card rounded z-30 shadow-2xl', className)}
       appElement={document.getElementById('root')!}
       closeTimeoutMS={200}
       overlayClassName={classNames(

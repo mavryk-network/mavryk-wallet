@@ -80,7 +80,7 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle,
         </ul>
       </div>
       {on !== undefined && (
-        <div className="px-4">
+        <div className={classNames(popup ? 'px-4' : 'px-12')}>
           <SortDivider />
           <div className="flex justify-between items-center">
             <span className="text-sm tracking-normal text-white">

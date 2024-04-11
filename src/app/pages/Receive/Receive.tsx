@@ -49,7 +49,7 @@ const Receive: FC = () => {
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
       <div>
-        <div className={clsx('w-full mx-auto h-full pb-8', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+        <div className={clsx('w-full mx-auto h-full', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-16')}>
           <div className="text-primary-white text-base-plus mb-4">
             <T id="myAddress" />
           </div>
@@ -66,7 +66,7 @@ const Receive: FC = () => {
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="p-6 bg-white rounded-2xl self-center my-7">
+            <div className="p-6 bg-white rounded-2xl self-center my-8">
               <QRCode value={address} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 196 }} />
             </div>
 

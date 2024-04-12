@@ -40,7 +40,12 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   removePaddings?: boolean;
 }
 
-const TEMPORARY_FULL_SCREEN_ALLOWED_URLS = ['/create-wallet', '/import-wallet', '/onboarding'];
+const TEMPORARY_FULL_SCREEN_ALLOWED_URLS = [
+  '/create-wallet',
+  '/import-wallet',
+  '/onboarding',
+  '/import-wallet/keystore-file'
+];
 
 const PageLayout: FC<PageLayoutProps> = ({
   children,

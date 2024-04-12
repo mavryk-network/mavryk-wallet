@@ -35,6 +35,7 @@ import { PageLayoutSelectors } from './PageLayout.selectors';
 
 interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentContainerStyle?: React.CSSProperties;
+  contentPaperStyle?: React.CSSProperties;
   isTopbarVisible?: boolean;
   removePaddings?: boolean;
 }
@@ -42,6 +43,7 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
 const PageLayout: FC<PageLayoutProps> = ({
   children,
   contentContainerStyle,
+  contentPaperStyle,
   isTopbarVisible = true,
   removePaddings = false,
   ...toolbarProps
@@ -66,7 +68,7 @@ const PageLayout: FC<PageLayoutProps> = ({
 
       <div className={classNames(fullPage && 'pb-16', 'relative')}>
         {isTopbarVisible && <Header />}
-        <ContentPaper>
+        <ContentPaper style={contentPaperStyle}>
           <Toolbar {...toolbarProps} />
 
           <div

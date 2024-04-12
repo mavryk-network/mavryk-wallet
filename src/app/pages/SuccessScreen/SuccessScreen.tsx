@@ -1,6 +1,9 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
+
+import clsx from 'clsx';
 
 import CustomPopup, { CustomPopupProps } from 'app/atoms/CustomPopup';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as SuccessIcon } from 'app/icons/m_chevron-down.svg';
 import { BgImageLayout } from 'app/layouts/BgImageLayout/BgImageLayout';
 import PageLayout from 'app/layouts/PageLayout';
@@ -34,8 +37,13 @@ const defaultStateValues: SuccessStateType = {
 };
 
 export const SuccessScreen = () => {
+  const { popup } = useAppEnv();
   const loc = useLocation();
   const state: SuccessStateType = { ...defaultStateValues, ...loc.state };
+
+  const bgSrc = useMemo(() => (popup ? '/misc/success-bg.webp' : '/misc/success-bg-full-view.webp'), [popup]);
+  const memoizedContainerStyle = useMemo(() => ({ padding: 0 }), []);
+  const memoizedContentPaperStyle = useMemo(() => ({ height: 664 }), []);
 
   return (
     <PageLayout
@@ -45,10 +53,11 @@ export const SuccessScreen = () => {
         </>
       }
       isTopbarVisible={false}
-      contentContainerStyle={{ padding: 0 }}
+      contentContainerStyle={memoizedContainerStyle}
+      contentPaperStyle={memoizedContentPaperStyle}
     >
-      <BgImageLayout src="/misc/success-bg.webp" className="flex justify-center items-center">
-        <div className=" text-white w-full px-4 py-8 flex flex-col items-center gap-6">
+      <BgImageLayout src={bgSrc} className="flex justify-center items-center flex-1 h-full">
+        <div className={clsx('text-white w-full py-8 flex flex-col items-center gap-6', popup ? 'px-4' : 'px-20')}>
           {/* icon */}
           <div className="w-11 h-11 rounded-full bg-accent-blue flex items-center justify-center">
             <SuccessIcon className="w-6 h-auto stroke-current" />

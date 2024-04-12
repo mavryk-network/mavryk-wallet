@@ -3,6 +3,7 @@
   display: flex;
   justify-content: space-between;
   margin: auto;
+  width: 100%;
 }
 .circle {
   box-sizing: border-box;

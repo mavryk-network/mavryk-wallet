@@ -4,7 +4,7 @@
 }
 
 .unlockpageBg {
-  background-image: url('/public/misc/unlock-full-screen.jpeg');
+  background-image: url('/public/misc/unlock-full-screen.png');
   width: 100vw;
   height: 100vh;
   background-size: cover;

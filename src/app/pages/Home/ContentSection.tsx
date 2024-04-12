@@ -69,14 +69,14 @@ export const ContentSection: FC<Props> = ({ className }) => {
         Component: HistoryComponent,
         testID: HomeSelectors.activityTab,
         whileMessageI18nKey: 'operationHistoryWhileMessage'
-      },
-      {
-        name: 'RWAs',
-        titleI18nKey: 'rwas',
-        Component: HistoryComponent,
-        testID: HomeSelectors.rwasTab,
-        disabled: true
       }
+      // {
+      //   name: 'RWAs',
+      //   titleI18nKey: 'rwas',
+      //   Component: HistoryComponent,
+      //   testID: HomeSelectors.rwasTab,
+      //   disabled: true
+      // }
     ];
   }, [scrollToTheTabsBar]);
 

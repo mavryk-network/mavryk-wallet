@@ -5,7 +5,6 @@ import clsx from 'clsx';
 
 import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
-import { ListItemDivider } from 'app/atoms/Divider';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ParallelArrowsIcon } from 'app/icons/parallel-opposing-arrows.svg';

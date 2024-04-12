@@ -11,17 +11,18 @@ const PopupSettings: FC<{}> = () => {
   const changingRef = useRef(false);
   const [error, setError] = useState<any>(null);
 
-  const handlePopupModeChange = useCallback(() => {
-    // (checked: boolean) => {
-    if (changingRef.current) return;
-    changingRef.current = true;
-    setError(null);
+  const handlePopupModeChange = useCallback(
+    (checked: boolean) => {
+      if (changingRef.current) return;
+      changingRef.current = true;
+      setError(null);
 
-    setPopupMode(true);
-    // setPopupMode(!checked);
-    changingRef.current = false;
-    window.location.reload();
-  }, [setError]);
+      setPopupMode(!checked);
+      changingRef.current = false;
+      window.location.reload();
+    },
+    [setError]
+  );
 
   return (
     <EnablingSetting

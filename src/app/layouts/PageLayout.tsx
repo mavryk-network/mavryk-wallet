@@ -165,6 +165,8 @@ export const Toolbar: FC<ToolbarProps> = ({
     if (step && setStep && step > 0) {
       setStep(step - 1);
     }
+
+    navigate('/', HistoryAction.Replace);
   };
 
   const inHome = pathname === '/';

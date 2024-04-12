@@ -1,0 +1,12 @@
+.fullpageBg {
+  background: linear-gradient(180deg, rgba(95, 88, 255, 0.25) 0%, rgba(0, 0, 0, 0) 263.1%), #010101;
+  background-color: #010101;
+}
+
+.unlockpageBg {
+  background-image: url('/public/misc/unlock-full-screen.jpeg');
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-color: #010101;
+}

@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import { Name } from 'app/atoms';
 import { Dropdown, DropdownHeader, DropdownOpened } from 'app/compound/CustomDropdown';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
@@ -99,6 +100,7 @@ type DAppActions = {
 const getDAppKey = (entry: DAppEntry) => entry[0];
 
 export const DAppsPopup: FC<DAppsPopupProps> = () => {
+  const { popup } = useAppEnv();
   const { isLoading, activeDAppEntry, getAccName, handleRemoveClick, dAppEntries } = useDappsContext();
 
   if (isLoading)
@@ -109,7 +111,7 @@ export const DAppsPopup: FC<DAppsPopupProps> = () => {
     );
 
   return (
-    <section className="px-4">
+    <section className={classNames(popup ? 'px-4' : 'px-12')}>
       {activeDAppEntry && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">

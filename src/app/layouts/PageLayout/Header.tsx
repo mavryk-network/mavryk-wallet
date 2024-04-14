@@ -67,6 +67,7 @@ const Control: FC = () => {
         isOpen={showDAppsPopup}
         onRequestClose={handlePopupToggle.bind(null, setShowDAppsPopup, false)}
         title={<T id="connectedSites" />}
+        contentPosition={popup ? 'bottom' : 'center'}
         portalClassName="daaps-popup"
       >
         <DAppsPopup opened={showDAppsPopup} setOpened={setShowDAppsPopup} />

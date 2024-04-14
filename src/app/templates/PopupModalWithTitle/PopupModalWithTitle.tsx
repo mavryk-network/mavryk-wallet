@@ -61,7 +61,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
       className={classNames(
         'w-full relative  bg-primary-card',
         contentPosition === 'center' ? 'rounded-2xl-plus' : 'rounded-tl-2xl-plus rounded-tr-2xl-plus',
-        popup ? 'max-w-md' : 'max-w-screen-xs',
+        popup ? 'max-w-md' : contentPosition === 'center' ? 'max-w-screen-xxsPlus' : 'max-w-screen-xs',
         className
       )}
       shouldCloseOnEsc
@@ -90,7 +90,8 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
           <div
             className={classNames(
               leftSidedComponent ? styles.headerContent : 'flex items-center justify-center',
-              'mb-4 px-4'
+              'px-4',
+              popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
             )}
           >
             {leftSidedComponent}

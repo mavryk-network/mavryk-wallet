@@ -37,6 +37,7 @@ export default Header;
 
 const Control: FC = () => {
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   // popup states
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
@@ -76,6 +77,7 @@ const Control: FC = () => {
         onRequestClose={handlePopupToggle.bind(null, setShowNetworkPopup, false)}
         title={<T id="networkSelect" />}
         portalClassName="networks-popup"
+        contentPosition={popup ? 'bottom' : 'center'}
       >
         <NetworkPopup setOpened={setShowNetworkPopup} />
       </PopupModalWithTitle>

@@ -1,6 +1,9 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
+import clsx from 'clsx';
+
 import { RadioButton } from 'app/atoms/RadioButton';
+import { useAppEnv } from 'app/env';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
@@ -26,6 +29,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   const allNetworks = useAllNetworks();
   const currentNetwork = useNetwork();
   const setNetworkId = useSetNetworkId();
+  const { popup } = useAppEnv();
 
   const chainId = useChainId(true)!;
   const { setExplorerId } = useBlockExplorer();
@@ -70,7 +74,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   );
 
   return (
-    <div className="px-4 flex flex-col">
+    <div className={clsx('flex flex-col', popup ? 'px-4' : 'px-12')}>
       <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 380 }}>
         {filteredNetworks.map(network => {
           const { id, rpcBaseURL } = network;

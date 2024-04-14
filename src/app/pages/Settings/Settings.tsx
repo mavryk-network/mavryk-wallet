@@ -1,5 +1,8 @@
 import React, { FC, useMemo, useState } from 'react';
 
+import clsx from 'clsx';
+
+import { useAppEnv } from 'app/env';
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
 import { ReactComponent as ConnectLedgericon } from 'app/icons/connect-clip.svg';
@@ -147,6 +150,7 @@ const TABS: Tab[] = [
 ];
 
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {
+  const { popup } = useAppEnv();
   const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
 
@@ -172,7 +176,7 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
               toolbarRightSidedComponent={toolbarRightSidedComponent}
             />
           ) : (
-            <ul className="flex flex-col pb-8">
+            <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
               {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
                 <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
               ))}

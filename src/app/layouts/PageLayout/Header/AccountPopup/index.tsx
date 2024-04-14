@@ -2,6 +2,7 @@ import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 
 import classNames from 'clsx';
 
+import { useAppEnv } from 'app/env';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField/SearchField';
@@ -21,6 +22,7 @@ type AccountPopupProps = {
 
 const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect = false }) => {
   const allAccounts = useRelevantAccounts();
+  const { popup } = useAppEnv();
   const account = useAccount();
   const setAccountPkh = useSetAccountPkh();
   const { assetName: gasTokenName } = useGasToken();
@@ -67,7 +69,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
   );
 
   return (
-    <div className="my-2">
+    <div className={classNames(popup ? 'my-2' : 'px-12')}>
       {isShowSearch && (
         <SearchField
           value={searchValue}
@@ -115,9 +117,9 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
       </div>
 
       {!onlyAccSelect && (
-        <div className="w-full flex justify-cente px-4">
+        <div className={classNames('w-full flex justify-cente', popup ? 'px-4 mt-4' : 'mt-8')}>
           <ButtonLink {...action}>
-            <ButtonRounded size="big" fill={false} className="w-full mt-4">
+            <ButtonRounded size="big" fill={false} className="w-full">
               <T id="addOrImportAccount" />
             </ButtonRounded>
           </ButtonLink>

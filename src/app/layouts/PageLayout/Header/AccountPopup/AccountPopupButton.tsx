@@ -3,6 +3,7 @@ import React, { FC, useCallback, useState } from 'react';
 import classNames from 'clsx';
 
 import { Button, Identicon, Name } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as AddressIcon } from 'app/icons/adress-with-setting.svg';
 import { ReactComponent as ArrowDownicon } from 'app/icons/chevron-down.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
@@ -40,6 +41,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   onlyAccSelect = false,
   restrictAccountSelect = false
 }) => {
+  const { popup } = useAppEnv();
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
   const handlePopupToggle = useCallback(
@@ -85,6 +87,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
         onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
         title={<T id="selectAccount" />}
         portalClassName="accounts-popup"
+        contentPosition={popup ? 'bottom' : 'center'}
         leftSidedComponent={
           <button id="manageAddressesBtn" onMouseEnter={handleMouseEnter} className="w-6">
             <Link to="/settings/address-book" className="w-6">

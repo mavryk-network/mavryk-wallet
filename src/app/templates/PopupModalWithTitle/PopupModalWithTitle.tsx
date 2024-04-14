@@ -90,7 +90,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
           <div
             className={classNames(
               leftSidedComponent ? styles.headerContent : 'flex items-center justify-center',
-              'px-4',
+              popup ? 'px-4' : contentPosition === 'center' ? 'ml-12' : 'ml-20',
               popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
             )}
           >

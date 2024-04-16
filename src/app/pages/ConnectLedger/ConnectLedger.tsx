@@ -1,11 +1,13 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
 import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
@@ -62,6 +64,7 @@ const ConnectLedger: FC = () => {
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
+  const { popup } = useAppEnv();
 
   const allLedgers = useMemo(() => allAccounts.filter(acc => acc.type === TempleAccountType.Ledger), [allAccounts]);
 
@@ -147,9 +150,12 @@ const ConnectLedger: FC = () => {
   );
 
   return (
-    <div className="relative w-full h-full">
-      <div className="w-full h-full max-w-sm mx-auto flex flex-col">
-        <form className="flex-grow flex flex-col justify-between pb-8" onSubmit={handleSubmit(onSubmit)}>
+    <div className="relative w-full h-full flex-1 flex flex-col">
+      <div className="w-full h-full max-w-sm mx-auto flex-1 flex flex-col">
+        <form
+          className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <div>
             {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
             <div className="text-sm text-secondary-white mb-4">

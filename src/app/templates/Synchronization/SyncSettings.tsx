@@ -1,9 +1,11 @@
 import React, { FC, useCallback, useLayoutEffect, useRef } from 'react';
 
+import clsx from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
 import { QRCode } from 'react-qr-svg';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { useVanishingState } from 'lib/ui/hooks';
@@ -18,6 +20,7 @@ type FormData = {
 
 const SyncSettings: FC = () => {
   const { generateSyncPayload } = useTempleClient();
+  const { popup } = useAppEnv();
 
   const formRef = useRef<HTMLFormElement>(null);
   const [payload, setPayload] = useVanishingState();
@@ -62,7 +65,7 @@ const SyncSettings: FC = () => {
   const isPasswordEntered = passwordValue?.length ?? 0 > 0;
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col flex-1">
       {payload ? (
         <>
           <Alert
@@ -83,7 +86,7 @@ const SyncSettings: FC = () => {
             <QRCode value={payload} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 216 }} />
           </div>
 
-          <div className="pb-8">
+          <div className={clsx(popup && 'pb-8')}>
             <FormSubmitButton
               className="w-full justify-center mt-2"
               onClick={handleQRBttonClick}
@@ -102,7 +105,7 @@ const SyncSettings: FC = () => {
           <form
             ref={formRef}
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col flex-grow justify-between pb-8"
+            className={clsx('flex flex-col flex-grow justify-between', popup && 'pb-8')}
           >
             <FormField
               ref={register({ required: t('required') })}

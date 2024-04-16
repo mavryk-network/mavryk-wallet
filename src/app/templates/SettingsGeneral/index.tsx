@@ -17,7 +17,7 @@ const GeneralSettings: FC = () => {
   const { popup } = useAppEnv();
 
   return (
-    <div className={clsx('w-full  mx-auto pb-8', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+    <div className={clsx('w-full mx-auto', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs')}>
       <FiatCurrencySelect />
 
       <LocaleSelect />

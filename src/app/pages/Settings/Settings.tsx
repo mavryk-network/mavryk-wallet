@@ -168,8 +168,8 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
       removePaddings={!activeTab || activeTab.linkTo === 'about'}
       RightSidedComponent={toolbarRightSidedComponent}
     >
-      <div className="h-full">
-        <div className="h-full">
+      <div className="h-full flex-1 flex flex-col">
+        <div className="h-full flex-1 flex flex-col">
           {activeTab ? (
             <activeTab.Component
               setToolbarRightSidedComponent={setToolbarRightSidedComponent}

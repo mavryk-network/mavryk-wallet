@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { TID, T } from 'lib/i18n';
@@ -31,6 +32,7 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
   const network = useNetwork();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
+  const { popup } = useAppEnv();
 
   const prevAccLengthRef = useRef(allAccounts.length);
   const prevNetworkRef = useRef(network);
@@ -112,9 +114,12 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
     [importOptions, slug]
   );
 
+  const memoizedContentContainerStyle = useMemo(() => (popup ? {} : { paddingBottom: 12 }), [popup]);
+
   return (
     <PageLayout
       isTopbarVisible={false}
+      contentContainerStyle={memoizedContentContainerStyle}
       pageTitle={
         <>
           <span className="capitalize">
@@ -123,7 +128,7 @@ const ImportAccount: FC<ImportAccountProps> = ({ tabSlug }) => {
         </>
       }
     >
-      <section className="h-full flex flex-col">
+      <section className="h-full flex flex-col flex-1">
         <div className="pb-4 border-b border-divider mb-4">
           <label className="flex flex-col mb-4 leading-tight">
             <span className="text-base-plus text-white">

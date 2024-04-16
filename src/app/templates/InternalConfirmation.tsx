@@ -253,8 +253,9 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
       className={classNames(
         'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar flex-1',
         !popup && 'justify-center px-2',
-        popup ? 'max-w-sm' : 'max-w-screen-xs flex-1'
+        popup ? 'max-w-sm' : 'w-screen-xs flex-1'
       )}
+      style={{ maxHeight: popup ? 'auto' : '664px' }}
     >
       <ContentPaper>
         <Toolbar pageTitle={<T id="confirmOperation" />} />
@@ -264,7 +265,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
             'flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar',
             popup ? 'px-4 pt-4' : 'pt-8 px-20 flex-1'
           )}
-          style={{ height: '34rem' }}
+          style={{ height: '34rem', maxHeight: popup ? 'auto' : '552px' }}
         >
           <div>
             {error ? (
@@ -371,7 +372,14 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
           <div className="flex-1" />
 
-          <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch py-4">
+          <div
+            className={classNames(
+              'sticky bottom-0 bg-primary-bg shadow-md flex items-stretch py-4',
+              popup && ' w-full mx-auto',
+              !popup && 'px-20 border-t border-divider'
+            )}
+            style={{ transform: !popup ? 'translateX(-80px)' : 'none', width: popup ? '100%' : '600px' }}
+          >
             <div className="w-1/2 pr-2">
               <ButtonRounded
                 type="button"

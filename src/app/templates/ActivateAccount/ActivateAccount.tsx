@@ -1,8 +1,10 @@
 import React, { memo, KeyboardEventHandler, ReactNode, useCallback, useMemo } from 'react';
 
+import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useTezos, useAccount, activateAccount } from 'lib/temple/front';
@@ -20,6 +22,7 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 const ActivateAccount = memo(() => {
   const tezos = useTezos();
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   const [success, setSuccess] = useSafeState<ReactNode>(null);
 
@@ -71,7 +74,7 @@ const ActivateAccount = memo(() => {
   );
 
   return (
-    <form className="w-full h-full max-w-sm mx-auto flex flex-col pb-8" onSubmit={submit}>
+    <form className={clsx('w-full h-full mx-auto flex flex-col flex-1', popup && 'pb-8  max-w-sm')} onSubmit={submit}>
       <p className="text-sm text-secondary-white mb-4">
         <T id="activateAccountParagraph" />
       </p>

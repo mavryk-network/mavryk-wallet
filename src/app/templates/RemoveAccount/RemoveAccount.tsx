@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useTempleClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
@@ -23,6 +24,7 @@ const RemoveAccount: FC = () => {
   const { removeAccount } = useTempleClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   const prevAccLengthRef = useRef(allAccounts.length);
   useEffect(() => {
@@ -56,7 +58,7 @@ const RemoveAccount: FC = () => {
   );
 
   return (
-    <div className="w-full h-full max-w-sm mx-auto flex flex-col pb-8">
+    <div className={clsx('w-full h-full mx-auto flex flex-col flex-1', popup && 'pb-8  max-w-sm')}>
       <p className="text-sm text-secondary-white mb-4">
         <T id="removeAccountParagraph" />
       </p>

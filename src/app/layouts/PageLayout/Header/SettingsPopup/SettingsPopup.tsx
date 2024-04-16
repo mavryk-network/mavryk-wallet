@@ -105,14 +105,8 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         <ListItemWithNavigate {...item} />
       ))}
       {/* Popup modal for account details list item */}
-      <PopupModalWithTitle
-        isOpen={showAccountsPopup}
-        onRequestClose={toggleAccountPopup}
-        title="selectAccount"
-        portalClassName="accounts-popup"
-      >
-        <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
-      </PopupModalWithTitle>
+
+      <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
     </div>
   );
 };
@@ -213,22 +207,12 @@ export const SettingsDropdown: FC = () => {
         }}
       />
 
-      <PopupModalWithTitle
-        isOpen={showAccountsPopup}
-        onRequestClose={toggleAccountPopup}
-        title="selectAccount"
-        portalClassName="accounts-popup"
-      >
-        <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
-      </PopupModalWithTitle>
+      <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
     </>
   );
 };
 
-const renderOptionContent = (
-  { Icon, i18nKey, linkTo, fillIcon, hasExternalLink }: ListItemWithNavigateprops,
-  last: boolean
-) => {
+const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListItemWithNavigateprops, last: boolean) => {
   const itemProps = {
     className: clsx(
       'relative p-4 hover:bg-gray-710 text-base-plus text-white text-left w-full',

@@ -232,7 +232,7 @@ export const Toolbar: FC<ToolbarProps> = ({
         // with the top of the browser window
         // (thus never triggering the intersection observer).
         top: -1,
-        minHeight: '2.75rem'
+        minHeight: fullPage ? '3.5rem' : '2.75rem'
       }}
     >
       <div className="flex-1">

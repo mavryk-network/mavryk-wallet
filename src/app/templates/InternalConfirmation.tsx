@@ -251,16 +251,19 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   return (
     <div
       className={classNames(
-        'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar',
+        'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar flex-1',
         !popup && 'justify-center px-2',
-        popup ? 'max-w-sm' : 'max-w-screen-xxs'
+        popup ? 'max-w-sm' : 'max-w-screen-xs flex-1'
       )}
     >
       <ContentPaper>
         <Toolbar pageTitle={<T id="confirmOperation" />} />
 
         <div
-          className={classNames('flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar px-4 pt-4')}
+          className={classNames(
+            'flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar',
+            popup ? 'px-4 pt-4' : 'pt-8 px-20 flex-1'
+          )}
           style={{ height: '34rem' }}
         >
           <div>

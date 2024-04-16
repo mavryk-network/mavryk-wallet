@@ -139,8 +139,8 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
     >
       <div
         className={clsx(
-          'w-full mx-auto h-full flex flex-col justify-start pb-8',
-          popup ? 'max-w-sm' : 'max-w-screen-xxs'
+          'w-full mx-auto h-full flex flex-col justify-start flex-1',
+          popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs'
         )}
       >
         <div className="flex flex-col gap-1 mb-4">
@@ -163,7 +163,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
             onFocus={handleEditFieldFocus}
           />
 
-          <ButtonRounded size="big" className="w-full capitalize" testID={EditableTitleSelectors.saveButton}>
+          <ButtonRounded size="big" className="w-full capitalize mt-auto" testID={EditableTitleSelectors.saveButton}>
             <T id="save" />
           </ButtonRounded>
         </form>

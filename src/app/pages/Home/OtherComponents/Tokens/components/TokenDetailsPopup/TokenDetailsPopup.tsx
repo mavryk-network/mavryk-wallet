@@ -140,7 +140,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               Icon={BuyIcon}
               to={network.type === 'dcp' ? 'https://buy.chainbits.com' : '/buy'}
               isAnchor={network.type === 'dcp'}
-              disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
+              // disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
+              disabled
               testID={HomeSelectors.buyButton}
             />
             <ActionButton
@@ -158,7 +159,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               label={<T id="withdraw" />}
               Icon={WithdrawIcon}
               to="/withdraw"
-              disabled={!canSend || network.type !== 'main'}
+              // disabled={!canSend || network.type !== 'main'}
+              disabled
               testID={HomeSelectors.withdrawButton}
             />
             <ActionButton

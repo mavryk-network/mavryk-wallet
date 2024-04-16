@@ -16,7 +16,7 @@ const Send: FC<SendProps> = ({ assetSlug }) => {
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('send')}</>}>
-      <div className={clsx('w-full  mx-auto min-h-full flex flex-col', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+      <div className={clsx('w-full flex-1 mx-auto min-h-full flex flex-col', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
         <SendForm assetSlug={assetSlug} />
       </div>
     </PageLayout>

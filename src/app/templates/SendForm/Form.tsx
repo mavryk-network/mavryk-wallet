@@ -19,6 +19,7 @@ import {
 } from '@mavrykdynamics/taquito';
 import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
 import BigNumber from 'bignumber.js';
+import clsx from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
 
 import { FormSubmitButton, NoSpaceField } from 'app/atoms';
@@ -93,6 +94,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const acc = useAccount();
   const tezos = useTezos();
   const domainsClient = useTezosDomainsClient();
+  const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('SendForm');
 
@@ -432,7 +434,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 
   return (
-    <form className="min-h-96 pb-8 flex flex-col flex-grow" onSubmit={handleSubmit(onSubmit)}>
+    <form className={clsx('min-h-96 flex flex-col flex-grow', popup && 'pb-8')} onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="to"
         as={

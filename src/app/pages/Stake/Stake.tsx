@@ -1,5 +1,8 @@
 import React, { FC, useCallback, useState } from 'react';
 
+import clsx from 'clsx';
+
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
@@ -12,6 +15,7 @@ export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
+  const { fullPage } = useAppEnv();
 
   return (
     <PageLayout
@@ -20,7 +24,7 @@ export const Stake: FC = () => {
       removePaddings
       RightSidedComponent={toolbarRightSidedComponent}
     >
-      <div className="h-full pb-8">
+      <div className={clsx('h-full pb-8 flex-1 flex flex-col', fullPage ? 'pb-11' : 'pb-8')}>
         {showStakeScreen ? (
           <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
         ) : (
@@ -71,13 +75,14 @@ type UnfamiliarWithDelegationScreenProps = {
 };
 
 const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({ setShowStakeScreen }) => {
+  const { popup } = useAppEnv();
   const handleBtnClick = useCallback(() => {
     // skip delegate onboarding screen
     setShowStakeScreen(false);
   }, [setShowStakeScreen]);
 
   return (
-    <div className="px-4 pt-4">
+    <div className={clsx(popup ? 'px-4 pt-4' : 'px-20 pt-8')}>
       <div className="text-base text-white text-center">
         <T id="delegationPointsHead1" substitutions={<span className="text-accent-blue">~5.6%</span>} />
       </div>
@@ -92,7 +97,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
         </div>
         <FooterSocials />
       </section>
-      <ButtonRounded onClick={handleBtnClick} size="big" className="mt-40px w-full" fill>
+      <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')} fill>
         <T id="continue" />
       </ButtonRounded>
     </div>

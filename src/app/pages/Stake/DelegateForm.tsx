@@ -67,6 +67,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { isDcpNetwork } = useGasToken();
+  const { popup } = useAppEnv();
 
   const { pathname } = useLocation();
 
@@ -330,7 +331,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
 
   return (
-    <div className={classNames(!restFormDisplayed && 'pt-4', 'h-full')}>
+    <div className={classNames(!restFormDisplayed && popup ? 'pt-4' : 'pt-8', 'h-full')}>
       {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
@@ -352,7 +353,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
           style={{
             resize: 'none'
           }}
-          containerClassName={classNames('px-4 mb-4', toFilled && 'hidden')}
+          containerClassName={classNames('mb-4', popup ? 'px-4' : 'px-20', toFilled && 'hidden')}
           testID={DelegateFormSelectors.bakerInput}
         />
 
@@ -428,6 +429,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   restFormDisplayed,
   toValue
 }) => {
+  const { popup } = useAppEnv();
   const testGroupName = useUserTestingGroupNameSelector();
   const assetSymbol = 'ꜩ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
@@ -456,11 +458,11 @@ const BakerForm: React.FC<BakerFormProps> = ({
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col" style={{ marginTop: 2 }}>
       <BakerBannerComponent baker={baker} tzError={tzError} />
-      <div className="mx-4 px-3 py-2 bg-primary-card rounded-lg mb-6">
+      <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup ? 'mx-4' : 'mx-20')}>
         <HashChip hash={toValue} type="link" small trim={false} />
       </div>
 
-      <div className={classNames('h-full px-4 flex flex-col flex-grow')}>
+      <div className={classNames('h-full flex flex-col flex-grow', popup ? 'px-4' : 'px-20')}>
         <div className={classNames(!Boolean(tzError) && 'flex-grow')}>
           <AdditionalFeeInput
             name="fee"

@@ -5,6 +5,7 @@ import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { getAccountBadgeTitle } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
@@ -28,6 +29,7 @@ type RevealSecretProps = {
 const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const { revealPrivateKey, revealMnemonic } = useTempleClient();
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
@@ -184,7 +186,11 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     if (secret) return <SecretField value={secret} revealType={reveal} />;
 
     return (
-      <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col justify-between pb-8">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit(onSubmit)}
+        className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
+      >
         <FormField
           ref={register({ required: t('required') })}
           label={t('password')}
@@ -222,7 +228,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   ]);
 
   return (
-    <div className="w-full h-full max-w-sm mx-auto flex flex-col">
+    <div className={clsx('w-full h-full  mx-auto flex flex-col flex-1', popup && 'max-w-sm')}>
       {texts.accountBanner}
 
       {texts.derivationPathBanner}

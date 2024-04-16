@@ -1,9 +1,10 @@
 import React, { ComponentProps, FC, useCallback, useMemo, useRef, useState } from 'react';
 
-import classNames from 'clsx';
+import clsx from 'clsx';
 
 import { Name, Divider } from 'app/atoms';
 import { Switcher } from 'app/atoms/Switcher';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
@@ -13,8 +14,6 @@ import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-
-// import { DAppSettingsSelectors } from './DAppSettings.selectors';
 
 type DAppEntry = [string, TempleDAppSession];
 type DAppActions = {
@@ -26,6 +25,7 @@ const getDAppKey = (entry: DAppEntry) => entry[0];
 const DAppSettings: FC = () => {
   const { getAllDAppSessions, removeDAppSession, removeAllDAppSessions } = useTempleClient();
   const confirm = useConfirm();
+  const { popup } = useAppEnv();
 
   const { data, mutate } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
     suspense: true,
@@ -87,7 +87,7 @@ const DAppSettings: FC = () => {
   }, [confirm, dAppEntries, mutate, removeAllDAppSessions]);
 
   return (
-    <div className="w-full h-full max-w-sm mx-auto pb-8">
+    <div className={clsx('w-full h-full max-w-sm mx-auto', popup && 'pb-8')}>
       <p className="text-sm text-secondary-white mb-4">
         <T id="dAppsCheckmarkPrompt" />
       </p>
@@ -105,7 +105,7 @@ const DAppSettings: FC = () => {
         <T id="authorizedDApps" />
       </div>
       {dAppEntries.length > 0 && (
-        <div className="flex-grow flex flex-col pb-8">
+        <div className={clsx('flex-grow flex flex-col', popup && 'pb-8')}>
           <div style={{ height: 290 }} className="no-scrollbar mb-6">
             <CustomSelect
               actions={{ remove: handleRemoveClick }}
@@ -170,7 +170,7 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
             href={origin}
             target="_blank"
             rel="noopener noreferrer"
-            className={classNames('text-blue-200 hover:underline', className)}
+            className={clsx('text-blue-200 hover:underline', className)}
           >
             <Name {...rest} />
           </a>
@@ -205,7 +205,7 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
               substitutions={[
                 <Component
                   key={key}
-                  className={classNames('font-normal text-sm inline-flex', valueClassName)}
+                  className={clsx('font-normal text-sm inline-flex', valueClassName)}
                   style={{ maxWidth: '10rem' }}
                 >
                   {value}
@@ -217,7 +217,7 @@ const DAppDescription: FC<OptionRenderProps<DAppEntry, string, DAppActions>> = p
       </div>
 
       <button
-        className={classNames('flex-none p-2', 'text-white hover:text-gray-600', 'transition ease-in-out duration-200')}
+        className={clsx('flex-none p-2', 'text-white hover:text-gray-600', 'transition ease-in-out duration-200')}
         onClick={handleRemoveClick}
       >
         <CloseIcon className="w-auto h-5 stroke-current stroke-2" title={t('delete')} />

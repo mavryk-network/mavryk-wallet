@@ -1,7 +1,10 @@
 import React, { FC, useMemo } from 'react';
 
+import clsx from 'clsx';
+
 import { Alert } from 'app/atoms/Alert/Alert';
 import { ReadOnlySecretField } from 'app/atoms/ReadOnlySecretField';
+import { useAppEnv } from 'app/env';
 import { ButtonNavigate } from 'app/molecules/ButtonNavigate';
 import { TID, T } from 'lib/i18n';
 
@@ -19,6 +22,8 @@ interface Texts {
 }
 
 export const SecretField: FC<Props> = ({ revealType, value }) => {
+  const { popup } = useAppEnv();
+
   const texts = useMemo<Texts>(() => {
     switch (revealType) {
       case 'private-key':
@@ -57,7 +62,7 @@ export const SecretField: FC<Props> = ({ revealType, value }) => {
         />
       </div>
 
-      <div className="pb-8">
+      <div className={clsx(popup && 'pb-8')}>
         <ButtonNavigate link="/" i18nKey="goToMain" />
       </div>
     </>

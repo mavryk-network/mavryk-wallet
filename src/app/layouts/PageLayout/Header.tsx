@@ -87,13 +87,15 @@ const Control: FC = () => {
         <NetworkPopup setOpened={setShowNetworkPopup} />
       </PopupModalWithTitle>
 
-      <PopupModalWithTitle
-        isOpen={showSettingsPopup}
-        onRequestClose={handlePopupToggle.bind(null, setShowSettingsPopup, false)}
-        portalClassName="settings-popup"
-      >
-        <SettingsPopup closePopup={handlePopupToggle.bind(null, setShowSettingsPopup, false)} />
-      </PopupModalWithTitle>
+      {popup && (
+        <PopupModalWithTitle
+          isOpen={showSettingsPopup}
+          onRequestClose={handlePopupToggle.bind(null, setShowSettingsPopup, false)}
+          portalClassName="settings-popup"
+        >
+          <SettingsPopup closePopup={handlePopupToggle.bind(null, setShowSettingsPopup, false)} />
+        </PopupModalWithTitle>
+      )}
     </DappsContext>
   );
 };

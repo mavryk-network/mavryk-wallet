@@ -2,6 +2,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { Anchor } from 'app/atoms';
 import { ListItemDivider } from 'app/atoms/Divider';
 import { openInFullPage, useAppEnv } from 'app/env';
 import { ReactComponent as BlocksSvgIcon } from 'app/icons/blocks.svg';
@@ -16,6 +17,7 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 import { translateYModifiers } from 'lib/ui/general-modifiers';
+import { Link } from 'lib/woozie';
 
 import { AccountDetailsPopup } from './components/AccountDetails';
 import { SettingButton } from './SettingButton';
@@ -192,34 +194,62 @@ export const SettingsDropdown: FC = () => {
   );
 
   return (
-    <DropdownSelect
-      dropdownWrapperClassName={clsx('border border-divider bg-primary-card rounded-2xl-plus w-auto')}
-      optionsListClassName="bg-primary-card w-auto py-2"
-      dropdownButtonClassName="bg-transparent gap-0 w-auto"
-      fontContentWrapperClassname="border-none bg-transparent"
-      DropdownFaceContent={<SettingButton onClick={() => console.log('clicked')} />}
-      showIcon={false}
-      poperModifiers={translateYModifiers}
-      poperPlacement="bottom-end"
-      optionsProps={{
-        options: settingsListData,
-        getKey: option => option.i18nKey,
-        noItemsText: 'No Items',
-        renderOptionContent: option => renderOptionContent(option, option.i18nKey === 'logout'),
-        onOptionChange: () => {}
-      }}
-    />
+    <>
+      <DropdownSelect
+        dropdownWrapperClassName={clsx('border border-divider bg-primary-card rounded-2xl-plus w-auto')}
+        optionsListClassName="bg-primary-card w-auto py-2"
+        dropdownButtonClassName="bg-transparent gap-0 w-auto"
+        fontContentWrapperClassname="border-none bg-transparent"
+        DropdownFaceContent={<SettingButton onClick={() => console.log('clicked')} />}
+        showIcon={false}
+        poperModifiers={translateYModifiers}
+        poperPlacement="bottom-end"
+        optionsProps={{
+          options: settingsListData,
+          getKey: option => option.i18nKey,
+          noItemsText: 'No Items',
+          renderOptionContent: option => renderOptionContent(option, option.i18nKey === 'logout'),
+          onOptionChange: option => option.onClick?.()
+        }}
+      />
+
+      <PopupModalWithTitle
+        isOpen={showAccountsPopup}
+        onRequestClose={toggleAccountPopup}
+        title="selectAccount"
+        portalClassName="accounts-popup"
+      >
+        <AccountDetailsPopup showAccountsPopup={showAccountsPopup} toggleAccountPopup={toggleAccountPopup} />
+      </PopupModalWithTitle>
+    </>
   );
 };
 
-const renderOptionContent = (option: ListItemWithNavigateprops, last: boolean) => {
-  return (
-    <div
-      onClick={option.onClick}
-      className={clsx('relative p-4 hover:bg-gray-710 text-base-plus text-white text-left', 'bg-primary-card')}
-    >
-      <T id={option.i18nKey} />
-      {!last && <ListItemDivider />}
-    </div>
-  );
+const renderOptionContent = (
+  { Icon, i18nKey, linkTo, fillIcon, hasExternalLink }: ListItemWithNavigateprops,
+  last: boolean
+) => {
+  const itemProps = {
+    className: clsx(
+      'relative p-4 hover:bg-gray-710 text-base-plus text-white text-left w-full',
+      'bg-primary-card flex'
+    ),
+    children: (
+      <div className="w-full">
+        <div className="flex items-center w-full">
+          {Icon && <Icon className={clsx('w-6 h-6 mr-2', 'fill-white')} />}
+          <span className="text-base-plus text-white display-block">
+            <T id={i18nKey} />
+          </span>
+        </div>
+        {!last && <ListItemDivider />}
+      </div>
+    )
+  };
+
+  if (hasExternalLink && linkTo) {
+    return <Anchor href={linkTo} {...itemProps} />;
+  }
+
+  return linkTo ? <Link to={linkTo} {...itemProps} /> : <div {...itemProps} />;
 };

@@ -51,7 +51,8 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', o
       height: 'auto',
       minHeight: fullPage ? 'auto' : 'calc(100vh - 56px)',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      flex: 'auto'
     }),
     [fullPage]
   );

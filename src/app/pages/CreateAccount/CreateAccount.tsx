@@ -97,11 +97,11 @@ const CreateAccount: FC = () => {
     >
       <div
         className={clsx(
-          'w-full mx-auto h-full flex flex-col justify-start pb-8',
-          popup ? 'max-w-sm' : 'max-w-screen-xxs'
+          'w-full mx-auto h-full flex flex-col flex-1 justify-start',
+          popup ? 'max-w-sm  pb-8' : 'max-w-screen-xxs'
         )}
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full justify-between">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 h-full justify-between">
           <FormField
             ref={register({
               pattern: {

@@ -1,15 +1,16 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { Divider } from 'app/atoms';
 import { Anchor } from 'app/atoms/Anchor';
 import { LogoSecondary } from 'app/atoms/LogoSecondary';
+import { useAppEnv } from 'app/env';
 import { ListItemWithNavigate } from 'app/molecules/ListItemWithNavigate';
 import { T } from 'lib/i18n';
 
 import { FooterSocials } from '../Socials/FooterSocials';
 import { LINKS } from '../Socials/socials.consts';
-import { useAppEnv } from 'app/env';
-import clsx from 'clsx';
 
 const About: FC = () => {
   const { popup } = useAppEnv();

@@ -13,7 +13,7 @@ import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
-import { SettingButton, SettingsPopup } from './Header/SettingsPopup';
+import { SettingButton, SettingsDropdown, SettingsPopup } from './Header/SettingsPopup';
 import styles from './Header.module.css';
 
 const Header: FC = () => {
@@ -57,7 +57,11 @@ const Control: FC = () => {
         <div className="flex item gap-2 items-center">
           <DAapsDropdownButton onClick={handlePopupToggle.bind(null, setShowDAppsPopup, true)} />
           <NetworkButton onClick={handlePopupToggle.bind(null, setShowNetworkPopup, true)} />
-          <SettingButton onClick={handlePopupToggle.bind(null, setShowSettingsPopup, true)} />
+          {popup ? (
+            <SettingButton onClick={handlePopupToggle.bind(null, setShowSettingsPopup, true)} />
+          ) : (
+            <SettingsDropdown />
+          )}
         </div>
       </div>
 

@@ -1,7 +1,9 @@
 import React, { ChangeEventHandler, ReactNode, FC, Dispatch, SetStateAction } from 'react';
 
+import { Modifier } from '@popperjs/core';
 import { isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
+import { Placement } from 'tippy.js';
 
 import AssetField from 'app/atoms/AssetField';
 import DropdownWrapper from 'app/atoms/DropdownWrapper';
@@ -24,6 +26,9 @@ interface Props<T> {
   searchProps?: SelectSearchProps;
   optionsProps: SelectOptionsPropsBase<T>;
   extraHeight?: number;
+  showIcon?: boolean;
+  poperPlacement?: Placement;
+  poperModifiers?: Partial<Modifier<any, any>>[] | undefined;
   testIds?: {
     dropdownTestId?: string;
   };
@@ -33,7 +38,10 @@ export const DropdownSelect = <T extends unknown>({
   Input,
   searchProps,
   optionsProps,
+  showIcon = true,
   extraHeight = 0,
+  poperPlacement = 'bottom',
+  poperModifiers = sameWidthModifiers,
   testIds,
   DropdownFaceContent,
   optionsListClassName,
@@ -52,9 +60,9 @@ export const DropdownSelect = <T extends unknown>({
 
   return (
     <Popper
-      placement="bottom"
+      placement={poperPlacement}
       strategy="fixed"
-      modifiers={sameWidthModifiers}
+      modifiers={poperModifiers}
       fallbackPlacementsEnabled={false}
       popup={({ opened, setOpened }) => (
         <SelectOptions
@@ -91,7 +99,7 @@ export const DropdownSelect = <T extends unknown>({
                   }}
                 >
                   {DropdownFaceContent}
-                  <ChevronDownIcon className="text-white stroke-current stroke-2 h-4 w-4" />
+                  {showIcon && <ChevronDownIcon className="text-white stroke-current stroke-2 h-4 w-4" />}
                 </button>
                 {Input}
               </div>

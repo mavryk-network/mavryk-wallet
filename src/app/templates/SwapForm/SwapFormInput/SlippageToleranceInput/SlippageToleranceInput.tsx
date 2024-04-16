@@ -38,19 +38,6 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
     [onChange]
   );
 
-  // const assetFieldActive = !value || !SLIPPAGE_PRESETS.includes(value);
-
-  // const borderClassName = useMemo(() => {
-  //   switch (true) {
-  //     case error:
-  //       return 'border-red-600';
-  //     case assetFieldActive:
-  //       return 'border-blue-600';
-  //     default:
-  //       return 'border-gray-300';
-  //   }
-  // }, [assetFieldActive, error]);
-
   useEffect(() => {
     const contentCopyElement = contentCopyRef.current;
     if (contentCopyElement) {

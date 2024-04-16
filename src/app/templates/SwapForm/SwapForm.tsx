@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { Alert, Divider, FormSubmitButton } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { useBlockLevel } from 'app/hooks/use-block-level.hook';
 import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { useSwap } from 'app/hooks/use-swap';
@@ -74,6 +75,7 @@ export const SwapForm: FC = () => {
   const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
   const getTokenMetadata = useGetTokenMetadata();
   const account = useAccount();
+  const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('SwapForm');
 
@@ -471,7 +473,7 @@ export const SwapForm: FC = () => {
   const routingFeeIsTakenFromOutput = atomsInputValue.lt(ATOMIC_INPUT_THRESHOLD_FOR_FEE_FROM_INPUT) ?? false;
 
   return (
-    <form className="mb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className={classNames(popup && 'mb-8')} onSubmit={handleSubmit(onSubmit)}>
       {isAlertVisible && (
         <Alert
           closable
@@ -596,7 +598,7 @@ export const SwapForm: FC = () => {
 
       {error && (
         <Alert
-          className="mb-6"
+          className="my-6"
           type="error"
           title={t('error')}
           description={error.message}
@@ -605,10 +607,10 @@ export const SwapForm: FC = () => {
         />
       )}
 
-      <Divider className="my-6" color="bg-divider" />
+      <Divider ignoreParent={!popup} className={classNames('my-6')} color="bg-divider" />
 
       <SwapRoute
-        className="mb-8"
+        className={classNames(popup && 'mb-8')}
         isLbInput={isDefined(inputValue.assetSlug) && inputValue.assetSlug === KNOWN_TOKENS_SLUGS.SIRS}
         isLbOutput={isDefined(outputValue.assetSlug) && outputValue.assetSlug === KNOWN_TOKENS_SLUGS.SIRS}
         routingFeeIsTakenFromOutput={routingFeeIsTakenFromOutput}

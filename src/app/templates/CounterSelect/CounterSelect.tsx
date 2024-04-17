@@ -73,10 +73,11 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
   return (
     <section
       className={clsx(
-        'p-2 flex items-center gap-3 bg-primary-card rounded-md max-h-8',
+        'p-2 flex items-center gap-2 bg-primary-card rounded-md max-h-8',
         'transition ease-in-out duration-200 border border-transparent',
         opened && 'border border-accent-blue'
       )}
+      style={{ minWidth: 141 }}
     >
       <FormCheckbox
         checked={count > 0}
@@ -87,7 +88,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
         overrideClassNames="w-4 h-4 rounded"
         shouldFocus={false}
       />
-      <div className="flex items-center gap-3 cursor-pointer" onClick={toggleOpened}>
+      <div className="flex items-center gap-2 cursor-pointer" onClick={toggleOpened}>
         <p className="text-white text-sm capitalize">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(

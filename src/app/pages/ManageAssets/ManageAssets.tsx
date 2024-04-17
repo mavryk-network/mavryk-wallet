@@ -260,7 +260,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
             </button>
           </div>
         </div>
-        <Divider ignoreParent color="bg-divider" className="mt-4" />
+        <Divider ignoreParent color="bg-divider" className="mt-3 mb-2" />
       </div>
 
       {sortedAssets.length > 0 ? (

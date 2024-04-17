@@ -150,6 +150,8 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   );
 });
 
+const buttonStyle = { maxHeight: 27 };
+
 const buildEmptySection = (isSyncing: boolean) =>
   isSyncing ? (
     <SyncSpinner className="pt-4" />
@@ -158,7 +160,7 @@ const buildEmptySection = (isSyncing: boolean) =>
       <p className={'text-white text-base-plus text-center'}>
         <T id="zeroNFTText" />
       </p>
-      <ButtonRounded type="button" size="small" fill>
+      <ButtonRounded type="button" size="small" fill style={buttonStyle}>
         <T id="getNFTs" />
       </ButtonRounded>
     </div>

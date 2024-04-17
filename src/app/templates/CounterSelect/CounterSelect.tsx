@@ -73,7 +73,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
   return (
     <section
       className={clsx(
-        'p-2 flex items-center gap-3 bg-primary-card rounded-md',
+        'p-2 flex items-center gap-3 bg-primary-card rounded-md max-h-8',
         'transition ease-in-out duration-200 border border-transparent',
         opened && 'border border-accent-blue'
       )}

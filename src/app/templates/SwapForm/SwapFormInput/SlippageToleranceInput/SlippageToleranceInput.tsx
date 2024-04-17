@@ -68,7 +68,7 @@ export const SlippageToleranceInput = forwardRef<HTMLInputElement, Props>(({ nam
             className={classNames('border-none bg-primary-bg -mb-2 text-right')}
             containerClassName="relative"
             style={{
-              padding: '0.125rem 1.175rem 0.125rem 0.25rem',
+              padding: '0.188rem 1.175rem 0.188rem 0.25rem',
               minWidth: 'unset'
             }}
             name={name}

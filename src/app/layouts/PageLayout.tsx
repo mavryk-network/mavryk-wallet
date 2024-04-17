@@ -57,7 +57,7 @@ const PageLayout: FC<PageLayoutProps> = ({
   );
 
   return (
-    <div className={classNames(fullPage && 'min-h-screen')}>
+    <div className={classNames(fullPage && 'min-h-screen', fullPage && styles.fullpageBg)}>
       <DocBg bgClassName={classNames(fullPage ? styles.fullpageBg : 'bg-primary-bg')} />
 
       {fullPage && (

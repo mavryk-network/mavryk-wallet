@@ -138,7 +138,7 @@ export const AddNetworkScreen: FC = () => {
       contentContainerStyle={{ padding: 0 }}
     >
       {' '}
-      <form onSubmit={handleSubmit(onNetworkFormSubmit)} className="h-full px-4 flex flex-col pt-4">
+      <form onSubmit={handleSubmit(onNetworkFormSubmit)} className="h-full px-4 flex flex-col pt-4 flex-1">
         <FormField
           ref={register({ required: t('required'), maxLength: 35 })}
           label={t('name')}

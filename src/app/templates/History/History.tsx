@@ -254,7 +254,11 @@ export const HistoryComponent: React.FC<Props> = memo(
 
                   <SortPopup>
                     <SortButton className={classNames(loading && 'opacity-50 pointer-events-none')} />
-                    <SortPopupContent items={memoizedSortAssetsOptions} title={<T id="filterBy" />} />
+                    <SortPopupContent
+                      items={memoizedSortAssetsOptions}
+                      title={<T id="filterBy" />}
+                      alternativeLogic={!popup}
+                    />
                   </SortPopup>
 
                   {showRestOfSearchSectionOptions && <ManageAssetsButton />}

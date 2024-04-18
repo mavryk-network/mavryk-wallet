@@ -121,7 +121,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
                 <SortPopup>
                   <SortButton />
-                  <SortPopupContent items={memoizedSortAssetsOptions} />
+                  <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
                 </SortPopup>
 
                 <ManageAssetsButton assetSlug={AssetTypesEnum.Collectibles} />

@@ -199,6 +199,7 @@ export const TokensTab: FC = () => {
                     items={memoizedSortAssetsOptions}
                     on={isZeroBalancesHidden}
                     toggle={toggleHideZeroBalances}
+                    alternativeLogic={!popup}
                   />
                 </SortPopup>
 

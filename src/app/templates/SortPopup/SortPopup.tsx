@@ -6,6 +6,7 @@ import { RadioButton } from 'app/atoms/RadioButton';
 import { Switcher } from 'app/atoms/Switcher';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as SortIcon } from 'app/icons/sort.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
 
 import { PopupModalWithTitle } from '../PopupModalWithTitle';
@@ -17,6 +18,7 @@ type SortPopupContentProps = {
   on?: boolean;
   toggle?: () => void;
   title?: ReactNode;
+  alternativeLogic?: boolean;
 };
 
 type SortPopupProps = { children: ReactNode; isOpened?: boolean };
@@ -60,9 +62,26 @@ export const useSortPopup = () => {
 };
 
 // Popup content
-export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle, title = <T id="sortBy" /> }) => {
+export const SortPopupContent: FC<SortPopupContentProps> = ({
+  items,
+  on,
+  toggle,
+  alternativeLogic = false,
+  title = <T id="sortBy" />
+}) => {
   const { popup } = useAppEnv();
+  const [selectedItem, setSelectedItem] = useState(() => items.find(i => i.selected) ?? items[0]);
   const { opened, close } = useSortPopup();
+
+  const handleButtonClick = useCallback(() => {
+    selectedItem.onClick?.();
+    close();
+  }, [selectedItem, close]);
+
+  const handleOptionSelect = useCallback((item: SortListItemType) => {
+    console.log('here');
+    setSelectedItem(item);
+  }, []);
 
   return (
     <PopupModalWithTitle
@@ -75,7 +94,13 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle,
       <div className="flex flex-col mt-2">
         <ul className={classNames('flex flex-col', popup ? 'px-4' : 'px-12')}>
           {items.map(item => (
-            <SortListItem key={item.id} item={item} />
+            <SortListItem
+              key={item.id}
+              item={item}
+              handleOptionSelect={handleOptionSelect}
+              alternativeLogic={alternativeLogic}
+              selectedItemId={selectedItem.id}
+            />
           ))}
         </ul>
       </div>
@@ -90,25 +115,50 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({ items, on, toggle,
           </div>
         </div>
       )}
+
+      {alternativeLogic && (
+        <ButtonRounded
+          size="big"
+          fill
+          onClick={handleButtonClick}
+          className={classNames('w-full mt-8', popup ? 'px-4' : 'px-12')}
+        >
+          <T id="apply" />
+        </ButtonRounded>
+      )}
     </PopupModalWithTitle>
   );
 };
 
-const SortListItem: FC<{ item: SortListItemType }> = ({ item }) => {
+type SortListItemProps = {
+  item: SortListItemType;
+  handleOptionSelect: (item: SortListItemType) => void;
+  alternativeLogic: boolean;
+  selectedItemId: string;
+};
+const SortListItem: FC<SortListItemProps> = ({ item, alternativeLogic, handleOptionSelect, selectedItemId }) => {
   const { nameI18nKey, selected, disabled = false, onClick, id } = item;
+
+  const checked = useMemo(
+    () => (alternativeLogic ? id === selectedItemId : selected),
+    [alternativeLogic, id, selected, selectedItemId]
+  );
 
   const handleRadioClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
   }, []);
 
   return (
-    <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
+    <div
+      className="flex items-center justify-between py-3 cursor-pointer"
+      onClick={alternativeLogic ? () => handleOptionSelect(item) : onClick}
+    >
       <div className="flex items-center">
         <span className="text-base-plus text-white">
           <T id={nameI18nKey} />
         </span>
       </div>
-      <RadioButton id={id} checked={selected} disabled={disabled} onClick={handleRadioClick} />
+      <RadioButton id={id} checked={checked} disabled={disabled} onClick={handleRadioClick} />
     </div>
   );
 };

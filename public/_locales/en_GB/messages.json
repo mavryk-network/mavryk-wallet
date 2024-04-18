@@ -3640,5 +3640,8 @@
   },
   "beta": {
     "message": "Beta"
+  },
+  "apply": {
+    "message": "Apply"
   }
 }

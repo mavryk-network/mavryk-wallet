@@ -546,6 +546,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {
   const knownBakers = useKnownBakers();
   const testGroupName = useUserTestingGroupNameSelector();
+  const { popup } = useAppEnv();
 
   const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
 
@@ -614,7 +615,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
 
         <SortPopup>
           <SortButton className="-mr-1" />
-          <SortPopupContent items={memoizedSortAssetsOptions} />
+          <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
         </SortPopup>
       </h2>
 

@@ -252,13 +252,15 @@ button,
 
 /* hide scrollbar */
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  overflow-y: auto;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+@media (max-width: 500px) {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-y: auto;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* input styles */

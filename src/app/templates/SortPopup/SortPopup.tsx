@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, ReactNode, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -71,17 +71,22 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
 }) => {
   const { popup } = useAppEnv();
   const [selectedItem, setSelectedItem] = useState(() => items.find(i => i.selected) ?? items[0]);
+  const [internalToggleValue, setInternalToggleValue] = useState(on);
   const { opened, close } = useSortPopup();
 
   const handleButtonClick = useCallback(() => {
     selectedItem.onClick?.();
+    if (internalToggleValue !== on) toggle?.();
     close();
-  }, [selectedItem, close]);
+  }, [selectedItem, internalToggleValue, on, toggle, close]);
 
   const handleOptionSelect = useCallback((item: SortListItemType) => {
-    console.log('here');
     setSelectedItem(item);
   }, []);
+
+  const handleInternalToggle = useCallback(() => {
+    setInternalToggleValue(!internalToggleValue);
+  }, [internalToggleValue]);
 
   return (
     <PopupModalWithTitle
@@ -111,20 +116,17 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
             <span className="text-sm tracking-normal text-white">
               <T id="hideZeroBalances" />
             </span>
-            <Switcher on={on} onClick={toggle} />
+            <Switcher on={on} onClick={alternativeLogic ? handleInternalToggle : toggle} />
           </div>
         </div>
       )}
 
       {alternativeLogic && (
-        <ButtonRounded
-          size="big"
-          fill
-          onClick={handleButtonClick}
-          className={classNames('w-full mt-8', popup ? 'px-4' : 'px-12')}
-        >
-          <T id="apply" />
-        </ButtonRounded>
+        <div className={classNames('mt-8', popup ? 'px-4' : 'px-12')}>
+          <ButtonRounded size="big" fill onClick={handleButtonClick} className={classNames('w-full')}>
+            <T id="apply" />
+          </ButtonRounded>
+        </div>
       )}
     </PopupModalWithTitle>
   );

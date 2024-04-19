@@ -125,7 +125,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     const confirmed = await confirm({
       title: assetType === AssetTypesEnum.Collectibles ? t('deleteNFTConfirm') : t('deleteAssets'),
       children: (
-        <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: 270 }}>
+        <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: popup ? 270 : 'auto' }}>
           <div>
             <T id={'areYousureAssetModalDeleteAction'} />
           </div>

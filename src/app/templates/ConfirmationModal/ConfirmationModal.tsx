@@ -1,5 +1,8 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
+import { useAppEnv } from 'app/env';
 import { BTN_PRIMARY, ButtonRounded, ButtonRoundedType } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/templates/PopupModalWithTitle';
 import { t } from 'lib/i18n';
@@ -22,10 +25,17 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
     ...restProps
   } = props;
 
+  const { fullPage } = useAppEnv();
+
   return (
-    <PopupModalWithTitle {...restProps} onRequestClose={onRequestClose} portalClassName="confirmation-modal">
-      <div className="px-4">
-        <div className="mb-11 mt-7 text-white text-sm text-center">{children}</div>
+    <PopupModalWithTitle
+      {...restProps}
+      onRequestClose={onRequestClose}
+      portalClassName="confirmation-modal"
+      contentPosition={fullPage ? 'center' : 'bottom'}
+    >
+      <div className={clsx(fullPage ? 'px-11' : 'px-4')}>
+        <div className={clsx('text-white text-sm text-center', fullPage ? 'mb-8' : 'mb-11 mt-7')}>{children}</div>
         <div className="grid grid-cols-2 gap-x-3">
           <ButtonRounded
             size="big"

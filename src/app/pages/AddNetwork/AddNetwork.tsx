@@ -1,9 +1,11 @@
-import React, { useCallback, FC } from 'react';
+import React, { useCallback, FC, useMemo } from 'react';
 
+import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { URL_PATTERN } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
 import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
@@ -30,6 +32,7 @@ export const AddNetworkScreen: FC = () => {
   const { customNetworks = [] } = useSettings();
   const { setExplorerId } = useBlockExplorer();
   const setNetworkId = useSetNetworkId();
+  const { popup } = useAppEnv();
 
   const {
     register,
@@ -127,6 +130,8 @@ export const AddNetworkScreen: FC = () => {
     [submitting, clearError, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]
   );
 
+  const memoizedContentContainerStyle = useMemo(() => (popup ? { padding: 0 } : {}), [popup]);
+
   return (
     <PageLayout
       pageTitle={
@@ -135,10 +140,12 @@ export const AddNetworkScreen: FC = () => {
         </>
       }
       isTopbarVisible={false}
-      contentContainerStyle={{ padding: 0 }}
+      contentContainerStyle={memoizedContentContainerStyle}
     >
-      {' '}
-      <form onSubmit={handleSubmit(onNetworkFormSubmit)} className="h-full px-4 flex flex-col pt-4 flex-1">
+      <form
+        onSubmit={handleSubmit(onNetworkFormSubmit)}
+        className={clsx('h-full flex flex-col flex-1', popup && 'px-4 pt-4')}
+      >
         <FormField
           ref={register({ required: t('required'), maxLength: 35 })}
           label={t('name')}
@@ -180,7 +187,7 @@ export const AddNetworkScreen: FC = () => {
         />
 
         <FormSubmitButton
-          className="mt-auto mb-8"
+          className={clsx('mt-auto', popup && 'mb-8')}
           loading={submitting}
           testID={CustomNetworkSettingsSelectors.addNetworkButton}
           disabled={!allowSubmission}

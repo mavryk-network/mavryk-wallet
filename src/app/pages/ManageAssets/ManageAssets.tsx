@@ -22,8 +22,7 @@ import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSel
 import SearchAssetField from 'app/templates/SearchAssetField';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { TEMPLE_TOKEN_SLUG } from 'lib/assets';
-import { useAllAvailableTokens } from 'lib/assets/hooks';
-import { AccountToken } from 'lib/assets/hooks/tokens';
+import { AccountToken, useAccountTokens } from 'lib/assets/hooks/tokens';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T, t } from 'lib/i18n';
@@ -81,7 +80,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const balances = useCurrentAccountBalances();
   const address = account.publicKeyHash;
 
-  const tokens = useAllAvailableTokens(account.publicKeyHash, chainId);
+  const tokens = useAccountTokens(address, chainId);
   const tokensRecord = useMemo(() => tokensToRecord(tokens), [tokens]);
 
   const managebleSlugs = useMemo(

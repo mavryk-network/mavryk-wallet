@@ -73,7 +73,7 @@ export const useEnabledAccountTokensSlugs = () => {
  */
 const TOKENS_SORT_ITERATEES: (keyof AccountToken)[] = ['predefined', 'slug'];
 
-const useAccountTokens = (account: string, chainId: string) => {
+export const useAccountTokens = (account: string, chainId: string) => {
   const storedRaw = useAccountTokensSelector(account, chainId);
   const whitelistSlugs = useWhitelistSlugs(chainId);
 

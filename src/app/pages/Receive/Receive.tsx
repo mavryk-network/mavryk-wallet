@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 
 import clsx from 'clsx';
 import { QRCode } from 'react-qr-svg';
@@ -32,11 +32,12 @@ const Receive: FC = () => {
   const account = useAccount();
   const { isSupported } = useTezosDomainsClient();
   const address = account.publicKeyHash;
-  const { popup } = useAppEnv();
+  const { popup, fullPage } = useAppEnv();
 
   const [activeView, setActiveView] = useSafeState(ADDRESS_FIELD_VIEWS[1]);
 
   const { data: reverseName } = useTezosDomainNameByAddress(address);
+  const memoizedStyle = useMemo(() => (fullPage ? { maxWidth: 'auto' } : { maxWidth: 271 }), [fullPage]);
 
   useEffect(() => {
     if (!isSupported) {
@@ -55,12 +56,18 @@ const Receive: FC = () => {
           </div>
 
           <div className="p-4 rounded-2xl-plus bg-primary-card relative">
-            <CopyButton type="button" text={hash}>
-              <div className="w-11 absolute top-4 right-4 bg-transparent flex justify-end items-center">
-                <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />
-              </div>
-              <div className="break-all text-left text-base-plus" style={{ maxWidth: 271 }}>
+            <CopyButton type="button" text={hash} className={clsx('flex', fullPage && 'mx-auto')}>
+              <div className="break-all text-left text-base-plus" style={memoizedStyle}>
                 <HashShortView hash={hash} trim={false} />
+              </div>
+
+              <div
+                className={clsx(
+                  'w-11 bg-transparent flex items-center',
+                  !fullPage ? 'absolute top-4 right-4 justify-end' : 'justify-start'
+                )}
+              >
+                <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />
               </div>
             </CopyButton>
           </div>

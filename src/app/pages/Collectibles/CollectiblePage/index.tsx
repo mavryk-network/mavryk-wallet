@@ -1,10 +1,12 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
+import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 
 import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
+import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
@@ -44,6 +46,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const metadata = useCollectibleMetadataSelector(assetSlug);
   const details = useCollectibleDetailsSelector(assetSlug);
   const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const { fullPage } = useAppEnv();
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
@@ -116,9 +119,39 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const listing = getDetailsListing(details);
 
+  const ButtonsSection = () => (
+    <div className={clsx('flex w-full', fullPage ? 'mt-8 flex-col gap-y-4' : 'gap-x-4 items-center mb-4')}>
+      <FormSubmitButton
+        disabled={!displayedOffer || displayedOffer.buyerIsMe || isSelling || !accountCanSign}
+        title={sellButtonTooltipStr}
+        onClick={onSellButtonClick}
+        testID={CollectibleSelectors.sellButton}
+      >
+        {displayedOffer ? <T id="sell" /> : <T id="noOffersYet" />}
+      </FormSubmitButton>
+
+      <FormSubmitButton disabled={isSelling} onClick={onSendButtonClick} testID={CollectibleSelectors.sendButton}>
+        <T id="send" />
+      </FormSubmitButton>
+    </div>
+  );
+
+  const CollectibleTextSection = () => (
+    <div>
+      <CopyButton
+        text={collectibleName}
+        type={'block'}
+        className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}
+      >
+        {collectibleName ?? 'NAME text #234'}
+      </CopyButton>
+      <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
+    </div>
+  );
+
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
-      <div className="flex flex-col w-full pb-6">
+      <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
         {operationError ? (
           <Alert
             type="error"
@@ -130,83 +163,67 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
           operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-4" />
         )}
 
-        <div className="rounded-2xl mb-6 bg-primary-card overflow-hidden" style={{ aspectRatio: '1/1' }}>
-          <CollectiblePageImage
-            metadata={metadata}
-            areDetailsLoading={areDetailsLoading}
-            objktArtifactUri={details?.objktArtifactUri}
-            isAdultContent={details?.isAdultContent}
-            mime={details?.mime}
-            className="h-full w-full"
-          />
+        <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
+          <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
+            <CollectiblePageImage
+              metadata={metadata}
+              areDetailsLoading={areDetailsLoading}
+              objktArtifactUri={details?.objktArtifactUri}
+              isAdultContent={details?.isAdultContent}
+              mime={details?.mime}
+              className="h-full w-full"
+            />
+          </div>
+          {fullPage && <CollectibleTextSection />}
         </div>
 
         {areDetailsLoading ? (
           <Spinner className="self-center w-20" />
         ) : (
           <>
-            <div className="flex gap-x-4 items-center w-full mb-4">
-              <FormSubmitButton
-                disabled={!displayedOffer || displayedOffer.buyerIsMe || isSelling || !accountCanSign}
-                title={sellButtonTooltipStr}
-                onClick={onSellButtonClick}
-                testID={CollectibleSelectors.sellButton}
-              >
-                {displayedOffer ? <T id="sell" /> : <T id="noOffersYet" />}
-              </FormSubmitButton>
+            {!fullPage && <ButtonsSection />}
 
-              <FormSubmitButton
-                disabled={isSelling}
-                onClick={onSendButtonClick}
-                testID={CollectibleSelectors.sendButton}
-              >
-                <T id="send" />
-              </FormSubmitButton>
-            </div>
-
-            <CopyButton
-              text={collectibleName}
-              type={'block'}
-              className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}
-            >
-              {collectibleName}
-            </CopyButton>
-
-            <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
+            {!fullPage && <CollectibleTextSection />}
 
             <div>
-              {creators.length > 0 && (
-                <>
-                  <CardWithLabel label={<T id={creators.length > 1 ? 'creators' : 'creator'} />} className="mb-3">
-                    <div className="flex flex-wrap gap-1">
-                      {creators.map((creator, idx) => (
-                        <div key={creator.address} className="w-full">
-                          <AvatarBlock hash={creator.address} />
-                          {creators.length > 1 && idx < creators.length - 1 && (
-                            <Divider color="bg-divider" className="my-2" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardWithLabel>
-                </>
-              )}
-
-              <CardWithLabel label={<T id={'floorPrice'} />}>
-                {isDefined(listing) ? (
-                  <div className="flex items-center gap-x-1">
-                    <Money shortened smallFractionFont={false} tooltip={true}>
-                      {atomsToTokens(listing.floorPrice, listing.decimals)}
-                    </Money>
-                    <span> {listing.symbol}</span>
-                  </div>
-                ) : (
-                  '-'
+              <div className={clsx(fullPage ? 'grid grid-cols-2 gap-4 items-stretch' : 'flex flex-col')}>
+                {creators.length > 0 && (
+                  <>
+                    <CardWithLabel
+                      label={<T id={creators.length > 1 ? 'creators' : 'creator'} />}
+                      className={clsx(!fullPage && 'mb-3')}
+                    >
+                      <div className="flex flex-wrap gap-1">
+                        {creators.map((creator, idx) => (
+                          <div key={creator.address} className="w-full">
+                            <AvatarBlock hash={creator.address} />
+                            {creators.length > 1 && idx < creators.length - 1 && (
+                              <Divider color="bg-divider" className="my-2" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardWithLabel>
+                  </>
                 )}
-              </CardWithLabel>
+
+                <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'floorPrice'} />}>
+                  {isDefined(listing) ? (
+                    <div className="flex items-center gap-x-1">
+                      <Money shortened smallFractionFont={false} tooltip={true}>
+                        {atomsToTokens(listing.floorPrice, listing.decimals)}
+                      </Money>
+                      <span> {listing.symbol}</span>
+                    </div>
+                  ) : (
+                    '-'
+                  )}
+                </CardWithLabel>
+              </div>
 
               <Divider className="my-6" color="bg-divider" />
               <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
+              {fullPage && <ButtonsSection />}
             </div>
           </>
         )}

@@ -13,7 +13,6 @@ import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
-import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useAccount, useTempleClient } from 'lib/temple/front';
 import { translateYModifiers } from 'lib/ui/general-modifiers';

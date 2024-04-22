@@ -8,14 +8,20 @@ type CardWithLabelProps = {
   label: ReactNode;
   children: ReactNode;
   className?: string;
+  cardContainerClassname?: string;
 };
 
-export const CardWithLabel: FC<CardWithLabelProps> = ({ label, children, className = '' }) => {
+export const CardWithLabel: FC<CardWithLabelProps> = ({
+  label,
+  children,
+  className = '',
+  cardContainerClassname = ''
+}) => {
   return (
     <div className={clsx('overflow-hidden relative', className)}>
       <div className="text-white text-base-plus mb-3">{label}</div>
 
-      <CardContainer className="text-white text-base-plus">{children}</CardContainer>
+      <CardContainer className={clsx('text-white text-base-plus', cardContainerClassname)}>{children}</CardContainer>
     </div>
   );
 };

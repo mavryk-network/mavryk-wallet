@@ -73,7 +73,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const sortedAssets = useSortededCollectiblesSlugs(sortOption, allSlugs);
 
-  const { isInSearchMode, displayedSlugs, paginatedSlugs, isSyncing, loadNext, searchValue, setSearchValue } =
+  const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
     useCollectiblesListingLogic(sortedAssets);
 
   const shouldScrollToTheTabsBar = paginatedSlugs.length > 0;
@@ -84,7 +84,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const contentElement = useMemo(
     () => (
-      <div className="grid grid-cols-2 gap-4">
+      <div className={clsx('grid gap-4', popup ? 'grid-cols-2' : 'grid-cols-3')}>
         {displayedSlugs.map(slug => (
           <CollectibleItem
             key={slug}
@@ -150,7 +150,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   );
 });
 
-const buttonStyle = { maxHeight: 27 };
+const buttonStyle = { maxHeight: 27, display: 'flex', alignItems: 'center' };
 
 const buildEmptySection = (isSyncing: boolean) =>
   isSyncing ? (

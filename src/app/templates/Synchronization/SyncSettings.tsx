@@ -65,7 +65,7 @@ const SyncSettings: FC = () => {
   const isPasswordEntered = passwordValue?.length ?? 0 > 0;
 
   return (
-    <div className="w-full h-full flex flex-col flex-1">
+    <div className={clsx('w-full flex flex-col flex-1')} style={{ minHeight: popup ? '100%' : 532 }}>
       {payload ? (
         <>
           <Alert
@@ -88,7 +88,7 @@ const SyncSettings: FC = () => {
 
           <div className={clsx(popup && 'pb-8')}>
             <FormSubmitButton
-              className="w-full justify-center mt-2"
+              className={clsx('w-full justify-center', popup ? 'mt-2' : 'mt-40px')}
               onClick={handleQRBttonClick}
               testID={SyncSettingsSelectors.doneButton}
             >

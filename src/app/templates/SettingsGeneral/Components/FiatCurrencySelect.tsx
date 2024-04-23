@@ -101,7 +101,7 @@ const FiatCurrencyFieldContent: FC<FiatCurrencyOptionContentProps> = ({ option }
     <div className="flex items-center text-white text-base-plus">
       <span>{option.name} (</span>
       <FiatCurrencyIcon option={option} />
-      <span>) - </span>
+      <span>)&nbsp;-&nbsp;</span>
       <span>{option.fullname}</span>
     </div>
   );

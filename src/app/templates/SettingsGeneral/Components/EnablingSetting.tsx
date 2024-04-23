@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react';
 
+import clsx from 'clsx';
+
 import { FormCheckboxProps } from 'app/atoms';
 import { Switcher } from 'app/atoms/Switcher';
+import { useAppEnv } from 'app/env';
 import { T, TID } from 'lib/i18n';
 
 interface Props extends Pick<FormCheckboxProps, 'onChange' | 'testID' | 'errorCaption'> {
@@ -20,6 +23,7 @@ export const EnablingSetting = ({
   // testID,
   errorCaption
 }: Props) => {
+  const { popup } = useAppEnv();
   const handleChange = useCallback(
     (toChecked: boolean, event: React.ChangeEvent<HTMLInputElement>) => {
       onChange?.(toChecked, event);
@@ -27,8 +31,8 @@ export const EnablingSetting = ({
     [onChange]
   );
   return (
-    <div className="flex items-start w-full justify-between gap-1">
-      <div className="mb-4 leading-tight flex flex-col" style={{ maxWidth: 283 }}>
+    <div className={clsx('flex items-start w-full justify-between gap-1', popup ? 'gap-1' : 'gap-4')}>
+      <div className="mb-4 leading-tight flex flex-col" style={{ maxWidth: popup ? 283 : '100%' }}>
         <span className="text-base-plus text-white">
           <T id={titleI18nKey} />
         </span>

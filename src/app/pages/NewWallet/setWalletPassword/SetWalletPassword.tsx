@@ -103,7 +103,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             name="repeatPassword"
             placeholder={t('confirmWalletPassword')}
             errorCaption={errors.repeatPassword?.message}
-            containerClassName={classNames(fullPage ? 'mt-2 mb-6' : 'mt-6 mb-1')}
+            containerClassName={classNames(fullPage ? 'mt-4 mb-6' : 'mt-6 mb-1')}
             testID={setWalletPasswordSelectors.repeatPasswordField}
           />
         </>

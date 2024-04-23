@@ -142,7 +142,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
 
   return (
     <div>
-      <div className="w-full text-left text-sm pb-4 text-secondary-white" style={{ maxWidth: 300 }}>
+      <div className="w-full text-left text-sm pb-4 text-secondary-white" style={{ maxWidth: popup ? 300 : '100%' }}>
         <p>{t('seedPhraseTip')}</p>
       </div>
       <div className="flex justify-between mb-4">

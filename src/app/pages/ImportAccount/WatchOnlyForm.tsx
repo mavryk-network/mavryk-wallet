@@ -118,7 +118,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
         onChange={([v]) => v}
         onFocus={() => addressFieldRef.current?.focus()}
         textarea
-        rows={2}
+        rows={popup ? 2 : 1}
         cleanable={Boolean(addressValue)}
         onClean={cleanAddressField}
         id="watch-address"

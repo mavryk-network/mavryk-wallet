@@ -2521,6 +2521,9 @@
   "addressContactPlaceholder": {
     "message": "Enter contact address"
   },
+  "addressContractPlaceholder": {
+    "message": "Enter contract address"
+  },
   "enterPublicAddressPlaceholder": {
     "message": "Enter public address"
   },

@@ -89,7 +89,11 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
         portalClassName="accounts-popup"
         contentPosition={popup ? 'bottom' : 'center'}
         leftSidedComponent={
-          <button id="manageAddressesBtn" onMouseEnter={handleMouseEnter} className="w-6">
+          <button
+            id="manageAddressesBtn"
+            onMouseEnter={handleMouseEnter}
+            className={classNames(popup ? 'w-6' : 'w-8 flex justify-start')}
+          >
             <Link to="/settings/address-book" className="w-6">
               <AddressIcon className="w-6 h-6" />
             </Link>

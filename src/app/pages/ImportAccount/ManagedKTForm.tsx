@@ -191,7 +191,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
             t('contractAddressInputDescription')
           )
         }
-        placeholder={t('addressContactPlaceholder')}
+        placeholder={t('addressContractPlaceholder')}
         errorCaption={errors.contractAddress?.message}
         style={{
           resize: 'none'

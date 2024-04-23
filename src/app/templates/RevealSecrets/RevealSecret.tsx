@@ -133,7 +133,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
                   <T id="derivationPath" />
                 </span>
 
-                <span className="mt-1 text-sm font-light text-secondary-white max-w-9/10">
+                <span className={clsx('mt-1 text-sm font-light text-secondary-white', popup ? 'max-w-9/10' : 'w-full')}>
                   <T id="pathForHDAccounts" />
                 </span>
               </h2>

@@ -87,7 +87,7 @@ const DAppSettings: FC = () => {
   }, [confirm, dAppEntries, mutate, removeAllDAppSessions]);
 
   return (
-    <div className={clsx('w-full h-full max-w-sm mx-auto', popup && 'pb-8')}>
+    <div className={clsx('w-full h-full', popup && 'pb-8 max-w-sm mx-auto')}>
       <p className="text-sm text-secondary-white mb-4">
         <T id="dAppsCheckmarkPrompt" />
       </p>

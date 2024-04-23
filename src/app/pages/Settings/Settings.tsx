@@ -101,7 +101,7 @@ const TABS: Tab[] = [
     fillIcon: false
   },
   {
-    linkTo: 'reveal-private-ke',
+    linkTo: 'reveal-private-key',
     i18nKey: 'revealPrivateKey',
     Icon: KeyIcon,
     Component: RevealPrivateKey,

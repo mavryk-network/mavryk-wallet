@@ -151,7 +151,7 @@ const ConnectLedger: FC = () => {
 
   return (
     <div className="relative w-full h-full flex-1 flex flex-col">
-      <div className="w-full h-full max-w-sm mx-auto flex-1 flex flex-col">
+      <div className={clsx('w-full h-full flex-1 flex flex-col', popup && 'max-w-sm mx-auto')}>
         <form
           className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
           onSubmit={handleSubmit(onSubmit)}

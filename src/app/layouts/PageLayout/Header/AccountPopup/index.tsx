@@ -92,9 +92,12 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
 
       <div
         className={classNames(
-          'overflow-y-auto shadow-inner max-h-80 no-scrollbar',
-          isShowSearch && 'border-t-0 rounded-t-none h-80'
+          'overflow-y-auto shadow-inner no-scrollbar',
+          popup && 'max-h-80',
+          isShowSearch && 'border-t-0 rounded-t-none',
+          !popup && filteredAccounts.length > 5 && 'pr-4'
         )}
+        style={{ height: isShowSearch && popup ? 328 : 397 }}
       >
         <div className="flex flex-col">
           {filteredAccounts.length === 0 ? (

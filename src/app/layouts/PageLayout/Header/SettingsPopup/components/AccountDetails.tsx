@@ -55,18 +55,18 @@ export const AccountDetails: FC<AccountDetailsProps> = ({ account }) => {
       <div
         className={clsx(
           'rounded-2xl-plus bg-gray-710 relative w-full p-4',
-          fullPage ? 'mt-8 flex items-center justify-center' : 'mt-6'
+          fullPage ? 'mt-8 flex items-center justify-between' : 'mt-6'
         )}
       >
-        <CopyButton type="button" text={account.publicKeyHash} className="flex">
+        <CopyButton type="button" text={account.publicKeyHash} className="flex w-full justify-between items-center">
           <div className="break-all text-left text-base-plus" style={memoizedStyle}>
             <HashShortView hash={account.publicKeyHash} trim={false} />
           </div>
 
           <div
             className={clsx(
-              'w-11 bg-transparent flex items-center',
-              !fullPage ? 'absolute top-4 right-4 justify-end' : 'justify-start'
+              'bg-transparent flex items-center',
+              !fullPage ? 'w-11 absolute top-4 right-4 justify-end' : 'justify-start h-6 w0auto'
             )}
           >
             <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />

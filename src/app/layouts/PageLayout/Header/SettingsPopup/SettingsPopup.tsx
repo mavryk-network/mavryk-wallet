@@ -214,7 +214,7 @@ export const SettingsDropdown: FC = () => {
 const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListItemWithNavigateprops, last: boolean) => {
   const itemProps = {
     className: clsx(
-      'relative p-4 hover:bg-gray-710 text-base-plus text-white text-left w-full',
+      'relative p-4 hover:bg-primary-card-hover text-base-plus text-white text-left w-full',
       'bg-primary-card flex'
     ),
     children: (

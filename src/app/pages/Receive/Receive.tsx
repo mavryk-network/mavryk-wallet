@@ -50,21 +50,25 @@ const Receive: FC = () => {
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
       <div>
-        <div className={clsx('w-full mx-auto h-full', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-14')}>
+        <div className={clsx('w-full mx-auto h-full', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-14 ')}>
           <div className="text-primary-white text-base-plus mb-4">
             <T id="myAddress" />
           </div>
 
           <div className="p-4 rounded-2xl-plus bg-primary-card relative">
-            <CopyButton type="button" text={hash} className={clsx('flex', fullPage && 'mx-auto')}>
+            <CopyButton
+              type="button"
+              text={hash}
+              className={clsx('flex', fullPage && 'w-full flex items-center justify-between')}
+            >
               <div className="break-all text-left text-base-plus" style={memoizedStyle}>
                 <HashShortView hash={hash} trim={false} />
               </div>
 
               <div
                 className={clsx(
-                  'w-11 bg-transparent flex items-center',
-                  !fullPage ? 'absolute top-4 right-4 justify-end' : 'justify-start'
+                  'bg-transparent flex items-center',
+                  !fullPage ? 'absolute top-4 right-4 justify-end w-11' : 'justify-start h-6 w0auto'
                 )}
               >
                 <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />

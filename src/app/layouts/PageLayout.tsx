@@ -176,11 +176,11 @@ export const Toolbar: FC<ToolbarProps> = ({
   const isBackButtonAvailable = displayed ? false : canBack || canStepBack;
 
   const handleBack = () => {
-    if (canBack) {
-      return goBack();
+    if (historyPosition === 0 || !canBack) {
+      return navigate('/', HistoryAction.Replace);
     }
 
-    navigate('/', HistoryAction.Replace);
+    return goBack();
   };
 
   const [sticked, setSticked] = useState(false);

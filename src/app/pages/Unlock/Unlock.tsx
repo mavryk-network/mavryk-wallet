@@ -153,7 +153,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         {canImportNew && (
           <div className="my-6">
-            <h3 className="text-sm font-light text-primary-white">
+            <h3 className={classNames('text-primary-white', popup ? 'text-sm font-light' : 'text-base')}>
               <T id="importNewAccountTitle" />
             </h3>
 

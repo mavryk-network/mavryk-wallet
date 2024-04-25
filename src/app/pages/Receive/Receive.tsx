@@ -55,7 +55,10 @@ const Receive: FC = () => {
             <T id="myAddress" />
           </div>
 
-          <div className="p-4 rounded-2xl-plus bg-primary-card relative">
+          <div
+            style={{ padding: fullPage ? '10.5px 16px' : '16px' }}
+            className={clsx('rounded-2xl-plus bg-primary-card relative')}
+          >
             <CopyButton
               type="button"
               text={hash}

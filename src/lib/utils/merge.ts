@@ -1,5 +1,5 @@
-import clsx from 'clsx';
-import { ClassNameValue, twMerge } from 'tailwind-merge';
+import clsx, { ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 // Attention it overrides classes !!!
-export const merge = (...classes: ClassNameValue[]) => twMerge(clsx(...classes));
+export const merge = (...classes: ClassValue[]) => twMerge([clsx(...classes)]);

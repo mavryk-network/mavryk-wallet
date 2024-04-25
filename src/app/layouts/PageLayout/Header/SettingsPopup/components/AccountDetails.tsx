@@ -54,9 +54,10 @@ export const AccountDetails: FC<AccountDetailsProps> = ({ account }) => {
 
       <div
         className={clsx(
-          'rounded-2xl-plus bg-gray-710 relative w-full p-4',
+          'rounded-2xl-plus bg-gray-710 relative w-full',
           fullPage ? 'mt-8 flex items-center justify-between' : 'mt-6'
         )}
+        style={{ padding: fullPage ? '10.5px 16px' : '16px' }}
       >
         <CopyButton type="button" text={account.publicKeyHash} className="flex w-full justify-between items-center">
           <div className="break-all text-left text-base-plus" style={memoizedStyle}>

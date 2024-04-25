@@ -146,12 +146,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
         <p>{t('seedPhraseTip')}</p>
       </div>
       <div className="flex justify-between mb-4">
-        <h1
-          className={classNames(
-            'font-aeonik flex self-center text-white',
-            popup ? 'text-base-plus' : 'text-xl leading-6 tracking-tight'
-          )}
-        >
+        <h1 className={classNames('font-aeonik flex self-center text-white', 'text-base-plus')}>
           <T id="seedPhrase" />
         </h1>
 

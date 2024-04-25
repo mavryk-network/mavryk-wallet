@@ -2212,7 +2212,7 @@
   "blockExplorer": {
     "message": "Blockchain Explorer"
   },
-  "viewOnBlockExplorer": { "message": "View on block explorer" },
+  "viewOnBlockExplorer": { "message": "View On Block Explorer" },
   "specifyTokenId": {
     "message": "Specify token ID"
   },

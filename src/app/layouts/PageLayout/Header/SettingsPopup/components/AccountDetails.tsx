@@ -23,6 +23,7 @@ export const AccountDetailsPopup: FC<AccountDetailsPopupProps> = ({ showAccounts
   return (
     <PopupModalWithTitle
       isOpen={showAccountsPopup}
+      className={'max-h-384px'}
       onRequestClose={toggleAccountPopup}
       contentPosition={!popup ? 'center' : 'bottom'}
       title={

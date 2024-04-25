@@ -48,9 +48,9 @@ const Receive: FC = () => {
   const hash = activeView.key === 'hash' ? address : reverseName || '';
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
+    <PageLayout customContainerMinHeight={664} isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
       <div>
-        <div className={clsx('w-full mx-auto h-full', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-14 ')}>
+        <div className={clsx('w-full mx-auto h-full', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-16 ')}>
           <div className="text-primary-white text-base-plus mb-4">
             <T id="myAddress" />
           </div>

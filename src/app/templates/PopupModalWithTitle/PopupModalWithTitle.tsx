@@ -89,12 +89,12 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
           </div>
           <div
             className={classNames(
-              leftSidedComponent ? styles.headerContent : 'flex items-center justify-center',
+              leftSidedComponent ? styles.headerContent : 'flex items-center justify-center relative',
               popup ? 'px-4' : contentPosition === 'center' ? 'mx-12' : 'ml-0',
               popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
             )}
           >
-            {leftSidedComponent}
+            <div className="z-10">{leftSidedComponent}</div>
             {title && (
               <div className={classNames('text-white text-center text-xl px-4 bg-primary-card', styles.middle)}>
                 {title}

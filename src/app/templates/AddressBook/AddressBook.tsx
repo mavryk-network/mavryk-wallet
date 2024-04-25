@@ -64,7 +64,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full flex-1">
       <div className={classNames('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
         <CustomSelect
           className={classNames('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}

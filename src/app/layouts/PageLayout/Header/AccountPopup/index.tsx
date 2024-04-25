@@ -97,7 +97,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
           isShowSearch && 'border-t-0 rounded-t-none',
           !popup && filteredAccounts.length > 5 && 'pr-4'
         )}
-        style={{ height: isShowSearch && popup ? 328 : 397 }}
+        style={{ height: isShowSearch && popup ? (filteredAccounts.length > 5 ? 328 : 397) : 'auto' }}
       >
         <div className="flex flex-col">
           {filteredAccounts.length === 0 ? (

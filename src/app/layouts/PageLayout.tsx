@@ -38,12 +38,14 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentPaperStyle?: React.CSSProperties;
   isTopbarVisible?: boolean;
   removePaddings?: boolean;
+  customContainerMinHeight?: number;
 }
 
 const PageLayout: FC<PageLayoutProps> = ({
   children,
   contentContainerStyle,
   contentPaperStyle,
+  customContainerMinHeight,
   isTopbarVisible = true,
   removePaddings = false,
   ...toolbarProps
@@ -68,7 +70,7 @@ const PageLayout: FC<PageLayoutProps> = ({
 
       <div className={classNames(fullPage && 'pb-16', 'relative')}>
         {isTopbarVisible && <Header />}
-        <ContentPaper style={contentPaperStyle}>
+        <ContentPaper style={contentPaperStyle} customContainerMinHeight={customContainerMinHeight}>
           <Toolbar {...toolbarProps} />
 
           <div
@@ -96,14 +98,20 @@ const PageLayout: FC<PageLayoutProps> = ({
 
 export default PageLayout;
 
-type ContentPaparProps = ComponentProps<typeof ContentContainer>;
+type ContentPaparProps = ComponentProps<typeof ContentContainer> & { customContainerMinHeight?: number };
 
 const fullPageMinHeightScreenWithHeader = 'calc(100vh - 230px)';
 const fullPageMinHeightTopbarNavigation = 'calc(100vh - 168px)';
 
 const routesWithheader = ['/'];
 
-export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, children, ...rest }) => {
+export const ContentPaper: FC<ContentPaparProps> = ({
+  customContainerMinHeight,
+  className,
+  style = {},
+  children,
+  ...rest
+}) => {
   const { pathname } = useLocation();
 
   const isMainPage = useMemo(() => routesWithheader.includes(pathname), [pathname]);
@@ -114,7 +122,11 @@ export const ContentPaper: FC<ContentPaparProps> = ({ className, style = {}, chi
       <div
         className={classNames('bg-primary-bg rounded-md shadow-lg h-full flex flex-col', className)}
         style={{
-          minHeight: isMainPage ? fullPageMinHeightScreenWithHeader : fullPageMinHeightTopbarNavigation,
+          minHeight: isMainPage
+            ? fullPageMinHeightScreenWithHeader
+            : customContainerMinHeight
+            ? customContainerMinHeight
+            : fullPageMinHeightTopbarNavigation,
           ...style
         }}
         {...rest}

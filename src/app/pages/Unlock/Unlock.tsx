@@ -153,15 +153,15 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         {canImportNew && (
           <div className="my-6">
-            <h3 className={classNames('text-primary-white', popup ? 'text-sm font-light' : 'text-base')}>
+            <h3 className={classNames('text-primary-white', popup ? 'text-sm font-light' : 'text-base-plus')}>
               <T id="importNewAccountTitle" />
             </h3>
 
             <Link
               to="/import-wallet"
               className={classNames(
-                'text-accent-blue',
-                'text-sm font-semibold',
+                'text-accent-blue font-semibold',
+                popup ? 'text-sm' : 'text-base-plus',
                 'transition duration-200 ease-in-out',
                 'opacity-75 hover:opacity-100 focus:opacity-100',
                 'hover:underline'

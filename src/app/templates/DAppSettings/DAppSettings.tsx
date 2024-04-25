@@ -99,7 +99,7 @@ const DAppSettings: FC = () => {
         <Switcher on={dAppEnabled} onChange={handleChange} />
         {error?.message && <div className="text-sm text-primary-error my-1">{error.message}</div>}
       </div>
-      <Divider className="my-4" color="bg-divider" />
+      <Divider ignoreParent={!popup} className="my-4" color="bg-divider" />
 
       <div className="text-base-plus text-white mb-4">
         <T id="authorizedDApps" />

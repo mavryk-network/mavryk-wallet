@@ -34,6 +34,7 @@ import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
 import { EditAccount } from './pages/EditAccount';
 import Onboarding from './pages/Onboarding/Onboarding';
+import RWAPage from './pages/RWAs/RWAPage';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
@@ -95,6 +96,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],
   ['/nft/:assetSlug?', onlyReady(({ assetSlug }) => <NFTsPage assetSlug={assetSlug!} />)],
+  ['/rwa/:assetSlug?', onlyReady(({ assetSlug }) => <RWAPage assetSlug={assetSlug!} />)],
   ['/add-asset', onlyReady(() => <AddAsset />)],
   ['/settings/:tabSlug?', onlyReady(({ tabSlug }) => <Settings tabSlug={tabSlug} />)],
   ['/add-network', onlyReady(() => <AddNetworkScreen />)],

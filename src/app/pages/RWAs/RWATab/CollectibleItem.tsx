@@ -45,7 +45,7 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
 
   return (
     <div className="relative overflow-x-hidden">
-      <Link to={`/nft/${assetSlug}`} className="relative flex gap-x-4 items-center rounded-2xl max-w-full">
+      <Link to={`/rwa/${assetSlug}`} className="relative flex gap-x-4 items-center rounded-2xl max-w-full">
         <div
           ref={toDisplayRef}
           className={clsx(

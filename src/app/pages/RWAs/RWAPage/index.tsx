@@ -15,6 +15,7 @@ import {
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { ActionsBlock } from 'app/templates/Actions';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
@@ -30,7 +31,6 @@ import { navigate } from 'lib/woozie';
 
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { mockedRWAMetadata, mockedRWASlug } from '../RWATab/rwa.mock';
-import { CollectibleSelectors } from '../selectors';
 import { getDetailsListing } from '../utils';
 
 import { CardWithLabel } from './CardWithLabel';
@@ -43,7 +43,7 @@ interface Props {
   assetSlug: string;
 }
 
-const CollectiblePage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
+const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
   // const metadata = useCollectibleMetadataSelector(assetSlug);
   const metadata = mockedRWAMetadata;
   const details = useCollectibleDetailsSelector(assetSlug);
@@ -93,50 +93,7 @@ const CollectiblePage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
     assetSlug
   ]);
 
-  const displayedOffer = useMemo(() => {
-    const highestOffer = offers?.[0];
-    if (!isDefined(highestOffer)) return null;
-
-    const offer = takableOffer ?? highestOffer;
-
-    const buyerIsMe = offer.buyer_address === publicKeyHash;
-
-    const currency = objktCurrencies[offer.currency_id];
-    if (!isDefined(currency)) return null;
-
-    const price = atomsToTokens(offer.price, currency.decimals);
-
-    return { price, symbol: currency.symbol, buyerIsMe };
-  }, [offers, takableOffer, publicKeyHash]);
-
-  const sellButtonTooltipStr = useMemo(() => {
-    if (!displayedOffer) return;
-    if (displayedOffer.buyerIsMe) return t('cannotSellToYourself');
-
-    let value = displayedOffer.price.toString();
-    if (!accountCanSign) value += ` [${t('selectedAccountCannotSignTx')}]`;
-
-    return value;
-  }, [displayedOffer, accountCanSign]);
-
   const listing = getDetailsListing(details);
-
-  const ButtonsSection = () => (
-    <div className={clsx('flex w-full', fullPage ? 'mt-8 flex-col gap-y-4' : 'gap-x-4 items-center mb-4')}>
-      <FormSubmitButton
-        disabled={!displayedOffer || displayedOffer.buyerIsMe || isSelling || !accountCanSign}
-        title={sellButtonTooltipStr}
-        onClick={onSellButtonClick}
-        testID={CollectibleSelectors.sellButton}
-      >
-        {displayedOffer ? <T id="sell" /> : <T id="noOffersYet" />}
-      </FormSubmitButton>
-
-      <FormSubmitButton disabled={isSelling} onClick={onSendButtonClick} testID={CollectibleSelectors.sendButton}>
-        <T id="send" />
-      </FormSubmitButton>
-    </div>
-  );
 
   const CollectibleTextSection = () => (
     <div>
@@ -179,12 +136,14 @@ const CollectiblePage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
           {fullPage && <CollectibleTextSection />}
         </div>
 
+        <div className="w-full">
+          <ActionsBlock assetSlug={assetSlug} />
+        </div>
+
         {areDetailsLoading ? (
           <Spinner className="self-center w-20" />
         ) : (
           <>
-            {!fullPage && <ButtonsSection />}
-
             {!fullPage && <CollectibleTextSection />}
 
             <div>
@@ -225,7 +184,6 @@ const CollectiblePage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
 
               <Divider className="my-6" color="bg-divider" />
               <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
-              {fullPage && <ButtonsSection />}
             </div>
           </>
         )}
@@ -234,4 +192,4 @@ const CollectiblePage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
   );
 });
 
-export default CollectiblePage;
+export default RWAPage;

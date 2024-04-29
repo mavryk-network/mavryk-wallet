@@ -1,0 +1,10 @@
+.searchWrapper {
+  position: absolute;
+  right: 1px;
+  top: -45px;
+  z-index: 2;
+}
+
+.searchWrapperPopup {
+  top: -38px;
+}

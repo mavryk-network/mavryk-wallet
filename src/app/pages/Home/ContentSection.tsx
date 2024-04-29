@@ -12,6 +12,7 @@ import { TabsBar } from 'app/templates/TabBar/TabBar';
 import { t, TID } from 'lib/i18n';
 
 import { CollectiblesTab } from '../Collectibles/CollectiblesTab';
+import { RWATab } from '../RWAs/RWATab';
 
 import { HomeSelectors } from './Home.selectors';
 import { TokensTab } from './OtherComponents/Tokens/Tokens';
@@ -69,14 +70,13 @@ export const ContentSection: FC<Props> = ({ className }) => {
         Component: HistoryComponent,
         testID: HomeSelectors.activityTab,
         whileMessageI18nKey: 'operationHistoryWhileMessage'
+      },
+      {
+        name: 'RWAs',
+        titleI18nKey: 'rwas',
+        Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        testID: HomeSelectors.rwasTab
       }
-      // {
-      //   name: 'RWAs',
-      //   titleI18nKey: 'rwas',
-      //   Component: HistoryComponent,
-      //   testID: HomeSelectors.rwasTab,
-      //   disabled: true
-      // }
     ];
   }, [scrollToTheTabsBar]);
 

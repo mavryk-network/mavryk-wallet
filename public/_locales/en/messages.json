@@ -3646,5 +3646,11 @@
   },
   "apply": {
     "message": "Apply"
+  },
+  "getAssets": {
+    "message": "Get Assets"
+  },
+  "noRWAs": {
+    "message": "You don’t have any RWAs yet"
   }
 }

@@ -1,0 +1,6 @@
+.outlineHover:hover {
+  outline: 1px solid #333;
+  outline-offset: 0px;
+  position: relative;
+  z-index: 1;
+}

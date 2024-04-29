@@ -20,6 +20,7 @@ import { Link } from 'lib/woozie';
 
 import { AccountDetailsPopup } from './components/AccountDetails';
 import { SettingButton } from './SettingButton';
+import styles from './settingPopup.module.css';
 
 type SettingsPopupProps = {
   closePopup: () => void;
@@ -212,11 +213,24 @@ export const SettingsDropdown: FC = () => {
 };
 
 const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListItemWithNavigateprops, last: boolean) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
   const itemProps = {
     className: clsx(
       'relative p-4 hover:bg-primary-card-hover text-base-plus text-white text-left w-full',
-      'bg-primary-card flex'
+      'bg-primary-card flex',
+      styles.outlineHover
     ),
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
     children: (
       <div className="w-full">
         <div className="flex items-center w-full">
@@ -225,7 +239,7 @@ const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListIte
             <T id={i18nKey} />
           </span>
         </div>
-        {!last && <ListItemDivider />}
+        {!last && !isHovered && <ListItemDivider />}
       </div>
     )
   };

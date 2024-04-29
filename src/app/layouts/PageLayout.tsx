@@ -38,7 +38,7 @@ interface PageLayoutProps extends PropsWithChildren, ToolbarProps {
   contentPaperStyle?: React.CSSProperties;
   isTopbarVisible?: boolean;
   removePaddings?: boolean;
-  customContainerMinHeight?: number;
+  customContainerMinHeight?: number | string;
 }
 
 const PageLayout: FC<PageLayoutProps> = ({
@@ -98,7 +98,7 @@ const PageLayout: FC<PageLayoutProps> = ({
 
 export default PageLayout;
 
-type ContentPaparProps = ComponentProps<typeof ContentContainer> & { customContainerMinHeight?: number };
+type ContentPaparProps = ComponentProps<typeof ContentContainer> & { customContainerMinHeight?: number | string };
 
 const fullPageMinHeightScreenWithHeader = 'calc(100vh - 230px)';
 const fullPageMinHeightTopbarNavigation = 'calc(100vh - 168px)';

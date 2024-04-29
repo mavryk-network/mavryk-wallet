@@ -30,6 +30,7 @@ const Onboarding: FC = () => {
       step={step}
       setStep={setStep}
       skip={step < 4}
+      customContainerMinHeight="auto"
     >
       {step < 4 && <Stepper style={style} steps={steps} currentStep={step} />}
       {step === 0 && <FirstStep setStep={setStep} />}

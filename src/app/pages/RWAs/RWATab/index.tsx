@@ -2,7 +2,7 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { SyncSpinner } from 'app/atoms';
+import { Divider, SyncSpinner } from 'app/atoms';
 import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
 import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
 import { useAppEnv } from 'app/env';
@@ -88,7 +88,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const contentElement = useMemo(
     () => (
-      <div className={clsx('grid gap-4', popup ? 'grid-cols-2' : 'grid-cols-3')}>
+      <div className={clsx('flex flex-col w-full')}>
         {displayedSlugs.map(slug => (
           <CollectibleItem
             key={slug}

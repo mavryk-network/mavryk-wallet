@@ -65,17 +65,17 @@ export const ContentSection: FC<Props> = ({ className }) => {
         testID: HomeSelectors.NFTsTab
       },
       {
+        name: 'RWAs',
+        titleI18nKey: 'rwas',
+        Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        testID: HomeSelectors.rwasTab
+      },
+      {
         name: 'history',
         titleI18nKey: 'history',
         Component: HistoryComponent,
         testID: HomeSelectors.activityTab,
         whileMessageI18nKey: 'operationHistoryWhileMessage'
-      },
-      {
-        name: 'RWAs',
-        titleI18nKey: 'rwas',
-        Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
-        testID: HomeSelectors.rwasTab
       }
     ];
   }, [scrollToTheTabsBar]);

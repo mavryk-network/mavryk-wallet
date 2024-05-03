@@ -80,7 +80,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const balances = useCurrentAccountBalances();
   const address = account.publicKeyHash;
 
-  const tokens = useAccountTokens(address, chainId);
+  const tokens = useAccountTokens(address, chainId, false);
   const tokensRecord = useMemo(() => tokensToRecord(tokens), [tokens]);
 
   const managebleSlugs = useMemo(

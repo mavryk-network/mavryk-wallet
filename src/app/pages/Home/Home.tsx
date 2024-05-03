@@ -128,7 +128,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             }}
             // disabled={!canSend}
             disabled
-            tippyProps={tippyPropsMock}
             testID={HomeSelectors.swapButton}
           />
           <ActionButton

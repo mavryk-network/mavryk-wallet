@@ -153,7 +153,6 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               }}
               // disabled={!canSend}
               disabled
-              tippyProps={tippyPropsMock}
               testID={HomeSelectors.swapButton}
             />
             <ActionButton

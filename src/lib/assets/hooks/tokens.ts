@@ -70,10 +70,11 @@ export const useEnabledAccountTokensSlugs = () => {
 /**
  * Sorting is needed to preserve some tokens order (avoid UI listing jumps)
  * after merge of multiple sources (e.g. stored, predefined, whitelist)
+ * returnRemovedTokes returns deleted tokens that are stored in memory by default
  */
 const TOKENS_SORT_ITERATEES: (keyof AccountToken)[] = ['predefined', 'slug'];
 
-export const useAccountTokens = (account: string, chainId: string) => {
+export const useAccountTokens = (account: string, chainId: string, returnRemovedTokes = true) => {
   const storedRaw = useAccountTokensSelector(account, chainId);
   const whitelistSlugs = useWhitelistSlugs(chainId);
 
@@ -106,12 +107,16 @@ export const useAccountTokens = (account: string, chainId: string) => {
       // Keep this order to preserve correct statuses & flags
       const concatenated: AccountToken[] = predefined.concat(stored).concat(whitelisted);
 
+      const filteredConcatened = returnRemovedTokes
+        ? concatenated
+        : concatenated.filter(slug => slug.status !== 'removed');
+
       return sortBy(
-        uniqBy(concatenated, t => t.slug),
+        uniqBy(filteredConcatened, t => t.slug),
         TOKENS_SORT_ITERATEES
       );
     },
-    [chainId, storedRaw, whitelistSlugs, balances],
+    [storedRaw, chainId, whitelistSlugs, returnRemovedTokes, balances],
     isEqual
   );
 };

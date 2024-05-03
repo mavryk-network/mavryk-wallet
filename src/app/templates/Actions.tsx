@@ -51,7 +51,6 @@ export const ActionsBlock = ({ assetSlug }: { assetSlug?: string }) => {
         }}
         // disabled={!canSend}
         disabled
-        tippyProps={tippyPropsMock}
         testID={HomeSelectors.swapButton}
       />
       <ActionButton

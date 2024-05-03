@@ -49,7 +49,8 @@ export const ActionsBlock = ({ assetSlug }: { assetSlug?: string }) => {
           pathname: '/swap',
           search: `from=${assetSlug ?? ''}`
         }}
-        disabled={!canSend}
+        // disabled={!canSend}
+        disabled
         tippyProps={tippyPropsMock}
         testID={HomeSelectors.swapButton}
       />

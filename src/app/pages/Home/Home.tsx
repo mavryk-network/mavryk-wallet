@@ -126,7 +126,8 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
               pathname: '/swap',
               search: `from=${assetSlug ?? ''}`
             }}
-            disabled={!canSend}
+            // disabled={!canSend}
+            disabled
             tippyProps={tippyPropsMock}
             testID={HomeSelectors.swapButton}
           />

@@ -15,16 +15,16 @@ export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
-  const { fullPage } = useAppEnv();
+  const { fullPage, popup } = useAppEnv();
 
   return (
     <PageLayout
       isTopbarVisible={false}
       pageTitle={<T id="stake" />}
-      removePaddings
+      removePaddings={popup}
       RightSidedComponent={toolbarRightSidedComponent}
     >
-      <div className={clsx('h-full pb-8 flex-1 flex flex-col', fullPage ? 'pb-11' : 'pb-8')}>
+      <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
         {showStakeScreen ? (
           <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
         ) : (
@@ -82,7 +82,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
   }, [setShowStakeScreen]);
 
   return (
-    <div className={clsx(popup ? 'px-4 pt-4' : 'px-20 pt-8')}>
+    <div className={clsx(popup && 'px-4 pt-4')}>
       <div className="text-base text-white text-center">
         <T id="delegationPointsHead1" substitutions={<span className="text-accent-blue">~5.6%</span>} />
       </div>

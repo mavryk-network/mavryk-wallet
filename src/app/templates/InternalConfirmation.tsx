@@ -13,6 +13,7 @@ import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import { ContentPaper, Toolbar } from 'app/layouts/PageLayout';
+import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setOnRampPossibilityAction } from 'app/store/settings/actions';
 import AccountBanner from 'app/templates/AccountBanner';
@@ -249,169 +250,176 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   );
 
   return (
-    <div
-      className={classNames(
-        'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar flex-1',
-        !popup && 'justify-center px-2',
-        popup ? 'max-w-sm' : 'w-screen-xs flex-1'
+    <div>
+      {!popup && (
+        <div className="py-9 flex justify-center">
+          <LogoDesktopIcon />
+        </div>
       )}
-      style={{ maxHeight: popup ? 'auto' : '664px' }}
-    >
-      <ContentPaper>
-        <Toolbar pageTitle={<T id="confirmOperation" />} />
-
-        <div
-          className={classNames(
-            'flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar',
-            popup ? 'px-4 pt-4' : 'pt-8 px-20 flex-1'
-          )}
-          style={{ height: '34rem', maxHeight: popup ? 'auto' : '552px' }}
-        >
-          <div>
-            {error ? (
-              <Alert
-                closable
-                onClose={handleErrorAlertClose}
-                type="error"
-                title={t('error')}
-                description={error?.message ?? t('smthWentWrong')}
-                className="my-4"
-                autoFocus
-              />
-            ) : (
-              <div>
-                <NetworkBanner
-                  rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
-                  narrow={false}
-                />
-                <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" restrictAccountSelect />
-
-                {payloadError && (
-                  <AlertWithCollapse
-                    wrapperClassName="mb-4"
-                    title={
-                      <span>
-                        <T id="attention" />!
-                      </span>
-                    }
-                    description={
-                      <span>
-                        <T id="txIsLikelyToFail" />
-                      </span>
-                    }
-                  >
-                    <OperationsBanner className="mb-0" copyButtonClassName="p-2" opParams={payloadError ?? {}} />
-                  </AlertWithCollapse>
-                )}
-
-                {signPayloadFormats && (
-                  <>
-                    <div className="w-full flex justify-end mb-3">
-                      <span className="mr-2 text-base-plus text-white">
-                        <T id="operation" />
-                      </span>
-                      <div className="flex-1" />
-                    </div>
-                  </>
-                )}
-
-                {signPayloadFormats.length > 1 && (
-                  <>
-                    <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
-                  </>
-                )}
-
-                {payload.type === 'operations' && spFormat.key === 'raw' && (
-                  <OperationsBanner
-                    opParams={payload.rawToSign ?? payload.opParams}
-                    jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
-                    modifiedTotalFee={modifiedTotalFeeValue}
-                    modifiedStorageLimit={modifiedStorageLimitValue}
-                  />
-                )}
-
-                {payload.type === 'sign' && spFormat.key === 'bytes' && (
-                  <>
-                    <RawPayloadView
-                      label={t('payloadToSign')}
-                      payload={payload.bytes}
-                      className="mb-4 px-4 py-4"
-                      style={bytesStyle}
-                    />
-                  </>
-                )}
-
-                {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
-                  <>
-                    <RawPayloadView payload={payload.bytesToSign} className="mb-4 px-4 py-4" style={bytesStyle} />
-                  </>
-                )}
-
-                {spFormat.key === 'preview' && (
-                  <ExpensesView
-                    expenses={expensesData}
-                    estimates={payload.type === 'operations' ? payload.estimates : undefined}
-                    modifyFeeAndLimit={modifyFeeAndLimit}
-                    mainnet={mainnet}
-                    gasFeeError={gasFeeError}
-                  />
-                )}
-
-                <ModifyFeeAndLimitComponent
-                  expenses={expensesData}
-                  estimates={estimates}
-                  modifyFeeAndLimit={modifyFeeAndLimit}
-                  mainnet={mainnet}
-                  gasFeeError={gasFeeError}
-                  includeStorageData={!isStorageDataHidden}
-                  includeBurnedFee
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1" />
+      <div
+        className={classNames(
+          'h-full w-full mx-auto flex flex-col relative overflow-x-hidden no-scrollbar flex-1',
+          !popup && 'justify-center px-2',
+          popup ? 'max-w-sm' : 'w-screen-xs flex-1'
+        )}
+      >
+        <ContentPaper>
+          <Toolbar pageTitle={<T id="confirmOperation" />} />
 
           <div
             className={classNames(
-              'sticky bottom-0 bg-primary-bg shadow-md flex items-stretch py-4',
-              popup && ' w-full mx-auto',
-              !popup && 'px-20 border-t border-divider'
+              'flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar',
+              popup ? 'px-4 pt-4' : 'pt-8 px-20 flex-1'
             )}
-            style={{ transform: !popup ? 'translateX(-80px)' : 'none', width: popup ? '100%' : '600px' }}
           >
-            <div className="w-1/2 pr-2">
-              <ButtonRounded
-                type="button"
-                size="big"
-                className="w-full"
-                isLoading={declining}
-                disabled={declining}
-                fill={false}
-                onClick={handleDeclineClick}
-                testID={InternalConfirmationSelectors.declineButton}
-              >
-                <T id="cancel" />
-              </ButtonRounded>
+            <div className=" h-full flex flex-col flex-1">
+              {error ? (
+                <Alert
+                  closable
+                  onClose={handleErrorAlertClose}
+                  type="error"
+                  title={t('error')}
+                  description={error?.message ?? t('smthWentWrong')}
+                  className={classNames('my-4')}
+                  autoFocus
+                />
+              ) : (
+                <div className="h-full flex flex-col flex-1">
+                  <NetworkBanner
+                    rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
+                    narrow={false}
+                  />
+                  <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" restrictAccountSelect />
+
+                  {payloadError && (
+                    <AlertWithCollapse
+                      wrapperClassName="mb-4"
+                      title={
+                        <span>
+                          <T id="attention" />!
+                        </span>
+                      }
+                      description={
+                        <span>
+                          <T id="txIsLikelyToFail" />
+                        </span>
+                      }
+                    >
+                      <OperationsBanner className="mb-0" copyButtonClassName="p-2" opParams={payloadError ?? {}} />
+                    </AlertWithCollapse>
+                  )}
+
+                  {signPayloadFormats && (
+                    <>
+                      <div className="w-full flex justify-end mb-3">
+                        <span className="mr-2 text-base-plus text-white">
+                          <T id="operation" />
+                        </span>
+                        <div className="flex-1" />
+                      </div>
+                    </>
+                  )}
+
+                  {signPayloadFormats.length > 1 && (
+                    <>
+                      <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
+                    </>
+                  )}
+
+                  {payload.type === 'operations' && spFormat.key === 'raw' && (
+                    <OperationsBanner
+                      opParams={payload.rawToSign ?? payload.opParams}
+                      jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
+                      modifiedTotalFee={modifiedTotalFeeValue}
+                      modifiedStorageLimit={modifiedStorageLimitValue}
+                    />
+                  )}
+
+                  {payload.type === 'sign' && spFormat.key === 'bytes' && (
+                    <>
+                      <RawPayloadView
+                        label={t('payloadToSign')}
+                        payload={payload.bytes}
+                        className="mb-4 px-4 py-4"
+                        style={bytesStyle}
+                      />
+                    </>
+                  )}
+
+                  {payload.type === 'operations' && payload.bytesToSign && spFormat.key === 'bytes' && (
+                    <>
+                      <RawPayloadView payload={payload.bytesToSign} className="mb-4 px-4 py-4" style={bytesStyle} />
+                    </>
+                  )}
+
+                  {spFormat.key === 'preview' && (
+                    <ExpensesView
+                      expenses={expensesData}
+                      estimates={payload.type === 'operations' ? payload.estimates : undefined}
+                      modifyFeeAndLimit={modifyFeeAndLimit}
+                      mainnet={mainnet}
+                      gasFeeError={gasFeeError}
+                    />
+                  )}
+
+                  <ModifyFeeAndLimitComponent
+                    expenses={expensesData}
+                    estimates={estimates}
+                    modifyFeeAndLimit={modifyFeeAndLimit}
+                    mainnet={mainnet}
+                    gasFeeError={gasFeeError}
+                    includeStorageData={!isStorageDataHidden}
+                    includeBurnedFee
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="w-1/2 pl-2">
-              <FormSubmitButton
-                type="button"
-                className="justify-center w-full"
-                disabled={gasFeeError}
-                loading={confirming}
-                onClick={handleConfirmClick}
-                testID={error ? InternalConfirmationSelectors.retryButton : InternalConfirmationSelectors.confirmButton}
-              >
-                <T id={error ? 'retry' : 'confirm'} />
-              </FormSubmitButton>
+            <div className={classNames('flex-1', !popup && 'mb-6')} />
+
+            <div
+              className={classNames(
+                'sticky bottom-0 bg-primary-bg shadow-md flex items-stretch py-4',
+                popup && ' w-full mx-auto',
+                !popup && 'px-20 border-t border-divider'
+              )}
+              style={{ transform: !popup ? 'translateX(-80px)' : 'none', width: popup ? '100%' : '600px' }}
+            >
+              <div className="w-1/2 pr-2">
+                <ButtonRounded
+                  type="button"
+                  size="big"
+                  className="w-full"
+                  isLoading={declining}
+                  disabled={declining}
+                  fill={false}
+                  onClick={handleDeclineClick}
+                  testID={InternalConfirmationSelectors.declineButton}
+                >
+                  <T id="cancel" />
+                </ButtonRounded>
+              </div>
+
+              <div className="w-1/2 pl-2">
+                <FormSubmitButton
+                  type="button"
+                  className="justify-center w-full"
+                  disabled={gasFeeError}
+                  loading={confirming}
+                  onClick={handleConfirmClick}
+                  testID={
+                    error ? InternalConfirmationSelectors.retryButton : InternalConfirmationSelectors.confirmButton
+                  }
+                >
+                  <T id={error ? 'retry' : 'confirm'} />
+                </FormSubmitButton>
+              </div>
             </div>
+
+            <ConfirmLedgerOverlay displayed={confirming && account.type === TempleAccountType.Ledger} />
           </div>
-
-          <ConfirmLedgerOverlay displayed={confirming && account.type === TempleAccountType.Ledger} />
-        </div>
-      </ContentPaper>
+        </ContentPaper>
+      </div>
     </div>
   );
 };

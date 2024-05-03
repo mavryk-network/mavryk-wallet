@@ -331,10 +331,10 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
 
   return (
-    <div className={classNames(!restFormDisplayed && popup ? 'pt-4' : 'pt-8', 'h-full')}>
+    <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
       {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
         <Controller
           name="to"
           as={<NoSpaceField ref={toFieldRef} />}
@@ -353,7 +353,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
           style={{
             resize: 'none'
           }}
-          containerClassName={classNames('mb-4', popup ? 'px-4' : 'px-20', toFilled && 'hidden')}
+          containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
           testID={DelegateFormSelectors.bakerInput}
         />
 
@@ -458,11 +458,11 @@ const BakerForm: React.FC<BakerFormProps> = ({
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col" style={{ marginTop: 2 }}>
       <BakerBannerComponent baker={baker} tzError={tzError} />
-      <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup ? 'mx-4' : 'mx-20')}>
+      <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup && 'mx-4')}>
         <HashChip hash={toValue} type="link" small trim={false} />
       </div>
 
-      <div className={classNames('h-full flex flex-col flex-grow', popup ? 'px-4' : 'px-20')}>
+      <div className={classNames('h-full flex flex-col flex-grow', popup && 'px-4')}>
         <div className={classNames(!Boolean(tzError) && 'flex-grow')}>
           <AdditionalFeeInput
             name="fee"
@@ -512,6 +512,8 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const { symbol } = useGasToken();
+  const { fullPage } = useAppEnv();
+
   return baker ? (
     <>
       <div className="flex flex-col items-center">
@@ -537,7 +539,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
       )}
     </>
   ) : (
-    <div className="p-4">
+    <div className={classNames(fullPage ? 'py-4' : 'p-4')}>
       <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
     </div>
   );

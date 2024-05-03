@@ -256,7 +256,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       <div className="text-white text-base-plus flex items-center justify-between">
         <T id="staking" />
         {myBakerPkh && (
-          <Anchor href="https://tezos-nodes.com/">
+          <Anchor href={process.env.NODES_URL}>
             <ButtonRounded fill={false} size="xs">
               <T id="validators" />
             </ButtonRounded>

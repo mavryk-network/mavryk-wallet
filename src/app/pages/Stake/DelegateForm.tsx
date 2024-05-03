@@ -148,7 +148,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
 
   const AllValidatorsComponent = useMemo(
     () => (
-      <Anchor href="https://tezos-nodes.com/" className="text-base-plus text-accent-blue cursor-pointer">
+      <Anchor href={process.env.NODES_URL} className="text-base-plus text-accent-blue cursor-pointer">
         All Validators
       </Anchor>
     ),
@@ -431,7 +431,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 }) => {
   const { popup } = useAppEnv();
   const testGroupName = useUserTestingGroupNameSelector();
-  const assetSymbol = 'ꜩ';
+  const assetSymbol = 'ṁ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
 
   const bakerTestMessage = useMemo(() => {

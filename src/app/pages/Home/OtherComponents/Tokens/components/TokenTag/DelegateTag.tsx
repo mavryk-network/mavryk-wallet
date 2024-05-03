@@ -137,7 +137,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
     <AlertWithAction
       btnLabel={t('details')}
       onClick={handleTagClick}
-      linkTo={`https://ghostnet.tzkt.io/${myBakerPkh ?? ''}`}
+      linkTo={`${process.env.TZKT_URL}/${myBakerPkh ?? ''}`}
     >
       {renderBakerData()}
     </AlertWithAction>

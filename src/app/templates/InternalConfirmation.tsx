@@ -309,22 +309,24 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     </AlertWithCollapse>
                   )}
 
-                  {signPayloadFormats && (
-                    <>
-                      <div className="w-full flex justify-end mb-3">
-                        <span className="mr-2 text-base-plus text-white">
-                          <T id="operation" />
-                        </span>
-                        <div className="flex-1" />
-                      </div>
-                    </>
-                  )}
+                  <div className="flex w-full items-center justify-between">
+                    {signPayloadFormats && (
+                      <>
+                        <div className="w-full flex justify-end mb-3">
+                          <span className="mr-2 text-base-plus text-white">
+                            <T id="operation" />
+                          </span>
+                          <div className="flex-1" />
+                        </div>
+                      </>
+                    )}
 
-                  {signPayloadFormats.length > 1 && (
-                    <>
-                      <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
-                    </>
-                  )}
+                    {signPayloadFormats.length > 1 && (
+                      <>
+                        <TabsSwitcher activeItem={spFormat} items={signPayloadFormats} onChange={setSpFormat} />
+                      </>
+                    )}
+                  </div>
 
                   {payload.type === 'operations' && spFormat.key === 'raw' && (
                     <OperationsBanner

@@ -17,7 +17,7 @@ export const NETWORK_IDS = new Map<string, string>([
   [TempleChainId.Weekly, 'weeklynet']
 ]);
 
-export const MAV_RPC_NETWORK = 'https://rpc.mavryk.network/atlasnet';
+export const MAV_RPC_NETWORK = 'https://atlasnet.rpc.mavryk.network';
 
 // const DCP_NETWORKS: TempleNetwork[] = [
 //   {

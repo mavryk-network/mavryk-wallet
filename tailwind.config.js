@@ -695,6 +695,7 @@ module.exports = {
         '163px': '10.188rem',
         500: '31.25rem',
         '384px': '384px',
+        '400px': '400px',
         max: '100%'
       },
       height: theme => theme('spacing'),

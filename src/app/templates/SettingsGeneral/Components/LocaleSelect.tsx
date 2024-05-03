@@ -4,6 +4,7 @@ import classNames from 'clsx';
 import browser from 'webextension-polyfill';
 
 import Flag from 'app/atoms/Flag';
+import { useAppEnv } from 'app/env';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
 import { AnalyticsEventCategory, AnalyticsEventEnum, setTestID, useAnalytics } from 'lib/analytics';
@@ -101,6 +102,7 @@ const LocaleSelect: FC = () => {
   // const selectedLocale = getCurrentLocale();
   const { trackEvent } = useAnalytics();
   const [searchValue, setSearchValue] = useState<string>('');
+  const { fullPage } = useAppEnv();
 
   const options = useMemo(
     () =>
@@ -126,7 +128,7 @@ const LocaleSelect: FC = () => {
   return (
     <InputContainer className="mb-4" header={<LocaleTitle />}>
       <DropdownSelect
-        optionsListClassName="p-2"
+        optionsListClassName={classNames('p-2', fullPage && 'max-h-400px')}
         dropdownButtonClassName="px-4 py-14px"
         DropdownFaceContent={<LocaleFieldContent {...value} />}
         optionsProps={{

@@ -2,6 +2,7 @@ import React, { useCallback, FC, useState, useMemo } from 'react';
 
 import classNames from 'clsx';
 
+import { useAppEnv } from 'app/env';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
 import { AnalyticsEventCategory, AnalyticsEventEnum, setTestID, useAnalytics } from 'lib/analytics';
@@ -16,6 +17,7 @@ const renderOptionContent = (option: FiatCurrencyOption, isSelected: boolean) =>
 );
 
 const FiatCurrencySelect: FC = () => {
+  const { fullPage } = useAppEnv();
   const { trackEvent } = useAnalytics();
   const { selectedFiatCurrency, setSelectedFiatCurrency } = useFiatCurrency();
 
@@ -51,7 +53,7 @@ const FiatCurrencySelect: FC = () => {
   return (
     <InputContainer className="mb-4" header={<FiatCurrencyTitle />}>
       <DropdownSelect
-        optionsListClassName="p-2"
+        optionsListClassName={classNames('p-2', fullPage && 'max-h-400px')}
         dropdownButtonClassName="px-4 py-14px"
         DropdownFaceContent={<FiatCurrencyFieldContent option={value} />}
         optionsProps={{

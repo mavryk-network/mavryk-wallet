@@ -6,6 +6,7 @@ import classNames from 'clsx';
 
 import { Money } from 'app/atoms';
 import PlainAssetInput from 'app/atoms/PlainAssetInput';
+import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
@@ -51,6 +52,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   includeStorageData = true
 }) => {
   const { symbol } = useGasToken();
+  const { popup } = useAppEnv();
 
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
@@ -223,8 +225,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       <div className="text-white text-base-plus mt-4 pb-3">
         <T id="payment" />
       </div>
-      <div className="flex-1" />
-
+      {popup && <div className="flex-1" />}
       <div
         className={classNames(
           'flex items-center',

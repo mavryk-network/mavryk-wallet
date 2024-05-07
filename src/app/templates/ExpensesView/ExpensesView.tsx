@@ -215,7 +215,7 @@ const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey,
         {arg.map((value, index) => (
           <span key={index} className="flex">
             &nbsp;
-            <HashChip key={index} hash={value} type="link" small trim />
+            <HashChip key={index} hash={value} type="button" small trim />
             {index === arg.length - 1 ? null : ','}
           </span>
         ))}

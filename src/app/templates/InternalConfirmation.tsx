@@ -250,7 +250,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   );
 
   return (
-    <div>
+    <div className={classNames(popup && 'flex-1 flex flex-col relative h-full')}>
       {!popup && (
         <div className="py-9 flex justify-center">
           <LogoDesktopIcon />
@@ -263,16 +263,16 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
           popup ? 'max-w-sm' : 'w-screen-xs flex-1 pb-16'
         )}
       >
-        <ContentPaper>
+        <ContentPaper className="flex-1 flex flex-col">
           <Toolbar pageTitle={<T id="confirmOperation" />} />
 
           <div
             className={classNames(
               'flex flex-col relative bg-primary-bg text-white shadow-md no-scrollbar',
-              popup ? 'px-4 pt-4' : 'pt-8 px-20 flex-1'
+              popup ? 'px-4 pt-4 flex-1' : 'pt-8 px-20 flex-1'
             )}
           >
-            <div className=" h-full flex flex-col flex-1">
+            <div className="h-full flex flex-col flex-1">
               {error ? (
                 <Alert
                   closable

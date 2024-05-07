@@ -263,7 +263,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
           popup ? 'max-w-sm' : 'w-screen-xs flex-1'
         )}
       >
-        <ContentPaper customContainerMinHeight="auto">
+        <ContentPaper customContainerMinHeight={classNames('auto', !popup && 'mb-20')}>
           <Toolbar pageTitle={<T id="confirmOperation" />} />
 
           <div

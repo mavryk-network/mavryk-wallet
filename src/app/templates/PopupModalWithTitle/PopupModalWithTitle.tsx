@@ -79,7 +79,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
           <div
             className={classNames(
               'absolute top-4 px-4 w-full flex justify-end items-center',
-              'transition duration-300 ease-in-out',
+              'transition duration-300 ease-in-out z-10',
               animateCloseIcon && 'bg-primary-card pb-4 z-10'
             )}
           >
@@ -94,7 +94,7 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
               popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
             )}
           >
-            <div className="z-10">{leftSidedComponent}</div>
+            <div className="z-20">{leftSidedComponent}</div>
             {title && (
               <div className={classNames('text-white text-center text-xl px-4 bg-primary-card', styles.middle)}>
                 {title}

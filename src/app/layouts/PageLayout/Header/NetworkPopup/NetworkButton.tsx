@@ -4,13 +4,10 @@ import classNames from 'clsx';
 
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as LogoIcon } from 'app/misc/mavryk/logo-small.svg';
-import { useBlockExplorer } from 'lib/temple/front';
 
 import styles from './style.module.css';
 
 export const NetworkButton: FC<HTMLAttributes<HTMLDivElement>> = ({ onClick, className, ...rest }) => {
-  // preload networks for networks modal (if remove this line, the modal wont be opened)
-  useBlockExplorer();
   return (
     <section
       {...rest}

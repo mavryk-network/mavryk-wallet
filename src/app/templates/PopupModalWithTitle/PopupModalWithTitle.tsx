@@ -25,88 +25,82 @@ export interface PopupModalWithTitlePropsProps extends CustomPopupProps {
   contentPosition?: CustomPopupContentPositionType;
 }
 
-export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = ({
-  title,
-  children,
-  className,
-  headerComponent,
-  leftSidedComponent,
-  contentPosition = 'bottom',
-  ...restProps
-}) => {
-  const { popup } = useAppEnv();
-  const handleMouseEnter = useTippyById('#close-icon', tippyProps);
-  const [animateCloseIcon, setAnimateCloseIcon] = useState(false);
+export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = memo(
+  ({ title, children, className, headerComponent, leftSidedComponent, contentPosition = 'bottom', ...restProps }) => {
+    const { popup } = useAppEnv();
+    const handleMouseEnter = useTippyById('#close-icon', tippyProps);
+    const [animateCloseIcon, setAnimateCloseIcon] = useState(false);
 
-  const scrollEvent = (e: SyntheticEvent) => {
-    const target = e.target as HTMLTextAreaElement;
+    const scrollEvent = (e: SyntheticEvent) => {
+      const target = e.target as HTMLTextAreaElement;
 
-    if (target.scrollTop > SCROLL_INDEX_POS && !animateCloseIcon) {
-      setAnimateCloseIcon(true);
-    }
+      if (target.scrollTop > SCROLL_INDEX_POS && !animateCloseIcon) {
+        setAnimateCloseIcon(true);
+      }
 
-    if (target.scrollTop < SCROLL_INDEX_POS && animateCloseIcon) {
-      setAnimateCloseIcon(false);
-    }
-  };
+      if (target.scrollTop < SCROLL_INDEX_POS && animateCloseIcon) {
+        setAnimateCloseIcon(false);
+      }
+    };
 
-  const memoizedContentStyle = useMemo(
-    () => (popup ? { maxHeight: 500 } : { maxHeight: 'calc(100vh - 190px' }),
-    [popup]
-  );
+    const memoizedContentStyle = useMemo(
+      () => (popup ? { maxHeight: 500 } : { maxHeight: 'calc(100vh - 190px' }),
+      [popup]
+    );
 
-  return (
-    <CustomPopup
-      {...restProps}
-      className={classNames(
-        'w-full relative  bg-primary-card',
-        contentPosition === 'center' ? 'rounded-2xl-plus' : 'rounded-tl-2xl-plus rounded-tr-2xl-plus',
-        popup ? 'max-w-md' : contentPosition === 'center' ? 'max-w-screen-xxsPlus' : 'max-w-screen-xs',
-        className
-      )}
-      shouldCloseOnEsc
-      contentPosition={contentPosition}
-    >
-      <>
-        {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
-        <div
-          // used for infinite scrol lib to load more stuff while scrolled to the end
-          id="popupModalScrollable"
-          style={memoizedContentStyle}
-          onScroll={scrollEvent}
-          className={classNames('w-full no-scrollbar', styles.container)}
-        >
+    return (
+      <CustomPopup
+        {...restProps}
+        className={classNames(
+          'w-full relative  bg-primary-card',
+          contentPosition === 'center' ? 'rounded-2xl-plus' : 'rounded-tl-2xl-plus rounded-tr-2xl-plus',
+          popup ? 'max-w-md' : contentPosition === 'center' ? 'max-w-screen-xxsPlus' : 'max-w-screen-xs',
+          className
+        )}
+        shouldCloseOnEsc
+        contentPosition={contentPosition}
+      >
+        <>
+          {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
           <div
-            className={classNames(
-              'absolute top-4 px-4 w-full flex justify-end items-center',
-              'transition duration-300 ease-in-out z-10',
-              animateCloseIcon && 'bg-primary-card pb-4 z-10'
-            )}
+            // used for infinite scrol lib to load more stuff while scrolled to the end
+            id="popupModalScrollable"
+            style={memoizedContentStyle}
+            onScroll={scrollEvent}
+            className={classNames('w-full no-scrollbar', styles.container)}
           >
-            <button onMouseEnter={handleMouseEnter} id="close-icon" className=" ">
-              <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
-            </button>
+            <div
+              className={classNames(
+                'absolute top-4 px-4 w-full flex justify-end items-center',
+                'transition duration-300 ease-in-out z-10',
+                animateCloseIcon && 'bg-primary-card pb-4 z-10'
+              )}
+            >
+              <button onMouseEnter={handleMouseEnter} id="close-icon" className=" ">
+                <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
+              </button>
+            </div>
+            <div
+              className={classNames(
+                leftSidedComponent ? styles.headerContent : 'flex items-center justify-center relative',
+                popup ? 'px-4' : contentPosition === 'center' ? 'mx-12' : 'ml-0',
+                popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
+              )}
+            >
+              <div className="z-20">{leftSidedComponent}</div>
+              {title && (
+                <div className={classNames('text-white text-center text-xl px-4 bg-primary-card', styles.middle)}>
+                  {title}
+                </div>
+              )}
+            </div>
+            <ChildComponent children={children} />
           </div>
-          <div
-            className={classNames(
-              leftSidedComponent ? styles.headerContent : 'flex items-center justify-center relative',
-              popup ? 'px-4' : contentPosition === 'center' ? 'mx-12' : 'ml-0',
-              popup ? 'mb-4' : contentPosition === 'center' ? 'mb-8' : 'mb-4'
-            )}
-          >
-            <div className="z-20">{leftSidedComponent}</div>
-            {title && (
-              <div className={classNames('text-white text-center text-xl px-4 bg-primary-card', styles.middle)}>
-                {title}
-              </div>
-            )}
-          </div>
-          <ChildComponent children={children} />
-        </div>
-      </>
-    </CustomPopup>
-  );
-};
+        </>
+      </CustomPopup>
+    );
+  }
+);
 
 const ChildComponent = memo(({ children }: { children: ReactNode }) => {
   return <div className="no-scrollbar h-full">{children}</div>;

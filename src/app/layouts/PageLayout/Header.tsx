@@ -6,7 +6,7 @@ import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import { useAccount, useBlockExplorer, useTempleClient } from 'lib/temple/front';
 
 import { AccountPopupButton, GetProlabel } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
@@ -43,6 +43,9 @@ const Control: FC = () => {
   const [showDAppsPopup, setShowDAppsPopup] = useState(false);
   const [showNetworkPopup, setShowNetworkPopup] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
+
+  // preload networks for networks modal (if u remove this line, the modal wont be opened)
+  useBlockExplorer();
 
   const handlePopupToggle = useCallback((popupFunction: (v: boolean) => void, popupValue: boolean) => {
     popupFunction(popupValue);

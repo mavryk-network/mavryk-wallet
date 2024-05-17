@@ -1,7 +1,8 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { Spinner } from 'app/atoms';
 import { RadioButton } from 'app/atoms/RadioButton';
 import { useAppEnv } from 'app/env';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
@@ -33,15 +34,18 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
 
   const chainId = useChainId(true)!;
   const { setExplorerId } = useBlockExplorer();
+  const [isNetworkSwitching, setisNetworkSwitching] = useState(false);
 
   const filteredNetworks = useMemo(() => allNetworks.filter(n => !n.hidden), [allNetworks]);
 
   const handleNetworkSelect = useCallback(
     async (netId: string, rpcUrl: string, selected: boolean, setOpened: (o: boolean) => void) => {
-      setOpened(false);
-
-      if (selected) return;
+      if (selected) {
+        setOpened(false);
+        return;
+      }
       try {
+        setisNetworkSwitching(true);
         const currentChainId = await loadChainId(rpcUrl);
 
         if (currentChainId && isKnownChainId(currentChainId)) {
@@ -55,12 +59,15 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
           setExplorerId('tzkt');
         }
       } catch (error) {
+        setisNetworkSwitching(false);
         console.error(error);
       }
 
       setNetworkId(netId);
+      setisNetworkSwitching(false);
+      setOpened(false);
     },
-    [setExplorerId, setNetworkId, chainId]
+    [setNetworkId, chainId, setExplorerId]
   );
 
   const action = useMemo(
@@ -76,22 +83,28 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   return (
     <div className={clsx('flex flex-col', popup ? 'px-4' : 'px-12')}>
       <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 380 }}>
-        {filteredNetworks.map(network => {
-          const { id, rpcBaseURL } = network;
-          const selected = id === currentNetwork.id;
+        {isNetworkSwitching ? (
+          <div className="flex items-center justify-center">
+            <Spinner className="w-20" />
+          </div>
+        ) : (
+          filteredNetworks.map(network => {
+            const { id, rpcBaseURL } = network;
+            const selected = id === currentNetwork.id;
 
-          return (
-            <NetworkListItem
-              key={id}
-              network={network}
-              selected={selected}
-              onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
-            />
-          );
-        })}
+            return (
+              <NetworkListItem
+                key={id}
+                network={network}
+                selected={selected}
+                onClick={() => handleNetworkSelect(id, rpcBaseURL, selected, setOpened)}
+              />
+            );
+          })
+        )}
       </div>
       <ButtonLink {...action}>
-        <ButtonRounded size="big" fill={false} className="w-full mt-6">
+        <ButtonRounded disabled={isNetworkSwitching} size="big" fill={false} className="w-full mt-6">
           <T id="addNetwork" />
         </ButtonRounded>
       </ButtonLink>

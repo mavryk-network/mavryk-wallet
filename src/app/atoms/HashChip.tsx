@@ -25,7 +25,7 @@ export const HashChip: FC<HashChipProps> = ({
   <CopyButton
     text={hash}
     type={type}
-    className={classNames(className, showIcon && 'flex gap-x-1 text-sm items-center text-blue-200')}
+    className={classNames(className, showIcon && 'flex text-sm items-center text-blue-200')}
     {...rest}
   >
     <HashShortView
@@ -35,6 +35,6 @@ export const HashChip: FC<HashChipProps> = ({
       lastCharsCount={lastCharsCount}
       trim={trim}
     />
-    {showIcon && <CopyIcon className="text-blue-200 fill-current w-4 h-4" />}
+    {showIcon && <CopyIcon className="text-blue-200 fill-current w-4 h-4 ml-1" />}
   </CopyButton>
 );

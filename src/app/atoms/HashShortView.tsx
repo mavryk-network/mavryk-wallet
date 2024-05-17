@@ -19,7 +19,7 @@ const HashShortView = memo<HashShortViewProps>(
       return ln > trimAfter ? (
         <>
           {hash.slice(0, firstCharsCount)}
-          <span className="opacity-75 -ml-1 -mr-1">...</span>
+          <span className="opacity-75">...</span>
           {hash.slice(ln - lastCharsCount, ln)}
         </>
       ) : (

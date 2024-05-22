@@ -11,6 +11,7 @@ import { MIGRATIONS } from './migrations';
 import { epicMiddleware, rootEpic } from './root-state.epics';
 import { rootReducer } from './root-state.reducer';
 import type { RootState } from './root-state.type';
+import { sanitizeRwasMetadataForDevTools } from './rwas-metadata/state';
 
 export const SLICES_BLACKLIST = [
   'buyWithCreditCard' as const,
@@ -56,7 +57,8 @@ const store = configureStore({
           // See: https://github.com/reduxjs/redux-devtools/issues/496#issuecomment-670246737
           stateSanitizer: state => ({
             ...state,
-            collectiblesMetadata: sanitizeCollectiblesMetadataForDevTools(state.collectiblesMetadata)
+            collectiblesMetadata: sanitizeCollectiblesMetadataForDevTools(state.collectiblesMetadata),
+            rwasMetadata: sanitizeRwasMetadataForDevTools(state.rwasMetadata)
           })
         })
       ]

@@ -13,6 +13,8 @@ import { currencyReducer } from './currency/reducers';
 import { dAppsReducer } from './d-apps/reducers';
 import { newsletterReducers } from './newsletter/newsletter-reducers';
 import { partnersPromotionPersistedReducer } from './partners-promotion/reducers';
+import { rwasPersistedReducer } from './rwas/reducer';
+import { rwasMetadataPersistedReducer } from './rwas-metadata/reducer';
 import { settingsReducer } from './settings/reducers';
 import { swapReducer } from './swap/reducers';
 import { tokensMetadataReducer } from './tokens-metadata/reducers';
@@ -29,9 +31,11 @@ const rootStateReducersMap = {
   assets: assetsPersistedReducer,
   tokensMetadata: tokensMetadataReducer,
   collectiblesMetadata: collectiblesMetadataPersistedReducer,
+  rwasMetadata: rwasMetadataPersistedReducer,
   abTesting: abTestingReducer,
   buyWithCreditCard: buyWithCreditCardReducer,
   collectibles: collectiblesPersistedReducer,
+  rwas: rwasPersistedReducer,
   newsletter: newsletterReducers
 };
 

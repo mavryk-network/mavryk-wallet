@@ -23,6 +23,7 @@ type StoredAssetsRecords = StringRecord<AccountAssetsRecord>;
 export interface SliceState {
   tokens: LoadableEntityState<StoredAssetsRecords>;
   collectibles: LoadableEntityState<StoredAssetsRecords>;
+  rwas: LoadableEntityState<StoredAssetsRecords>;
   /** Mainnet tokens whitelist slugs */
   mainnetWhitelist: LoadableEntityState<string[]>;
   mainnetScamlist: LoadableEntityState<Record<string, boolean>>;
@@ -31,6 +32,7 @@ export interface SliceState {
 export const initialState: SliceState = {
   tokens: createEntity({}),
   collectibles: createEntity({}),
+  rwas: createEntity({}),
   mainnetWhitelist: createEntity([]),
   mainnetScamlist: createEntity({})
 };

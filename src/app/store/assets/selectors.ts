@@ -2,7 +2,7 @@ import { useSelector } from '../root-state.selector';
 
 import { getAccountAssetsStoreKey } from './utils';
 
-type AssetsType = 'collectibles' | 'tokens';
+type AssetsType = 'collectibles' | 'tokens' | 'rwas';
 
 export const useAllTokensSelector = () => useSelector(state => state.assets.tokens.data);
 

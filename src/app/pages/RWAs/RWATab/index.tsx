@@ -2,11 +2,11 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { Divider, SyncSpinner } from 'app/atoms';
+import { SyncSpinner } from 'app/atoms';
 import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
 import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
 import { useAppEnv } from 'app/env';
-import { useCollectiblesListingLogic } from 'app/hooks/use-collectibles-listing-logic';
+import { useRWAListingLogic } from 'app/hooks/use-rwa-listing-logic';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
@@ -74,8 +74,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const sortedAssets = useSortededCollectiblesSlugs(sortOption, allSlugs) ?? [mockedRWASlug];
 
-  const { isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
-    useCollectiblesListingLogic(sortedAssets);
+  const { isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } = useRWAListingLogic(sortedAssets);
 
   const displayedSlugs = [mockedRWASlug];
   const isSyncing = false;

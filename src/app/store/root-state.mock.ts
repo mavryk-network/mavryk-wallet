@@ -12,6 +12,8 @@ import { mockDAppsState } from './d-apps/state.mock';
 import { mockNewsletterState } from './newsletter/newsletter-state.mock';
 import { mockPartnersPromotionState } from './partners-promotion/state.mock';
 import type { RootState } from './root-state.type';
+import { mockRwasState } from './rwas/state.mock';
+import { mockRwasMetadataState } from './rwas-metadata/state.mock';
 import { mockSettingsState } from './settings/state.mock';
 import { mockSwapState } from './swap/state.mock';
 import { mockTokensMetadataState } from './tokens-metadata/state.mock';
@@ -29,8 +31,10 @@ export const mockRootState: RootState = {
   assets: mockAssetsState,
   tokensMetadata: mockTokensMetadataState,
   collectiblesMetadata: mockCollectiblesMetadataState,
+  rwasMetadata: mockRwasMetadataState,
   abTesting: mockABTestingState,
   buyWithCreditCard: mockBuyWithCreditCardState,
   collectibles: mockCollectiblesState,
+  rwas: mockRwasState,
   newsletter: mockNewsletterState
 };

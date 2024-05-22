@@ -64,12 +64,12 @@ export const ContentSection: FC<Props> = ({ className }) => {
         Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
         testID: HomeSelectors.NFTsTab
       },
-      // {
-      //   name: 'RWAs',
-      //   titleI18nKey: 'rwas',
-      //   Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
-      //   testID: HomeSelectors.rwasTab
-      // },
+      {
+        name: 'RWAs',
+        titleI18nKey: 'rwas',
+        Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        testID: HomeSelectors.rwasTab
+      },
       {
         name: 'history',
         titleI18nKey: 'history',

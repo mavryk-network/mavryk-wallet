@@ -39,7 +39,10 @@ const ConfirmPage: FC = () => {
 
   if (ready)
     return (
-      <ContentContainer padding={false} className="min-h-screen flex flex-col items-center justify-center">
+      <ContentContainer
+        padding={false}
+        className="min-h-screen flex flex-col items-center justify-center max-w-screen-xs overflow-x-hidden"
+      >
         <ErrorBoundary whileMessage={t('fetchingConfirmationDetails')}>
           <Suspense
             fallback={

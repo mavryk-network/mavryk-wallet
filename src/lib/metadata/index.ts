@@ -9,6 +9,7 @@ import {
   useAllCollectiblesMetadataSelector,
   useCollectibleMetadataSelector
 } from 'app/store/collectibles-metadata/selectors';
+import { useAllRwasMetadataSelector, useRwasMetadataLoadingSelector } from 'app/store/rwas-metadata/selectors';
 import { loadTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import {
   useTokenMetadataSelector,
@@ -74,6 +75,12 @@ export const useGetCollectibleMetadata = () => {
   return useCallback<TokenMetadataGetter>(slug => allMeta.get(slug), [allMeta]);
 };
 
+export const useGetRwaMetadata = () => {
+  const allMeta = useAllRwasMetadataSelector();
+
+  return useCallback<TokenMetadataGetter>(slug => allMeta.get(slug), [allMeta]);
+};
+
 export const useGetAssetMetadata = () => {
   const getTokenOrGasMetadata = useGetTokenOrGasMetadata();
   const getCollectibleMetadata = useGetCollectibleMetadata();
@@ -99,6 +106,16 @@ export const useTokensMetadataPresenceCheck = (slugsToCheck?: string[]) => {
  */
 export const useCollectiblesMetadataPresenceCheck = (slugsToCheck?: string[]) => {
   const metadataLoading = useCollectiblesMetadataLoadingSelector();
+  const getMetadata = useGetCollectibleMetadata();
+
+  useAssetsMetadataPresenceCheck(true, metadataLoading, getMetadata, slugsToCheck);
+};
+
+/**
+ * @param slugsToCheck // Memoize
+ */
+export const useRwasMetadataPresenceCheck = (slugsToCheck?: string[]) => {
+  const metadataLoading = useRwasMetadataLoadingSelector();
   const getMetadata = useGetCollectibleMetadata();
 
   useAssetsMetadataPresenceCheck(true, metadataLoading, getMetadata, slugsToCheck);

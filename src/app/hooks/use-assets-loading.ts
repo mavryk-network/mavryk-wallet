@@ -4,7 +4,8 @@ import { dispatch } from 'app/store';
 import {
   loadAccountTokensActions,
   loadTokensWhitelistActions,
-  loadAccountCollectiblesActions
+  loadAccountCollectiblesActions,
+  loadAccountRwasActions
 } from 'app/store/assets/actions';
 import { useAreAssetsLoading } from 'app/store/assets/selectors';
 import { isKnownChainId } from 'lib/apis/tzkt';
@@ -33,11 +34,15 @@ export const useAssetsLoading = () => {
   );
 
   const collectiblesAreLoading = useAreAssetsLoading('collectibles');
+  const rwasAreLoading = useAreAssetsLoading('rwas');
 
   useInterval(
     () => {
       if (!collectiblesAreLoading && isKnownChainId(chainId))
         dispatch(loadAccountCollectiblesActions.submit({ account: publicKeyHash, chainId }));
+
+      if (!rwasAreLoading && isKnownChainId(chainId))
+        dispatch(loadAccountRwasActions.submit({ account: publicKeyHash, chainId }));
     },
     ASSETS_SYNC_INTERVAL,
     [chainId, publicKeyHash]

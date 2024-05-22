@@ -7,12 +7,15 @@ import { storageConfig, createTransformsBeforePersist } from 'lib/store';
 import {
   loadAccountTokensActions,
   loadAccountCollectiblesActions,
+  loadAccountRwasActions,
   loadTokensWhitelistActions,
   setTokenStatusAction,
   setCollectibleStatusAction,
   putTokensAsIsAction,
   putCollectiblesAsIsAction,
-  loadTokensScamlistActions
+  loadTokensScamlistActions,
+  setRwaStatusAction,
+  putRwasAsIsAction
 } from './actions';
 import { initialState, SliceState } from './state';
 import { getAccountAssetsStoreKey } from './utils';
@@ -46,6 +49,7 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
     }
   });
 
+  // collectibles
   builder.addCase(loadAccountCollectiblesActions.submit, state => {
     state.collectibles.isLoading = true;
     delete state.collectibles.error;
@@ -80,6 +84,63 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
       if (!stored) collectibles[slug] = { status: 'idle' };
     }
   });
+
+  // rwas
+  builder.addCase(loadAccountRwasActions.submit, state => {
+    state.rwas.isLoading = true;
+    delete state.rwas.error;
+  });
+
+  builder.addCase(loadAccountRwasActions.fail, (state, { payload }) => {
+    state.rwas.isLoading = false;
+    state.rwas.error = payload.code ? String(payload.code) : 'unknown';
+  });
+
+  builder.addCase(loadAccountRwasActions.success, (state, { payload }) => {
+    state.rwas.isLoading = false;
+    delete state.rwas.error;
+
+    const { account, chainId, slugs } = payload;
+
+    const data = state.rwas.data;
+    const key = getAccountAssetsStoreKey(account, chainId);
+
+    if (!data[key]) data[key] = {};
+    const rwas = data[key];
+
+    // Removing no-longer owned collectibles (if not 'idle' or added manually)
+    for (const [slug, stored] of Object.entries(rwas)) {
+      if (stored.manual || stored.status !== 'idle') continue;
+
+      if (!slugs.includes(slug)) delete rwas[slug];
+    }
+
+    for (const slug of slugs) {
+      const stored = rwas[slug];
+      if (!stored) rwas[slug] = { status: 'idle' };
+    }
+  });
+
+  builder.addCase(setRwaStatusAction, (state, { payload: { account, chainId, slug, status } }) => {
+    const records = state.rwas.data;
+    const key = getAccountAssetsStoreKey(account, chainId);
+    const rwa = records[key]?.[slug];
+
+    if (rwa) rwa.status = status;
+  });
+
+  builder.addCase(putRwasAsIsAction, (state, { payload }) => {
+    const records = state.rwas.data;
+
+    for (const asset of payload) {
+      const { slug, account, chainId, status, manual } = asset;
+      const key = getAccountAssetsStoreKey(account, chainId);
+      if (!records[key]) records[key] = {};
+      records[key][slug] = { status, manual };
+    }
+  });
+
+  // --------------
 
   builder.addCase(setTokenStatusAction, (state, { payload: { account, chainId, slug, status } }) => {
     const records = state.tokens.data;

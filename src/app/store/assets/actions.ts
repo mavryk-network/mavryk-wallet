@@ -24,6 +24,12 @@ export const loadAccountCollectiblesActions = createActions<
   { code?: string }
 >('assets/LOAD_ACCOUNT_COLLECTIBLES');
 
+export const loadAccountRwasActions = createActions<
+  LoadAssetsPayload,
+  LoadAssetsPayload & { slugs: string[] },
+  { code?: string }
+>('assets/LOAD_ACCOUNT_RWAS');
+
 export const loadTokensWhitelistActions = createActions<void, WhitelistResponseToken[], { code?: string }>(
   'assets/LOAD_TOKENS_WHITELIST'
 );
@@ -38,8 +44,12 @@ export const setTokenStatusAction = createAction<SetAssetStatusPayload>('assets/
 
 export const setCollectibleStatusAction = createAction<SetAssetStatusPayload>('assets/SET_COLLECTIBLE_STATUS');
 
+export const setRwaStatusAction = createAction<SetAssetStatusPayload>('assets/SET_RWA_STATUS');
+
 export type AssetToPut = AccountAssetForStore & StoredAsset;
 
 export const putTokensAsIsAction = createAction<AssetToPut[]>('assets/PUT_TOKENS_AS_IS');
 
 export const putCollectiblesAsIsAction = createAction<AssetToPut[]>('assets/PUT_COLLECTIBLES_AS_IS');
+
+export const putRwasAsIsAction = createAction<AssetToPut[]>('assets/PUT_RWA_AS_IS');

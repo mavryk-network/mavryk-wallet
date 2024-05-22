@@ -16,6 +16,9 @@ export const useAccountCollectiblesSelector = (account: string, chainId: string)
     state => state.assets.collectibles.data[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY
   );
 
+export const useAccountRwasSelector = (account: string, chainId: string) =>
+  useSelector(state => state.assets.rwas.data[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
+
 export const useAreAssetsLoading = (type: AssetsType) => useSelector(state => state.assets[type].isLoading);
 
 export const useMainnetTokensWhitelistSelector = () => useSelector(state => state.assets.mainnetWhitelist.data);

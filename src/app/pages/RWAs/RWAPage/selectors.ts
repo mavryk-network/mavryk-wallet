@@ -1,5 +1,5 @@
 export enum CollectiblesSelectors {
-  sendButton = 'Collectible Page/Send Button',
-  sellButton = 'Collectible Page/Sell Button',
-  collectibleTitle = 'Collectible Page/Title'
+  sendButton = 'Rwa Page/Send Button',
+  sellButton = 'Rwa Page/Sell Button',
+  rwaTitle = 'Rwa Page/Title'
 }

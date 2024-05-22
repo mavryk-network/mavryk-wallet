@@ -13,7 +13,7 @@ import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-pa
 
 const DEFAULT_OBJKT_STORAGE_LIMIT = 350;
 
-export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => {
+export const useRwaSelling = (assetSlug: string, offer?: ObjktOffer) => {
   const tezos = useTezos();
   const { publicKeyHash } = useAccount();
   const [isSelling, setIsSelling] = useState(false);

@@ -22,7 +22,7 @@ interface Props {
   className?: string;
 }
 
-export const CollectiblePageImage = memo<Props>(
+export const RwaPageImage = memo<Props>(
   ({ metadata, mime, objktArtifactUri, className, areDetailsLoading, isAdultContent = false }) => {
     const [adultBlur] = useLocalStorage(LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY, true);
     const blurred = isAdultContent && adultBlur;

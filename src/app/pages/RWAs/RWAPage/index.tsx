@@ -1,10 +1,10 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 
-import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
+import { Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -14,10 +14,9 @@ import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
 import OperationStatus from 'app/templates/OperationStatus';
-import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
+import { fetchCollectibleExtraDetails } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
@@ -25,17 +24,15 @@ import { getAssetName } from 'lib/metadata';
 import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
-import { TempleAccountType } from 'lib/temple/types';
 import { useInterval } from 'lib/ui/hooks';
-import { navigate } from 'lib/woozie';
 
-import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
+import { useRwaSelling } from '../hooks/use-rwa-selling.hook';
 import { mockedRWAMetadata, mockedRWASlug } from '../RWATab/rwa.mock';
 import { getDetailsListing } from '../utils';
 
 import { CardWithLabel } from './CardWithLabel';
-import { CollectiblePageImage } from './CollectiblePageImage';
 import { PropertiesItems } from './PropertiesItems';
+import { RwaPageImage } from './RwaPageImage';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -65,7 +62,6 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
   const offers = extraDetails?.offers_active;
 
   const { publicKeyHash } = account;
-  const accountCanSign = account.type !== TempleAccountType.WatchOnly;
 
   const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
 
@@ -78,14 +74,7 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
     [details, publicKeyHash]
   );
 
-  const {
-    isSelling,
-    initiateSelling: onSellButtonClick,
-    operation,
-    operationError
-  } = useCollectibleSelling(assetSlug, takableOffer);
-
-  const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
+  const { operation, operationError } = useRwaSelling(assetSlug, takableOffer);
 
   const dispatch = useDispatch();
   useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
@@ -124,7 +113,7 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
 
         <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
           <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
-            <CollectiblePageImage
+            <RwaPageImage
               metadata={metadata}
               areDetailsLoading={areDetailsLoading}
               objktArtifactUri={details?.objktArtifactUri}

@@ -2,14 +2,14 @@ import { useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { useAllCollectibleDetailsSelector } from 'app/store/collectibles/selectors';
+import { useAllRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { objktCurrencies } from 'lib/apis/objkt';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { atomsToTokens } from 'lib/temple/helpers';
 
-export function useSortededCollectiblesSlugs(sortOption: SortOptions | null, assetsSlugs: string[]) {
-  const assetsDetails = useAllCollectibleDetailsSelector();
+export function useSortededRwasSlugs(sortOption: SortOptions | null, assetsSlugs: string[]) {
+  const assetsDetails = useAllRwaDetailsSelector();
 
   const assetsMetadatas = useAllTokensMetadataSelector();
 

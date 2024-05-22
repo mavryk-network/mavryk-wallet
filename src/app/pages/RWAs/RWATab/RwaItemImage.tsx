@@ -22,7 +22,7 @@ interface Props {
   containerElemRef: React.RefObject<Element>;
 }
 
-export const CollectibleItemImage = memo<Props>(
+export const RwaItemImage = memo<Props>(
   ({ assetSlug, metadata, adultBlur, areDetailsLoading, mime, containerElemRef }) => {
     const isAdultContent = useCollectibleIsAdultSelector(assetSlug);
     const isAdultFlagLoading = areDetailsLoading && !isDefined(isAdultContent);

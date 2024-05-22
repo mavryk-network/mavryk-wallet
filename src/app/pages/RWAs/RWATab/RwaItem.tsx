@@ -1,26 +1,15 @@
-import React, { memo, useRef, useMemo, FC } from 'react';
+import React, { memo, useRef, FC } from 'react';
 
-import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
 
 import { Divider } from 'app/atoms';
-import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
-import { useBalanceSelector } from 'app/store/balances/selectors';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
-import { T } from 'lib/i18n';
+import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { getAssetName } from 'lib/metadata';
-import { atomsToTokens } from 'lib/temple/helpers';
 import { Link } from 'lib/woozie';
 
-import { getDetailsListing } from '../utils';
-
-import { CollectibleItemImage } from './CollectibleItemImage';
 import { mockedRWAMetadata } from './rwa.mock';
+import { RwaItemImage } from './RwaItemImage';
 
 interface Props {
   assetSlug: string;
@@ -29,17 +18,14 @@ interface Props {
   chainId: string;
 }
 
-export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, areDetailsShown }) => {
+export const RwaItem = memo<Props>(({ assetSlug }) => {
   const { popup } = useAppEnv();
   // const metadata = useCollectibleMetadataSelector(assetSlug);
   const metadata = mockedRWAMetadata;
   const toDisplayRef = useRef<HTMLDivElement>(null);
-  const balanceAtomic = useBalanceSelector(accountPkh, chainId, assetSlug);
 
-  const decimals = metadata?.decimals;
-
-  const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-  const details = useCollectibleDetailsSelector(assetSlug);
+  const areDetailsLoading = useAllRwasDetailsLoadingSelector();
+  const details = useRwaDetailsSelector(assetSlug);
 
   const assetName = getAssetName(metadata);
 
@@ -54,7 +40,7 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
           style={{ width: 59, height: 59 }}
           title={assetName}
         >
-          <CollectibleItemImage
+          <RwaItemImage
             assetSlug={assetSlug}
             metadata={metadata}
             areDetailsLoading={areDetailsLoading && details === undefined}

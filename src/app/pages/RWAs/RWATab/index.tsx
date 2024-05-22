@@ -25,11 +25,11 @@ import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
 
-import { useSortededCollectiblesSlugs } from '../hooks/use-collectible-sorted.hook';
+import { useSortededRwasSlugs } from '../hooks/use-rwa-sorted.hook';
 
-import styles from './Collectible.module.css';
-import { CollectibleItem } from './CollectibleItem';
 import { mockedRWASlug } from './rwa.mock';
+import styles from './rwa.module.css';
+import { RwaItem } from './RwaItem';
 
 interface Props {
   scrollToTheTabsBar: EmptyFn;
@@ -42,6 +42,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
   const chainId = useChainId(true)!;
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
+  // TODO filter RWAS
   const allSlugs = useEnabledAccountCollectiblesSlugs() ?? [mockedRWASlug];
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
@@ -72,7 +73,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
     [sortOption]
   );
 
-  const sortedAssets = useSortededCollectiblesSlugs(sortOption, allSlugs) ?? [mockedRWASlug];
+  const sortedAssets = useSortededRwasSlugs(sortOption, allSlugs) ?? [mockedRWASlug];
 
   const { isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } = useRWAListingLogic(sortedAssets);
 
@@ -89,7 +90,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
     () => (
       <div className={clsx('flex flex-col w-full')}>
         {displayedSlugs.map(slug => (
-          <CollectibleItem
+          <RwaItem
             key={slug}
             assetSlug={slug}
             chainId={chainId}

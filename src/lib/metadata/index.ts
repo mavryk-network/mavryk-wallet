@@ -9,6 +9,7 @@ import {
   useAllCollectiblesMetadataSelector,
   useCollectibleMetadataSelector
 } from 'app/store/collectibles-metadata/selectors';
+import { loadRwasMetadataAction } from 'app/store/rwas-metadata/actions';
 import { useAllRwasMetadataSelector, useRwasMetadataLoadingSelector } from 'app/store/rwas-metadata/selectors';
 import { loadTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import {
@@ -98,7 +99,7 @@ export const useTokensMetadataPresenceCheck = (slugsToCheck?: string[]) => {
   const metadataLoading = useTokensMetadataLoadingSelector();
   const getMetadata = useGetTokenMetadata();
 
-  useAssetsMetadataPresenceCheck(false, metadataLoading, getMetadata, slugsToCheck);
+  useAssetsMetadataPresenceCheck('tokens', metadataLoading, getMetadata, slugsToCheck);
 };
 
 /**
@@ -108,7 +109,7 @@ export const useCollectiblesMetadataPresenceCheck = (slugsToCheck?: string[]) =>
   const metadataLoading = useCollectiblesMetadataLoadingSelector();
   const getMetadata = useGetCollectibleMetadata();
 
-  useAssetsMetadataPresenceCheck(true, metadataLoading, getMetadata, slugsToCheck);
+  useAssetsMetadataPresenceCheck('collectibles', metadataLoading, getMetadata, slugsToCheck);
 };
 
 /**
@@ -116,13 +117,13 @@ export const useCollectiblesMetadataPresenceCheck = (slugsToCheck?: string[]) =>
  */
 export const useRwasMetadataPresenceCheck = (slugsToCheck?: string[]) => {
   const metadataLoading = useRwasMetadataLoadingSelector();
-  const getMetadata = useGetCollectibleMetadata();
+  const getMetadata = useGetRwaMetadata();
 
-  useAssetsMetadataPresenceCheck(true, metadataLoading, getMetadata, slugsToCheck);
+  useAssetsMetadataPresenceCheck('rwas', metadataLoading, getMetadata, slugsToCheck);
 };
 
 const useAssetsMetadataPresenceCheck = (
-  ofCollectibles: boolean,
+  ofAssets: 'collectibles' | 'rwas' | 'tokens',
   metadataLoading: boolean,
   getMetadata: TokenMetadataGetter,
   slugsToCheck?: string[]
@@ -149,13 +150,17 @@ const useAssetsMetadataPresenceCheck = (
       checkedRef.current = [...checkedRef.current, ...missingChunk];
 
       dispatch(
-        (ofCollectibles ? loadCollectiblesMetadataAction : loadTokensMetadataAction)({
+        (ofAssets === 'collectibles'
+          ? loadCollectiblesMetadataAction
+          : ofAssets === 'rwas'
+          ? loadRwasMetadataAction
+          : loadTokensMetadataAction)({
           rpcUrl,
           slugs: missingChunk
         })
       );
     }
-  }, [ofCollectibles, slugsToCheck, getMetadata, metadataLoading, dispatch, rpcUrl]);
+  }, [ofAssets, slugsToCheck, getMetadata, metadataLoading, dispatch, rpcUrl]);
 };
 
 export function getAssetSymbol(metadata: AssetMetadataBase | nullish, short = false) {

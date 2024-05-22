@@ -14,6 +14,7 @@ import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
+import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails } from 'lib/apis/objkt';
@@ -33,6 +34,7 @@ import { getDetailsListing } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
+import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -42,39 +44,26 @@ interface Props {
 
 const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
   // const metadata = useCollectibleMetadataSelector(assetSlug);
-  const metadata = mockedRWAMetadata;
-  const details = useCollectibleDetailsSelector(assetSlug);
+  const metadata = useTokenMetadataSelector(assetSlug);
+  const details = useRwaDetailsSelector(assetSlug) ?? mockedRWAMetadata;
   const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
   const { fullPage } = useAppEnv();
 
-  const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
+  // const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
-  const { data: extraDetails } = useRetryableSWR(
-    ['fetchCollectibleExtraDetails', contractAddress, tokenId],
-    () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
-    {
-      refreshInterval: DETAILS_SYNC_INTERVAL
-    }
-  );
+  // const { data: extraDetails } = useRetryableSWR(
+  //   ['fetchCollectibleExtraDetails', contractAddress, tokenId],
+  //   () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
+  //   {
+  //     refreshInterval: DETAILS_SYNC_INTERVAL
+  //   }
+  // );
 
   const account = useAccount();
 
-  const offers = extraDetails?.offers_active;
-
-  const { publicKeyHash } = account;
-
   const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
 
-  const collectibleName = getAssetName(metadata);
-
-  const creators = details?.creators ?? [];
-
-  const takableOffer = useMemo(
-    () => offers?.find(({ buyer_address }) => buyer_address !== publicKeyHash),
-    [details, publicKeyHash]
-  );
-
-  const { operation, operationError } = useRwaSelling(assetSlug, takableOffer);
+  const rwaName = getAssetName(metadata);
 
   const dispatch = useDispatch();
   useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
@@ -82,43 +71,31 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
     assetSlug
   ]);
 
-  const listing = getDetailsListing(details);
-
   const CollectibleTextSection = () => (
     <div>
       <CopyButton
-        text={collectibleName}
+        text={rwaName}
         type={'block'}
         className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}
       >
-        {collectibleName ?? 'NAME text #234'}
+        {rwaName ?? 'NAME text #234'}
       </CopyButton>
       <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
     </div>
   );
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{rwaName}</span>}>
       <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
-        {operationError ? (
-          <Alert
-            type="error"
-            title={t('error')}
-            description={operationError instanceof Error ? operationError.message : t('unknownError')}
-            className="mb-4"
-          />
-        ) : (
-          operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-4" />
-        )}
-
         <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
           <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
             <RwaPageImage
               metadata={metadata}
               areDetailsLoading={areDetailsLoading}
-              objktArtifactUri={details?.objktArtifactUri}
-              isAdultContent={details?.isAdultContent}
-              mime={details?.mime}
+              // @ts-ignore
+              objktArtifactUri={details?.displayUri}
+              isAdultContent={false}
+              mime={null}
               className="h-full w-full"
             />
           </div>
@@ -137,38 +114,10 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
 
             <div>
               <div className={clsx(fullPage ? 'grid grid-cols-2 gap-4 items-stretch' : 'flex flex-col')}>
-                {creators.length > 0 && (
-                  <>
-                    <CardWithLabel
-                      label={<T id={creators.length > 1 ? 'creators' : 'creator'} />}
-                      className={clsx(!fullPage && 'mb-3')}
-                    >
-                      <div className="flex flex-wrap gap-1">
-                        {creators.map((creator, idx) => (
-                          <div key={creator.address} className="w-full">
-                            <AvatarBlock hash={creator.address} />
-                            {creators.length > 1 && idx < creators.length - 1 && (
-                              <Divider color="bg-divider" className="my-2" />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </CardWithLabel>
-                  </>
-                )}
-
-                <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'floorPrice'} />}>
-                  {isDefined(listing) ? (
-                    <div className="flex items-center gap-x-1">
-                      <Money shortened smallFractionFont={false} tooltip={true}>
-                        {atomsToTokens(listing.floorPrice, listing.decimals)}
-                      </Money>
-                      <span> {listing.symbol}</span>
-                    </div>
-                  ) : (
-                    '-'
-                  )}
-                </CardWithLabel>
+                <CardWithLabel
+                  cardContainerClassname={clsx(fullPage && 'min-h-16')}
+                  label={<T id={'floorPrice'} />}
+                ></CardWithLabel>
               </div>
 
               <Divider className="my-6" color="bg-divider" />

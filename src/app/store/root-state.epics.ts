@@ -14,6 +14,8 @@ import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 import { currencyEpics } from './currency/epics';
 import { partnersPromotionEpics } from './partners-promotion/epics';
 import type { RootState } from './root-state.type';
+import { rwasEpics } from './rwas/epics';
+import { rwasMetadataEpics } from './rwas-metadata/epics';
 import { swapEpics } from './swap/epics';
 import { tokensMetadataEpics } from './tokens-metadata/epics';
 
@@ -27,8 +29,10 @@ const allEpics = combineEpics(
   assetsEpics,
   tokensMetadataEpics,
   collectiblesMetadataEpics,
+  rwasMetadataEpics,
   abTestingEpics,
   buyWithCreditCardEpics,
+  rwasEpics,
   collectiblesEpics
 );
 

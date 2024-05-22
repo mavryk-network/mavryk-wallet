@@ -9,7 +9,7 @@ import { rwasInitialState, RwasState } from './state';
 /** In seconds // TTL = Time To Live */
 const ADULT_FLAG_TTL = 3 * 60 * 60;
 
-const rwassReducer = createReducer<RwasState>(rwasInitialState, builder => {
+const rwasReducer = createReducer<RwasState>(rwasInitialState, builder => {
   builder.addCase(loadRwasDetailsActions.submit, state => {
     state.details.isLoading = true;
   });
@@ -50,5 +50,5 @@ export const rwasPersistedReducer = persistReducer(
     ...storageConfig,
     whitelist: ['adultFlags'] as (keyof RwasState)[]
   },
-  rwassReducer
+  rwasReducer
 );

@@ -39,4 +39,4 @@ const loadRwasDetailsEpic: Epic = action$ =>
     )
   );
 
-export const rwassEpics = combineEpics(loadRwasDetailsEpic);
+export const rwasEpics = combineEpics(loadRwasDetailsEpic);

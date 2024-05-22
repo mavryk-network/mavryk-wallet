@@ -5,7 +5,7 @@ import { useDebounce } from 'use-debounce';
 import { useAreAssetsLoading } from 'app/store/assets/selectors';
 import { useRwasMetadataLoadingSelector } from 'app/store/rwas-metadata/selectors';
 import { searchAssetsWithNoMeta } from 'lib/assets/search.utils';
-import { useCollectiblesMetadataPresenceCheck, useGetRwaMetadata } from 'lib/metadata';
+import { useRwasMetadataPresenceCheck, useGetRwaMetadata } from 'lib/metadata';
 import { isSearchStringApplicable } from 'lib/utils/search-items';
 import { createLocationState } from 'lib/woozie/location';
 
@@ -48,7 +48,7 @@ export const useRWAListingLogic = (allSlugsSorted: string[]) => {
     return pageIsLoading ? undefined : allSlugsSorted.slice(paginatedSlugs.length + ITEMS_PER_PAGE * 2);
   }, [isInSearchMode, pageIsLoading, allSlugsSorted, paginatedSlugs.length]);
 
-  useCollectiblesMetadataPresenceCheck(metaToCheckAndLoad);
+  useRwasMetadataPresenceCheck(metaToCheckAndLoad);
 
   const getRwaMeta = useGetRwaMetadata();
 

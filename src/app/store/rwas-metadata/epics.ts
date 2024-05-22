@@ -7,7 +7,7 @@ import { loadTokensMetadata } from 'lib/metadata/fetch';
 
 import { loadRwasMetadataAction, putRwasMetadataAction, resetRwasMetadataLoadingAction } from './actions';
 
-const loadCollectiblesMetadataEpic: Epic = action$ =>
+const loadRwasMetadataEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadRwasMetadataAction),
     toPayload(),
@@ -19,4 +19,4 @@ const loadCollectiblesMetadataEpic: Epic = action$ =>
     )
   );
 
-export const collectiblesMetadataEpics = combineEpics(loadCollectiblesMetadataEpic);
+export const rwasMetadataEpics = combineEpics(loadRwasMetadataEpic);

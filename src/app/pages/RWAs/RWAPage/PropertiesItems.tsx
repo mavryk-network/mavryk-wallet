@@ -6,7 +6,7 @@ import { HashChip, ExternalLinkChip } from 'app/atoms';
 import type { CollectibleDetails } from 'app/store/collectibles/state';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
-import { formatDate } from 'lib/i18n';
+import { formatDate, T } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
 import { CardWithLabel } from './CardWithLabel';
@@ -47,53 +47,40 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
   return (
     <>
       <section className="w-full grid grid-cols-2 gap-x-4 gap-y-6 mb-6">
-        <CardWithLabel label={'Editions'}>
+        <CardWithLabel label={<T id={'yourTokens'} />}>
           <span className={itemValueClassName}>{details?.supply ?? '-'}</span>
         </CardWithLabel>
 
-        <CardWithLabel label={'Owned'}>
+        <CardWithLabel label={<T id={'totalValue'} />}>
           <span className={itemValueClassName}>{balance?.toString() ?? '-'}</span>
         </CardWithLabel>
 
-        <CardWithLabel label={'Minted'}>
+        <CardWithLabel label={<T id={'estMarketPrice'} />}>
           <span className={itemValueClassName}>{mintedTimestamp}</span>
         </CardWithLabel>
 
-        <CardWithLabel label={'Royalties'}>
+        <CardWithLabel label={<T id={'lastSale'} />}>
           <span className={itemValueClassName}>{royaltiesStr}</span>
         </CardWithLabel>
       </section>
 
-      <CardWithLabel label={'Contract'} className="mb-3">
-        <div className="flex items-center">
-          <HashChip
-            hash={contract}
-            firstCharsCount={5}
-            lastCharsCount={5}
-            className="tracking-tighter"
-            rounded="base"
-            showIcon={false}
-          />
-          {exploreContractUrl && (
-            <ExternalLinkChip href={exploreContractUrl} alternativeDesign tooltip="Explore contract" />
-          )}
-        </div>
-      </CardWithLabel>
-
-      <CardWithLabel label={'Metadata'}>
-        {details?.metadataHash ? (
+      <div style={{ maxWidth: 343 }}>
+        <CardWithLabel label={<T id={'assetId'} />}>
           <div className="flex items-center">
-            <span className="text-base-plus text-blue-200">IPFS</span>
-            <ExternalLinkChip
-              alternativeDesign
-              href={`https://ipfs.io/ipfs/${details.metadataHash}`}
-              tooltip="Open metadata"
+            <HashChip
+              hash={contract}
+              firstCharsCount={5}
+              lastCharsCount={5}
+              className="tracking-tighter"
+              rounded="base"
+              showIcon={false}
             />
+            {exploreContractUrl && (
+              <ExternalLinkChip href={exploreContractUrl} alternativeDesign tooltip="Explore contract" />
+            )}
           </div>
-        ) : (
-          <span className={itemValueClassName}>-</span>
-        )}
-      </CardWithLabel>
+        </CardWithLabel>
+      </div>
     </>
   );
 });

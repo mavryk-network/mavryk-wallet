@@ -4,9 +4,10 @@ import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 
-import { Spinner, Money, Alert, Divider } from 'app/atoms';
+import { Spinner, Money, Alert, Divider, Identicon, Anchor } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
@@ -15,6 +16,7 @@ import {
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
+import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails } from 'lib/apis/objkt';
@@ -34,7 +36,8 @@ import { getDetailsListing } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
+
+// icons
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -80,7 +83,11 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
       >
         {rwaName ?? 'NAME text #234'}
       </CopyButton>
-      <div className="text-base-plus text-white break-words mb-4">{details?.description ?? ''}</div>
+      <div className="text-base-plus text-white break-words mb-4">
+        Lorem ipsum dolor sit amet consectetur. Donec malesuada id fringilla maecenas at orci eu vel tellus. Ac arcu
+        velit amet nascetur vestibulum consectetur sem. Facilisis dictumst leo eget sit eu. Ultricies ornare sed
+        fringilla quis id sit. Turpis ut placerat leo convallis.
+      </div>
     </div>
   );
 
@@ -92,7 +99,7 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
             <RwaPageImage
               metadata={metadata}
               areDetailsLoading={areDetailsLoading}
-              // @ts-ignore
+              // @ts-expect-error
               objktArtifactUri={details?.displayUri}
               isAdultContent={false}
               mime={null}
@@ -113,11 +120,16 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
             {!fullPage && <CollectibleTextSection />}
 
             <div>
-              <div className={clsx(fullPage ? 'grid grid-cols-2 gap-4 items-stretch' : 'flex flex-col')}>
-                <CardWithLabel
-                  cardContainerClassname={clsx(fullPage && 'min-h-16')}
-                  label={<T id={'floorPrice'} />}
-                ></CardWithLabel>
+              <div className={clsx('flex flex-col')}>
+                <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
+                  <div className="flex items-center gap-x-2">
+                    <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
+                    <Anchor href={process.env.NODES_URL} className="flex items-center gap-x-2">
+                      <span>NextGen Real Estate</span>
+                      <ExternalLinkIcon className="w-4 h-4 text-white stroke-current" />
+                    </Anchor>
+                  </div>
+                </CardWithLabel>
               </div>
 
               <Divider className="my-6" color="bg-divider" />

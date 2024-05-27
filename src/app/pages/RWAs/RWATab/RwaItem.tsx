@@ -30,7 +30,10 @@ export const RwaItem = memo<Props>(({ assetSlug }) => {
 
   return (
     <div className="relative overflow-x-hidden">
-      <Link to={`/rwa/${assetSlug}`} className="relative flex gap-x-4 items-center rounded-2xl max-w-full">
+      <Link
+        to={`/rwa/${assetSlug}`}
+        className={clsx('relative flex gap-x-4 items-center rounded-2xl max-w-full', !popup && 'px-4')}
+      >
         <div
           ref={toDisplayRef}
           className={clsx(

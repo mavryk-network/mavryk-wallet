@@ -3652,5 +3652,20 @@
   },
   "noRWAs": {
     "message": "You don’t have any RWAs yet"
+  },
+  "rwaIssuer": {
+    "message": "RWA Issuer"
+  },
+  "yourTokens": {
+    "message": "Your Tokens"
+  },
+  "estMarketPrice": {
+    "message": "Est. Market Price"
+  },
+  "lastSale": {
+    "message": "Last Sale"
+  },
+  "totalValue": {
+    "message": "Total value"
   }
 }

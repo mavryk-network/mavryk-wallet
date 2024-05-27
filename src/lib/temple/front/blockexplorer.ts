@@ -45,7 +45,7 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
         {
           account: 'https://tzkt.io',
           transaction: 'https://tzkt.io',
-          api: 'https://atlasnet.api.mavryk.network'
+          api: 'https://consensus.api.mavryk.network'
         }
       ],
       [

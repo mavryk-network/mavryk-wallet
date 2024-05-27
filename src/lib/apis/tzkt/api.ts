@@ -21,7 +21,7 @@ import { calcTzktAccountSpendableTezBalance } from './utils';
 
 const TZKT_API_BASE_URLS = {
   [TempleChainId.Mainnet]: 'https://api.mavryk.network/mainnet/v1',
-  [TempleChainId.Atlas]: 'https://atlasnet.api.mavryk.network/v1',
+  [TempleChainId.Atlas]: 'https://consensus.api.mavryk.network/v1',
   [TempleChainId.Basenet]: 'https://api.mavryk.network/basenet/v1',
   [TempleChainId.Weekly]: 'https://api.mavryk.network/weeklynet/v1'
 };

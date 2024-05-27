@@ -25,7 +25,8 @@ import {
   loadTokensScamlistActions,
   loadAccountRwasActions
 } from './actions';
-import { loadAccountTokens, loadAccountCollectibles } from './utils';
+// TODO add RWA loading assets
+import { loadAccountTokens, loadAccountCollectibles, loadAccountRwas } from './utils';
 
 const loadAccountTokensEpic: Epic<Action, Action, RootState> = (action$, state$) =>
   action$.pipe(
@@ -82,9 +83,9 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
     ofType(loadAccountRwasActions.submit),
     toPayload(),
     toLatestValue(state$),
-    switchMap(([{ account, chainId }, state]) =>
-      from(
-        loadAccountCollectibles(
+    switchMap(([{ account, chainId }, state]) => {
+      return from(
+        loadAccountRwas(
           account,
           chainId,
           mergeAssetsMetadata(state.tokensMetadata.metadataRecord, state.rwasMetadata.records)
@@ -96,8 +97,8 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
           putRwasMetadataAction({ records: newMeta })
         ]),
         catchError(err => of(loadAccountRwasActions.fail({ code: axios.isAxiosError(err) ? err.code : undefined })))
-      )
-    )
+      );
+    })
   );
 
 const loadTokensWhitelistEpic: Epic = action$ =>

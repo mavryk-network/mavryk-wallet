@@ -46,6 +46,8 @@ export const fetchObjktCollectibles$ = (slugs: string[]) =>
         }
       }
 
+      console.log(slugs, '-----------');
+
       return fetchObjktGalleriesAttributesCounts$(attributesToGet).pipe(
         map(galleriesAttributesCounts => ({
           tokens,

@@ -5,7 +5,8 @@ import clsx from 'clsx';
 import { Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
-import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+// import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { getAssetName } from 'lib/metadata';
 import { Link } from 'lib/woozie';
 
@@ -20,7 +21,8 @@ interface Props {
 
 export const RwaItem = memo<Props>(({ assetSlug }) => {
   const { popup } = useAppEnv();
-  const metadata = useRwaMetadataSelector(assetSlug);
+  // const metadata = useRwaMetadataSelector(assetSlug);
+  const metadata = useTokenMetadataSelector(assetSlug);
   const toDisplayRef = useRef<HTMLDivElement>(null);
 
   const areDetailsLoading = useAllRwasDetailsLoadingSelector();

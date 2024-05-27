@@ -41,7 +41,6 @@ export const useEnabledAccountRwaSlugs = () => {
   const { publicKeyHash } = useAccount();
 
   const rwas = useAccountRwas(publicKeyHash, chainId);
-
   return useMemo(
     () => rwas.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
     [rwas]

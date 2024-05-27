@@ -19,7 +19,7 @@ import {
   SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
-import { useEnabledAccountRwaSlugs } from 'lib/assets/hooks/rwas';
+// import { useEnabledAccountRwaSlugs } from 'lib/assets/hooks/rwas';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
@@ -44,7 +44,6 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
 
-  // const allSlugs = useEnabledAccountRwaSlugs() ?? [mockedRWASlug];
   const allSlugs = useFakeRwaData();
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);

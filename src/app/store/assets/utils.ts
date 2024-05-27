@@ -47,6 +47,20 @@ export const loadAccountCollectibles = (account: string, chainId: string, knownM
     }
   );
 
+export const loadAccountRwas = (account: string, chainId: string, knownMeta: MetadataMap) =>
+  Promise.all([
+    // Fetching assets known to be NFTs, not checking metadata
+    fetchTzktAccountAssets(account, chainId, false).then(data => finishCollectiblesLoadingWithMeta(data)),
+    // Fetching unknowns only, checking metadata to filter for NFTs
+    fetchTzktAccountUnknownAssets(account, chainId).then(data => finishRwasLoadingWithoutMeta(data, knownMeta, chainId))
+  ]).then(
+    ([data1, data2]) => mergeLoadedAssetsData(data1, data2),
+    error => {
+      console.error(error);
+      throw error;
+    }
+  );
+
 const fetchTzktAccountUnknownAssets = memoizee(
   // Simply reducing frequency of requests per set of arguments.
   (account: string, chainId: string) => fetchTzktAccountAssets(account, chainId, null),
@@ -136,6 +150,40 @@ const finishCollectiblesLoadingWithoutMeta = async (
     const metadata = metadataOfNew || knownMeta.get(slug);
 
     if (!metadata || !isCollectible(metadata)) continue;
+
+    if (metadataOfNew) newMeta[slug] = metadataOfNew;
+
+    slugs.push(slug);
+    balances[slug] = asset.balance;
+  }
+
+  return { slugs, balances, newMeta };
+};
+
+const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], knownMeta: MetadataMap, chainId: string) => {
+  const slugsWithoutMeta = data.reduce<string[]>((acc, curr) => {
+    const slug = tzktAssetToTokenSlug(curr);
+    return knownMeta.has(slug) ? acc : acc.concat(slug);
+  }, []);
+
+  const newMetadatas = isKnownChainId(chainId)
+    ? await fetchTokensMetadata(chainId, slugsWithoutMeta).catch(err => {
+        console.error(err);
+      })
+    : null;
+
+  const slugs: string[] = [];
+  const balances: StringRecord = {};
+  const newMeta: FetchedMetadataRecord = {};
+
+  for (const asset of data) {
+    const slug = tzktAssetToTokenSlug(asset);
+
+    // Not optimal data pick, but we don't expect large arrays here
+    const metadataOfNew = newMetadatas?.[slugsWithoutMeta.indexOf(slug)];
+    const metadata = metadataOfNew || knownMeta.get(slug);
+
+    if (!metadata) continue;
 
     if (metadataOfNew) newMeta[slug] = metadataOfNew;
 

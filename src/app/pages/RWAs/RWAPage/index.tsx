@@ -1,37 +1,23 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
-import { isDefined } from '@rnw-community/shared';
+// import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 
-import { Spinner, Money, Alert, Divider, Identicon, Anchor } from 'app/atoms';
+import { Spinner, Divider, Identicon, Anchor } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
+// import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
-import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
-import OperationStatus from 'app/templates/OperationStatus';
-import { fetchCollectibleExtraDetails } from 'lib/apis/objkt';
-import { fromAssetSlug } from 'lib/assets/utils';
 import { BLOCK_DURATION } from 'lib/fixed-times';
-import { t, T } from 'lib/i18n';
+import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
-import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
-import { atomsToTokens } from 'lib/temple/helpers';
 import { useInterval } from 'lib/ui/hooks';
-
-import { useRwaSelling } from '../hooks/use-rwa-selling.hook';
-import { mockedRWAMetadata, mockedRWASlug } from '../RWATab/rwa.mock';
-import { getDetailsListing } from '../utils';
 
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
@@ -45,11 +31,25 @@ interface Props {
   assetSlug: string;
 }
 
-const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
+export type TemporaryRwaType = {
+  tokens: number;
+  totalValue: string;
+  estMarketPrice: string;
+  lastSale: string;
+};
+
+export const details: TemporaryRwaType = {
+  tokens: 100,
+  totalValue: '5,000,00',
+  estMarketPrice: '50,00',
+  lastSale: '52,00'
+};
+
+const RWAPage = memo<Props>(({ assetSlug }) => {
   // const metadata = useCollectibleMetadataSelector(assetSlug);
   const metadata = useTokenMetadataSelector(assetSlug);
-  const details = useRwaDetailsSelector(assetSlug) ?? mockedRWAMetadata;
-  const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  // const details = useRwaDetailsSelector(assetSlug) ?? mockedRWAMetadata;
+  // const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
   const { fullPage } = useAppEnv();
 
   // const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
@@ -64,7 +64,8 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
 
   const account = useAccount();
 
-  const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
+  // const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
+  const areDetailsLoading = false;
 
   const rwaName = getAssetName(metadata);
 
@@ -98,9 +99,8 @@ const RWAPage = memo<Props>(({ assetSlug = mockedRWASlug }) => {
           <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
             <RwaPageImage
               metadata={metadata}
-              areDetailsLoading={areDetailsLoading}
-              // @ts-expect-error
-              objktArtifactUri={details?.displayUri}
+              areDetailsLoading={false}
+              objktArtifactUri={'ipfs://QmZxcWgVM7Kn4ohZ5Tw45GdS2wc1zih4EPKQr6iPZrLgS8'}
               isAdultContent={false}
               mime={null}
               className="h-full w-full"

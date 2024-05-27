@@ -83,7 +83,7 @@ type RWATableItemProps = {
 
 const RWATableItem: FC<RWATableItemProps> = ({ label, value }) => {
   return (
-    <section className="flex flex-col gap-y-2 justify-start text-sm">
+    <section className="flex flex-col gap-y-1 justify-start text-xs">
       <div className="text-secondary-white capitalize">{label}</div>
       <div className="text-white">{value}</div>
     </section>

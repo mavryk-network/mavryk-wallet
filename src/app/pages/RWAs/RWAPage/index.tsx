@@ -40,9 +40,9 @@ export type TemporaryRwaType = {
 
 export const details: TemporaryRwaType = {
   tokens: 100,
-  totalValue: '5,000,00',
-  estMarketPrice: '50,00',
-  lastSale: '52,00'
+  totalValue: '5.000.00',
+  estMarketPrice: '50.00',
+  lastSale: '52.00'
 };
 
 const RWAPage = memo<Props>(({ assetSlug }) => {
@@ -50,7 +50,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
   const metadata = useTokenMetadataSelector(assetSlug);
   // const details = useRwaDetailsSelector(assetSlug) ?? mockedRWAMetadata;
   // const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-  const { fullPage } = useAppEnv();
+  const { fullPage, popup } = useAppEnv();
 
   // const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
@@ -126,13 +126,13 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
                     <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
                     <Anchor href={process.env.NODES_URL} className="flex items-center gap-x-2">
                       <span>NextGen Real Estate</span>
-                      <ExternalLinkIcon className="w-4 h-4 text-white stroke-current" />
+                      <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>
                   </div>
                 </CardWithLabel>
               </div>
 
-              <Divider className="my-6" color="bg-divider" />
+              <Divider className="my-6" color="bg-divider" ignoreParent={!popup} />
               <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
             </div>
           </>

@@ -107,7 +107,7 @@ const OperationView: FC<OperationViewProps> = ({
   const gasFeeError = useMemo(() => (modifyFeeAndLimit?.totalFee ?? 0) <= MIN_GAS_FEE, [modifyFeeAndLimit]);
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full h-full flex flex-col flex-1">
       {signPayloadFormats.length > 1 && (
         <div className="w-full flex justify-end mb-3">
           <span className="mr-2 text-base-plus text-white">

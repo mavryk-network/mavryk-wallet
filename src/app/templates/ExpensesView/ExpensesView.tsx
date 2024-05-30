@@ -43,8 +43,8 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError })
   return (
     <>
       <div
-        className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm')}
-        style={{ maxHeight: gasFeeError ? '14.5rem' : '15.5rem' }}
+        className={classNames('relative no-scrollbar', 'flex flex-col text-white text-sm ')}
+        style={{ maxHeight: gasFeeError ? '14.5rem' : '15.5rem', overflowY: 'scroll' }}
       >
         <div className="h-full">
           {expenses.map((item, index, arr) => (

@@ -311,7 +311,7 @@ const ConfirmDAppForm: FC = () => {
     <CustomRpcContext.Provider value={payload.networkRpc}>
       <div
         className={clsx(
-          'relative h-full bg-primary-bg shadow-md overflow-y-auto flex flex-col no-scrollbar',
+          'relative h-full bg-primary-bg shadow-md overflow-y-auto flex flex-col no-scrollbar overflow-x-hidden',
           height > APP_POPUP_LIMIT && 'border border-divider'
         )}
         style={{

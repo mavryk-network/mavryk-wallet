@@ -41,15 +41,15 @@ export const MAV_RPC_NETWORK = 'https://atlasnet.rpc.mavryk.network';
 // ];
 
 export const NETWORKS: TempleNetwork[] = [
-  // {
-  //   id: 'mainnet',
-  //   nameI18nKey: 'tezosMainnet',
-  //   description: 'Mavryk mainnet',
-  //   type: 'main',
-  //   rpcBaseURL: 'https://rpc.mavryk.network/mainnet',
-  //   color: '#83b300',
-  //   disabled: false
-  // },
+  {
+    id: 'mainnet',
+    nameI18nKey: 'tezosMainnet',
+    description: 'Mavryk mainnet',
+    type: 'main',
+    rpcBaseURL: 'https://rpc.mavryk.network/mainnet',
+    color: '#83b300',
+    disabled: false
+  },
   {
     id: 'atlasnet',
     name: 'Mavryk Atlasnet',

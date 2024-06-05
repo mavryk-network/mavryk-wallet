@@ -63,10 +63,10 @@ export const AddNetworkScreen: FC = () => {
 
       if (NETWORKS.findIndex(n => n.rpcBaseURL === rpcBaseURL) === -1) {
         setError('rpcBaseURL', SUBMIT_ERROR_TYPE, t('invalidRpcNotSupported'));
-        return;
+        // return;
+      } else {
+        clearError();
       }
-
-      clearError();
 
       let chainId: string = '';
       try {

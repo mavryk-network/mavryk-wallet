@@ -11,7 +11,7 @@ export const useFakeRwaData = () => {
     () =>
       filteredAssets.filter(
         asset =>
-          asset === 'KT19S7YeHEnKaBysuGuTBq4QgmxEZNptvBJS_0' || asset === 'KT1RH2fB6bANvSGPKHsBdzSVA4ef7PSQWn2A_0'
+          asset === 'KT1J1p1f1owAEjJigKGXhwzu3tVCvRPVgGCh_0' || asset === 'KT1CgLvrzj5MziwPWWzPkZj1eDeEpRAsYvQ9_0'
       ),
     [filteredAssets]
   );

@@ -23,8 +23,8 @@
   "clickIconToResetPermissions": {
     "message": "Click on the X icon to reset permissions."
   },
-  "tezosMainnet": {
-    "message": "Главная сеть Tezos"
+  "mavrykMainnet": {
+    "message": "Главная сеть Mavryk"
   },
   "resetExtensionConfirmation": {
     "message": "Вы уверены, что хотите сбросить TempleWallet?\nВ результате все Ваши данные будут удалены."

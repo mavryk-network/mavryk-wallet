@@ -477,7 +477,7 @@
   "tryAgain": {
     "message": "もう一度お試しください"
   },
-  "tezosMainnet": {
+  "mavrykMainnet": {
     "message": "テゾスメインネット",
     "description": "Mainnet = main network"
   },

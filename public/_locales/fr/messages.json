@@ -477,8 +477,8 @@
   "tryAgain": {
     "message": "Réessayer"
   },
-  "tezosMainnet": {
-    "message": "Mainnet Tezos",
+  "mavrykMainnet": {
+    "message": "Mainnet Mavryk",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {

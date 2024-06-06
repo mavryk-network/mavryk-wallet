@@ -495,7 +495,7 @@
   "tryAgain": {
     "message": "Erneut versuchen"
   },
-  "tezosMainnet": {
+  "mavrykMainnet": {
     "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },

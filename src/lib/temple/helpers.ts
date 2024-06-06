@@ -11,9 +11,13 @@ export const loadFastRpcClient = memoizee((rpc: string) => new FastRpcClient(rpc
 export const michelEncoder = new MichelCodecPacker();
 
 export function loadChainId(rpcUrl: string) {
-  const rpc = loadFastRpcClient(rpcUrl);
+  try {
+    const rpc = loadFastRpcClient(rpcUrl);
 
-  return rpc.getChainId();
+    return rpc.getChainId();
+  } catch (e) {
+    throw e;
+  }
 }
 
 export function hasManager(manager: ManagerKeyResponse) {

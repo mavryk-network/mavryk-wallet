@@ -19,6 +19,7 @@ import { navigate } from 'lib/woozie';
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { CustomNetworkSettingsSelectors } from './AddNetwork.selectors';
+import { addHttps } from './utils';
 
 interface NetworkFormData {
   name: string;
@@ -53,13 +54,17 @@ export const AddNetworkScreen: FC = () => {
 
   const rpcURLIsUnique = useCallback(
     (url: string) =>
-      ![...defaultNetworks, ...customNetworks].filter(n => !n.hidden).some(({ rpcBaseURL }) => rpcBaseURL === url),
+      ![...defaultNetworks, ...customNetworks]
+        .filter(n => !n.hidden)
+        .some(({ rpcBaseURL }) => rpcBaseURL === addHttps(url)),
     [customNetworks, defaultNetworks]
   );
 
   const onNetworkFormSubmit = useCallback(
-    async ({ rpcBaseURL, name }: NetworkFormData) => {
+    async ({ rpcBaseURL: rpcUrl, name }: NetworkFormData) => {
       if (submitting) return;
+
+      const rpcBaseURL = addHttps(rpcUrl);
 
       if (NETWORKS.findIndex(n => n.rpcBaseURL === rpcBaseURL) === -1) {
         setError('rpcBaseURL', SUBMIT_ERROR_TYPE, t('invalidRpcNotSupported'));

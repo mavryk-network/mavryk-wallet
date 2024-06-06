@@ -644,7 +644,7 @@
   "tryAgain": {
     "message": "Try again"
   },
-  "tezosMainnet": {
+  "mavrykMainnet": {
     "message": "Mavryk Mainnet",
     "description": "Mainnet = main network"
   },
@@ -2086,7 +2086,7 @@
     "description": "RPC = Remote Procedure Call (https://en.wikipedia.org/wiki/Remote_procedure_call)"
   },
   "invalidRpcNotSupported": {
-    "message": "Unsupported PRC detected. The wallet functionality may be compromised"
+    "message": "Unsupported RPC detected. The wallet functionality may be compromised"
   },
   "contractNotOriginated": {
     "message": "Contract not originated"

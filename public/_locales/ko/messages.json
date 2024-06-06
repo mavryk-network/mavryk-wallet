@@ -477,7 +477,7 @@
   "tryAgain": {
     "message": "다시 시도하기"
   },
-  "tezosMainnet": {
+  "mavrykMainnet": {
     "message": "테조스 메인넷(Mavryk Mainnet)",
     "description": "Mainnet = main network"
   },

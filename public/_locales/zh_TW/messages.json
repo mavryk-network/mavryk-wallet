@@ -477,8 +477,8 @@
   "tryAgain": {
     "message": "再試一次"
   },
-  "tezosMainnet": {
-    "message": "Tezos 主網路",
+  "mavrykMainnet": {
+    "message": "Mavryk 主網路",
     "description": "Mainnet = main network"
   },
   "marigoldMainnet": {

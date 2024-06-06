@@ -39,7 +39,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
             id="analyticsInputDescription"
             substitutions={[
               <a
-                href="https://templewallet.com/analytics-collecting"
+                href="https://docs.google.com/document/d/1CxGYpRhMHoqTZda4O9FoVFfL5iNKpowjsPBRrlWWok0/edit?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-secondary text-accent-blue"
@@ -92,7 +92,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
             id="acceptTermsInputDescription"
             substitutions={[
               <a
-                href="https://templewallet.com/terms"
+                href="https://docs.google.com/document/d/1Qu9Ge-fBg9x3aCAjKgSYGHQgpeOKF5WWqOZVLP-cfyo/edit?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-secondary text-accent-blue"
@@ -100,7 +100,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
                 <T id="termsOfUsage" key="termsLink" />
               </a>,
               <a
-                href="https://templewallet.com/privacy"
+                href="https://docs.google.com/document/d/1Kl6Vo1WpEy8XjwzwbuGvyyDfDwwTc_x7q0WyfLfzJcs/edit?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-secondary text-accent-blue"

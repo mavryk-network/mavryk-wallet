@@ -34,7 +34,7 @@ export const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
 
   {
     key: 'privacyPolicy',
-    link: 'https://ghostnet.mavenfinance.io',
+    link: 'https://docs.google.com/document/d/1Kl6Vo1WpEy8XjwzwbuGvyyDfDwwTc_x7q0WyfLfzJcs/edit?usp=sharing',
     testID: AboutSelectors.privacyPolicyLink,
     i18nKey: 'privacyPolicy',
     Icon: ShieldIcon,
@@ -42,7 +42,7 @@ export const LINKS: (ListItemWithNavigateprops & AboutLinkAdditionalprops)[] = [
   },
   {
     key: 'termsOfUse',
-    link: 'https://ghostnet.mavenfinance.io',
+    link: 'https://docs.google.com/document/d/1Qu9Ge-fBg9x3aCAjKgSYGHQgpeOKF5WWqOZVLP-cfyo/edit?usp=sharing',
     testID: AboutSelectors.termsOfUseLink,
     i18nKey: 'termsOfUse',
     Icon: DocumentIcon,

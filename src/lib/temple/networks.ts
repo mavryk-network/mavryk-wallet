@@ -64,7 +64,7 @@ export const NETWORKS: TempleNetwork[] = [
   //   nameI18nKey: 'marigoldMainnet',
   //   description: 'Marigold mainnet',
   //   type: 'main',
-  //   rpcBaseURL: 'https://mainnet.tezos.marigold.dev',
+  //   rpcBaseURL: 'https://atlasnet.mavryk.network',
   //   color: '#48bb78',
   //   disabled: false
   // },

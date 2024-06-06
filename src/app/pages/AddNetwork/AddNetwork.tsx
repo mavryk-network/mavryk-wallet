@@ -1,9 +1,9 @@
-import React, { useCallback, FC, useMemo } from 'react';
+import React, { useCallback, FC, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
 
-import { FormField, FormSubmitButton } from 'app/atoms';
+import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { URL_PATTERN } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -47,6 +47,8 @@ export const AddNetworkScreen: FC = () => {
   } = useForm<NetworkFormData>();
   const submitting = formState.isSubmitting;
 
+  const [rpcWarning, setRpcWarning] = useState<string>('');
+
   const name = watch('name');
   const rpcBaseURL = watch('rpcBaseURL');
 
@@ -67,11 +69,10 @@ export const AddNetworkScreen: FC = () => {
       const rpcBaseURL = addHttps(rpcUrl);
 
       if (NETWORKS.findIndex(n => n.rpcBaseURL === rpcBaseURL) === -1) {
-        setError('rpcBaseURL', SUBMIT_ERROR_TYPE, t('invalidRpcNotSupported'));
-        // return;
-      } else {
-        clearError();
+        setRpcWarning(t('unrecognizedRPC'));
+        await delay(5000);
       }
+      clearError();
 
       let chainId: string = '';
       try {
@@ -191,13 +192,15 @@ export const AddNetworkScreen: FC = () => {
           }}
         />
 
+        {rpcWarning && <Alert type="warning" title={t('warning')} description={rpcWarning} className="mb-4 mt-2" />}
+
         <FormSubmitButton
           className={clsx('mt-auto', popup && 'mb-8')}
           loading={submitting}
           testID={CustomNetworkSettingsSelectors.addNetworkButton}
           disabled={!allowSubmission}
         >
-          <T id="addNetwork" />
+          {<T id="addNetwork" />}
         </FormSubmitButton>
       </form>
     </PageLayout>

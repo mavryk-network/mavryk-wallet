@@ -183,6 +183,8 @@ module.exports = {
         'primary-divider': baseColors.divider,
         'primary-success': baseColors.green[910],
         'primary-error': '#FF3E3E',
+        'primary-warning': '#E68226',
+        'primary-info': '#B9EEFE',
         'accent-orange': baseColors.orange[600],
 
         'list-item-selected': baseColors.gray[710],

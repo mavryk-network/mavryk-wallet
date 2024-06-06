@@ -384,6 +384,9 @@
   "error": {
     "message": "Error"
   },
+  "warning": {
+    "message": "Warning"
+  },
   "tokenType": {
     "message": "Token type"
   },
@@ -3664,5 +3667,11 @@
   },
   "lastSale": {
     "message": "Last Sale"
+  },
+  "totalValue": {
+    "message": "Total value"
+  },
+  "unrecognizedRPC": {
+    "message": "Unrecognized RPC node. It may not work properly with the wallet, please verify node url."
   }
 }

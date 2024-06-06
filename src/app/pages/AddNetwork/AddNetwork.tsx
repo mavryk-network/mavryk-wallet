@@ -192,7 +192,9 @@ export const AddNetworkScreen: FC = () => {
           }}
         />
 
-        {rpcWarning && <Alert type="warning" title={t('attention')} description={rpcWarning} className="mb-4 mt-2" />}
+        {rpcWarning && (
+          <Alert type="warning" title={`${t('attention')}!`} description={rpcWarning} className="mb-4 mt-2" />
+        )}
 
         <FormSubmitButton
           className={clsx('mt-auto', popup && 'mb-8')}

@@ -1,11 +1,11 @@
 import React, { memo, useMemo } from 'react';
 
-import BigNumber from 'bignumber.js';
-
-import { HashChip, ExternalLinkChip } from 'app/atoms';
+import { HashChip, ExternalLinkChip, Money } from 'app/atoms';
+import InFiat from 'app/templates/InFiat';
+import { isTzbtcAsset } from 'lib/assets';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
-import { useBalance } from 'lib/balances';
-import { formatDate, T } from 'lib/i18n';
+import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
+import { T } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
 import { CardWithLabel } from './CardWithLabel';
@@ -20,6 +20,9 @@ interface PropertiesItemsProps {
 
 export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountPkh, details }) => {
   const { contract } = fromFa2TokenSlug(assetSlug);
+  const isTzBTC = isTzbtcAsset(assetSlug);
+  const price = useAssetFiatCurrencyPrice(assetSlug);
+  const { selectedFiatCurrency } = useFiatCurrency();
 
   const { transaction: explorerBaseUrl } = useExplorerBaseUrls();
   const exploreContractUrl = useMemo(
@@ -33,15 +36,35 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
     <>
       <section className="w-full grid grid-cols-2 gap-x-4 gap-y-6 mb-6">
         <CardWithLabel label={<T id={'yourTokens'} />}>
-          <span className={itemValueClassName}>{details?.tokens}</span>
+          <div className={itemValueClassName}>
+            <div className="text-white text-sm flex items-center">
+              <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? details?.metadata?.decimals : undefined}>
+                {details?.tokens ?? 0}
+              </Money>
+              <span>&nbsp;</span>
+              <span>{details?.metadata?.symbol}</span>
+            </div>
+          </div>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'totalValue'} />}>
-          <span className={itemValueClassName}>${details?.totalValue ?? '-'}</span>
+          <span className={itemValueClassName}>
+            <InFiat assetSlug={assetSlug} volume={details?.tokens ?? 0} smallFractionFont={false}>
+              {({ balance, symbol }) => (
+                <div className="ml-1 font-normal text-white flex items-center truncate text-right">
+                  <span>{symbol}</span>
+                  {balance}
+                </div>
+              )}
+            </InFiat>
+          </span>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'estMarketPrice'} />}>
-          <span className={itemValueClassName}>${details?.estMarketPrice}</span>
+          <div className={itemValueClassName}>
+            {selectedFiatCurrency.symbol}
+            <Money smallFractionFont={false}>{price}</Money>
+          </div>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'lastSale'} />}>

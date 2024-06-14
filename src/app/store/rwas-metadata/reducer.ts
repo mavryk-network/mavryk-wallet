@@ -5,7 +5,7 @@ import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 
 import { tokenToSlug } from 'lib/assets';
 import { fromAssetSlug } from 'lib/assets/utils';
-import { TokenMetadata } from 'lib/metadata';
+import { TokenMetadata, isRwa } from 'lib/metadata';
 import { buildTokenMetadataFromFetched } from 'lib/metadata/utils';
 import { storageConfig, createTransformsBeforePersist, createTransformsBeforeHydrate } from 'lib/store';
 
@@ -19,7 +19,8 @@ const rwasMetadataReducer = createReducer(rwasMetadataInitialState, builder => {
   builder.addCase(putRwasMetadataAction, (state, { payload: { records, resetLoading } }) => {
     for (const slug of Object.keys(records)) {
       const metadataRaw = records[slug];
-      if (!metadataRaw) continue;
+
+      if (!metadataRaw || !isRwa(metadataRaw)) continue;
       const [address, id] = fromAssetSlug(slug);
       if (!id) continue;
 

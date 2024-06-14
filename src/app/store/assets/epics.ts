@@ -131,10 +131,10 @@ export const assetsEpics = combineEpics(
   loadTokensScamlistEpic
 );
 
-const mergeAssetsMetadata = (tokensMetadata: MetadataRecords, collectiblesMetadata: MetadataMap) => {
+const mergeAssetsMetadata = (tokensMetadata: MetadataRecords, assetsMetadata: MetadataMap) => {
   const map = new Map(Object.entries(tokensMetadata));
 
-  for (const [slug, metadata] of collectiblesMetadata) {
+  for (const [slug, metadata] of assetsMetadata) {
     map.set(slug, metadata);
   }
 

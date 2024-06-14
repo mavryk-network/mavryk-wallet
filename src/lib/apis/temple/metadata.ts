@@ -48,7 +48,9 @@ export const fetchTokensMetadata = (
   return Promise.all(
     // Parallelizing
     chunk(slugs, METADATA_API_LOAD_CHUNK_SIZE).map(clugsChunk => fetchTokensMetadataChunk(chainId, clugsChunk))
-  ).then(datum => datum.flat());
+  ).then(datum => {
+    return datum.flat();
+  });
 };
 
 const fetchTokensMetadataChunk = memoizee(

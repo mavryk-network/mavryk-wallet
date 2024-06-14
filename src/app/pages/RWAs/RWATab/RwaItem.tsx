@@ -2,12 +2,16 @@ import React, { memo, useRef, FC } from 'react';
 
 import clsx from 'clsx';
 
-import { Divider } from 'app/atoms';
+import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
 // import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import InFiat from 'app/templates/InFiat';
+import { isTzbtcAsset } from 'lib/assets';
+import { useBalance } from 'lib/balances';
 import { getAssetName } from 'lib/metadata';
+import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
 
 import { RwaItemImage } from './RwaItemImage';
@@ -19,16 +23,17 @@ interface Props {
   chainId: string;
 }
 
-export const RwaItem = memo<Props>(({ assetSlug }) => {
+export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
   const { popup } = useAppEnv();
-  // const metadata = useRwaMetadataSelector(assetSlug);
-  const metadata = useTokenMetadataSelector(assetSlug);
+  const metadata = useRwaMetadataSelector(assetSlug);
+  const { value: balance = ZERO } = useBalance(assetSlug, accountPkh);
   const toDisplayRef = useRef<HTMLDivElement>(null);
 
   const areDetailsLoading = useAllRwasDetailsLoadingSelector();
   const details = useRwaDetailsSelector(assetSlug);
 
   const assetName = getAssetName(metadata);
+  const isTzBTC = isTzbtcAsset(assetSlug);
 
   return (
     <div className="relative overflow-x-hidden">
@@ -65,9 +70,32 @@ export const RwaItem = memo<Props>(({ assetSlug }) => {
             {assetName}
           </div>
           <div className="flex gap-x-6 items-start">
-            <RWATableItem label="tokens" value="100" />
+            <RWATableItem
+              label="tokens"
+              value={
+                <div className="flex items-center">
+                  <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? metadata?.decimals : undefined}>
+                    {balance ?? 0}
+                  </Money>
+                  <span>&nbsp;</span>
+                  <span>{metadata?.symbol}</span>
+                </div>
+              }
+            />
             <RWATableItem label="last sale" value="$50.00" />
-            <RWATableItem label="total value" value="$5,000.00" />
+            <RWATableItem
+              label="total value"
+              value={
+                <InFiat assetSlug={assetSlug} volume={balance ?? 0} smallFractionFont={false}>
+                  {({ balance, symbol }) => (
+                    <div className="ml-1 font-normal text-white flex items-center truncate text-right">
+                      <span>{symbol}</span>
+                      {balance}
+                    </div>
+                  )}
+                </InFiat>
+              }
+            />
           </div>
         </div>
       </Link>
@@ -78,7 +106,7 @@ export const RwaItem = memo<Props>(({ assetSlug }) => {
 
 type RWATableItemProps = {
   label: string;
-  value: string;
+  value: string | React.ReactElement;
 };
 
 const RWATableItem: FC<RWATableItemProps> = ({ label, value }) => {

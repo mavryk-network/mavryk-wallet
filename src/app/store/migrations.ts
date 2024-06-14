@@ -1,10 +1,11 @@
 import type { MigrationManifest, PersistedState } from 'redux-persist';
 
 import { toTokenSlug } from 'lib/assets';
-import { isCollectible } from 'lib/metadata';
+import { isCollectible, isRwa } from 'lib/metadata';
 
 import { collectiblesMetadataInitialStateClone } from './collectibles-metadata/state';
 import type { RootState } from './root-state.type';
+import { rwasMetadataInitialStateClone } from './rwas-metadata/state';
 
 import type { SLICES_BLACKLIST } from './index';
 
@@ -26,6 +27,8 @@ export const MIGRATIONS: MigrationManifest = {
     // It is safe as it is blacklisted & won't be persisted in this (root) slice.
     // @ts-expect-error // Due to the absence of `_persist` property yet
     const collectiblesMetadata = (typedPersistedState.collectiblesMetadata = collectiblesMetadataInitialStateClone);
+    // @ts-expect-error // Due to the absence of `_persist` property yet
+    const rwasMetadata = (typedPersistedState.rwasMetadata = rwasMetadataInitialStateClone);
 
     for (const slug of Object.keys(allTokensMetadata)) {
       const metadata = allTokensMetadata[slug];
@@ -49,6 +52,11 @@ export const MIGRATIONS: MigrationManifest = {
 
       if (isCollectible(metadata)) {
         collectiblesMetadata.records.set(newSlug, {
+          ...metadata,
+          id: tokenId
+        });
+      } else if (isRwa(metadata)) {
+        rwasMetadata.records.set(newSlug, {
           ...metadata,
           id: tokenId
         });

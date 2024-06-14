@@ -79,17 +79,7 @@ export const TokensTab: FC = () => {
     leadingAssets
   );
 
-  // TODO remove this hardcoded block when redux RWAS will work (for now it's empty array)
-  const omittedRwas = useMemo(
-    () =>
-      filteredAssets.filter(
-        asset =>
-          asset !== 'KT1J1p1f1owAEjJigKGXhwzu3tVCvRPVgGCh_0' && asset !== 'KT1CgLvrzj5MziwPWWzPkZj1eDeEpRAsYvQ9_0'
-      ),
-    [filteredAssets]
-  );
-
-  const sortedSlugs = useSortededAssetsSlugs(sortOption, omittedRwas, balances);
+  const sortedSlugs = useSortededAssetsSlugs(sortOption, filteredAssets, balances);
 
   const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
     () => [

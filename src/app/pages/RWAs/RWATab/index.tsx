@@ -20,12 +20,12 @@ import {
 } from 'app/templates/SearchExplorer';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 // import { useEnabledAccountRwaSlugs } from 'lib/assets/hooks/rwas';
+import { useEnabledAccountRwaSlugs } from 'lib/assets/hooks/rwas';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { SortOptions } from 'lib/assets/use-sorted';
 import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
 
-import { useFakeRwaData } from '../hooks/use-fake-rwa-data';
 import { useSortededRwasSlugs } from '../hooks/use-rwa-sorted.hook';
 
 import { mockedRWASlug } from './rwa.mock';
@@ -44,7 +44,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
 
-  const allSlugs = useFakeRwaData();
+  const allSlugs = useEnabledAccountRwaSlugs();
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 
@@ -76,9 +76,8 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const sortedAssets = useSortededRwasSlugs(sortOption, allSlugs) ?? [mockedRWASlug];
 
-  const { isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } = useRWAListingLogic(sortedAssets);
-  const displayedSlugs = sortedAssets;
-  const isSyncing = false;
+  const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
+    useRWAListingLogic(sortedAssets);
 
   const shouldScrollToTheTabsBar = paginatedSlugs.length > 0;
 

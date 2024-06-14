@@ -1,6 +1,11 @@
 import { dispatch } from 'app/store';
-import { AssetToPut, putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
-import { isCollectible, TokenMetadata } from 'lib/metadata';
+import {
+  AssetToPut,
+  putTokensAsIsAction,
+  putCollectiblesAsIsAction,
+  putRwasAsIsAction
+} from 'app/store/assets/actions';
+import { isCollectible, isRwa, TokenMetadata } from 'lib/metadata';
 import * as Repo from 'lib/temple/repo';
 
 export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetadata>) => {
@@ -8,6 +13,7 @@ export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetada
 
   const collectibles: AssetToPut[] = [];
   const tokens: AssetToPut[] = [];
+  const rwas: AssetToPut[] = [];
 
   const statusMap = {
     [Repo.ITokenStatus.Enabled]: 'enabled',
@@ -20,7 +26,9 @@ export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetada
     const metadata = metadatas[tokenSlug];
     if (!metadata) continue;
 
-    (isCollectible(metadata) ? collectibles : tokens).push({
+    const assetsDestionation = isCollectible(metadata) ? collectibles : isRwa(metadata) ? rwas : tokens;
+
+    assetsDestionation.push({
       slug: tokenSlug,
       account,
       chainId,
@@ -32,6 +40,7 @@ export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetada
 
   if (tokens.length) dispatch(putTokensAsIsAction(tokens));
   if (collectibles.length) dispatch(putCollectiblesAsIsAction(collectibles));
+  if (rwas.length) dispatch(putRwasAsIsAction(rwas));
 
   await Repo.accountTokens.clear();
 };

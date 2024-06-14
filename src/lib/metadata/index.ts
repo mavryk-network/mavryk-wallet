@@ -10,7 +10,11 @@ import {
   useCollectibleMetadataSelector
 } from 'app/store/collectibles-metadata/selectors';
 import { loadRwasMetadataAction } from 'app/store/rwas-metadata/actions';
-import { useAllRwasMetadataSelector, useRwasMetadataLoadingSelector } from 'app/store/rwas-metadata/selectors';
+import {
+  useAllRwasMetadataSelector,
+  useRwaMetadataSelector,
+  useRwasMetadataLoadingSelector
+} from 'app/store/rwas-metadata/selectors';
 import { loadTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import {
   useTokenMetadataSelector,
@@ -37,9 +41,11 @@ export const useGasTokenMetadata = () => {
 export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined => {
   const tokenMetadata = useTokenMetadataSelector(slug);
   const collectibleMetadata = useCollectibleMetadataSelector(slug);
+  const rwaMetadata = useRwaMetadataSelector(slug);
   const gasMetadata = useGasTokenMetadata();
 
-  return isTezAsset(slug) ? gasMetadata : tokenMetadata || collectibleMetadata;
+  // @ts-expect-error
+  return isTezAsset(slug) ? gasMetadata : tokenMetadata || isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata;
 };
 
 export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {
@@ -176,6 +182,11 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 /** Empty string for `artifactUri` counts */
 export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
+
+export const isRwa = (metadata: Record<string, any>) => {
+  if (!metadata) return false;
+  return ('symbol' in metadata && metadata.symbol === 'OCEAN') || metadata.symbol === 'MARS1';
+};
 
 /**
  * @deprecated // Assertion here is not safe!

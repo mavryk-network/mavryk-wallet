@@ -227,6 +227,7 @@ export const assetsPersistedReducer = persistReducer<SliceState>(
       createTransformsBeforePersist<SliceState>({
         tokens: entry => ({ ...entry, isLoading: false }),
         collectibles: entry => ({ ...entry, isLoading: false }),
+        rwas: entry => ({ ...entry, isLoading: false }),
         mainnetWhitelist: entry => ({ ...entry, isLoading: false }),
         mainnetScamlist: entry => ({ ...entry, isLoading: false })
       })

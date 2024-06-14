@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 // import { isDefined } from '@rnw-community/shared';
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 
@@ -11,13 +12,15 @@ import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg'
 import PageLayout from 'app/layouts/PageLayout';
 // import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
+import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T } from 'lib/i18n';
-import { getAssetName } from 'lib/metadata';
+import { getAssetName, TokenMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
+import { ZERO } from 'lib/utils/numbers';
 
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
@@ -32,39 +35,22 @@ interface Props {
 }
 
 export type TemporaryRwaType = {
-  tokens: number;
+  tokens: BigNumber;
   totalValue: string;
   estMarketPrice: string;
   lastSale: string;
-};
-
-export const details: TemporaryRwaType = {
-  tokens: 100,
-  totalValue: '5.000.00',
-  estMarketPrice: '50.00',
-  lastSale: '52.00'
+  metadata: TokenMetadata | undefined;
 };
 
 const RWAPage = memo<Props>(({ assetSlug }) => {
-  // const metadata = useCollectibleMetadataSelector(assetSlug);
-  const metadata = useTokenMetadataSelector(assetSlug);
-  // const details = useRwaDetailsSelector(assetSlug) ?? mockedRWAMetadata;
-  // const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
   const { fullPage, popup } = useAppEnv();
 
-  // const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
-
-  // const { data: extraDetails } = useRetryableSWR(
-  //   ['fetchCollectibleExtraDetails', contractAddress, tokenId],
-  //   () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
-  //   {
-  //     refreshInterval: DETAILS_SYNC_INTERVAL
-  //   }
-  // );
+  const { publicKeyHash } = useAccount();
+  const metadata = useRwaMetadataSelector(assetSlug);
+  const { value: balance = ZERO } = useBalance(assetSlug, publicKeyHash);
 
   const account = useAccount();
 
-  // const areDetailsLoading = areAnyNFTsDetailsLoading && details === undefined;
   const areDetailsLoading = false;
 
   const rwaName = getAssetName(metadata);
@@ -74,6 +60,17 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
     dispatch,
     assetSlug
   ]);
+
+  const details: TemporaryRwaType = useMemo(
+    () => ({
+      tokens: balance,
+      totalValue: '5.000.00',
+      estMarketPrice: '50.00',
+      lastSale: '52.00',
+      metadata
+    }),
+    [balance, metadata]
+  );
 
   const CollectibleTextSection = () => (
     <div>
@@ -124,7 +121,10 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
                 <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
                   <div className="flex items-center gap-x-2">
                     <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
-                    <Anchor href={process.env.NODES_URL} className="flex items-center gap-x-2">
+                    <Anchor
+                      href={`https://dev.equiteez.pages.dev/properties/${metadata?.address}`}
+                      className="flex items-center gap-x-2"
+                    >
                       <span>NextGen Real Estate</span>
                       <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>

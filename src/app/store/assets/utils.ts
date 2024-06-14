@@ -4,7 +4,7 @@ import { fetchTokensMetadata, isKnownChainId } from 'lib/apis/temple';
 import { fetchTzktAccountAssets } from 'lib/apis/tzkt';
 import type { TzktAccountAsset } from 'lib/apis/tzkt/types';
 import { toTokenSlug } from 'lib/assets';
-import { isCollectible } from 'lib/metadata';
+import { isCollectible, isRwa } from 'lib/metadata';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 
 import { MetadataMap } from '../collectibles-metadata/state';
@@ -24,7 +24,9 @@ export const loadAccountTokens = (account: string, chainId: string, knownMeta: M
     // Fetching unknowns only, checking metadata to filter for FTs
     fetchTzktAccountUnknownAssets(account, chainId).then(data => finishTokensLoading(data, chainId, knownMeta, true))
   ]).then(
-    ([data1, data2]) => mergeLoadedAssetsData(data1, data2),
+    ([data1, data2]) => {
+      return mergeLoadedAssetsData(data1, data2);
+    },
     error => {
       console.error(error);
       throw error;
@@ -34,13 +36,17 @@ export const loadAccountTokens = (account: string, chainId: string, knownMeta: M
 export const loadAccountCollectibles = (account: string, chainId: string, knownMeta: MetadataMap) =>
   Promise.all([
     // Fetching assets known to be NFTs, not checking metadata
-    fetchTzktAccountAssets(account, chainId, false).then(data => finishCollectiblesLoadingWithMeta(data)),
+    fetchTzktAccountAssets(account, chainId, false).then(data => {
+      return finishCollectiblesLoadingWithMeta(data);
+    }),
     // Fetching unknowns only, checking metadata to filter for NFTs
-    fetchTzktAccountUnknownAssets(account, chainId).then(data =>
-      finishCollectiblesLoadingWithoutMeta(data, knownMeta, chainId)
-    )
+    fetchTzktAccountUnknownAssets(account, chainId).then(data => {
+      return finishCollectiblesLoadingWithoutMeta(data, knownMeta, chainId);
+    })
   ]).then(
-    ([data1, data2]) => mergeLoadedAssetsData(data1, data2),
+    ([data1, data2]) => {
+      return mergeLoadedAssetsData(data1, data2);
+    },
     error => {
       console.error(error);
       throw error;
@@ -50,7 +56,7 @@ export const loadAccountCollectibles = (account: string, chainId: string, knownM
 export const loadAccountRwas = (account: string, chainId: string, knownMeta: MetadataMap) =>
   Promise.all([
     // Fetching assets known to be NFTs, not checking metadata
-    fetchTzktAccountAssets(account, chainId, false).then(data => finishCollectiblesLoadingWithMeta(data)),
+    fetchTzktAccountAssets(account, chainId, false).then(data => finishRwasLoadingWithMeta(data)),
     // Fetching unknowns only, checking metadata to filter for NFTs
     fetchTzktAccountUnknownAssets(account, chainId).then(data => finishRwasLoadingWithoutMeta(data, knownMeta, chainId))
   ]).then(
@@ -97,6 +103,7 @@ const finishTokensLoading = async (
     if (fungibleByMetaCheck) {
       const metadata = metadataOfNew || knownMeta.get(slug);
 
+      // TODO RWA check add
       if (!metadata || isCollectible(metadata)) continue;
     }
 
@@ -107,6 +114,8 @@ const finishTokensLoading = async (
 
   return { slugs, balances, newMeta };
 };
+
+// collectibles ---------------
 
 const finishCollectiblesLoadingWithMeta = async (data: TzktAccountAsset[]) => {
   const slugs: string[] = [];
@@ -160,6 +169,21 @@ const finishCollectiblesLoadingWithoutMeta = async (
   return { slugs, balances, newMeta };
 };
 
+// rwa ---------------
+const finishRwasLoadingWithMeta = async (data: TzktAccountAsset[]) => {
+  const slugs: string[] = [];
+  const balances: StringRecord = {};
+
+  for (const asset of data) {
+    const slug = tzktAssetToTokenSlug(asset);
+
+    slugs.push(slug);
+    balances[slug] = asset.balance;
+  }
+
+  return { slugs, balances };
+};
+
 const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], knownMeta: MetadataMap, chainId: string) => {
   const slugsWithoutMeta = data.reduce<string[]>((acc, curr) => {
     const slug = tzktAssetToTokenSlug(curr);
@@ -183,7 +207,7 @@ const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], knownMeta:
     const metadataOfNew = newMetadatas?.[slugsWithoutMeta.indexOf(slug)];
     const metadata = metadataOfNew || knownMeta.get(slug);
 
-    if (!metadata) continue;
+    if (!metadata || !isRwa(metadata)) continue;
 
     if (metadataOfNew) newMeta[slug] = metadataOfNew;
 

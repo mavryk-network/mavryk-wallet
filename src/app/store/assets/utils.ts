@@ -104,7 +104,7 @@ const finishTokensLoading = async (
       const metadata = metadataOfNew || knownMeta.get(slug);
 
       // TODO RWA check add
-      if (!metadata || isCollectible(metadata)) continue;
+      if (!metadata || isCollectible(metadata) || isRwa(metadata)) continue;
     }
 
     slugs.push(slug);

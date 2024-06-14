@@ -37,7 +37,7 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountP
       <section className="w-full grid grid-cols-2 gap-x-4 gap-y-6 mb-6">
         <CardWithLabel label={<T id={'yourTokens'} />}>
           <div className={itemValueClassName}>
-            <div className="text-white text-sm flex items-center">
+            <div className="text-white  flex items-center">
               <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? details?.metadata?.decimals : undefined}>
                 {details?.tokens ?? 0}
               </Money>

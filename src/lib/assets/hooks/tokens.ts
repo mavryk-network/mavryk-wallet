@@ -10,6 +10,8 @@ import {
 } from 'app/store/assets/selectors';
 import { isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount } from 'app/store/assets/utils';
 import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
+import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { isRwa } from 'lib/metadata';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 
@@ -57,13 +59,15 @@ export const useAllAvailableTokens = (account: string, chainId: string) => {
 
 export const useEnabledAccountTokensSlugs = () => {
   const chainId = useChainId(true)!;
+  const metadatas = useAllTokensMetadataSelector();
   const { publicKeyHash } = useAccount();
 
   const tokens = useAccountTokens(publicKeyHash, chainId);
+  const filtered = tokens.filter(token => !isRwa(metadatas[token.slug]));
 
   return useMemo(
-    () => tokens.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
-    [tokens]
+    () => filtered.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
+    [filtered]
   );
 };
 
@@ -77,6 +81,7 @@ const TOKENS_SORT_ITERATEES: (keyof AccountToken)[] = ['predefined', 'slug'];
 export const useAccountTokens = (account: string, chainId: string, returnRemovedTokes = true) => {
   const storedRaw = useAccountTokensSelector(account, chainId);
   const whitelistSlugs = useWhitelistSlugs(chainId);
+  const metadatas = useAllTokensMetadataSelector();
 
   const balances = useAllAccountBalancesSelector(account, chainId);
 
@@ -116,7 +121,7 @@ export const useAccountTokens = (account: string, chainId: string, returnRemoved
         TOKENS_SORT_ITERATEES
       );
     },
-    [storedRaw, chainId, whitelistSlugs, returnRemovedTokes, balances],
+    [storedRaw, chainId, whitelistSlugs, returnRemovedTokes, balances, metadatas],
     isEqual
   );
 };

@@ -44,8 +44,11 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   const rwaMetadata = useRwaMetadataSelector(slug);
   const gasMetadata = useGasTokenMetadata();
 
-  // @ts-expect-error
-  return isTezAsset(slug) ? gasMetadata : tokenMetadata || isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata;
+  return isTezAsset(slug)
+    ? gasMetadata
+    : tokenMetadata || (rwaMetadata && isRwa(rwaMetadata))
+    ? rwaMetadata
+    : collectibleMetadata;
 };
 
 export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {
@@ -183,10 +186,8 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
-export const isRwa = (metadata: Record<string, any>) => {
-  if (!metadata) return false;
-  return ('symbol' in metadata && metadata.symbol === 'OCEAN') || metadata.symbol === 'MARS1';
-};
+export const isRwa = (metadata: Record<string, any>) =>
+  'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
 
 /**
  * @deprecated // Assertion here is not safe!

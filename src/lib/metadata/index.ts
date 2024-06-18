@@ -44,11 +44,10 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   const rwaMetadata = useRwaMetadataSelector(slug);
   const gasMetadata = useGasTokenMetadata();
 
-  return isTezAsset(slug)
-    ? gasMetadata
-    : tokenMetadata || (rwaMetadata && isRwa(rwaMetadata))
-    ? rwaMetadata
-    : collectibleMetadata;
+  return (
+    (isTezAsset(slug) ? gasMetadata : tokenMetadata) ||
+    (rwaMetadata && isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata)
+  );
 };
 
 export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {

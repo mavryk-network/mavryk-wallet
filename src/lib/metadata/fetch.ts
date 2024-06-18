@@ -35,8 +35,7 @@ const fetchTokensMetadata = async (rpcUrl: string, slugs: string[]): Promise<(To
   const chainId = await tezos.rpc.getChainId();
 
   if (isKnownChainId(chainId)) {
-    const res = await fetchTokensMetadataOnAPI(chainId, slugs);
-    return res;
+    return await fetchTokensMetadataOnAPI(chainId, slugs);
   }
 
   return await Promise.all(

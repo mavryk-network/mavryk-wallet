@@ -338,8 +338,6 @@ function deriveHistoryItemType(
   address: string,
   firstOperation: TzktOperation
 ): HistoryItemOpTypeEnum {
-  if (items.find(i => i.hash === 'ooZtpFvNd6Ug2ppA4s6bfCMb4CfTdLz571wacz2bxCKqXHfkyTZ'))
-    return HistoryItemOpTypeEnum.Multiple;
   let type = HistoryItemOpTypeEnum.Other;
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
@@ -353,6 +351,16 @@ function deriveHistoryItemType(
   } else {
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       type = HistoryItemOpTypeEnum.Swap;
+      return type;
+    } else if (
+      items.reduce<number>((acc, item) => {
+        const amount = isZero(item.amountSigned) ? 0 : 1;
+
+        acc += amount;
+        return acc;
+      }, 0) >= 2
+    ) {
+      type = HistoryItemOpTypeEnum.Multiple;
       return type;
     } else {
       const item = items[0];

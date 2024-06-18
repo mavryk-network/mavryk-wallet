@@ -351,18 +351,23 @@ function deriveHistoryItemType(
   } else {
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       type = HistoryItemOpTypeEnum.Swap;
+      return type;
     } else {
       const item = items[0];
-      // Handle transactions now
+
       if (isZero(item.amountSigned)) {
         type = HistoryItemOpTypeEnum.Interaction;
+        return type;
       }
       if (item.source.address === address) {
         type = HistoryItemOpTypeEnum.TransferTo;
+        return type;
       }
+
       if ('tokenTransfers' in item && item.tokenTransfers)
         if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
           type = HistoryItemOpTypeEnum.TransferFrom;
+          return type;
         } else {
           type = HistoryItemOpTypeEnum.TransferTo;
         }

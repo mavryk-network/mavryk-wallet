@@ -160,6 +160,12 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
     diffs.push({ assetSlug, diff });
   }
 
+  // if (historyItem.type === HistoryItemOpTypeEnum.TransferTo || historyItem.type === HistoryItemOpTypeEnum.TransferFrom) {
+  //   return diffs.sort((a, b) => {
+
+  //   })
+  // }
+
   return diffs;
 }
 

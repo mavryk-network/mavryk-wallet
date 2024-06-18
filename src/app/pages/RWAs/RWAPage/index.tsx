@@ -22,6 +22,8 @@ import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
 
+import { addRandomDecimals } from '../utils';
+
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
@@ -66,7 +68,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
       tokens: balance,
       totalValue: '5.000.00',
       estMarketPrice: '50.00',
-      lastSale: '52.00',
+      lastSale: `${addRandomDecimals()}`,
       metadata
     }),
     [balance, metadata]

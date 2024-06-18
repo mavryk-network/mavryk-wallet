@@ -14,3 +14,11 @@ export function getDetailsListing(details: CollectibleDetails | nullish) {
 
   return { floorPrice, decimals: currency.decimals, symbol: currency.symbol };
 }
+
+// get random number with 2 decimals
+export function addRandomDecimals() {
+  const precision = 100; // 2 decimals
+  const randomNum = Math.floor(Math.random() * (10 * precision - 1 * precision) + 1 * precision) / (1 * precision);
+
+  return randomNum;
+}

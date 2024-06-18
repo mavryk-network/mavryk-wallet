@@ -18,7 +18,7 @@ interface PropertiesItemsProps {
   details?: TemporaryRwaType | null;
 }
 
-export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, accountPkh, details }) => {
+export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details }) => {
   const { contract } = fromFa2TokenSlug(assetSlug);
   const isTzBTC = isTzbtcAsset(assetSlug);
   const price = useAssetFiatCurrencyPrice(assetSlug);

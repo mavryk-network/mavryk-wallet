@@ -14,6 +14,8 @@ import { getAssetName } from 'lib/metadata';
 import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
 
+import { addRandomDecimals } from '../utils';
+
 import { RwaItemImage } from './RwaItemImage';
 
 interface Props {
@@ -82,7 +84,7 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
                 </div>
               }
             />
-            <RWATableItem label="last sale" value="$50.00" />
+            <RWATableItem label="last sale" value={`$${addRandomDecimals()}`} />
             <RWATableItem
               label="total value"
               value={

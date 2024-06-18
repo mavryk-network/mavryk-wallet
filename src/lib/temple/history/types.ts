@@ -32,7 +32,8 @@ export enum HistoryItemOpTypeEnum {
   Origination,
   Other,
   Swap,
-  Reveal
+  Reveal,
+  Multiple
 }
 
 export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {

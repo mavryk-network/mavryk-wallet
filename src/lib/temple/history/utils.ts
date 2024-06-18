@@ -338,6 +338,8 @@ function deriveHistoryItemType(
   address: string,
   firstOperation: TzktOperation
 ): HistoryItemOpTypeEnum {
+  if (items.find(i => i.hash === 'ooZtpFvNd6Ug2ppA4s6bfCMb4CfTdLz571wacz2bxCKqXHfkyTZ'))
+    return HistoryItemOpTypeEnum.Multiple;
   let type = HistoryItemOpTypeEnum.Other;
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.

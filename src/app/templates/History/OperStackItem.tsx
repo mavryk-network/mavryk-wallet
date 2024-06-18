@@ -80,6 +80,20 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           }
         />
       );
+    case HistoryItemOpTypeEnum.Multiple:
+      const opMultiple = item as HistoryItemTransactionOp;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={'Called'}
+          argsNode={
+            <StackItemArgs
+              i18nKey="multipleInteractionOnContract"
+              args={[opMultiple.destination.address, <span>{originalHistoryItem?.operations.length ?? 1} more</span>]}
+            />
+          }
+        />
+      );
     case HistoryItemOpTypeEnum.Swap:
       // const opSwap = item as HistoryItemTransactionOp;
       const symbol1 = (tokensMetadata && tokensMetadata[tokensMetadata.length - 1]?.symbol) ?? '?';
@@ -226,7 +240,6 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
                 type="link"
                 showIcon={false}
               />
-              {index === args.length - 1 ? null : ', '}
             </span>
           ) : (
             value

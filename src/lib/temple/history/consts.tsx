@@ -6,7 +6,8 @@ export const HistoryItemOpTypeTexts = {
   4: 'Originated',
   5: 'Other',
   6: 'Swapped',
-  7: 'Revealed'
+  7: 'Revealed',
+  8: 'Multiple Contract Interactions'
 };
 
 export const HistoryItemTypeLabels = {
@@ -17,5 +18,6 @@ export const HistoryItemTypeLabels = {
   4: 'Originated to',
   5: 'Other',
   6: 'Transfered to',
-  7: 'Revealed'
+  7: 'Revealed',
+  8: 'Interaction with'
 };

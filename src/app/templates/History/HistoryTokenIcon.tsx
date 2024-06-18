@@ -57,6 +57,7 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
       case HistoryItemOpTypeEnum.Origination:
         return <OriginateIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Interaction:
+      case HistoryItemOpTypeEnum.Multiple:
         return <InteractIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Reveal:
       case HistoryItemOpTypeEnum.Other:

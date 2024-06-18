@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { MAV_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { MoneyDiff } from 'lib/temple/history/helpers';
+import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum, HistoryItemTransactionOp } from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
@@ -70,4 +70,8 @@ export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   // the first itme is token we got
   // f.e if swap TEZ to KUSD -> items[0] === KUSD, item[last] === TEZ
   return [diff[0], diff[diff.length - 1]];
+}
+
+export function getMoneyDiffForMultiple(diffs: MoneyDiff[]) {
+  return diffs.filter(diff => !isZero(diff.diff));
 }

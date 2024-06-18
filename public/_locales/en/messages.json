@@ -1983,6 +1983,18 @@
       }
     }
   },
+
+  "multipleInteractionOnContract": {
+    "message": "$contract$ with $count$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
   "originationOnContract": {
     "message": "$contract$",
     "placeholders": {

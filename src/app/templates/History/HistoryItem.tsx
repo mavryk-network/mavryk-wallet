@@ -15,7 +15,7 @@ import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
-import { getMoneyDiffsForSwap } from './utils';
+import { getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -41,6 +41,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
   );
 
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
+  const isMultipleOperation = historyItem.type === HistoryItemOpTypeEnum.Multiple;
 
   const rest = useMemo(
     () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
@@ -48,8 +49,13 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
   );
 
   const moneyDiffsBase = useMemo(
-    () => (isSwapOperation ? getMoneyDiffsForSwap(moneyDiffs) : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE)),
-    [isSwapOperation, moneyDiffs]
+    () =>
+      isSwapOperation
+        ? getMoneyDiffsForSwap(moneyDiffs)
+        : isMultipleOperation
+        ? getMoneyDiffForMultiple(moneyDiffs)
+        : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
+    [isMultipleOperation, isSwapOperation, moneyDiffs]
   );
   const moneyDiffsRest = useMemo(
     () => (isSwapOperation ? moneyDiffs : moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
@@ -103,7 +109,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
                 assetId={assetSlug}
                 diff={diff}
                 pending={status === 'pending'}
-                showFiatBalance={!isSwapOperation}
+                showFiatBalance={!isSwapOperation && !isMultipleOperation}
               />
             );
           })}

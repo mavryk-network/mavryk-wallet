@@ -1,7 +1,9 @@
-import React, { FC } from 'react';
+import React, { CSSProperties, FC, useMemo } from 'react';
 
 import clsx from 'clsx';
 
+import { Identicon } from 'app/atoms';
+import { ReactComponent as NFTsPlacehonder } from 'app/icons/nft-placeholder.svg';
 import { ReactComponent as InteractIcon } from 'app/icons/operations/interact.svg';
 import { ReactComponent as OriginateIcon } from 'app/icons/operations/originate.svg';
 import { ReactComponent as OtherIcon } from 'app/icons/operations/other.svg';
@@ -10,7 +12,7 @@ import { ReactComponent as SwapIcon } from 'app/icons/operations/swap.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/operations/transfer-from.svg';
 import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg';
 // import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
-import { useMultipleAssetsMetadata } from 'lib/metadata';
+import { AssetMetadataBase, getAssetSymbol, isCollectible, useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeEnum, UserHistoryItem } from 'lib/temple/history/types';
 
 import { AssetImage } from '../AssetImage';
@@ -79,20 +81,29 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
       >
         {renderOperationIcon()}
         {tokensMetadata &&
-          tokensMetadata.map((token, idx, arr) => (
-            <AssetImage
-              key={idx}
-              className={clsx(
+          tokensMetadata.map((token, idx, arr) => {
+            const baseProps = {
+              className: clsx(
                 'rounded-full overflow-hidden absolute top-1/2 bg-gray-405',
                 arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
-              )}
-              style={{
+              ),
+              style: {
                 left: `${getLeftImagePosition(idx)}%`,
                 zIndex: arr.length - idx
-              }}
-              metadata={token}
-            />
-          ))}
+              }
+            };
+
+            const size = arr.length > 1 && !fullSizeAssets ? 16 : 24;
+            return (
+              <AssetImage
+                key={idx}
+                {...baseProps}
+                metadata={token}
+                loader={<AssetIconPlaceholder size={size} {...baseProps} metadata={token} />}
+                fallback={<AssetIconPlaceholder size={size} {...baseProps} metadata={token} />}
+              />
+            );
+          })}
       </div>
     </div>
   );
@@ -103,3 +114,18 @@ function getLeftImagePosition(idx: number) {
 
   return 60 + idx * 30;
 }
+
+interface PlaceholderProps {
+  metadata: AssetMetadataBase | nullish;
+  size?: number;
+  style?: CSSProperties;
+  className?: string;
+}
+
+export const AssetIconPlaceholder: FC<PlaceholderProps> = ({ metadata, size, style, className }) => {
+  return metadata && isCollectible(metadata) ? (
+    <NFTsPlacehonder style={{ maxWidth: `${size}px`, width: '100%', height: '100%' }} />
+  ) : (
+    <Identicon className={className} style={style} type="initials" hash={getAssetSymbol(metadata)} size={size} />
+  );
+};

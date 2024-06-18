@@ -52,11 +52,20 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
 
 export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {
   const tokensMetadata = useAllTokensMetadataSelector();
+  const collectiblesMetadata = useAllCollectiblesMetadataSelector();
+  const rwasMetadata = useAllRwasMetadataSelector();
   const gasMetadata = useGasTokenMetadata();
 
+  const metadata = new Map([...collectiblesMetadata, ...rwasMetadata]);
+
+  for (const [key, value] of Object.entries(tokensMetadata)) {
+    metadata.set(key, value);
+  }
+
+  /// @ts-expect-error
   return slugs.map(s => {
     if (isTezAsset(s)) return gasMetadata;
-    return tokensMetadata[s];
+    return metadata.get(s);
   });
 };
 

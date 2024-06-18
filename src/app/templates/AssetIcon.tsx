@@ -32,7 +32,7 @@ interface PlaceholderProps {
   size?: number;
 }
 
-const AssetIconPlaceholder: FC<PlaceholderProps> = ({ metadata, size }) => {
+export const AssetIconPlaceholder: FC<PlaceholderProps> = ({ metadata, size }) => {
   return metadata && isCollectible(metadata) ? (
     <NFTsPlacehonder style={{ maxWidth: `${size}px`, width: '100%', height: '100%' }} />
   ) : (

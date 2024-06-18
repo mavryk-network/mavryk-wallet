@@ -59,15 +59,13 @@ export const useAllAvailableTokens = (account: string, chainId: string) => {
 
 export const useEnabledAccountTokensSlugs = () => {
   const chainId = useChainId(true)!;
-  const metadatas = useAllTokensMetadataSelector();
   const { publicKeyHash } = useAccount();
 
   const tokens = useAccountTokens(publicKeyHash, chainId);
-  const filtered = tokens.filter(token => !isRwa(metadatas[token.slug]));
 
   return useMemo(
-    () => filtered.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
-    [filtered]
+    () => tokens.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
+    [tokens]
   );
 };
 

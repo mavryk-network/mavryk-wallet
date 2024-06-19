@@ -58,7 +58,7 @@ export const useAllAvailableTokens = (account: string, chainId: string) => {
   }, [tokens, allTokensStored, account, chainId]);
 };
 
-export const useEnabledAccountTokensSlugs = () => {
+export const useEnabledAccountTokensSlugs = (onlyTokens = false) => {
   const chainId = useChainId(true)!;
   const { publicKeyHash } = useAccount();
 
@@ -69,9 +69,9 @@ export const useEnabledAccountTokensSlugs = () => {
   return useMemo(
     () =>
       tokens
-        .concat([...collectibles, ...rwas])
+        .concat(onlyTokens ? [] : [...collectibles, ...rwas])
         .reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
-    [tokens, collectibles, rwas]
+    [tokens, collectibles, rwas, onlyTokens]
   );
 };
 

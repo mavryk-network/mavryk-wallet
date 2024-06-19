@@ -194,7 +194,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 return (
                   <div key={slug} className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-x-2">
-                      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-405">
+                      <div className="w-8 max-h-8 flex items-center justify-center">
                         <AssetImage
                           metadata={slugsMetadataRecord[slug]}
                           loader={<AssetIconPlaceholder size={32} metadata={slugsMetadataRecord[slug]} />}

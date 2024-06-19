@@ -18,6 +18,8 @@ import { PREDEFINED_TOKENS_METADATA } from '../known-tokens';
 import type { AccountAsset } from '../types';
 import { tokenToSlug } from '../utils';
 
+import { useAccountCollectibles } from './collectibles';
+import { useAccountRwas } from './rwas';
 import { isAssetStatusIdle, getAssetStatus } from './utils';
 
 export interface AccountToken extends AccountAsset {
@@ -61,10 +63,15 @@ export const useEnabledAccountTokensSlugs = () => {
   const { publicKeyHash } = useAccount();
 
   const tokens = useAccountTokens(publicKeyHash, chainId);
+  const collectibles = useAccountCollectibles(publicKeyHash, chainId);
+  const rwas = useAccountRwas(publicKeyHash, chainId);
 
   return useMemo(
-    () => tokens.reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
-    [tokens]
+    () =>
+      tokens
+        .concat([...collectibles, ...rwas])
+        .reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
+    [tokens, collectibles, rwas]
   );
 };
 

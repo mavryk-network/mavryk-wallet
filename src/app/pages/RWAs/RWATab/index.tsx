@@ -127,7 +127,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
                   <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
                 </SortPopup>
 
-                <ManageAssetsButton assetSlug={AssetTypesEnum.Collectibles} />
+                <ManageAssetsButton assetSlug={AssetTypesEnum.Rwas} />
               </div>
             </SearchExplorerClosed>
           </>

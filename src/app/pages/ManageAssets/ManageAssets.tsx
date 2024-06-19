@@ -6,14 +6,13 @@ import classNames from 'clsx';
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
 import { useAppEnv } from 'app/env';
-import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { dispatch } from 'app/store';
-import { setCollectibleStatusAction, setTokenStatusAction } from 'app/store/assets/actions';
+import { setCollectibleStatusAction, setTokenStatusAction, setRwaStatusAction } from 'app/store/assets/actions';
 import { useAreAssetsLoading } from 'app/store/assets/selectors';
 import { StoredAssetStatus } from 'app/store/assets/state';
 import { useTokensMetadataLoadingSelector } from 'app/store/tokens-metadata/selectors';
@@ -22,7 +21,7 @@ import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSel
 import SearchAssetField from 'app/templates/SearchAssetField';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { TEMPLE_TOKEN_SLUG } from 'lib/assets';
-import { AccountToken, useAccountTokens } from 'lib/assets/hooks/tokens';
+import { AccountToken } from 'lib/assets/hooks/tokens';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T, t } from 'lib/i18n';
@@ -33,6 +32,8 @@ import useTippy from 'lib/ui/useTippy';
 
 import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance';
 
+import { useAssetsListingLogic } from './hooks/useAssetsListingLogic';
+import { useAssetsTokens } from './hooks/useAssetsTokens';
 import { SELECT_ALL_ASSETS, SELECT_HIDDEN_ASSETS } from './manageAssets.const';
 import styles from './ManageAssets.module.css';
 import { ManageAssetsSelectOptionType } from './manageAssets.types';
@@ -48,7 +49,15 @@ const ManageAssets: FC<Props> = ({ assetType }) => (
     RightSidedComponent={<TopbarRightText linkTo="/add-asset" label={t('add')} />}
     pageTitle={
       <>
-        <T id={assetType === AssetTypesEnum.Collectibles ? 'manageNFTs' : 'manageAssets'} />
+        <T
+          id={
+            assetType === AssetTypesEnum.Collectibles
+              ? 'manageNFTs'
+              : assetType === AssetTypesEnum.Rwas
+              ? 'manageRWAs'
+              : 'manageAssets'
+          }
+        />
       </>
     }
   >
@@ -80,7 +89,11 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const balances = useCurrentAccountBalances();
   const address = account.publicKeyHash;
 
-  const tokens = useAccountTokens(address, chainId, false);
+  const assetTypeForFiltering =
+    assetType === AssetTypesEnum.Collectibles ? 'collectibles' : assetType === AssetTypesEnum.Rwas ? 'rwas' : 'tokens';
+
+  const tokens = useAssetsTokens(assetTypeForFiltering, address, chainId, false);
+
   const tokensRecord = useMemo(() => tokensToRecord(tokens), [tokens]);
 
   const managebleSlugs = useMemo(
@@ -88,11 +101,15 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     [tokens]
   );
 
-  const assetsAreLoading = useAreAssetsLoading(assetType === AssetTypesEnum.Collectibles ? 'collectibles' : 'tokens');
-  const metadatasLoading = useTokensMetadataLoadingSelector();
+  const assetsAreLoading = useAreAssetsLoading(assetTypeForFiltering);
+  const metadatasLoading = useTokensMetadataLoadingSelector(); // rwas and collectibles are taken from tokens, so no need to checl loading statuses for them
   const isSyncing = assetsAreLoading || metadatasLoading;
 
-  const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(managebleSlugs, false);
+  const {
+    displayedSlugs: filteredAssets,
+    searchValue,
+    setSearchValue
+  } = useAssetsListingLogic(assetTypeForFiltering, managebleSlugs);
 
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<ManageAssetsSelectOptionType | null>(null);
@@ -106,7 +123,11 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
     async (assetSlug: string, status: StoredAssetStatus) => {
       try {
         dispatch(
-          (assetType === AssetTypesEnum.Collectibles ? setCollectibleStatusAction : setTokenStatusAction)({
+          (assetType === AssetTypesEnum.Collectibles
+            ? setCollectibleStatusAction
+            : assetType === AssetTypesEnum.Rwas
+            ? setRwaStatusAction
+            : setTokenStatusAction)({
             account: account.publicKeyHash,
             chainId,
             slug: assetSlug,
@@ -123,7 +144,12 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const handleDeleteSelectedTokens = useCallback(async () => {
     const confirmed = await confirm({
-      title: assetType === AssetTypesEnum.Collectibles ? t('deleteNFTConfirm') : t('deleteAssets'),
+      title:
+        assetType === AssetTypesEnum.Collectibles
+          ? t('deleteNFTConfirm')
+          : assetType === AssetTypesEnum.Rwas
+          ? t('deleteRWAConfirm')
+          : t('deleteAssets'),
       children: (
         <div className="flex flex-col gap-1 mx-auto" style={{ maxWidth: popup ? 270 : 'auto' }}>
           <div>

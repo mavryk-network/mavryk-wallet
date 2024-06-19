@@ -11,7 +11,6 @@ import {
 import { isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount } from 'app/store/assets/utils';
 import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
 import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
-import { isRwa } from 'lib/metadata';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 

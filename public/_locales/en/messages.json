@@ -3054,8 +3054,14 @@
   "manageNFTs": {
     "message": "Manage NFTs"
   },
+  "manageRWAs": {
+    "message": "Manage RWAs"
+  },
   "deleteNFTConfirm": {
     "message": "Are you sure you want to delete this NFT?"
+  },
+  "deleteRWAConfirm": {
+    "message": "Are you sure you want to delete this RWA?"
   },
   "zeroNFTText": {
     "message": "You don't have any NFTs yet"

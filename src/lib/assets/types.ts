@@ -22,5 +22,6 @@ export type TokenStandardType = 'fa1.2' | 'fa2';
 
 export enum AssetTypesEnum {
   Collectibles = 'collectibles',
-  Tokens = 'tokens'
+  Tokens = 'tokens',
+  Rwas = 'rwas'
 }

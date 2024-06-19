@@ -5,7 +5,7 @@ import { emptyFn } from '@rnw-community/shared';
 import { AssetImage } from 'app/templates/AssetImage';
 import { AssetMetadataBase } from 'lib/metadata';
 
-import { CollectibleImageFallback } from './CollectibleImageFallback';
+import { RwaImageFallback } from './CollectibleImageFallback';
 import { CollectibleImageLoader } from './CollectibleImageLoader';
 import { Player } from './VideoPlayer/Player';
 
@@ -46,7 +46,7 @@ export const AudioCollectible = memo<Props>(({ uri, metadata, className, style, 
           <AssetImage
             metadata={metadata}
             fullViewCollectible
-            fallback={<CollectibleImageFallback large isAudioCollectible />}
+            fallback={<RwaImageFallback large isAudioCollectible symbol={metadata?.symbol} />}
             className={className}
             style={style}
             onStackLoaded={handleImageLoaded}

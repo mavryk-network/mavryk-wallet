@@ -99,6 +99,9 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const isSwapOperation = historyItem?.type === HistoryItemOpTypeEnum.Swap;
   const isMultipleOperation = historyItem?.type === HistoryItemOpTypeEnum.Multiple;
+  const isInteractionOperation = historyItem?.type === HistoryItemOpTypeEnum.Interaction;
+  const showDiffs =
+    historyItem?.type === HistoryItemOpTypeEnum.TransferTo || historyItem?.type === HistoryItemOpTypeEnum.TransferFrom;
 
   const moneyDiffForSwap = useMemo(
     () => (isSwapOperation ? getMoneyDiffsForSwap(moneyDiffs) : []),
@@ -144,9 +147,14 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               isSwapOperation ? 'text-xl leading-6 tracking-tight mb-1 text-white' : 'text-sm text-secondary-white'
             )}
           >
-            {HistoryItemOpTypeTexts[historyItem.type]}
+            {HistoryItemOpTypeTexts[historyItem.type]}{' '}
+            {isInteractionOperation ? (
+              <span className="text-accent-blue">{historyItem.operations[0].entrypoint}</span>
+            ) : (
+              ''
+            )}
           </div>
-          {!isSwapOperation && !isMultipleOperation && (
+          {showDiffs && (
             <div className="flex flex-col">
               {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
                 <MoneyDiffView
@@ -186,7 +194,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 return (
                   <div key={slug} className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-x-2">
-                      <div className="max-w-8 max-h-8 rounded-full overflow-hidden">
+                      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-405">
                         <AssetImage
                           metadata={slugsMetadataRecord[slug]}
                           loader={<AssetIconPlaceholder size={32} metadata={slugsMetadataRecord[slug]} />}

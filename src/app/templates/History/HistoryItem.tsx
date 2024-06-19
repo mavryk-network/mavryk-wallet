@@ -66,9 +66,6 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => {
-        console.log(historyItem);
-      }}
       className={classNames(
         'py-3 px-4 relative cursor-pointer overflow-hidden',
         styles.historyItem,

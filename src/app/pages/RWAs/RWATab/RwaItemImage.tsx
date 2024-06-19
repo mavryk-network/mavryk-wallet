@@ -10,7 +10,7 @@ import { ImageStacked } from 'lib/ui/ImageStacked';
 import { useIntersectionByOffsetObserver } from 'lib/ui/use-intersection-observer';
 
 import { CollectibleBlur } from '../components/CollectibleBlur';
-import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
+import { RwaImageFallback } from '../components/CollectibleImageFallback';
 import { CollectibleImageLoader } from '../components/CollectibleImageLoader';
 
 interface Props {
@@ -49,7 +49,7 @@ export const RwaItemImage = memo<Props>(
             loading="lazy"
             className="max-w-full max-h-full object-contain"
             loader={<CollectibleImageLoader />}
-            fallback={<CollectibleImageFallback isAudioCollectible={isAudioCollectible} />}
+            fallback={<RwaImageFallback isAudioCollectible={isAudioCollectible} symbol={metadata?.symbol} />}
           />
         )}
       </div>

@@ -8,7 +8,7 @@ import { useLocalStorage } from 'lib/ui/local-storage';
 
 import { AudioCollectible } from '../components/AudioCollectible';
 import { CollectibleBlur } from '../components/CollectibleBlur';
-import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
+import { RwaImageFallback } from '../components/CollectibleImageFallback';
 import { CollectibleImageLoader } from '../components/CollectibleImageLoader';
 import { VideoCollectible } from '../components/VideoCollectible';
 import { LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY } from '../constants';
@@ -88,7 +88,7 @@ export const RwaPageImage = memo<Props>(
         metadata={metadata}
         fullViewCollectible
         loader={<CollectibleImageLoader large />}
-        fallback={<CollectibleImageFallback large />}
+        fallback={<RwaImageFallback symbol={metadata?.symbol} large />}
         className={className}
       />
     );

@@ -91,7 +91,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
               i18nKey="multipleInteractionOnContract"
               args={[
                 opMultiple.destination.address,
-                <span>{originalHistoryItem?.operations.length - 1 ?? 1} more</span>
+                <span>{originalHistoryItem ? originalHistoryItem?.operations.length - 1 : 1} more</span>
               ]}
             />
           }

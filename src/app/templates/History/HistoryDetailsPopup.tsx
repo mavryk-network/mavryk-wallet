@@ -429,6 +429,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
           size={24}
           hash={getTxOpLabelAndAddress.address ?? ''}
           className="flex-shrink-0 shadow-xs rounded-full"
+          isToken
         />
         <HashChip hash={getTxOpLabelAndAddress.address ?? ''} small className="text-sm" />
       </div>

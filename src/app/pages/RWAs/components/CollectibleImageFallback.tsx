@@ -3,11 +3,11 @@ import React, { memo } from 'react';
 import clsx from 'clsx';
 
 import { estimateOptimalFontSize } from 'app/atoms/Identicon';
+import { useAppEnv } from 'app/env';
 import { ReactComponent as BrokenImageSvg } from 'app/icons/broken-image.svg';
 import { ReactComponent as MusicSvg } from 'app/icons/music.svg';
 import NoImageToken from 'app/misc/no-image-token.png';
 import NoRWABg from 'app/misc/no-rwa-bg.png';
-import { useAppEnv } from 'app/env';
 
 const MAX_INITIALS_LENGTH = 5;
 

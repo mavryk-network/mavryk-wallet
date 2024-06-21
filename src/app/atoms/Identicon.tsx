@@ -34,7 +34,7 @@ const Identicon: FC<IdenticonProps> = ({
   size = 100,
   className,
   style = {},
-  isToken = true,
+  isToken = false,
   ...rest
 }) => {
   const backgroundImage = useMemo(() => {
@@ -67,10 +67,27 @@ const Identicon: FC<IdenticonProps> = ({
     }
   }, [type, hash, size, isToken]);
 
+  const memoizedStyle = useMemo(
+    () =>
+      isToken && type === 'initials'
+        ? {
+            top: 0,
+            left: 0
+          }
+        : style,
+    [isToken, type, style]
+  );
+
   return (
     <RenderIcon
       addWrapper={isToken && type === 'initials'}
-      className={classNames('relative', 'bg-transparent', 'bg-no-repeat bg-center', 'overflow-hidden', className)}
+      className={classNames(
+        !className?.includes('absolute') && 'relative',
+        'bg-transparent',
+        'bg-no-repeat bg-center',
+        'overflow-hidden',
+        className
+      )}
       style={{
         width: size,
         height: size,
@@ -80,7 +97,8 @@ const Identicon: FC<IdenticonProps> = ({
     >
       <div
         className={classNames(
-          'inline-block relative',
+          !className?.includes('absolute') && 'relative',
+          'inline-block',
           type === 'initials' ? 'bg-transparent' : 'bg-gray-100',
           'bg-no-repeat bg-center',
           'overflow-hidden',
@@ -92,7 +110,7 @@ const Identicon: FC<IdenticonProps> = ({
           height: size,
           maxWidth: size,
           zIndex: isToken ? 1 : 0,
-          ...style
+          ...memoizedStyle
         }}
         {...rest}
       />

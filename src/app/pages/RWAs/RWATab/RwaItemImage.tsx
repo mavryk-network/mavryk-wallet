@@ -37,6 +37,8 @@ export const RwaItemImage = memo<Props>(
 
     useIntersectionByOffsetObserver(containerElemRef, handleIntersection, true, 800);
 
+    console.log(sources);
+
     return (
       <div className={isInViewport ? 'contents' : 'hidden'}>
         {isAdultFlagLoading ? (

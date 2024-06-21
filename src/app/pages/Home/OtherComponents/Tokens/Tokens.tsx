@@ -49,7 +49,7 @@ export const TokensTab: FC = () => {
   const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
 
-  const slugs = useEnabledAccountTokensSlugs(true);
+  const slugs = useEnabledAccountTokensSlugs();
 
   const [isZeroBalancesHidden, setIsZeroBalancesHidden] = useLocalStorage(LOCAL_STORAGE_TOGGLE_KEY, false);
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);

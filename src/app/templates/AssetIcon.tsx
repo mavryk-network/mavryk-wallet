@@ -36,6 +36,6 @@ export const AssetIconPlaceholder: FC<PlaceholderProps> = ({ metadata, size }) =
   return metadata && isCollectible(metadata) ? (
     <NFTsPlacehonder style={{ maxWidth: `${size}px`, width: '100%', height: '100%' }} />
   ) : (
-    <Identicon type="initials" hash={getAssetSymbol(metadata)} size={size} />
+    <Identicon type="initials" hash={getAssetSymbol(metadata)} size={size} isToken />
   );
 };

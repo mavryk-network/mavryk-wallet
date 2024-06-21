@@ -7,6 +7,7 @@ import { ReactComponent as BrokenImageSvg } from 'app/icons/broken-image.svg';
 import { ReactComponent as MusicSvg } from 'app/icons/music.svg';
 import NoImageToken from 'app/misc/no-image-token.png';
 import NoRWABg from 'app/misc/no-rwa-bg.png';
+import { useAppEnv } from 'app/env';
 
 const MAX_INITIALS_LENGTH = 5;
 
@@ -17,8 +18,9 @@ interface Props {
 }
 // Token image not found
 export const RwaImageFallback = memo<Props>(({ large = false, isAudioCollectible = false, symbol }) => {
+  const { popup } = useAppEnv();
   const height = large ? '23%' : '32%';
-  const size = large ? 165 : 50;
+  const size = large ? (popup ? 222 : 165) : 50;
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -30,7 +32,10 @@ export const RwaImageFallback = memo<Props>(({ large = false, isAudioCollectible
             className={'text-white'}
             style={{
               zIndex: 2,
-              fontSize: estimateOptimalFontSize(symbol.slice(0, MAX_INITIALS_LENGTH).length, large ? 50 : 18)
+              fontSize: estimateOptimalFontSize(
+                symbol.slice(0, MAX_INITIALS_LENGTH).length,
+                large ? (popup ? 64 : 50) : 18
+              )
             }}
           >
             {symbol.slice(0, MAX_INITIALS_LENGTH)}

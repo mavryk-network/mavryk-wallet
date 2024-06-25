@@ -16,6 +16,8 @@ import { sanitizeRwasMetadataForDevTools } from './rwas-metadata/state';
 export const SLICES_BLACKLIST = [
   'buyWithCreditCard' as const,
   'collectibles' as const,
+  'rwas' as const,
+  'rwasMetadata' as const,
   'assets' as const,
   'collectiblesMetadata' as const
 ];

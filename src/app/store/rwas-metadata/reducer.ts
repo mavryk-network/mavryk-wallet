@@ -55,7 +55,7 @@ export const rwasMetadataPersistedReducer = persistReducer<SliceState>(
       createTransformsBeforePersist<SliceState>({
         records: nonSerializibleRecords => {
           // Converting `records` from `Map` to `Array`
-          const serializibleRecords = Array.from(nonSerializibleRecords.values());
+          const serializibleRecords = Array.from(Object.values(nonSerializibleRecords));
 
           return serializibleRecords as unknown as typeof nonSerializibleRecords;
         }

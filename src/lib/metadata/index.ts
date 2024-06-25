@@ -194,8 +194,8 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
-export const isRwa = (metadata: Record<string, any>) =>
-  'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
+export const isRwa = (metadata: Record<string, any>) => false;
+// 'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
 
 /**
  * @deprecated // Assertion here is not safe!

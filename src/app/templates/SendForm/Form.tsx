@@ -56,6 +56,7 @@ import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
 import { delay } from 'lib/utils';
 
 import ContactsDropdown, { ContactsDropdownProps } from './ContactsDropdown';
+import ContactsDropdownItem from './ContactsDropdownItem';
 import { FeeSection } from './FeeSection';
 import { SendFormSelectors } from './selectors';
 import { SpinnerSection } from './SpinnerSection';
@@ -399,10 +400,13 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
     ]
   );
 
+  const [pickedFromDropdown, setPickedFromDropdown] = useState(false);
+
   const handleAccountSelect = useCallback(
     (account: string) => {
       setValue('to', account);
       triggerValidation('to');
+      setPickedFromDropdown(true);
     },
     [setValue, triggerValidation]
   );
@@ -438,19 +442,29 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       <Controller
         name="to"
         as={
-          <NoSpaceField
-            ref={toFieldRef}
-            onFocus={handleToFieldFocus}
-            extraInner={
-              <InnerDropDownComponentGuard
-                contacts={allContactsWithoutCurrent}
-                opened={isContactsDropdownOpen}
-                onSelect={handleAccountSelect}
-                searchTerm={toValue}
+          pickedFromDropdown && filledContact ? (
+            <div className="bg-primary-card rounded-xl overflow-hidden mb-6">
+              <ContactsDropdownItem
+                contact={filledContact}
+                active={false}
+                onClick={() => setPickedFromDropdown(false)}
               />
-            }
-            extraInnerWrapper="unset"
-          />
+            </div>
+          ) : (
+            <NoSpaceField
+              ref={toFieldRef}
+              onFocus={handleToFieldFocus}
+              extraInner={
+                <InnerDropDownComponentGuard
+                  contacts={allContactsWithoutCurrent}
+                  opened={isContactsDropdownOpen}
+                  onSelect={handleAccountSelect}
+                  searchTerm={toValue}
+                />
+              }
+              extraInnerWrapper="unset"
+            />
+          )
         }
         control={control}
         rules={{

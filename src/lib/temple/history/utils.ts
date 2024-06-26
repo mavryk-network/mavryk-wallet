@@ -343,41 +343,29 @@ function deriveHistoryItemType(
   // then need to take that opp type.
   // Is Delegation operation
   if (firstOperation.type === 'delegation') {
-    type = HistoryItemOpTypeEnum.Delegation;
-    return type;
+    return HistoryItemOpTypeEnum.Delegation;
   } else if (firstOperation.type === 'origination') {
-    type = HistoryItemOpTypeEnum.Origination;
-    return type;
+    return HistoryItemOpTypeEnum.Origination;
   } else {
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
-      type = HistoryItemOpTypeEnum.Swap;
-      return type;
-    } else if (
-      items.reduce<number>((acc, item) => {
-        const amount = isZero(item.amountSigned) ? 0 : 1;
-
-        acc += amount;
-        return acc;
-      }, 0) >= 2
-    ) {
-      type = HistoryItemOpTypeEnum.Multiple;
-      return type;
+      return HistoryItemOpTypeEnum.Swap;
     } else {
       const item = items[0];
 
+      if (items.some(item => item.entrypoint === 'placeSellOrder' || item.entrypoint === 'placeBuyOrder')) {
+        return HistoryItemOpTypeEnum.Multiple;
+      }
+
       if (isZero(item.amountSigned)) {
-        type = HistoryItemOpTypeEnum.Interaction;
-        return type;
+        return HistoryItemOpTypeEnum.Interaction;
       }
       if (item.source.address === address) {
-        type = HistoryItemOpTypeEnum.TransferTo;
-        return type;
+        return HistoryItemOpTypeEnum.TransferTo;
       }
 
       if ('tokenTransfers' in item && item.tokenTransfers)
         if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
-          type = HistoryItemOpTypeEnum.TransferFrom;
-          return type;
+          return HistoryItemOpTypeEnum.TransferFrom;
         } else {
           type = HistoryItemOpTypeEnum.TransferTo;
         }

@@ -103,7 +103,6 @@ const finishTokensLoading = async (
     if (fungibleByMetaCheck) {
       const metadata = metadataOfNew || knownMeta.get(slug);
 
-      // TODO RWA check add
       if (!metadata || isCollectible(metadata) || isRwa(metadata)) continue;
     }
 

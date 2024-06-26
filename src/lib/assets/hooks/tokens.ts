@@ -63,6 +63,7 @@ export const useEnabledAccountTokensSlugs = (onlyTokens = false) => {
   const { publicKeyHash } = useAccount();
 
   const tokens = useAccountTokens(publicKeyHash, chainId);
+
   const collectibles = useAccountCollectibles(publicKeyHash, chainId);
   const rwas = useAccountRwas(publicKeyHash, chainId);
 
@@ -85,6 +86,7 @@ const TOKENS_SORT_ITERATEES: (keyof AccountToken)[] = ['predefined', 'slug'];
 export const useAccountTokens = (account: string, chainId: string, returnRemovedTokes = true) => {
   const storedRaw = useAccountTokensSelector(account, chainId);
   const whitelistSlugs = useWhitelistSlugs(chainId);
+
   const metadatas = useAllTokensMetadataSelector();
 
   const balances = useAllAccountBalancesSelector(account, chainId);

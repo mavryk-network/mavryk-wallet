@@ -41,7 +41,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
   );
 
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
-  const isMultipleOperation = historyItem.type === HistoryItemOpTypeEnum.Multiple;
+  const isInteractionOperation = historyItem.type === HistoryItemOpTypeEnum.Multiple;
 
   const rest = useMemo(
     () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
@@ -52,10 +52,10 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
     () =>
       isSwapOperation
         ? getMoneyDiffsForSwap(moneyDiffs)
-        : isMultipleOperation
+        : isInteractionOperation
         ? getMoneyDiffForMultiple(moneyDiffs)
         : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
-    [isMultipleOperation, isSwapOperation, moneyDiffs]
+    [isInteractionOperation, isSwapOperation, moneyDiffs]
   );
   const moneyDiffsRest = useMemo(
     () => (isSwapOperation ? moneyDiffs : moneyDiffs.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
@@ -106,7 +106,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
                 assetId={assetSlug}
                 diff={diff}
                 pending={status === 'pending'}
-                showFiatBalance={!isSwapOperation && !isMultipleOperation}
+                showFiatBalance={!isSwapOperation && !isInteractionOperation}
               />
             );
           })}

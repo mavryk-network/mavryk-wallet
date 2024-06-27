@@ -152,12 +152,12 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
 
   for (const oper of historyItem.operations) {
     // TODO check why Origination type returns another token diff when called with Interaction or Multiple op
-    if ((isZero(oper.amountSigned) && !allowZero) || oper.type === HistoryItemOpTypeEnum.Origination) continue;
+    if (isZero(oper.amountSigned) && !allowZero) continue;
 
     const assetSlug =
       // @ts-expect-error
       oper.contractAddress == null ? MAV_TOKEN_SLUG : toTokenSlug(oper.contractAddress, oper.tokenTransfers?.tokenId);
-    const diff = new BigNumber(oper.amountSigned).toFixed();
+    const diff = new BigNumber(oper.type === HistoryItemOpTypeEnum.Origination ? 0 : oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }
 

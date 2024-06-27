@@ -72,6 +72,6 @@ export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   return [diff[0], diff[diff.length - 1]];
 }
 
-export function getMoneyDiffForMultiple(diffs: MoneyDiff[]) {
-  return diffs.filter(diff => !isZero(diff.diff));
+export function getMoneyDiffForMultiple(diffs: MoneyDiff[], previewSize: number) {
+  return diffs.filter(diff => !isZero(diff.diff)).slice(0, previewSize);
 }

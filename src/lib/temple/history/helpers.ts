@@ -151,7 +151,8 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
   if (!historyItem) return diffs;
 
   for (const oper of historyItem.operations) {
-    if (isZero(oper.amountSigned) && !allowZero) continue;
+    // TODO check why Origination type returns another token diff when called with Interaction or Multiple op
+    if ((isZero(oper.amountSigned) && !allowZero) || oper.type === HistoryItemOpTypeEnum.Origination) continue;
 
     const assetSlug =
       // @ts-expect-error
@@ -159,12 +160,6 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
     const diff = new BigNumber(oper.amountSigned).toFixed();
     diffs.push({ assetSlug, diff });
   }
-
-  // if (historyItem.type === HistoryItemOpTypeEnum.TransferTo || historyItem.type === HistoryItemOpTypeEnum.TransferFrom) {
-  //   return diffs.sort((a, b) => {
-
-  //   })
-  // }
 
   return diffs;
 }

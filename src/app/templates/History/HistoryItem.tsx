@@ -3,7 +3,7 @@ import React, { useMemo, memo, useState } from 'react';
 import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
-import { OP_STACK_PREVIEW_SIZE } from 'app/defaults';
+import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
@@ -41,7 +41,8 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
   );
 
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
-  const isInteractionOperation = historyItem.type === HistoryItemOpTypeEnum.Multiple;
+  const isInteractionOperation =
+    historyItem.type === HistoryItemOpTypeEnum.Multiple || historyItem.type === HistoryItemOpTypeEnum.Interaction;
 
   const rest = useMemo(
     () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
@@ -53,7 +54,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
       isSwapOperation
         ? getMoneyDiffsForSwap(moneyDiffs)
         : isInteractionOperation
-        ? getMoneyDiffForMultiple(moneyDiffs)
+        ? getMoneyDiffForMultiple(moneyDiffs, OP_STACK_PREVIEW_MULTIPLE_SIZE)
         : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
     [isInteractionOperation, isSwapOperation, moneyDiffs]
   );

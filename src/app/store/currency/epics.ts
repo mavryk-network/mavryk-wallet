@@ -21,7 +21,7 @@ const loadExchangeRatesEpic: Epic = action$ =>
           loadExchangeRates.success({
             usdToTokenRates: {
               ...usdToTokenRates,
-              // TODO dake rates for rwa tokens, remove later
+              // TODO take rates for rwa tokens, remove later
               [MARS_TOKEN_SLUG]: '51.094475357904031783253356',
               [OCEAN_TOKEN_SLUG]: '72.844475357904031783253356'
             },

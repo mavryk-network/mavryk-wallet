@@ -56,7 +56,7 @@ import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
 import { delay } from 'lib/utils';
 
 import ContactsDropdown, { ContactsDropdownProps } from './ContactsDropdown';
-import ContactsDropdownItem from './ContactsDropdownItem';
+import { ContactsDropdownItemSecondary } from './ContactsDropdownItem';
 import { FeeSection } from './FeeSection';
 import { SendFormSelectors } from './selectors';
 import { SpinnerSection } from './SpinnerSection';
@@ -431,6 +431,11 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
     [allContacts, accountPkh]
   );
 
+  const handlePickedAccountClean = useCallback(() => {
+    setPickedFromDropdown(false);
+    setValue('to', '');
+  }, [setValue]);
+
   const { selectedFiatCurrency } = useFiatCurrency();
 
   // const visibleAssetSymbol = shoudUseFiat ? selectedFiatCurrency.symbol : assetSymbol;
@@ -443,12 +448,17 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         name="to"
         as={
           pickedFromDropdown && filledContact ? (
-            <div className="bg-primary-card rounded-xl overflow-hidden mb-6">
-              <ContactsDropdownItem
-                contact={filledContact}
-                active={false}
-                onClick={() => setPickedFromDropdown(false)}
-              />
+            <div>
+              <div className="text-base font-normal text-primary-white mb-3">
+                <T id="sendTo" />
+              </div>
+              <div className="bg-primary-card rounded-xl overflow-hidden mb-4">
+                <ContactsDropdownItemSecondary
+                  contact={filledContact}
+                  active={false}
+                  onClick={handlePickedAccountClean}
+                />
+              </div>
             </div>
           ) : (
             <NoSpaceField

@@ -76,7 +76,7 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
     <>
       {/* {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />} */}
 
-      <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-6 no-scrollbar" />
+      <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-4 no-scrollbar" />
 
       <Suspense fallback={<SpinnerSection />}>
         <Form assetSlug={selectedAsset} setOperation={setOperation} onAddContactRequested={handleAddContactRequested} />

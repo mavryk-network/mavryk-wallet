@@ -92,6 +92,7 @@ const AccountOptionContent = memo<{ item: TempleAccount; selected: boolean; isFa
                   value={bal}
                   showEqualSymbol={false}
                   className="text-base-plus"
+                  tooltip={false}
                 />
               </span>
             )}

@@ -22,6 +22,7 @@ interface InFiatProps extends TestIDProps {
   smallFractionFont?: boolean;
   mainnet?: boolean;
   showCents?: boolean;
+  tooltip?: boolean;
 }
 
 const InFiat: FC<InFiatProps> = ({
@@ -33,6 +34,7 @@ const InFiat: FC<InFiatProps> = ({
   smallFractionFont,
   mainnet,
   showCents = true,
+  tooltip = true,
   testID,
   testIDProperties
 }) => {
@@ -66,6 +68,7 @@ const InFiat: FC<InFiatProps> = ({
         smallFractionFont={smallFractionFont}
         testID={testID}
         testIDProperties={testIDProperties}
+        tooltip={tooltip}
       >
         {roundedInFiat}
       </Money>

@@ -32,9 +32,20 @@ interface FiatBalanceProps extends TestIDProps {
   customSymbol?: string;
   value: BigNumber | string | number;
   roundingMode?: BigNumber.RoundingMode;
+  tooltip?: boolean;
 }
 export const FiatBalance = memo<FiatBalanceProps>(
-  ({ assetSlug, value, testID, testIDProperties, className, roundingMode, customSymbol, showEqualSymbol = true }) => (
+  ({
+    assetSlug,
+    tooltip,
+    value,
+    testID,
+    testIDProperties,
+    className,
+    roundingMode,
+    customSymbol,
+    showEqualSymbol = true
+  }) => (
     <InFiat
       assetSlug={assetSlug}
       volume={value}
@@ -42,6 +53,7 @@ export const FiatBalance = memo<FiatBalanceProps>(
       testID={testID}
       testIDProperties={testIDProperties}
       roundingMode={roundingMode}
+      tooltip={tooltip}
     >
       {({ balance, symbol }) => (
         <div

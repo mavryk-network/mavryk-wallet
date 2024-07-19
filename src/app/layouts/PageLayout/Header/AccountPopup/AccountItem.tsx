@@ -72,7 +72,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
       </div>
       <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus">
         <span className="ml-1">{fiatSymbol}</span>
-        <Money smallFractionFont={false} fiat>
+        <Money smallFractionFont={false} fiat tooltip={false}>
           {totalBalanceInDollar}
         </Money>
       </div>

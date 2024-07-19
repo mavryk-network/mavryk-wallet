@@ -76,6 +76,23 @@ export const useEnabledAccountTokensSlugs = (onlyTokens = false) => {
   );
 };
 
+export const useEnabledOtherAccountTokensSlugs = (publicKeyHash: string) => {
+  const chainId = useChainId(true)!;
+
+  const tokens = useAccountTokens(publicKeyHash, chainId);
+
+  const collectibles = useAccountCollectibles(publicKeyHash, chainId);
+  const rwas = useAccountRwas(publicKeyHash, chainId);
+
+  return useMemo(
+    () =>
+      tokens
+        .concat([...collectibles, ...rwas])
+        .reduce<string[]>((acc, { slug, status }) => (status === 'enabled' ? acc.concat(slug) : acc), []),
+    [tokens, collectibles, rwas]
+  );
+};
+
 /**
  * Sorting is needed to preserve some tokens order (avoid UI listing jumps)
  * after merge of multiple sources (e.g. stored, predefined, whitelist)

@@ -48,7 +48,7 @@ const AccountBanner = memo<AccountBannerProps>(
           {displayBalance && (
             <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus text-white">
               <span className="ml-1">{fiatSymbol}</span>
-              <Money smallFractionFont={false} fiat>
+              <Money smallFractionFont={false} fiat tooltip={false}>
                 {totalBalanceInFiat}
               </Money>
             </div>

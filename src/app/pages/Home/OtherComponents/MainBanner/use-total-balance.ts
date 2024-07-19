@@ -5,6 +5,7 @@ import { isDefined } from '@rnw-community/shared';
 import { useSelector } from 'app/store/root-state.selector';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
+import { useEnabledOtherAccountTokensSlugs } from 'lib/assets/hooks/tokens';
 import {
   useGetCurrentAccountTokenOrGasBalanceWithDecimals,
   useGetOtherAccountTokenOrGasBalanceWithDecimals
@@ -36,7 +37,7 @@ export const useTotalBalance = () => {
 };
 
 export const useOtherAccountTotalBalance = (accountPkh: string) => {
-  const tokensSlugs = useEnabledAccountTokensSlugs();
+  const tokensSlugs = useEnabledOtherAccountTokensSlugs(accountPkh);
 
   const getBalance = useGetOtherAccountTokenOrGasBalanceWithDecimals(accountPkh);
   const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);

@@ -137,7 +137,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
     <AlertWithAction
       btnLabel={t('details')}
       onClick={handleTagClick}
-      linkTo={`${process.env.NODES_URL}/portfolio/${myBakerPkh ?? ''}`}
+      linkTo={`${process.env.NODES_URL}/account/${myBakerPkh ?? ''}`}
     >
       {renderBakerData()}
     </AlertWithAction>

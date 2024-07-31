@@ -43,8 +43,8 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
       [
         TempleChainId.Atlas,
         {
-          account: 'https://tzkt.io',
-          transaction: 'https://tzkt.io',
+          account: 'https://nexus.mavryk.org/account/',
+          transaction: 'https://nexus.mavryk.org/operation/',
           api: 'https://atlasnet.api.mavryk.network'
         }
       ],

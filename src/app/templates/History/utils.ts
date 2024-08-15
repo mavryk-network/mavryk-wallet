@@ -73,5 +73,13 @@ export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
 }
 
 export function getMoneyDiffForMultiple(diffs: MoneyDiff[], previewSize: number) {
-  return diffs.filter(diff => !isZero(diff.diff)).slice(0, previewSize);
+  const record: StringRecord<MoneyDiff> = {};
+
+  diffs.forEach(diff => {
+    if (!isZero(diff.diff)) {
+      record[diff.assetSlug] = diff;
+    }
+  });
+
+  return Object.values(record).slice(0, previewSize);
 }

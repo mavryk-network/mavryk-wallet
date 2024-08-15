@@ -5,6 +5,7 @@ import clsx from 'clsx';
 
 import { Divider, HashChip, Identicon } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
+import { OP_STACK_PREVIEW_MULTIPLE_SIZE } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ParallelArrowsIcon } from 'app/icons/parallel-opposing-arrows.svg';
@@ -16,7 +17,7 @@ import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsM
 import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import {
   HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
@@ -34,7 +35,7 @@ import { HistoryTime } from './HistoryTime';
 import { AssetIconPlaceholder, HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OpertionStackItem } from './OperStackItem';
-import { alterIpfsUrl, getAssetsFromOperations, getMoneyDiffsForSwap } from './utils';
+import { alterIpfsUrl, getAssetsFromOperations, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
 // import { toHistoryTokenSlug } from './utils';
 
@@ -108,17 +109,18 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [isSwapOperation, moneyDiffs]
   );
 
-  const multipleAssetsData = useMemo(
-    () =>
-      isMultipleOperation
-        ? slugs.reduce<Record<string, string>>((acc, slug) => {
-            const item = moneyDiffs.find(diff => diff.assetSlug === slug && !isZero(diff.diff));
-            if (item) acc[slug] = item.diff;
-            return acc;
-          }, {})
-        : {},
-    [isMultipleOperation, moneyDiffs, slugs]
-  );
+  const multipleAssetsData = useMemo(() => {
+    const diffs = getMoneyDiffForMultiple(moneyDiffs, OP_STACK_PREVIEW_MULTIPLE_SIZE);
+
+    return isMultipleOperation
+      ? diffs.reduce<StringRecord<MoneyDiff['diff']>>((acc, diff) => {
+          acc[diff.assetSlug] = diff.diff;
+          return acc;
+        }, {})
+      : {};
+  }, [isMultipleOperation, moneyDiffs]);
+
+  console.log(multipleAssetsData, 'multipleAssetsData');
 
   const slugsMetadataRecord = useMemo(
     () =>

@@ -183,10 +183,12 @@ interface StackItemBaseProps {
 
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
   return (
-    <div className="flex items-center text-white text-sm">
-      <div className="flex items-center">{titleNode}</div>
-      <span>&nbsp;</span>
-      {argsNode}
+    <div className="flex items-start text-white text-sm">
+      <div className="break-words">
+        {titleNode}
+        <span>&nbsp;</span>
+        {argsNode}
+      </div>
     </div>
   );
 };

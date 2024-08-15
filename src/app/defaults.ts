@@ -2,7 +2,7 @@ import { t } from 'lib/i18n';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 
 export const OP_STACK_PREVIEW_SIZE = 1;
-export const OP_STACK_PREVIEW_MULTIPLE_SIZE = 3;
+export const OP_STACK_PREVIEW_MULTIPLE_SIZE = 2;
 
 export class ArtificialError extends Error {}
 export class NotEnoughFundsError extends ArtificialError {}

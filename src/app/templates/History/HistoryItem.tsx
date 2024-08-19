@@ -4,6 +4,7 @@ import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
+import { useAppEnv } from 'app/env';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
@@ -16,7 +17,6 @@ import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
 import { getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
-import { useAppEnv } from 'app/env';
 
 const popupInteractionOpTextMaxLength = 6;
 

@@ -16,6 +16,9 @@ import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
 import { getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
+import { useAppEnv } from 'app/env';
+
+const popupInteractionOpTextMaxLength = 6;
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -27,6 +30,7 @@ interface Props {
 
 export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) => {
   const [expanded, setExpanded] = useState(false);
+  const { popup } = useAppEnv();
   const [isHovered, setIsHovered] = useState(false);
 
   const { hash, addedAt, status } = historyItem;
@@ -65,6 +69,11 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
     [moneyDiffs, isSwapOperation]
   );
 
+  const hasLongInteractionOpText =
+    popup &&
+    historyItem.type === HistoryItemOpTypeEnum.Interaction &&
+    (historyItem.operations[0].entrypoint?.length ?? 0) > popupInteractionOpTextMaxLength;
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -99,7 +108,10 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-end gap-1" style={{ maxWidth: 76 }}>
+        <div
+          className="flex flex-col justify-center items-end gap-1"
+          style={{ maxWidth: 76, marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
+        >
           {moneyDiffsBase.map(({ assetSlug, diff }, i) => {
             if (isZero(diff)) return null;
             return (

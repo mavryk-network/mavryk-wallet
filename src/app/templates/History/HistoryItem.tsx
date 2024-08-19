@@ -75,7 +75,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-center justify-between">
+      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div className="flex flex-col gap-1 items-start justify-center">

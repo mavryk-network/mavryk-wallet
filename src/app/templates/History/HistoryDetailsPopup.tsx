@@ -94,7 +94,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [historyItem?.operations]
   );
 
-  const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.gasUsed + fees?.storageUsed) * 0.5 : 0), [fees]);
+  const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.storageFee) * 0.5 : 0), [fees]);
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 

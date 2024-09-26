@@ -75,8 +75,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
           i++;
         }
 
-        // @ts-expect-error
-        burnedFee = new BigNumber(estimates[0].burnFeeMumav + estimates[0]?.baseFeeMumav ?? 0).plus(storageFeeMumav);
+        burnedFee = new BigNumber(modifyFeeAndLimit.totalFee ?? 0).plus(storageFeeMumav).multipliedBy(0.5);
       } catch {
         return null;
       }
@@ -164,7 +163,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                     </>
                   ) : (
                     <span className="flex items-baseline" style={{ maxHeight: 19 }}>
-                      <Money>{value}</Money>
+                      {key === 'feesBurned' && '~'}
+                      <Money smallFractionFont={false}>{value}</Money>
                       <span className="ml-1">{symbol}</span>
                     </span>
                   )}

@@ -508,7 +508,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
           <button
             type="button"
-            className="text-xs font-light text-secondary-white"
+            className="text-sm text-secondary-white"
             onClick={() => onAddContactRequested(toResolved)}
           >
             <T id="addThisAddressToContacts" />

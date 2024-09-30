@@ -6,10 +6,11 @@ import { FormField, FormSubmitButton } from 'app/atoms';
 import HashShortView from 'app/atoms/HashShortView';
 import Identicon from 'app/atoms/Identicon';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import ModalWithTitle from 'app/templates/ModalWithTitle';
 import { T, t } from 'lib/i18n';
 import { useContactsActions } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+
+import { PopupModalWithTitle } from '../PopupModalWithTitle';
 
 type AddContactModalProps = {
   address: string | null;
@@ -56,10 +57,21 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
   );
 
   return (
-    <ModalWithTitle isOpen={Boolean(address)} title={<T id="addNewContact" />} onRequestClose={onClose}>
-      <form onSubmit={handleSubmit(onAddContactSubmit)}>
+    <PopupModalWithTitle
+      isOpen={Boolean(address)}
+      title={
+        <span className="capitalize">
+          <T id="addNewContact" />
+        </span>
+      }
+      onRequestClose={onClose}
+    >
+      <form className="px-4" onSubmit={handleSubmit(onAddContactSubmit)}>
         <div className="mb-8">
-          <div className="mb-4 flex items-stretch border rounded-md p-2">
+          <div className="text-base-plus text-white mb-3">
+            <T id="address" />
+          </div>
+          <div className="mb-4 flex items-stretch border rounded-md px-4 py-14px">
             <Identicon
               type="bottts"
               hash={address ?? ''}
@@ -68,7 +80,7 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
             />
 
             <div className="ml-3 flex-1 flex items-center">
-              <span className="text-base text-white">
+              <span className="text-base-plus text-white">
                 <HashShortView hash={address ?? ''} />
               </span>
             </div>
@@ -89,8 +101,8 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
           />
         </div>
 
-        <div className="flex justify-end">
-          <ButtonRounded type="button" size="big" fill={false} className="mr-3" onClick={onClose}>
+        <div className="grid grid-cols-2 gap-3 w-full">
+          <ButtonRounded type="button" size="big" fill={false} onClick={onClose}>
             <T id="cancel" />
           </ButtonRounded>
 
@@ -99,7 +111,7 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
           </FormSubmitButton>
         </div>
       </form>
-    </ModalWithTitle>
+    </PopupModalWithTitle>
   );
 };
 

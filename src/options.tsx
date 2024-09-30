@@ -46,10 +46,10 @@ const Options: FC = () => {
           className={classNames(
             'relative',
             'px-2 py-1',
-            'bg-primary-orange rounded',
+            'bg-accent-blue rounded',
             'border-2 border-primary-orange',
             'flex items-center',
-            'text-primary-orange-lighter',
+            'text-white',
             'text-sm font-semibold',
             'transition duration-200 ease-in-out',
             'opacity-90 hover:opacity-100 focus:opacity-100',

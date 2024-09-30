@@ -652,7 +652,7 @@
     "description": "Mainnet = main network"
   },
   "templeWalletOptions": {
-    "message": "Temple Wallet | Options"
+    "message": "Mavryk Wallet | Options"
   },
   "resetExtension": {
     "message": "Reset Extension"

@@ -11,6 +11,7 @@ import 'lib/ledger/proxy/foreground';
 import 'lib/keep-bg-worker-alive/script';
 
 import DisableOutlinesForClick from 'app/a11y/DisableOutlinesForClick';
+import DocBg from 'app/a11y/DocBg';
 import Dialogs from 'app/layouts/Dialogs';
 import { StoreProvider } from 'app/store/provider';
 import { getMessage, T } from 'lib/i18n';
@@ -24,6 +25,7 @@ const OptionsWrapper: FC = () => (
       <Dialogs />
       <DisableOutlinesForClick />
     </DialogsProvider>
+    <DocBg bgClassName="bg-primary-bg" />
   </StoreProvider>
 );
 
@@ -37,7 +39,7 @@ const Options: FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="mb-2 text-xl font-semibold">
+      <h1 className="mb-2 text-xl font-semibold text-white">
         <T id="templeWalletOptions" />
       </h1>
 
@@ -47,7 +49,6 @@ const Options: FC = () => {
             'relative',
             'px-2 py-1',
             'bg-accent-blue rounded',
-            'border-2 border-primary-orange',
             'flex items-center',
             'text-white',
             'text-sm font-semibold',

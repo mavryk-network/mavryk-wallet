@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 
 import BigNumber from 'bignumber.js';
+import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
 import InFiat from 'app/templates/InFiat';
@@ -13,7 +14,7 @@ interface CryptoBalanceProps extends TestIDProps {
 }
 
 export const CryptoBalance = memo<CryptoBalanceProps>(({ value, cryptoDecimals, testID, testIDProperties }) => (
-  <div className="truncate text-base-plus text-white text-right ml-4 flex-1 flex justify-end">
+  <div className={clsx('truncate text-base-plus text-white text-right ml-4 flex-1 flex justify-end')}>
     <Money
       smallFractionFont={false}
       cryptoDecimals={cryptoDecimals}

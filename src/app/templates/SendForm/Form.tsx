@@ -22,7 +22,7 @@ import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
 
-import { FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { FormSubmitButton, Money, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
@@ -535,11 +535,15 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
             maxAmount && (
               <div className="flex items-center w-full">
                 <T id="availableToSend" />
-                <span>
+                <div className="flex items-center">
                   &nbsp;
                   {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
-                  {toLocalFixed(maxAmount)}
-                </span>
+                  <div className={clsx('truncate text-sm text-secondary-white text-right flex justify-end')}>
+                    <Money smallFractionFont={false} cryptoDecimals={assetMetadata?.decimals}>
+                      {maxAmount}
+                    </Money>
+                  </div>
+                </div>
                 <span onClick={handleSetMaxAmount} className="text-accent-blue cursor-pointer ml-auto">
                   &nbsp;
                   <T id="useMax" />

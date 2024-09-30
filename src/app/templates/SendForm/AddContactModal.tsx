@@ -2,9 +2,10 @@ import React, { FC, useCallback } from 'react';
 
 import { useForm } from 'react-hook-form';
 
-import { FormField, FormSubmitButton, FormSecondaryButton } from 'app/atoms';
+import { FormField, FormSubmitButton } from 'app/atoms';
 import HashShortView from 'app/atoms/HashShortView';
 import Identicon from 'app/atoms/Identicon';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import ModalWithTitle from 'app/templates/ModalWithTitle';
 import { T, t } from 'lib/i18n';
 import { useContactsActions } from 'lib/temple/front';
@@ -59,10 +60,15 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
       <form onSubmit={handleSubmit(onAddContactSubmit)}>
         <div className="mb-8">
           <div className="mb-4 flex items-stretch border rounded-md p-2">
-            <Identicon type="bottts" hash={address ?? ''} size={32} className="flex-shrink-0 shadow-xs" />
+            <Identicon
+              type="bottts"
+              hash={address ?? ''}
+              size={32}
+              className="flex-shrink-0 shadow-xs rounded-full overflow-hidden"
+            />
 
             <div className="ml-3 flex-1 flex items-center">
-              <span className="text-base text-gray-700">
+              <span className="text-base text-white">
                 <HashShortView hash={address ?? ''} />
               </span>
             </div>
@@ -84,9 +90,9 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
         </div>
 
         <div className="flex justify-end">
-          <FormSecondaryButton small className="mr-3" onClick={onClose}>
+          <ButtonRounded type="button" size="big" fill={false} className="mr-3" onClick={onClose}>
             <T id="cancel" />
-          </FormSecondaryButton>
+          </ButtonRounded>
 
           <FormSubmitButton small loading={submitting}>
             <T id="addContact" />

@@ -512,7 +512,13 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const { symbol } = useGasToken();
-  const { fullPage } = useAppEnv();
+  // const { fullPage } = useAppEnv();
+
+  // (
+  //   <div className={classNames(fullPage ? 'py-4' : 'p-4')}>
+  //     <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
+  //   </div>
+  // )
 
   return baker ? (
     <>
@@ -538,11 +544,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
         />
       )}
     </>
-  ) : (
-    <div className={classNames(fullPage ? 'py-4' : 'p-4')}>
-      <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
-    </div>
-  );
+  ) : null;
 };
 
 const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {

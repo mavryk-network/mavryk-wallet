@@ -197,8 +197,9 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
   return (
     <div
       className={clsx(
-        'flex items-start justify-between text-white text-xs h-12 py-2',
-        !last && ' border-b border-divider'
+        'flex items-start justify-between text-white text-xs py-2',
+        moneyDiff && !isZero(moneyDiff.diff) ? 'h-12' : 'h-9',
+        !last ? 'border-b border-divider' : 'h-auto'
       )}
     >
       <div className="flex items-center">

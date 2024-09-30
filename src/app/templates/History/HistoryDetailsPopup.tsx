@@ -322,8 +322,13 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <CardContainer className="text-white flex flex-col">
               {renderTxHistoryDetails(operStack, !expandedTxHistory).map((item, i, arr) => {
                 return (
-                  <div key={i}>
-                    <OpertionStackItem item={item} moneyDiff={moneyDiffs[i]} isTiny last={i === arr.length - 1} />
+                  <div key={i} className={clsx(i === 0 && '-mt-2')}>
+                    <OpertionStackItem
+                      item={item}
+                      moneyDiff={moneyDiffs[i]}
+                      isTiny
+                      last={arr.length > 2 && i === arr.length - 1}
+                    />
                   </div>
                 );
               })}

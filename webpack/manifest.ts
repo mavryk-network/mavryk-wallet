@@ -116,7 +116,7 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
   };
 };
 
-const AUTHOR_URL = 'https://madfish.solutions';
+const AUTHOR_URL = 'https://mavryk.org/wallet';
 
 const PERMISSIONS = ['storage', 'unlimitedStorage', 'clipboardWrite', 'activeTab'];
 

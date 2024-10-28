@@ -15,27 +15,15 @@ import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
-  console.log('hello there');
   // TODO fetch if address is verified
-
-  const isAddressVerified = false;
+  const isAddressVerified = true;
   const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
-  const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
   const { fullPage, popup } = useAppEnv();
 
   return (
-    <PageLayout
-      isTopbarVisible={false}
-      pageTitle={<T id="proVersion" />}
-      removePaddings={popup}
-      RightSidedComponent={toolbarRightSidedComponent}
-    >
+    <PageLayout isTopbarVisible={false} pageTitle={<T id="addressVerification" />} removePaddings={popup}>
       <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
-        {navigateToForm ? (
-          <VerificationForm setToolbarRightSidedComponent={setToolbarRightSidedComponent} />
-        ) : (
-          <GetProVersionScreen setNavigateToForm={setNavigateToForm} />
-        )}
+        {navigateToForm ? <VerificationForm /> : <GetProVersionScreen setNavigateToForm={setNavigateToForm} />}
       </div>
     </PageLayout>
   );

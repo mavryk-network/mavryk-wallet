@@ -3715,5 +3715,23 @@
   },
   "goToMavopoly": {
     "message": "Go To Mavopoly"
+  },
+  "addressVerification": {
+    "message": "Address Verification"
+  },
+  "addressVerificationDescr": {
+    "message": "Verify your vault contract addresses here. As part of Mavopoly, you are required to use vault’s on Maven Finance to leverage your RWAs. For that to happen, they need to be verified for the purposes of the game. You can do that here."
+  },
+  "contractAddress": {
+    "message": "Contract Address"
+  },
+  "enterContractAddressPlaceholder": {
+    "message": "Enter the contract address"
+  },
+  "veridyAddressSuccessMsg": {
+    "message": "The address has been successfully verified. "
+  },
+  "verify": {
+    "message": "Verify"
   }
 }

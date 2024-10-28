@@ -1,13 +1,12 @@
-import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { FC, ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
-import classNames from 'clsx';
+import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Anchor, NoSpaceField } from 'app/atoms';
+import { NoSpaceField } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import OperationStatus from 'app/templates/OperationStatus';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
-import { useGasToken } from 'lib/assets/hooks';
 import { TID, T, t } from 'lib/i18n';
 import { isDomainNameValid, useTezos, useTezosDomainsClient } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
@@ -32,109 +31,37 @@ type DelegateFormProps = {
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
-const VerificationForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) => {
-  const { registerBackHandler } = useAppEnv();
+const VerificationForm: FC<DelegateFormProps> = () => {
   const formAnalytics = useFormAnalytics('AddressValidationForm');
-  const { isDcpNetwork } = useGasToken();
   const { popup } = useAppEnv();
 
-  const { pathname } = useLocation();
-
   const tezos = useTezos();
-
-  const domainsClient = useTezosDomainsClient();
-  const canUseDomainNames = domainsClient.isSupported;
 
   /**
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation, reset } = useForm<FormData>({
+  const { watch, handleSubmit, errors, control, formState, reset } = useForm<FormData>({
     mode: 'onChange'
   });
 
   const toValue = watch('to');
 
-  const toFilledWithAddress = useMemo(() => Boolean(toValue && isAddressValid(toValue)), [toValue]);
-  const toFilledWithDomain = useMemo(
-    () => toValue && isDomainNameValid(toValue, domainsClient),
-    [toValue, domainsClient]
-  );
   const { data: resolvedAddress } = useTezosAddressByDomainName(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
 
-  const toFilled = useMemo(
-    () => (resolvedAddress ? toFilledWithDomain : toFilledWithAddress),
-    [toFilledWithAddress, toFilledWithDomain, resolvedAddress]
-  );
-
   const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
-
-  const cleanToField = useCallback(() => {
-    setValue('to', '');
-    triggerValidation('to');
-  }, [setValue, triggerValidation]);
-
-  useLayoutEffect(() => {
-    if (pathname === '/stake') {
-      cleanToField();
-    }
-  }, [pathname, cleanToField]);
-
-  useLayoutEffect(() => {
-    if (toFilled) {
-      return registerBackHandler(() => {
-        cleanToField();
-        window.scrollTo(0, 0);
-      });
-    }
-    return undefined;
-  }, [toFilled, registerBackHandler, cleanToField]);
-
-  const AllValidatorsComponent = useMemo(
-    () => (
-      <Anchor href={`${process.env.NODES_URL}/validators`} className="text-base-plus text-accent-blue cursor-pointer">
-        All Validators
-      </Anchor>
-    ),
-    []
-  );
-
-  useEffect(() => {
-    setToolbarRightSidedComponent(AllValidatorsComponent);
-
-    return () => {
-      setToolbarRightSidedComponent(null);
-    };
-  }, []);
 
   const memoizedValidateAddress = useMemo(() => (value: any) => validateAnyAddress(value), []);
 
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
-  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
-
-  useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
-      // navigate to success screen
-      const hash = operation.hash || operation.opHash;
-
-      navigate<SuccessStateType>('/success', undefined, {
-        pageTitle: 'stake',
-        btnText: 'goToMain',
-        contentId: 'hash',
-        contentIdFnProps: { hash, i18nKey: 'staking' },
-        subHeader: 'success'
-      });
-    }
-  }, [operation]);
 
   const onSubmit = useCallback(
-    async ({}: FormData) => {
+    async (_: FormData) => {
       const to = toResolved;
       if (formState.isSubmitting) return;
       setSubmitError(null);
-      setOperation(null);
 
       const analyticsProperties = { bakerAddress: to };
 
@@ -143,6 +70,13 @@ const VerificationForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent
         reset({ to: '' });
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
+
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'addressVerification',
+          btnText: 'goToMavopoly',
+          description: 'veridyAddressSuccessMsg',
+          subHeader: 'success'
+        });
       } catch (err: any) {
         formAnalytics.trackSubmitFail(analyticsProperties);
 
@@ -157,16 +91,15 @@ const VerificationForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent
         setSubmitError(err);
       }
     },
-    [toResolved, formState.isSubmitting, setSubmitError, setOperation, formAnalytics, reset]
+    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, reset]
   );
 
-  const restFormDisplayed = Boolean(toFilled);
-
   return (
-    <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
-      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
+    <div className={clsx(popup ? 'pt-2' : 'pt-4', 'h-full flex-1 flex flex-col')}>
+      <p className="text-sm text-secondary-white mb-2 px-4">
+        <T id="addressVerificationDescr" />
+      </p>
+      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col justify-between flex-1">
         <Controller
           name="to"
           as={<NoSpaceField ref={toFieldRef} />}
@@ -176,18 +109,30 @@ const VerificationForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent
           onFocus={() => toFieldRef.current?.focus()}
           textarea
           rows={2}
-          cleanable={Boolean(toValue)}
-          onClean={cleanToField}
-          id="delegate-to"
-          label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
-          placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
+          // cleanable={Boolean(toValue)}
+          // onClean={cleanToField}
+          id="validate-to"
+          label={t('contractAddress')}
+          placeholder={t('enterContractAddressPlaceholder')}
           errorCaption={(errors.to?.message && t(errors.to.message.toString() as TID)) || submitError?.message}
           style={{
             resize: 'none'
           }}
-          containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
+          containerClassName={clsx('mb-4', popup && 'px-4')}
           testID={VerificationFormSelectors.addressInput}
         />
+        <div className="px-4">
+          <ButtonRounded
+            isLoading={formState.isSubmitting}
+            disabled={!toResolved}
+            size="big"
+            type="submit"
+            className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}
+            fill
+          >
+            <T id="verify" />
+          </ButtonRounded>
+        </div>
       </form>
     </div>
   );

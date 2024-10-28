@@ -9,5 +9,6 @@ export enum AccountDropdownSelectors {
   dAppsButton = 'Account Drop-down/DApps Button',
   settingsButton = 'Account Drop-down/Settings Button',
   newTabButton = 'Account Drop-down/New Tab Button',
-  maximizeButton = 'Account Drop-down/Maximize Button'
+  maximizeButton = 'Account Drop-down/Maximize Button',
+  getProButton = 'Account Header/getPro Button'
 }

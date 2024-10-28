@@ -105,15 +105,3 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
     </div>
   );
 };
-
-// TODO move to GetPro popup | screen
-export const GetProlabel: FC = () => {
-  return (
-    <div
-      className="px-2 text-white text-xs leading-3 bg-accent-blue rounded text-center cursor-not-allowed"
-      style={{ paddingBlock: 3, marginTop: 1 }}
-    >
-      <T id="beta" />
-    </div>
-  );
-};

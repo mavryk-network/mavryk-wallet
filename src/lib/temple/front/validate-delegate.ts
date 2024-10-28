@@ -5,7 +5,7 @@ import { isAddressValid } from 'lib/temple/helpers';
 
 import { isDomainNameValid } from './tzdns';
 
-function validateAnyAddress(value: string) {
+export function validateAnyAddress(value: string) {
   switch (false) {
     case value?.length > 0:
       return true;

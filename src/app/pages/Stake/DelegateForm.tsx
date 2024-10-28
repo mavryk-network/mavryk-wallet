@@ -456,7 +456,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const tzError = submitError || estimationError;
 
   return restFormDisplayed ? (
-    <div className="flex-grow flex flex-col" style={{ marginTop: 2 }}>
+    <div className="flex-grow flex flex-col mt-2">
       <BakerBannerComponent baker={baker} tzError={tzError} />
       <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup && 'mx-4')}>
         <HashChip hash={toValue} type="link" small trim={false} />

@@ -3691,5 +3691,23 @@
   },
   "unrecognizedRPC": {
     "message": "Unrecognized RPC node. It may not work properly with the wallet, please verify node url."
+  },
+  "proVersion": {
+    "message": "Pro Screen"
+  },
+  "joinMavryk": {
+    "message": "Join Mavryk Pro and Unlock New Opportunities!"
+  },
+  "proSreenItem1": {
+    "message": "Verify once, use throughout the ecosystem. The pro wallet version offers address verifications."
+  },
+  "proSreenItem2": {
+    "message": "Seamlessly interact with Real World Assets all within your wallet."
+  },
+  "proSreenItem3": {
+    "message": "Easily use RWA's in DeFi; trade, lend, & borrow."
+  },
+  "proSreenItem4": {
+    "message": "Non-custodial: take control of your financial future and manage your portfolio."
   }
 }

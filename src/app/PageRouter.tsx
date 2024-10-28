@@ -34,6 +34,7 @@ import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
 import { EditAccount } from './pages/EditAccount';
 import Onboarding from './pages/Onboarding/Onboarding';
+import { ProVersion } from './pages/ProVersion/ProVersion';
 import RWAPage from './pages/RWAs/RWAPage';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
@@ -92,6 +93,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/send/:assetSlug?', onlyReady(({ assetSlug }) => <Send assetSlug={assetSlug} />)],
   ['/swap', onlyReady(() => <Swap />)],
   ['/delegate', onlyReady(() => <Delegate />)],
+  ['/pro-version', onlyReady(() => <ProVersion />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],

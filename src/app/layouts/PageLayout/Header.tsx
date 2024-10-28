@@ -8,9 +8,10 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
 import { useAccount, useBlockExplorer, useTempleClient } from 'lib/temple/front';
 
-import { AccountPopupButton, GetProlabel } from './Header/AccountPopup/AccountPopupButton';
+import { AccountPopupButton } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
 import { DAppsPopup, DappsContext } from './Header/DAapsPopup/DAppsPopup';
+import { GetProlabel } from './Header/GetProButton';
 import { NetworkButton } from './Header/NetworkPopup/NetworkButton';
 import { NetworkPopup } from './Header/NetworkPopup/NetworkPopup';
 import { SettingButton, SettingsDropdown, SettingsPopup } from './Header/SettingsPopup';

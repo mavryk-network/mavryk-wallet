@@ -7,13 +7,19 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
+import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
+
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
   console.log('hello there');
   // TODO fetch if address is verified
-  const [showStakeScreen, setShowStakeScreen] = useState(true);
+
+  const isAddressVerified = false;
+  const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
   const { fullPage, popup } = useAppEnv();
 
@@ -25,10 +31,10 @@ export const ProVersion: FC = () => {
       RightSidedComponent={toolbarRightSidedComponent}
     >
       <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
-        {showStakeScreen ? (
-          <GetProVersionScreen setShowStakeScreen={setShowStakeScreen} />
-        ) : (
+        {navigateToForm ? (
           <VerificationForm setToolbarRightSidedComponent={setToolbarRightSidedComponent} />
+        ) : (
+          <GetProVersionScreen setNavigateToForm={setNavigateToForm} />
         )}
       </div>
     </PageLayout>
@@ -71,15 +77,42 @@ const UnfamiliarListItem: FC<UnfamiliarListItemType> = ({ content, i18nKey }) =>
 };
 
 type GetProVersionScreenProps = {
-  setShowStakeScreen: (value: boolean) => void;
+  setNavigateToForm: (value: boolean) => void;
 };
 
-const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setShowStakeScreen }) => {
+type FormData = {
+  submitting: boolean;
+  error?: null | string;
+};
+
+const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
   const { popup } = useAppEnv();
-  const handleBtnClick = useCallback(() => {
-    // skip delegate onboarding screen
-    setShowStakeScreen(false);
-  }, [setShowStakeScreen]);
+  const [formState, setFormState] = useState<FormData>({
+    submitting: false,
+    error: null
+  });
+
+  const handleBtnClick = useCallback(async () => {
+    try {
+      // contract call to set current address as pro
+      // skip delegate onboarding screen
+      setFormState({ ...formState, submitting: true });
+      await delay(3_000);
+      setFormState({ ...formState, submitting: false });
+      setNavigateToForm(false);
+
+      navigate<SuccessStateType>('/success', undefined, {
+        pageTitle: 'proVersion',
+        btnText: 'goToMavopoly',
+        description: 'mavopolySuccessMsg',
+        subHeader: 'success'
+      });
+    } catch (e) {
+      console.log(e);
+      // show err on ui
+      setFormState({ ...formState, error: e.message || 'Something went wrong' });
+    }
+  }, [formState, setNavigateToForm]);
 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>
@@ -97,9 +130,16 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setShowStakeScreen 
         </div>
         <FooterSocials />
       </section>
-      <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')} fill>
+      <ButtonRounded
+        isLoading={formState.submitting}
+        onClick={handleBtnClick}
+        size="big"
+        className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}
+        fill
+      >
         <T id="getPro" />
       </ButtonRounded>
+      {formState?.error && <div className="mt-2 text-primary-error textbase-plus">{formState.error}</div>}
     </div>
   );
 };

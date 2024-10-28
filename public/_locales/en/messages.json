@@ -3709,5 +3709,11 @@
   },
   "proSreenItem4": {
     "message": "Non-custodial: take control of your financial future and manage your portfolio."
+  },
+  "mavopolySuccessMsg": {
+    "message": "Your wallet address has been successfully verified.\n You are now able to play Mavopoly. Make sure to verify\n your Maven Vaults"
+  },
+  "goToMavopoly": {
+    "message": "Go To Mavopoly"
   }
 }

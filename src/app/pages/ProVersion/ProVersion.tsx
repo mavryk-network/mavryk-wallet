@@ -88,8 +88,6 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
 
   const handleBtnClick = useCallback(async () => {
     try {
-      // contract call to set current address as pro
-      // skip delegate onboarding screen
       setFormState({ ...formState, submitting: true });
 
       const tezos = signerTezos(rpcUrl);
@@ -103,9 +101,9 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       const memberList = [
         {
           memberAddress: publicKeyHash,
-          country: 'japan',
-          region: 'asia',
-          investorType: 'institution'
+          country: 'NIL',
+          region: 'NIL',
+          investorType: 'NIL'
         }
       ];
 

@@ -9,17 +9,22 @@ import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
 import { KYC_CONTRACT } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useNetwork, useTezos } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { getGeoLocation } from './utils/getGeoLocation';
 import VerificationForm from './VerificationForm/VerificationForm';
+import { createMemorySigner } from 'lib/temple/back/vault/misc';
+import { fetchAndDecryptOne } from 'lib/temple/back/vault/safe-storage';
+import { accPrivKeyStrgKey } from 'lib/temple/back/vault/storage-keys';
+import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
 
 export const ProVersion: FC = () => {
   // TODO fetch if address is verified
-  const isAddressVerified = true;
+  const isAddressVerified = false;
   const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
   const { fullPage, popup } = useAppEnv();
 
@@ -78,7 +83,7 @@ type FormData = {
 
 const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
   const { popup } = useAppEnv();
-  const tezos = useTezos();
+  const { rpcBaseURL: rpcUrl } = useNetwork();
   const { publicKeyHash } = useAccount();
   const [formState, setFormState] = useState<FormData>({
     submitting: false,
@@ -91,24 +96,26 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // skip delegate onboarding screen
       setFormState({ ...formState, submitting: true });
 
+      const tezos = signerTezos(rpcUrl);
+
       const contract = await loadContract(tezos, KYC_CONTRACT);
 
-      const { country, regionName } = await getGeoLocation();
+      // const { country, regionName } = await getGeoLocation();
 
-      const newMembers = [
+      const setMemberAction = 'addMember';
+
+      const memberList = [
         {
           memberAddress: publicKeyHash,
-          country,
-          region: regionName,
-          investorType: 'NIL'
+          country: 'japan',
+          region: 'asia',
+          investorType: 'institution'
         }
       ];
 
-      await contract.methods
-        .setMember({
-          addMember: newMembers
-        })
-        .send();
+      // debugger;
+
+      await contract.methods.setMember(setMemberAction, memberList).send();
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
@@ -124,7 +131,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // show err on ui
       setFormState({ ...formState, error: e.message || 'Something went wrong' });
     }
-  }, [formState, setNavigateToForm, tezos, publicKeyHash]);
+  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm]);
 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>
@@ -154,4 +161,25 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       {formState?.error && <div className="mt-2 text-primary-error textbase-plus">{formState.error}</div>}
     </div>
   );
+};
+
+const signerTezos = (rpcUrl: string) => {
+  if (!rpcUrl) {
+    throw new Error('No RPC_URL defined.');
+  }
+
+  const TezToolkit = new TezosToolkit(rpcUrl);
+
+  const faucetPrivateKey =
+    'edskSA1MhTp6Eq3T79MEP822eXAmxXBk89eFYGgwBsJjfyUHDGsYfudasQocwcb5DUEMvA1B3EsvxCZ8G6Wek6syxAA49DEKzq';
+  if (!faucetPrivateKey) {
+    throw new Error('No FAUCET_PRIVATE_KEY defined.');
+  }
+
+  // Create signer
+  TezToolkit.setProvider({
+    signer: new InMemorySigner(faucetPrivateKey)
+  });
+
+  return TezToolkit;
 };

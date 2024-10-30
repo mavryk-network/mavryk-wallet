@@ -10,7 +10,6 @@ import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
 import { useTezos } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { validateAnyAddress } from 'lib/temple/front/validate-delegate';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -18,6 +17,7 @@ import { navigate } from 'lib/woozie';
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
 
 import { VerificationFormSelectors } from './verificationForm.selectors';
+import { isAddressValid } from 'lib/temple/helpers';
 
 interface FormData {
   to: string;
@@ -67,9 +67,10 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
-        const isAddressVerified = validateAnyAddress(to);
+        const isAddressVerified = isAddressValid(to);
 
         await delay();
+
         if (!isAddressVerified) throw new Error(t('verifyAddressErrMsg'));
 
         reset({ to: '' });
@@ -128,7 +129,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         <div className={clsx(popup && 'px-4')}>
           <ButtonRounded
             isLoading={formState.isSubmitting}
-            disabled={!toResolved}
+            disabled={!toResolved || Boolean(submitError?.message)}
             size="big"
             type="submit"
             className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}

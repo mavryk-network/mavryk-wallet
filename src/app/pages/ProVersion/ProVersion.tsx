@@ -1,7 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
 
-import { TezosToolkit } from '@mavrykdynamics/taquito';
-import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
 import clsx from 'clsx';
 
 import { Alert } from 'app/atoms';
@@ -9,7 +7,6 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
-import { EnvVars } from 'lib/env';
 import { T, TID } from 'lib/i18n';
 import { KYC_CONTRACT } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
@@ -18,9 +15,8 @@ import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
+import { signerTezos } from './utils/tezosSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
-
-const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
 export const ProVersion: FC = () => {
   // TODO fetch if address is verified
@@ -171,23 +167,4 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       </ButtonRounded>
     </div>
   );
-};
-
-const signerTezos = (rpcUrl: string) => {
-  if (!rpcUrl) {
-    throw new Error('No RPC_URL defined.');
-  }
-
-  const TezToolkit = new TezosToolkit(rpcUrl);
-
-  if (!SUPER_ADMIN_PRIVATE_KEY) {
-    throw new Error('No FAUCET_PRIVATE_KEY defined.');
-  }
-
-  // Create signer
-  TezToolkit.setProvider({
-    signer: new InMemorySigner(SUPER_ADMIN_PRIVATE_KEY)
-  });
-
-  return TezToolkit;
 };

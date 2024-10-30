@@ -10,6 +10,7 @@ import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
 import { useTezos } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
+import { isAddressValid } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -17,7 +18,6 @@ import { navigate } from 'lib/woozie';
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
 
 import { VerificationFormSelectors } from './verificationForm.selectors';
-import { isAddressValid } from 'lib/temple/helpers';
 
 interface FormData {
   to: string;

@@ -3733,5 +3733,8 @@
   },
   "verify": {
     "message": "Verify"
+  },
+  "verifyAddressErrMsg": {
+    "message": "The address is invalid. Please check it again or try a different one."
   }
 }

@@ -14,12 +14,12 @@ import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
-import VerificationForm from './VerificationForm/VerificationForm';
 import { getGeoLocation } from './utils/getGeoLocation';
+import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
   // TODO fetch if address is verified
-  const isAddressVerified = false;
+  const isAddressVerified = true;
   const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
   const { fullPage, popup } = useAppEnv();
 
@@ -104,9 +104,11 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
         }
       ];
 
-      await contract.methods['setMember']({
-        addMember: newMembers
-      }).send();
+      await contract.methods
+        .setMember({
+          addMember: newMembers
+        })
+        .send();
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);

@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
@@ -8,13 +8,12 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { isDomainNameValid, useTezos, useTezosDomainsClient } from 'lib/temple/front';
+import { useTezos } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { validateAnyAddress } from 'lib/temple/front/validate-delegate';
-import { isAddressValid } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { navigate, useLocation } from 'lib/woozie';
+import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
 
@@ -51,9 +50,12 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
   const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
 
-  const memoizedValidateAddress = useMemo(() => (value: any) => validateAnyAddress(value), []);
+  // const memoizedValidateAddress = useMemo(() => (value: any) => validateAnyAddress(value), []);
 
-  const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
+  const [submitError, setSubmitError] = useSafeState<{ message: string } | null>(
+    null,
+    `${tezos.checksum}_${toResolved}`
+  );
 
   const onSubmit = useCallback(
     async (_: FormData) => {
@@ -61,10 +63,15 @@ const VerificationForm: FC<DelegateFormProps> = () => {
       if (formState.isSubmitting) return;
       setSubmitError(null);
 
-      const analyticsProperties = { bakerAddress: to };
+      const analyticsProperties = { enteredAddress: to };
 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
+        const isAddressVerified = validateAnyAddress(to);
+
+        await delay();
+        if (!isAddressVerified) throw new Error(t('verifyAddressErrMsg'));
+
         reset({ to: '' });
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
@@ -102,13 +109,12 @@ const VerificationForm: FC<DelegateFormProps> = () => {
           name="to"
           as={<NoSpaceField ref={toFieldRef} />}
           control={control}
-          rules={{ validate: memoizedValidateAddress }}
+          // will no allow form submitting is address is invalid
+          // rules={{ validate: memoizedValidateAddress }}
           onChange={([v]) => v}
           onFocus={() => toFieldRef.current?.focus()}
           textarea
           rows={2}
-          // cleanable={Boolean(toValue)}
-          // onClean={cleanToField}
           id="validate-to"
           label={t('contractAddress')}
           placeholder={t('enterContractAddressPlaceholder')}

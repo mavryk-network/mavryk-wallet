@@ -27,9 +27,7 @@ interface FormData {
 export const RECOMMENDED_BAKER_ADDRESS = 'tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM';
 export const HELP_UKRAINE_BAKER_ADDRESS = 'tz1bMFzs2aECPn4aCRmKQWHSLHF8ZnZbYcah';
 
-type DelegateFormProps = {
-  setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
-};
+type DelegateFormProps = {};
 
 const VerificationForm: FC<DelegateFormProps> = () => {
   const formAnalytics = useFormAnalytics('AddressValidationForm');
@@ -96,7 +94,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
   return (
     <div className={clsx(popup ? 'pt-2' : 'pt-4', 'h-full flex-1 flex flex-col')}>
-      <p className="text-sm text-secondary-white mb-2 px-4">
+      <p className={clsx('text-sm text-secondary-white mb-2', popup && 'px-4')}>
         <T id="addressVerificationDescr" />
       </p>
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col justify-between flex-1">
@@ -121,7 +119,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
           containerClassName={clsx('mb-4', popup && 'px-4')}
           testID={VerificationFormSelectors.addressInput}
         />
-        <div className="px-4">
+        <div className={clsx(popup && 'px-4')}>
           <ButtonRounded
             isLoading={formState.isSubmitting}
             disabled={!toResolved}

@@ -7,16 +7,19 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
-import { delay } from 'lib/utils';
+import { KYC_CONTRACT } from 'lib/route3/constants';
+import { loadContract } from 'lib/temple/contract';
+import { useAccount, useTezos } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import VerificationForm from './VerificationForm/VerificationForm';
+import { getGeoLocation } from './utils/getGeoLocation';
 
 export const ProVersion: FC = () => {
   // TODO fetch if address is verified
-  const isAddressVerified = true;
+  const isAddressVerified = false;
   const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
   const { fullPage, popup } = useAppEnv();
 
@@ -75,6 +78,8 @@ type FormData = {
 
 const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
   const { popup } = useAppEnv();
+  const tezos = useTezos();
+  const { publicKeyHash } = useAccount();
   const [formState, setFormState] = useState<FormData>({
     submitting: false,
     error: null
@@ -85,7 +90,24 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // contract call to set current address as pro
       // skip delegate onboarding screen
       setFormState({ ...formState, submitting: true });
-      await delay(3_000);
+
+      const contract = await loadContract(tezos, KYC_CONTRACT);
+
+      const { country, regionName } = await getGeoLocation();
+
+      const newMembers = [
+        {
+          memberAddress: publicKeyHash,
+          country,
+          region: regionName,
+          investorType: 'NIL'
+        }
+      ];
+
+      await contract.methods['setMember']({
+        addMember: newMembers
+      }).send();
+
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
 
@@ -100,7 +122,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // show err on ui
       setFormState({ ...formState, error: e.message || 'Something went wrong' });
     }
-  }, [formState, setNavigateToForm]);
+  }, [formState, setNavigateToForm, tezos, publicKeyHash]);
 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>

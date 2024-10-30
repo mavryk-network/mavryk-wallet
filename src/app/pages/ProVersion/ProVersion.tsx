@@ -1,26 +1,26 @@
 import React, { FC, useCallback, useState } from 'react';
 
+import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
 import clsx from 'clsx';
 
+import { Alert } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
+import { EnvVars } from 'lib/env';
 import { T, TID } from 'lib/i18n';
 import { KYC_CONTRACT } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
-import { useAccount, useNetwork, useTezos } from 'lib/temple/front';
+import { useAccount, useNetwork } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
-import { getGeoLocation } from './utils/getGeoLocation';
 import VerificationForm from './VerificationForm/VerificationForm';
-import { createMemorySigner } from 'lib/temple/back/vault/misc';
-import { fetchAndDecryptOne } from 'lib/temple/back/vault/safe-storage';
-import { accPrivKeyStrgKey } from 'lib/temple/back/vault/storage-keys';
-import { TezosToolkit } from '@mavrykdynamics/taquito';
-import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
+
+const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
 export const ProVersion: FC = () => {
   // TODO fetch if address is verified
@@ -134,7 +134,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
   }, [formState, publicKeyHash, rpcUrl, setNavigateToForm]);
 
   return (
-    <div className={clsx(popup && 'px-4 pt-4')}>
+    <div className={clsx(popup && 'px-4 py-4', popup && formState?.error && 'overflow-y-scroll')}>
       <div className="text-base text-white text-center">
         <T id="joinMavryk" />
       </div>
@@ -143,12 +143,23 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
           <UnfamiliarListItem key={item.i18nKey} {...item} />
         ))}
       </div>
+
+      {formState?.error && (
+        <Alert
+          type="error"
+          title="Error"
+          description={formState.error ?? t('smthWentWrong')}
+          className="my-4"
+          autoFocus
+        />
+      )}
       <section className="flex flex-col items-center">
         <div className="mb-3 text-sm text-white text-center">
           <T id="aboutFooterDescription" />
         </div>
         <FooterSocials />
       </section>
+
       <ButtonRounded
         isLoading={formState.submitting}
         onClick={handleBtnClick}
@@ -158,7 +169,6 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       >
         <T id="getPro" />
       </ButtonRounded>
-      {formState?.error && <div className="mt-2 text-primary-error textbase-plus">{formState.error}</div>}
     </div>
   );
 };
@@ -170,15 +180,13 @@ const signerTezos = (rpcUrl: string) => {
 
   const TezToolkit = new TezosToolkit(rpcUrl);
 
-  const faucetPrivateKey =
-    'edskSA1MhTp6Eq3T79MEP822eXAmxXBk89eFYGgwBsJjfyUHDGsYfudasQocwcb5DUEMvA1B3EsvxCZ8G6Wek6syxAA49DEKzq';
-  if (!faucetPrivateKey) {
+  if (!SUPER_ADMIN_PRIVATE_KEY) {
     throw new Error('No FAUCET_PRIVATE_KEY defined.');
   }
 
   // Create signer
   TezToolkit.setProvider({
-    signer: new InMemorySigner(faucetPrivateKey)
+    signer: new InMemorySigner(SUPER_ADMIN_PRIVATE_KEY)
   });
 
   return TezToolkit;

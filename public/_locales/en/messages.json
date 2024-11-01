@@ -3734,7 +3734,13 @@
   "verify": {
     "message": "Verify"
   },
+  "verifyAddress": {
+    "message": "Verify Address"
+  },
   "verifyAddressErrMsg": {
     "message": "The address is invalid. Please check it again or try a different one."
+  },
+  "mavopoly": {
+    "message": "Mavopoly"
   }
 }

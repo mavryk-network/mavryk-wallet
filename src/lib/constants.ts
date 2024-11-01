@@ -24,3 +24,5 @@ export const HYPELAB_STUB_CAMPAIGN_SLUG = 'e55d2795d2';
 
 const isMacOS = /Mac OS/.test(navigator.userAgent);
 export const searchHotkey = ` (${isMacOS ? '⌘' : 'Ctrl + '}K)`;
+
+export const VERIFIED_USER_KEY = 'isAddressVerified';

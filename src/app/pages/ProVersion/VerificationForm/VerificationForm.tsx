@@ -8,9 +8,8 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useTezos } from 'lib/temple/front';
+import { useTezos, validateContractAddress } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { isAddressValid } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -67,11 +66,11 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
-        const isAddressVerified = isAddressValid(to);
+        const isAddressVerified = validateContractAddress(to);
 
         await delay();
 
-        if (!isAddressVerified) throw new Error(t('verifyAddressErrMsg'));
+        if (isAddressVerified !== true) throw new Error(t('verifyAddressErrMsg'));
 
         reset({ to: '' });
 

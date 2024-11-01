@@ -108,6 +108,12 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
         type: TempleMessageType.EditAccountResponse
       };
 
+    case TempleMessageType.UpdateKYCAccountRequest:
+      await Actions.updateAccountKYC(req.accountPublicKeyHash, req.isKYC);
+      return {
+        type: TempleMessageType.UpdateKYCAccountResponse
+      };
+
     case TempleMessageType.ImportAccountRequest:
       await Actions.importAccount(req.privateKey, req.encPassword);
       return {

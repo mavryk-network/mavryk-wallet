@@ -7,12 +7,11 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
-import { VERIFIED_USER_KEY } from 'lib/constants';
 import { T, TID } from 'lib/i18n';
 import { KYC_CONTRACT } from 'lib/route3/constants';
+import { updateAccountKYC } from 'lib/temple/back/actions';
 import { loadContract } from 'lib/temple/contract';
 import { useAccount, useNetwork } from 'lib/temple/front';
-import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -21,19 +20,17 @@ import { signerTezos } from './utils/tezosSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
-  const [isAddressVerified, setIsAddressVerified] = useLocalStorage<boolean>(VERIFIED_USER_KEY, false);
+  const { isKYC = false } = useAccount();
   // TODO fetch if address is verified
-  const [navigateToForm, setNavigateToForm] = useState(isAddressVerified);
+  const [navigateToForm, setNavigateToForm] = useState(isKYC);
   const { fullPage, popup } = useAppEnv();
+  const account = useAccount();
+  console.log(account);
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<T id="addressVerification" />} removePaddings={popup}>
       <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
-        {navigateToForm ? (
-          <VerificationForm />
-        ) : (
-          <GetProVersionScreen setNavigateToForm={setNavigateToForm} setIsAddressVerified={setIsAddressVerified} />
-        )}
+        {navigateToForm ? <VerificationForm /> : <GetProVersionScreen setNavigateToForm={setNavigateToForm} />}
       </div>
     </PageLayout>
   );
@@ -75,7 +72,6 @@ const UnfamiliarListItem: FC<UnfamiliarListItemType> = ({ content, i18nKey }) =>
 };
 
 type GetProVersionScreenProps = {
-  setIsAddressVerified: (value: boolean | ((val: boolean) => boolean)) => void;
   setNavigateToForm: (value: boolean) => void;
 };
 
@@ -84,7 +80,7 @@ type FormData = {
   error?: null | string;
 };
 
-const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm, setIsAddressVerified }) => {
+const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
   const { publicKeyHash } = useAccount();
@@ -114,14 +110,12 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm, 
         }
       ];
 
-      // debugger;
-
       await contract.methods.setMember(setMemberAction, memberList).send();
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
 
-      setIsAddressVerified(true);
+      await updateAccountKYC(publicKeyHash, true);
 
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'proVersion',
@@ -135,7 +129,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm, 
       // show err on ui
       setFormState({ ...formState, error: e.message || 'Something went wrong' });
     }
-  }, [formState, publicKeyHash, rpcUrl, setIsAddressVerified, setNavigateToForm]);
+  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm]);
 
   return (
     <div className={clsx(popup && 'px-4 py-4', popup && formState?.error && 'overflow-y-scroll')}>

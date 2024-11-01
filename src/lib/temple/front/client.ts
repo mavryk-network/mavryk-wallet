@@ -184,6 +184,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.EditAccountResponse);
   }, []);
 
+  const updateKYCAccount = useCallback(async (accountPublicKeyHash: string, isKYC: boolean) => {
+    const res = await request({
+      type: TempleMessageType.UpdateKYCAccountRequest,
+      accountPublicKeyHash,
+      isKYC
+    });
+    assertResponse(res.type === TempleMessageType.UpdateKYCAccountResponse);
+  }, []);
+
   const importAccount = useCallback(async (privateKey: string, encPassword?: string) => {
     const res = await request({
       type: TempleMessageType.ImportAccountRequest,
@@ -383,6 +392,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     generateSyncPayload,
     removeAccount,
     editAccountName,
+    updateKYCAccount,
     importAccount,
     importMnemonicAccount,
     importFundraiserAccount,

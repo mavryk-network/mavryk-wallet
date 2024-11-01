@@ -54,11 +54,13 @@ export enum TempleStatus {
 }
 
 export type TempleAccount =
-  | TempleHDAccount
-  | TempleImportedAccount
-  | TempleLedgerAccount
-  | TempleManagedKTAccount
-  | TempleWatchOnlyAccount;
+  | { isKYC: boolean } & (
+      | TempleHDAccount
+      | TempleImportedAccount
+      | TempleLedgerAccount
+      | TempleManagedKTAccount
+      | TempleWatchOnlyAccount
+    );
 
 interface TempleLedgerAccount extends TempleAccountBase {
   type: TempleAccountType.Ledger;
@@ -247,6 +249,8 @@ export enum TempleMessageType {
   RemoveAccountResponse = 'TEMPLE_REMOVE_ACCOUNT_RESPONSE',
   EditAccountRequest = 'TEMPLE_EDIT_ACCOUNT_REQUEST',
   EditAccountResponse = 'TEMPLE_EDIT_ACCOUNT_RESPONSE',
+  UpdateKYCAccountRequest = 'TEMPLE_UPDATE_KYC_ACCOUNT_REQUEST',
+  UpdateKYCAccountResponse = 'TEMPLE_UPDATE_KYC_ACCOUNT_RESPONSE',
   ImportAccountRequest = 'TEMPLE_IMPORT_ACCOUNT_REQUEST',
   ImportAccountResponse = 'TEMPLE_IMPORT_ACCOUNT_RESPONSE',
   ImportMnemonicAccountRequest = 'TEMPLE_IMPORT_MNEMONIC_ACCOUNT_REQUEST',
@@ -307,6 +311,7 @@ export type TempleRequest =
   | TempleRevealMnemonicRequest
   | TempleGenerateSyncPayloadRequest
   | TempleEditAccountRequest
+  | TempleUpdateKYCAccountRequest
   | TempleImportAccountRequest
   | TempleImportMnemonicAccountRequest
   | TempleImportFundraiserAccountRequest
@@ -341,6 +346,7 @@ export type TempleResponse =
   | TempleRevealMnemonicResponse
   | TempleGenerateSyncPayloadResponse
   | TempleEditAccountResponse
+  | TempleUpdateKYCAccountResponse
   | TempleImportAccountResponse
   | TempleImportMnemonicAccountResponse
   | TempleImportFundraiserAccountResponse
@@ -496,9 +502,17 @@ interface TempleEditAccountRequest extends TempleMessageBase {
   accountPublicKeyHash: string;
   name: string;
 }
-
 interface TempleEditAccountResponse extends TempleMessageBase {
   type: TempleMessageType.EditAccountResponse;
+}
+interface TempleUpdateKYCAccountRequest extends TempleMessageBase {
+  type: TempleMessageType.UpdateKYCAccountRequest;
+  accountPublicKeyHash: string;
+  isKYC: boolean;
+}
+
+interface TempleUpdateKYCAccountResponse extends TempleMessageBase {
+  type: TempleMessageType.UpdateKYCAccountResponse;
 }
 
 interface TempleImportAccountRequest extends TempleMessageBase {

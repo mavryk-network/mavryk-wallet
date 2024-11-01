@@ -26,7 +26,8 @@ import {
   createMemorySigner,
   getMainDerivationPath,
   getPublicKeyAndHash,
-  withError
+  withError,
+  getKYCStatus
 } from './misc';
 import {
   encryptAndSaveMany,
@@ -107,7 +108,8 @@ export class Vault {
         type: TempleAccountType.HD,
         name: 'Account 1',
         publicKeyHash: accPublicKeyHash,
-        hdIndex: hdAccIndex
+        hdIndex: hdAccIndex,
+        isKYC: false
       };
       const newAccounts = [initialAccount];
 
@@ -328,7 +330,8 @@ export class Vault {
         type: TempleAccountType.HD,
         name: accName,
         publicKeyHash: accPublicKeyHash,
-        hdIndex: hdAccIndex
+        hdIndex: hdAccIndex,
+        isKYC: false
       };
       const newAllAcounts = concatAccount(allAccounts, newAccount);
 
@@ -357,10 +360,13 @@ export class Vault {
         signer.publicKeyHash()
       ]);
 
+      const isKYC = await getKYCStatus(accPublicKeyHash);
+
       const newAccount: TempleAccount = {
         type: TempleAccountType.Imported,
         name: await fetchNewAccountName(allAccounts),
-        publicKeyHash: accPublicKeyHash
+        publicKeyHash: accPublicKeyHash,
+        isKYC
       };
       const newAllAcounts = concatAccount(allAccounts, newAccount);
 
@@ -406,6 +412,8 @@ export class Vault {
   async importManagedKTAccount(accPublicKeyHash: string, chainId: string, owner: string) {
     return withError('Failed to import Managed KT account', async () => {
       const allAccounts = await this.fetchAccounts();
+
+      const isKYC = await getKYCStatus(accPublicKeyHash);
       const newAccount: TempleAccount = {
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
@@ -414,7 +422,8 @@ export class Vault {
         ),
         publicKeyHash: accPublicKeyHash,
         chainId,
-        owner
+        owner,
+        isKYC
       };
       const newAllAcounts = concatAccount(allAccounts, newAccount);
 
@@ -436,7 +445,8 @@ export class Vault {
               'defaultWatchOnlyAccountName'
             ),
         publicKeyHash: accPublicKeyHash,
-        chainId
+        chainId,
+        isKYC: false
       };
       const newAllAcounts = concatAccount(allAccounts, newAccount);
 
@@ -456,12 +466,15 @@ export class Vault {
         const accPublicKey = await signer.publicKey();
         const accPublicKeyHash = await signer.publicKeyHash();
 
+        const isKYC = await getKYCStatus(accPublicKeyHash);
+
         const newAccount: TempleAccount = {
           type: TempleAccountType.Ledger,
           name,
           publicKeyHash: accPublicKeyHash,
           derivationPath,
-          derivationType
+          derivationType,
+          isKYC
         };
         const allAccounts = await this.fetchAccounts();
         const newAllAcounts = concatAccount(allAccounts, newAccount);
@@ -493,6 +506,21 @@ export class Vault {
       }
 
       const newAllAcounts = allAccounts.map(acc => (acc.publicKeyHash === accPublicKeyHash ? { ...acc, name } : acc));
+      await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], this.passKey);
+
+      return newAllAcounts;
+    });
+  }
+
+  async updateAccountKYCStatus(accPublicKeyHash: string, isKYC: boolean) {
+    return withError('Failed to edit account name', async () => {
+      const allAccounts = await this.fetchAccounts();
+
+      if (!allAccounts.some(acc => acc.publicKeyHash === accPublicKeyHash)) {
+        throw new PublicError('Account not found');
+      }
+
+      const newAllAcounts = allAccounts.map(acc => (acc.publicKeyHash === accPublicKeyHash ? { ...acc, isKYC } : acc));
       await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], this.passKey);
 
       return newAllAcounts;

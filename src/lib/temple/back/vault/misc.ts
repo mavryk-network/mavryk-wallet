@@ -37,6 +37,22 @@ export async function getPublicKeyAndHash(privateKey: string) {
   return Promise.all([signer.publicKey(), signer.publicKeyHash()]);
 }
 
+export async function getKYCStatus(pkh: string) {
+  try {
+    const data: any = await fetch(
+      'https://atlasnet.api.mavryk.network/v1/contracts/KT19bfnNi9mMptoJsFZpwxA8SYRYjfsMgTt2/storage/'
+    );
+    const bigMapId = data.memberLedger;
+
+    const isKYCAddress = await fetch(`https://atlasnet.api.mavryk.network/v1/bigmaps/${bigMapId}/keys/${pkh}`);
+
+    return Boolean(isKYCAddress);
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
 export async function createMemorySigner(privateKey: string, encPassword?: string) {
   return InMemorySigner.fromSecretKey(privateKey, encPassword);
 }

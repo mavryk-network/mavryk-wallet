@@ -178,6 +178,15 @@ export function editAccount(accPublicKeyHash: string, name: string) {
   });
 }
 
+export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
+  return withUnlocked(async ({ vault }) => {
+    const updatedAccounts = await vault.updateAccountKYCStatus(accPublicKeyHash, isKYC);
+    accountsUpdated(updatedAccounts);
+  });
+}
+
+// TODO add update KYC
+
 export function importAccount(privateKey: string, encPassword?: string) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.importAccount(privateKey, encPassword);

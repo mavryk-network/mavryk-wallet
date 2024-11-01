@@ -47,7 +47,8 @@ export const MIGRATIONS = [
       type: TempleAccountType.HD,
       name: await fetchNewAccountName(accounts),
       publicKeyHash: accPublicKeyHash,
-      hdIndex: hdAccIndex
+      hdIndex: hdAccIndex,
+      isKYC: false
     };
     const newAccounts = [newInitialAccount, ...migratedAccounts];
 

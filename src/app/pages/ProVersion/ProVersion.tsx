@@ -20,7 +20,6 @@ import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
   const { isKYC = false } = useAccount();
-  // TODO fetch if address is verified
   const [navigateToForm, setNavigateToForm] = useState(isKYC);
   const { fullPage, popup } = useAppEnv();
 

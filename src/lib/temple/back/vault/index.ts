@@ -331,7 +331,7 @@ export class Vault {
         name: accName,
         publicKeyHash: accPublicKeyHash,
         hdIndex: hdAccIndex,
-        isKYC: false
+        isKYC: undefined
       };
       const newAllAcounts = concatAccount(allAccounts, newAccount);
 

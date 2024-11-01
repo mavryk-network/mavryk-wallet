@@ -30,6 +30,7 @@ import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress
 import { ContentSection } from './ContentSection';
 import styles from './Home.module.css';
 import { HomeSelectors } from './Home.selectors';
+import { useInitialKYC } from './hooks/useInitialKYC';
 import MainBanner from './OtherComponents/MainBanner';
 import { TokenPageSelectors } from './OtherComponents/TokenPage.selectors';
 
@@ -58,6 +59,8 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
 
   const assetMetadata = useAssetMetadata(assetSlug || MAV_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
+
+  useInitialKYC(account);
 
   useLayoutEffect(() => {
     const usp = new URLSearchParams(search);

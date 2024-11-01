@@ -79,6 +79,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addressVerification',
           btnText: 'goToMavopoly',
+          btnLink: '/pro-version',
           description: 'veridyAddressSuccessMsg',
           subHeader: 'success'
         });

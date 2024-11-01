@@ -23,8 +23,6 @@ export const ProVersion: FC = () => {
   // TODO fetch if address is verified
   const [navigateToForm, setNavigateToForm] = useState(isKYC);
   const { fullPage, popup } = useAppEnv();
-  const account = useAccount();
-  console.log(account);
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<T id="addressVerification" />} removePaddings={popup}>

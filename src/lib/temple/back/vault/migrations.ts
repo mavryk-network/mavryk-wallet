@@ -48,7 +48,7 @@ export const MIGRATIONS = [
       name: await fetchNewAccountName(accounts),
       publicKeyHash: accPublicKeyHash,
       hdIndex: hdAccIndex,
-      isKYC: false
+      isKYC: undefined
     };
     const newAccounts = [newInitialAccount, ...migratedAccounts];
 

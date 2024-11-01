@@ -54,7 +54,7 @@ export enum TempleStatus {
 }
 
 export type TempleAccount =
-  | { isKYC: boolean } & (
+  | { isKYC: boolean | undefined } & (
       | TempleHDAccount
       | TempleImportedAccount
       | TempleLedgerAccount

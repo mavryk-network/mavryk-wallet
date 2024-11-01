@@ -109,7 +109,7 @@ export class Vault {
         name: 'Account 1',
         publicKeyHash: accPublicKeyHash,
         hdIndex: hdAccIndex,
-        isKYC: false
+        isKYC: undefined
       };
       const newAccounts = [initialAccount];
 

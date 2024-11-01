@@ -7,11 +7,10 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
-import { T, TID } from 'lib/i18n';
+import { T, TID, t } from 'lib/i18n';
 import { KYC_CONTRACT } from 'lib/route3/constants';
-import { updateAccountKYC } from 'lib/temple/back/actions';
 import { loadContract } from 'lib/temple/contract';
-import { useAccount, useNetwork } from 'lib/temple/front';
+import { useAccount, useNetwork, useTempleClient } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -81,6 +80,7 @@ type FormData = {
 };
 
 const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
+  const { updateAccountKYCStatus } = useTempleClient();
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
   const { publicKeyHash } = useAccount();
@@ -109,13 +109,12 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
           investorType: 'NIL'
         }
       ];
-
       await contract.methods.setMember(setMemberAction, memberList).send();
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
 
-      await updateAccountKYC(publicKeyHash, true);
+      await updateAccountKYCStatus(publicKeyHash, true);
 
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'proVersion',
@@ -129,7 +128,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // show err on ui
       setFormState({ ...formState, error: e.message || 'Something went wrong' });
     }
-  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm]);
+  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus]);
 
   return (
     <div className={clsx(popup && 'px-4 py-4', popup && formState?.error && 'overflow-y-scroll')}>

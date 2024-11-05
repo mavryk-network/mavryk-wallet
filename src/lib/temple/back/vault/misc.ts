@@ -39,12 +39,17 @@ export async function getPublicKeyAndHash(privateKey: string) {
 
 export async function getKYCStatus(pkh: string) {
   try {
-    const data: any = await fetch(
+    const storageRes: any = await fetch(
       'https://atlasnet.api.mavryk.network/v1/contracts/KT19bfnNi9mMptoJsFZpwxA8SYRYjfsMgTt2/storage/'
     );
-    const bigMapId = data.memberLedger;
+    const bigMapId = (await storageRes.json()).memberLedger;
 
-    const isKYCAddress = await fetch(`https://atlasnet.api.mavryk.network/v1/bigmaps/${bigMapId}/keys/${pkh}`);
+    const contractData = await fetch(`https://atlasnet.api.mavryk.network/v1/bigmaps/${bigMapId}/keys/${pkh}`);
+
+    // if no data than no KYCed user
+    if (contractData.status === 204) return false;
+
+    const isKYCAddress = await contractData.json();
 
     return Boolean(isKYCAddress);
   } catch (e) {

@@ -1,5 +1,7 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { Spinner } from 'app/atoms';
 import { T } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';
@@ -13,13 +15,16 @@ export const GetProlabel: FC = () => {
   return (
     <Link to="/pro-version" testID={AccountDropdownSelectors.getProButton}>
       <div
-        className="px-2 text-white text-xs leading-3 bg-accent-blue rounded text-center"
+        className={clsx(
+          'px-2 text-white text-xs leading-3 rounded text-center',
+          !isKYC ? 'bg-accent-blue' : 'border border-accent-blue'
+        )}
         style={{ paddingBlock: 3, marginTop: 1 }}
       >
         {isKYC === undefined ? (
           <Spinner theme="white" className="w-6" />
         ) : isKYC ? (
-          <T id="mavopoly" />
+          <T id="mavrykPro" />
         ) : (
           <T id="getPro" />
         )}

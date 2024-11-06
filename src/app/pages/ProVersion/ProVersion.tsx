@@ -3,6 +3,7 @@ import React, { FC, useCallback, useState } from 'react';
 import clsx from 'clsx';
 
 import { Alert } from 'app/atoms';
+import { getErrorMsgByCode } from 'app/consts/errorCodes';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
@@ -24,7 +25,11 @@ export const ProVersion: FC = () => {
   const { fullPage, popup } = useAppEnv();
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<T id="addressVerification" />} removePaddings={popup}>
+    <PageLayout
+      isTopbarVisible={false}
+      pageTitle={isKYC ? <T id="addressVerification" /> : <T id="proVersion" />}
+      removePaddings={popup}
+    >
       <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
         {navigateToForm ? <VerificationForm /> : <GetProVersionScreen setNavigateToForm={setNavigateToForm} />}
       </div>
@@ -123,7 +128,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
     } catch (e) {
       console.log(e);
       // show err on ui
-      setFormState({ ...formState, error: e.message || 'Something went wrong' });
+      setFormState({ ...formState, error: getErrorMsgByCode(e.message) });
     }
   }, [formState, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus]);
 

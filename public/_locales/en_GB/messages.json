@@ -3693,7 +3693,7 @@
     "message": "Unrecognized RPC node. It may not work properly with the wallet, please verify node url."
   },
   "proVersion": {
-    "message": "Pro Screen"
+    "message": "Pro Version"
   },
   "joinMavryk": {
     "message": "Join Mavryk Pro and Unlock New Opportunities!"

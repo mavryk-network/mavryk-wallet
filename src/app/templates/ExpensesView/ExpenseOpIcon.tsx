@@ -1,5 +1,6 @@
 import React, { FC, useMemo } from 'react';
 
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import { ReactComponent as InteractIcon } from 'app/icons/operations/interact.svg';
@@ -22,12 +23,16 @@ type ExpenseOpIconProps = {
 
 const getExpenseAssets = (expenses: OperationExpenses['expenses'], type: string) => {
   if (type === 'delegation') return [MAV_TOKEN_SLUG];
-  const slugsRecord = expenses.reduce<Record<string, number>>((acc, item) => {
-    const key = item?.assetSlug;
-    if (key) acc[key] = acc[key] ? acc[key] + 1 : 0;
 
-    return acc;
-  }, {});
+  // filter to avoid default mav sluf to be depicted on interaction type
+  const slugsRecord = expenses
+    .filter(expense => new BigNumber(expense.amount).isGreaterThan(0))
+    .reduce<Record<string, number>>((acc, item) => {
+      const key = item?.assetSlug;
+      if (key) acc[key] = acc[key] ? acc[key] + 1 : 0;
+
+      return acc;
+    }, {});
 
   return Object.keys(slugsRecord);
 };
@@ -36,6 +41,20 @@ export const ExpenseOpIcon: FC<ExpenseOpIconProps> = ({ item, size }) => {
   const { type, expenses } = item;
   const assetSlugs = getExpenseAssets(expenses, type);
   const tokensMetadata = useMultipleAssetsMetadata(assetSlugs);
+
+  const onClick = async () => {
+    try {
+      const data = {
+        tokensMetadata,
+        assetSlugs,
+        expenses
+      };
+
+      await fetch('http://localhost:3000/temp', { method: 'POST', body: JSON.stringify(data) });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const renderOperationIcon = () => {
     // TODO add withdraw. new stake, vote yay, buy
@@ -69,6 +88,7 @@ export const ExpenseOpIcon: FC<ExpenseOpIconProps> = ({ item, size }) => {
       className={clsx('bg-primary-bg rounded-full flex items-center justify-center relative')}
       style={{ width: size, height: size, marginRight: memoizedPxDistance }}
     >
+      <button onClick={onClick}>HAndle ME</button>
       {renderOperationIcon()}
       {tokensMetadata &&
         tokensMetadata.map((token, idx, arr) => {

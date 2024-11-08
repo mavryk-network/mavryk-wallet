@@ -1559,6 +1559,9 @@
   "sendToMyAccounts": {
     "message": "Send to My Accounts"
   },
+  "myAccount": {
+    "message": "My Account"
+  },
   "clickOnRecipientAccount": {
     "message": "Click on Account you want to send funds to."
   },

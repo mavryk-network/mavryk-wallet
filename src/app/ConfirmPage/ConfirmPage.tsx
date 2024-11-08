@@ -346,13 +346,21 @@ const ConfirmDAppForm: FC = () => {
               <Divider color="bg-divider" className="mb-4" />
               <NetworkBanner rpc={payload.networkRpc} />
               {payload.type !== 'connect' && connectedAccount && (
-                <AccountBanner
-                  account={connectedAccount}
-                  networkRpc={payload.networkRpc}
-                  labelIndent="sm"
-                  className="w-full mb-4"
-                  restrictAccountSelect
-                />
+                <>
+                  <div className="w-full bg-primary-card rounded-lg px-4 py-3">
+                    <AccountBanner
+                      account={connectedAccount}
+                      networkRpc={payload.networkRpc}
+                      labelIndent="sm"
+                      className="w-full"
+                      restrictAccountSelect
+                      showDivider={false}
+                      showMVRK
+                    />
+                  </div>
+
+                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
+                </>
               )}
 
               {payloadError && (

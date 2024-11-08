@@ -289,6 +289,9 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
                     narrow={false}
                   />
+                  <div className="text-base-plus mb-3">
+                    <T id="myAccount" />
+                  </div>
                   <div className="bg-primary-card rounded-lg px-4 py-3">
                     <AccountBanner
                       account={account}
@@ -296,6 +299,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                       className="w-full"
                       showDivider={false}
                       restrictAccountSelect
+                      showMVRK
                     />
                   </div>
 

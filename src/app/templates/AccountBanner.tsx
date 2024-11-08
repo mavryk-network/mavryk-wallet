@@ -6,7 +6,10 @@ import { HashChip, Money } from 'app/atoms';
 import { AccountPopupButton } from 'app/layouts/PageLayout/Header/AccountPopup/AccountPopupButton';
 import { useTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
 import { useFiatCurrency } from 'lib/fiat-currency';
+import { MAVEN_METADATA } from 'lib/metadata';
 import { TempleAccount } from 'lib/temple/types';
+
+import Balance from './Balance';
 
 type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
   account: TempleAccount;
@@ -17,11 +20,20 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
   labelIndent?: 'sm' | 'md';
   restrictAccountSelect?: boolean;
   showDivider?: boolean;
+  showMVRK?: boolean;
 };
 
 const AccountBanner = memo<AccountBannerProps>(
-  ({ account, displayBalance = true, restrictAccountSelect = false, showDivider = true, className }) => {
+  ({
+    account,
+    displayBalance = true,
+    restrictAccountSelect = false,
+    showDivider = true,
+    showMVRK = false,
+    className
+  }) => {
     const totalBalanceInFiat = useTotalBalance();
+    // const { value: gasBalance } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
 
     const {
       selectedFiatCurrency: { symbol: fiatSymbol }
@@ -52,11 +64,24 @@ const AccountBanner = memo<AccountBannerProps>(
           </div>
 
           {displayBalance && (
-            <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus text-white">
-              <span className="ml-1">{fiatSymbol}</span>
-              <Money smallFractionFont={false} fiat tooltip={false}>
-                {totalBalanceInFiat}
-              </Money>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center flex-wrap justify-end ml-auto text-base-plus text-white">
+                <span className="ml-1">{fiatSymbol}</span>
+                <Money smallFractionFont={false} fiat tooltip={false}>
+                  {totalBalanceInFiat}
+                </Money>
+              </div>
+              {showMVRK && (
+                <div className="text-white text-sm flex items-center">
+                  <Balance address={account.publicKeyHash}>
+                    {bal => (
+                      <div className={classNames('text-sm leading-none', 'text-secondary-white')}>
+                        <Money smallFractionFont={false}>{bal}</Money> <span>{MAVEN_METADATA.symbol}</span>
+                      </div>
+                    )}
+                  </Balance>
+                </div>
+              )}
             </div>
           )}
         </div>

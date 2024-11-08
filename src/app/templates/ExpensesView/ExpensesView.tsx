@@ -78,20 +78,13 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
       // TODO: add translations for other operations types
       case 'transaction':
       case 'transfer':
-        return `↑ ${t('transfer')}`;
+        return `${t('transfer')}`;
       case 'approve':
         return t('approveToken');
       case 'delegation':
         return item.delegate ? t('staking') : t('unStaking');
       default:
-        return item.isEntrypointInteraction ? (
-          <>
-            <ClipboardIcon className="mr-1 h-3 w-auto stroke-current inline align-text-top" />
-            <T id="interaction" />
-          </>
-        ) : (
-          t('transactionOfSomeType', item.type)
-        );
+        return item.isEntrypointInteraction ? <T id="interaction" /> : t('transactionOfSomeType', item.type);
     }
   }, [item]);
 

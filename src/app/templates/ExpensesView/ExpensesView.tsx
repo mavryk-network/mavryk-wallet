@@ -173,7 +173,13 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
   const withdrawal = useMemo(() => ['transaction', 'transfer'].includes(item.type), [item.type]);
 
   return (
-    <div className={classNames('p-4 flex items-start bg-primary-card rounded-2xl-plus', !last && 'mb-3')}>
+    <div
+      className={classNames(
+        'p-4 flex bg-primary-card rounded-2xl-plus',
+        item.expenses.length === 0 ? 'items-center' : 'items-start',
+        !last && 'mb-3'
+      )}
+    >
       <ExpenseOpIcon item={item} size={32} />
 
       <div className="flex-1 flex-col gap-1">

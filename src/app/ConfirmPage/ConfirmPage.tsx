@@ -385,7 +385,7 @@ const ConfirmDAppForm: FC = () => {
         </div>
         <div className="flex-1" />
 
-        <div className="sticky bottom-0 w-full bg-primary-bg shadow-md flex items-stretch py-4 px-8 border-t border-divider">
+        <div className="sticky bottom-0 z-10 w-full bg-primary-bg shadow-md flex items-stretch py-4 px-8 border-t border-divider">
           <div className="w-1/2 pr-2">
             <ButtonRounded
               type="button"

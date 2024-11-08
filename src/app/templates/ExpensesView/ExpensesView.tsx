@@ -118,7 +118,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
 
     const alteredReceivers = receivers.map(receiver => {
       if (savedAccountsRecord[receiver]) return <TinySavedAccountInfo account={savedAccountsRecord[receiver]} />;
-      return <HashChip className="text-base-plus" hash={receiver} type="button" small trim showIcon={false} />;
+      return receiver;
     });
 
     switch (item.type) {
@@ -222,7 +222,11 @@ const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey,
         {arg.map((value, index) => (
           <span key={index} className="flex">
             &nbsp;
-            {value}
+            {typeof value === 'string' ? (
+              <HashChip className="text-base-plus" hash={value} type="button" small trim showIcon={false} />
+            ) : (
+              value
+            )}
             {index === arg.length - 1 ? null : ','}
           </span>
         ))}

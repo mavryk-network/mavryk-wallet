@@ -391,7 +391,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
             <div
               className={classNames(
-                'sticky bottom-0 bg-primary-bg shadow-md flex items-stretch py-4',
+                'sticky bottom-0 z-10 bg-primary-bg shadow-md flex items-stretch py-4',
                 popup && ' w-full mx-auto',
                 !popup && 'px-20 border-t border-divider'
               )}

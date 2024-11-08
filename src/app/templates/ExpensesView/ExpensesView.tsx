@@ -4,15 +4,16 @@ import { Estimate } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { HashChip, Money, Identicon } from 'app/atoms';
-import { ReactComponent as ClipboardIcon } from 'app/icons/clipboard.svg';
+import { HashChip, Money } from 'app/atoms';
 import InFiat from 'app/templates/InFiat';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
-import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
+import { RawOperationAssetExpense, RawOperationExpenses, useAllAccounts } from 'lib/temple/front';
+import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
+import { TinySavedAccountInfo } from './TinySavedAccountInfo';
 // import { HistoryTokenIcon } from '../History/HistoryTokenIcon';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
@@ -39,6 +40,8 @@ export interface ModifyFeeAndLimit {
 }
 
 const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError }) => {
+  const accounts = useAllAccounts();
+
   if (!expenses) {
     return null;
   }
@@ -51,7 +54,13 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError })
       >
         <div className="h-full">
           {expenses.map((item, index, arr) => (
-            <ExpenseViewItem key={index} item={item} last={index === arr.length - 1} mainnet={mainnet} />
+            <ExpenseViewItem
+              key={index}
+              item={item}
+              last={index === arr.length - 1}
+              mainnet={mainnet}
+              accounts={accounts}
+            />
           ))}
         </div>
       </div>
@@ -70,9 +79,17 @@ type ExpenseViewItemProps = {
   item: OperationExpenses;
   last: boolean;
   mainnet?: boolean;
+  accounts: TempleAccount[];
 };
 
-const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
+const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accounts }) => {
+  const savedAccountsRecord = useMemo(() => {
+    return accounts.reduce<StringRecord<TempleAccount>>((accumulator, account) => {
+      accumulator[account.publicKeyHash] = account;
+      return accumulator;
+    }, {});
+  }, [accounts]);
+
   const operationTypeLabel = useMemo(() => {
     switch (item.type) {
       // TODO: add translations for other operations types
@@ -99,13 +116,18 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
       )
     ];
 
+    const alteredReceivers = receivers.map(receiver => {
+      if (savedAccountsRecord[receiver]) return <TinySavedAccountInfo account={savedAccountsRecord[receiver]} />;
+      return <HashChip className="text-base-plus" hash={receiver} type="button" small trim showIcon={false} />;
+    });
+
     switch (item.type) {
       case 'transaction':
       case 'transfer':
         return {
           argumentDisplayProps: {
             i18nKey: 'transferToSmb',
-            arg: receivers
+            arg: alteredReceivers
           }
         };
 
@@ -113,7 +135,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
         return {
           argumentDisplayProps: {
             i18nKey: 'approveForSmb',
-            arg: receivers
+            arg: alteredReceivers
           }
         };
 
@@ -139,16 +161,23 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
             }
           : {};
     }
-  }, [item]);
+  }, [
+    item.contractAddress,
+    item.delegate,
+    item.expenses,
+    item.isEntrypointInteraction,
+    item.type,
+    savedAccountsRecord
+  ]);
 
   const withdrawal = useMemo(() => ['transaction', 'transfer'].includes(item.type), [item.type]);
 
   return (
-    <div className={classNames('p-4 flex items-center bg-primary-card rounded-2xl-plus', !last && 'mb-3')}>
+    <div className={classNames('p-4 flex items-start bg-primary-card rounded-2xl-plus', !last && 'mb-3')}>
       <ExpenseOpIcon item={item} size={32} />
 
       <div className="flex-1 flex-col gap-1">
-        <div className="flex items-center text-base-plus text-white">
+        <div className="flex items-center text-base-plus text-white mb-1">
           <span className="mr-1 flex items-center">{operationTypeLabel}</span>
 
           {argumentDisplayProps && <OperationArgumentDisplay {...argumentDisplayProps} />}
@@ -182,7 +211,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
 
 type OperationArgumentDisplayProps = {
   i18nKey: TProps['id'];
-  arg: string[];
+  arg: (string | React.ReactNode)[];
 };
 
 const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey, arg }) => (
@@ -193,7 +222,7 @@ const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey,
         {arg.map((value, index) => (
           <span key={index} className="flex">
             &nbsp;
-            <HashChip key={index} hash={value} type="button" small trim showIcon={false} />
+            {value}
             {index === arg.length - 1 ? null : ','}
           </span>
         ))}
@@ -215,7 +244,7 @@ const OperationVolumeDisplay = memo<OperationVolumeDisplayProps>(({ expense, vol
   const finalVolume = expense ? expense.amount.div(10 ** (metadata?.decimals || 0)) : volume;
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-col items-start gap-1">
       <span className="text-sm text-white flex items-center">
         {/* {withdrawal && "-"} */}
         <span>

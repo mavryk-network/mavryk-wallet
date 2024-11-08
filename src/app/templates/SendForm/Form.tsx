@@ -591,7 +591,13 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
       <FormSubmitButton
         loading={formState.isSubmitting}
-        disabled={Boolean(estimationError) || estimateFallbackDisplayed || formState.isSubmitting || !filledContact}
+        disabled={
+          Boolean(estimationError) ||
+          estimateFallbackDisplayed ||
+          formState.isSubmitting ||
+          !toResolved ||
+          Boolean(errors?.to)
+        }
         testID={SendFormSelectors.sendButton}
         className="mt-6"
       >

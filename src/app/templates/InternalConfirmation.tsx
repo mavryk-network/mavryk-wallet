@@ -289,7 +289,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
                     narrow={false}
                   />
-                  <div className="bg-gray-910 rounded-lg px-4 py-3">
+                  <div className="bg-primary-card rounded-lg px-4 py-3">
                     <AccountBanner
                       account={account}
                       labelIndent="sm"

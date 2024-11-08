@@ -16,10 +16,11 @@ type AccountBannerProps = HTMLAttributes<HTMLDivElement> & {
   labelDescription?: ReactNode;
   labelIndent?: 'sm' | 'md';
   restrictAccountSelect?: boolean;
+  showDivider?: boolean;
 };
 
 const AccountBanner = memo<AccountBannerProps>(
-  ({ account, displayBalance = true, restrictAccountSelect = false, className }) => {
+  ({ account, displayBalance = true, restrictAccountSelect = false, showDivider = true, className }) => {
     const totalBalanceInFiat = useTotalBalance();
 
     const {
@@ -28,7 +29,12 @@ const AccountBanner = memo<AccountBannerProps>(
 
     return (
       <div className={classNames('flex flex-col', className)}>
-        <div className="w-full flex items-center justify-between pb-4 border-b border-divider">
+        <div
+          className={classNames(
+            'w-full flex items-center justify-between',
+            showDivider && 'pb-4 border-b border-divider'
+          )}
+        >
           <div className=" flex items-center">
             <AccountPopupButton
               account={account}

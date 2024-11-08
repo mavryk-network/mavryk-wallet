@@ -1,4 +1,4 @@
-import React, { CSSProperties, FC, useMemo } from 'react';
+import React, { CSSProperties, FC } from 'react';
 
 import clsx from 'clsx';
 
@@ -14,6 +14,7 @@ import { ReactComponent as SendIcon } from 'app/icons/operations/transfer-to.svg
 // import { ReactComponent as WithdrawIcon } from 'app/icons/operations/withdraw.svg';
 import { AssetMetadataBase, getAssetSymbol, isCollectible, useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeEnum, UserHistoryItem } from 'lib/temple/history/types';
+import { getLeftImagePosition } from 'lib/utils/token-icon';
 
 import { AssetImage } from '../AssetImage';
 
@@ -109,12 +110,6 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
     </div>
   );
 };
-
-function getLeftImagePosition(idx: number) {
-  if (idx === 0) return 60;
-
-  return 60 + idx * 30;
-}
 
 interface PlaceholderProps {
   metadata: AssetMetadataBase | nullish;

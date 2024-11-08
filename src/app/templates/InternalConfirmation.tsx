@@ -289,7 +289,17 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     rpc={payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc}
                     narrow={false}
                   />
-                  <AccountBanner account={account} labelIndent="sm" className="w-full mb-4" restrictAccountSelect />
+                  <div className="bg-gray-910 rounded-lg px-4 py-3">
+                    <AccountBanner
+                      account={account}
+                      labelIndent="sm"
+                      className="w-full"
+                      showDivider={false}
+                      restrictAccountSelect
+                    />
+                  </div>
+
+                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
 
                   {payloadError && (
                     <AlertWithCollapse

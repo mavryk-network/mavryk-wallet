@@ -12,11 +12,14 @@ import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 
+import { ExpenseOpIcon } from './ExpenseOpIcon';
+// import { HistoryTokenIcon } from '../History/HistoryTokenIcon';
+
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
 };
 
-type OperationExpenses = Omit<RawOperationExpenses, 'expenses'> & {
+export type OperationExpenses = Omit<RawOperationExpenses, 'expenses'> & {
   expenses: OperationAssetExpense[];
 };
 
@@ -92,9 +95,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
     }
   }, [item]);
 
-  const { iconHash, iconType, argumentDisplayProps } = useMemo<{
-    iconHash: string;
-    iconType: 'bottts' | 'jdenticon';
+  const { argumentDisplayProps } = useMemo<{
     argumentDisplayProps?: OperationArgumentDisplayProps;
   }>(() => {
     const receivers = [
@@ -109,8 +110,6 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
       case 'transaction':
       case 'transfer':
         return {
-          iconHash: item.expenses[0]?.to || 'unknown',
-          iconType: 'bottts',
           argumentDisplayProps: {
             i18nKey: 'transferToSmb',
             arg: receivers
@@ -119,8 +118,6 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
 
       case 'approve':
         return {
-          iconHash: item.expenses[0]?.to || 'unknown',
-          iconType: 'jdenticon',
           argumentDisplayProps: {
             i18nKey: 'approveForSmb',
             arg: receivers
@@ -130,8 +127,6 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
       case 'delegation':
         if (item.delegate) {
           return {
-            iconHash: item.delegate,
-            iconType: 'bottts',
             argumentDisplayProps: {
               i18nKey: 'delegationToSmb',
               arg: [item.delegate]
@@ -139,25 +134,17 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
           };
         }
 
-        return {
-          iconHash: 'none',
-          iconType: 'jdenticon'
-        };
+        return {};
 
       default:
         return item.isEntrypointInteraction
           ? {
-              iconHash: item.contractAddress!,
-              iconType: 'jdenticon',
               argumentDisplayProps: {
                 i18nKey: 'interactionWithContract',
                 arg: [item.contractAddress!]
               }
             }
-          : {
-              iconHash: 'unknown',
-              iconType: 'jdenticon'
-            };
+          : {};
     }
   }, [item]);
 
@@ -165,9 +152,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet }) => {
 
   return (
     <div className={classNames('p-4 flex items-center bg-primary-card rounded-2xl-plus', !last && 'mb-3')}>
-      <div className="mr-2">
-        <Identicon hash={iconHash} type={iconType} size={32} className="rounded-full" />
-      </div>
+      <ExpenseOpIcon item={item} size={32} />
 
       <div className="flex-1 flex-col gap-1">
         <div className="flex items-center text-base-plus text-white">
@@ -215,7 +200,7 @@ const OperationArgumentDisplay = memo<OperationArgumentDisplayProps>(({ i18nKey,
         {arg.map((value, index) => (
           <span key={index} className="flex">
             &nbsp;
-            <HashChip key={index} hash={value} type="button" small trim />
+            <HashChip key={index} hash={value} type="button" small trim showIcon={false} />
             {index === arg.length - 1 ? null : ','}
           </span>
         ))}

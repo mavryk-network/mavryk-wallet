@@ -94,7 +94,6 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [historyItem?.operations]
   );
 
-  // TODO check birned & network fees
   const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.storageFee) * 0.5 : 0), [fees]);
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
@@ -120,8 +119,6 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         }, {})
       : {};
   }, [isMultipleOperation, moneyDiffs]);
-
-  console.log(multipleAssetsData, 'multipleAssetsData');
 
   const slugsMetadataRecord = useMemo(
     () =>

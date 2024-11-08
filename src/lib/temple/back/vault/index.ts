@@ -6,6 +6,7 @@ import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
+import { DEFAULT_TZKT_API } from 'lib/temple/front/blockexplorer';
 import { formatOpParamsBeforeSend, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
@@ -360,7 +361,8 @@ export class Vault {
         signer.publicKeyHash()
       ]);
 
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      // TODO get api url from props
+      const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
 
       const newAccount: TempleAccount = {
         type: TempleAccountType.Imported,
@@ -413,7 +415,8 @@ export class Vault {
     return withError('Failed to import Managed KT account', async () => {
       const allAccounts = await this.fetchAccounts();
 
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      // TODO get api url from props
+      const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
       const newAccount: TempleAccount = {
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
@@ -466,7 +469,8 @@ export class Vault {
         const accPublicKey = await signer.publicKey();
         const accPublicKeyHash = await signer.publicKeyHash();
 
-        const isKYC = await getKYCStatus(accPublicKeyHash);
+        // TODO get api url from props
+        const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
 
         const newAccount: TempleAccount = {
           type: TempleAccountType.Ledger,

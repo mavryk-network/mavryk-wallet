@@ -3,6 +3,7 @@ import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import * as Ed25519 from 'ed25519-hd-key';
 
+import { KYC_CONTRACT } from 'lib/route3/constants';
 import { TempleAccount } from 'lib/temple/types';
 
 import { PublicError } from '../PublicError';
@@ -37,14 +38,13 @@ export async function getPublicKeyAndHash(privateKey: string) {
   return Promise.all([signer.publicKey(), signer.publicKeyHash()]);
 }
 
-export async function getKYCStatus(pkh: string) {
+export async function getKYCStatus(apiUrl: string, pkh: string) {
   try {
-    const storageRes: any = await fetch(
-      'https://atlasnet.api.mavryk.network/v1/contracts/KT19bfnNi9mMptoJsFZpwxA8SYRYjfsMgTt2/storage/'
-    );
+    // TODO ad chain data
+    const storageRes: any = await fetch(`${apiUrl}/v1/contracts/${KYC_CONTRACT}/storage/`);
     const bigMapId = (await storageRes.json()).memberLedger;
 
-    const contractData = await fetch(`https://atlasnet.api.mavryk.network/v1/bigmaps/${bigMapId}/keys/${pkh}`);
+    const contractData = await fetch(`${apiUrl}/v1/bigmaps/${bigMapId}/keys/${pkh}`);
 
     // if no data than no KYCed user
     if (contractData.status === 204) return false;

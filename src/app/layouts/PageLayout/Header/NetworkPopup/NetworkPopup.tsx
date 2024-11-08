@@ -33,6 +33,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   const { popup } = useAppEnv();
 
   const chainId = useChainId(true)!;
+
   const { setExplorerId } = useBlockExplorer();
   const [isNetworkSwitching, setisNetworkSwitching] = useState(false);
 

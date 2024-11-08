@@ -23,8 +23,8 @@ type ExpenseOpIconProps = {
 const getExpenseAssets = (expenses: OperationExpenses['expenses'], type: string) => {
   if (type === 'delegation') return [MAV_TOKEN_SLUG];
   const slugsRecord = expenses.reduce<Record<string, number>>((acc, item) => {
-    const key = item?.assetSlug ?? MAV_TOKEN_SLUG;
-    acc[key] = acc[key] ? acc[key] + 1 : 0;
+    const key = item?.assetSlug;
+    if (key) acc[key] = acc[key] ? acc[key] + 1 : 0;
 
     return acc;
   }, {});
@@ -55,10 +55,10 @@ export const ExpenseOpIcon: FC<ExpenseOpIconProps> = ({ item, size }) => {
 
   const memoizedPxDistance = useMemo(() => {
     // single operation icon type
-    if (!tokensMetadata) return 16;
+    if (tokensMetadata?.length === 0 || !tokensMetadata) return 8;
 
     // operation with only one asset (f.e. send, stake)
-    if (tokensMetadata.length === 1) return 16;
+    if (tokensMetadata?.length === 1) return 16;
 
     // interaction, swap etc. types
     return tokensMetadata.length * 8 + size * 0.1;

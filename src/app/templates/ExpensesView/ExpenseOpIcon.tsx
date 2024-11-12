@@ -42,20 +42,6 @@ export const ExpenseOpIcon: FC<ExpenseOpIconProps> = ({ item, size }) => {
   const assetSlugs = getExpenseAssets(expenses, type);
   const tokensMetadata = useMultipleAssetsMetadata(assetSlugs);
 
-  const onClick = async () => {
-    try {
-      const data = {
-        tokensMetadata,
-        assetSlugs,
-        expenses
-      };
-
-      await fetch('http://localhost:3000/temp', { method: 'POST', body: JSON.stringify(data) });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   const renderOperationIcon = () => {
     // TODO add withdraw. new stake, vote yay, buy
     switch (type) {
@@ -88,7 +74,6 @@ export const ExpenseOpIcon: FC<ExpenseOpIconProps> = ({ item, size }) => {
       className={clsx('bg-primary-bg rounded-full flex items-center justify-center relative')}
       style={{ width: size, height: size, marginRight: memoizedPxDistance }}
     >
-      <button onClick={onClick}>HAndle ME</button>
       {renderOperationIcon()}
       {tokensMetadata &&
         tokensMetadata.map((token, idx, arr) => {

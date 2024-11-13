@@ -3,7 +3,7 @@ import React, { ReactNode, memo } from 'react';
 import clsx from 'clsx';
 
 import { HashChip } from 'app/atoms';
-import { TID, T } from 'lib/i18n';
+import { TID, T, t } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
@@ -43,11 +43,17 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation:
       const opDelegate = item as HistoryItemDelegationOp;
+
+      const isDelegateTo = Boolean(opDelegate.newDelegate?.address);
+
+      const i18nkey: TID = isDelegateTo ? 'delegationToSmb' : 'delegationFromSmb';
+      const address = isDelegateTo ? opDelegate.newDelegate?.address : opDelegate.source?.address;
+
       return (
         <Component
           {...componentBaseProps}
-          titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="delegationToSmb" args={[opDelegate.newDelegate?.address ?? 'unknown']} />}
+          titleNode={isDelegateTo ? HistoryItemOpTypeTexts[item.type] : t('delegationReceived')}
+          argsNode={<StackItemArgs i18nKey={i18nkey} args={[address ?? 'unknown']} />}
         />
       );
 

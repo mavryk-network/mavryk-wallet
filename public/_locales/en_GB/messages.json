@@ -2023,6 +2023,17 @@
       }
     }
   },
+  "delegationFromSmb": {
+    "message": "from $delegate$",
+    "placeholders": {
+      "delegate": {
+        "content": "$1"
+      }
+    }
+  },
+  "delegationReceived": {
+    "message": "Delegation received"
+  },
   "fa2TokenAlreadyExists": {
     "message": "Token with address $address$ and ID $tokenId$ already exists.",
     "placeholders": {

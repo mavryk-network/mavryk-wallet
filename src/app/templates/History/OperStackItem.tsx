@@ -184,7 +184,7 @@ interface StackItemBaseProps {
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
   return (
     <div className="flex items-start text-white text-sm">
-      <div className="break-words">
+      <div style={{ maxWidth: '240px' }} className="break-words">
         {titleNode}
         <span>&nbsp;</span>
         {argsNode}

@@ -371,7 +371,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opDelegate = item as HistoryItemDelegationOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opDelegate.newDelegate?.address
+          address: opDelegate.newDelegate?.address || opDelegate.source.address
         };
 
       case HistoryItemOpTypeEnum.Origination:

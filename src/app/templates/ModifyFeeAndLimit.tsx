@@ -223,7 +223,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   return modifyFeeAndLimit ? (
     <>
       <div className="text-white text-base-plus mt-4 pb-3">
-        <T id="payment" />
+        <T id="networkFees" />
       </div>
       {popup && <div className="flex-1" />}
       <div

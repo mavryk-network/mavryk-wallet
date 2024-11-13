@@ -19,8 +19,6 @@ export type BlockExplorer = {
   baseUrls: Map<TempleChainId, BaseUrls>;
 };
 
-export const DEFAULT_TZKT_API = 'https://atlasnet.api.mavryk.network';
-
 export const BLOCK_EXPLORERS: BlockExplorer[] = [
   {
     id: 'tzkt',

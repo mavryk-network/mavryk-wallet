@@ -6,7 +6,6 @@ import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
-import { DEFAULT_TZKT_API } from 'lib/temple/front/blockexplorer';
 import { formatOpParamsBeforeSend, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
@@ -362,7 +361,7 @@ export class Vault {
       ]);
 
       // TODO get api url from props
-      const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash);
 
       const newAccount: TempleAccount = {
         type: TempleAccountType.Imported,
@@ -416,7 +415,7 @@ export class Vault {
       const allAccounts = await this.fetchAccounts();
 
       // TODO get api url from props
-      const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash);
       const newAccount: TempleAccount = {
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
@@ -470,7 +469,7 @@ export class Vault {
         const accPublicKeyHash = await signer.publicKeyHash();
 
         // TODO get api url from props
-        const isKYC = await getKYCStatus(DEFAULT_TZKT_API, accPublicKeyHash);
+        const isKYC = await getKYCStatus(accPublicKeyHash);
 
         const newAccount: TempleAccount = {
           type: TempleAccountType.Ledger,

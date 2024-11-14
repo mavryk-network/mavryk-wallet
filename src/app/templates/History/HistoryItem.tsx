@@ -7,7 +7,7 @@ import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defau
 import { useAppEnv } from 'app/env';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
@@ -74,6 +74,15 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     historyItem.type === HistoryItemOpTypeEnum.Interaction &&
     (historyItem.operations[0].entrypoint?.length ?? 0) > popupInteractionOpTextMaxLength;
 
+  const filteredMoneyDiffBase = useMemo(
+    () =>
+      moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
+        if (!isZero(item.diff)) acc.push(item);
+        return acc;
+      }, []),
+    [moneyDiffsBase]
+  );
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -88,7 +97,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
-            style={{ maxWidth: !moneyDiffsBase.length ? 'auto' : 240 }}
+            style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
             className="flex flex-col gap-1 items-start justify-center break-words"
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
@@ -115,8 +124,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
           className="flex flex-col justify-center items-end gap-1"
           style={{ maxWidth: 76, marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
         >
-          {moneyDiffsBase.map(({ assetSlug, diff }, i) => {
-            if (isZero(diff)) return null;
+          {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (
               <MoneyDiffView
                 key={i}

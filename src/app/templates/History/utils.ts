@@ -2,9 +2,8 @@ import BigNumber from 'bignumber.js';
 
 import { MAV_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
-import { UserHistoryItem } from 'lib/temple/history';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
-import { HistoryItemOpTypeEnum, HistoryItemTransactionOp } from 'lib/temple/history/types';
+import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
   if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
@@ -51,11 +50,17 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
   const slugs = item.operations.reduce<string[]>((acc, op) => {
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
-    const assetSlug = op.contractAddress
-      ? isTezAsset(op.contractAddress)
-        ? MAV_TOKEN_SLUG
-        : toTokenSlug(op.contractAddress, tokenId)
-      : '';
+    let assetSlug: string = '';
+
+    if (op.contractAddress) {
+      if (isTezAsset(op.contractAddress)) {
+        assetSlug = MAV_TOKEN_SLUG;
+      } else {
+        assetSlug = toTokenSlug(op.contractAddress, tokenId);
+      }
+    } else if (op.type === HistoryItemOpTypeEnum.Delegation) {
+      assetSlug = MAV_TOKEN_SLUG;
+    }
     acc = [...new Set([...acc, assetSlug].filter(o => Boolean(o)))];
     return acc;
   }, []);

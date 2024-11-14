@@ -47,7 +47,7 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
 
   const historyItemOperations = reduceTzktOperations(operations, address);
 
-  const status = deriveHistoryItemStatus(historyItemOperations);
+  const status = deriveHistoryItemStatus(!historyItemOperations.length ? operations : historyItemOperations);
   const type = deriveHistoryItemType(historyItemOperations, address, operations[0]);
 
   const newUserHistoryItem: UserHistoryItem = {
@@ -83,8 +83,6 @@ function reduceOneTzktOperation(
     case 'transaction':
       return reduceOneTzktTransactionOperation(address, operation, index);
     case 'delegation': {
-      if (operation.sender.address !== address) return null;
-
       const delegationOpBase = buildHistoryItemOpBase(operation, address, 0, operation.sender, index);
       const delegationOp: HistoryItemDelegationOp = {
         ...delegationOpBase,

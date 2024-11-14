@@ -14,6 +14,7 @@ import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from 'app/template
 import { MAV_TOKEN_SLUG, tokenToSlug } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
+import { useAccount } from 'lib/temple/front';
 import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
@@ -48,6 +49,7 @@ export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
 export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
   const { popup } = useAppEnv();
+  const { publicKeyHash } = useAccount();
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
@@ -323,6 +325,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                     <OpertionStackItem
                       item={item}
                       moneyDiff={moneyDiffs[i]}
+                      userAddress={publicKeyHash}
                       isTiny
                       last={arr.length > 2 && i === arr.length - 1}
                     />

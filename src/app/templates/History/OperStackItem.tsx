@@ -26,9 +26,10 @@ interface Props {
   moneyDiff?: MoneyDiff;
   originalHistoryItem?: UserHistoryItem;
   last?: boolean;
+  userAddress: string;
 }
 
-export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, originalHistoryItem, last }) => {
+export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, originalHistoryItem, last, userAddress }) => {
   const Component = isTiny ? StackItemBaseTiny : StackItemBase;
 
   const componentBaseProps = {
@@ -44,7 +45,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
     case HistoryItemOpTypeEnum.Delegation:
       const opDelegate = item as HistoryItemDelegationOp;
 
-      const isDelegateTo = Boolean(opDelegate.newDelegate?.address);
+      const isDelegateTo = userAddress.toLocaleLowerCase() !== 'mv1V4h45W3p4e1sjSBvRkK2uYbvkTnSuHg8g'.toLowerCase();
 
       const i18nkey: TID = isDelegateTo ? 'delegationToSmb' : 'delegationFromSmb';
       const address = isDelegateTo ? opDelegate.newDelegate?.address : opDelegate.source?.address;
@@ -190,7 +191,7 @@ interface StackItemBaseProps {
 const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) => {
   return (
     <div className="flex items-start text-white text-sm">
-      <div style={{ maxWidth: '240px' }} className="break-words">
+      <div>
         {titleNode}
         <span>&nbsp;</span>
         {argsNode}

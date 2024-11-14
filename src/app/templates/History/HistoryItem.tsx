@@ -28,7 +28,7 @@ interface Props {
   handleItemClick: (hash: string) => void;
 }
 
-export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) => {
+export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, address }) => {
   const [expanded, setExpanded] = useState(false);
   const { popup } = useAppEnv();
   const [isHovered, setIsHovered] = useState(false);
@@ -87,8 +87,11 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
       <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
-          <div className="flex flex-col gap-1 items-start justify-center">
-            <OperationStack historyItem={historyItem} base={base} />
+          <div
+            style={{ maxWidth: !moneyDiffsBase.length ? 'auto' : 240 }}
+            className="flex flex-col gap-1 items-start justify-center break-words"
+          >
+            <OperationStack historyItem={historyItem} base={base} userAddress={address} />
             <div className="flex items-start gap-x-1">
               <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
               {rest.length > 0 && (
@@ -131,7 +134,13 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick }) 
         <div className="px-4 pt-2 pb-2 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">
           {rest.map((item, i, arr) => (
             <div key={i}>
-              <OpertionStackItem item={item} moneyDiff={moneyDiffsRest[i]} last={arr.length - 1 === i} isTiny />
+              <OpertionStackItem
+                item={item}
+                moneyDiff={moneyDiffsRest[i]}
+                last={arr.length - 1 === i}
+                userAddress={address}
+                isTiny
+              />
             </div>
           ))}
         </div>

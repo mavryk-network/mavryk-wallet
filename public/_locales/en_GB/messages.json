@@ -3725,7 +3725,7 @@
     "message": "Non-custodial: take control of your financial future and manage your portfolio."
   },
   "mavopolySuccessMsg": {
-    "message": "Your wallet address has been successfully verified.\n You are now able to play Mavopoly. Make sure to verify\n your Maven Vaults"
+    "message": "Your wallet address has been successfully verified.\n You are now able to use this contract with RWA assets. Make sure to verify\n your Maven Vaults"
   },
   "goToMavopoly": {
     "message": "Go To Mavopoly"
@@ -3734,7 +3734,7 @@
     "message": "Address Verification"
   },
   "addressVerificationDescr": {
-    "message": "Verify your vault contract addresses here. As part of Mavopoly, you are required to use vault’s on Maven Finance to leverage your RWAs. For that to happen, they need to be verified for the purposes of the game. You can do that here."
+    "message": "Verify your vault contract addresses here. As part of Testnet, you are required to use vault’s on Maven Finance to leverage your RWAs. For that to happen, they need to be verified for the purposes of the game. You can do that here."
   },
   "contractAddress": {
     "message": "Contract Address"

@@ -41,7 +41,6 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
   const { type } = historyItem;
   const slugs = getAssetsFromOperations(historyItem);
 
-  console.log(slugs, 'slugs', historyItem);
   const tokensMetadata = useMultipleAssetsMetadata([
     ...new Set([slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)).reverse())
   ]);

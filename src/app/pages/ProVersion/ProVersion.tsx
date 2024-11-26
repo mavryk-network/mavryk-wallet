@@ -9,14 +9,12 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
-import { KYC_CONTRACT } from 'lib/route3/constants';
-import { loadContract } from 'lib/temple/contract';
 import { useAccount, useNetwork, useTempleClient } from 'lib/temple/front';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
-import { signerTezos } from './utils/tezosSigner';
+import { signKYCAction } from './utils/tezosSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
@@ -95,23 +93,8 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
     try {
       setFormState({ ...formState, submitting: true });
 
-      const tezos = signerTezos(rpcUrl);
-
-      const contract = await loadContract(tezos, KYC_CONTRACT);
-
-      // const { country, regionName } = await getGeoLocation();
-
-      const setMemberAction = 'addMember';
-
-      const memberList = [
-        {
-          memberAddress: publicKeyHash,
-          country: 'NIL',
-          region: 'NIL',
-          investorType: 'NIL'
-        }
-      ];
-      await contract.methods.setMember(setMemberAction, memberList).send();
+      // make account a KYC account
+      await signKYCAction(rpcUrl, publicKeyHash);
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
@@ -125,8 +108,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
         description: 'mavopolySuccessMsg',
         subHeader: 'success'
       });
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
       // show err on ui
       setFormState({ ...formState, error: getErrorMsgByCode(e.message) });
     }

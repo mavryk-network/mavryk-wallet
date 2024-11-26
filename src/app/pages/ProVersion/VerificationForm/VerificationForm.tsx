@@ -8,13 +8,14 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useTezos, validateContractAddress } from 'lib/temple/front';
+import { useNetwork, useTezos, validateContractAddress } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
+import { signKYCAction } from '../utils/tezosSigner';
 
 import { VerificationFormSelectors } from './verificationForm.selectors';
 
@@ -30,7 +31,7 @@ type DelegateFormProps = {};
 const VerificationForm: FC<DelegateFormProps> = () => {
   const formAnalytics = useFormAnalytics('AddressValidationForm');
   const { popup } = useAppEnv();
-
+  const { rpcBaseURL: rpcUrl } = useNetwork();
   const tezos = useTezos();
 
   /**
@@ -68,9 +69,10 @@ const VerificationForm: FC<DelegateFormProps> = () => {
       try {
         const isAddressVerified = validateContractAddress(to);
 
-        await delay();
-
         if (isAddressVerified !== true) throw new Error(t('verifyAddressErrMsg'));
+
+        // make account a KYC account
+        await signKYCAction(rpcUrl, to);
 
         reset({ to: '' });
 
@@ -78,8 +80,8 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addressVerification',
-          btnText: 'goToMavopoly',
-          btnLink: '/pro-version',
+          btnText: 'goToMain',
+          btnLink: '/',
           description: 'veridyAddressSuccessMsg',
           subHeader: 'success'
         });
@@ -97,7 +99,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         setSubmitError(err);
       }
     },
-    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, reset]
+    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, rpcUrl, reset]
   );
 
   return (
@@ -129,7 +131,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         <div className={clsx(popup && 'px-4')}>
           <ButtonRounded
             isLoading={formState.isSubmitting}
-            disabled={!toResolved || Boolean(submitError?.message)}
+            disabled={!toResolved || formState.isSubmitting || Boolean(submitError?.message)}
             size="big"
             type="submit"
             className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}

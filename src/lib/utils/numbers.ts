@@ -4,6 +4,12 @@ export const ZERO = new BigNumber(0);
 
 export const isPositiveNumber = (value?: number): value is number => value != null && value > 0;
 
+export function isNumeric(str: unknown) {
+  if (typeof str != 'string') return false; // we only process strings!
+  // @ts-expect-error // str is always string
+  return !isNaN(str) && !isNaN(parseFloat(str));
+}
+
 const THOUSAND = 1_000;
 const MILLION = 1_000_000;
 const BILLION = 1_000_000_000;

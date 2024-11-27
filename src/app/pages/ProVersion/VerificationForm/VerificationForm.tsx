@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { NoSpaceField } from 'app/atoms';
+import { getErrorMsgByCode } from 'app/consts/errorCodes';
 import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
@@ -12,6 +13,7 @@ import { useNetwork, useTezos, validateContractAddress } from 'lib/temple/front'
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { isNumeric } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
@@ -92,10 +94,13 @@ const VerificationForm: FC<DelegateFormProps> = () => {
           return;
         }
 
-        console.error(err);
-
         // Human delay.
         await delay();
+
+        if (isNumeric(err.message)) {
+          return setSubmitError({ message: getErrorMsgByCode(err.message) });
+        }
+
         setSubmitError(err);
       }
     },

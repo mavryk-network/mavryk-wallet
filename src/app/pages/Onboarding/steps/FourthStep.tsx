@@ -4,7 +4,6 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import TxActionsImg from '../assets/fourth.svg';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
@@ -14,9 +13,10 @@ const style = {
 
 interface Props {
   setStep: (step: number) => void;
+  imgSrc: string;
 }
 
-const FourthStep: FC<Props> = ({ setStep }) => {
+const FourthStep: FC<Props> = ({ setStep, imgSrc }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.fourthStepText)}>
@@ -35,7 +35,7 @@ const FourthStep: FC<Props> = ({ setStep }) => {
         <T id={'txActionsDetailsPart4'} />
       </p>
       <div className="my-8" style={style}>
-        <img src={TxActionsImg} alt="ProfileRpcImg" />
+        <img src={imgSrc} alt="ProfileRpcImg" />
       </div>
 
       <ButtonRounded

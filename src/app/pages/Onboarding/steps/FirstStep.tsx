@@ -5,15 +5,15 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import AddressBalancesImg from '../assets/first.svg';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
 interface Props {
   setStep: (step: number) => void;
+  imgSrc: string;
 }
 
-const FirstStep: FC<Props> = ({ setStep }) => {
+const FirstStep: FC<Props> = ({ setStep, imgSrc }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.firstStepText)}>
@@ -23,7 +23,7 @@ const FirstStep: FC<Props> = ({ setStep }) => {
         <T id={'addressBalanceDescription'} />
       </p>
       <div style={{ height: 324 }} className="my-8">
-        <img src={AddressBalancesImg} alt="AddressBalancesImg" />
+        <img src={imgSrc} alt="AddressBalancesImg" />
       </div>
       <p className={styles['description']}>
         <T

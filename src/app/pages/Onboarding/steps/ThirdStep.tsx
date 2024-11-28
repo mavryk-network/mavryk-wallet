@@ -4,19 +4,19 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 
-import AddressesImg from '../assets/third.svg';
 import styles from '../Onboarding.module.css';
 import { OnboardingSelectors } from '../Onboarding.selectors';
 
 interface Props {
   setStep: (step: number) => void;
+  imgSrc: string;
 }
 
 const style = {
   height: 404
 };
 
-const ThirdStep: FC<Props> = ({ setStep }) => {
+const ThirdStep: FC<Props> = ({ setStep, imgSrc }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.thirdStepText)}>
@@ -27,7 +27,7 @@ const ThirdStep: FC<Props> = ({ setStep }) => {
       </p>
 
       <div className="my-8 flex justify-center" style={style}>
-        <img src={AddressesImg} alt="ProfileAddressesImg" />
+        <img src={imgSrc} className="object-contain mx-auto" alt="ProfileAddressesImg" />
       </div>
       <p className={styles['description']}>
         <T id={'profileAndAccountsHintPart1'} />

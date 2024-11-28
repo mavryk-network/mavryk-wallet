@@ -5,6 +5,10 @@ import PageLayout from 'app/layouts/PageLayout';
 import { t, T } from 'lib/i18n';
 import { useStorage } from 'lib/temple/front';
 
+import AddressBalancesImg from './assets/first.png';
+import TxActionsImg from './assets/fourth.png';
+import TokensImg from './assets/second.png';
+import AddressesImg from './assets/third.png';
 import CongratsPage from './pages/CongratsPage';
 import FirstStep from './steps/FirstStep';
 import FourthStep from './steps/FourthStep';
@@ -22,6 +26,7 @@ const Onboarding: FC = () => {
   return (
     <PageLayout
       isTopbarVisible={false}
+      hasBackAction={step !== 0}
       pageTitle={
         <span>
           <T id="onboarding" />
@@ -33,10 +38,10 @@ const Onboarding: FC = () => {
       customContainerMinHeight="auto"
     >
       {step < 4 && <Stepper style={style} steps={steps} currentStep={step} />}
-      {step === 0 && <FirstStep setStep={setStep} />}
-      {step === 1 && <SecondStep setStep={setStep} />}
-      {step === 2 && <ThirdStep setStep={setStep} />}
-      {step === 3 && <FourthStep setStep={setStep} />}
+      {step === 0 && <FirstStep setStep={setStep} imgSrc={AddressBalancesImg} />}
+      {step === 1 && <SecondStep setStep={setStep} imgSrc={TokensImg} />}
+      {step === 2 && <ThirdStep setStep={setStep} imgSrc={AddressesImg} />}
+      {step === 3 && <FourthStep setStep={setStep} imgSrc={TxActionsImg} />}
       {step === 4 && <CongratsPage />}
       <div style={{ margin: 'auto' }} className="text-center"></div>
     </PageLayout>

@@ -9,14 +9,14 @@ import { OnboardingSelectors } from '../Onboarding.selectors';
 
 interface Props {
   setStep: (step: number) => void;
-  imgSrc: string;
+  image: JSX.Element;
 }
 
 const style = {
   height: 404
 };
 
-const ThirdStep: FC<Props> = ({ setStep, imgSrc }) => {
+const ThirdStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.thirdStepText)}>
@@ -27,7 +27,7 @@ const ThirdStep: FC<Props> = ({ setStep, imgSrc }) => {
       </p>
 
       <div className="my-8 flex justify-center" style={style}>
-        <img src={imgSrc} className="object-contain mx-auto" alt="ProfileAddressesImg" />
+        {image}
       </div>
       <p className={styles['description']}>
         <T id={'profileAndAccountsHintPart1'} />

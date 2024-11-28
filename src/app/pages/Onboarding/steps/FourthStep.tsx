@@ -13,10 +13,10 @@ const style = {
 
 interface Props {
   setStep: (step: number) => void;
-  imgSrc: string;
+  image: JSX.Element;
 }
 
-const FourthStep: FC<Props> = ({ setStep, imgSrc }) => {
+const FourthStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.fourthStepText)}>
@@ -35,7 +35,7 @@ const FourthStep: FC<Props> = ({ setStep, imgSrc }) => {
         <T id={'txActionsDetailsPart4'} />
       </p>
       <div className="my-8" style={style}>
-        <img src={imgSrc} alt="ProfileRpcImg" />
+        {image}
       </div>
 
       <ButtonRounded

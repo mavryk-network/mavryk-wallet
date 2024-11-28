@@ -10,10 +10,10 @@ import { OnboardingSelectors } from '../Onboarding.selectors';
 
 interface Props {
   setStep: (step: number) => void;
-  imgSrc: string;
+  image: JSX.Element;
 }
 
-const FirstStep: FC<Props> = ({ setStep, imgSrc }) => {
+const FirstStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.firstStepText)}>
@@ -23,7 +23,7 @@ const FirstStep: FC<Props> = ({ setStep, imgSrc }) => {
         <T id={'addressBalanceDescription'} />
       </p>
       <div style={{ height: 324 }} className="my-8">
-        <img src={imgSrc} alt="AddressBalancesImg" />
+        {image}
       </div>
       <p className={styles['description']}>
         <T

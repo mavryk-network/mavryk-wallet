@@ -13,10 +13,10 @@ const style = {
 
 interface Props {
   setStep: (step: number) => void;
-  imgSrc: string;
+  image: JSX.Element;
 }
 
-const SecondStep: FC<Props> = ({ setStep, imgSrc }) => {
+const SecondStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
       <p className={styles['title']} {...setTestID(OnboardingSelectors.secondStepText)}>
@@ -29,7 +29,7 @@ const SecondStep: FC<Props> = ({ setStep, imgSrc }) => {
         <T id={'tokensDescPart2'} />
       </p>
       <div className="my-8" style={style}>
-        <img src={imgSrc} alt="TokensImg" />
+        {image}
       </div>
       <p className={styles['description']}>
         <T id={'tokensHint'} />

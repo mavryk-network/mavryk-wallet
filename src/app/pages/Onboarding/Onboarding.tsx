@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Stepper } from 'app/atoms';
 import PageLayout from 'app/layouts/PageLayout';
@@ -22,6 +22,16 @@ const style = {
 const Onboarding: FC = () => {
   const [step, setStep] = useStorage<number>(`onboarding_step_state`, 0);
 
+  const images = useMemo(
+    () => ({
+      0: <img src={AddressBalancesImg} alt="AddressBalancesImg" />,
+      1: <img src={TokensImg} alt="TokensImg" />,
+      2: <img src={AddressesImg} className="object-contain mx-auto" alt="ProfileAddressesImg" />,
+      3: <img src={TxActionsImg} alt="ProfileRpcImg" />
+    }),
+    []
+  );
+
   const steps = (stepWord => [`${stepWord} 1`, `${stepWord} 2`, `${stepWord} 3`, `${stepWord} 4`])(t('step'));
   return (
     <PageLayout
@@ -38,10 +48,10 @@ const Onboarding: FC = () => {
       customContainerMinHeight="auto"
     >
       {step < 4 && <Stepper style={style} steps={steps} currentStep={step} />}
-      {step === 0 && <FirstStep setStep={setStep} imgSrc={AddressBalancesImg} />}
-      {step === 1 && <SecondStep setStep={setStep} imgSrc={TokensImg} />}
-      {step === 2 && <ThirdStep setStep={setStep} imgSrc={AddressesImg} />}
-      {step === 3 && <FourthStep setStep={setStep} imgSrc={TxActionsImg} />}
+      {step === 0 && <FirstStep setStep={setStep} image={images[0]} />}
+      {step === 1 && <SecondStep setStep={setStep} image={images[1]} />}
+      {step === 2 && <ThirdStep setStep={setStep} image={images[2]} />}
+      {step === 3 && <FourthStep setStep={setStep} image={images[3]} />}
       {step === 4 && <CongratsPage />}
       <div style={{ margin: 'auto' }} className="text-center"></div>
     </PageLayout>

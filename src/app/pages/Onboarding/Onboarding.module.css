@@ -6,6 +6,7 @@
   letter-spacing: -0.02em;
   text-align: center;
   color: #f4f4f4;
+  margin-bottom: 16px;
 }
 
 .description {
@@ -16,7 +17,6 @@
   letter-spacing: -0.02em;
   text-align: left;
 
-  margin: 16px 0 16px 0;
   color: #f4f4f4;
 }
 

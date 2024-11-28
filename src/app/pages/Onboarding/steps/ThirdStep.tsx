@@ -1,5 +1,7 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
@@ -32,7 +34,7 @@ const ThirdStep: FC<Props> = ({ setStep, image }) => {
       <p className={styles['description']}>
         <T id={'profileAndAccountsHintPart1'} />
       </p>
-      <p className={styles['description']}>
+      <p className={clsx(styles['description'], 'my-4')}>
         <T id={'profileAndAccountsHintPart2'} />
       </p>
       <p className={styles['description']}>
@@ -41,7 +43,7 @@ const ThirdStep: FC<Props> = ({ setStep, image }) => {
 
       <ButtonRounded
         fill
-        className="w-full mt-4"
+        className="w-full mt-8"
         size="big"
         onClick={() => setStep(3)}
         testID={OnboardingSelectors.thirdStepNextButton}

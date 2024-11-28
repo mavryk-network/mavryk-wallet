@@ -37,7 +37,7 @@ const FirstStep: FC<Props> = ({ setStep, image }) => {
       </p>
       <ButtonRounded
         fill
-        className="w-full mt-4"
+        className="w-full mt-8"
         size="big"
         onClick={() => setStep(1)}
         testID={OnboardingSelectors.firstStepNextButton}

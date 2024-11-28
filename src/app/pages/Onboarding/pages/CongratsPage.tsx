@@ -30,31 +30,31 @@ const CongratsPage: FC = () => {
       <p className={styles['title']} {...setTestID(OnboardingSelectors.congratsText)}>
         <T id={'welcomeOnboard'} />
       </p>
-      <p className={styles['description']}>
+      <p className={clsx(styles['description'], 'mb-4')}>
         <T id={'welcomeOnboardDetailsPart1'} />
       </p>
-      <p className={styles['description']}>
+      <p className={clsx(styles['description'], 'mb-4')}>
         <T id={'welcomeOnboardDetailsPart2'} />
       </p>
-      <p className={styles['description']}>
+      <p className={clsx(styles['description'])}>
         <T id={'welcomeOnboardDetailsPart3'} />
       </p>
 
       <div className="my-6">
-        <p className={clsx(styles['description'], 'text-center flex justify-center')}>
+        <p className={clsx(styles['description'], 'text-center flex justify-center mb-4')}>
           <T id={'joinCommunity'} />
         </p>
         <div className="flex justify-center">
           <CongratsSocials />
         </div>
       </div>
-      <p className={clsx(styles['description'], 'text-center flex justify-center mt-6')}>
+      <p className={clsx(styles['description'], 'text-center flex justify-center')}>
         <T id={'goodLuckMsg'} />
       </p>
 
       <ButtonRounded
         fill
-        className="w-full mt-4"
+        className="w-full mt-8"
         size="big"
         onClick={handleGetStartedClick}
         testID={OnboardingSelectors.congratsStartButton}

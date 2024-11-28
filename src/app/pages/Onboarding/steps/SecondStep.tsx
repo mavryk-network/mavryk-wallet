@@ -1,5 +1,7 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
@@ -22,7 +24,7 @@ const SecondStep: FC<Props> = ({ setStep, image }) => {
       <p className={styles['title']} {...setTestID(OnboardingSelectors.secondStepText)}>
         <T id={'tokensRwasNFTs'} />
       </p>
-      <p className={styles['description']}>
+      <p className={clsx(styles['description'], 'mb-4')}>
         <T id={'tokensDescPart1'} />
       </p>
       <p className={styles['description']}>
@@ -37,7 +39,7 @@ const SecondStep: FC<Props> = ({ setStep, image }) => {
 
       <ButtonRounded
         fill
-        className="w-full mt-4"
+        className="w-full mt-8"
         size="big"
         onClick={() => setStep(2)}
         testID={OnboardingSelectors.secondStepNextButton}

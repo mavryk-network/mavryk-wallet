@@ -143,7 +143,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination.address]} />}
+          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination?.address ?? 'unkwonn']} />}
         />
       );
     case HistoryItemOpTypeEnum.Reveal:
@@ -159,6 +159,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
     case HistoryItemOpTypeEnum.Other:
     default:
       const opOther = item as HistoryItemOtherOp;
+
       const titleNode = opOther.name
         ? opOther.name
             .split('_')

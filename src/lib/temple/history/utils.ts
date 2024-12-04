@@ -332,11 +332,12 @@ function deriveHistoryItemStatus(items: { status: HistoryItemStatus }[]): Histor
 }
 
 function deriveHistoryItemType(
-  items: IndividualHistoryItem[],
+  items: IndividualHistoryItem[], // [5, 2]
   address: string,
-  firstOperation: TzktOperation
+  firstOperation: TzktOperation // 5
 ): HistoryItemOpTypeEnum {
   let type = HistoryItemOpTypeEnum.Other;
+
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
   // Is Delegation operation
@@ -348,16 +349,19 @@ function deriveHistoryItemType(
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       return HistoryItemOpTypeEnum.Swap;
     } else {
+      // has already type from HistoryItemOpTypeEnum (only firstOperation has original api data)
       const item = items[0];
 
       if (items.some(item => item.entrypoint === 'placeSellOrder' || item.entrypoint === 'placeBuyOrder')) {
         return HistoryItemOpTypeEnum.Multiple;
       }
 
-      if (isZero(item.amountSigned)) {
+      if (isZero(item.amountSigned) && item.entrypoint !== undefined) {
         return HistoryItemOpTypeEnum.Interaction;
       }
-      if (item.source.address === address) {
+
+      // check if sender address is the source address and if type if transaction
+      if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo) {
         return HistoryItemOpTypeEnum.TransferTo;
       }
 

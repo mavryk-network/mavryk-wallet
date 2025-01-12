@@ -195,6 +195,7 @@ export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
 export const isRwa = (metadata: Record<string, any>) =>
+  // TODO update hardcoded logic to be dynamic one
   'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
 
 /**

@@ -1,5 +1,6 @@
 import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
 import * as TZKT from 'lib/apis/tzkt';
+import { fetchGetAccountOperationByHash } from 'lib/apis/tzkt/api';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { detectTokenStandard } from 'lib/assets/standards';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
@@ -10,6 +11,14 @@ import type { UserHistoryItem, OperationsGroup } from './types';
 import { operationsGroupToHistoryItem } from './utils';
 
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
+
+export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
+  const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
+
+  const groups = await fetchOperGroupsForOperations(chainId, operations);
+  const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
+  return arr;
+}
 
 export default async function fetchUserHistory(
   chainId: TzktApiChainId,

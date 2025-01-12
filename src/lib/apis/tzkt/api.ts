@@ -79,6 +79,11 @@ type GetOperationsBaseParams = {
   [key in `initiator${'' | '.ne'}`]?: string;
 };
 
+export const fetchGetAccountOperationByHash = (chainId: TzktApiChainId, accountAddress: string, hash: string) =>
+  fetchGet<TzktOperation[]>(chainId, `/accounts/${accountAddress}/operations`, {
+    'parameter.hash': hash
+  });
+
 export const fetchGetAccountOperations = (
   chainId: TzktApiChainId,
   accountAddress: string,

@@ -1,6 +1,7 @@
-import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
+import _ from 'lodash';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { SyncSpinner } from 'app/atoms';
@@ -10,8 +11,9 @@ import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
 import { T } from 'lib/i18n/react';
-import { useAccount } from 'lib/temple/front';
+import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
+import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import useHistory from '../../../lib/temple/history/hook';
@@ -28,6 +30,7 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from '../So
 import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
+
 // import { txMocked, StakedMock } from './mock';
 
 const INITIAL_NUMBER = 30;
@@ -56,6 +59,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     scrollableTarget
   }) => {
     const { popup } = useAppEnv();
+    const chainId = useChainId();
     const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
 
     const { publicKeyHash: accountAddress } = useAccount();
@@ -64,6 +68,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // sort
     const [filterOptions, setFilterOptions] = useState<HistoryItemOpTypeEnum[]>([]);
+    // op35P1ZyZffwgNCJqaRx7wBrAUa3WgUDuCmD1fzbGDQhPstVynr
 
     // Sort popup options
     // in this case we will filter history by selected option
@@ -181,15 +186,60 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // search
     const [searchValue, setSearchValue] = useState('');
-    // const [searchFocused, setSearchFocused] = useState(false);
+    // using debounce set new name after 450 ms to filter estates data
+    const [searchValueForFilter, setSearchValueForFilter] = useState('');
+
+    const sendRequest = useCallback((hash: string) => {
+      setSearchValueForFilter(hash);
+    }, []);
+
+    const clearInput = useCallback(() => {
+      setSearchValue('');
+      sendRequest('');
+    }, [sendRequest]);
+
+    // debounced diltering when srching estate by name
+    const handleDebouncedSearch = useMemo(() => {
+      return _.debounce(sendRequest, 450);
+    }, [sendRequest]);
+
+    useEffect(() => {
+      return () => {
+        handleDebouncedSearch.cancel();
+      };
+    }, [handleDebouncedSearch]);
+
+    const onChange = useCallback(
+      (value: string) => {
+        // state is updated on every value change, so input will work
+        setSearchValue(value);
+
+        // call debounced request here
+        handleDebouncedSearch(value);
+      },
+      [handleDebouncedSearch]
+    );
+
+    // useEffect(() => {
+    //   async function execute() {
+    //     const arr = await fetchUserOperationByHash(
+    //       chainId,
+    //       accountAddress,
+    //       'ooFBHpmXZ1QM4pSx7vdAvCNwsG9N8fg6Bw289djW1dhQLoLCffB'
+    //     );
+    //     console.log(arr, 'fetched arr');
+    //   }
+
+    //   execute();
+    // }, [searchValue, chainId, accountAddress]);
 
     // popup
     const [isOpen, setIsOpen] = useState(false);
     const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
 
     const filteredBySearchHistory = useMemo(
-      () => (userHistory ? userHistory.filter(op => op.hash.includes(searchValue)) : []),
-      [searchValue, userHistory]
+      () => (userHistory ? userHistory.filter(op => op.hash.includes(searchValueForFilter)) : []),
+      [searchValueForFilter, userHistory]
     );
 
     const filteredHistory = filterTransactionHistory(filteredBySearchHistory, filterOptions);
@@ -231,7 +281,8 @@ export const HistoryComponent: React.FC<Props> = memo(
                 >
                   <SearchExplorerFinder
                     value={searchValue}
-                    onValueChange={setSearchValue}
+                    onValueChange={onChange}
+                    cleanButtonCb={clearInput}
                     containerClassName="mr-2"
                     className={classNames(theme === DARK_LIGHT_THEME && styles.inputBgDarkLight)}
                     cleanButtonStyle={searchbtnStyles}

@@ -15,6 +15,7 @@ import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
+import { isKnownChainId } from 'lib/temple/types';
 
 import useHistory from '../../../lib/temple/history/hook';
 import {
@@ -60,15 +61,23 @@ export const HistoryComponent: React.FC<Props> = memo(
   }) => {
     const { popup } = useAppEnv();
     const chainId = useChainId();
-    const { loading, reachedTheEnd, list: userHistory, loadMore } = useHistory(INITIAL_NUMBER, assetSlug);
+    const {
+      loading: userHistoryLoading,
+      reachedTheEnd,
+      list: userHistory,
+      loadMore
+    } = useHistory(INITIAL_NUMBER, assetSlug);
 
     const { publicKeyHash: accountAddress } = useAccount();
 
     // useLoadPartnersPromo();
 
+    const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);
+    const [isSearchingByHash, setIsSearchingByHash] = useState(false);
+
+    const loading = userHistoryLoading || isSearchingByHash;
     // sort
     const [filterOptions, setFilterOptions] = useState<HistoryItemOpTypeEnum[]>([]);
-    // op35P1ZyZffwgNCJqaRx7wBrAUa3WgUDuCmD1fzbGDQhPstVynr
 
     // Sort popup options
     // in this case we will filter history by selected option
@@ -184,7 +193,7 @@ export const HistoryComponent: React.FC<Props> = memo(
       [filterOptions]
     );
 
-    // search
+    // debounced search ****************************************************
     const [searchValue, setSearchValue] = useState('');
     // using debounce set new name after 450 ms to filter estates data
     const [searchValueForFilter, setSearchValueForFilter] = useState('');
@@ -220,29 +229,34 @@ export const HistoryComponent: React.FC<Props> = memo(
       [handleDebouncedSearch]
     );
 
-    // useEffect(() => {
-    //   async function execute() {
-    //     const arr = await fetchUserOperationByHash(
-    //       chainId,
-    //       accountAddress,
-    //       'ooFBHpmXZ1QM4pSx7vdAvCNwsG9N8fg6Bw289djW1dhQLoLCffB'
-    //     );
-    //     console.log(arr, 'fetched arr');
-    //   }
+    // end of debounced search ****************************************************
 
-    //   execute();
-    // }, [searchValue, chainId, accountAddress]);
+    // fetch single user operation by entered search value
+    useEffect(() => {
+      async function fetchOperationData() {
+        setIsSearchingByHash(true);
+        if (chainId && isKnownChainId(chainId)) {
+          try {
+            const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter);
+            setIsSearchingByHash(false);
 
-    // popup
+            setFilteredHistory(arr);
+          } catch (e) {
+            console.log(e);
+            setFilteredHistory([]);
+            setIsSearchingByHash(false);
+          }
+        } else {
+          setIsSearchingByHash(false);
+        }
+      }
+
+      fetchOperationData();
+    }, [searchValueForFilter, chainId, accountAddress]);
+
+    // popup states
     const [isOpen, setIsOpen] = useState(false);
     const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
-
-    const filteredBySearchHistory = useMemo(
-      () => (userHistory ? userHistory.filter(op => op.hash.includes(searchValueForFilter)) : []),
-      [searchValueForFilter, userHistory]
-    );
-
-    const filteredHistory = filterTransactionHistory(filteredBySearchHistory, filterOptions);
 
     const handleRequestClose = useCallback(() => {
       setIsOpen(false);
@@ -251,20 +265,29 @@ export const HistoryComponent: React.FC<Props> = memo(
     const handleItemClick = useCallback(
       (hash: string) => {
         setIsOpen(true);
-
-        setActiveHistoryItem(filteredHistory.find(item => item.hash === hash) ?? null);
+        const activeHistory = searchValue.length > 0 ? filteredHistory : userHistory;
+        setActiveHistoryItem(activeHistory.find(item => item.hash === hash) ?? null);
       },
-      [filteredHistory]
+      [filteredHistory, searchValue.length, userHistory]
     );
 
     const retryInitialLoad = () => loadMore(INITIAL_NUMBER);
     const loadMoreActivities = () => loadMore(LOAD_STEP);
 
-    const loadNext = userHistory.length === 0 ? retryInitialLoad : loadMoreActivities;
+    // check for searchValue to not load history if search is active
+    const loadNext =
+      searchValue.length !== 0 ? () => {} : userHistory.length === 0 ? retryInitialLoad : loadMoreActivities;
 
     const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
 
     const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
+
+    const historyToshow = useMemo(
+      () =>
+        searchValueForFilter.length !== 0 ? filteredHistory : filterTransactionHistory(userHistory, filterOptions),
+      [filterOptions, filteredHistory, searchValueForFilter.length, userHistory]
+    );
+
     return (
       <div className={classNames('w-full mx-auto h-full relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
         <div className={classNames('mt-3 w-full mx-4')}>
@@ -315,7 +338,7 @@ export const HistoryComponent: React.FC<Props> = memo(
           </SearchExplorer>
         </div>
 
-        {!filteredHistory.length && !loading ? (
+        {!historyToshow.length && !loading ? (
           <div
             className={classNames('h-full my-auto py-16', 'flex flex-col items-center justify-center', 'text-white')}
           >
@@ -340,7 +363,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                 </div>
               }
             >
-              {filteredHistory.map(historyItem => (
+              {historyToshow.map(historyItem => (
                 <Fragment key={historyItem.hash}>
                   <HistoryItem
                     address={accountAddress}

@@ -79,10 +79,19 @@ type GetOperationsBaseParams = {
   [key in `initiator${'' | '.ne'}`]?: string;
 };
 
-export const fetchGetAccountOperationByHash = (chainId: TzktApiChainId, accountAddress: string, hash: string) =>
-  fetchGet<TzktOperation[]>(chainId, `/accounts/${accountAddress}/operations`, {
-    'parameter.hash': hash
-  });
+export const fetchGetAccountOperationByHash = async (chainId: TzktApiChainId, accountAddress: string, hash: string) => {
+  try {
+    // fetching operation from /operations, cuz parameter filter doesnt work on account operations
+    // example -> /accounts/{address}/operation?parameter.hash={hash} -> wont work
+    const [operation] = await fetchGetOperationsByHash(chainId, hash);
+
+    return fetchGet<TzktOperation[]>(chainId, `/accounts/${accountAddress}/operations`, {
+      level: operation.level
+    });
+  } catch (e) {
+    throw e;
+  }
+};
 
 export const fetchGetAccountOperations = (
   chainId: TzktApiChainId,

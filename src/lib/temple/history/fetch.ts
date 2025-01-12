@@ -13,11 +13,15 @@ import { operationsGroupToHistoryItem } from './utils';
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
 export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
-  const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
+  try {
+    const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
 
-  const groups = await fetchOperGroupsForOperations(chainId, operations);
-  const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
-  return arr;
+    const groups = await fetchOperGroupsForOperations(chainId, operations);
+    const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
+    return arr;
+  } catch (e) {
+    throw e;
+  }
 }
 
 export default async function fetchUserHistory(

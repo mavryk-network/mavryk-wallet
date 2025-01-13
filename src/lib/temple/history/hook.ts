@@ -7,6 +7,20 @@ import { UserHistoryItem } from './types';
 
 type TLoading = 'init' | 'more' | false;
 
+// origination, delegation
+// transfer to -> transaction -> initiator -> me, entrypoint -> transfer
+// transfer from -> transaction -> target -> me, entrypoint -> transfer
+// interaction ******************
+
+//  transactiuon && if (isZero(item.amountSigned) && item.entrypoint !== undefined) {
+//         return HistoryItemOpTypeEnum.Interaction;
+//       }
+
+// ******************
+// reveal -> type -> reveal
+// swap -> entrypoint -> swap && transaction
+// other -> type === other || transaction &&  ???
+
 export default function useHistory(initialPseudoLimit: number, assetSlug?: string) {
   const tezos = useTezos();
   const chainId = useChainId(true);

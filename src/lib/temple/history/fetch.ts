@@ -178,6 +178,8 @@ async function fetchOperations_Any(
   return allOperations;
 }
 
+// incoming operations fetchers
+
 function fetchIncomingOperTransactions_Fa_1_2(
   chainId: TzktApiChainId,
   accountAddress: string,

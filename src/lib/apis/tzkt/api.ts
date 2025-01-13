@@ -79,8 +79,15 @@ type GetOperationsBaseParams = {
   [key in `initiator${'' | '.ne'}`]?: string;
 };
 
-export const fetchGetAccountOperationByHash = async (chainId: TzktApiChainId, accountAddress: string, hash: string) => {
+export const fetchGetAccountOperationByHash = async (
+  chainId: TzktApiChainId,
+  accountAddress: string,
+  hash: string | undefined
+) => {
   try {
+    if (!hash) {
+      throw new Error('No transaction hash is provided!');
+    }
     // fetching operation from /operations, cuz parameter filter doesnt work on account operations
     // example -> /accounts/{address}/operation?parameter.hash={hash} -> wont work
     const [operation] = await fetchGetOperationsByHash(chainId, hash);
@@ -89,7 +96,7 @@ export const fetchGetAccountOperationByHash = async (chainId: TzktApiChainId, ac
       level: operation.level
     });
   } catch (e) {
-    throw e;
+    throw new Error("Can't fetch transaction by hash");
   }
 };
 

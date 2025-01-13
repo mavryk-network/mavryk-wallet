@@ -161,7 +161,7 @@ function reduceOneTzktTransactionOperation(
 
       historyTxOp.assetSlug = toTokenSlug(tokenContractAddress, tokenId);
 
-      if (sender.address === address ?? !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
+      if (sender.address === address || !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.TransferTo;
       } else if (historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.Swap;
@@ -340,11 +340,12 @@ function deriveHistoryItemType(
 
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
-  // Is Delegation operation
   if (firstOperation.type === 'delegation') {
     return HistoryItemOpTypeEnum.Delegation;
   } else if (firstOperation.type === 'origination') {
     return HistoryItemOpTypeEnum.Origination;
+  } else if (firstOperation.type === 'reveal') {
+    return HistoryItemOpTypeEnum.Reveal;
   } else {
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       return HistoryItemOpTypeEnum.Swap;

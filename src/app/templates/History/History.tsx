@@ -32,8 +32,6 @@ import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 
-// import { txMocked, StakedMock } from './mock';
-
 const INITIAL_NUMBER = 30;
 const LOAD_STEP = 30;
 
@@ -47,8 +45,6 @@ interface Props {
   lastItemDividerClassName?: string;
   scrollableTarget?: string;
 }
-
-// const userHistory = [StakedMock];
 
 export const HistoryComponent: React.FC<Props> = memo(
   ({

@@ -74,6 +74,8 @@ export const HistoryComponent: React.FC<Props> = memo(
       [filterOptions, paramsRecord]
     );
 
+    console.log(historyFilterParams, 'historyFilterParams');
+
     // Sort popup options (used only for ui sort)
     // in this case we will filter history by selected option
     // the filter option array looks like this -> [0, 3, 5, 7] etc.

@@ -34,7 +34,9 @@ export default async function fetchUserHistory(
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
+
   // console.log('Logging operations in the fetchUserHistory function:', operations);
+  if (!operations.length) return [];
   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
   // console.log('Logging groups in the fetchUserHistory function:', groups);
   const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
@@ -101,14 +103,13 @@ const fetchOperations_TEZ = (
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  console.log(operationParams, 'fetchOperations_TEZ');
   return TZKT.fetchGetOperationsTransactions(chainId, {
     'anyof.sender.target.initiator': accountAddress,
     ...buildOlderThanParam(olderThan),
     limit: pseudoLimit,
+    ...operationParams,
     'sort.desc': 'id',
-    'amount.ne': '0',
-    ...operationParams
+    'amount.ne': '0'
   });
 };
 
@@ -119,15 +120,14 @@ const fetchOperations_Contract = (
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  console.log(operationParams, 'fetchOperations_Contract');
   return TZKT.fetchGetAccountOperations(chainId, accountAddress, {
     type: 'transaction',
     limit: pseudoLimit,
-    sort: 1,
     initiator: accountAddress,
     entrypoint: 'mintOrBurn',
+    ...operationParams,
     'level.lt': olderThan?.oldestOperation?.level,
-    ...operationParams
+    sort: 1
   });
 };
 
@@ -139,15 +139,14 @@ const fetchOperations_Token_Fa_1_2 = (
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  console.log(operationParams, 'fetchOperations_Token_Fa_1_2');
   return TZKT.fetchGetOperationsTransactions(chainId, {
-    limit: pseudoLimit,
     entrypoint: 'transfer',
-    'sort.desc': 'level',
     target: contractAddress,
     'parameter.in': `[{"from":"${accountAddress}"},{"to":"${accountAddress}"}]`,
-    'level.lt': olderThan?.oldestOperation?.level,
-    ...operationParams
+    ...operationParams,
+    limit: pseudoLimit,
+    'sort.desc': 'level',
+    'level.lt': olderThan?.oldestOperation?.level
   });
 };
 
@@ -160,15 +159,14 @@ const fetchOperations_Token_Fa_2 = (
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  console.log(operationParams, 'fetchOperations_Token_Fa_2');
   return TZKT.fetchGetOperationsTransactions(chainId, {
-    limit: pseudoLimit,
     entrypoint: 'transfer',
-    'sort.desc': 'level',
     target: contractAddress,
     'parameter.[*].in': `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`,
+    ...operationParams,
+    limit: pseudoLimit,
     'level.lt': olderThan?.oldestOperation?.level,
-    ...operationParams
+    'sort.desc': 'level'
   });
 };
 
@@ -179,16 +177,17 @@ async function fetchOperations_Any(
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) {
-  console.log(operationParams, 'fetchOperations_Any');
   const limit = pseudoLimit;
 
   const accOperations = await TZKT.fetchGetAccountOperations(chainId, accountAddress, {
     type: ['delegation', 'origination', 'transaction'],
     ...buildOlderThanParam(olderThan),
+    ...operationParams,
     limit,
-    sort: 1,
-    ...operationParams
+    sort: 1
   });
+
+  if (!accOperations.length) return [];
 
   let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
 

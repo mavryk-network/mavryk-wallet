@@ -70,12 +70,12 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
   title = <T id="sortBy" />
 }) => {
   const { popup } = useAppEnv();
-  const [selectedItem, setSelectedItem] = useState(() => items.find(i => i.selected) ?? items[0]);
+  const [selectedItem, setSelectedItem] = useState(() => items.find(i => i.selected));
   const [internalToggleValue, setInternalToggleValue] = useState(on);
   const { opened, close } = useSortPopup();
 
   const handleButtonClick = useCallback(() => {
-    selectedItem.onClick?.();
+    selectedItem?.onClick?.();
     if (internalToggleValue !== on) toggle?.();
     close();
   }, [selectedItem, internalToggleValue, on, toggle, close]);
@@ -104,7 +104,7 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
               item={item}
               handleOptionSelect={handleOptionSelect}
               alternativeLogic={alternativeLogic}
-              selectedItemId={selectedItem.id}
+              selectedItemId={selectedItem?.id}
             />
           ))}
         </ul>
@@ -136,7 +136,7 @@ type SortListItemProps = {
   item: SortListItemType;
   handleOptionSelect: (item: SortListItemType) => void;
   alternativeLogic: boolean;
-  selectedItemId: string;
+  selectedItemId: string | undefined;
 };
 const SortListItem: FC<SortListItemProps> = ({ item, alternativeLogic, handleOptionSelect, selectedItemId }) => {
   const { nameI18nKey, selected, disabled = false, onClick, id } = item;

@@ -1,11 +1,12 @@
+import { useMemo } from 'react';
+
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
+import usePrevious from 'lib/ui/hooks/usePrevious';
 
 import fetchUserHistory from './fetch';
 import { UserHistoryItem } from './types';
-import { useMemo } from 'react';
-import usePrevious from 'lib/ui/hooks/usePrevious';
 
 type TLoading = 'init' | 'more' | false;
 
@@ -58,6 +59,7 @@ export default function useHistory(
     const lastHistoryItem = historyItems[historyItems.length - 1];
 
     let newHistoryItems: UserHistoryItem[];
+
     try {
       newHistoryItems = await fetchUserHistory(
         chainId,

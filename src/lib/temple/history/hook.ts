@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
 import fetchUserHistory from './fetch';
 import { UserHistoryItem } from './types';
+import { useMemo } from 'react';
+import usePrevious from 'lib/ui/hooks/usePrevious';
 
 type TLoading = 'init' | 'more' | false;
 
@@ -40,12 +40,12 @@ export default function useHistory(
 
   const { stop: stopLoading, stopAndBuildChecker } = useStopper();
 
-  // const hasFilters = useMemo(
-  //   () => Boolean(operationParams) && Object.keys(operationParams).length !== 0,
-  //   [operationParams]
-  // );
+  const hasParameters = useMemo(
+    () => Boolean(operationParams) && typeof operationParams === 'object' && Object.keys(operationParams).length !== 0,
+    [operationParams]
+  );
 
-  // console.log(hasFilters, 'hasFilters', operationParams);
+  const originalHistory = usePrevious<UserHistoryItem[]>(userHistory, hasParameters);
 
   async function loadUserHistory(pseudoLimit: number, historyItems: UserHistoryItem[], shouldStop: () => boolean) {
     if (!isKnownChainId(chainId)) {
@@ -99,7 +99,20 @@ export default function useHistory(
     setReachedTheEnd(false);
 
     loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-  }, [chainId, accountAddress, assetSlug, operationParams]);
+  }, [chainId, accountAddress, assetSlug]);
+
+  useDidUpdate(() => {
+    if (hasParameters) {
+      setUserHistory([]);
+      setLoading('init');
+      setReachedTheEnd(false);
+
+      loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
+    } else {
+      setUserHistory(originalHistory ?? []);
+      setReachedTheEnd(false);
+    }
+  }, [hasParameters]);
 
   return {
     loading,

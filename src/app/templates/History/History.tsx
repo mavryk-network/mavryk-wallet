@@ -14,6 +14,7 @@ import { T } from 'lib/i18n/react';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
+import { createOpParams } from 'lib/temple/history/filterParams';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 import { isKnownChainId } from 'lib/temple/types';
 
@@ -56,29 +57,28 @@ export const HistoryComponent: React.FC<Props> = memo(
     scrollableTarget
   }) => {
     const { popup } = useAppEnv();
-    const chainId = useChainId();
-    const {
-      loading: userHistoryLoading,
-      reachedTheEnd,
-      list: userHistory,
-      loadMore
-    } = useHistory(INITIAL_NUMBER, assetSlug);
-
     const { publicKeyHash: accountAddress } = useAccount();
+    const chainId = useChainId();
 
-    // useLoadPartnersPromo();
-
-    const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);
-    const [isSearchingByHash, setIsSearchingByHash] = useState(false);
-
-    const loading = userHistoryLoading || isSearchingByHash;
-    // sort
+    // factory method to create params object for api calls
+    const paramsRecord = useMemo(() => createOpParams(accountAddress), [accountAddress]);
+    // sort [0, 1, 2]
     const [filterOptions, setFilterOptions] = useState<HistoryItemOpTypeEnum[]>([]);
 
-    // Sort popup options
+    const historyFilterParams = useMemo(
+      () =>
+        filterOptions.reduce((acc, item) => {
+          acc = { ...acc, ...paramsRecord[item] };
+          return acc;
+        }, {}),
+      [filterOptions, paramsRecord]
+    );
+
+    // Sort popup options (used only for ui sort)
     // in this case we will filter history by selected option
     // the filter option array looks like this -> [0, 3, 5, 7] etc.
     // it filters history based on type
+
     const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
       () => [
         {
@@ -189,6 +189,20 @@ export const HistoryComponent: React.FC<Props> = memo(
       [filterOptions]
     );
 
+    const {
+      loading: userHistoryLoading,
+      reachedTheEnd,
+      list: userHistory,
+      loadMore
+    } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams);
+
+    // useLoadPartnersPromo();
+
+    const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);
+    const [isSearchingByHash, setIsSearchingByHash] = useState(false);
+
+    const loading = userHistoryLoading || isSearchingByHash;
+
     // debounced search ****************************************************
     const [searchValue, setSearchValue] = useState('');
     // using debounce set new name after 450 ms to filter estates data
@@ -231,7 +245,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     useEffect(() => {
       async function fetchOperationData() {
         setIsSearchingByHash(true);
-        if (chainId && isKnownChainId(chainId)) {
+        if (chainId && isKnownChainId(chainId) && searchValueForFilter !== '') {
           try {
             const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter);
             setIsSearchingByHash(false);
@@ -279,9 +293,8 @@ export const HistoryComponent: React.FC<Props> = memo(
     const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
 
     const historyToshow = useMemo(
-      () =>
-        searchValueForFilter.length !== 0 ? filteredHistory : filterTransactionHistory(userHistory, filterOptions),
-      [filterOptions, filteredHistory, searchValueForFilter.length, userHistory]
+      () => (searchValueForFilter.length !== 0 ? filteredHistory : userHistory),
+      [filteredHistory, searchValueForFilter.length, userHistory]
     );
 
     return (

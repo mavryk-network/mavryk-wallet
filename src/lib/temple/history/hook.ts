@@ -1,4 +1,6 @@
-import { isKnownChainId } from 'lib/apis/tzkt/api';
+import { useMemo } from 'react';
+
+import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
@@ -21,7 +23,11 @@ type TLoading = 'init' | 'more' | false;
 // swap -> entrypoint -> swap && transaction
 // other -> type === other || transaction &&  ???
 
-export default function useHistory(initialPseudoLimit: number, assetSlug?: string) {
+export default function useHistory(
+  initialPseudoLimit: number,
+  assetSlug?: string,
+  operationParams?: GetOperationsTransactionsParams
+) {
   const tezos = useTezos();
   const chainId = useChainId(true);
   const account = useAccount();
@@ -33,6 +39,13 @@ export default function useHistory(initialPseudoLimit: number, assetSlug?: strin
   const [reachedTheEnd, setReachedTheEnd] = useSafeState(false);
 
   const { stop: stopLoading, stopAndBuildChecker } = useStopper();
+
+  // const hasFilters = useMemo(
+  //   () => Boolean(operationParams) && Object.keys(operationParams).length !== 0,
+  //   [operationParams]
+  // );
+
+  // console.log(hasFilters, 'hasFilters', operationParams);
 
   async function loadUserHistory(pseudoLimit: number, historyItems: UserHistoryItem[], shouldStop: () => boolean) {
     if (!isKnownChainId(chainId)) {
@@ -46,7 +59,15 @@ export default function useHistory(initialPseudoLimit: number, assetSlug?: strin
 
     let newHistoryItems: UserHistoryItem[];
     try {
-      newHistoryItems = await fetchUserHistory(chainId, account, assetSlug, pseudoLimit, tezos, lastHistoryItem);
+      newHistoryItems = await fetchUserHistory(
+        chainId,
+        account,
+        assetSlug,
+        pseudoLimit,
+        tezos,
+        lastHistoryItem,
+        operationParams
+      );
       // console.log('Logging user history in the History Hook:', newHistoryItems);
       if (shouldStop()) return;
     } catch (error) {
@@ -55,7 +76,6 @@ export default function useHistory(initialPseudoLimit: number, assetSlug?: strin
       console.error('Logging error in History Hook after fetching history items:', error);
       return;
     }
-
     setUserHistory(historyItems.concat(newHistoryItems));
     setLoading(false);
     if (newHistoryItems.length === 0) setReachedTheEnd(true);
@@ -79,7 +99,7 @@ export default function useHistory(initialPseudoLimit: number, assetSlug?: strin
     setReachedTheEnd(false);
 
     loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-  }, [chainId, accountAddress, assetSlug]);
+  }, [chainId, accountAddress, assetSlug, operationParams]);
 
   return {
     loading,

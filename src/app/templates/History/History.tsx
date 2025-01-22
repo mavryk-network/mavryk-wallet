@@ -74,8 +74,6 @@ export const HistoryComponent: React.FC<Props> = memo(
       [filterOptions, paramsRecord]
     );
 
-    console.log(filterOptions, 'filterOptions');
-
     // Sort popup options (used only for ui sort)
     // in this case we will filter history by selected option
     // the filter option array looks like this -> [0, 3, 5, 7] etc.
@@ -86,104 +84,48 @@ export const HistoryComponent: React.FC<Props> = memo(
         {
           id: HistoryItemOpTypeEnum.Delegation.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Delegation),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Delegation);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Delegation)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Delegation];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'delegation'
         },
         {
           id: HistoryItemOpTypeEnum.Interaction.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Interaction),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Interaction);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Interaction)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Interaction];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'interaction'
         },
         {
           id: HistoryItemOpTypeEnum.Origination.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Origination),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Origination);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Origination)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Origination];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'origination'
         },
         {
           id: HistoryItemOpTypeEnum.Reveal.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Reveal),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Reveal);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Reveal)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Reveal];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'reveal'
         },
         {
           id: HistoryItemOpTypeEnum.Swap.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Swap),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Swap);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Swap)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Swap];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'swap'
         },
         {
           id: HistoryItemOpTypeEnum.TransferFrom.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.TransferFrom),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.TransferFrom);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.TransferFrom)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.TransferFrom];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'transferFrom'
         },
         {
           id: HistoryItemOpTypeEnum.TransferTo.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.TransferTo),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.TransferTo);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.TransferTo)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.TransferTo];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'transferTo'
         },
         {
           id: HistoryItemOpTypeEnum.Other.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Other),
-          // onClick: () => {
-          //   const isSelected = filterOptions.includes(HistoryItemOpTypeEnum.Other);
-          //   const newFllteredOptions = isSelected
-          //     ? filterOptions.filter(op => op !== HistoryItemOpTypeEnum.Other)
-          //     : [...filterOptions, HistoryItemOpTypeEnum.Other];
-          //   setFilterOptions(newFllteredOptions);
-          // },
 
           nameI18nKey: 'other'
         }

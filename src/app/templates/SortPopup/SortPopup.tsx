@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, ReactNode, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -60,7 +60,10 @@ export const useSortPopup = () => {
   return ctx;
 };
 
-// Popup content
+/**
+ * default logic - when selecting an option it executes it imidiately (often used within popup)
+ * alternative logic - when selecting an option it wont execute it until u confirm it (more for desktop version)
+ */
 export const SortPopupContent: FC<SortPopupContentProps> = ({
   items,
   on,
@@ -131,39 +134,37 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
   );
 };
 
-// Popup content
-export const MultiSortPopupContent: FC<Omit<SortPopupContentProps, 'alternativeLogic'>> = ({
-  items,
-  on,
-  toggle,
-  title = <T id="sortBy" />
-}) => {
+// Milti select Popup content
+export const MultiSortPopupContent: FC<
+  Omit<SortPopupContentProps, 'alternativeLogic'> & { onFiltersUpdate: (ids: string[]) => void }
+> = ({ items, on, toggle, onFiltersUpdate, title = <T id="sortBy" /> }) => {
   const { popup } = useAppEnv();
-  const [isLoading, setIslLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Map<string, SortListItemType>>(() => new Map());
+  // handle toggle state inside popup
   const [internalToggleValue, setInternalToggleValue] = useState(on);
   const { opened, close } = useSortPopup();
 
-  const handleButtonClick = useCallback(async () => {
-    const onClickPromises = Array.from(selectedItems.values()).map(async item => {
-      if (item.onClick) {
-        if (typeof item.onClick === 'function') {
-          const callResult = item.onClick() as unknown as (() => Promise<unknown> | void) | undefined;
-          if (callResult instanceof Promise) {
-            setIslLoading(true);
-            await callResult;
-            setIslLoading(false);
-          }
-        }
-      }
+  const keepOriginalSelectedItemsAfterUpdate = useCallback(() => {
+    const originalSelectedItems = new Map();
+    items.forEach(item => {
+      item.selected && originalSelectedItems.set(item.id, item);
     });
 
-    // Wait for all onClick handlers to complete
-    await Promise.all(onClickPromises);
+    setSelectedItems(originalSelectedItems);
+  }, [items]);
+
+  const handleClose = useCallback(() => {
+    keepOriginalSelectedItemsAfterUpdate();
+    close();
+  }, [close, keepOriginalSelectedItemsAfterUpdate]);
+
+  const handleButtonClick = useCallback(async () => {
+    onFiltersUpdate(Array.from(selectedItems.keys()));
 
     if (internalToggleValue !== on) toggle?.();
+
     close();
-  }, [selectedItems, internalToggleValue, on, toggle, close]);
+  }, [onFiltersUpdate, selectedItems, internalToggleValue, on, toggle, close]);
 
   const handleOptionSelect = useCallback((item: SortListItemType) => {
     setSelectedItems(prevSelectedItems => {
@@ -184,11 +185,17 @@ export const MultiSortPopupContent: FC<Omit<SortPopupContentProps, 'alternativeL
     setInternalToggleValue(!internalToggleValue);
   }, [internalToggleValue]);
 
+  const clearOptions = useCallback(async () => {
+    setSelectedItems(new Map());
+    onFiltersUpdate([]);
+    close();
+  }, [onFiltersUpdate, close]);
+
   return (
     <PopupModalWithTitle
       isOpen={opened}
       contentPosition={popup ? 'bottom' : 'center'}
-      onRequestClose={close}
+      onRequestClose={handleClose}
       title={title}
       portalClassName="sort-popup"
     >
@@ -217,14 +224,11 @@ export const MultiSortPopupContent: FC<Omit<SortPopupContentProps, 'alternativeL
         </div>
       )}
 
-      <div className={classNames('mt-8', popup ? 'px-4' : 'px-12')}>
-        <ButtonRounded
-          size="big"
-          fill
-          onClick={handleButtonClick}
-          className={classNames('w-full')}
-          isLoading={isLoading}
-        >
+      <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', popup ? 'px-4' : 'px-12')}>
+        <ButtonRounded size="big" onClick={clearOptions} disabled={selectedItems.size === 0} fill={false}>
+          <T id="clean" />
+        </ButtonRounded>
+        <ButtonRounded size="big" fill onClick={handleButtonClick}>
           <T id="apply" />
         </ButtonRounded>
       </div>

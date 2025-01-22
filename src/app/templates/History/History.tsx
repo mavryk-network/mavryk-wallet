@@ -27,7 +27,7 @@ import {
   SearchExplorerOpened,
   SearchExplorerCloseBtn
 } from '../SearchExplorer';
-import { SortButton, SortListItemType, SortPopup, SortPopupContent } from '../SortPopup';
+import { MultiSortPopupContent, SortButton, SortListItemType, SortPopup } from '../SortPopup';
 
 import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
@@ -339,7 +339,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 
                   <SortPopup>
                     <SortButton className={classNames(loading && 'opacity-50 pointer-events-none')} />
-                    <SortPopupContent items={memoizedSortAssetsOptions} title={<T id="filterBy" />} />
+                    <MultiSortPopupContent items={memoizedSortAssetsOptions} title={<T id="filterBy" />} />
                   </SortPopup>
 
                   {showRestOfSearchSectionOptions && <ManageAssetsButton />}
@@ -407,7 +407,3 @@ const buildOnScroll =
     const atBottom = 0 === elem.offsetHeight - elem.clientHeight - elem.scrollTop;
     if (atBottom) next();
   };
-
-const filterTransactionHistory = (history: UserHistoryItem[], options: HistoryItemOpTypeEnum[]) => {
-  return !options.length ? history : history.filter(op => options.includes(op.type));
-};

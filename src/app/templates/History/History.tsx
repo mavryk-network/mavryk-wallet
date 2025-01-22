@@ -208,8 +208,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);
     const [isSearchingByHash, setIsSearchingByHash] = useState(false);
 
-    // const loading = userHistoryLoading || isSearchingByHash;
-    const loading = false;
+    const loading = userHistoryLoading || isSearchingByHash;
 
     // debounced search ****************************************************
     const [searchValue, setSearchValue] = useState('');

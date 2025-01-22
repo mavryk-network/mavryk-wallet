@@ -139,7 +139,15 @@ export const MultiSortPopupContent: FC<
   Omit<SortPopupContentProps, 'alternativeLogic'> & { onFiltersUpdate: (ids: string[]) => void }
 > = ({ items, on, toggle, onFiltersUpdate, title = <T id="sortBy" /> }) => {
   const { popup } = useAppEnv();
-  const [selectedItems, setSelectedItems] = useState<Map<string, SortListItemType>>(() => new Map());
+  const [selectedItems, setSelectedItems] = useState<Map<string, SortListItemType>>(() => {
+    const originalSelectedItems = new Map();
+
+    items.forEach(item => {
+      item.selected && originalSelectedItems.set(item.id, item);
+    });
+
+    return originalSelectedItems;
+  });
   // handle toggle state inside popup
   const [internalToggleValue, setInternalToggleValue] = useState(on);
   const { opened, close } = useSortPopup();

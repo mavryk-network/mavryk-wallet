@@ -29,6 +29,7 @@ export default function useHistory(
   assetSlug?: string,
   operationParams?: GetOperationsTransactionsParams
 ) {
+  console.log(operationParams, 'operationParams');
   const tezos = useTezos();
   const chainId = useChainId(true);
   const account = useAccount();
@@ -101,7 +102,7 @@ export default function useHistory(
     setReachedTheEnd(false);
 
     loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-  }, [chainId, accountAddress, assetSlug]);
+  }, [chainId, accountAddress, assetSlug, operationParams]);
 
   useDidUpdate(() => {
     if (hasParameters) {

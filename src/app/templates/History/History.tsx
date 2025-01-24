@@ -14,7 +14,7 @@ import { T } from 'lib/i18n/react';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
-import { createOpParams } from 'lib/temple/history/filterParams';
+import { createOpParams, mergeOpParams } from 'lib/temple/history/filterParams';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 import { isKnownChainId } from 'lib/temple/types';
 
@@ -67,8 +67,8 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     const historyFilterParams = useMemo(
       () =>
-        filterOptions.reduce((acc, item) => {
-          acc = { ...acc, ...paramsRecord[item] };
+        filterOptions.reduce<StringRecord<string | number>>((acc, item) => {
+          acc = mergeOpParams(acc, paramsRecord[item]);
           return acc;
         }, {}),
       [filterOptions, paramsRecord]
@@ -144,6 +144,8 @@ export const HistoryComponent: React.FC<Props> = memo(
       list: userHistory,
       loadMore
     } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams);
+
+    console.log(userHistory, 'userHistory');
 
     // useLoadPartnersPromo();
 

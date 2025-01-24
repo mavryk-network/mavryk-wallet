@@ -29,7 +29,6 @@ export default function useHistory(
   assetSlug?: string,
   operationParams?: GetOperationsTransactionsParams
 ) {
-  console.log(operationParams, 'operationParams');
   const tezos = useTezos();
   const chainId = useChainId(true);
   const account = useAccount();

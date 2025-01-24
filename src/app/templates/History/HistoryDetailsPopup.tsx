@@ -55,9 +55,12 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
   const slugs = getAssetsFromOperations(historyItem);
-  const tokensMetadata = useMultipleAssetsMetadata([
-    ...new Set([slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)))
-  ]);
+  const slugsForMultiple = useMemo(
+    () => [...new Set([slugs[0], slugs[slugs.length - 1]].filter(s => Boolean(s)))],
+    [slugs]
+  );
+
+  const tokensMetadata = useMultipleAssetsMetadata(slugsForMultiple);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
@@ -125,8 +128,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const slugsMetadataRecord = useMemo(
     () =>
       tokensMetadata && isMultipleOperation
-        ? tokensMetadata?.reduce<Record<string, AssetMetadataBase>>((acc, meta) => {
-            if (!meta.address) return acc;
+        ? tokensMetadata.reduce<Record<string, AssetMetadataBase>>((acc, meta) => {
+            if (!meta || !meta.address) return acc;
 
             const slug = tokenToSlug({ address: meta.address });
             acc[slug] = meta;
@@ -189,7 +192,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </div>
           </CardContainer>
         )}
-        {isMultipleOperation && tokensMetadata && (
+        {isMultipleOperation && tokensMetadata && tokensMetadata.length > 0 && (
           <CardContainer className="mb-6">
             <div className="flex flex-col gap-y-3">
               {Object.entries(multipleAssetsData).map(([slug, diff]) => {

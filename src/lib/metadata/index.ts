@@ -63,10 +63,12 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
   }
 
   /// @ts-expect-error
-  return slugs.map(s => {
-    if (isTezAsset(s)) return gasMetadata;
-    return metadata.get(s);
-  });
+  return slugs
+    .map(s => {
+      if (isTezAsset(s)) return gasMetadata;
+      return metadata.get(s);
+    })
+    .filter(s => Boolean(s));
 };
 
 export type TokenMetadataGetter = (slug: string) => TokenMetadata | undefined;

@@ -35,7 +35,7 @@ export default async function fetchUserHistory(
 ): Promise<UserHistoryItem[]> {
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
 
-  // console.log('Logging operations in the fetchUserHistory function:', operations);
+  console.log('Logging operations in the fetchUserHistory function:', operations);
   if (!operations.length) return [];
   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
   // console.log('Logging groups in the fetchUserHistory function:', groups);
@@ -205,6 +205,8 @@ async function fetchOperations_Any(
     () => fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
     1000
   );
+
+  // const fa2OperationsTransactions = [];
 
   const allOperations = accOperations
     .concat(fa12OperationsTransactions, fa2OperationsTransactions)

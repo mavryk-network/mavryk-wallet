@@ -201,12 +201,14 @@ async function fetchOperations_Any(
     newerThen = fa12OperationsTransactions[accOperations.length - 1]?.timestamp;
   }
 
-  const fa2OperationsTransactions = await TZKT.refetchOnce429(
-    () => fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
-    1000
-  );
-
-  // const fa2OperationsTransactions = [];
+  let fa2OperationsTransactions: TzktOperation[] = [];
+  if (operationParams && Object.keys(operationParams).length === 0) {
+    fa2OperationsTransactions = await TZKT.refetchOnce429(
+      () =>
+        fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
+      1000
+    );
+  }
 
   const allOperations = accOperations
     .concat(fa12OperationsTransactions, fa2OperationsTransactions)

@@ -9,7 +9,8 @@ export const createOpParams = (accountAddress: string) => ({
   },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
     type: 'transaction', // wrong data for some reason
-    'entrypoint.ne': 'transfer'
+    'entrypoint.ne': 'transfer',
+    hasInternals: true
   },
   [HistoryItemOpTypeEnum.Reveal.toString()]: {
     type: 'reveal' // remove transactions
@@ -20,7 +21,8 @@ export const createOpParams = (accountAddress: string) => ({
   },
   [HistoryItemOpTypeEnum.TransferTo.toString()]: {
     type: 'transaction', // review query
-    'sender.eq': accountAddress
+    'sender.eq': accountAddress,
+    hasInternals: false
   },
   [HistoryItemOpTypeEnum.TransferFrom.toString()]: {
     type: 'transaction', // all good

@@ -115,29 +115,7 @@ export const build_Token_Fa_1_2OpParams = (
     'sort.desc': 'level'
   };
 
-  if (!operationParams || !Object.keys(operationParams).length) {
-    return defaultFa_1_2OpParams;
-  }
-
-  const internalOperationParams = { ...operationParams };
-
-  // this params will for to /transactions
-  // transaction request doesnt have type prop
-  delete internalOperationParams.type;
-  delete internalOperationParams.hasInternals;
-  // filter traget to get "received" transactions
-  if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
-  // used for interactions type
-  // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
-  if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
-    delete internalOperationParams['entrypoint.null'];
-
-    if (internalOperationParams.sender !== accountAddress) {
-      internalOperationParams.initiator = accountAddress;
-    }
-  }
-
-  return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
+  return getReturnedTransactionParams(accountAddress, defaultFa_1_2OpParams, operationParams);
 };
 
 export const build_Token_Fa_2OpParams = (
@@ -153,18 +131,23 @@ export const build_Token_Fa_2OpParams = (
     'sort.desc': 'level'
   };
 
+  return getReturnedTransactionParams(accountAddress, defaultFa_1_2OpParams, operationParams);
+};
+
+// helper function to return params for transactions
+const getReturnedTransactionParams = (
+  accountAddress: string,
+  defaultFa_1_2OpParams: GetOperationsTransactionsParams,
+  operationParams: GetOperationsTransactionsParams | undefined
+) => {
   if (!operationParams || !Object.keys(operationParams).length) {
     return defaultFa_1_2OpParams;
   }
 
   const internalOperationParams = { ...operationParams };
 
-  // this params will for to /transactions
-  // transaction request doesnt have type prop
-  delete internalOperationParams.type;
-  delete internalOperationParams.hasInternals;
-  // filter traget to get "received" transactions
-  if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
+  const hasBothTargetAndSender = Boolean(internalOperationParams.target) && Boolean(internalOperationParams.sender);
+
   // used for interactions type
   // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
   if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
@@ -174,6 +157,17 @@ export const build_Token_Fa_2OpParams = (
       internalOperationParams.initiator = accountAddress;
     }
   }
+
+  // this params will for to /transactions
+  // transaction request doesnt have type prop
+  delete internalOperationParams.type;
+  delete internalOperationParams.hasInternals;
+  // filter target to get "received" transactions
+  if (hasBothTargetAndSender) {
+    internalOperationParams['anyof.sender.target'] = accountAddress;
+    delete internalOperationParams.sender;
+    delete internalOperationParams.target;
+  } else if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
 
   return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
 };

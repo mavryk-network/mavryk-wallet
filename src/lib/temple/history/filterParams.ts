@@ -2,34 +2,38 @@ import { HistoryItemOpTypeEnum } from './types';
 
 export const createOpParams = (accountAddress: string) => ({
   [HistoryItemOpTypeEnum.Delegation.toString()]: {
-    type: 'delegation' // remove transactions
+    type: 'delegation'
   },
   [HistoryItemOpTypeEnum.Origination.toString()]: {
-    type: 'origination' // all good
+    type: 'origination',
+    hasInternals: false,
+    'parameter.originatedContract.null': false
   },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
-    type: 'transaction', // wrong data for some reason
-    'entrypoint.ne': 'transfer',
+    type: 'transaction',
+    'entrypoint.null': false,
     hasInternals: true
   },
   [HistoryItemOpTypeEnum.Reveal.toString()]: {
-    type: 'reveal' // remove transactions
+    type: 'reveal'
   },
   [HistoryItemOpTypeEnum.Swap.toString()]: {
-    type: 'transaction', // all good
+    type: 'transaction',
     entrypoint: 'swap'
   },
   [HistoryItemOpTypeEnum.TransferTo.toString()]: {
-    type: 'transaction', // review query
+    type: 'transaction',
     'sender.eq': accountAddress,
-    hasInternals: false
+    hasInternals: false,
+    'entrypoint.null': true
   },
   [HistoryItemOpTypeEnum.TransferFrom.toString()]: {
-    type: 'transaction', // all good
-    'target.eq': accountAddress
+    type: 'transaction',
+    'target.eq': accountAddress,
+    hasInternals: false
   },
   [HistoryItemOpTypeEnum.Other.toString()]: {
-    type: 'other' // all good
+    type: 'other'
   }
 });
 

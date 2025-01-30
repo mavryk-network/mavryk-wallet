@@ -155,8 +155,6 @@ export const HistoryComponent: React.FC<Props> = memo(
       loadMore
     } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams);
 
-    console.log(userHistory, 'userHistory');
-
     // useLoadPartnersPromo();
 
     const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);

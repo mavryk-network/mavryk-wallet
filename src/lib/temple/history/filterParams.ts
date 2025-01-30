@@ -1,6 +1,6 @@
-import { ExtendedGetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 
-import { HistoryItemOpTypeEnum } from './types';
+import { HistoryItemOpTypeEnum, OlderThanParams } from './types';
 
 export const createOpParams = (accountAddress: string): StringRecord<ExtendedGetOperationsTransactionsParams> => ({
   [HistoryItemOpTypeEnum.Delegation.toString()]: {
@@ -84,4 +84,20 @@ export const mergeOpParams = (
   }
 
   return mergedParams;
+};
+
+export const buildTEZOpParams = (
+  accountAddress: string,
+  operationParams: GetOperationsTransactionsParams | undefined
+): GetOperationsTransactionsParams => {
+  const hasAnyofSenderTargetInitiator = Object.keys(operationParams ?? {}).some(
+    key => key.startsWith('sender') || key.startsWith('target') || key.startsWith('initiator')
+  );
+
+  return {
+    ...(hasAnyofSenderTargetInitiator ? operationParams : { 'anyof.sender.target.initiator': accountAddress }),
+    ...operationParams,
+    'sort.desc': 'id',
+    'amount.ne': '0'
+  };
 };

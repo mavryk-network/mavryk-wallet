@@ -10,7 +10,7 @@ import { useAppEnv } from 'app/env';
 import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
-import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 import { T } from 'lib/i18n/react';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
@@ -68,7 +68,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     const historyFilterParams = useMemo(
       () =>
-        filterOptions.reduce<GetOperationsTransactionsParams>((acc, item) => {
+        filterOptions.reduce<ExtendedGetOperationsTransactionsParams>((acc, item) => {
           acc = mergeOpParams(acc, paramsRecord[item]);
           return acc;
         }, {}),

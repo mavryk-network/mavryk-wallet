@@ -133,6 +133,16 @@ export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
 } & { type?: TzktOperationType };
 
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  type?: TzktOperationType;
+  hasInternals?: boolean;
+  entrypoint?: string;
+  'entrypoint.null'?: boolean;
+  'parameter.originatedContract.null'?: boolean;
+  'sender.eq'?: string;
+  'target.eq'?: string;
+};
+
 export const fetchGetOperationsTransactions = (chainId: TzktApiChainId, params: GetOperationsTransactionsParams) =>
   fetchGet<TzktOperation[]>(chainId, `/operations/transactions`, params);
 

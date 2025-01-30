@@ -94,6 +94,7 @@ export const buildTEZOpParams = (
     key => key.startsWith('sender') || key.startsWith('target') || key.startsWith('initiator')
   );
 
+  // TODO only received fix
   return {
     ...(hasAnyofSenderTargetInitiator ? operationParams : { 'anyof.sender.target.initiator': accountAddress }),
     ...operationParams,
@@ -107,8 +108,6 @@ export const build_Token_Fa_1_2OpParams = (
   contractAddress: string,
   operationParams: GetOperationsTransactionsParams | undefined
 ): GetOperationsTransactionsParams => {
-  const parameterIn = [];
-
   const defaultFa_1_2OpParams: GetOperationsTransactionsParams = {
     entrypoint: 'transfer',
     target: contractAddress,
@@ -122,18 +121,20 @@ export const build_Token_Fa_1_2OpParams = (
 
   const internalOperationParams = { ...operationParams };
 
-  if (internalOperationParams['sender']) {
-    parameterIn.push({ from: internalOperationParams['sender'] });
-    delete internalOperationParams.sender;
-  }
+  // this params will for to /transactions
+  // transaction request doesnt have type prop
+  delete internalOperationParams.type;
+  delete internalOperationParams.hasInternals;
+  // filter traget to get "received" transactions
+  if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
+  // used for interactions type
+  // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
+  if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
+    delete internalOperationParams['entrypoint.null'];
 
-  if (internalOperationParams['target']) {
-    parameterIn.push({ to: internalOperationParams['target'] });
-    delete internalOperationParams.target;
-  }
-
-  if (parameterIn.length > 0) {
-    defaultFa_1_2OpParams['parameter.in'] = JSON.stringify(parameterIn);
+    if (internalOperationParams.sender !== accountAddress) {
+      internalOperationParams.initiator = accountAddress;
+    }
   }
 
   return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
@@ -145,8 +146,6 @@ export const build_Token_Fa_2OpParams = (
   tokenId: string | number,
   operationParams: GetOperationsTransactionsParams | undefined
 ): GetOperationsTransactionsParams => {
-  const parameterIn = [];
-
   const defaultFa_1_2OpParams: GetOperationsTransactionsParams = {
     entrypoint: 'transfer',
     target: contractAddress,
@@ -159,23 +158,20 @@ export const build_Token_Fa_2OpParams = (
   }
 
   const internalOperationParams = { ...operationParams };
-  const hasBothTargets = internalOperationParams['sender'] && internalOperationParams['target'];
 
-  if (!hasBothTargets) {
-    if (internalOperationParams['sender']) {
-      parameterIn.push({ from_: accountAddress, txs: [{ token_id: tokenId }] });
-      parameterIn.push({ txs: [{ token_id: tokenId }] });
-      delete internalOperationParams.sender;
-    }
+  // this params will for to /transactions
+  // transaction request doesnt have type prop
+  delete internalOperationParams.type;
+  delete internalOperationParams.hasInternals;
+  // filter traget to get "received" transactions
+  if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
+  // used for interactions type
+  // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
+  if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
+    delete internalOperationParams['entrypoint.null'];
 
-    if (internalOperationParams['target']) {
-      parameterIn.push({ txs: [{ token_id: tokenId }] });
-      parameterIn.push({ txs: [{ to_: accountAddress, token_id: tokenId }] });
-      delete internalOperationParams.target;
-    }
-
-    if (parameterIn.length > 0 && !hasBothTargets) {
-      defaultFa_1_2OpParams['parameter.[*].in'] = JSON.stringify(parameterIn);
+    if (internalOperationParams.sender !== accountAddress) {
+      internalOperationParams.initiator = accountAddress;
     }
   }
 

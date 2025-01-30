@@ -359,7 +359,7 @@ function deriveHistoryItemType(
         return HistoryItemOpTypeEnum.Multiple;
       }
 
-      if (isZero(item.amountSigned) && item.entrypoint !== undefined) {
+      if (item.entrypoint !== undefined && item.entrypoint !== 'transfer') {
         return HistoryItemOpTypeEnum.Interaction;
       }
 
@@ -368,7 +368,7 @@ function deriveHistoryItemType(
         return HistoryItemOpTypeEnum.TransferTo;
       }
 
-      if ('tokenTransfers' in item && item.tokenTransfers)
+      if ('tokenTransfers' in item && item.tokenTransfers && items.length === 1)
         if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
           return HistoryItemOpTypeEnum.TransferFrom;
         } else {

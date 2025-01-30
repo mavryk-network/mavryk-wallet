@@ -66,15 +66,6 @@ export const HistoryComponent: React.FC<Props> = memo(
     // sort [0, 1, 2]
     const [filterOptions, setFilterOptions] = useState<HistoryItemOpTypeEnum[]>([]);
 
-    const historyFilterParams = useMemo(
-      () =>
-        filterOptions.reduce<ExtendedGetOperationsTransactionsParams>((acc, item) => {
-          acc = mergeOpParams(acc, paramsRecord[item]);
-          return acc;
-        }, {}),
-      [filterOptions, paramsRecord]
-    );
-
     // Sort popup options (used only for ui sort)
     // in this case we will filter history by selected option
     // the filter option array looks like this -> [0, 3, 5, 7] etc.
@@ -133,6 +124,18 @@ export const HistoryComponent: React.FC<Props> = memo(
       ],
       [filterOptions]
     );
+
+    const historyFilterParams = useMemo(() => {
+      // do not apply filters if they are all selected, cuz its the same as non of them is selected
+      if (Object.keys(memoizedSortAssetsOptions).length === filterOptions.length) {
+        return {};
+      }
+
+      return filterOptions.reduce<ExtendedGetOperationsTransactionsParams>((acc, item) => {
+        acc = mergeOpParams(acc, paramsRecord[item]);
+        return acc;
+      }, {});
+    }, [filterOptions, memoizedSortAssetsOptions, paramsRecord]);
 
     const onFiltersUpdate = useCallback((items: string[]) => {
       const newFllteredOptions: HistoryItemOpTypeEnum[] = items.map(item => parseInt(item, 10));

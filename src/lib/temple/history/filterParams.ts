@@ -90,17 +90,35 @@ export const buildTEZOpParams = (
   accountAddress: string,
   operationParams: GetOperationsTransactionsParams | undefined
 ): GetOperationsTransactionsParams => {
-  const hasAnyofSenderTargetInitiator = Object.keys(operationParams ?? {}).some(
-    key => key.startsWith('sender') || key.startsWith('target') || key.startsWith('initiator')
-  );
-
-  // TODO only received fix
-  return {
-    ...(hasAnyofSenderTargetInitiator ? operationParams : { 'anyof.sender.target.initiator': accountAddress }),
-    ...operationParams,
+  const defaultTEZpParams: GetOperationsTransactionsParams = {
+    'anyof.sender.target.initiator': accountAddress,
     'sort.desc': 'id',
     'amount.ne': '0'
   };
+
+  if (!operationParams || !Object.keys(operationParams).length) {
+    return defaultTEZpParams;
+  }
+
+  const internalOperationParams = { ...operationParams };
+
+  const hasBothTargetAndSender = Boolean(internalOperationParams.target) && Boolean(internalOperationParams.sender);
+
+  delete internalOperationParams.type;
+  delete internalOperationParams.hasInternals;
+  delete defaultTEZpParams['anyof.sender.target.initiator'];
+
+  // filter target to get "received" transactions
+  if (hasBothTargetAndSender) {
+    internalOperationParams['anyof.sender.target'] = accountAddress;
+    delete internalOperationParams.sender;
+    delete internalOperationParams.target;
+    internalOperationParams['initiator.ne'] = accountAddress;
+  } else if (internalOperationParams.target) {
+    internalOperationParams['initiator.ne'] = accountAddress;
+  }
+
+  return mergeOpParams(defaultTEZpParams, internalOperationParams);
 };
 
 export const build_Token_Fa_1_2OpParams = (

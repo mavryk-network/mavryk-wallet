@@ -36,7 +36,7 @@ export default async function fetchUserHistory(
 ): Promise<UserHistoryItem[]> {
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
 
-  console.log('Logging operations in the fetchUserHistory function:', operations);
+  // console.log('Logging operations in the fetchUserHistory function:', operations);
   if (!operations.length) return [];
   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
   // console.log('Logging groups in the fetchUserHistory function:', groups);

@@ -2,6 +2,8 @@ import { EntrypointsResponse, RpcClient, RPCOptions } from '@mavrykdynamics/taqu
 import retry from 'async-retry';
 import memoizee from 'memoizee';
 
+import { TempleChainId } from 'lib/temple/types';
+
 import { makeCachedChainIdKey, getCachedChainId, setCachedChainId } from './chain-ids-cache';
 import { getCachedEntrypoints, setCachedEntrypoints } from './entrypoints-cache';
 
@@ -33,15 +35,21 @@ export class FastRpcClient extends RpcClient {
   private latestBlock?: LatestBlock;
 
   async getChainId() {
-    const cacheKey = makeCachedChainIdKey(this.url, this.chain);
+    try {
+      const cacheKey = makeCachedChainIdKey(this.url, this.chain);
 
-    const cached = getCachedChainId(cacheKey);
-    if (cached) return cached;
+      const cached = getCachedChainId(cacheKey);
+      if (cached) return cached;
 
-    const result = await this.getChainIdMemo();
-    setCachedChainId(cacheKey, result);
+      const result = await this.getChainIdMemo();
+      setCachedChainId(cacheKey, result);
 
-    return result;
+      return result;
+    } catch (e) {
+      console.error(e);
+      console.error('Failed to get chain ID, falling back to Taquito RPC client...');
+      return TempleChainId.Atlas;
+    }
   }
 
   /** Cache storage (localStorage) is not available in BG worker. */

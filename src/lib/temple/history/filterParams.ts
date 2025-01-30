@@ -1,6 +1,19 @@
+import { TzktOperationType } from 'lib/apis/tzkt';
+import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+
 import { HistoryItemOpTypeEnum } from './types';
 
-export const createOpParams = (accountAddress: string) => ({
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  type: TzktOperationType;
+  hasInternals?: boolean;
+  entrypoint?: string;
+  'entrypoint.null'?: boolean;
+  'parameter.originatedContract.null'?: boolean;
+  'sender.eq'?: string;
+  'target.eq'?: string;
+};
+
+export const createOpParams = (accountAddress: string): StringRecord<ExtendedGetOperationsTransactionsParams> => ({
   [HistoryItemOpTypeEnum.Delegation.toString()]: {
     type: 'delegation'
   },
@@ -37,14 +50,14 @@ export const createOpParams = (accountAddress: string) => ({
   }
 });
 
-export const mergeOpParams = (prevParams: StringRecord<string | number>, params: StringRecord<string | number>) => {
-  const mergedParams = { ...prevParams, ...params };
-
+export const mergeOpParams = (prevParams: GetOperationsTransactionsParams, params: GetOperationsTransactionsParams) => {
+  const mergedParams: GetOperationsTransactionsParams = { ...prevParams, ...params };
   // Merge `type` values if both exist
   if (prevParams.type && params.type) {
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
     mergedParams.type = Array.from(new Set(`${prevParams.type},${params.type}`.split(',').map(t => t.trim()))).join(
       ','
-    );
+    ) as ExtendedGetOperationsTransactionsParams['type'];
   }
 
   return mergedParams;

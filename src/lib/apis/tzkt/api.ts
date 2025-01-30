@@ -65,7 +65,7 @@ async function fetchGet<R>(chainId: TzktApiChainId, endpoint: string, params?: R
 type GetOperationsBaseParams = {
   limit?: number;
   offset?: number;
-  entrypoint?: 'transfer' | 'mintOrBurn';
+  entrypoint?: string;
   lastId?: number;
 } & {
   [key in `timestamp.${'lt' | 'ge'}`]?: string;
@@ -131,7 +131,7 @@ export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `parameter.${'to' | 'in' | '[*].in' | '[*].txs.[*].to_'}`]?: string;
 } & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
-};
+} & { type?: TzktOperationType };
 
 export const fetchGetOperationsTransactions = (chainId: TzktApiChainId, params: GetOperationsTransactionsParams) =>
   fetchGet<TzktOperation[]>(chainId, `/operations/transactions`, params);

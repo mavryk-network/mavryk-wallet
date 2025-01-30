@@ -364,7 +364,7 @@ function deriveHistoryItemType(
       }
 
       // check if sender address is the source address and if type if transaction
-      if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo) {
+      if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo && items.length === 1) {
         return HistoryItemOpTypeEnum.TransferTo;
       }
 

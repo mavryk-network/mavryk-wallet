@@ -1,6 +1,6 @@
 import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 
-import { HistoryItemOpTypeEnum, OlderThanParams } from './types';
+import { HistoryItemOpTypeEnum } from './types';
 
 export const createOpParams = (accountAddress: string): StringRecord<ExtendedGetOperationsTransactionsParams> => ({
   [HistoryItemOpTypeEnum.Delegation.toString()]: {
@@ -136,8 +136,6 @@ export const build_Token_Fa_1_2OpParams = (
     defaultFa_1_2OpParams['parameter.in'] = JSON.stringify(parameterIn);
   }
 
-  // delete internalOperationParams.type;
-
   return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
 };
 
@@ -180,9 +178,6 @@ export const build_Token_Fa_2OpParams = (
       defaultFa_1_2OpParams['parameter.[*].in'] = JSON.stringify(parameterIn);
     }
   }
-
-  // delete internalOperationParams['entrypoint.null'];
-  // delete internalOperationParams.type;
 
   return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
 };

@@ -74,35 +74,12 @@ export const HistoryComponent: React.FC<Props> = memo(
     const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
       () => [
         {
-          id: HistoryItemOpTypeEnum.Delegation.toString(),
-          selected: filterOptions.includes(HistoryItemOpTypeEnum.Delegation),
-
-          nameI18nKey: 'delegation'
-        },
-        {
           id: HistoryItemOpTypeEnum.Interaction.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.Interaction),
 
           nameI18nKey: 'interaction'
         },
-        {
-          id: HistoryItemOpTypeEnum.Origination.toString(),
-          selected: filterOptions.includes(HistoryItemOpTypeEnum.Origination),
 
-          nameI18nKey: 'origination'
-        },
-        {
-          id: HistoryItemOpTypeEnum.Reveal.toString(),
-          selected: filterOptions.includes(HistoryItemOpTypeEnum.Reveal),
-
-          nameI18nKey: 'reveal'
-        },
-        {
-          id: HistoryItemOpTypeEnum.Swap.toString(),
-          selected: filterOptions.includes(HistoryItemOpTypeEnum.Swap),
-
-          nameI18nKey: 'swap'
-        },
         {
           id: HistoryItemOpTypeEnum.TransferFrom.toString(),
           selected: filterOptions.includes(HistoryItemOpTypeEnum.TransferFrom),
@@ -115,14 +92,43 @@ export const HistoryComponent: React.FC<Props> = memo(
 
           nameI18nKey: 'transferTo'
         },
-        {
-          id: HistoryItemOpTypeEnum.Other.toString(),
-          selected: filterOptions.includes(HistoryItemOpTypeEnum.Other),
 
-          nameI18nKey: 'other'
-        }
+        ...(assetSlug
+          ? ([] as SortListItemType[])
+          : ([
+              {
+                id: HistoryItemOpTypeEnum.Delegation.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Delegation),
+
+                nameI18nKey: 'delegation'
+              },
+              {
+                id: HistoryItemOpTypeEnum.Origination.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Origination),
+
+                nameI18nKey: 'origination'
+              },
+              {
+                id: HistoryItemOpTypeEnum.Reveal.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Reveal),
+
+                nameI18nKey: 'reveal'
+              },
+              {
+                id: HistoryItemOpTypeEnum.Swap.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Swap),
+
+                nameI18nKey: 'swap'
+              },
+              {
+                id: HistoryItemOpTypeEnum.Other.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Other),
+
+                nameI18nKey: 'other'
+              }
+            ] as SortListItemType[]))
       ],
-      [filterOptions]
+      [assetSlug, filterOptions]
     );
 
     const historyFilterParams = useMemo(() => {

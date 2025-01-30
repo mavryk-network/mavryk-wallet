@@ -7,6 +7,7 @@ import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { filterUnique } from 'lib/utils';
 
+import { buildTEZOpParams } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
 import { operationsGroupToHistoryItem } from './utils';
 
@@ -64,9 +65,11 @@ async function fetchOperations(
     const [contractAddress, tokenId] = (assetSlug ?? '').split('_');
 
     if (assetSlug === MAV_TOKEN_SLUG) {
+      // filter by anyof only for TEZ
       return await fetchOperations_TEZ(chainId, accAddress, pseudoLimit, olderThan, operationParams);
+      // do not filter
     } else if (assetSlug === LIQUIDITY_BAKING_DEX_ADDRESS) {
-      return await fetchOperations_Contract(chainId, accAddress, pseudoLimit, olderThan, operationParams);
+      return await fetchOperations_Contract(chainId, accAddress, pseudoLimit, olderThan);
     } else {
       const tokenType = await detectTokenStandard(tezos, contractAddress);
 
@@ -104,12 +107,9 @@ const fetchOperations_TEZ = (
   operationParams?: GetOperationsTransactionsParams
 ) => {
   return TZKT.fetchGetOperationsTransactions(chainId, {
-    'anyof.sender.target.initiator': accountAddress,
     ...buildOlderThanParam(olderThan),
-    limit: pseudoLimit,
-    ...operationParams,
-    'sort.desc': 'id',
-    'amount.ne': '0'
+    ...buildTEZOpParams(accountAddress, operationParams),
+    limit: pseudoLimit
   });
 };
 
@@ -117,15 +117,13 @@ const fetchOperations_Contract = (
   chainId: TzktApiChainId,
   accountAddress: string,
   pseudoLimit: number,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
+  olderThan?: UserHistoryItem
 ) => {
   return TZKT.fetchGetAccountOperations(chainId, accountAddress, {
     type: 'transaction',
     limit: pseudoLimit,
     initiator: accountAddress,
     entrypoint: 'mintOrBurn',
-    ...operationParams,
     'level.lt': olderThan?.oldestOperation?.level,
     sort: 1
   });

@@ -7,7 +7,7 @@ import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { filterUnique } from 'lib/utils';
 
-import { buildTEZOpParams } from './filterParams';
+import { build_Token_Fa_1_2OpParams, build_Token_Fa_2OpParams, buildTEZOpParams } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
 import { operationsGroupToHistoryItem } from './utils';
 
@@ -138,12 +138,8 @@ const fetchOperations_Token_Fa_1_2 = (
   operationParams?: GetOperationsTransactionsParams
 ) => {
   return TZKT.fetchGetOperationsTransactions(chainId, {
-    entrypoint: 'transfer',
-    target: contractAddress,
-    'parameter.in': `[{"from":"${accountAddress}"},{"to":"${accountAddress}"}]`,
-    ...operationParams,
+    ...build_Token_Fa_1_2OpParams(accountAddress, contractAddress, operationParams),
     limit: pseudoLimit,
-    'sort.desc': 'level',
     'level.lt': olderThan?.oldestOperation?.level
   });
 };
@@ -158,13 +154,9 @@ const fetchOperations_Token_Fa_2 = (
   operationParams?: GetOperationsTransactionsParams
 ) => {
   return TZKT.fetchGetOperationsTransactions(chainId, {
-    entrypoint: 'transfer',
-    target: contractAddress,
-    'parameter.[*].in': `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`,
-    ...operationParams,
+    ...build_Token_Fa_2OpParams(accountAddress, contractAddress, tokenId, operationParams),
     limit: pseudoLimit,
-    'level.lt': olderThan?.oldestOperation?.level,
-    'sort.desc': 'level'
+    'level.lt': olderThan?.oldestOperation?.level
   });
 };
 

@@ -25,13 +25,13 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
   },
   [HistoryItemOpTypeEnum.TransferTo.toString()]: {
     type: 'transaction',
-    'sender.eq': accountAddress,
+    sender: accountAddress,
     hasInternals: false,
     'entrypoint.null': true
   },
   [HistoryItemOpTypeEnum.TransferFrom.toString()]: {
     type: 'transaction',
-    'target.eq': accountAddress,
+    target: accountAddress,
     hasInternals: false
   },
   [HistoryItemOpTypeEnum.Other.toString()]: {
@@ -100,4 +100,89 @@ export const buildTEZOpParams = (
     'sort.desc': 'id',
     'amount.ne': '0'
   };
+};
+
+export const build_Token_Fa_1_2OpParams = (
+  accountAddress: string,
+  contractAddress: string,
+  operationParams: GetOperationsTransactionsParams | undefined
+): GetOperationsTransactionsParams => {
+  const parameterIn = [];
+
+  const defaultFa_1_2OpParams: GetOperationsTransactionsParams = {
+    entrypoint: 'transfer',
+    target: contractAddress,
+    'parameter.in': `[{"from":"${accountAddress}"},{"to":"${accountAddress}"}]`,
+    'sort.desc': 'level'
+  };
+
+  if (!operationParams || !Object.keys(operationParams).length) {
+    return defaultFa_1_2OpParams;
+  }
+
+  const internalOperationParams = { ...operationParams };
+
+  if (internalOperationParams['sender']) {
+    parameterIn.push({ from: internalOperationParams['sender'] });
+    delete internalOperationParams.sender;
+  }
+
+  if (internalOperationParams['target']) {
+    parameterIn.push({ to: internalOperationParams['target'] });
+    delete internalOperationParams.target;
+  }
+
+  if (parameterIn.length > 0) {
+    defaultFa_1_2OpParams['parameter.in'] = JSON.stringify(parameterIn);
+  }
+
+  // delete internalOperationParams.type;
+
+  return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
+};
+
+export const build_Token_Fa_2OpParams = (
+  accountAddress: string,
+  contractAddress: string,
+  tokenId: string | number,
+  operationParams: GetOperationsTransactionsParams | undefined
+): GetOperationsTransactionsParams => {
+  const parameterIn = [];
+
+  const defaultFa_1_2OpParams: GetOperationsTransactionsParams = {
+    entrypoint: 'transfer',
+    target: contractAddress,
+    'parameter.[*].in': `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`,
+    'sort.desc': 'level'
+  };
+
+  if (!operationParams || !Object.keys(operationParams).length) {
+    return defaultFa_1_2OpParams;
+  }
+
+  const internalOperationParams = { ...operationParams };
+  const hasBothTargets = internalOperationParams['sender'] && internalOperationParams['target'];
+
+  if (!hasBothTargets) {
+    if (internalOperationParams['sender']) {
+      parameterIn.push({ from_: accountAddress, txs: [{ token_id: tokenId }] });
+      parameterIn.push({ txs: [{ token_id: tokenId }] });
+      delete internalOperationParams.sender;
+    }
+
+    if (internalOperationParams['target']) {
+      parameterIn.push({ txs: [{ token_id: tokenId }] });
+      parameterIn.push({ txs: [{ to_: accountAddress, token_id: tokenId }] });
+      delete internalOperationParams.target;
+    }
+
+    if (parameterIn.length > 0 && !hasBothTargets) {
+      defaultFa_1_2OpParams['parameter.[*].in'] = JSON.stringify(parameterIn);
+    }
+  }
+
+  // delete internalOperationParams['entrypoint.null'];
+  // delete internalOperationParams.type;
+
+  return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
 };

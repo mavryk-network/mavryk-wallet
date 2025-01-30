@@ -336,11 +336,13 @@ function deriveHistoryItemType(
   address: string,
   firstOperation: TzktOperation // 5
 ): HistoryItemOpTypeEnum {
-  let type = HistoryItemOpTypeEnum.Other;
+  let type = HistoryItemOpTypeEnum.Interaction;
 
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
-  if (firstOperation.type === 'delegation') {
+  if (firstOperation.type === 'other') {
+    return HistoryItemOpTypeEnum.Other;
+  } else if (firstOperation.type === 'delegation') {
     return HistoryItemOpTypeEnum.Delegation;
   } else if (firstOperation.type === 'origination') {
     return HistoryItemOpTypeEnum.Origination;

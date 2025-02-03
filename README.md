@@ -1,7 +1,7 @@
 # Mavryk Wallet
 
 Cryptocurrency wallet for [Mavryk blockchain](https://mavryk.org/) as Web Extension for your Browser.<br>
-Providing ability to manage NFT, tez tokens and interact with dApps.
+Providing ability to manage NFT, mav tokens and interact with dApps.
 
 ![Mavryk Wallet](https://raw.githubusercontent.com/mavryk-network/mavryk-wallet/dev/public/misc/wallet-readme.svg)
 

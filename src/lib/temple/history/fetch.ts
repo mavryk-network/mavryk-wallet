@@ -35,7 +35,6 @@ export default async function fetchUserHistory(
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
-
   // console.log('Logging operations in the fetchUserHistory function:', operations);
   if (!operations.length) return [];
   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
@@ -177,8 +176,6 @@ async function fetchOperations_Any(
     sort: 1
   });
 
-  if (!accOperations.length) return [];
-
   let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
 
   const fa12OperationsTransactions = await TZKT.refetchOnce429(
@@ -192,7 +189,7 @@ async function fetchOperations_Any(
   }
 
   let fa2OperationsTransactions: TzktOperation[] = [];
-  if (operationParams && Object.keys(operationParams).length === 0) {
+  if (Object.keys(operationParams ?? {}).length === 0) {
     fa2OperationsTransactions = await TZKT.refetchOnce429(
       () =>
         fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),

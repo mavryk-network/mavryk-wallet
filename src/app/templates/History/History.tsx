@@ -11,7 +11,7 @@ import { ReactComponent as LayersIcon } from 'app/icons/layers.svg';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
 import { ExtendedGetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
-import { T } from 'lib/i18n/react';
+import { t, T } from 'lib/i18n/react';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
@@ -277,6 +277,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                     containerClassName="mr-2"
                     className={classNames(theme === DARK_LIGHT_THEME && styles.inputBgDarkLight)}
                     cleanButtonStyle={searchbtnStyles}
+                    placeholder={t('searchTransactions')}
                   />
                   <SearchExplorerCloseBtn />
                 </div>

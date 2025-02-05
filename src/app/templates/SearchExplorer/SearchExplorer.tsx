@@ -1,4 +1,15 @@
-import React, { FC, useCallback, createContext, useState, useMemo, useContext, memo } from 'react';
+import React, {
+  FC,
+  useCallback,
+  createContext,
+  useState,
+  useMemo,
+  useContext,
+  memo,
+  useRef,
+  useLayoutEffect,
+  useEffect
+} from 'react';
 
 import classNames from 'clsx';
 
@@ -60,11 +71,18 @@ const useSearchExplorer = () => {
 };
 
 export const SearchExplorerFinder: FC<SearchAssetFieldProps> = props => {
+  const ref = useRef<HTMLInputElement | null>(null);
   const { toggleExplorer, explored, allowAnimation } = useSearchExplorer();
+
+  useEffect(() => {
+    if (explored && ref.current) {
+      ref.current.focus();
+    }
+  }, [explored]);
 
   return (
     <div className={classNames('w-full', explored && allowAnimation && styles.explorerSearch)}>
-      <SearchAssetField {...props} searchIconCb={toggleExplorer} />
+      <SearchAssetField ref={ref} {...props} searchIconCb={toggleExplorer} />
     </div>
   );
 };

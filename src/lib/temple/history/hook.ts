@@ -114,7 +114,7 @@ export default function useHistory(
       setUserHistory(originalHistory ?? []);
       setReachedTheEnd(false);
     }
-  }, [hasParameters]);
+  }, [hasParameters, assetSlug, accountAddress, chainId]);
 
   return {
     loading,

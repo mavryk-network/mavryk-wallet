@@ -13,8 +13,8 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
   },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
     type: 'transaction',
-    'entrypoint.null': false,
-    hasInternals: true
+    'entrypoint.null': false
+    // hasInternals: true
   },
   [HistoryItemOpTypeEnum.Reveal.toString()]: {
     type: 'reveal'

@@ -90,9 +90,9 @@ export const fetchGetAccountOperationByHash = async (
     }
     // fetching operation from /operations, cuz parameter filter doesnt work on account operations
     // example -> /accounts/{address}/operation?parameter.hash={hash} -> wont work
-    const [operation] = await fetchGetOperationsByHash(chainId, hash);
+    // const [operation] = await fetchGetOperationsByHash(chainId, hash);
     return fetchGet<TzktOperation[]>(chainId, `/operations/${hash}`, {
-      level: operation.level
+      // level: operation.level
     });
   } catch (e) {
     throw new Error("Can't fetch transaction by hash");

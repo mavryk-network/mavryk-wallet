@@ -1793,6 +1793,9 @@
   "searchAssets": {
     "message": "Search assets..."
   },
+  "searchTransactions": {
+    "message": "Search transactions..."
+  },
   "searchByName": {
     "message": "Search by name..."
   },

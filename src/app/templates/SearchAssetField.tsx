@@ -7,7 +7,7 @@ import { t } from 'lib/i18n';
 
 export type SearchAssetFieldProps = SearchFieldProps;
 
-const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, ...rest }) => (
+const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, placeholder = t('searchAssets'), ...rest }) => (
   <SearchField
     className={clsx(
       'py-2 pl-8 pr-6 bg-primary-card',
@@ -17,7 +17,7 @@ const SearchAssetField: FC<SearchAssetFieldProps> = memo(({ className, ...rest }
       'focus:text-white',
       className
     )}
-    placeholder={t('searchAssets')}
+    placeholder={placeholder}
     searchIconClassName="h-5 w-auto"
     searchIconWrapperClassName="px-2 text-gray-600"
     {...rest}

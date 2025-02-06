@@ -11,6 +11,23 @@ import { operationsGroupToHistoryItem } from './utils';
 
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
+// export default async function fetchUserHistory(
+//   chainId: TzktApiChainId,
+//   account: TempleAccount,
+//   assetSlug: string | undefined,
+//   pseudoLimit: number,
+//   tezos: ReactiveTezosToolkit,
+//   olderThan?: UserHistoryItem
+// ): Promise<UserHistoryItem[]> {
+//   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan);
+//   // console.log('Logging operations in the fetchUserHistory function:', operations);
+//   const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
+//   console.log(groups);
+//   // console.log('Logging groups in the fetchUserHistory function:', groups);
+//   const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+//   return arr;
+// }
+
 export default async function fetchUserHistory(
   chainId: TzktApiChainId,
   account: TempleAccount,
@@ -20,9 +37,20 @@ export default async function fetchUserHistory(
   olderThan?: UserHistoryItem
 ): Promise<UserHistoryItem[]> {
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan);
-  // console.log('Logging operations in the fetchUserHistory function:', operations);
-  const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
-  // console.log('Logging groups in the fetchUserHistory function:', groups);
+  const groups = Object.values(
+    operations.reduce((acc, item) => {
+      if (!acc[item.hash]) {
+        acc[item.hash] = { hash: item.hash, operations: [] };
+      }
+      acc[item.hash].operations.push(item);
+      return acc;
+    }, {} as Record<string, { hash: string; operations: TzktOperation[] }>)
+  );
+  if (groups.length > 0) {
+    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
+    groups[groups.length - 1] = lastGroup[0];
+  }
+
   const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
   return arr;
 }

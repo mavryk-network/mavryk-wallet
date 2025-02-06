@@ -37,7 +37,19 @@ export default async function fetchUserHistory(
   const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
   // console.log('Logging operations in the fetchUserHistory function:', operations);
   if (!operations.length) return [];
-  const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
+  const groups = Object.values(
+    operations.reduce((acc, item) => {
+      if (!acc[item.hash]) {
+        acc[item.hash] = { hash: item.hash, operations: [] };
+      }
+      acc[item.hash].operations.push(item);
+      return acc;
+    }, {} as Record<string, { hash: string; operations: TzktOperation[] }>)
+  );
+  if (groups.length > 0) {
+    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
+    groups[groups.length - 1] = lastGroup[0];
+  }
   // console.log('Logging groups in the fetchUserHistory function:', groups);
   const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
   return arr;

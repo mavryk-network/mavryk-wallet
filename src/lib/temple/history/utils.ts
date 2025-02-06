@@ -80,9 +80,6 @@ function reduceOneTzktOperation(
   index: number,
   address: string
 ): IndividualHistoryItem | null {
-  // if (operation?.hash === 'oouj1Sy2MQmAXxwoJkErHNatT6BkkJq49g1rSBjCgTGgAQUCE8i') {
-  //   debugger;
-  // }
   switch (operation.type) {
     case 'transaction':
       return reduceOneTzktTransactionOperation(address, operation, index);

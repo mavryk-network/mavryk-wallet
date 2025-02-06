@@ -19,6 +19,7 @@ export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountA
     const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
 
     const groups = await fetchOperGroupsForOperations(chainId, operations);
+
     const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
     return arr;
   } catch (e) {
@@ -48,7 +49,8 @@ export default async function fetchUserHistory(
     // console.log('Logging operations in the fetchUserHistory function:', operations);
     if (!operations.length) return [];
 
-    const groups = await reduceOperationsGroups(operations, chainId);
+    // const groups = await reduceOperationsGroups(operations, chainId);
+    const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     // console.log('Logging groups in the fetchUserHistory function:', groups);
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
@@ -269,21 +271,30 @@ function fetchIncomingOperTransactions_Fa_2(
  */
 async function fetchOperGroupsForOperations(
   chainId: TzktApiChainId,
-  operations: TzktOperation[], // [{} - one per last]
+  operations: TzktOperation[],
   olderThan?: UserHistoryItem
 ) {
-  const { id: originalOpId } = operations[0]; // Capture the original operation's ID
-  const uniqueHashes = filterUnique(operations.map(d => d.hash));
+  const uniqueHashes = [...new Set(operations.map(d => d.hash))];
+
+  const operationsMap = new Map(operations.map(op => [op.hash, op]));
 
   if (olderThan && uniqueHashes[0] === olderThan.hash) uniqueHashes.shift();
 
   const groups: OperationsGroup[] = [];
 
   for (const hash of uniqueHashes) {
+    const originalOpId = operationsMap.get(hash)?.id;
+
     const fetchedOperations = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
 
-    // Ensure the operation with originalOpId is first
-    fetchedOperations.sort((a, b) => (a.id === originalOpId ? -1 : b.id === originalOpId ? 1 : b.id - a.id));
+    if (originalOpId) {
+      // Move originalOpId to the first position only if it's not already first
+      const index = fetchedOperations.findIndex(op => op.id === originalOpId);
+      if (index > 0) {
+        const [originalOp] = fetchedOperations.splice(index, 1);
+        fetchedOperations.unshift(originalOp);
+      }
+    }
 
     groups.push({ hash, operations: fetchedOperations });
   }

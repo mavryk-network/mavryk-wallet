@@ -13,8 +13,9 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
   },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
     type: 'transaction',
-    'entrypoint.null': false
-    // hasInternals: true
+    'entrypoint.ne': 'transfer',
+    'entrypoint.null': false,
+    hasInternals: true
   },
   [HistoryItemOpTypeEnum.Reveal.toString()]: {
     type: 'reveal'
@@ -170,6 +171,7 @@ const getReturnedTransactionParams = (
   // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
   if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
     delete internalOperationParams['entrypoint.null'];
+    delete internalOperationParams['entrypoint.ne'];
 
     if (internalOperationParams.sender !== accountAddress) {
       internalOperationParams.initiator = accountAddress;

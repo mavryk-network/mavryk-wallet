@@ -41,7 +41,7 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
   if (operations[0]) {
     firstOperation = reduceOneTzktOperation(operations[0], 0, address);
   }
-  if (operations[operations.length - 1]) {
+  if (operations?.length > 1 && operations[operations.length - 1]) {
     oldestOperation = reduceOneTzktOperation(operations[operations.length - 1], operations.length - 1, address);
   }
 
@@ -73,12 +73,16 @@ function reduceTzktOperations(operations: TzktOperation[], address: string): Ind
 
 /**
  * (i) Does not mutate operation object
+ * works with original operation type, nit the custom one like interaction, multiole etc. from the enum
  */
 function reduceOneTzktOperation(
   operation: TzktOperation,
   index: number,
   address: string
 ): IndividualHistoryItem | null {
+  // if (operation?.hash === 'oouj1Sy2MQmAXxwoJkErHNatT6BkkJq49g1rSBjCgTGgAQUCE8i') {
+  //   debugger;
+  // }
   switch (operation.type) {
     case 'transaction':
       return reduceOneTzktTransactionOperation(address, operation, index);
@@ -359,13 +363,13 @@ function deriveHistoryItemType(
         return HistoryItemOpTypeEnum.Multiple;
       }
 
-      if (item.entrypoint !== undefined && item.entrypoint !== 'transfer') {
-        return HistoryItemOpTypeEnum.Interaction;
-      }
-
       // check if sender address is the source address and if type if transaction
       if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo && items.length === 1) {
         return HistoryItemOpTypeEnum.TransferTo;
+      }
+
+      if (item.entrypoint !== undefined && item.entrypoint !== 'transfer') {
+        return HistoryItemOpTypeEnum.Interaction;
       }
 
       if ('tokenTransfers' in item && item.tokenTransfers && items.length === 1)

@@ -14,7 +14,7 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 import { OperationsGroup } from '../activity-new/types';
 
-import { getMoneyDiff } from './helpers';
+import { getMoneyDiff, isZero } from './helpers';
 import {
   Fa2TransferSummaryArray,
   HistoryItemDelegationOp,
@@ -444,37 +444,23 @@ function transformToHistoryMember(address: string, alias: string = ''): TzktAlia
   return { alias: alias, address: address };
 }
 
-// Similar functions for Delegation, Origination, Reveal, Other
-
-// export function groupOperationsByHash(operations: IndividualHistoryItem[]): UserHistoryItem[] {
-//   const grouped = operations.reduce((acc, operation) => {
-//     // Grouping logic based on hash
-//     if (!acc[operation.hash]) {
-//       acc[operation.hash] = [];
-//     }
-//     acc[operation.hash].push(operation);
-//     return acc;
-//   }, {});
-//
-//
-//   return Object.entries(grouped).map(([hash, ops]) => ({
-//     hash: hash,
-//     operations: ops,
-//     highlightedOperationIndex: 0 // Assuming the first operation is highlighted
-//     isGroupedOp: ops.length > 0
-//   }));
-// }
-
 // set the end destination address based on diffs if it exists
 // f.e. JPD 200 -> SIRS -> Mavryk Finance
 // we wend to SIRS but the end address is Mavryk Finance so we show that address instead of SIRS address
 // NOTE - It doesn't apply to simple transfers where we have amount
 function getDestinationAddress(operation: TzktTransactionOperation) {
-  return operation.parameter.entrypoint === 'transfer' &&
+  return operation.parameter?.entrypoint &&
+    operation.parameter.entrypoint === 'transfer' &&
     operation.parameter.value.length === 1 &&
     operation.parameter.value[0].txs.length === 1
     ? { address: operation.parameter.value[0].txs[0].to_ }
-    : operation.target;
+    : checDestByDiff(operation);
 }
 
-const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();
+function checDestByDiff(operation: TzktTransactionOperation) {
+  const diff = operation.diffs ? operation.diffs[0] : null;
+
+  return diff && !isZero(new BigNumber(diff.content.value)) && typeof diff.content.key === 'string'
+    ? { address: diff.content.key }
+    : operation.target;
+}

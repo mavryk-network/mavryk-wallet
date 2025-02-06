@@ -13,6 +13,7 @@ import { operationsGroupToHistoryItem } from './utils';
 
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
+// always will return one operation object
 export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
   try {
     const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
@@ -34,25 +35,27 @@ export default async function fetchUserHistory(
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
-  const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
-  // console.log('Logging operations in the fetchUserHistory function:', operations);
-  if (!operations.length) return [];
-  const groups = Object.values(
-    operations.reduce((acc, item) => {
-      if (!acc[item.hash]) {
-        acc[item.hash] = { hash: item.hash, operations: [] };
-      }
-      acc[item.hash].operations.push(item);
-      return acc;
-    }, {} as Record<string, { hash: string; operations: TzktOperation[] }>)
-  );
-  if (groups.length > 0) {
-    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
-    groups[groups.length - 1] = lastGroup[0];
+  try {
+    const operations = await fetchOperations(
+      chainId,
+      account,
+      assetSlug,
+      pseudoLimit,
+      tezos,
+      olderThan,
+      operationParams
+    );
+    // console.log('Logging operations in the fetchUserHistory function:', operations);
+    if (!operations.length) return [];
+
+    const groups = await reduceOperationsGroups(operations, chainId);
+    // console.log('Logging groups in the fetchUserHistory function:', groups);
+    const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+    return arr;
+  } catch (e) {
+    console.error('Error while fetching user history:', e);
+    return [];
   }
-  // console.log('Logging groups in the fetchUserHistory function:', groups);
-  const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
-  return arr;
 }
 
 /**
@@ -284,6 +287,24 @@ async function fetchOperGroupsForOperations(
 
   return groups;
 }
+
+const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId) => {
+  const groups = Object.values(
+    operations.reduce<StringRecord<{ hash: string; operations: TzktOperation[] }>>((acc, item) => {
+      if (!acc[item.hash]) {
+        acc[item.hash] = { hash: item.hash, operations: [] };
+      }
+      acc[item.hash].operations.push(item);
+      return acc;
+    }, {})
+  );
+  if (groups.length > 0) {
+    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
+    groups[groups.length - 1] = lastGroup[0];
+  }
+
+  return groups;
+};
 
 /**
  * > (!) When using `lastId` param, TZKT API might error with:

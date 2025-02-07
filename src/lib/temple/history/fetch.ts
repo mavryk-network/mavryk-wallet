@@ -51,8 +51,8 @@ export default async function fetchUserHistory(
     // console.log('Logging operations in the fetchUserHistory function:', operations);
     if (!operations.length) return [];
 
-    const groups = await reduceOperationsGroups(operations, chainId);
-    // const groups = await fetchOperGroupsForOperations(chainId, operations);
+    // const groups = await reduceOperationsGroups(operations, chainId);
+    const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     // console.log('Logging groups in the fetchUserHistory function:', groups);
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
@@ -280,27 +280,22 @@ async function fetchOperGroupsForOperations(
 ) {
   const uniqueHashes = filterUnique(operations.map(d => d.hash));
 
-  const operationsMap = new Map(operations.map(op => [op.hash, op]));
-
-  if (olderThan && uniqueHashes[0] === olderThan.hash) uniqueHashes.shift();
+  if (olderThan && uniqueHashes[0] === olderThan.hash) uniqueHashes.splice(1);
 
   const groups: OperationsGroup[] = [];
-
   for (const hash of uniqueHashes) {
-    const originalOpId = operationsMap.get(hash)?.id;
-
-    const fetchedOperations = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
-
-    if (originalOpId) {
-      // Move originalOpId to the first position only if it's not already first
-      const index = fetchedOperations.findIndex(op => op.id === originalOpId);
-      if (index > 0) {
-        const [originalOp] = fetchedOperations.splice(index, 1);
-        fetchedOperations.unshift(originalOp);
-      }
-    }
-
-    groups.push({ hash, operations: fetchedOperations });
+    const transactions = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
+    // usually it returns transactions with type transaction and the orinal operation with other type
+    // so we sort it out to put that operation group to be always in the first place
+    transactions.sort((a, b) => {
+      if (a.type !== 'transaction' && b.type === 'transaction') return -1;
+      if (a.type === 'transaction' && b.type !== 'transaction') return 1;
+      return b.id - a.id; // Default sort by ID in descending order
+    });
+    groups.push({
+      hash,
+      operations: transactions
+    });
   }
 
   return groups;

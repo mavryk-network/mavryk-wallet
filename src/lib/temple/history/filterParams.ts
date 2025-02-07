@@ -7,9 +7,7 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
     type: 'delegation'
   },
   [HistoryItemOpTypeEnum.Origination.toString()]: {
-    type: 'origination',
-    hasInternals: false,
-    'parameter.originatedContract.null': false
+    type: 'origination'
   },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
     type: 'transaction',

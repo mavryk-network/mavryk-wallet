@@ -41,7 +41,7 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
   if (operations[0]) {
     firstOperation = reduceOneTzktOperation(operations[0], 0, address);
   }
-  if (operations?.length > 1 && operations[operations.length - 1]) {
+  if (operations[operations.length - 1]) {
     oldestOperation = reduceOneTzktOperation(operations[operations.length - 1], operations.length - 1, address);
   }
 

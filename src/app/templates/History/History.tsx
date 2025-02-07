@@ -157,8 +157,6 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // useLoadPartnersPromo();
 
-    console.log(userHistory, 'userHistory');
-
     const [filteredHistory, setFilteredHistory] = useState<UserHistoryItem[]>([]);
     const [isSearchingByHash, setIsSearchingByHash] = useState(false);
 

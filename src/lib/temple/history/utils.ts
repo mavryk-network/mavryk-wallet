@@ -455,13 +455,5 @@ function getDestinationAddress(operation: TzktTransactionOperation) {
     operation.parameter.value.length === 1 &&
     operation.parameter.value[0].txs.length === 1
     ? { address: operation.parameter.value[0].txs[0].to_ }
-    : checDestByDiff(operation);
-}
-
-function checDestByDiff(operation: TzktTransactionOperation) {
-  const diff = operation.diffs ? operation.diffs[0] : null;
-
-  return diff && !isZero(new BigNumber(diff.content.value)) && typeof diff.content.key === 'string'
-    ? { address: diff.content.key }
     : operation.target;
 }

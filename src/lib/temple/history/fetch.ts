@@ -51,8 +51,8 @@ export default async function fetchUserHistory(
     // console.log('Logging operations in the fetchUserHistory function:', operations);
     if (!operations.length) return [];
 
-    // const groups = await reduceOperationsGroups(operations, chainId);
-    const groups = await fetchOperGroupsForOperations(chainId, operations);
+    const groups = await reduceOperationsGroups(operations, chainId);
+    // const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     // console.log('Logging groups in the fetchUserHistory function:', groups);
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
@@ -211,6 +211,7 @@ async function fetchOperations_Any(
   }
 
   let fa2OperationsTransactions: TzktOperation[] = [];
+
   if (Object.keys(operationParams ?? {}).length === 0) {
     fa2OperationsTransactions = await TZKT.refetchOnce429(
       () =>
@@ -285,13 +286,8 @@ async function fetchOperGroupsForOperations(
   const groups: OperationsGroup[] = [];
   for (const hash of uniqueHashes) {
     const transactions = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
-    // usually it returns transactions with type transaction and the orinal operation with other type
-    // so we sort it out to put that operation group to be always in the first place
-    transactions.sort((a, b) => {
-      if (a.type !== 'transaction' && b.type === 'transaction') return -1;
-      if (a.type === 'transaction' && b.type !== 'transaction') return 1;
-      return b.id - a.id; // Default sort by ID in descending order
-    });
+
+    sortTransactionsBasedOnTheOriginalType(transactions);
     groups.push({
       hash,
       operations: transactions
@@ -307,7 +303,11 @@ const reduceOperationsGroups = async (operations: TzktOperation[], chainId: Tzkt
       if (!acc[item.hash]) {
         acc[item.hash] = { hash: item.hash, operations: [] };
       }
+
       acc[item.hash].operations.push(item);
+
+      sortTransactionsBasedOnTheOriginalType(acc[item.hash].operations);
+
       return acc;
     }, {})
   );
@@ -319,6 +319,8 @@ const reduceOperationsGroups = async (operations: TzktOperation[], chainId: Tzkt
   return groups;
 };
 
+/****************** UTILS Fns ********************/
+
 /**
  * > (!) When using `lastId` param, TZKT API might error with:
  * > `{"code":400,"errors":{"lastId":"The value '331626822238208' is not valid."}}`
@@ -327,3 +329,18 @@ const reduceOperationsGroups = async (operations: TzktOperation[], chainId: Tzkt
 const buildOlderThanParam = (olderThan?: UserHistoryItem) => ({
   'timestamp.lt': olderThan?.oldestOperation?.addedAt
 });
+
+/**
+ *
+ * @param transactions
+ * @returns Mutaded array of sorted transactions
+ */
+const sortTransactionsBasedOnTheOriginalType = (transactions: TzktOperation[]) => {
+  // usually it returns transactions with type transaction and the original operation with other type
+  // so we sort it out to put that operation group to be always in the first place
+  return transactions.sort((a, b) => {
+    if (a.type !== 'transaction' && b.type === 'transaction') return -1;
+    if (a.type === 'transaction' && b.type !== 'transaction') return 1;
+    return b.id - a.id; // Default sort by ID in descending order
+  });
+};

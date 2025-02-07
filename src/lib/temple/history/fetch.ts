@@ -18,6 +18,8 @@ export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountA
   try {
     const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
 
+    if (!operations.length) return [];
+
     const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
@@ -49,8 +51,8 @@ export default async function fetchUserHistory(
     // console.log('Logging operations in the fetchUserHistory function:', operations);
     if (!operations.length) return [];
 
-    // const groups = await reduceOperationsGroups(operations, chainId);
-    const groups = await fetchOperGroupsForOperations(chainId, operations);
+    const groups = await reduceOperationsGroups(operations, chainId);
+    // const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     // console.log('Logging groups in the fetchUserHistory function:', groups);
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
@@ -194,6 +196,8 @@ async function fetchOperations_Any(
     sort: 1
   });
 
+  if (!accOperations.length) return [];
+
   let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
 
   const fa12OperationsTransactions = await TZKT.refetchOnce429(
@@ -274,7 +278,7 @@ async function fetchOperGroupsForOperations(
   operations: TzktOperation[],
   olderThan?: UserHistoryItem
 ) {
-  const uniqueHashes = [...new Set(operations.map(d => d.hash))];
+  const uniqueHashes = filterUnique(operations.map(d => d.hash));
 
   const operationsMap = new Map(operations.map(op => [op.hash, op]));
 

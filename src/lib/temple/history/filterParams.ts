@@ -57,30 +57,34 @@ export const mergeOpParams = (
     ) as ExtendedGetOperationsTransactionsParams['type'];
   }
 
-  // Merge `entrypoint` and `entrypoint.null`
-  const prevEntrypoint = prevParams.entrypoint;
-  const prevEntrypointNull = prevParams['entrypoint.null'];
-  const paramsEntrypoint = params.entrypoint;
-  const paramsEntrypointNull = params['entrypoint.null'];
+  // Merge all other parameters except `type`
+  const keys = new Set([...Object.keys(prevParams), ...Object.keys(params)]);
+  keys.delete('type');
 
-  if (prevEntrypoint || paramsEntrypoint) {
-    const entrypoints = [prevEntrypoint, paramsEntrypoint].filter(Boolean);
-    mergedParams.entrypoint = entrypoints.length > 1 ? entrypoints.join(' OR ') : entrypoints[0];
-  }
+  keys.forEach(key => {
+    const prevValue = prevParams[key];
+    const newValue = params[key];
 
-  if (prevEntrypointNull !== undefined || paramsEntrypointNull !== undefined) {
-    mergedParams['entrypoint.null'] =
-      prevEntrypointNull !== undefined && paramsEntrypointNull !== undefined
-        ? prevEntrypointNull || paramsEntrypointNull // OR condition for boolean
-        : prevEntrypointNull !== undefined
-        ? prevEntrypointNull
-        : paramsEntrypointNull;
-  }
-
-  // Merge `hasInternals` using logical OR
-  if (prevParams.hasInternals !== undefined || params.hasInternals !== undefined) {
-    mergedParams.hasInternals = prevParams.hasInternals || params.hasInternals;
-  }
+    if (prevValue === undefined) {
+      mergedParams[key] = newValue;
+    } else if (newValue === undefined) {
+      mergedParams[key] = prevValue;
+    } else if (prevValue === newValue) {
+      mergedParams[key] = prevValue;
+    } else if (key === 'entrypoint.null') {
+      // Apply the specific rules for entrypoint.null
+      if ((prevValue === true && newValue === false) || (prevValue === false && newValue === true)) {
+        delete mergedParams['entrypoint.null']; // Remove if both true and false exist
+      }
+    } else if (key === 'entrypoint.ne' && mergedParams['entrypoint.null'] === undefined) {
+      // Keep entrypoint.ne only if entrypoint.null was removed
+      mergedParams[key] = [prevValue, newValue].filter(Boolean).join(' OR ');
+    } else if (typeof prevValue === 'boolean' && typeof newValue === 'boolean') {
+      mergedParams[key] = prevValue || newValue; // OR condition for boolean values
+    } else {
+      mergedParams[key] = [prevValue, newValue].filter(Boolean).join(' OR ');
+    }
+  });
 
   return mergedParams;
 };

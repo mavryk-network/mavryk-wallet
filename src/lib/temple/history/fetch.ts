@@ -50,8 +50,14 @@ export default async function fetchUserHistory(
     );
     // console.log('Logging operations in the fetchUserHistory function:', operations);
     if (!operations.length) return [];
-
     const groups = await reduceOperationsGroups(operations, chainId);
+
+    // if (operations.length >= pseudoLimit) {
+    //   groups = await reduceOperationsGroups(operations, chainId);
+    // } else {
+    //   console.log('tx fetching waterfall');
+    //   groups = await fetchOperGroupsForOperations(chainId, operations);
+    // }
     // const groups = await fetchOperGroupsForOperations(chainId, operations);
 
     // console.log('Logging groups in the fetchUserHistory function:', groups);

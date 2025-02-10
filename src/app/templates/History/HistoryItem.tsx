@@ -65,7 +65,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   // 0 to show all operations
   const moneyDiffsRest = useMemo(
-    () => (isSwapOperation ? moneyDiffs : moneyDiffs.filter((_, i) => i >= 0)),
+    () => (isSwapOperation ? moneyDiffs : moneyDiffs.slice(1)),
     [moneyDiffs, isSwapOperation]
   );
 

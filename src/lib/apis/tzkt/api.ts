@@ -137,6 +137,7 @@ export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransact
   hasInternals?: boolean;
   entrypoint?: string;
   'entrypoint.null'?: boolean;
+  'entrypoint.ne'?: string;
   'parameter.originatedContract.null'?: boolean;
   'sender.eq'?: string;
   'target.eq'?: string;

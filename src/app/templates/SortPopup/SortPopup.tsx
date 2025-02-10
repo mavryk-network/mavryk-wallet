@@ -177,7 +177,7 @@ export const MultiSortPopupContent: FC<
   const handleOptionSelect = useCallback((item: SortListItemType) => {
     setSelectedItems(prevSelectedItems => {
       // Create a copy of the Map
-      const updatedItems = new Map(prevSelectedItems);
+      const updatedItems = new Map();
 
       if (updatedItems.has(item.id)) {
         updatedItems.delete(item.id);

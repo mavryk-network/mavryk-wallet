@@ -13,11 +13,15 @@ import { operationsGroupToHistoryItem } from './utils';
 
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
+// always will return one operation object
 export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
   try {
     const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
 
+    if (!operations.length) return [];
+
     const groups = await fetchOperGroupsForOperations(chainId, operations);
+
     const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
     return arr;
   } catch (e) {
@@ -34,13 +38,35 @@ export default async function fetchUserHistory(
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
-  const operations = await fetchOperations(chainId, account, assetSlug, pseudoLimit, tezos, olderThan, operationParams);
-  // console.log('Logging operations in the fetchUserHistory function:', operations);
-  if (!operations.length) return [];
-  const groups = await fetchOperGroupsForOperations(chainId, operations, olderThan);
-  // console.log('Logging groups in the fetchUserHistory function:', groups);
-  const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
-  return arr;
+  try {
+    const operations = await fetchOperations(
+      chainId,
+      account,
+      assetSlug,
+      pseudoLimit,
+      tezos,
+      olderThan,
+      operationParams
+    );
+    // console.log('Logging operations in the fetchUserHistory function:', operations);
+    if (!operations.length) return [];
+    const groups = await reduceOperationsGroups(operations, chainId);
+
+    // if (operations.length >= pseudoLimit) {
+    //   groups = await reduceOperationsGroups(operations, chainId);
+    // } else {
+    //   console.log('tx fetching waterfall');
+    //   groups = await fetchOperGroupsForOperations(chainId, operations);
+    // }
+    // const groups = await fetchOperGroupsForOperations(chainId, operations);
+
+    // console.log('Logging groups in the fetchUserHistory function:', groups);
+    const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+    return arr;
+  } catch (e) {
+    console.error('Error while fetching user history:', e);
+    return [];
+  }
 }
 
 /**
@@ -176,6 +202,8 @@ async function fetchOperations_Any(
     sort: 1
   });
 
+  if (!accOperations.length) return [];
+
   let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
 
   const fa12OperationsTransactions = await TZKT.refetchOnce429(
@@ -189,6 +217,7 @@ async function fetchOperations_Any(
   }
 
   let fa2OperationsTransactions: TzktOperation[] = [];
+
   if (Object.keys(operationParams ?? {}).length === 0) {
     fa2OperationsTransactions = await TZKT.refetchOnce429(
       () =>
@@ -262,16 +291,41 @@ async function fetchOperGroupsForOperations(
 
   const groups: OperationsGroup[] = [];
   for (const hash of uniqueHashes) {
-    const operations = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
-    operations.sort((b, a) => a.id - b.id);
+    const transactions = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
+
+    sortTransactionsBasedOnTheOriginalType(transactions);
     groups.push({
       hash,
-      operations
+      operations: transactions
     });
   }
 
   return groups;
 }
+
+const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId) => {
+  const groups = Object.values(
+    operations.reduce<StringRecord<{ hash: string; operations: TzktOperation[] }>>((acc, item) => {
+      if (!acc[item.hash]) {
+        acc[item.hash] = { hash: item.hash, operations: [] };
+      }
+
+      acc[item.hash].operations.push(item);
+
+      sortTransactionsBasedOnTheOriginalType(acc[item.hash].operations);
+
+      return acc;
+    }, {})
+  );
+  if (groups.length > 0) {
+    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
+    groups[groups.length - 1] = lastGroup[0];
+  }
+
+  return groups;
+};
+
+/****************** UTILS Fns ********************/
 
 /**
  * > (!) When using `lastId` param, TZKT API might error with:
@@ -281,3 +335,18 @@ async function fetchOperGroupsForOperations(
 const buildOlderThanParam = (olderThan?: UserHistoryItem) => ({
   'timestamp.lt': olderThan?.oldestOperation?.addedAt
 });
+
+/**
+ *
+ * @param transactions
+ * @returns Mutaded array of sorted transactions
+ */
+const sortTransactionsBasedOnTheOriginalType = (transactions: TzktOperation[]) => {
+  // usually it returns transactions with type transaction and the original operation with other type
+  // so we sort it out to put that operation group to be always in the first place
+  return transactions.sort((a, b) => {
+    if (a.type !== 'transaction' && b.type === 'transaction') return -1;
+    if (a.type === 'transaction' && b.type !== 'transaction') return 1;
+    return b.id - a.id; // Default sort by ID in descending order
+  });
+};

@@ -166,7 +166,7 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
 
     ...withVendors('firefox')({
       applications: {
-        gecko: { id: '{34ac229e-1cf5-4e4c-8a77-988155c4360f}' }
+        gecko: { id: '{4b36f54a-8223-478e-9e31-d87000b4745c}' }
       }
     }),
 

@@ -14,7 +14,7 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 import { OperationsGroup } from '../activity-new/types';
 
-import { getMoneyDiff } from './helpers';
+import { getMoneyDiff, isZero } from './helpers';
 import {
   Fa2TransferSummaryArray,
   HistoryItemDelegationOp,
@@ -73,6 +73,7 @@ function reduceTzktOperations(operations: TzktOperation[], address: string): Ind
 
 /**
  * (i) Does not mutate operation object
+ * works with original operation type, nit the custom one like interaction, multiole etc. from the enum
  */
 function reduceOneTzktOperation(
   operation: TzktOperation,
@@ -161,7 +162,7 @@ function reduceOneTzktTransactionOperation(
 
       historyTxOp.assetSlug = toTokenSlug(tokenContractAddress, tokenId);
 
-      if (sender.address === address ?? !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
+      if (sender.address === address || !historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.TransferTo;
       } else if (historyTxOp.entrypoint?.toLowerCase()?.includes('swap')) {
         historyTxOp.type = HistoryItemOpTypeEnum.Swap;
@@ -336,15 +337,18 @@ function deriveHistoryItemType(
   address: string,
   firstOperation: TzktOperation // 5
 ): HistoryItemOpTypeEnum {
-  let type = HistoryItemOpTypeEnum.Other;
+  let type = HistoryItemOpTypeEnum.Interaction;
 
   // Need to find the first transaction that isn't an approval
   // then need to take that opp type.
-  // Is Delegation operation
-  if (firstOperation.type === 'delegation') {
+  if (firstOperation.type === 'other') {
+    return HistoryItemOpTypeEnum.Other;
+  } else if (firstOperation.type === 'delegation') {
     return HistoryItemOpTypeEnum.Delegation;
   } else if (firstOperation.type === 'origination') {
     return HistoryItemOpTypeEnum.Origination;
+  } else if (firstOperation.type === 'reveal') {
+    return HistoryItemOpTypeEnum.Reveal;
   } else {
     if (items.some(item => item?.entrypoint?.toLocaleLowerCase() === 'swap')) {
       return HistoryItemOpTypeEnum.Swap;
@@ -356,16 +360,16 @@ function deriveHistoryItemType(
         return HistoryItemOpTypeEnum.Multiple;
       }
 
-      if (isZero(item.amountSigned) && item.entrypoint !== undefined) {
-        return HistoryItemOpTypeEnum.Interaction;
-      }
-
       // check if sender address is the source address and if type if transaction
-      if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo) {
+      if (item.source.address === address && item.type === HistoryItemOpTypeEnum.TransferTo && items.length === 1) {
         return HistoryItemOpTypeEnum.TransferTo;
       }
 
-      if ('tokenTransfers' in item && item.tokenTransfers)
+      if (item.entrypoint !== undefined && item.entrypoint !== 'transfer') {
+        return HistoryItemOpTypeEnum.Interaction;
+      }
+
+      if ('tokenTransfers' in item && item.tokenTransfers && items.length === 1)
         if (item.tokenTransfers?.recipients?.find(o => o.to.address === address)) {
           return HistoryItemOpTypeEnum.TransferFrom;
         } else {
@@ -441,37 +445,15 @@ function transformToHistoryMember(address: string, alias: string = ''): TzktAlia
   return { alias: alias, address: address };
 }
 
-// Similar functions for Delegation, Origination, Reveal, Other
-
-// export function groupOperationsByHash(operations: IndividualHistoryItem[]): UserHistoryItem[] {
-//   const grouped = operations.reduce((acc, operation) => {
-//     // Grouping logic based on hash
-//     if (!acc[operation.hash]) {
-//       acc[operation.hash] = [];
-//     }
-//     acc[operation.hash].push(operation);
-//     return acc;
-//   }, {});
-//
-//
-//   return Object.entries(grouped).map(([hash, ops]) => ({
-//     hash: hash,
-//     operations: ops,
-//     highlightedOperationIndex: 0 // Assuming the first operation is highlighted
-//     isGroupedOp: ops.length > 0
-//   }));
-// }
-
 // set the end destination address based on diffs if it exists
-// f.e. JPD 200 -> SIRS -> MAvryk Finance
-// we wend to SIRS but the end address is Mavryk Financem so we show that address instead of SIRS address
+// f.e. JPD 200 -> SIRS -> Mavryk Finance
+// we wend to SIRS but the end address is Mavryk Finance so we show that address instead of SIRS address
 // NOTE - It doesn't apply to simple transfers where we have amount
 function getDestinationAddress(operation: TzktTransactionOperation) {
-  const diff = operation.diffs ? operation.diffs[0] : null;
-
-  return diff && !isZero(new BigNumber(diff.content.value)) && typeof diff.content.key === 'string'
-    ? { address: diff.content.key }
+  return operation.parameter?.entrypoint &&
+    operation.parameter.entrypoint === 'transfer' &&
+    operation.parameter.value.length === 1 &&
+    operation.parameter.value[0].txs.length === 1
+    ? { address: operation.parameter.value[0].txs[0].to_ }
     : operation.target;
 }
-
-const isZero = (val: BigNumber.Value) => new BigNumber(val).isZero();

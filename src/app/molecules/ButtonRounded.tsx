@@ -69,15 +69,12 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           size === 'small' && btnSmall,
           size === 'big' && btnBig,
           size === 'xs' && btnXs,
-          fill && !disabled
-            ? `${bgColor} hover:${bgColorHover} border border-${borderColor}`
-            : classNames(
-                'bg-transparent',
-                size === 'xs' ? 'border' : 'border-2',
-                `border-solid border-${borderColor} hover:${bgColorHover}`
-              ),
-          isLoading && ' flex justify-center w-24 align-middle',
-          disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed border-none text-gray-15',
+          fill
+            ? `${bgColor} hover:${bgColorHover} border`
+            : classNames('bg-transparent', size === 'xs' ? 'border' : 'border-2', `border-solid hover:${bgColorHover}`), // fill | outline styles
+          disabled ? 'border-transparent' : `border-${borderColor}`, // border color
+          isLoading && ' flex justify-center w-24 align-middle', // loading
+          disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed  text-gray-15', // disabled styles
           className
         )}
         {...props}

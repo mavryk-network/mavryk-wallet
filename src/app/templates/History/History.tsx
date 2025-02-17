@@ -301,6 +301,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                       items={memoizedSortAssetsOptions}
                       onFiltersUpdate={onFiltersUpdate}
                       title={<T id="filterBy" />}
+                      keepOnlyOneSelectedOption
                     />
                   </SortPopup>
 

@@ -39,6 +39,8 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
 });
 
 /**
+ * TODO update current function when API can filter by complex types at the same time
+ * (f.e. interaction & sent to ...)
  * Used to merge ONLY specofic params of GetOperationsTransactionsParams
  * @param prevParams createOpParams returned params  object
  * @param params createOpParams returned params  object

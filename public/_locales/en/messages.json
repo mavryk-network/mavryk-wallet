@@ -1793,6 +1793,9 @@
   "searchAssets": {
     "message": "Search assets..."
   },
+  "searchTransactions": {
+    "message": "Search transactions..."
+  },
   "searchByName": {
     "message": "Search by name..."
   },
@@ -3438,7 +3441,7 @@
     "message": "Market price"
   },
   "stakeYourTokensBannerDescription": {
-    "message": "Stake your tokens to trusted validators and Lorem ipsum dolor sit amet consectetur. Egestas vel maecenas in a. Semper aliquet sagittis aliquam."
+    "message": "Stake your tokens to trusted validators"
   },
   "reStake": {
     "message": "Re-stake"

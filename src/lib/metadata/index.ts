@@ -63,10 +63,12 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
   }
 
   /// @ts-expect-error
-  return slugs.map(s => {
-    if (isTezAsset(s)) return gasMetadata;
-    return metadata.get(s);
-  });
+  return slugs
+    .map(s => {
+      if (isTezAsset(s)) return gasMetadata;
+      return metadata.get(s);
+    })
+    .filter(s => Boolean(s));
 };
 
 export type TokenMetadataGetter = (slug: string) => TokenMetadata | undefined;
@@ -195,6 +197,7 @@ export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
 export const isRwa = (metadata: Record<string, any>) =>
+  // TODO update hardcoded logic to be dynamic one
   'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
 
 /**

@@ -10,6 +10,6 @@ export type SortListItemType = {
   id: string;
   selected: boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   nameI18nKey: TID;
 };

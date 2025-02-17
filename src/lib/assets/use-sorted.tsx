@@ -29,6 +29,11 @@ export function useSortededAssetsSlugs(
     [assetsSlugs, tokensMetadata]
   );
 
+  const hasTopSlug = useMemo(
+    () => Boolean(assetsSlugNames.find(item => item.slug === MAV_TOKEN_SLUG)),
+    [assetsSlugNames]
+  );
+
   let sortedAssetSlugs = [...assetsSlugs].filter(slug => slug !== topSlug);
 
   switch (sortOption) {
@@ -60,5 +65,5 @@ export function useSortededAssetsSlugs(
       sortedAssetSlugs = [...sortedAssetSlugs];
   }
 
-  return [...new Set([topSlug, ...sortedAssetSlugs])];
+  return [...new Set([...(hasTopSlug ? [topSlug] : []), ...sortedAssetSlugs])];
 }

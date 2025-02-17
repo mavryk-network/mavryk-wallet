@@ -65,7 +65,7 @@ async function fetchGet<R>(chainId: TzktApiChainId, endpoint: string, params?: R
 type GetOperationsBaseParams = {
   limit?: number;
   offset?: number;
-  entrypoint?: 'transfer' | 'mintOrBurn';
+  entrypoint?: string;
   lastId?: number;
 } & {
   [key in `timestamp.${'lt' | 'ge'}`]?: string;
@@ -77,6 +77,26 @@ type GetOperationsBaseParams = {
   [key in `sender${'' | '.ne'}`]?: string;
 } & {
   [key in `initiator${'' | '.ne'}`]?: string;
+};
+
+export const fetchGetAccountOperationByHash = async (
+  chainId: TzktApiChainId,
+  accountAddress: string,
+  hash: string | undefined
+) => {
+  try {
+    if (!hash) {
+      throw new Error('No transaction hash is provided!');
+    }
+    // fetching operation from /operations, cuz parameter filter doesnt work on account operations
+    // example -> /accounts/{address}/operation?parameter.hash={hash} -> wont work
+    // const [operation] = await fetchGetOperationsByHash(chainId, hash);
+    return fetchGet<TzktOperation[]>(chainId, `/operations/${hash}`, {
+      // level: operation.level
+    });
+  } catch (e) {
+    throw new Error("Can't fetch transaction by hash");
+  }
 };
 
 export const fetchGetAccountOperations = (
@@ -102,7 +122,7 @@ export const fetchGetOperationsByHash = (
   } = {}
 ) => fetchGet<TzktOperation[]>(chainId, `/operations/${hash}`, params);
 
-type GetOperationsTransactionsParams = GetOperationsBaseParams & {
+export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `anyof.sender.target${'' | '.initiator'}`]?: string;
 } & {
   [key in `amount${'' | '.ne'}`]?: string;
@@ -110,6 +130,17 @@ type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `parameter.${'to' | 'in' | '[*].in' | '[*].txs.[*].to_'}`]?: string;
 } & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
+} & { type?: TzktOperationType };
+
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  type?: TzktOperationType;
+  hasInternals?: boolean;
+  entrypoint?: string;
+  'entrypoint.null'?: boolean;
+  'entrypoint.ne'?: string;
+  'parameter.originatedContract.null'?: boolean;
+  'sender.eq'?: string;
+  'target.eq'?: string;
 };
 
 export const fetchGetOperationsTransactions = (chainId: TzktApiChainId, params: GetOperationsTransactionsParams) =>

@@ -14,6 +14,7 @@ const loadRwasDetailsEpic: Epic = action$ =>
     ofType(loadRwasDetailsActions.submit),
     toPayload(),
     switchMap(slugs =>
+      // TODO fetch from mavryk api, for npw api isn't available
       fetchObjktCollectibles$(slugs).pipe(
         map(data => {
           const details: RwaDetailsRecord = {};

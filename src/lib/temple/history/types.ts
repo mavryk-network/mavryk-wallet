@@ -133,3 +133,7 @@ export type TransferSummary = {
 };
 
 export type Fa2TransferSummaryArray = TransferSummary[];
+
+export type OlderThanParams = {
+  'timestamp.lt': string | undefined;
+};

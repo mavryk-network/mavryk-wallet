@@ -76,7 +76,8 @@ export const TokensTab: FC = () => {
   const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(
     slugs,
     isZeroBalancesHidden,
-    leadingAssets
+    leadingAssets,
+    true
   );
 
   const sortedSlugs = useSortededAssetsSlugs(sortOption, filteredAssets, balances);

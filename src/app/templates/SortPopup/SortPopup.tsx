@@ -136,8 +136,11 @@ export const SortPopupContent: FC<SortPopupContentProps> = ({
 
 // Milti select Popup content
 export const MultiSortPopupContent: FC<
-  Omit<SortPopupContentProps, 'alternativeLogic'> & { onFiltersUpdate: (ids: string[]) => void }
-> = ({ items, on, toggle, onFiltersUpdate, title = <T id="sortBy" /> }) => {
+  Omit<SortPopupContentProps, 'alternativeLogic'> & {
+    onFiltersUpdate: (ids: string[]) => void;
+    keepOnlyOneSelectedOption?: boolean;
+  }
+> = ({ items, on, toggle, onFiltersUpdate, title = <T id="sortBy" />, keepOnlyOneSelectedOption = false }) => {
   const { popup } = useAppEnv();
   const [selectedItems, setSelectedItems] = useState<Map<string, SortListItemType>>(() => {
     const originalSelectedItems = new Map();
@@ -174,20 +177,23 @@ export const MultiSortPopupContent: FC<
     close();
   }, [onFiltersUpdate, selectedItems, internalToggleValue, on, toggle, close]);
 
-  const handleOptionSelect = useCallback((item: SortListItemType) => {
-    setSelectedItems(prevSelectedItems => {
-      // Create a copy of the Map
-      const updatedItems = new Map();
+  const handleOptionSelect = useCallback(
+    (item: SortListItemType) => {
+      setSelectedItems(prevSelectedItems => {
+        // Create a copy of the Map
+        const updatedItems = keepOnlyOneSelectedOption ? new Map() : new Map(prevSelectedItems);
 
-      if (updatedItems.has(item.id)) {
-        updatedItems.delete(item.id);
-      } else {
-        updatedItems.set(item.id, item);
-      }
+        if (updatedItems.has(item.id)) {
+          updatedItems.delete(item.id);
+        } else {
+          updatedItems.set(item.id, item);
+        }
 
-      return updatedItems; // Return the updated Map
-    });
-  }, []);
+        return updatedItems; // Return the updated Map
+      });
+    },
+    [keepOnlyOneSelectedOption]
+  );
 
   const handleInternalToggle = useCallback(() => {
     setInternalToggleValue(!internalToggleValue);

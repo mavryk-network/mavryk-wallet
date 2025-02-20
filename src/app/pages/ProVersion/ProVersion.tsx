@@ -103,10 +103,13 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
 
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'proVersion',
-        btnText: 'verifyAddress',
-        btnLink: '/pro-version',
+        btnText: 'goToMain',
         description: 'mavopolySuccessMsg',
-        subHeader: 'success'
+        subHeader: 'success',
+        secondaryBtnLink: '/pro-version',
+        bottomDescription: 'addressVerificationMsg',
+        contentId: 'verifySuccess',
+        secondaryBtnText: 'continueToVerifyAddressesMsg'
       });
     } catch (e: any) {
       // show err on ui

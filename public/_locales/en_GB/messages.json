@@ -1793,6 +1793,9 @@
   "searchAssets": {
     "message": "Search assets..."
   },
+  "searchTransactions": {
+    "message": "Search transactions..."
+  },
   "searchByName": {
     "message": "Search by name..."
   },
@@ -3725,7 +3728,13 @@
     "message": "Non-custodial: take control of your financial future and manage your portfolio."
   },
   "mavopolySuccessMsg": {
-    "message": "Your wallet address has been successfully verified.\n You are now able to use this contract with RWA assets.\n Make sure to verify your Maven Vaults"
+    "message": "Your wallet address has been verified. You can now hold and interact with RWA tokens in this wallet."
+  },
+  "addressVerificationMsg": {
+    "message": "You can access this verification screen anytime through the Mavryk Pro tab on your wallet's Home Screen."
+  },
+  "continueToVerifyAddressesMsg": {
+    "message": "Continue to Verify Address"
   },
   "goToMavopoly": {
     "message": "Go To Mavopoly"

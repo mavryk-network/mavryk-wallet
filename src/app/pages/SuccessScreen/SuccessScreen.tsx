@@ -22,18 +22,24 @@ export type SuccessStateType = {
   contentID?: string;
   btnText: TID;
   btnLink?: string;
+  secondaryBtnText?: TID;
+  secondaryBtnLink?: string;
   contentId?: keyof typeof successContentData;
   contentIdFnProps?: any;
+  bottomDescription?: TID;
 };
 
 const defaultStateValues: SuccessStateType = {
   pageTitle: 'operations',
   subHeader: 'success',
   description: undefined,
+  bottomDescription: undefined,
   contentId: undefined,
   contentIdFnProps: undefined,
   btnText: 'goToMain',
-  btnLink: '/'
+  btnLink: '/',
+  secondaryBtnText: undefined,
+  secondaryBtnLink: undefined
 };
 
 export const SuccessScreen = () => {
@@ -79,13 +85,25 @@ export const SuccessScreen = () => {
               </div>
             )}
           </section>
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-2">
             <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess} replace>
               <ButtonRounded size="big" fill className="w-full">
                 <T id={state.btnText} />
               </ButtonRounded>
             </ButtonLink>
+            {state.secondaryBtnLink && state.secondaryBtnText && (
+              <ButtonLink linkTo={state.secondaryBtnLink} testID={SuccessScreenSelectors.buttonSuccess} replace>
+                <ButtonRounded size="big" fill={false} className="w-full">
+                  <T id={state.secondaryBtnText} />
+                </ButtonRounded>
+              </ButtonLink>
+            )}
           </div>
+          {state.bottomDescription && (
+            <div className="text-sm text-center mt-2">
+              <T id={state.bottomDescription} />
+            </div>
+          )}
         </div>
       </BgImageLayout>
     </PageLayout>

@@ -137,22 +137,23 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
           autoFocus
         />
       )}
-      <section className="flex flex-col items-center">
-        <div className="mb-3 text-sm text-white text-center">
-          <T id="aboutFooterDescription" />
-        </div>
-        <FooterSocials />
-      </section>
 
       <ButtonRounded
         isLoading={formState.submitting}
         onClick={handleBtnClick}
         size="big"
-        className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}
+        className={clsx('w-full')}
         fill
       >
         <T id="getPro" />
       </ButtonRounded>
+
+      <section className={clsx('flex flex-col items-center', popup ? 'mt-8' : 'mt-17')}>
+        <div className="mb-3 text-sm text-white text-center">
+          <T id="aboutFooterDescription" />
+        </div>
+        <FooterSocials />
+      </section>
     </div>
   );
 };

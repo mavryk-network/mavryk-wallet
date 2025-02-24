@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -89,6 +89,18 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
     error: null
   });
 
+  useEffect(() => {
+    navigate<SuccessStateType>('/success', undefined, {
+      pageTitle: 'proVersion',
+      btnText: 'goToMain',
+      description: 'mavopolySuccessMsg',
+      subHeader: 'success',
+      secondaryBtnLink: '/pro-version',
+      bottomDescription: 'addressVerificationMsg',
+      contentId: 'verifySuccess',
+      secondaryBtnText: 'continueToVerifyAddressesMsg'
+    });
+  }, []);
   const handleBtnClick = useCallback(async () => {
     try {
       setFormState({ ...formState, submitting: true });

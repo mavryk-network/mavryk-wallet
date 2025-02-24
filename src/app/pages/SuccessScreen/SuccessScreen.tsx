@@ -49,7 +49,6 @@ export const SuccessScreen = () => {
 
   const bgSrc = useMemo(() => (popup ? '/misc/success-bg.webp' : '/misc/success-bg-full-view.webp'), [popup]);
   const memoizedContainerStyle = useMemo(() => ({ padding: 0 }), []);
-  const memoizedContentPaperStyle = useMemo(() => ({ height: 664 }), []);
 
   return (
     <PageLayout
@@ -60,7 +59,6 @@ export const SuccessScreen = () => {
       }
       isTopbarVisible={false}
       contentContainerStyle={memoizedContainerStyle}
-      contentPaperStyle={memoizedContentPaperStyle}
     >
       <BgImageLayout src={bgSrc} className="flex justify-center items-center flex-1 h-full">
         <div className={clsx('text-white w-full py-8 flex flex-col items-center gap-6', popup ? 'px-4' : 'px-20')}>

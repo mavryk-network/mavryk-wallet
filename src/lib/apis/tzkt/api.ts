@@ -1,4 +1,5 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
+import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
 
 import { toTokenSlug } from 'lib/assets';
@@ -176,7 +177,6 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
 
   const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
     const data = await fetchTzktAccountAssetsPage(account, chainId, offset, fungible);
-
     if (!data.length) return accum;
 
     if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
@@ -185,6 +185,21 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
     return accum.concat(data);
   };
 
+  return recurse([], 0);
+}
+
+export async function fetchTzktAccountRWAAssets(account: string, chainId: string, fungible: boolean | null) {
+  if (!isKnownChainId(chainId)) return Promise.resolve([]);
+
+  const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
+    const data = await fetchTzktAccountRWAAssetsPage(account, chainId, offset, fungible);
+    if (!data.length) return accum;
+
+    if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
+      return recurse(accum.concat(data), offset + TZKT_MAX_QUERY_ITEMS_LIMIT);
+
+    return accum.concat(data);
+  };
   return recurse([], 0);
 }
 
@@ -206,6 +221,88 @@ const fetchTzktAccountAssetsPage = (
         }),
     'sort.desc': 'balance'
   });
+
+// HERE equiteez api call for metadata, cuz chain meta is missing
+
+async function fetchWithTimeout<T extends unknown>(url: string, timeout = 5000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+
+    if (!res.ok) {
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    const data: T = await res.json();
+    return data;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchTzktAccountRWAAssetsPage(
+  account: string,
+  chainId: TzktApiChainId,
+  offset?: number,
+  fungible: boolean | null = null
+) {
+  try {
+    return await retry(
+      async bail => {
+        try {
+          // return await fetchWithTimeout<any>('equiteez api', 5000);
+          // HERE make sure to fetch only mars and ocean for now
+          const data = await fetchGet<TzktAccountAsset[]>(chainId, '/tokens/balances', {
+            account,
+            limit: TZKT_MAX_QUERY_ITEMS_LIMIT,
+            offset,
+            'balance.gt': 0,
+            ...(fungible === null
+              ? { 'token.metadata.null': true }
+              : {
+                  'token.contract.in': `KT1CgLvrzj5MziwPWWzPkZj1eDeEpRAsYvQ9,KT1J1p1f1owAEjJigKGXhwzu3tVCvRPVgGCh`
+                }),
+            'sort.desc': 'balance'
+          });
+
+          const mockedRwaMetadata = {
+            decimals: 6,
+            description: 'A tokenized real-world asset representing digital ownership.',
+            name: 'Real Estate Token',
+            shouldPreferSymbol: true,
+            symbol: 'MARS1',
+            thumbnailUri: 'https://fakeimage.com/token-thumbnail.png'
+          };
+
+          return data.map(item => {
+            return { ...item, token: { ...item.token, metadata: mockedRwaMetadata } };
+          });
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            throw new Error('Request timeout');
+          }
+
+          if (error.message.includes('403')) {
+            bail(new Error('Unauthorized'));
+          }
+
+          throw error;
+        }
+      },
+      {
+        retries: 5,
+        factor: 2, // Exponential backoff
+        minTimeout: 1000, // 1s initial delay
+        maxTimeout: 10000 // 10s max delay
+      }
+    );
+  } catch (error) {
+    console.error('API failed after retries:', error);
+    return 'Fallback data or alternative API response';
+  }
+}
 
 export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundInMS = 1000) {
   try {

@@ -208,7 +208,7 @@ interface TzktAssetToken {
   /**
    * @deprecated // Not always correct information
    */
-  metadata?: TzktAssetMetadata;
+  metadata?: TzktAssetMetadata | TzktRWAAssetMetadata;
 }
 
 interface TzktAssetMetadata {
@@ -224,6 +224,15 @@ interface TzktAssetMetadata {
   thumbnailUri: string;
   displayUri: string;
   artifactUri: string;
+}
+
+interface TzktRWAAssetMetadata {
+  decimals: number;
+  description: string;
+  name: string;
+  shouldPreferSymbol: boolean;
+  symbol: string;
+  thumbnailUri: string;
 }
 
 export interface TzktTokenTransfer {

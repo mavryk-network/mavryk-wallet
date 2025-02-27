@@ -187,7 +187,7 @@ const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], knownMeta:
 
     if (!metadata || !isRwa(metadata)) continue;
 
-    if (metadataOfNew) newMeta[slug] = metadataOfNew as TzktRWAAssetMetadata;
+    if (metadataOfNew) newMeta[slug] = metadataOfNew;
 
     slugs.push(slug);
     balances[slug] = asset.balance;

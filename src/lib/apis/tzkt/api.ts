@@ -18,7 +18,7 @@ import {
   TzktAccount,
   TzktHubConnection
 } from './types';
-import { calcTzktAccountSpendableTezBalance } from './utils';
+import { calcTzktAccountSpendableTezBalance, fetchRwaAssetsMetadata, parseRwaMetadatas } from './utils';
 
 const TZKT_API_BASE_URLS = {
   [TempleChainId.Mainnet]: 'https://api.mavryk.network/mainnet/v1',
@@ -224,24 +224,6 @@ const fetchTzktAccountAssetsPage = (
 
 // HERE equiteez api call for metadata, cuz chain meta is missing
 
-async function fetchWithTimeout<T extends unknown>(url: string, timeout = 5000) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-
-    if (!res.ok) {
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-
-    const data: T = await res.json();
-    return data;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
 async function fetchTzktAccountRWAAssetsPage(
   account: string,
   chainId: TzktApiChainId,
@@ -252,8 +234,6 @@ async function fetchTzktAccountRWAAssetsPage(
     return await retry(
       async bail => {
         try {
-          // return await fetchWithTimeout<any>('equiteez api', 5000);
-          // HERE make sure to fetch only mars and ocean for now
           const data = await fetchGet<TzktAccountAsset[]>(chainId, '/tokens/balances', {
             account,
             limit: TZKT_MAX_QUERY_ITEMS_LIMIT,
@@ -267,18 +247,19 @@ async function fetchTzktAccountRWAAssetsPage(
             'sort.desc': 'balance'
           });
 
-          const mockedRwaMetadata = {
-            decimals: 6,
-            description: 'A tokenized real-world asset representing digital ownership.',
-            name: 'Real Estate Token',
-            shouldPreferSymbol: true,
-            symbol: 'MARS1',
-            thumbnailUri: 'https://fakeimage.com/token-thumbnail.png'
-          };
+          const contracts = data.map(({ token: { contract } }) => contract.address);
 
-          return data.map(item => {
-            return { ...item, token: { ...item.token, metadata: mockedRwaMetadata } };
+          const rwaMetadatas = await fetchRwaAssetsMetadata(contracts);
+          const parsedRwaMetadatasRecord = parseRwaMetadatas(rwaMetadatas);
+
+          const temp = data.map(item => {
+            return {
+              ...item,
+              token: { ...item.token, metadata: parsedRwaMetadatasRecord[item.token.contract.address] ?? {} }
+            };
           });
+
+          return temp;
         } catch (error: any) {
           if (error.name === 'AbortError') {
             throw new Error('Request timeout');
@@ -299,6 +280,7 @@ async function fetchTzktAccountRWAAssetsPage(
       }
     );
   } catch (error) {
+    // HERE
     console.error('API failed after retries:', error);
     return 'Fallback data or alternative API response';
   }

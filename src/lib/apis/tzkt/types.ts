@@ -211,7 +211,7 @@ interface TzktAssetToken {
   metadata?: TzktAssetMetadata | TzktRWAAssetMetadata;
 }
 
-interface TzktAssetMetadata {
+export interface TzktAssetMetadata {
   creators: string[];
   decimals?: string;
   description: string;
@@ -226,13 +226,28 @@ interface TzktAssetMetadata {
   artifactUri: string;
 }
 
-interface TzktRWAAssetMetadata {
-  decimals: number;
+export interface TzktRWAAssetMetadata {
+  decimals?: string;
+  address: string;
   description: string;
   name: string;
   shouldPreferSymbol: boolean;
   symbol: string;
-  thumbnailUri: string;
+  thumbnailUri?: string;
+}
+export interface TzktRWAAssetMetadataResponse {
+  address: string;
+  token_id: number;
+  token_standard: string;
+  token_metadata: {
+    icon?: string;
+    name: string;
+    symbol: string;
+    decimals?: string;
+    assetDetails?: string;
+    thumbnailUri?: string;
+    shouldPreferSymbol: boolean;
+  };
 }
 
 export interface TzktTokenTransfer {

@@ -3,13 +3,14 @@
 import { chunk } from 'lodash';
 import { forkJoin, map } from 'rxjs';
 
+import { fromAssetSlug } from 'lib/assets/utils';
+
 import { TzktRWAAssetMetadata } from '../tzkt/types';
 import { fetchWithTimeout } from '../tzkt/utils';
 
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
 import { RWA_ASSETS_CONTRACTS_QUERY, RWA_TOKEN_METADATA_QUERY } from './queries';
 import { dodoAssetsContractsSchema } from './rwa.schema';
-import { fromAssetSlug } from 'lib/assets/utils';
 
 export async function fetchRwaAssetsContracts() {
   try {

@@ -22,7 +22,7 @@ const loadExchangeRatesEpic: Epic = action$ =>
             usdToTokenRates: {
               ...usdToTokenRates,
               // TODO take rates for rwa tokens, remove later
-              [MARS_TOKEN_SLUG]: '51.094475357904031783253356',
+              [MARS_TOKEN_SLUG]: `${Math.random()}`,
               [OCEAN_TOKEN_SLUG]: '72.844475357904031783253356'
             },
             fiatToTezosRates

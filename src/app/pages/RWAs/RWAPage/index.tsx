@@ -120,10 +120,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
                 <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
                   <div className="flex items-center gap-x-2">
                     <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
-                    <Anchor
-                      href={`https://app.equiteez.com/marketplace/${rwaDetails?.identifier}`}
-                      className="flex items-center gap-x-2"
-                    >
+                    <Anchor href={`https://app.equiteez.com/marketplace/`} className="flex items-center gap-x-2">
                       <span>NextGen Real Estate</span>
                       <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>

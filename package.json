@@ -23,7 +23,8 @@
     "lint:fix": "prettier \"./**/*\" --write --ignore-unknown",
     "clear:lint": "rimraf node_modules/.cache/.eslintcache",
     "find-deadcode": "ts-prune --error",
-    "audit-deps": "node ./audit-deps.js"
+    "audit-deps": "node ./audit-deps.js",
+    "temp": "redux-devtools --open --port=8000"
   },
   "engines": {
     "node": ">=18"

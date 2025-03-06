@@ -27,12 +27,12 @@ const allEpics = combineEpics(
   partnersPromotionEpics,
   balancesEpics,
   assetsEpics,
+  rwasEpics,
   tokensMetadataEpics,
   collectiblesMetadataEpics,
   rwasMetadataEpics,
   abTestingEpics,
   buyWithCreditCardEpics,
-  rwasEpics,
   collectiblesEpics
 );
 

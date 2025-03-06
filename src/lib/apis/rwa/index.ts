@@ -9,6 +9,7 @@ import { fetchWithTimeout } from '../tzkt/utils';
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
 import { RWA_ASSETS_CONTRACTS_QUERY, RWA_TOKEN_METADATA_QUERY } from './queries';
 import { dodoAssetsContractsSchema } from './rwa.schema';
+import { fromAssetSlug } from 'lib/assets/utils';
 
 export async function fetchRwaAssetsContracts() {
   try {
@@ -41,7 +42,7 @@ export async function fetchRwaAssetsContracts() {
 // api rwa metadata utils
 export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[]> {
   const variables = {
-    addresses: contracts
+    addresses: contracts.map(address => fromAssetSlug(address)[0])
   };
 
   const response = await fetchWithTimeout('https://api.equiteez.com/v1/graphql', {
@@ -61,6 +62,8 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[
   // TODO add zod schema // HERE
   const { data } = await response.json();
 
+  console.log(data, 'data');
+
   return data.token;
 }
 
@@ -68,7 +71,6 @@ export const fetchRWADetails$ = (slugs: string[]) =>
   forkJoin(
     chunk(slugs, MAX_RWA_QUERY_RESPONSE_ITEMS).map(slugsChunk =>
       fetchRwaAssetsMetadata$(slugsChunk).then(data => {
-        debugger;
         return data.map(meta => {
           const { token_metadata, address } = meta;
           const {

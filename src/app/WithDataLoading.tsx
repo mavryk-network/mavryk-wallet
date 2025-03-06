@@ -13,6 +13,7 @@ import { useTokensApyLoading } from './hooks/use-load-tokens-apy.hook';
 import { useLongRefreshLoading } from './hooks/use-long-refresh-loading.hook';
 import { useMetadataLoading } from './hooks/use-metadata-loading';
 import { useMetadataRefresh } from './hooks/use-metadata-refresh';
+import { useRWAsDetailsLoading } from './hooks/use-rwa-details-loading';
 import { useStorageAnalytics } from './hooks/use-storage-analytics';
 import { useUserIdSync } from './hooks/use-user-id-sync';
 
@@ -26,6 +27,7 @@ export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
   useMetadataRefresh();
   useBalancesLoading();
   useCollectiblesDetailsLoading();
+  useRWAsDetailsLoading();
 
   useLongRefreshLoading();
   useAdvertisingLoading();

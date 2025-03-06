@@ -12,8 +12,8 @@ const loadRwasDetailsEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadRwasDetailsActions.submit),
     toPayload(),
-    switchMap(slugs =>
-      fetchRWADetails$(slugs).pipe(
+    switchMap(slugs => {
+      return fetchRWADetails$(slugs).pipe(
         map(data => {
           const details: RwaDetailsRecord = {};
 
@@ -34,8 +34,8 @@ const loadRwasDetailsEpic: Epic = action$ =>
           console.error(error);
           return of(loadRwasDetailsActions.fail(error instanceof Error ? error.message : 'Unknown error'));
         })
-      )
-    )
+      );
+    })
   );
 
 export const rwasEpics = combineEpics(loadRwasDetailsEpic);

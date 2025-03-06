@@ -236,6 +236,7 @@ export interface TzktRWAAssetMetadata {
   shouldPreferSymbol: boolean;
   symbol: string;
   thumbnailUri?: string;
+  identifier: string;
 }
 export interface TzktRWAAssetMetadataResponse {
   address: string;

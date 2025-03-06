@@ -24,7 +24,8 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
   const price = useAssetFiatCurrencyPrice(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();
 
-  const { transaction: explorerBaseUrl } = useExplorerBaseUrls();
+  const { contract: explorerBaseUrl } = useExplorerBaseUrls();
+
   const exploreContractUrl = useMemo(
     () => (explorerBaseUrl ? new URL(contract, explorerBaseUrl).href : null),
     [explorerBaseUrl, contract]

@@ -2,26 +2,24 @@ import { combineEpics, Epic } from 'redux-observable';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { ofType, toPayload } from 'ts-action-operators';
 
-import { fetchObjktCollectibles$ } from 'lib/apis/objkt';
+import { fetchRWADetails$ } from 'lib/apis/rwa';
 import { toTokenSlug } from 'lib/assets';
 
 import { loadRwasDetailsActions } from './actions';
 import type { RwaDetailsRecord } from './state';
-import { convertRwaObjktInfoToStateDetailsType } from './utils';
 
 const loadRwasDetailsEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadRwasDetailsActions.submit),
     toPayload(),
     switchMap(slugs =>
-      // TODO fetch from mavryk api, for npw api isn't available
-      fetchObjktCollectibles$(slugs).pipe(
+      fetchRWADetails$(slugs).pipe(
         map(data => {
           const details: RwaDetailsRecord = {};
 
           for (const info of data.tokens) {
-            const slug = toTokenSlug(info.fa_contract, info.token_id);
-            const itemDetails = convertRwaObjktInfoToStateDetailsType(info, data.galleriesAttributesCounts);
+            const slug = toTokenSlug(info.address, info.token_id);
+            const itemDetails = info;
 
             details[slug] = itemDetails;
           }

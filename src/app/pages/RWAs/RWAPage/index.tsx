@@ -12,12 +12,13 @@ import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg'
 import PageLayout from 'app/layouts/PageLayout';
 // import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
+import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T } from 'lib/i18n';
-import { getAssetName, TokenMetadata } from 'lib/metadata';
+import { TokenMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
@@ -49,13 +50,12 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
 
   const { publicKeyHash } = useAccount();
   const metadata = useRwaMetadataSelector(assetSlug);
+  const rwaDetails = useRwaDetailsSelector(assetSlug);
   const { value: balance = ZERO } = useBalance(assetSlug, publicKeyHash);
 
   const account = useAccount();
 
   const areDetailsLoading = false;
-
-  const rwaName = getAssetName(metadata);
 
   const dispatch = useDispatch();
   useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
@@ -74,25 +74,19 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
     [balance, metadata]
   );
 
+  const name = rwaDetails?.name ?? '--';
+
   const CollectibleTextSection = () => (
     <div>
-      <CopyButton
-        text={rwaName}
-        type={'block'}
-        className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}
-      >
-        {rwaName ?? 'NAME text #234'}
+      <CopyButton text={name} type={'block'} className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}>
+        {name}
       </CopyButton>
-      <div className="text-base-plus text-white break-words mb-4">
-        Lorem ipsum dolor sit amet consectetur. Donec malesuada id fringilla maecenas at orci eu vel tellus. Ac arcu
-        velit amet nascetur vestibulum consectetur sem. Facilisis dictumst leo eget sit eu. Ultricies ornare sed
-        fringilla quis id sit. Turpis ut placerat leo convallis.
-      </div>
+      <div className="text-base-plus text-white break-words mb-4">{rwaDetails?.description ?? '--'}</div>
     </div>
   );
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{rwaName}</span>}>
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{name}</span>}>
       <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
         <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
           <div
@@ -127,7 +121,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
                   <div className="flex items-center gap-x-2">
                     <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
                     <Anchor
-                      href={`https://dev.equiteez.pages.dev/properties/${metadata?.address}`}
+                      href={`https://app.equiteez.com/marketplace/${rwaDetails?.identifier}`}
                       className="flex items-center gap-x-2"
                     >
                       <span>NextGen Real Estate</span>

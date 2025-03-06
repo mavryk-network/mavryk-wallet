@@ -34,9 +34,6 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
   const areDetailsLoading = useAllRwasDetailsLoadingSelector();
   const details = useRwaDetailsSelector(assetSlug);
 
-  console.log(details, 'details');
-
-  const assetName = getAssetName(metadata);
   const isTzBTC = isTzbtcAsset(assetSlug);
 
   return (
@@ -51,13 +48,12 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
             'relative flex items-center justify-center bg-gray-405 rounded-lg overflow-hidden hover:opacity-70'
           )}
           style={{ width: 59, height: 59 }}
-          title={assetName}
+          title={details?.name}
         >
           <RwaItemImage
             assetSlug={assetSlug}
             metadata={metadata}
             areDetailsLoading={areDetailsLoading && details === undefined}
-            mime={details?.mime}
             // TODO add adult blur logic
             adultBlur={false}
             containerElemRef={toDisplayRef}
@@ -71,7 +67,7 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
               popup ? 'max-w-64' : 'max-w-96'
             )}
           >
-            {assetName}
+            {details?.name ?? '--'}
           </div>
           <div className="flex gap-x-6 items-start">
             <RWATableItem

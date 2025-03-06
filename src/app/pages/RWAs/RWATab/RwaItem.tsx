@@ -28,12 +28,13 @@ interface Props {
 export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
   const { popup } = useAppEnv();
   const metadata = useRwaMetadataSelector(assetSlug);
-  // console.log(metadata, 'metadata');
   const { value: balance = ZERO } = useBalance(assetSlug, accountPkh);
   const toDisplayRef = useRef<HTMLDivElement>(null);
 
   const areDetailsLoading = useAllRwasDetailsLoadingSelector();
   const details = useRwaDetailsSelector(assetSlug);
+
+  console.log(details, 'details');
 
   const assetName = getAssetName(metadata);
   const isTzBTC = isTzbtcAsset(assetSlug);

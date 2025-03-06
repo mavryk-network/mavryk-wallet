@@ -6,6 +6,8 @@ import { toTokenSlug } from 'lib/assets';
 import { TempleChainId } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
+import { fetchRwaAssetsContracts } from '../rwa';
+
 import {
   TzktOperation,
   TzktOperationType,
@@ -18,7 +20,7 @@ import {
   TzktAccount,
   TzktHubConnection
 } from './types';
-import { calcTzktAccountSpendableTezBalance, fetchRwaAssetsMetadata, parseRwaMetadatas } from './utils';
+import { calcTzktAccountSpendableTezBalance } from './utils';
 
 const TZKT_API_BASE_URLS = {
   [TempleChainId.Mainnet]: 'https://api.mavryk.network/mainnet/v1',
@@ -222,8 +224,6 @@ const fetchTzktAccountAssetsPage = (
     'sort.desc': 'balance'
   });
 
-// HERE equiteez api call for metadata, cuz chain meta is missing
-
 async function fetchTzktAccountRWAAssetsPage(
   account: string,
   chainId: TzktApiChainId,
@@ -234,6 +234,7 @@ async function fetchTzktAccountRWAAssetsPage(
     return await retry(
       async bail => {
         try {
+          const rwaContracts = await fetchRwaAssetsContracts();
           const data = await fetchGet<TzktAccountAsset[]>(chainId, '/tokens/balances', {
             account,
             limit: TZKT_MAX_QUERY_ITEMS_LIMIT,
@@ -242,24 +243,17 @@ async function fetchTzktAccountRWAAssetsPage(
             ...(fungible === null
               ? { 'token.metadata.null': true }
               : {
-                  'token.contract.in': `KT1CgLvrzj5MziwPWWzPkZj1eDeEpRAsYvQ9,KT1J1p1f1owAEjJigKGXhwzu3tVCvRPVgGCh`
+                  'token.contract.in': rwaContracts.join(',')
                 }),
             'sort.desc': 'balance'
           });
 
-          const contracts = data.map(({ token: { contract } }) => contract.address);
-
-          const rwaMetadatas = await fetchRwaAssetsMetadata(contracts);
-          const parsedRwaMetadatasRecord = parseRwaMetadatas(rwaMetadatas);
-
-          const temp = data.map(item => {
+          return data.map(item => {
             return {
               ...item,
-              token: { ...item.token, metadata: parsedRwaMetadatasRecord[item.token.contract.address] ?? {} }
+              token: { ...item.token }
             };
           });
-
-          return temp;
         } catch (error: any) {
           if (error.name === 'AbortError') {
             throw new Error('Request timeout');
@@ -280,9 +274,8 @@ async function fetchTzktAccountRWAAssetsPage(
       }
     );
   } catch (error) {
-    // HERE
-    console.error('API failed after retries:', error);
-    return 'Fallback data or alternative API response';
+    console.error('API failed after 5 retries:', error);
+    return [];
   }
 }
 

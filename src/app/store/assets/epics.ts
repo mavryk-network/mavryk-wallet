@@ -92,7 +92,7 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => {
-          console.log(slugs, newMeta);
+          console.log(newMeta, 'newMeta');
           return [
             loadAccountRwasActions.success({ account, chainId, slugs }),
             putTokensBalancesAction({ publicKeyHash: account, chainId, balances: fixBalances(balances) }),

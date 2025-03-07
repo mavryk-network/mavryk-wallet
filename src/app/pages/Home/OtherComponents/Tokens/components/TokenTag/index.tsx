@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { TokenApyInfo } from 'app/hooks/use-token-apy.hook';
-import { isTezAsset } from 'lib/assets';
+import { isMavSlug } from 'lib/assets';
 import { isTruthy } from 'lib/utils';
 
 import { TokenApyTag } from './ApyTag';
@@ -16,7 +16,7 @@ interface TokenTagProps {
 }
 
 export const TokenTag: React.FC<TokenTagProps> = ({ assetSlug, assetSymbol, apyInfo, scam }) => {
-  if (isTezAsset(assetSlug)) return <DelegateTezosTag />;
+  if (isMavSlug(assetSlug)) return <DelegateTezosTag />;
 
   if (isTruthy(scam)) return <ScamTag assetSlug={assetSlug} />;
 

@@ -9,7 +9,7 @@ import { detectTokenStandard } from './standards';
 import type { Asset } from './types';
 import { fromAssetSlug } from './utils';
 
-import { isFA2Token, isTezAsset } from './index';
+import { isFA2Token, isMavSlug } from './index';
 
 export const toTransferParams = async (
   tezos: TezosToolkit,
@@ -21,7 +21,7 @@ export const toTransferParams = async (
 ) => {
   const asset = await fromAssetSlugWithStandardDetect(tezos, assetSlug);
 
-  if (isTezAsset(asset)) {
+  if (isMavSlug(asset)) {
     return {
       to: toPkh,
       amount: amount as any
@@ -69,7 +69,7 @@ export const toTransferParams = async (
 };
 
 export const fromAssetSlugWithStandardDetect = async (tezos: TezosToolkit, slug: string): Promise<Asset> => {
-  if (isTezAsset(slug)) return slug;
+  if (isMavSlug(slug)) return slug;
 
   const [contractAddress, tokenIdStr] = fromAssetSlug(slug);
 

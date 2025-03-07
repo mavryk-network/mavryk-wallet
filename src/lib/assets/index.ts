@@ -17,9 +17,9 @@ export const tokenToSlug = <T extends { address: string; id?: BigNumber.Value }>
 };
 
 export const isFA2Token = (asset: Asset): asset is FA2Token =>
-  isTezAsset(asset) ? false : typeof asset.id !== 'undefined';
+  isMavSlug(asset) ? false : typeof asset.id !== 'undefined';
 
-export const isTezAsset = (asset: Asset | string): asset is typeof MAV_TOKEN_SLUG => asset === MAV_TOKEN_SLUG;
+export const isMavSlug = (asset: Asset | string): asset is typeof MAV_TOKEN_SLUG => asset === MAV_TOKEN_SLUG;
 
 export const isTzbtcAsset = (asset: Asset | string): asset is typeof TZBTC_TOKEN_SLUG => asset === TZBTC_TOKEN_SLUG;
 

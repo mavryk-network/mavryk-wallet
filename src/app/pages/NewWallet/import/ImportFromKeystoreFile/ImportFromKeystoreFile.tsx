@@ -240,7 +240,7 @@ const KeystoreFileInput: React.FC<KeystoreFileInputProps> = ({ value, name, clea
           </span>
         ) : (
           <span className={classNames('font-light text-secondary-white max-w-9/10', fullPage ? 'text-sm' : 'text-xs')}>
-            (*.tez)
+            (*.mav)
           </span>
         )}
       </div>

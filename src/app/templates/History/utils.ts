@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import { MAV_TOKEN_SLUG, isTezAsset, toTokenSlug } from 'lib/assets';
+import { MAV_TOKEN_SLUG, isMavSlug, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
@@ -53,7 +53,7 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
     let assetSlug: string = '';
 
     if (op.contractAddress) {
-      if (isTezAsset(op.contractAddress)) {
+      if (isMavSlug(op.contractAddress)) {
         assetSlug = MAV_TOKEN_SLUG;
       } else {
         assetSlug = toTokenSlug(op.contractAddress, tokenId);

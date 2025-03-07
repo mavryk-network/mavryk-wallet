@@ -1046,7 +1046,7 @@
     "message": "Anahtar Deposu Dosyası"
   },
   "keystoreFileFieldDescription": {
-    "message": "Şifreli bir anahtar deposu dosyasından (.tez) cüzdanınızı içe aktarın."
+    "message": "Şifreli bir anahtar deposu dosyasından (.mav) cüzdanınızı içe aktarın."
   },
   "filePassword": {
     "message": "Dosya Parolası"
@@ -1205,8 +1205,8 @@
     "message": "ör. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "ör. alice.tez veya mv1V4h45W3p4e...",
-    "description": "alice.tez = domain like google.com"
+    "message": "ör. alice.mav veya mv1V4h45W3p4e...",
+    "description": "alice.mav = domain like google.com"
   },
   "tryingToTransferToYourself": {
     "message": "Fonları kendinize transfer etmeye çalışıyorsunuz.\nLütfen bunun tam olarak yapmak istediğiniz şey olduğundan emin olun."
@@ -1763,7 +1763,7 @@
     }
   },
   "emptyImplicitContract": {
-    "message": "Hesabınız boş. Etkinleştirmek için bu hesaba herhangi bir tutarda tez yatırın"
+    "message": "Hesabınız boş. Etkinleştirmek için bu hesaba herhangi bir tutarda mav yatırın"
   },
   "balanceTooLow": {
     "message": "Gas token bakiyesi çok düşük"
@@ -1988,7 +1988,7 @@
     "message": "Uyarı! İşlemin başarısız olma ihtimali var"
   },
   "dAppsListTvlDescription": {
-    "message": "Toplam Değer Kilitlendi. Tez değeri, dApps'te kilitlenen toplam tez miktarıdır. USD değeri, burada kilitlenen toplam tez ve token miktarıdır."
+    "message": "Toplam Değer Kilitlendi. Tez değeri, dApps'te kilitlenen toplam mav miktarıdır. USD değeri, burada kilitlenen toplam mav ve token miktarıdır."
   },
   "noFavoriteDApps": {
     "message": "Favori dApps'iniz yok"

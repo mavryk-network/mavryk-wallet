@@ -98,7 +98,7 @@ export const InitialStep: FC<Omit<StepProps, 'orderInfo'>> = ({ isApiError, setO
   return (
     <>
       <p className={styles['title']}>
-        <T id="sellTezDetails" />
+        <T id="sellMavDetails" />
       </p>
       <p className={styles['description']}>
         <T id="sellDetailsDescription" />

@@ -1,5 +1,3 @@
-// TODO move to rwa details
-
 import { chunk } from 'lodash';
 import { forkJoin, map } from 'rxjs';
 
@@ -14,7 +12,7 @@ import { dodoAssetsContractsSchema } from './rwa.schema';
 
 export async function fetchRwaAssetsContracts() {
   try {
-    const response = await fetchWithTimeout('https://api.equiteez.com/v1/graphql', {
+    const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -46,7 +44,7 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[
     addresses: contracts.map(address => fromAssetSlug(address)[0])
   };
 
-  const response = await fetchWithTimeout('https://api.equiteez.com/v1/graphql', {
+  const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

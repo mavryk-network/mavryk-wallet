@@ -40,7 +40,7 @@ export enum TempleChainId {
   Mainnet = 'NetXdQprcVkpaWU',
   Basenet = 'NetXJMfAoC7pZSW',
   Weekly = 'NetXRp4kyGKJTuB',
-  Atlas = 'NetXvyTAafh8goH'
+  Atlas = 'NetXUrNc8uioxP8'
 }
 
 export function isKnownChainId(chainId: string): chainId is TempleChainId {

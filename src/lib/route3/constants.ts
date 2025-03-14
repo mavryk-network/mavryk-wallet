@@ -7,7 +7,7 @@ export const ROUTE3_CONTRACT = 'KT1R7WEtNNim3YgkxPt8wPMczjH3eyhbJMtz';
 export const LIQUIDITY_BAKING_PROXY_CONTRACT = 'KT1WLWMMm9MywjCqnA8wBAYy9QhUE1LzfZ4j';
 export const BURN_ADDREESS = 'mv2burnburnburnburnburnburnbur7hzNeg';
 export const ROUTING_FEE_ADDRESS = 'tz1UbRzhYjQKTtWYvGUWcRtVT4fN3NESDVYT';
-export const KYC_CONTRACT = 'KT1RzBPUrktjuMGKYidfFC5t8BGJ8MSZaAp7';
+export const KYC_CONTRACT = 'KT1TYqkzAYKDrCmPo7Be1vZtC7kdUoNfKyZa';
 
 const ROUTING_FEE_PERCENT = 0.35;
 export const ROUTING_FEE_RATIO = getPercentageRatio(ROUTING_FEE_PERCENT);

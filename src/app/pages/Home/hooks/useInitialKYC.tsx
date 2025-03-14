@@ -12,5 +12,5 @@ export const useInitialKYC = (acc: TempleAccount) => {
 
       await updateAccountKYCStatus(acc.publicKeyHash, isKYC);
     })();
-  }, [acc.isKYC, acc.publicKeyHash, updateAccountKYCStatus]);
+  }, [acc.publicKeyHash]);
 };

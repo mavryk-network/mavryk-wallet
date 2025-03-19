@@ -23,7 +23,7 @@ export type BlockExplorer = {
 export const BLOCK_EXPLORERS: BlockExplorer[] = [
   {
     id: 'tzkt',
-    name: 'TzKT',
+    name: 'Nexus',
     baseUrls: new Map([
       [
         TempleChainId.Mainnet,

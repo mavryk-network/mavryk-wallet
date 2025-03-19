@@ -177,7 +177,7 @@ const ErrorsComponent: React.FC<ErrorsComponentProps> = ({
 }) => (
   <div className="flex justify-between items-baseline">
     <p className={isInsufficientTezBalanceError ? 'text-red-700' : 'text-transparent'}>
-      <T id="insufficientTezBalance" />
+      <T id="insufficientMavBalance" />
     </p>
     {maxAmount && (
       <p className={getSmallErrorText(isMaxAmountError)}>

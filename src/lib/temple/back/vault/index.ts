@@ -518,7 +518,6 @@ export class Vault {
   async updateAccountKYCStatus(accPublicKeyHash: string, isKYC: boolean) {
     return withError('Failed to update account KYC status', async () => {
       const allAccounts = await this.fetchAccounts();
-
       if (!allAccounts.some(acc => acc.publicKeyHash === accPublicKeyHash)) {
         throw new PublicError('Account not found');
       }
@@ -526,6 +525,7 @@ export class Vault {
       const newAllAcounts = allAccounts.map(acc =>
         acc.publicKeyHash === accPublicKeyHash ? { ...acc, isKYC: isKYC } : acc
       );
+
       await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], this.passKey);
 
       return newAllAcounts;

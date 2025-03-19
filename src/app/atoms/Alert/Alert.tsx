@@ -3,6 +3,7 @@ import React, { FC, HTMLAttributes, ReactNode, useCallback, useEffect, useRef, u
 import classNames from 'clsx';
 import { Collapse } from 'react-collapse';
 
+import { ReactComponent as ErrorIcon } from 'app/icons/alert-error.svg';
 import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as AlertIcon } from 'app/icons/warning.svg';
@@ -43,6 +44,7 @@ export const Alert: FC<AlertProps> = ({
   }, [autoFocus]);
 
   const [bgColorClassName, _, textColorClassName, titleColorClassName] = getColorsByType(type);
+  const Icon = getIconByType(type);
 
   return (
     <div
@@ -59,7 +61,7 @@ export const Alert: FC<AlertProps> = ({
       aria-label={t('alert')}
       {...rest}
     >
-      {type === 'warning' && <AlertIcon className="w-6 h-6" style={{ minWidth: 24 }} />}
+      {Icon && <Icon className="w-6 h-6" style={{ minWidth: 24 }} />}
       <div>
         {title && (
           <h2
@@ -137,15 +139,26 @@ const getColorsByType = (type: AlertType) => {
   const [bgColorClassName, borderColorClassName, textColorClassName, titleColorClassName] = (() => {
     switch (type) {
       case 'success':
-        return ['bg-green-100', 'border-green-100', 'text-green-700', 'text-green-700'];
+        return ['bg-primary-success-bg', 'border-primary-success-bg', 'text-white', 'text-white'];
       case 'warning':
         return ['bg-primary-alert-bg', 'border-primary-alert-bg', 'text-white', 'text-white'];
       case 'error':
-        return ['bg-red-100', 'border-red-700', 'text-red-700', 'text-red-700'];
+        return ['bg-primary-alert-error', 'border-primary-alert-error', 'text-white', 'text-white'];
       case 'delegate':
-        return ['bg-blue-150', 'border-blue-750', 'text-blue-750', 'text-blue-500'];
+        return ['bg-accent-blue-hover', 'border-accent-blue-hover', 'text-white', 'text-white'];
     }
   })();
 
   return [bgColorClassName, borderColorClassName, textColorClassName, titleColorClassName] as const;
+};
+
+const getIconByType = (type: AlertType) => {
+  switch (type) {
+    case 'warning':
+      return AlertIcon;
+    case 'error':
+      return ErrorIcon;
+    default:
+      return null;
+  }
 };

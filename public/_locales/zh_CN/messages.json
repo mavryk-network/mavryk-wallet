@@ -1118,8 +1118,8 @@
     "message": "例如：mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "例如：alice.tez或mv1V4h45W3p4e…",
-    "description": "alice.tez = domain like google.com"
+    "message": "例如：alice.mav或mv1V4h45W3p4e…",
+    "description": "alice.mav = domain like google.com"
   },
   "tryingToTransferToYourself": {
     "message": "您正在尝试向自己转账。\n请确认您确实想这样做。"

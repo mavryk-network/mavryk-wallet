@@ -15,14 +15,14 @@ export const tokenToSlug = <T extends { address: string; id?: string | number }>
 };
 
 export const isFA2Token = (asset: Asset): asset is FA2Token =>
-  isTezAsset(asset) ? false : typeof asset.id !== 'undefined';
+  isMavSlug(asset) ? false : typeof asset.id !== 'undefined';
 
-export const isTezAsset = (asset: Asset | string): asset is typeof MAV_TOKEN_SLUG => asset === MAV_TOKEN_SLUG;
+export const isMavSlug = (asset: Asset | string): asset is typeof MAV_TOKEN_SLUG => asset === MAV_TOKEN_SLUG;
 
 export const toPenny = (metadata: AssetMetadataBase | nullish) => new BigNumber(1).div(10 ** (metadata?.decimals ?? 0));
 
 export const fromFa2TokenSlug = (slug: string): FA2Token => {
-  if (isTezAsset(slug)) {
+  if (isMavSlug(slug)) {
     throw new Error('Only fa2 token slug allowed');
   }
 

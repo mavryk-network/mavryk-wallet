@@ -159,7 +159,7 @@
     "message": "Borrow, Land and Earn on your favorite tokens!"
   },
   "tokensAreSupported": {
-    "message": "TEZ, cTEZ, kUSD, tzBTC, uUSD, and uBTC are supported."
+    "message": "Mav, cMAV, kUSD, tzBTC, uUSD, and uBTC are supported."
   },
   "independenceDayOfUkraine": {
     "message": "Independence Day of Ukraine"
@@ -349,11 +349,11 @@
     "message": "Use CoinSwitch",
     "description": "CoinSwitch = https://coinswitch.co/"
   },
-  "tezosFaucet": {
-    "message": "Tezos Faucet"
+  "mavenFaucet": {
+    "message": "Maven Faucet"
   },
-  "tezosFaucetAlpha": {
-    "message": "Tezos Faucet (Alpha)"
+  "mavenFaucetAlpha": {
+    "message": "Maven Faucet (Alpha)"
   },
   "depositToWallet": {
     "message": "Deposit to your wallet"
@@ -915,8 +915,8 @@
     "message": "In this section you can enable ability to interact with decentralized applications that support Temple Wallet."
   },
   "networksDescription": {
-    "message": "In this section you can add or delete custom Tezos networks.",
-    "description": "Tezos = blockchain name (https://tezos.com/)"
+    "message": "In this section you can add or delete custom Mavryk networks.",
+    "description": "Mavryk = blockchain name"
   },
   "activateAccount": {
     "message": "Activate Account"
@@ -1096,7 +1096,7 @@
     "message": "Routing Fee"
   },
   "routingFeeTooltip": {
-    "message": "For choosing the most profitable exchange route among Tezos DEXes. DEXes commissions are not included."
+    "message": "For choosing the most profitable exchange route among Mavryk DEXes. DEXes commissions are not included."
   },
   "space": {
     "message": "Space"
@@ -1141,13 +1141,13 @@
     }
   },
   "delegationPointsHead2": {
-    "message": "on your Tezos"
+    "message": "on your Maveyk"
   },
   "delegationPointsHead3": {
     "message": "annualy from Baking rewards"
   },
   "delegationPoint1": {
-    "message": "Your first reward in Tezos will be paid approximately in 36 days."
+    "message": "Your first reward in Mavryk will be paid approximately in 36 days."
   },
   "delegationPoint2": {
     "message": "Then, you receive a reward every 3 days."
@@ -1156,7 +1156,7 @@
     "message": "Earn rate varies over time. Check the current rate in your Wallet."
   },
   "delegationPoint4": {
-    "message": "Your Tezos tokens are never locked. Send anytime!"
+    "message": "Your Mavryk tokens are never locked. Send anytime!"
   },
   "baker": {
     "message": "Baker"
@@ -1245,8 +1245,8 @@
       }
     }
   },
-  "insufficientTezBalance": {
-    "message": "Insufficient TEZ balance"
+  "insufficientMavBalance": {
+    "message": "Insufficient MAV balance"
   },
   "notEnoughFunds": {
     "message": "Not enough funds"
@@ -1374,7 +1374,7 @@
     "message": "Keystore File"
   },
   "keystoreFileFieldDescription": {
-    "message": "Import your wallet from an encrypted keystore file (.tez)."
+    "message": "Import your wallet from an encrypted keystore file (.mav)."
   },
   "filePassword": {
     "message": "File Password"
@@ -1510,7 +1510,7 @@
     }
   },
   "tokensRecepientInputDescriptionWithDomain": {
-    "message": "Address or Tezos domain to send $assetSymbol$ funds to.",
+    "message": "Address or Mavryk domain to send $assetSymbol$ funds to.",
     "placeholders": {
       "assetSymbol": {
         "content": "$1"
@@ -1527,8 +1527,8 @@
     "message": "e.g. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "e.g. alice.tez or mv1V4h45W3p4e...",
-    "description": "alice.tez = domain like google.com"
+    "message": "e.g. alice.mav or mv1V4h45W3p4e...",
+    "description": "alice.mav = domain like google.com"
   },
   "tryingToTransferToYourself": {
     "message": "You're trying to transfer funds to yourself.\nPlease, ensure that it's exactly what you want."
@@ -1566,7 +1566,7 @@
     "message": "Click on Account you want to send funds to."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Your tez(main asset) balance is zero. ꝳ funds are required for the fee."
+    "message": "Your mav(main asset) balance is zero. ꝳ funds are required for the fee."
   },
   "unableToSendTransactionAction": {
     "message": "Unable to send transaction to provided Recipient."
@@ -2103,7 +2103,7 @@
     "message": "Invalid address or domain name"
   },
   "otherNetworkAddressError": {
-    "message": "You entered the $network$ network address. Please enter the Tezos network address",
+    "message": "You entered the $network$ network address. Please enter the Mavryk network address",
     "placeholders": {
       "network": {
         "content": "$1"
@@ -2165,7 +2165,7 @@
     }
   },
   "emptyImplicitContract": {
-    "message": "Your account is empty. Deposit any tez amount on this account to activate it"
+    "message": "Your account is empty. Deposit any mav amount on this account to activate it"
   },
   "balanceTooLow": {
     "message": "Gas token balance is too low"
@@ -2182,7 +2182,7 @@
   "noResults": {
     "message": "No Results"
   },
-  "tezosApy": {
+  "mavenApy": {
     "message": "APY: 6%"
   },
   "tokenApy": {
@@ -2486,7 +2486,7 @@
     "message": "Copy Error Logs"
   },
   "dAppsListTvlDescription": {
-    "message": "Total Value Locked. The value in tez is the total amount of tez locked in dApps. The value in USD is the total amount of tez and tokens locked there."
+    "message": "Total Value Locked. The value in mav is the total amount of mav locked in dApps. The value in USD is the total amount of mav and tokens locked there."
   },
   "noFavoriteDApps": {
     "message": "You don't have any favorite dApps"
@@ -2516,7 +2516,7 @@
     "message": "Unknown account"
   },
   "ledgerBridgeGuide": {
-    "message": "To connect the Ledger, please activate your device and open Tezos Wallet application."
+    "message": "To connect the Ledger, please activate your device and open Mavryk Wallet application."
   },
   "noExchangerFoundForToken": {
     "message": "No exchanger was found for token $symbol$ ($name$).",
@@ -2591,7 +2591,7 @@
     "message": "Disclaimer. Beta version, read before using the SWAP section."
   },
   "swapDisclaimerContent": {
-    "message": "Temple wallet only provides an interface to interact with the Tezos Dexes. \n\nWe are not responsible for: DEX issues, displayed tokens, price, exchange rates, and user trading decisions. \n\nBefore using this Swap Section, you should review the relevant documentation to understand how the DEX(AMM) protocols work. \n\nUsing this section is solely the user's responsibility."
+    "message": "Temple wallet only provides an interface to interact with the Mavryk Dexes. \n\nWe are not responsible for: DEX issues, displayed tokens, price, exchange rates, and user trading decisions. \n\nBefore using this Swap Section, you should review the relevant documentation to understand how the DEX(AMM) protocols work. \n\nUsing this section is solely the user's responsibility."
   },
   "noContactsFound": {
     "message": "No contacts found"
@@ -2649,10 +2649,10 @@
     "message": "How to start"
   },
   "howToStartDescription1": {
-    "message": "To start using your wallet and interacting with the Tezos DApps ecosystem, the account balance must be positive. To do this, top up your address with TEZ."
+    "message": "To start using your wallet and interacting with the Mavryk DApps ecosystem, the account balance must be positive. To do this, top up your address with MAV."
   },
   "howToStartDescription2": {
-    "message": "You can use the \"Buy\" button to exchange your\ncryptocurrencies, as well as top up your balance using fiat currencies to receive TEZ or USDt."
+    "message": "You can use the \"Buy\" button to exchange your\ncryptocurrencies, as well as top up your balance using fiat currencies to receive MAV or USDt."
   },
   "howToStartHint": {
     "message": "Also, you can copy your address and send coins to it from another wallet or Exchange. To copy the address, click on it on the main wallet screen or use “Receive”."
@@ -2707,7 +2707,7 @@
     "message": "Join our communities in Telegram and Discord."
   },
   "congratsDescription6": {
-    "message": "PS: Good luck exploring the Tezos world!"
+    "message": "PS: Good luck exploring the Mavryk world!"
   },
   "attention": {
     "message": "Attention"
@@ -2808,13 +2808,13 @@
     "message": "Buy With Ramp"
   },
   "buyWithRampDescription": {
-    "message": "Buy TEZ  using Visa, Mastercard, and all major debit and credit cards. Ramp is available in 160+ countries and territories."
+    "message": "Buy MAV  using Visa, Mastercard, and all major debit and credit cards. Ramp is available in 160+ countries and territories."
   },
   "sellWithAliceBob": {
-    "message": "Sell TEZ with Alice-Bob"
+    "message": "Sell MAV with Alice-Bob"
   },
   "sellWithAliceBobDescription": {
-    "message": "Fast and cost-effective exchange of TEZ."
+    "message": "Fast and cost-effective exchange of MAV."
   },
   "selectPaymentProvider": {
     "message": "Select payment provider"
@@ -2828,11 +2828,11 @@
   "buyWithCard": {
     "message": "Buy with Debit/Credit Card"
   },
-  "sellTez": {
-    "message": "Sell TEZ"
+  "sellMav": {
+    "message": "Sell MAV"
   },
   "topUpDescription": {
-    "message": "Temple integrated third-party solutions to buy TEZ or other currencies with Debit/Credit card."
+    "message": "Temple integrated third-party solutions to buy MAV or other currencies with Debit/Credit card."
   },
   "noTopUpOptionsAvailable": {
     "message": "No top up options are available"
@@ -2888,7 +2888,7 @@
     "message": "Best price"
   },
   "withdrawDescription": {
-    "message": "Temple integrated third-party solutions to sell TEZ. Choose a provider, follow guides, \n get fiat to your Debit/Credit card"
+    "message": "Temple integrated third-party solutions to sell MAV. Choose a provider, follow guides, \n get fiat to your Debit/Credit card"
   },
   "topUpCrypto": {
     "message": "Crypto"
@@ -2915,18 +2915,18 @@
     "message": "Enter exchange details"
   },
   "exchangeDetailsDescription": {
-    "message": "Top up your TEZ or USDT Tezos balance instantly with $number$ cryptocurrencies",
+    "message": "Top up your MAV or USDT Mavryk balance instantly with $number$ cryptocurrencies",
     "placeholders": {
       "number": {
         "content": "$1"
       }
     }
   },
-  "sellTezDetails": {
-    "message": "Sell TEZ details"
+  "sellMavDetails": {
+    "message": "Sell MAV details"
   },
   "sellDetailsDescription": {
-    "message": "Sell TEZ to fiat. Get fiat to Visa, Mastercard cards."
+    "message": "Sell MAV to fiat. Get fiat to Visa, Mastercard cards."
   },
   "privacyAndPolicyLinks": {
     "message": "By clicking $buttonContent$ you agree with $termsOfUse$ and $privacyPolicy$",
@@ -3187,11 +3187,11 @@
   "swapCashbackDescription": {
     "message": "Swap more than 10$ and receive 0.175% from the swapped amount in the TKEY token as a cashback"
   },
-  "jumpInTezos": {
-    "message": "Jump in Tezos right now!"
+  "jumpInMaven": {
+    "message": "Jump in Mavryk right now!"
   },
   "onRampDesription": {
-    "message": "Buy TEZ using $text$ and start working with the Tezos blockchain immediately.",
+    "message": "Buy MAV using $text$ and start working with the Mavryk blockchain immediately.",
     "placeholders": {
       "text": {
         "content": "$1"

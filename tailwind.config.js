@@ -192,6 +192,7 @@ module.exports = {
         'primary-card-op': 'rgba(0, 0, 0, 0.50)',
         'primary-border': 'rgba(255, 255, 255, 0.25)',
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
+        'primary-alert-error': 'rgba(219, 5, 5, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
         // --
         'primary-orange': baseColors.orange[500],

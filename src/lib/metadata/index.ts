@@ -22,7 +22,7 @@ import {
   useAllTokensMetadataSelector
 } from 'app/store/tokens-metadata/selectors';
 import { METADATA_API_LOAD_CHUNK_SIZE } from 'lib/apis/temple';
-import { isTezAsset } from 'lib/assets';
+import { isMavSlug } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
@@ -45,7 +45,7 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   const gasMetadata = useGasTokenMetadata();
 
   return (
-    (isTezAsset(slug) ? gasMetadata : tokenMetadata) ||
+    (isMavSlug(slug) ? gasMetadata : tokenMetadata) ||
     (rwaMetadata && isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata)
   );
 };
@@ -65,7 +65,7 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
   /// @ts-expect-error
   return slugs
     .map(s => {
-      if (isTezAsset(s)) return gasMetadata;
+      if (isMavSlug(s)) return gasMetadata;
       return metadata.get(s);
     })
     .filter(s => Boolean(s));
@@ -84,7 +84,7 @@ export const useGetTokenOrGasMetadata = () => {
   const gasMetadata = useGasTokenMetadata();
 
   return useCallback(
-    (slug: string): AssetMetadataBase | undefined => (isTezAsset(slug) ? gasMetadata : getTokenMetadata(slug)),
+    (slug: string): AssetMetadataBase | undefined => (isMavSlug(slug) ? gasMetadata : getTokenMetadata(slug)),
     [getTokenMetadata, gasMetadata]
   );
 };
@@ -158,7 +158,7 @@ const useAssetsMetadataPresenceCheck = (
     const missingChunk = slugsToCheck
       .filter(
         slug =>
-          !isTezAsset(slug) &&
+          !isMavSlug(slug) &&
           !isTruthy(getMetadata(slug)) &&
           // In case fetched metadata is `null` & won't save
           !checkedRef.current.includes(slug)

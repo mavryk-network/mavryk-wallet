@@ -47,7 +47,8 @@ describe('Store tests', () => {
       {
         name: 'testName',
         type: TempleAccountType.Imported,
-        publicKeyHash: 'testHashKey'
+        publicKeyHash: 'testHashKey',
+        isKYC: false
       }
     ]);
     const { accounts } = store.getState();

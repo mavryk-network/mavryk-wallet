@@ -5,6 +5,7 @@ import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
 import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
 import constate from 'constate';
 
+import { useInitialKYC } from 'app/pages/Home/hooks/useInitialKYC';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
@@ -102,6 +103,8 @@ function useReadyTemple() {
     () => allAccounts.find(a => a.publicKeyHash === accountPkh) ?? defaultAcc,
     [allAccounts, accountPkh, defaultAcc]
   );
+
+  useInitialKYC(account);
 
   /**
    * Error boundary reset

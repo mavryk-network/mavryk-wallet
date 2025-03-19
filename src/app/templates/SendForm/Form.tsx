@@ -28,7 +28,7 @@ import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceE
 import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
-import { isTezAsset, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
+import { isMavSlug, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
@@ -209,7 +209,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       if (!assetMetadata) throw new Error('Metadata not found');
 
       const to = toResolved;
-      const tez = isTezAsset(assetSlug);
+      const tez = isMavSlug(assetSlug);
 
       if (balance.isZero()) {
         throw new ZeroBalanceError();
@@ -278,7 +278,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const maxAmount = useMemo(() => {
     if (!(baseFee instanceof BigNumber)) return null;
 
-    const maxAmountAsset = isTezAsset(assetSlug) ? getMaxAmountToken(acc, balance, baseFee, safeFeeValue) : balance;
+    const maxAmountAsset = isMavSlug(assetSlug) ? getMaxAmountToken(acc, balance, baseFee, safeFeeValue) : balance;
     const maxAmountFiat = getMaxAmountFiat(assetPrice.toNumber(), maxAmountAsset);
 
     return shoudUseFiat ? maxAmountFiat : maxAmountAsset;

@@ -45,7 +45,7 @@ export const AliceBobWithdraw: FC = () => {
     <PageLayout
       pageTitle={
         <div className="font-medium text-sm">
-          <T id="sellTez" />
+          <T id="sellMav" />
         </div>
       }
     >

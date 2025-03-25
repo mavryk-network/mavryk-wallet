@@ -29,8 +29,8 @@ const allEpics = combineEpics(
   assetsEpics,
   rwasEpics,
   tokensMetadataEpics,
-  collectiblesMetadataEpics,
   rwasMetadataEpics,
+  collectiblesMetadataEpics,
   abTestingEpics,
   buyWithCreditCardEpics,
   collectiblesEpics

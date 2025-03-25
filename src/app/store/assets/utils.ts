@@ -58,7 +58,7 @@ export const loadAccountRwas = (account: string, chainId: string, knownMeta: Met
   Promise.all([
     // Fetching unknowns only, checking metadata to filter for RWAs
     fetchTzktAccountRWAAssets(account, chainId, true).then(data => {
-      return finishRwasLoadingWithoutMeta(data, knownMeta);
+      return finishRwasLoadingWithoutMeta(data, chainId, knownMeta);
     })
   ]).then(
     ([data]) => ({
@@ -110,7 +110,6 @@ const finishTokensLoading = async (
 
       if (!metadata || isCollectible(metadata) || isRwa(metadata)) continue;
     }
-
     slugs.push(slug);
     balances[slug] = asset.balance;
     if (metadataOfNew) newMeta[slug] = metadataOfNew;
@@ -174,15 +173,28 @@ const finishCollectiblesLoadingWithoutMeta = async (
 };
 
 // rwa ---------------
-const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], knownMeta: MetadataMap) => {
+const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], chainId: string, knownMeta: MetadataMap) => {
   const slugs: string[] = [];
   const balances: StringRecord = {};
   const newMeta: FetchedMetadataRecord = {};
 
+  const slugsWithoutMeta = data.reduce<string[]>((acc, curr) => {
+    const slug = tzktAssetToTokenSlug(curr);
+    return knownMeta.has(slug) ? acc : acc.concat(slug);
+  }, []);
+
+  const newMetadatas = isKnownChainId(chainId)
+    ? await fetchTokensMetadata(chainId, slugsWithoutMeta).catch(err => {
+        console.error(err);
+      })
+    : null;
+
   for (const asset of data) {
     const slug = tzktAssetToTokenSlug(asset);
 
-    const metadataOfNew = asset.token.metadata;
+    // Not optimal data pick, but we don't expect large arrays here
+    const metadataOfNew = asset.token.metadata || newMetadatas?.[slugsWithoutMeta.indexOf(slug)];
+
     const metadata = metadataOfNew || knownMeta.get(slug);
 
     if (!metadata || !isRwa(metadata)) continue;

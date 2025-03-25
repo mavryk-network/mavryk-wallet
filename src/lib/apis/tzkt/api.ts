@@ -239,7 +239,6 @@ async function fetchTzktAccountRWAAssetsPage(
             account,
             limit: TZKT_MAX_QUERY_ITEMS_LIMIT,
             offset,
-            'balance.gt': 0,
             ...(fungible === null
               ? { 'token.metadata.null': true }
               : {
@@ -248,12 +247,14 @@ async function fetchTzktAccountRWAAssetsPage(
             'sort.desc': 'balance'
           });
 
-          return data.map(item => {
+          const mappedResult = data.map(item => {
             return {
               ...item,
               token: { ...item.token }
             };
           });
+
+          return mappedResult;
         } catch (error: any) {
           if (error.name === 'AbortError') {
             throw new Error('Request timeout');

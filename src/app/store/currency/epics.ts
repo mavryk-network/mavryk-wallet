@@ -3,27 +3,25 @@ import { from, forkJoin, map, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { ofType } from 'ts-action-operators';
 
-import { MARS_TOKEN_SLUG, OCEAN_TOKEN_SLUG } from 'app/consts/rwas';
-import { fetchUsdToTokenRates } from 'lib/apis/temple';
+import { fetchUsdToTokenRates, fetchRWAToUsdtRates } from 'lib/apis/temple';
 import { fetchFiatToTezosRates } from 'lib/fiat-currency';
 
 import { loadExchangeRates } from './actions';
 
 const loadUsdToTokenRates$ = () => from(fetchUsdToTokenRates());
 const loadFiatToTezosRates$ = () => from(fetchFiatToTezosRates());
+const loadRWAToUsdtRates$ = () => from(fetchRWAToUsdtRates());
 
 const loadExchangeRatesEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadExchangeRates.submit),
     switchMap(() =>
-      forkJoin([loadUsdToTokenRates$(), loadFiatToTezosRates$()]).pipe(
-        map(([usdToTokenRates, fiatToTezosRates]) =>
+      forkJoin([loadUsdToTokenRates$(), loadFiatToTezosRates$(), loadRWAToUsdtRates$()]).pipe(
+        map(([usdToTokenRates, fiatToTezosRates, rwasToUsdtRates]) =>
           loadExchangeRates.success({
             usdToTokenRates: {
               ...usdToTokenRates,
-              // TODO take rates for rwa tokens, remove later
-              [MARS_TOKEN_SLUG]: `${Math.random()}`,
-              [OCEAN_TOKEN_SLUG]: '72.844475357904031783253356'
+              ...rwasToUsdtRates
             },
             fiatToTezosRates
           })

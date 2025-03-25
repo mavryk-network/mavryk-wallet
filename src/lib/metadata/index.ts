@@ -196,9 +196,11 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
+// TODO update hardcoded logic to be dynamic one, at this moment api doesn't provide this info
+const RWA_SYMBOLS = ['ocean', 'mars1', 'ntbm', 'queen'];
+
 export const isRwa = (metadata: Record<string, any>) =>
-  // TODO update hardcoded logic to be dynamic one
-  'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
+  'symbol' in metadata && RWA_SYMBOLS.includes(metadata.symbol.toLowerCase());
 
 /**
  * @deprecated // Assertion here is not safe!

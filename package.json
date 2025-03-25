@@ -209,7 +209,8 @@
     "webpack-target-webextension": "^1.0.4",
     "webpackbar": "^5",
     "yup": "^1.1.1",
-    "zip-a-folder": "^1.1.5"
+    "zip-a-folder": "^1.1.5",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "source-map": "^0.7.4"

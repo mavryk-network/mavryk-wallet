@@ -61,8 +61,6 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[
   // TODO add zod schema // HERE
   const { data } = await response.json();
 
-  console.log(data, 'data');
-
   return data.token;
 }
 

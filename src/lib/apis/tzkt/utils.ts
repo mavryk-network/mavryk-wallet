@@ -83,7 +83,7 @@ export function isTzktOperParam_LiquidityBaking(param: any): param is ParameterL
   return true;
 }
 
-export async function fetchWithTimeout(url: string, params: RequestInit = {}, timeout = 5000) {
+export async function fetchWithTimeout(url: string, params: RequestInit = {}, timeout = 20000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 

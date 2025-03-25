@@ -5,16 +5,12 @@ import clsx from 'clsx';
 import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
-// import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { useBalance } from 'lib/balances';
-import { getAssetName } from 'lib/metadata';
 import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
-
-import { addRandomDecimals } from '../utils';
 
 import { RwaItemImage } from './RwaItemImage';
 
@@ -82,7 +78,19 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
                 </div>
               }
             />
-            <RWATableItem label="last sale" value={`$${addRandomDecimals()}`} />
+            <RWATableItem
+              label="last sale"
+              value={
+                <InFiat assetSlug={assetSlug} volume={1} smallFractionFont={false}>
+                  {({ balance, symbol }) => (
+                    <div className="ml-1 font-normal text-white flex items-center truncate text-right">
+                      <span>{symbol}</span>
+                      {balance}
+                    </div>
+                  )}
+                </InFiat>
+              }
+            />
             <RWATableItem
               label="total value"
               value={

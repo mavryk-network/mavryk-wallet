@@ -88,7 +88,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{name}</span>}>
       <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
-        <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
+        <div className={clsx(fullPage && 'grid grid-cols-1 items-start gap-x-4')}>
           <div
             className={clsx('relative rounded-2xl mb-6 bg-primary-card overflow-hidden')}
             style={{ aspectRatio: '1/1' }}

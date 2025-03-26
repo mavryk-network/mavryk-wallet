@@ -15,6 +15,7 @@ import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
 import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
+import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T } from 'lib/i18n';
@@ -28,8 +29,6 @@ import { addRandomDecimals } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
-
-// icons
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -52,6 +51,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
   const metadata = useRwaMetadataSelector(assetSlug);
   const rwaDetails = useRwaDetailsSelector(assetSlug);
   const { value: balance = ZERO } = useBalance(assetSlug, publicKeyHash);
+  const [address] = fromAssetSlug(assetSlug);
 
   const account = useAccount();
 
@@ -119,8 +119,8 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
               <div className={clsx('flex flex-col')}>
                 <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
                   <div className="flex items-center gap-x-2">
-                    <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
-                    <Anchor href={`https://app.equiteez.com/marketplace/`} className="flex items-center gap-x-2">
+                    <Identicon size={32} hash={address} className="rounded-full" />
+                    <Anchor href={`https://nexus.mavryk.org/contract/${address}`} className="flex items-center gap-x-2">
                       <span>NextGen Real Estate</span>
                       <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>

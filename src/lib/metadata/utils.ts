@@ -30,3 +30,7 @@ export const buildTokenMetadataFromWhitelist = ({
   thumbnailUri: metadata.thumbnailUri,
   standard: type === 'FA12' ? TokenStandardsEnum.Fa12 : TokenStandardsEnum.Fa2
 });
+
+export function mapToRecord<K extends string | number | symbol, V>(map: Map<K, V>): Record<K, V> {
+  return Object.fromEntries(map) as Record<K, V>;
+}

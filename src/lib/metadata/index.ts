@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { isString } from 'lodash';
 import { useDispatch } from 'react-redux';
@@ -28,6 +28,7 @@ import { isTruthy } from 'lib/utils';
 
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
+import { mapToRecord } from './utils';
 
 export type { AssetMetadataBase, TokenMetadata } from './types';
 export { MAVEN_METADATA, EMPTY_BASE_METADATA } from './defaults';
@@ -74,7 +75,12 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
 export type TokenMetadataGetter = (slug: string) => TokenMetadata | undefined;
 
 export const useGetTokenMetadata = () => {
-  const allMeta = useAllTokensMetadataSelector();
+  const tokensMeta = useAllTokensMetadataSelector();
+  const rwaMetaMap = useAllRwasMetadataSelector();
+
+  const rwaMeta = useMemo(() => mapToRecord(rwaMetaMap), [rwaMetaMap]);
+
+  const allMeta: Record<string, TokenMetadata> = useMemo(() => ({ ...tokensMeta, ...rwaMeta }), [rwaMeta, tokensMeta]);
 
   return useCallback<TokenMetadataGetter>(slug => allMeta[slug], [allMeta]);
 };

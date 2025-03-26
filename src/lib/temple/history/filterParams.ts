@@ -39,6 +39,8 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
 });
 
 /**
+ * TODO update current function when API can filter by complex types at the same time
+ * (f.e. interaction & sent to ...)
  * Used to merge ONLY specofic params of GetOperationsTransactionsParams
  * @param prevParams createOpParams returned params  object
  * @param params createOpParams returned params  object
@@ -76,13 +78,6 @@ export const mergeOpParams = (
       if ((prevValue === true && newValue === false) || (prevValue === false && newValue === true)) {
         delete mergedParams['entrypoint.null']; // Remove if both true and false exist
       }
-    } else if (key === 'entrypoint.ne' && mergedParams['entrypoint.null'] === undefined) {
-      // Keep entrypoint.ne only if entrypoint.null was removed
-      mergedParams[key] = [prevValue, newValue].filter(Boolean).join(' OR ');
-    } else if (typeof prevValue === 'boolean' && typeof newValue === 'boolean') {
-      mergedParams[key] = prevValue || newValue; // OR condition for boolean values
-    } else {
-      mergedParams[key] = [prevValue, newValue].filter(Boolean).join(' OR ');
     }
   });
 
@@ -124,6 +119,7 @@ export const buildTEZOpParams = (
   return mergeOpParams(defaultTEZpParams, internalOperationParams);
 };
 
+// TODO: update and test when fa12 token will be available
 export const build_Token_Fa_1_2OpParams = (
   accountAddress: string,
   contractAddress: string,
@@ -145,14 +141,15 @@ export const build_Token_Fa_2OpParams = (
   tokenId: string | number,
   operationParams: GetOperationsTransactionsParams | undefined
 ): GetOperationsTransactionsParams => {
-  const defaultFa_1_2OpParams: GetOperationsTransactionsParams = {
+  const query = createQuery(accountAddress, Number(tokenId), undefined);
+  const defaultFa_2OpParams: GetOperationsTransactionsParams = {
     entrypoint: 'transfer',
     target: contractAddress,
-    'parameter.[*].in': `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`,
+    ...query,
     'sort.desc': 'level'
   };
 
-  return getReturnedTransactionParams(accountAddress, defaultFa_1_2OpParams, operationParams);
+  return getReturnedTransactionParams(accountAddress, defaultFa_2OpParams, operationParams);
 };
 
 // helper function to return params for transactions
@@ -165,31 +162,66 @@ const getReturnedTransactionParams = (
     return defaultFa_1_2OpParams;
   }
 
-  const internalOperationParams = { ...operationParams };
+  // target (receiver from )
+  // sender (sent to)
+  // interaction ...
 
-  const hasBothTargetAndSender = Boolean(internalOperationParams.target) && Boolean(internalOperationParams.sender);
+  let internalOperationParams = { ...operationParams };
+  const hasTarget = Boolean(internalOperationParams.target);
+  const hasSender = Boolean(internalOperationParams.sender);
+  console.log(internalOperationParams, 'internalOperationParams');
+
+  // params for received transactions
+  if (internalOperationParams['target'] === accountAddress) {
+    delete defaultFa_1_2OpParams['parameter.[*].in'];
+    internalOperationParams = {
+      ...internalOperationParams,
+      ...createQuery(accountAddress, 0, true)
+    };
+  }
+
+  // params for sent transactions
+  if (internalOperationParams['sender'] === accountAddress) {
+    delete defaultFa_1_2OpParams['parameter.[*].in'];
+    internalOperationParams = {
+      ...internalOperationParams,
+      ...createQuery(accountAddress, 0, false)
+    };
+  }
 
   // used for interactions type
   // remove entrypoint null and hasInternals cuz it's transactions to specific contract address (usually token address)
   if (internalOperationParams.hasOwnProperty('entrypoint.null')) {
     delete internalOperationParams['entrypoint.null'];
-    delete internalOperationParams['entrypoint.ne'];
-
-    if (internalOperationParams.sender !== accountAddress) {
-      internalOperationParams.initiator = accountAddress;
-    }
   }
 
-  // this params will for to /transactions
-  // transaction request doesnt have type prop
   delete internalOperationParams.type;
   delete internalOperationParams.hasInternals;
-  // filter target to get "received" transactions
-  if (hasBothTargetAndSender) {
-    internalOperationParams['anyof.sender.target'] = accountAddress;
-    delete internalOperationParams.sender;
+
+  // clear target and sender for transaction API filters, because it uses contract address
+  // transaction endpoint has different logic for filters so we get rid of them
+  if (hasTarget) {
     delete internalOperationParams.target;
-  } else if (internalOperationParams.target !== accountAddress) delete internalOperationParams.target;
+  }
+  if (hasSender) {
+    delete internalOperationParams.sender;
+  }
 
   return mergeOpParams(defaultFa_1_2OpParams, internalOperationParams);
+};
+
+const createQuery = (accountAddress: string, tokenId: number, isFrom: boolean | undefined) => {
+  if (isFrom === undefined) {
+    return {
+      'parameter.[*].in': `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`
+    };
+  }
+
+  const filter = !isFrom
+    ? `[{"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]}, {"from_":"${accountAddress}","txs":[{"token_id":"${tokenId}"}]}]` // From query
+    : `[{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]},{"txs":[{"to_":"${accountAddress}","token_id":"${tokenId}"}]}]`; // To query
+
+  return {
+    'parameter.[*].in': filter
+  };
 };

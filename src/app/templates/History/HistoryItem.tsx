@@ -98,7 +98,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
           <HistoryTokenIcon historyItem={historyItem} />
           <div
             style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
-            className="flex flex-col gap-1 items-start justify-center break-words"
+            className="flex flex-col gap-1 items-start justify-center break-words flex-wrap"
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
             <div className="flex items-start gap-x-1">

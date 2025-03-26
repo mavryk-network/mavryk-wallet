@@ -1,9 +1,12 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
+import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
 
 import { toTokenSlug } from 'lib/assets';
 import { TempleChainId } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+
+import { fetchRwaAssetsContracts } from '../rwa';
 
 import {
   TzktOperation,
@@ -176,7 +179,6 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
 
   const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
     const data = await fetchTzktAccountAssetsPage(account, chainId, offset, fungible);
-
     if (!data.length) return accum;
 
     if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
@@ -185,6 +187,21 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
     return accum.concat(data);
   };
 
+  return recurse([], 0);
+}
+
+export async function fetchTzktAccountRWAAssets(account: string, chainId: string, fungible: boolean | null) {
+  if (!isKnownChainId(chainId)) return Promise.resolve([]);
+
+  const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
+    const data = await fetchTzktAccountRWAAssetsPage(account, chainId, offset, fungible);
+    if (!data.length) return accum;
+
+    if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
+      return recurse(accum.concat(data), offset + TZKT_MAX_QUERY_ITEMS_LIMIT);
+
+    return accum.concat(data);
+  };
   return recurse([], 0);
 }
 
@@ -206,6 +223,62 @@ const fetchTzktAccountAssetsPage = (
         }),
     'sort.desc': 'balance'
   });
+
+async function fetchTzktAccountRWAAssetsPage(
+  account: string,
+  chainId: TzktApiChainId,
+  offset?: number,
+  fungible: boolean | null = null
+) {
+  try {
+    return await retry(
+      async bail => {
+        try {
+          const rwaContracts = await fetchRwaAssetsContracts();
+          const data = await fetchGet<TzktAccountAsset[]>(chainId, '/tokens/balances', {
+            account,
+            limit: TZKT_MAX_QUERY_ITEMS_LIMIT,
+            offset,
+            ...(fungible === null
+              ? { 'token.metadata.null': true }
+              : {
+                  'token.contract.in': rwaContracts.join(',')
+                }),
+            'sort.desc': 'balance'
+          });
+
+          const mappedResult = data.map(item => {
+            return {
+              ...item,
+              token: { ...item.token }
+            };
+          });
+
+          return mappedResult;
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            throw new Error('Request timeout');
+          }
+
+          if (error.message.includes('403')) {
+            bail(new Error('Unauthorized'));
+          }
+
+          throw error;
+        }
+      },
+      {
+        retries: 5,
+        factor: 2, // Exponential backoff
+        minTimeout: 1000, // 1s initial delay
+        maxTimeout: 10000 // 10s max delay
+      }
+    );
+  } catch (error) {
+    console.error('API failed after 5 retries:', error);
+    return [];
+  }
+}
 
 export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundInMS = 1000) {
   try {

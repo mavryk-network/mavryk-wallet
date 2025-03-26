@@ -11,6 +11,7 @@ interface BaseUrls {
   account?: string;
   transaction: string;
   api?: string;
+  contract?: string;
 }
 
 export type BlockExplorer = {
@@ -22,7 +23,7 @@ export type BlockExplorer = {
 export const BLOCK_EXPLORERS: BlockExplorer[] = [
   {
     id: 'tzkt',
-    name: 'TzKT',
+    name: 'Nexus',
     baseUrls: new Map([
       [
         TempleChainId.Mainnet,
@@ -45,6 +46,7 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
         {
           account: 'https://nexus.mavryk.org/account/',
           transaction: 'https://nexus.mavryk.org/operation/',
+          contract: 'https://nexus.mavryk.org/contract/',
           api: 'https://atlasnet.api.mavryk.network'
         }
       ],

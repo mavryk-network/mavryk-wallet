@@ -22,18 +22,24 @@ export type SuccessStateType = {
   contentID?: string;
   btnText: TID;
   btnLink?: string;
+  secondaryBtnText?: TID;
+  secondaryBtnLink?: string;
   contentId?: keyof typeof successContentData;
   contentIdFnProps?: any;
+  bottomDescription?: TID;
 };
 
 const defaultStateValues: SuccessStateType = {
   pageTitle: 'operations',
   subHeader: 'success',
   description: undefined,
+  bottomDescription: undefined,
   contentId: undefined,
   contentIdFnProps: undefined,
   btnText: 'goToMain',
-  btnLink: '/'
+  btnLink: '/',
+  secondaryBtnText: undefined,
+  secondaryBtnLink: undefined
 };
 
 export const SuccessScreen = () => {
@@ -43,7 +49,6 @@ export const SuccessScreen = () => {
 
   const bgSrc = useMemo(() => (popup ? '/misc/success-bg.webp' : '/misc/success-bg-full-view.webp'), [popup]);
   const memoizedContainerStyle = useMemo(() => ({ padding: 0 }), []);
-  const memoizedContentPaperStyle = useMemo(() => ({ height: 664 }), []);
 
   return (
     <PageLayout
@@ -54,7 +59,6 @@ export const SuccessScreen = () => {
       }
       isTopbarVisible={false}
       contentContainerStyle={memoizedContainerStyle}
-      contentPaperStyle={memoizedContentPaperStyle}
     >
       <BgImageLayout src={bgSrc} className="flex justify-center items-center flex-1 h-full">
         <div className={clsx('text-white w-full py-8 flex flex-col items-center gap-6', popup ? 'px-4' : 'px-20')}>
@@ -79,13 +83,25 @@ export const SuccessScreen = () => {
               </div>
             )}
           </section>
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-2">
             <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess} replace>
               <ButtonRounded size="big" fill className="w-full">
                 <T id={state.btnText} />
               </ButtonRounded>
             </ButtonLink>
+            {state.secondaryBtnLink && state.secondaryBtnText && (
+              <ButtonLink linkTo={state.secondaryBtnLink} testID={SuccessScreenSelectors.buttonSuccess} replace>
+                <ButtonRounded size="big" fill={false} className="w-full">
+                  <T id={state.secondaryBtnText} />
+                </ButtonRounded>
+              </ButtonLink>
+            )}
           </div>
+          {state.bottomDescription && (
+            <div className="text-sm text-center mt-2">
+              <T id={state.bottomDescription} />
+            </div>
+          )}
         </div>
       </BgImageLayout>
     </PageLayout>

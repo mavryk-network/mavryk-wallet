@@ -103,10 +103,13 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
 
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'proVersion',
-        btnText: 'verifyAddress',
-        btnLink: '/pro-version',
+        btnText: 'goToMain',
         description: 'mavopolySuccessMsg',
-        subHeader: 'success'
+        subHeader: 'success',
+        secondaryBtnLink: '/pro-version',
+        bottomDescription: 'addressVerificationMsg',
+        contentId: 'verifySuccess',
+        secondaryBtnText: 'continueToVerifyAddressesMsg'
       });
     } catch (e: any) {
       // show err on ui
@@ -134,22 +137,23 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
           autoFocus
         />
       )}
-      <section className="flex flex-col items-center">
-        <div className="mb-3 text-sm text-white text-center">
-          <T id="aboutFooterDescription" />
-        </div>
-        <FooterSocials />
-      </section>
 
       <ButtonRounded
         isLoading={formState.submitting}
         onClick={handleBtnClick}
         size="big"
-        className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}
+        className={clsx('w-full')}
         fill
       >
         <T id="getPro" />
       </ButtonRounded>
+
+      <section className={clsx('flex flex-col items-center', popup ? 'mt-8' : 'mt-17')}>
+        <div className="mb-3 text-sm text-white text-center">
+          <T id="aboutFooterDescription" />
+        </div>
+        <FooterSocials />
+      </section>
     </div>
   );
 };

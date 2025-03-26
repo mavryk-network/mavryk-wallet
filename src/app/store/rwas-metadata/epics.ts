@@ -11,12 +11,14 @@ const loadRwasMetadataEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadRwasMetadataAction),
     toPayload(),
-    switchMap(({ rpcUrl, slugs }) =>
-      from(loadTokensMetadata(rpcUrl, slugs)).pipe(
-        map(records => putRwasMetadataAction({ records, resetLoading: true })),
+    switchMap(({ rpcUrl, slugs }) => {
+      return from(loadTokensMetadata(rpcUrl, slugs)).pipe(
+        map(records => {
+          return putRwasMetadataAction({ records, resetLoading: true });
+        }),
         catchError(() => of(resetRwasMetadataLoadingAction()))
-      )
-    )
+      );
+    })
   );
 
 export const rwasMetadataEpics = combineEpics(loadRwasMetadataEpic);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { isString } from 'lodash';
 import { useDispatch } from 'react-redux';
@@ -22,12 +22,13 @@ import {
   useAllTokensMetadataSelector
 } from 'app/store/tokens-metadata/selectors';
 import { METADATA_API_LOAD_CHUNK_SIZE } from 'lib/apis/temple';
-import { isTezAsset } from 'lib/assets';
+import { isMavSlug } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
+import { mapToRecord } from './utils';
 
 export type { AssetMetadataBase, TokenMetadata } from './types';
 export { MAVEN_METADATA, EMPTY_BASE_METADATA } from './defaults';
@@ -45,7 +46,7 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   const gasMetadata = useGasTokenMetadata();
 
   return (
-    (isTezAsset(slug) ? gasMetadata : tokenMetadata) ||
+    (isMavSlug(slug) ? gasMetadata : tokenMetadata) ||
     (rwaMetadata && isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata)
   );
 };
@@ -65,7 +66,7 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
   /// @ts-expect-error
   return slugs
     .map(s => {
-      if (isTezAsset(s)) return gasMetadata;
+      if (isMavSlug(s)) return gasMetadata;
       return metadata.get(s);
     })
     .filter(s => Boolean(s));
@@ -74,7 +75,12 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
 export type TokenMetadataGetter = (slug: string) => TokenMetadata | undefined;
 
 export const useGetTokenMetadata = () => {
-  const allMeta = useAllTokensMetadataSelector();
+  const tokensMeta = useAllTokensMetadataSelector();
+  const rwaMetaMap = useAllRwasMetadataSelector();
+
+  const rwaMeta = useMemo(() => mapToRecord(rwaMetaMap), [rwaMetaMap]);
+
+  const allMeta: Record<string, TokenMetadata> = useMemo(() => ({ ...tokensMeta, ...rwaMeta }), [rwaMeta, tokensMeta]);
 
   return useCallback<TokenMetadataGetter>(slug => allMeta[slug], [allMeta]);
 };
@@ -84,7 +90,7 @@ export const useGetTokenOrGasMetadata = () => {
   const gasMetadata = useGasTokenMetadata();
 
   return useCallback(
-    (slug: string): AssetMetadataBase | undefined => (isTezAsset(slug) ? gasMetadata : getTokenMetadata(slug)),
+    (slug: string): AssetMetadataBase | undefined => (isMavSlug(slug) ? gasMetadata : getTokenMetadata(slug)),
     [getTokenMetadata, gasMetadata]
   );
 };
@@ -158,7 +164,7 @@ const useAssetsMetadataPresenceCheck = (
     const missingChunk = slugsToCheck
       .filter(
         slug =>
-          !isTezAsset(slug) &&
+          !isMavSlug(slug) &&
           !isTruthy(getMetadata(slug)) &&
           // In case fetched metadata is `null` & won't save
           !checkedRef.current.includes(slug)
@@ -196,9 +202,11 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 export const isCollectible = (metadata: Record<string, any>) =>
   'artifactUri' in metadata && isString(metadata.artifactUri);
 
+// TODO update hardcoded logic to be dynamic one, at this moment api doesn't provide this info
+const RWA_SYMBOLS = ['ocean', 'mars1', 'ntbm', 'queen'];
+
 export const isRwa = (metadata: Record<string, any>) =>
-  // TODO update hardcoded logic to be dynamic one
-  'symbol' in metadata && (metadata.symbol === 'OCEAN' || metadata.symbol === 'MARS1');
+  'symbol' in metadata && RWA_SYMBOLS.includes(metadata.symbol.toLowerCase());
 
 /**
  * @deprecated // Assertion here is not safe!

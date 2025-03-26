@@ -244,7 +244,7 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
   };
 
   return (
-    <span className="text-white">
+    <span className="text-white break-all">
       <T
         id={i18nKey}
         substitutions={args.map((value, index) => {

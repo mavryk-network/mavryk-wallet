@@ -69,7 +69,9 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'lastSale'} />}>
-          <span className={itemValueClassName}>${details?.lastSale}</span>
+          <div className={itemValueClassName}>
+            <Money smallFractionFont={false}>{price}</Money>
+          </div>
         </CardWithLabel>
       </section>
 

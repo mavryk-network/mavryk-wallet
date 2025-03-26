@@ -91,11 +91,13 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
           mergeAssetsMetadata(state.tokensMetadata.metadataRecord, state.rwasMetadata.records)
         )
       ).pipe(
-        concatMap(({ slugs, balances, newMeta }) => [
-          loadAccountRwasActions.success({ account, chainId, slugs }),
-          putTokensBalancesAction({ publicKeyHash: account, chainId, balances: fixBalances(balances) }),
-          putRwasMetadataAction({ records: newMeta })
-        ]),
+        concatMap(({ slugs, balances, newMeta }) => {
+          return [
+            loadAccountRwasActions.success({ account, chainId, slugs }),
+            putTokensBalancesAction({ publicKeyHash: account, chainId, balances: fixBalances(balances) }),
+            putRwasMetadataAction({ records: newMeta })
+          ];
+        }),
         catchError(err => of(loadAccountRwasActions.fail({ code: axios.isAxiosError(err) ? err.code : undefined })))
       );
     })

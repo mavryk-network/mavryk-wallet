@@ -12,12 +12,14 @@ import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg'
 import PageLayout from 'app/layouts/PageLayout';
 // import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
+import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
+import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T } from 'lib/i18n';
-import { getAssetName, TokenMetadata } from 'lib/metadata';
+import { TokenMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
@@ -27,8 +29,6 @@ import { addRandomDecimals } from '../utils';
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
-
-// icons
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -49,13 +49,13 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
 
   const { publicKeyHash } = useAccount();
   const metadata = useRwaMetadataSelector(assetSlug);
+  const rwaDetails = useRwaDetailsSelector(assetSlug);
   const { value: balance = ZERO } = useBalance(assetSlug, publicKeyHash);
+  const [address] = fromAssetSlug(assetSlug);
 
   const account = useAccount();
 
   const areDetailsLoading = false;
-
-  const rwaName = getAssetName(metadata);
 
   const dispatch = useDispatch();
   useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
@@ -74,27 +74,21 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
     [balance, metadata]
   );
 
+  const name = rwaDetails?.name ?? '--';
+
   const CollectibleTextSection = () => (
     <div>
-      <CopyButton
-        text={rwaName}
-        type={'block'}
-        className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}
-      >
-        {rwaName ?? 'NAME text #234'}
+      <CopyButton text={name} type={'block'} className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}>
+        {name}
       </CopyButton>
-      <div className="text-base-plus text-white break-words mb-4">
-        Lorem ipsum dolor sit amet consectetur. Donec malesuada id fringilla maecenas at orci eu vel tellus. Ac arcu
-        velit amet nascetur vestibulum consectetur sem. Facilisis dictumst leo eget sit eu. Ultricies ornare sed
-        fringilla quis id sit. Turpis ut placerat leo convallis.
-      </div>
+      <div className="text-base-plus text-white break-words mb-4">{rwaDetails?.description ?? '--'}</div>
     </div>
   );
 
   return (
-    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{rwaName}</span>}>
+    <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{name}</span>}>
       <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
-        <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
+        <div className={clsx(fullPage && 'grid grid-cols-1 items-start gap-x-4')}>
           <div
             className={clsx('relative rounded-2xl mb-6 bg-primary-card overflow-hidden')}
             style={{ aspectRatio: '1/1' }}
@@ -125,11 +119,8 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
               <div className={clsx('flex flex-col')}>
                 <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
                   <div className="flex items-center gap-x-2">
-                    <Identicon size={32} hash={'mv1Q3DyGiVYDrRj5PrUVQkTA1LHwYy8gHwQV'} className="rounded-full" />
-                    <Anchor
-                      href={`https://dev.equiteez.pages.dev/properties/${metadata?.address}`}
-                      className="flex items-center gap-x-2"
-                    >
+                    <Identicon size={32} hash={address} className="rounded-full" />
+                    <Anchor href={`https://nexus.mavryk.org/contract/${address}`} className="flex items-center gap-x-2">
                       <span>NextGen Real Estate</span>
                       <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>

@@ -1,0 +1,12 @@
+.verifyAddress ol {
+  counter-reset: list-counter;
+}
+
+.verifyAddress ol li {
+  counter-increment: list-counter;
+  list-style: none; /* Removes default numbering */
+}
+
+.verifyAddress ol li::before {
+  content: counter(list-counter) '. ';
+}

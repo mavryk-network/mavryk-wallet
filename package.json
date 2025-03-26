@@ -1,6 +1,6 @@
 {
   "name": "mavryk-wallet",
-  "version": "0.2.16",
+  "version": "0.2.21",
   "private": true,
   "scripts": {
     "start-run": "cross-env TS_NODE_PROJECT=\"webpack/tsconfig.json\" webpack --watch --stats errors-warnings",
@@ -23,7 +23,8 @@
     "lint:fix": "prettier \"./**/*\" --write --ignore-unknown",
     "clear:lint": "rimraf node_modules/.cache/.eslintcache",
     "find-deadcode": "ts-prune --error",
-    "audit-deps": "node ./audit-deps.js"
+    "audit-deps": "node ./audit-deps.js",
+    "temp": "redux-devtools --open --port=8000"
   },
   "engines": {
     "node": ">=18"
@@ -208,7 +209,8 @@
     "webpack-target-webextension": "^1.0.4",
     "webpackbar": "^5",
     "yup": "^1.1.1",
-    "zip-a-folder": "^1.1.5"
+    "zip-a-folder": "^1.1.5",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "source-map": "^0.7.4"

@@ -1114,8 +1114,8 @@
     "message": "例: mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "例: alice.tez、または mv1V4h45W3p4e...",
-    "description": "alice.tez = domain like google.com"
+    "message": "例: alice.mav mv1V4h45W3p4e...",
+    "description": "alice.mav = domain like google.com"
   },
   "tryingToTransferToYourself": {
     "message": "自分に送金をしようとしています。\n本当に自分に送金したいのか確認してください。"

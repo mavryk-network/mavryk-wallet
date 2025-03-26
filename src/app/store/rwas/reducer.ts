@@ -27,7 +27,7 @@ const rwasReducer = createReducer<RwasState>(rwasInitialState, builder => {
 
     for (const [slug, details] of Object.entries(detailsRecord)) {
       if (details) {
-        adultFlags[slug] = { val: details.isAdultContent, ts: timestampInSeconds };
+        adultFlags[slug] = { val: details.isAdultContent ?? false, ts: timestampInSeconds };
       }
     }
 

@@ -1,0 +1,1 @@
+export const MAX_RWA_QUERY_RESPONSE_ITEMS = 100;

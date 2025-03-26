@@ -26,8 +26,12 @@ export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetada
     const metadata = metadatas[tokenSlug];
     if (!metadata) continue;
 
-    // HERE
-    const assetsDestionation = isCollectible(metadata) ? collectibles : isRwa(metadata) ? rwas : tokens;
+    let assetsDestionation = tokens;
+    if (isCollectible(metadata)) {
+      assetsDestionation = collectibles;
+    } else if (isRwa(metadata)) {
+      assetsDestionation = rwas;
+    }
 
     assetsDestionation.push({
       slug: tokenSlug,

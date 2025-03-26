@@ -1,45 +1,9 @@
-import type { UserObjktCollectible } from 'lib/apis/objkt';
+import { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
 import { createEntity, LoadableEntityState } from 'lib/store';
 
 // TODO check UserObjktCollectible
-export interface RwaDetails extends Pick<UserObjktCollectible, 'fa' | 'description' | 'mime'> {
-  metadataHash: string | null;
-  /** Minted on date.
-   * ISO String (e.g. `2023-05-30T09:40:33+00:00`)
-   */
-  mintedTimestamp: string;
-  /** Editions */
-  supply: number;
-  /** Cheepest listing */
-  listing: null | RwaDetailsListing;
-  /** Highest offer */
-  objktArtifactUri: string;
-  creators: RwaDetailsCreator[];
-  galleries: RwaDetailsGallery[];
-  isAdultContent: boolean;
-  /** Percents */
-  royalties?: number;
-  attributes: RwaDetailsAttribute[];
-}
-
-interface RwaDetailsListing {
-  /** In atoms */
-  floorPrice: number;
-  currencyId: number;
-}
-
-interface RwaDetailsCreator {
-  address: string;
-  tzDomain: string;
-}
-
-interface RwaDetailsGallery {
-  title: string;
-}
-
-type RwaDetailsAttribute = UserObjktCollectible['attributes'][number]['attribute'] & {
-  /** Percent */
-  rarity: number;
+export type RwaDetails = TzktRWAAssetMetadata & {
+  isAdultContent?: boolean;
 };
 
 /** `null` for no available asset details */

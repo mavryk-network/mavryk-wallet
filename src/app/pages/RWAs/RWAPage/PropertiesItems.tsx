@@ -24,7 +24,8 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
   const price = useAssetFiatCurrencyPrice(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();
 
-  const { transaction: explorerBaseUrl } = useExplorerBaseUrls();
+  const { contract: explorerBaseUrl } = useExplorerBaseUrls();
+
   const exploreContractUrl = useMemo(
     () => (explorerBaseUrl ? new URL(contract, explorerBaseUrl).href : null),
     [explorerBaseUrl, contract]
@@ -68,7 +69,9 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'lastSale'} />}>
-          <span className={itemValueClassName}>${details?.lastSale}</span>
+          <div className={itemValueClassName}>
+            <Money smallFractionFont={false}>{price}</Money>
+          </div>
         </CardWithLabel>
       </section>
 

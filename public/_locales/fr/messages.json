@@ -1127,8 +1127,8 @@
     "message": "p. ex. mv1V4h45W3p4e…"
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "p. ex. alice.tez or mv1V4h45W3p4e…",
-    "description": "alice.tez = domain like google.com"
+    "message": "p. ex. alice.mav or mv1V4h45W3p4e…",
+    "description": "alice.mav = domain like google.com"
   },
   "tryingToTransferToYourself": {
     "message": "Vous essayez de transférer des fonds à vous-même. Veuillez vous assurer que c'est exactement ce que vous voulez faire."

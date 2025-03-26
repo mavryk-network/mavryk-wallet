@@ -1159,8 +1159,8 @@
     "message": "e.g. mv1V4h45W3p4e..."
   },
   "recipientInputPlaceholderWithDomain": {
-    "message": "e.g. alice.tez or mv1V4h45W3p4e...",
-    "description": "alice.tez = домен як google.com"
+    "message": "e.g. alice.mav or mv1V4h45W3p4e...",
+    "description": "alice.mav = домен як google.com"
   },
   "tryingToTransferToYourself": {
     "message": "Ви намагаєтесь переказати кошти собі..\nБудь ласка, переконайся, що це саме те, що ти хочеш зробити"
@@ -1189,7 +1189,7 @@
     "message": "Клацніть на аккаунт, на який ти бажаєш надіслати кошти."
   },
   "mainAssetBalanceIsZero": {
-    "message": "Твої tez(головний актив) баланс дорівнює нулю. ꝳ кошти необхідні для сплати комісій в блокчейні."
+    "message": "Твої mav(головний актив) баланс дорівнює нулю. ꝳ кошти необхідні для сплати комісій в блокчейні."
   },
   "unableToSendTransactionAction": {
     "message": "Неможливо надіслати транзакцію наданому Одержувачу."
@@ -1691,7 +1691,7 @@
     }
   },
   "emptyImplicitContract": {
-    "message": "Ваш аккаунт порожній. Внесіть будь-яку суму tez на цей рахунок, щоб активувати його"
+    "message": "Ваш аккаунт порожній. Внесіть будь-яку суму mav на цей рахунок, щоб активувати його"
   },
   "balanceTooLow": {
     "message": "Gas token баланс дуже низький"

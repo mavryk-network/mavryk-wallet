@@ -15,12 +15,12 @@ const loadCollectiblesMetadataEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadCollectiblesMetadataAction),
     toPayload(),
-    switchMap(({ rpcUrl, slugs }) =>
-      from(loadTokensMetadata(rpcUrl, slugs)).pipe(
+    switchMap(({ rpcUrl, slugs }) => {
+      return from(loadTokensMetadata(rpcUrl, slugs)).pipe(
         map(records => putCollectiblesMetadataAction({ records, resetLoading: true })),
         catchError(() => of(resetCollectiblesMetadataLoadingAction()))
-      )
-    )
+      );
+    })
   );
 
 export const collectiblesMetadataEpics = combineEpics(loadCollectiblesMetadataEpic);

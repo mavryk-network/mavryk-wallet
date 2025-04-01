@@ -1,4 +1,4 @@
-import { OpKind, TezosToolkit } from '@mavrykdynamics/taquito';
+import { OpKind, MavrykToolkit } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 
 import type { AssetMetadataBase } from 'lib/metadata';
@@ -12,7 +12,7 @@ import { fromAssetSlug } from './utils';
 import { isFA2Token, isMavSlug } from './index';
 
 export const toTransferParams = async (
-  tezos: TezosToolkit,
+  tezos: MavrykToolkit,
   assetSlug: string,
   assetMetadata: AssetMetadataBase,
   fromPkh: string,
@@ -68,7 +68,7 @@ export const toTransferParams = async (
   return contract.methods.transfer(fromPkh, toPkh, pennyAmount).toTransferParams();
 };
 
-export const fromAssetSlugWithStandardDetect = async (tezos: TezosToolkit, slug: string): Promise<Asset> => {
+export const fromAssetSlugWithStandardDetect = async (tezos: MavrykToolkit, slug: string): Promise<Asset> => {
   if (isMavSlug(slug)) return slug;
 
   const [contractAddress, tokenIdStr] = fromAssetSlug(slug);

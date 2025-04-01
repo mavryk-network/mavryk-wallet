@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import { pick } from 'lodash';
 
 import {
@@ -16,7 +16,7 @@ export const fetchOneTokenMetadata = async (
   address: string,
   id: string
 ): Promise<TokenMetadataResponse | undefined> => {
-  const tezos = new TezosToolkit(rpcUrl);
+  const tezos = new MavrykToolkit(rpcUrl);
   const chainId = await tezos.rpc.getChainId();
 
   if (isKnownChainId(chainId)) {
@@ -31,7 +31,7 @@ export const fetchOneTokenMetadata = async (
 const fetchTokensMetadata = async (rpcUrl: string, slugs: string[]): Promise<(TokenMetadataResponse | null)[]> => {
   if (slugs.length === 0) return [];
 
-  const tezos = new TezosToolkit(rpcUrl);
+  const tezos = new MavrykToolkit(rpcUrl);
   const chainId = await tezos.rpc.getChainId();
 
   if (isKnownChainId(chainId)) {

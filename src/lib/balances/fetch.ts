@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 
 import { isFA2Token, MAV_TOKEN_SLUG } from 'lib/assets';
@@ -6,7 +6,7 @@ import { fromAssetSlugWithStandardDetect } from 'lib/assets/contract.utils';
 import { loadContract } from 'lib/temple/contract';
 import { ZERO } from 'lib/utils/numbers';
 
-export const fetchRawBalance = async (tezos: TezosToolkit, assetSlug: string, account: string) => {
+export const fetchRawBalance = async (tezos: MavrykToolkit, assetSlug: string, account: string) => {
   const asset = await fromAssetSlugWithStandardDetect(tezos, assetSlug);
 
   if (asset === MAV_TOKEN_SLUG)

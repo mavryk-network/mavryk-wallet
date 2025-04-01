@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { Subscription, TezosToolkit } from '@mavrykdynamics/taquito';
+import { Subscription, MavrykToolkit } from '@mavrykdynamics/taquito';
 import constate from 'constate';
 import { useSWRConfig } from 'swr';
 
@@ -41,7 +41,7 @@ function useNewBlockTriggers() {
   };
 }
 
-export function useOnBlock(callback: (blockHash: string) => void, altTezos?: TezosToolkit, pause = false) {
+export function useOnBlock(callback: (blockHash: string) => void, altTezos?: MavrykToolkit, pause = false) {
   const currentTezos = useTezos();
   const blockHashRef = useRef<string>();
   const callbackRef = useUpdatableRef(callback);

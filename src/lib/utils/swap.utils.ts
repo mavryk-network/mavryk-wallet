@@ -1,4 +1,4 @@
-import { ContractMethod, ContractProvider, TezosToolkit, TransferParams, Wallet } from '@mavrykdynamics/taquito';
+import { ContractMethod, ContractProvider, MavrykToolkit, TransferParams, Wallet } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
 
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
@@ -26,7 +26,7 @@ export const getSwapTransferParams = async (
   inputAmountAtomic: BigNumber,
   minimumReceivedAtomic: BigNumber,
   chains: Route3SwapChains | Route3LiquidityBakingChains,
-  tezos: TezosToolkit,
+  tezos: MavrykToolkit,
   accountPkh: string
 ) => {
   const resultParams: Array<TransferParams> = [];
@@ -112,7 +112,7 @@ export const getRoutingFeeTransferParams = async (
   feeAmountAtomic: BigNumber,
   senderPublicKeyHash: string,
   routingFeeAddress: string,
-  tezos: TezosToolkit
+  tezos: MavrykToolkit
 ) => {
   if (feeAmountAtomic.lte(ZERO)) {
     return [];

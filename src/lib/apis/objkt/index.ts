@@ -3,7 +3,7 @@
  * Explore: https://public-api-v3-20221206.objkt.com/explore
  */
 
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import { chunk } from 'lodash';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 
@@ -104,5 +104,5 @@ export const fetchCollectibleExtraDetails = (contract: string, id: string) =>
     })
     .then(data => data?.token[0] ?? null);
 
-export const getObjktMarketplaceContract = (tezos: TezosToolkit, address?: string) =>
+export const getObjktMarketplaceContract = (tezos: MavrykToolkit, address?: string) =>
   tezos.contract.at<ObjktContractInterface | FxHashContractInterface>(address ?? OBJKT_CONTRACT);

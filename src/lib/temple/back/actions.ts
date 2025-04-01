@@ -4,7 +4,7 @@ import {
   MavrykWalletDAppRequest,
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { MavrykOperationError } from '@mavrykdynamics/taquito';
 import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import { char2Bytes } from '@mavrykdynamics/taquito-utils';
 import browser, { Runtime } from 'webextension-polyfill';
@@ -323,7 +323,7 @@ const promisableUnlock = async (
 
           resolve({ opHash: op.hash });
         } catch (err: any) {
-          if (err instanceof TezosOperationError) {
+          if (err instanceof MavrykOperationError) {
             reject(err);
           } else {
             throw err;
@@ -539,7 +539,7 @@ const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: stri
       console.log('origin', origin);
       return await formatTempleReq(getTempleReq(req), req, resBase, origin);
     } catch (err: any) {
-      if (err instanceof TezosOperationError) {
+      if (err instanceof MavrykOperationError) {
         throw err;
       }
 
@@ -568,7 +568,7 @@ const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: stri
       type: Beacon.MessageType.Error,
       errorType: (() => {
         switch (true) {
-          case err instanceof TezosOperationError:
+          case err instanceof MavrykOperationError:
             return Beacon.ErrorType.TRANSACTION_INVALID_ERROR;
 
           case err?.message in Beacon.ErrorType:
@@ -682,7 +682,7 @@ async function createCustomNetworksSnapshot(settings: TempleSettings) {
 }
 
 function getErrorData(err: any) {
-  return err instanceof TezosOperationError ? err.errors.map(({ contract_code, ...rest }: any) => rest) : undefined;
+  return err instanceof MavrykOperationError ? err.errors.map(({ contract_code, ...rest }: any) => rest) : undefined;
 }
 
 function generateRawPayloadBytes(payload: string) {

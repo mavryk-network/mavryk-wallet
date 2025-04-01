@@ -1,4 +1,4 @@
-import { CompositeForger, RpcForger, Signer, TezosOperationError, TezosToolkit } from '@mavrykdynamics/taquito';
+import { CompositeForger, RpcForger, Signer, MavrykOperationError, MavrykToolkit } from '@mavrykdynamics/taquito';
 import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
 import { localForger } from '@mavrykdynamics/taquito-local-forging';
@@ -553,7 +553,7 @@ export class Vault {
   async sendOperations(accPublicKeyHash: string, rpc: string, opParams: any[]) {
     return this.withSigner(accPublicKeyHash, async signer => {
       const batch = await withError('Failed to send operations', async () => {
-        const tezos = new TezosToolkit(loadFastRpcClient(rpc));
+        const tezos = new MavrykToolkit(loadFastRpcClient(rpc));
         tezos.setSignerProvider(signer);
         tezos.setForgerProvider(new CompositeForger([tezos.getFactory(RpcForger)(), localForger]));
         tezos.setPackerProvider(michelEncoder);
@@ -567,7 +567,7 @@ export class Vault {
 
         switch (true) {
           case err instanceof PublicError:
-          case err instanceof TezosOperationError:
+          case err instanceof MavrykOperationError:
             throw err;
 
           case err instanceof HttpResponseError:

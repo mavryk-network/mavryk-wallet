@@ -1,4 +1,4 @@
-// import { TezosToolkit } from '@mavrykdynamics/taquito';
+// import { MavrykToolkit } from '@mavrykdynamics/taquito';
 // import {
 //   contracts,
 //   AssetDefinition,
@@ -39,7 +39,7 @@
 // }
 
 // export const getYOUTokenApr$ = (
-//   tezos: TezosToolkit,
+//   tezos: MavrykToolkit,
 //   assetToUsdExchangeRate: BigNumber,
 //   governanceToUsdExchangeRate: BigNumber
 // ): Observable<number> => {
@@ -51,7 +51,7 @@
 //   );
 // };
 
-// export const getYouvesTokenApr$ = (tezos: TezosToolkit, token: AssetDefinition): Observable<number> => {
+// export const getYouvesTokenApr$ = (tezos: MavrykToolkit, token: AssetDefinition): Observable<number> => {
 //   const youves = createEngine({
 //     tezos,
 //     contracts: token,

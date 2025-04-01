@@ -1,4 +1,4 @@
-import type { Operation, TezosToolkit } from '@mavrykdynamics/taquito';
+import type { Operation, MavrykToolkit } from '@mavrykdynamics/taquito';
 
 type ActivationResult =
   | {
@@ -9,7 +9,7 @@ type ActivationResult =
       operation: Operation;
     };
 
-export const activateAccount = (address: string, secret: string, tezos: TezosToolkit): Promise<ActivationResult> =>
+export const activateAccount = (address: string, secret: string, tezos: MavrykToolkit): Promise<ActivationResult> =>
   tezos.tz.activate(address, secret).then(
     operation => ({ status: 'SENT', operation }),
     err => {

@@ -1,4 +1,4 @@
-// import { TezosToolkit } from '@mavrykdynamics/taquito';
+// import { MavrykToolkit } from '@mavrykdynamics/taquito';
 // import BigNumber from 'bignumber.js';
 import { map } from 'rxjs';
 
@@ -25,19 +25,19 @@ export const fetchTzBtcApy$ = () => {
   return fetchApyFromYupana$('TZBTC').pipe(map(val => ({ [slug]: val })));
 };
 
-// export const fetchUBTCApr$ = (tezos: TezosToolkit) => {
+// export const fetchUBTCApr$ = (tezos: MavrykToolkit) => {
 //   const slug = KNOWN_TOKENS_SLUGS.UBTC;
 
 //   return getYouvesTokenApr$(tezos, youvesTokensRecord[YouvesTokensEnum.UBTC]).pipe(map(value => ({ [slug]: value })));
 // };
 
-// export const fetchUUSDCApr$ = (tezos: TezosToolkit) => {
+// export const fetchUUSDCApr$ = (tezos: MavrykToolkit) => {
 //   const slug = KNOWN_TOKENS_SLUGS.UUSD;
 
 //   return getYouvesTokenApr$(tezos, youvesTokensRecord[YouvesTokensEnum.UUSD]).pipe(map(value => ({ [slug]: value })));
 // };
 
-// export const fetchYOUApr$ = (tezos: TezosToolkit, tokenUsdExchangeRates: ExchangeRateRecord) => {
+// export const fetchYOUApr$ = (tezos: MavrykToolkit, tokenUsdExchangeRates: ExchangeRateRecord) => {
 //   const slug = KNOWN_TOKENS_SLUGS.YOU;
 //   const assetToUsdExchangeRate = new BigNumber(tokenUsdExchangeRates[slug]);
 

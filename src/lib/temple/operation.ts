@@ -1,11 +1,11 @@
-import type { TezosToolkit } from '@mavrykdynamics/taquito';
+import type { MavrykToolkit } from '@mavrykdynamics/taquito';
 
 import { BLOCK_DURATION } from 'lib/fixed-times';
 
 const TIMEOUT = 3 * BLOCK_DURATION;
 export const CONFIRMATION_TIMED_OUT_ERROR_MSG = 'Confirmation polling timed out';
 
-export const confirmOperation = (tezos: TezosToolkit, opHash: string) =>
+export const confirmOperation = (tezos: MavrykToolkit, opHash: string) =>
   Promise.race([
     tezos.operation
       .createOperation(opHash)

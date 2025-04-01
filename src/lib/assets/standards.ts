@@ -1,4 +1,4 @@
-import { TezosToolkit, WalletContract, Contract, ChainIds } from '@mavrykdynamics/taquito';
+import { MavrykToolkit, WalletContract, Contract, ChainIds } from '@mavrykdynamics/taquito';
 import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import retry from 'async-retry';
 
@@ -26,7 +26,7 @@ const FA2_ENTRYPOINTS_SCHEMA = [
 ];
 
 export const detectTokenStandard = async (
-  tezos: TezosToolkit,
+  tezos: MavrykToolkit,
   contract: string | Contract | WalletContract
 ): Promise<TokenStandardType | null> => {
   const { entrypoints } =
@@ -46,7 +46,7 @@ export const detectTokenStandard = async (
   }
 };
 
-export const assertFa2TokenDefined = async (tezos: TezosToolkit, contract: WalletContract, tokenId = 0) => {
+export const assertFa2TokenDefined = async (tezos: MavrykToolkit, contract: WalletContract, tokenId = 0) => {
   const chainId = (await tezos.rpc.getChainId()) as ChainIds;
 
   try {

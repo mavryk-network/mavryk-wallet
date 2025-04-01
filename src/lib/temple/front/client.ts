@@ -417,7 +417,13 @@ type TaquitoWalletOps = {
   onBeforeSend?: (id: string) => void;
 };
 
-class TaquitoWallet implements WalletProvider {
+class TaquitoWallet
+  implements
+    Omit<
+      WalletProvider,
+      'mapStakeParamsToWalletParams' | 'mapUnstakeParamsToWalletParams' | 'mapFinalizeUnstakeParamsToWalletParams'
+    >
+{
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
 
   async getPKH() {

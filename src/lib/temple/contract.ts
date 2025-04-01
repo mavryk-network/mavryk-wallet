@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import memoizee from 'memoizee';
 
 export const loadContract = memoizee(fetchContract, {
@@ -6,6 +6,6 @@ export const loadContract = memoizee(fetchContract, {
   max: 100
 });
 
-function fetchContract(tezos: TezosToolkit, address: string, walletAPI = true) {
+function fetchContract(tezos: MavrykToolkit, address: string, walletAPI = true) {
   return walletAPI ? tezos.wallet.at(address) : tezos.contract.at(address);
 }

@@ -1,4 +1,4 @@
-import { Estimate, TezosToolkit } from '@mavrykdynamics/taquito';
+import { Estimate, MavrykToolkit } from '@mavrykdynamics/taquito';
 import { localForger } from '@mavrykdynamics/taquito-local-forging';
 import { ForgeOperationsParams } from '@mavrykdynamics/taquito-rpc';
 
@@ -31,7 +31,7 @@ export async function dryRunOpParams({
   sourcePublicKey
 }: DryRunParams): Promise<DryRunResult | null> {
   try {
-    const tezos = new TezosToolkit(loadFastRpcClient(networkRpc));
+    const tezos = new MavrykToolkit(loadFastRpcClient(networkRpc));
 
     let bytesToSign: string | undefined;
     const signer = new ReadOnlySigner(sourcePkh, sourcePublicKey, digest => {

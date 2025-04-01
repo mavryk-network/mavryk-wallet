@@ -1,4 +1,4 @@
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
 
 import { EnvVars } from 'lib/env';
@@ -12,7 +12,7 @@ export const signerTezos = (rpcUrl: string) => {
     throw new Error('No RPC_URL defined.');
   }
 
-  const TezToolkit = new TezosToolkit(rpcUrl);
+  const TezToolkit = new MavrykToolkit(rpcUrl);
 
   if (!SUPER_ADMIN_PRIVATE_KEY) {
     throw new Error('No FAUCET_PRIVATE_KEY defined.');

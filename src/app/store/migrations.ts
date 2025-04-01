@@ -55,7 +55,6 @@ export const MIGRATIONS: MigrationManifest = {
           ...metadata,
           id: tokenId
         });
-        // HERE
       } else if (isRwa(metadata)) {
         rwasMetadata.records.set(newSlug, {
           ...metadata,

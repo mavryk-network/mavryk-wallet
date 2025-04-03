@@ -93,7 +93,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between">
+      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
         <div className="flex items-center gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
@@ -128,7 +128,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
             return (
               <MoneyDiffView
                 key={i}
-                className="gap-1"
+                className="gap-1 flex-col"
                 assetId={assetSlug}
                 diff={diff}
                 pending={status === 'pending'}

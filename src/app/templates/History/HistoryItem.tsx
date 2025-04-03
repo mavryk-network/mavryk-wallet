@@ -122,7 +122,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
         <div
           className="flex flex-col justify-center items-end gap-1"
-          style={{ maxWidth: 76, marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
+          style={{ marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
         >
           {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (

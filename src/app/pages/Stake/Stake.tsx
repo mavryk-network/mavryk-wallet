@@ -40,7 +40,7 @@ type UnfamiliarListItemType = {
   i18nKey: TID;
 };
 
-type StakePlanListItemType = UnfamiliarListItemType & { internalList: string[] };
+type StakePlanListItemType = UnfamiliarListItemType & { internalList: TID[] };
 
 const unfamiliarDelegateList: UnfamiliarListItemType[] = [
   {
@@ -58,20 +58,20 @@ const stakingPlanList: StakePlanListItemType[] = [
     content: '💧️',
     i18nKey: 'stakePlanOption1',
     internalList: [
-      'Earn competitive yields that adjust with network activity',
-      'Tokens are 100% liquid and stay in your wallet—use them anytime',
-      'No lock-up or waiting periods or restrictions.',
-      'Your funds are safe from penalties'
+      'delegatePlanListOption1',
+      'delegatePlanListOption2',
+      'delegatePlanListOption3',
+      'delegatePlanListOption4'
     ]
   },
   {
     content: '🔒️',
     i18nKey: 'stakePlanOption2',
     internalList: [
-      'Earn higher rewards by committing your tokens.',
-      'Tokens are locked for 14 days when unstaking',
-      'Support network security by co-staking with validator bonds',
-      'Penalties may apply if validators misbehave'
+      'coStakePlanListOption1',
+      'coStakePlanListOption2',
+      'coStakePlanListOption3',
+      'coStakePlanListOption4'
     ]
   }
 ];
@@ -98,7 +98,7 @@ const StakePlanListItem: FC<StakePlanListItemType> = ({ content, i18nKey, intern
         <ul className="list-disc ml-4">
           {internalList.map(item => (
             <li key={item} className="text-sm text-white">
-              {item}
+              <T id={item} />
             </li>
           ))}
         </ul>
@@ -128,7 +128,9 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
           <UnfamiliarListItem key={item.i18nKey} {...item} />
         ))}
       </div>
-      <div className="text-base text-white text-left">Choose Your Staking Plan:</div>
+      <div className="text-base text-white text-left">
+        <T id="chooseStakingPlanMsg" />
+      </div>
       <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 mt-4 mb-6">
         {stakingPlanList.map(item => (
           <StakePlanListItem key={item.i18nKey} {...item} />
@@ -142,7 +144,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
       </section>
       <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
         <ButtonRounded size="big" className={clsx('w-full ')} fill={false}>
-          Co-stake
+          <T id="coStake" />
         </ButtonRounded>
 
         <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full')} fill>

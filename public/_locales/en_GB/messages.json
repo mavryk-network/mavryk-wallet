@@ -3401,6 +3401,30 @@
   "stakeListItem2": {
     "message": "Your MVRK tokens stay in your wallet, under your control. Use them anytime!"
   },
+  "delegatePlanListOption1": {
+    "message": "Earn competitive yields that adjust with network activity"
+  },
+  "delegatePlanListOption2": {
+    "message": "Tokens are 100% liquid and stay in your wallet—use them anytime"
+  },
+  "delegatePlanListOption3": {
+    "message": "No lock-up or waiting periods or restrictions."
+  },
+  "delegatePlanListOption4": {
+    "message": "Your funds are safe from penalties"
+  },
+  "coStakePlanListOption1": {
+    "message": "Earn higher rewards by committing your tokens."
+  },
+  "coStakePlanListOption2": {
+    "message": "Tokens are locked for 14 days when unstaking"
+  },
+  "coStakePlanListOption3": {
+    "message": "Support network security by co-staking with validator bonds"
+  },
+  "coStakePlanListOption4": {
+    "message": "Penalties may apply if validators misbehave"
+  },
   "stakePlanOption1": {
     "message": "<b>Delegate</b> - Flexible and instant access to your tokens"
   },
@@ -3446,8 +3470,14 @@
   "stakeYourTokensBannerDescription": {
     "message": "Stake your tokens to trusted validators"
   },
+  "chooseStakingPlanMsg": {
+    "message": "Choose Your Staking Plan:"
+  },
   "reStake": {
     "message": "Re-stake"
+  },
+  "coStake": {
+    "message": "Co-stake"
   },
   "deleteContact": {
     "message": "Delete Contact"

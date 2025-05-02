@@ -56,7 +56,7 @@ interface FormData {
   fee: number;
 }
 
-export const RECOMMENDED_BAKER_ADDRESS = 'tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM';
+export const RECOMMENDED_BAKER_ADDRESS = 'mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8';
 export const HELP_UKRAINE_BAKER_ADDRESS = 'tz1bMFzs2aECPn4aCRmKQWHSLHF8ZnZbYcah';
 
 type DelegateFormProps = {
@@ -526,7 +526,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
       </div>
 
-      {!tzError && baker.minDelegation > balanceNum && (
+      {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
         <Alert
           type="warning"
           title={t('minDelegationAmountTitle')}
@@ -535,7 +535,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
               id="minDelegationAmountDescription"
               substitutions={[
                 <span className="font-normal" key="minDelegationsAmount">
-                  <Money>{baker.minDelegation}</Money> <span style={{ fontSize: '0.75em' }}>{symbol}</span>
+                  <Money>{baker.minDelegation ?? 0}</Money> <span style={{ fontSize: '0.75em' }}>{symbol}</span>
                 </span>
               ]}
             />
@@ -586,13 +586,13 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
     const toSort = Array.from(knownBakers);
     switch (sortOption) {
       case SortOptions.AVAILABLE_SPACE:
-        return toSort.sort((a, b) => b.freeSpace - a.freeSpace);
+        return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
 
       case SortOptions.FEE:
-        return toSort.sort((a, b) => a.fee - b.fee);
+        return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
 
       case SortOptions.UP_TIME:
-        return toSort.sort((a, b) => b.estimatedRoi - a.estimatedRoi);
+        return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
 
       default:
         return toSort;

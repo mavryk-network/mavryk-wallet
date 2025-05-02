@@ -96,13 +96,10 @@ type RewardConfig = Record<
   | 'lowPriorityEndorses',
   boolean
 >;
-export type Baker = Pick<
-  BakingBadBaker,
-  'address' | 'name' | 'fee' | 'freeSpace' | 'minDelegation' | 'stakingBalance' | 'estimatedRoi'
-> & {
+export type Baker = BakingBadBaker & {
   logo?: string;
   feeHistory?: BakingBadBakerValueHistoryItem<number>[];
-  rewardConfigHistory: BakingBadBakerValueHistoryItem<RewardConfig>[];
+  rewardConfigHistory?: BakingBadBakerValueHistoryItem<RewardConfig>[];
 };
 
 const defaultRewardConfigHistory = [
@@ -137,34 +134,36 @@ export function useKnownBaker(address: string | null, suspense = true) {
       if (typeof bakingBadBaker === 'object') {
         return {
           address: bakingBadBaker.address,
-          name: bakingBadBaker.name,
-          logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
+          stakedBalance: bakingBadBaker.stakedBalance,
+          balance: bakingBadBaker.balance,
+          // name: bakingBadBaker.name,
+          // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
           fee: bakingBadBaker.fee,
           freeSpace: bakingBadBaker.freeSpace,
-          stakingBalance: bakingBadBaker.stakingBalance,
-          feeHistory: bakingBadBaker.config?.fee,
-          minDelegation: bakingBadBaker.minDelegation,
-          estimatedRoi: bakingBadBaker.estimatedRoi,
-          rewardConfigHistory:
-            bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
-              cycle,
-              value: {
-                blocks: (rewardStruct & 1) > 0,
-                endorses: (rewardStruct & 2) > 0,
-                fees: (rewardStruct & 4) > 0,
-                accusationRewards: (rewardStruct & 8) > 0,
-                accusationLostDeposits: (rewardStruct & 16) > 0,
-                accusationLostRewards: (rewardStruct & 32) > 0,
-                accusationLostFees: (rewardStruct & 64) > 0,
-                revelationRewards: (rewardStruct & 128) > 0,
-                revelationLostRewards: (rewardStruct & 256) > 0,
-                revelationLostFees: (rewardStruct & 512) > 0,
-                missedBlocks: (rewardStruct & 1024) > 0,
-                stolenBlocks: (rewardStruct & 2048) > 0,
-                missedEndorses: (rewardStruct & 4096) > 0,
-                lowPriorityEndorses: (rewardStruct & 8192) > 0
-              }
-            })) ?? defaultRewardConfigHistory
+          // stakingBalance: bakingBadBaker.stakingBalance,
+          // feeHistory: bakingBadBaker.config?.fee,
+          // minDelegation: bakingBadBaker.minDelegation,
+          estimatedRoi: bakingBadBaker.estimatedRoi
+          // rewardConfigHistory:
+          //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
+          //     cycle,
+          //     value: {
+          //       blocks: (rewardStruct & 1) > 0,
+          //       endorses: (rewardStruct & 2) > 0,
+          //       fees: (rewardStruct & 4) > 0,
+          //       accusationRewards: (rewardStruct & 8) > 0,
+          //       accusationLostDeposits: (rewardStruct & 16) > 0,
+          //       accusationLostRewards: (rewardStruct & 32) > 0,
+          //       accusationLostFees: (rewardStruct & 64) > 0,
+          //       revelationRewards: (rewardStruct & 128) > 0,
+          //       revelationLostRewards: (rewardStruct & 256) > 0,
+          //       revelationLostFees: (rewardStruct & 512) > 0,
+          //       missedBlocks: (rewardStruct & 1024) > 0,
+          //       stolenBlocks: (rewardStruct & 2048) > 0,
+          //       missedEndorses: (rewardStruct & 4096) > 0,
+          //       lowPriorityEndorses: (rewardStruct & 8192) > 0
+          //     }
+          //   })) ?? defaultRewardConfigHistory
         };
       }
 
@@ -181,10 +180,9 @@ export function useKnownBaker(address: string | null, suspense = true) {
 }
 
 export function useKnownBakers(suspense = true) {
-  // const net = useNetwork();
-  // TODO add our baler list
-  // const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
-  const { data: bakers } = useRetryableSWR(null, getAllBakersBakingBad, {
+  const net = useNetwork();
+  // const { data: bakers } = useRetryableSWR(null, getAllBakersBakingBad, {
+  const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense

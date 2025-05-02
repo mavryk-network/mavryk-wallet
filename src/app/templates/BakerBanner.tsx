@@ -172,7 +172,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   child: (
                     <>
                       {/* TODO calculate ETD and add symbol */}
-                      <Money>{(baker.stakingBalance / 1000).toFixed(0)}</Money>
+                      <Money>{(baker.stakedBalance / 1000).toFixed(0)}</Money>
                     </>
                   )
                 },
@@ -195,7 +195,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   i18nKey: 'space',
                   child: (
                     <>
-                      <Money>{(baker.freeSpace / 1000).toFixed(0)}</Money>K
+                      <Money>{((baker.freeSpace ?? 0) / 1000).toFixed(0)}</Money>K
                     </>
                   )
                 },
@@ -204,7 +204,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   i18nKey: 'upTime',
                   child: (
                     <>
-                      {toLocalFormat(new BigNumber(baker.estimatedRoi).times(100), {
+                      {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
                         decimalPlaces: 2
                       })}
                       %
@@ -228,15 +228,21 @@ const BakerBanner = memo<BakerBannerProps>(
           <>
             <div className={classNames('flex items-center', 'text-white')}>
               <div>
-                <img
+                {/* <img
                   src={baker.logo}
-                  alt={baker.name}
+                  alt={baker.address}
                   className={classNames('flex-shrink-0', 'bg-white rounded-full')}
                   style={{
                     minHeight: '2rem',
                     width: 59,
                     height: 59
                   }}
+                /> */}
+                <Identicon
+                  type="bottts"
+                  hash={baker.address}
+                  size={59}
+                  className="shadow-xs rounded-full flex-shrink-0"
                 />
               </div>
 

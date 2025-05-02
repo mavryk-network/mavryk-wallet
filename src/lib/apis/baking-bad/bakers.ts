@@ -20,7 +20,13 @@ const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'addres
 );
 
 export async function getAllBakersBakingBad() {
-  const bakers = (await bakingBadGetKnownBakers({})).map(baker => ({ ...baker, minDelegation: 0, estimatedRoi: 0 }));
+  const bakers = (await bakingBadGetKnownBakers({})).map(baker => ({
+    ...baker,
+    minDelegation: 0,
+    estimatedRoi: 0,
+    fee: 5,
+    estimatedRoi: 5
+  }));
 
   return bakers.filter(baker => typeof baker !== 'string') as BakingBadBaker[];
 }

@@ -194,11 +194,11 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       console.error(err);
 
       switch (true) {
-        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
-          return new UnchangedError(err.message);
+        // case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
+        //   return new UnchangedError(err.message);
 
-        case err?.id.includes('unregistered_delegate'):
-          return new UnregisteredDelegateError(err.message);
+        // case err?.id.includes('unregistered_delegate'):
+        //   return new UnregisteredDelegateError(err.message);
 
         default:
           throw err;

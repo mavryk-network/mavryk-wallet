@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { DelegateResponse } from '@mavrykdynamics/taquito-rpc';
 import classNames from 'clsx';
 
-import { HashChip } from 'app/atoms';
+import { HashChip, Identicon } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
@@ -110,7 +110,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
           <T id="stakedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
-              <img
+              {/* <img
                 src={baker?.logo}
                 alt={baker?.name}
                 className={classNames('flex-shrink-0', 'bg-white rounded-full')}
@@ -119,8 +119,9 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
                   width: 24,
                   height: 24
                 }}
-              />
-              <span>{baker?.name}</span>
+              /> */}
+              <Identicon hash={myBakerPkh} size={24} className="rounded-full" />
+              <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>
             </div>
           ) : (
             <HashChip hash={myBakerPkh} small />

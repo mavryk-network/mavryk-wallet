@@ -23,7 +23,7 @@ export const FooterSocials: FC<FooterSocialsProps> = ({ className }) => {
 
 const FooterLinkItem: FC<AboutFooterLinkItemType> = ({ Icon, link, testID }) => {
   return (
-    <Anchor testID={testID} href={link} className="border border-divider p-1 no-underline">
+    <Anchor testID={testID} href={link} className="border border-divider p-1 no-underline rounded">
       <Icon className="w-6 h-6" />
     </Anchor>
   );

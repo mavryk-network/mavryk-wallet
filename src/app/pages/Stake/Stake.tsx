@@ -20,7 +20,7 @@ export const Stake: FC = () => {
   return (
     <PageLayout
       isTopbarVisible={false}
-      pageTitle={<T id="stake" />}
+      pageTitle={<T id="stakeAndEarn" />}
       removePaddings={popup}
       RightSidedComponent={toolbarRightSidedComponent}
     >
@@ -40,22 +40,39 @@ type UnfamiliarListItemType = {
   i18nKey: TID;
 };
 
+type StakePlanListItemType = UnfamiliarListItemType & { internalList: string[] };
+
 const unfamiliarDelegateList: UnfamiliarListItemType[] = [
   {
     content: '⭐️',
     i18nKey: 'stakeListItem1'
   },
   {
-    content: '📆',
+    content: '💰',
     i18nKey: 'stakeListItem2'
+  }
+];
+
+const stakingPlanList: StakePlanListItemType[] = [
+  {
+    content: '💧️',
+    i18nKey: 'stakePlanOption1',
+    internalList: [
+      'Earn competitive yields that adjust with network activity',
+      'Tokens are 100% liquid and stay in your wallet—use them anytime',
+      'No lock-up or waiting periods or restrictions.',
+      'Your funds are safe from penalties'
+    ]
   },
   {
-    content: '📈',
-    i18nKey: 'stakeListItem3'
-  },
-  {
-    content: '🔓',
-    i18nKey: 'stakeListItem4'
+    content: '🔒️',
+    i18nKey: 'stakePlanOption2',
+    internalList: [
+      'Earn higher rewards by committing your tokens.',
+      'Tokens are locked for 14 days when unstaking',
+      'Support network security by co-staking with validator bonds',
+      'Penalties may apply if validators misbehave'
+    ]
   }
 ];
 
@@ -66,6 +83,26 @@ const UnfamiliarListItem: FC<UnfamiliarListItemType> = ({ content, i18nKey }) =>
       <span className="text-sm text-white">
         <T id={i18nKey} />
       </span>
+    </div>
+  );
+};
+
+const StakePlanListItem: FC<StakePlanListItemType> = ({ content, i18nKey, internalList }) => {
+  return (
+    <div className="flex items-start gap-3">
+      <span className={`flex text-2xl`}>{content}</span>
+      <div className="text-sm text-white flex flex-col gap-4">
+        <p className="block">
+          <T id={i18nKey} />
+        </p>
+        <ul className="list-disc ml-4">
+          {internalList.map(item => (
+            <li key={item} className="text-sm text-white">
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
@@ -83,12 +120,18 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>
-      <div className="text-base text-white text-center">
-        <T id="delegationPointsHead1" substitutions={<span className="text-accent-blue">~5.6%</span>} />
+      <div className="text-base text-white text-left">
+        <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">5.6%</span>} />
       </div>
       <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 my-6">
         {unfamiliarDelegateList.map(item => (
           <UnfamiliarListItem key={item.i18nKey} {...item} />
+        ))}
+      </div>
+      <div className="text-base text-white text-left">Choose Your Staking Plan:</div>
+      <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 mt-4 mb-6">
+        {stakingPlanList.map(item => (
+          <StakePlanListItem key={item.i18nKey} {...item} />
         ))}
       </div>
       <section className="flex flex-col items-center">
@@ -97,9 +140,15 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
         </div>
         <FooterSocials />
       </section>
-      <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')} fill>
-        <T id="continue" />
-      </ButtonRounded>
+      <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
+        <ButtonRounded size="big" className={clsx('w-full ')} fill={false}>
+          Co-stake
+        </ButtonRounded>
+
+        <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full')} fill>
+          <T id="delegate" />
+        </ButtonRounded>
+      </div>
     </div>
   );
 };

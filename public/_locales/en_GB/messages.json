@@ -1110,6 +1110,9 @@
   "stake": {
     "message": "Stake"
   },
+  "stakeAndEarn": {
+    "message": "Stake & Earn"
+  },
   "recommended": {
     "message": "Recommended"
   },
@@ -1132,7 +1135,7 @@
     "message": "In case you have any questions, write them in our communities"
   },
   "delegationPointsHead1": {
-    "message": "Earn $interest$ rewards on your Mavryk annually for helping to secure the Mavryk Network",
+    "message": "Earn Up to $interest$ Annual Rewards on MVRK. \nHelp secure the Mavryk Network and get rewarded!",
     "description": "Delegation rewards description",
     "placeholders": {
       "interest": {
@@ -3393,16 +3396,16 @@
     "message": "Disconnect All"
   },
   "stakeListItem1": {
-    "message": "Your first reward on Mavryk will be paid approximately in 21 days. "
+    "message": "Earn your first reward in ~21 days, then receive payouts every ~3 days."
   },
   "stakeListItem2": {
-    "message": "Then, you receive rewards every ~3 days."
+    "message": "Your MVRK tokens stay in your wallet, under your control. Use them anytime!"
   },
-  "stakeListItem3": {
-    "message": "Earn rate varies over time. Check the current rate in your wallet."
+  "stakePlanOption1": {
+    "message": "<b>Delegate</b> - Flexible and instant access to your tokens"
   },
-  "stakeListItem4": {
-    "message": "Your Mavryk tokens always remain liquid in your wallet & under you control. Use anytime!"
+  "stakePlanOption2": {
+    "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
   },
   "delegateToValidator": {
     "message": "Delegate to Custom Validator"

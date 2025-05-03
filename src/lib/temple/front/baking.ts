@@ -181,14 +181,16 @@ export function useKnownBaker(address: string | null, suspense = true) {
 
 export function useKnownBakers(suspense = true) {
   const net = useNetwork();
-  // const { data: bakers } = useRetryableSWR(null, getAllBakersBakingBad, {
   const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense
   });
 
-  return useMemo(() => (bakers && bakers.length > 1 ? bakers : null), [bakers]);
+  return useMemo(
+    () => (bakers && bakers.length > 1 ? bakers.filter(baker => !new BigNumber(baker.stakedBalance).isZero()) : null),
+    [bakers]
+  );
 }
 
 type RewardsStatsCalculationParams = {

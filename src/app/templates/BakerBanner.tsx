@@ -315,6 +315,47 @@ const BakerBanner = memo<BakerBannerProps>(
   }
 );
 
+export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
+  const { data: baker } = useKnownBaker(bakerPkh);
+
+  const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
+
+  return baker ? (
+    <div className={classNames('w-full', 'p-4', 'bg-gray-910 rounded-2xl-plus')}>
+      <div className="flex items-center gap-2 mb-4">
+        <Identicon type="bottts" hash={baker.address} size={32} className="shadow-xs rounded-full flex-shrink-0" />
+
+        <div className="flex flex-col items-start flex-1 relative gap-1">
+          <Name
+            style={{
+              maxWidth: '8rem'
+            }}
+            className="text-base-plus text-white"
+            testID={BakingSectionSelectors.delegatedBakerName}
+          >
+            {baker.name || baker.address}
+          </Name>
+
+          <div className="flex flex-wrap items-center">
+            <HashChip hash={baker.address} small />
+          </div>
+        </div>
+
+        {isRecommendedBaker && (
+          <ABContainer
+            groupAComponent={<SponsoredBaker isRecommendedBaker={isRecommendedBaker} />}
+            groupBComponent={<PromotedBaker isRecommendedBaker={isRecommendedBaker} />}
+          />
+        )}
+      </div>
+      <div className="text-base-plus text-white flex items-center justify-between">
+        <span>Validator Free Space</span>
+        <span>20,000.00 MVRK</span>
+      </div>
+    </div>
+  ) : null;
+};
+
 export default BakerBanner;
 
 const BakerAccount: React.FC<{

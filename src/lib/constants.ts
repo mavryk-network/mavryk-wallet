@@ -26,3 +26,6 @@ const isMacOS = /Mac OS/.test(navigator.userAgent);
 export const searchHotkey = ` (${isMacOS ? '⌘' : 'Ctrl + '}K)`;
 
 export const VERIFIED_USER_KEY = 'isAddressVerified';
+
+export const PENNY = 0.000001;
+export const RECOMMENDED_ADD_FEE = 0.0001;

@@ -574,12 +574,17 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     close();
   }, [avtivateReDelegation, close]);
 
+  const handleCoStakeNavigation = useCallback(() => {
+    navigate('/co-stake');
+    close();
+  }, [close]);
+
   return (
     <div className="grid gap-3 grid-cols-2">
       <ButtonRounded size="xs" fill={false} onClick={open}>
         Re-delegate
       </ButtonRounded>
-      <ButtonRounded size="xs" fill>
+      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation}>
         Co-stake
       </ButtonRounded>
 

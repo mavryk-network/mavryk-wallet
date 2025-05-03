@@ -185,6 +185,7 @@ module.exports = {
         'primary-error': '#FF3E3E',
         'primary-warning': '#E68226',
         'primary-info': '#B9EEFE',
+        'primary-info-hover': '#B9EEFE40',
         'accent-orange': baseColors.orange[600],
 
         'list-item-selected': baseColors.gray[710],

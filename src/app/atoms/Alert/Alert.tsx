@@ -6,6 +6,7 @@ import { Collapse } from 'react-collapse';
 import { ReactComponent as ErrorIcon } from 'app/icons/alert-error.svg';
 import { ReactComponent as ChevronDownIcon } from 'app/icons/chevron-down.svg';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
+import { ReactComponent as InfoIcon } from 'app/icons/info-secondary.svg';
 import { ReactComponent as AlertIcon } from 'app/icons/warning.svg';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { t } from 'lib/i18n';
@@ -14,7 +15,7 @@ import { merge } from 'lib/utils/merge';
 import styles from './alert.module.css';
 import { AlertSelectors } from './Alert.selectors';
 
-type AlertType = 'success' | 'warning' | 'error' | 'delegate';
+type AlertType = 'success' | 'warning' | 'error' | 'delegate' | 'info';
 
 type AlertProps = Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
   type?: AlertType;
@@ -53,7 +54,7 @@ export const Alert: FC<AlertProps> = ({
         'relative w-full px-3 pb-3 pt-2',
         'flex items-center gap-3',
         bgColorClassName,
-        'rounded-md',
+        'rounded-xl',
         className
       )}
       tabIndex={-1}
@@ -146,6 +147,8 @@ const getColorsByType = (type: AlertType) => {
         return ['bg-primary-alert-error', 'border-primary-alert-error', 'text-white', 'text-white'];
       case 'delegate':
         return ['bg-accent-blue-hover', 'border-accent-blue-hover', 'text-white', 'text-white'];
+      case 'info':
+        return ['bg-primary-info-hover', 'border-primary-info-hover', 'text-white', 'text-white'];
     }
   })();
 
@@ -158,6 +161,8 @@ const getIconByType = (type: AlertType) => {
       return AlertIcon;
     case 'error':
       return ErrorIcon;
+    case 'info':
+      return InfoIcon;
     default:
       return null;
   }

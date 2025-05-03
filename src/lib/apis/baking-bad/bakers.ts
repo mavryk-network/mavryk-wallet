@@ -24,8 +24,7 @@ export async function getAllBakersBakingBad() {
     ...baker,
     minDelegation: 0,
     estimatedRoi: 0,
-    fee: 5,
-    estimatedRoi: 5
+    fee: 5
   }));
 
   return bakers.filter(baker => typeof baker !== 'string') as BakingBadBaker[];
@@ -43,6 +42,7 @@ export type BakingBadBaker = {
   minDelegation?: number;
   freeSpace?: number;
   fee?: number;
+  name?: string;
 };
 
 type BakingBadGetBakerResponse = BakingBadBaker | '';

@@ -51,6 +51,8 @@ import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selector
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { DelegateFormSelectors } from './delegateForm.selectors';
+import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
+import clsx from 'clsx';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
@@ -546,11 +548,60 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   ) : null;
 };
 
+export const DelegateActionsComponent = () => {
+  const [opened, setOpened] = useState(false);
+  const { popup } = useAppEnv();
+
+  const close = useCallback(() => {
+    setOpened(false);
+  }, []);
+
+  const open = useCallback(() => {
+    setOpened(true);
+  }, []);
+
+  return (
+    <div className="grid gap-3 grid-cols-2">
+      <ButtonRounded size="xs" fill={false} onClick={open}>
+        Re-delegate
+      </ButtonRounded>
+      <ButtonRounded size="xs" fill>
+        Co-stake
+      </ButtonRounded>
+
+      <PopupModalWithTitle
+        isOpen={opened}
+        contentPosition={popup ? 'bottom' : 'center'}
+        onRequestClose={close}
+        title={'Re-delegate To A New Validator'}
+        portalClassName="re-delegate-popup"
+      >
+        <div className={clsx(popup ? 'px-4' : 'px-6')}>
+          <div className={clsx('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
+            By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked.
+            You'll continue earning rewards from your current validator until the transfer completes, then immediately
+            begin earning from the new validator with no interruption in rewards or participation.
+          </div>
+          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', popup ? 'px-4' : 'px-12')}>
+            <ButtonRounded size="big" fill={false} onClick={close}>
+              <T id="cancel" />
+            </ButtonRounded>
+            <ButtonRounded size="big" fill>
+              Re-delegate
+            </ButtonRounded>
+          </div>
+        </div>
+      </PopupModalWithTitle>
+    </div>
+  );
+};
+
 export const AdvancedBakerBannerComponent: React.FC<{ bakerAddress: string }> = ({ bakerAddress }) => {
   const { data: baker } = useKnownBaker(bakerAddress || null, false);
+  const { popup } = useAppEnv();
 
   return baker ? (
-    <div>
+    <div className={clsx(popup && 'px-4')}>
       <p className="text-white text-base">My Validator</p>
       <div className="flex items-center py-4">
         <BakerBanner bakerPkh={baker.address} style={{ padding: 0 }} />
@@ -558,14 +609,7 @@ export const AdvancedBakerBannerComponent: React.FC<{ bakerAddress: string }> = 
           <ExternalLinkIcon className="w-6 h-6 text-white fill-current" />
         </Anchor>
       </div>
-      <div className="grid gap-3 grid-cols-2">
-        <ButtonRounded size="xs" fill={false}>
-          Re-delegate
-        </ButtonRounded>
-        <ButtonRounded size="xs" fill>
-          Co-stake
-        </ButtonRounded>
-      </div>
+      <DelegateActionsComponent />
       <Divider className="my-6" color="bg-divider" ignoreParent />
     </div>
   ) : null;

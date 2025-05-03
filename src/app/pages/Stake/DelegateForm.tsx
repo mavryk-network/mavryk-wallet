@@ -63,10 +63,15 @@ interface FormData {
 
 type DelegateFormProps = {
   unfamiliarWithDelegation: boolean;
+  isFromCoStakeNavigation: boolean;
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
-const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, unfamiliarWithDelegation }) => {
+const DelegateForm: FC<DelegateFormProps> = ({
+  setToolbarRightSidedComponent,
+  unfamiliarWithDelegation,
+  isFromCoStakeNavigation
+}) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { isDcpNetwork } = useGasToken();
@@ -341,11 +346,19 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, un
   const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
 
   return (
-    <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
+    <div className={classNames(!restFormDisplayed && popup && 'pt-4 px-4', 'h-full flex-1 flex flex-col')}>
+      {unfamiliarWithDelegation && isFromCoStakeNavigation && (
+        <Alert
+          type="info"
+          title={'Attention!'}
+          className={classNames('mb-6')}
+          description={'Before co-staking, delegate your stake to a trusted validator to begin earning rewards.'}
+        />
+      )}
       {!unfamiliarWithDelegation && myBakerPkh && !isReDelegationActive && (
         <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} avtivateReDelegation={avtivateReDelegation} />
       )}
-      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
+      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8" />}
       {isReDelegationActive && (
         <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
           <Controller
@@ -366,12 +379,12 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, un
             style={{
               resize: 'none'
             }}
-            containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
+            containerClassName={classNames('mb-4', toFilled && 'hidden')}
             testID={DelegateFormSelectors.bakerInput}
           />
 
           {resolvedAddress && (
-            <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center px-4">
+            <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
               <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
               <span className="font-normal">{resolvedAddress}</span>
             </div>
@@ -447,7 +460,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const testGroupName = useUserTestingGroupNameSelector();
   const assetSymbol = 'ṁ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
-  const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { padding: 0 } : {}) }), [popup]);
+  const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
@@ -505,7 +518,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
             message: bakerTestMessage
           }}
         >
-          {t('stake')}
+          {t('delegate')}
         </FormSubmitButton>
       </div>
     </div>
@@ -620,10 +633,9 @@ export const AdvancedBakerBannerComponent: React.FC<{
   avtivateReDelegation: () => void;
 }> = ({ bakerAddress, avtivateReDelegation }) => {
   const { data: baker } = useKnownBaker(bakerAddress || null, false);
-  const { popup } = useAppEnv();
 
   return baker ? (
-    <div className={classNames(popup && 'px-4')}>
+    <div>
       <p className="text-white text-base">My Validator</p>
       <div className="flex items-center py-4">
         <BakerBanner bakerPkh={baker.address} style={{ padding: 0 }} />
@@ -704,7 +716,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
 
   return (
     <div className="flex flex-col">
-      <h2 className=" w-full mb-4 -mt-2 leading-tight flex items-center justify-between px-4">
+      <h2 className=" w-full mb-4 -mt-2 leading-tight flex items-center justify-between">
         <span className="text-base-plus text-white">
           <T id="delegateToPromotedValidators" />
         </span>
@@ -715,7 +727,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         </SortPopup>
       </h2>
 
-      <div className="px-4">
+      <div>
         <AlertWithAction btnLabel={t('promote')}>
           <T id="promoteYourself" />
         </AlertWithAction>

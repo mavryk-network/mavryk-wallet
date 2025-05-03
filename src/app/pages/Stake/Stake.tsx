@@ -14,6 +14,7 @@ import { useBakingHistory } from './hooks/use-baking-history';
 export const Stake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
+  const [isFromCoStakeNavigation, setIsFromCoStakeNavigation] = useState(false);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
   const { fullPage, popup } = useAppEnv();
 
@@ -26,11 +27,15 @@ export const Stake: FC = () => {
     >
       <div className={clsx('h-full flex-1 flex flex-col', !fullPage && 'pb-8')}>
         {showStakeScreen ? (
-          <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
+          <UnfamiliarWithDelegationScreen
+            setShowStakeScreen={setShowStakeScreen}
+            setIsFromCoStakeNavigation={setIsFromCoStakeNavigation}
+          />
         ) : (
           <DelegateForm
             setToolbarRightSidedComponent={setToolbarRightSidedComponent}
             unfamiliarWithDelegation={unfamiliarWithDelegation}
+            isFromCoStakeNavigation={isFromCoStakeNavigation}
           />
         )}
       </div>
@@ -112,14 +117,23 @@ const StakePlanListItem: FC<StakePlanListItemType> = ({ content, i18nKey, intern
 
 type UnfamiliarWithDelegationScreenProps = {
   setShowStakeScreen: (value: boolean) => void;
+  setIsFromCoStakeNavigation: (value: boolean) => void;
 };
 
-const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({ setShowStakeScreen }) => {
+const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({
+  setShowStakeScreen,
+  setIsFromCoStakeNavigation
+}) => {
   const { popup } = useAppEnv();
   const handleBtnClick = useCallback(() => {
     // skip delegate onboarding screen
     setShowStakeScreen(false);
   }, [setShowStakeScreen]);
+
+  const handleCoStakeNavigation = useCallback(() => {
+    setIsFromCoStakeNavigation(true);
+    setShowStakeScreen(false);
+  }, [setIsFromCoStakeNavigation, setShowStakeScreen]);
 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>
@@ -146,7 +160,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
         <FooterSocials />
       </section>
       <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
-        <ButtonRounded size="big" className={clsx('w-full ')} fill={false}>
+        <ButtonRounded size="big" className={clsx('w-full ')} fill={false} onClick={handleCoStakeNavigation}>
           <T id="coStake" />
         </ButtonRounded>
 

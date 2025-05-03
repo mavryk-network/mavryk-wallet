@@ -3432,7 +3432,7 @@
     "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
   },
   "delegateToValidator": {
-    "message": "Delegate to Custom Validator"
+    "message": "Delegate to Specific Validator"
   },
   "delegateToPromotedValidators": {
     "message": "Delegate to Promoted Validators "

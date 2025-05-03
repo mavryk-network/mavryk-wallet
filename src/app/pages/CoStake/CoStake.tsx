@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Alert, FormSubmitButton } from 'app/atoms';
+import { Alert, FormSubmitButton, Money } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
 import { useAppEnv } from 'app/env';
@@ -12,12 +12,15 @@ import ContentContainer from 'app/layouts/ContentContainer';
 import PageLayout from 'app/layouts/PageLayout';
 import AccountBanner from 'app/templates/AccountBanner';
 import { CoStakeBakerBanner } from 'app/templates/BakerBanner';
+import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { t, toLocalFixed } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate } from 'lib/temple/front';
+import { useAccount, useDelegate, useKnownBaker } from 'lib/temple/front';
+import { useSafeState } from 'lib/ui/hooks';
+import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
 import { navigate } from 'lib/woozie';
 
@@ -32,14 +35,18 @@ export const CoStake: FC = () => {
   const { fullPage, popup } = useAppEnv();
   const account = useAccount();
   const { data: myBakerPkh } = useDelegate(account.publicKeyHash);
+  const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
 
+  const formAnalytics = useFormAnalytics('CoStakeForm');
+
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
   });
+  const [submitError, setSubmitError] = useSafeState<any>(null);
 
   useEffect(() => {
     if (unfamiliarWithDelegation) {
@@ -81,12 +88,23 @@ export const CoStake: FC = () => {
   const onSubmit = useCallback(
     async ({ amount }: FormData) => {
       if (formState.isSubmitting) return;
+      formAnalytics.trackSubmit({ amount });
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
-        console.log('amount', amount);
-      } catch (err: any) {}
+        formAnalytics.trackSubmitSuccess({
+          amount
+        });
+      } catch (err: any) {
+        formAnalytics.trackSubmitFail({ amount });
+
+        console.error(err);
+
+        // Human delay.
+        await delay();
+        setSubmitError(err);
+      }
     },
-    [assetMetadata, formState.isSubmitting]
+    [assetMetadata, formAnalytics, formState.isSubmitting, setSubmitError]
   );
 
   return (
@@ -112,20 +130,25 @@ export const CoStake: FC = () => {
               }}
               onChange={([v]) => v}
               onFocus={() => amountFieldRef.current?.focus()}
-              id="send-amount"
+              id="co-stake-amount"
               assetDecimals={assetMetadata?.decimals ?? 0}
               label={'Co-stake Amount'}
               placeholder={'Enter amount'}
-              errorCaption={errors.amount?.message}
+              errorCaption={errors.amount?.message || submitError?.message}
               containerClassName="mb-3"
               autoFocus={Boolean(maxAmount)}
               extraInner={<MaxButton onClick={handleSetMaxAmount} fill={false} className="relative z-10" />}
             />
-            <div className="flex text-sm gap-1 mb-6">
+            <div className="flex text-sm gap-1 mb-6 items-center">
               <p className="text-secondary-white">Delegated Amount </p>
-              <p className="text-white">
-                {12} {assetMetadata?.symbol}
-              </p>
+              <div className="text-white">
+                <div className="text-white text-sm flex items-center">
+                  <div className={clsx('text-sm leading-none', 'text-white')}>
+                    <Money smallFractionFont={false}>{new BigNumber(baker?.stakedBalance ?? 0)}</Money>{' '}
+                    <span>{assetMetadata?.symbol}</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <FormSubmitButton
               loading={formState.isSubmitting}

@@ -91,7 +91,7 @@ export const CoStake: FC = () => {
 
   return (
     <PageLayout isTopbarVisible={false} pageTitle={'Co-stake'} removePaddings={popup}>
-      <ContentContainer className={clsx('h-full flex-1 flex flex-col text-white', !fullPage && 'pb-8')}>
+      <ContentContainer className={clsx('h-full flex-1 flex flex-col text-white', !fullPage && 'pb-8 pt-4')}>
         <AccountBanner account={account} showMVRK className="mb-4" />
         <div>
           <p className="text-base-plus mb-3">Stake to</p>
@@ -132,7 +132,7 @@ export const CoStake: FC = () => {
               disabled={Boolean(
                 formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
               )}
-              className="mt-6"
+              className="my-6"
             >
               Co-stake
             </FormSubmitButton>

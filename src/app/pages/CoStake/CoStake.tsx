@@ -110,7 +110,8 @@ export const CoStake: FC = () => {
         const op = await tezos.wallet
           .stake({
             to: myBakerPkh,
-            amount: new BigNumber(amount).toNumber()
+            amount: new BigNumber(amount).toNumber(),
+            mumav: true
           })
           .send();
 

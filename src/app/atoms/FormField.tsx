@@ -236,12 +236,7 @@ interface ExtraInnerProps {
 const ExtraInner: React.FC<ExtraInnerProps> = ({ useDefaultWrapper, innerComponent }) => {
   if (useDefaultWrapper)
     return (
-      <div
-        className={classNames(
-          'absolute flex items-center justify-end inset-y-0 right-0 w-32',
-          'pointer-events-none overflow-hidden'
-        )}
-      >
+      <div className={classNames('absolute flex items-center justify-end inset-y-0 right-0 w-32', ' overflow-hidden')}>
         <span className="mx-4 text-base-plus text-secondary-white">{innerComponent}</span>
       </div>
     );

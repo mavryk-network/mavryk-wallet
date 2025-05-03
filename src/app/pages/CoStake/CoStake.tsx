@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
+import { MaxButton } from 'app/atoms/MaxButton';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import PageLayout from 'app/layouts/PageLayout';
@@ -112,14 +113,13 @@ export const CoStake: FC = () => {
               onChange={([v]) => v}
               onFocus={() => amountFieldRef.current?.focus()}
               id="send-amount"
-              assetSymbol={assetMetadata?.symbol}
               assetDecimals={assetMetadata?.decimals ?? 0}
               label={'Co-stake Amount'}
               placeholder={'Enter amount'}
               errorCaption={errors.amount?.message}
               containerClassName="mb-3"
               autoFocus={Boolean(maxAmount)}
-              // childForInputWrapper={<div>test</div>}
+              extraInner={<MaxButton onClick={handleSetMaxAmount} fill={false} className="relative z-10" />}
             />
             <div className="flex text-sm gap-1 mb-6">
               <p className="text-secondary-white">Delegated Amount </p>

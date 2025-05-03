@@ -64,13 +64,17 @@ interface FormData {
 type DelegateFormProps = {
   unfamiliarWithDelegation: boolean;
   isFromCoStakeNavigation: boolean;
+  isReDelegationActive: boolean;
+  avtivateReDelegation: () => void;
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
 const DelegateForm: FC<DelegateFormProps> = ({
   setToolbarRightSidedComponent,
   unfamiliarWithDelegation,
-  isFromCoStakeNavigation
+  isFromCoStakeNavigation,
+  isReDelegationActive,
+  avtivateReDelegation
 }) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
@@ -254,26 +258,30 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
-  const [isReDelegationActive, setIsReDelegationActive] = useSafeState(unfamiliarWithDelegation);
-
-  const avtivateReDelegation = useCallback(() => {
-    setIsReDelegationActive(true);
-  }, [setIsReDelegationActive]);
 
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
-      navigate<SuccessStateType>('/success', undefined, {
-        pageTitle: 'stake',
-        btnText: 'goToMain',
-        contentId: 'hash',
-        contentIdFnProps: { hash, i18nKey: 'staking' },
-        subHeader: 'success'
-      });
+      if (isReDelegationActive) {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'reDelegate',
+          description: 'reDelegateSuccessDescMsg',
+          subHeader: 'reDelegateSuccessMsg',
+          btnText: 'goToMain'
+        });
+      } else {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'stake',
+          btnText: 'goToMain',
+          contentId: 'hash',
+          contentIdFnProps: { hash, i18nKey: 'staking' },
+          subHeader: 'success'
+        });
+      }
     }
-  }, [operation]);
+  }, [isReDelegationActive, operation]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -350,9 +358,9 @@ const DelegateForm: FC<DelegateFormProps> = ({
       {unfamiliarWithDelegation && isFromCoStakeNavigation && (
         <Alert
           type="info"
-          title={'Attention!'}
+          title={<T id="attentionExclamation" />}
           className={classNames('mb-6')}
-          description={'Before co-staking, delegate your stake to a trusted validator to begin earning rewards.'}
+          description={<T id="coStakeAttentionMsg" />}
         />
       )}
       {!unfamiliarWithDelegation && myBakerPkh && !isReDelegationActive && (
@@ -595,31 +603,29 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   return (
     <div className="grid gap-3 grid-cols-2">
       <ButtonRounded size="xs" fill={false} onClick={open}>
-        Re-delegate
+        <T id="reDelegate" />
       </ButtonRounded>
       <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation}>
-        Co-stake
+        <T id="coStake" />
       </ButtonRounded>
 
       <PopupModalWithTitle
         isOpen={opened}
         contentPosition={popup ? 'bottom' : 'center'}
         onRequestClose={close}
-        title={'Re-delegate To A New Validator'}
+        title={<T id="reDelegateToNewValidator" />}
         portalClassName="re-delegate-popup"
       >
         <div className={classNames(popup ? 'px-4' : 'px-6')}>
           <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
-            By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked.
-            You'll continue earning rewards from your current validator until the transfer completes, then immediately
-            begin earning from the new validator with no interruption in rewards or participation.
+            <T id="reDelegateToNewValidatorDescr" />
           </div>
           <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', popup ? 'px-4' : 'px-12')}>
             <ButtonRounded size="big" fill={false} onClick={close}>
               <T id="cancel" />
             </ButtonRounded>
             <ButtonRounded size="big" fill onClick={handleReDelegateNavigation}>
-              Re-delegate
+              <T id="reDelegate" />
             </ButtonRounded>
           </div>
         </div>

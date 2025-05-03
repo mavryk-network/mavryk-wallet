@@ -16,12 +16,25 @@ export const Stake: FC = () => {
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
   const [isFromCoStakeNavigation, setIsFromCoStakeNavigation] = useState(false);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
+  const [isReDelegationActive, setIsReDelegationActive] = useState(unfamiliarWithDelegation);
   const { fullPage, popup } = useAppEnv();
+
+  const label = unfamiliarWithDelegation
+    ? 'stakeAndEarn'
+    : isReDelegationActive
+    ? 'reDelegate'
+    : showStakeScreen
+    ? 'delegate'
+    : 'stake';
+
+  const avtivateReDelegation = useCallback(() => {
+    setIsReDelegationActive(true);
+  }, [setIsReDelegationActive]);
 
   return (
     <PageLayout
       isTopbarVisible={false}
-      pageTitle={<T id="stakeAndEarn" />}
+      pageTitle={<T id={label} />}
       removePaddings={popup}
       RightSidedComponent={toolbarRightSidedComponent}
     >
@@ -36,6 +49,8 @@ export const Stake: FC = () => {
             setToolbarRightSidedComponent={setToolbarRightSidedComponent}
             unfamiliarWithDelegation={unfamiliarWithDelegation}
             isFromCoStakeNavigation={isFromCoStakeNavigation}
+            isReDelegationActive={isReDelegationActive}
+            avtivateReDelegation={avtivateReDelegation}
           />
         )}
       </div>

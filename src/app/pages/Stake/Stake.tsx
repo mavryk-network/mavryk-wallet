@@ -7,6 +7,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
+import { useLocation } from 'lib/woozie';
 
 import DelegateForm from './DelegateForm';
 import { useBakingHistory } from './hooks/use-baking-history';
@@ -16,7 +17,8 @@ export const Stake: FC = () => {
   const [showStakeScreen, setShowStakeScreen] = useState(unfamiliarWithDelegation);
   const [isFromCoStakeNavigation, setIsFromCoStakeNavigation] = useState(false);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
-  const [isReDelegationActive, setIsReDelegationActive] = useState(unfamiliarWithDelegation);
+  const { state } = useLocation();
+  const [isReDelegationActive, setIsReDelegationActive] = useState(() => unfamiliarWithDelegation || state?.state);
   const { fullPage, popup } = useAppEnv();
 
   const label = unfamiliarWithDelegation

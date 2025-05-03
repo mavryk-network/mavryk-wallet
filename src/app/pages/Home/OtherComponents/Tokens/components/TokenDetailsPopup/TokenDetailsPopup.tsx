@@ -29,7 +29,7 @@ import { AssetMetadataBase, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { ZERO } from 'lib/utils/numbers';
-import { navigate } from 'lib/woozie';
+import { HistoryAction, navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
 
@@ -217,7 +217,7 @@ type BakerBannerSectionProps = {
 
 const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   const handleButtonClick = useCallback(() => {
-    navigate('/stake');
+    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
   }, []);
 
   const NotStakedBanner = useMemo(
@@ -237,14 +237,23 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   const StakedBanner = useMemo(
     () =>
       myBakerPkh ? (
-        <BakerBanner
-          bakerPkh={myBakerPkh ?? ''}
-          displayAddress
-          displayDivider
-          alternativeTableData
-          displayBg
-          style={{ width: undefined }}
-        />
+        <div className="flex flex-col gap-3">
+          <BakerBanner
+            bakerPkh={myBakerPkh ?? ''}
+            displayAddress
+            displayDivider
+            alternativeTableData
+            displayBg
+            style={{ width: undefined }}
+            extraComponent={
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <ButtonRounded size="xs" fill={false} onClick={handleButtonClick}>
+                  <T id="reDelegate" />
+                </ButtonRounded>
+              </div>
+            }
+          />
+        </div>
       ) : (
         <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),

@@ -122,6 +122,7 @@ type BakerBannerProps = HTMLAttributes<HTMLDivElement> & {
   displayBg?: boolean;
   displayDivider?: boolean;
   alternativeTableData?: boolean;
+  extraComponent?: React.ReactNode;
 };
 
 const BakerBanner = memo<BakerBannerProps>(
@@ -132,6 +133,7 @@ const BakerBanner = memo<BakerBannerProps>(
     displayDivider = false,
     displayBg = false,
     alternativeTableData = false,
+    extraComponent,
     className,
     style
   }) => {
@@ -288,6 +290,7 @@ const BakerBanner = memo<BakerBannerProps>(
                 )}
               </div>
             </div>
+            {extraComponent}
           </>
         ) : (
           <div className={classNames('flex items-stretch', 'text-white')}>

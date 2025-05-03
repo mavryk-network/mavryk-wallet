@@ -16,6 +16,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
+import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
@@ -51,8 +52,6 @@ import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selector
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { DelegateFormSelectors } from './delegateForm.selectors';
-import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import clsx from 'clsx';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
@@ -250,6 +249,11 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, un
 
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+  const [isReDelegationActive, setIsReDelegationActive] = useSafeState(unfamiliarWithDelegation);
+
+  const avtivateReDelegation = useCallback(() => {
+    setIsReDelegationActive(true);
+  }, [setIsReDelegationActive]);
 
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
@@ -338,57 +342,60 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, un
 
   return (
     <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
-      {!unfamiliarWithDelegation && myBakerPkh && <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} />}
+      {!unfamiliarWithDelegation && myBakerPkh && !isReDelegationActive && (
+        <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} avtivateReDelegation={avtivateReDelegation} />
+      )}
       {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
+      {isReDelegationActive && (
+        <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
+          <Controller
+            name="to"
+            as={<NoSpaceField ref={toFieldRef} />}
+            control={control}
+            rules={{ validate: fifoValidateDelegate }}
+            onChange={([v]) => v}
+            onFocus={() => toFieldRef.current?.focus()}
+            textarea
+            rows={2}
+            cleanable={Boolean(toValue)}
+            onClean={cleanToField}
+            id="delegate-to"
+            label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
+            placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
+            errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
+            testID={DelegateFormSelectors.bakerInput}
+          />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
-        <Controller
-          name="to"
-          as={<NoSpaceField ref={toFieldRef} />}
-          control={control}
-          rules={{ validate: fifoValidateDelegate }}
-          onChange={([v]) => v}
-          onFocus={() => toFieldRef.current?.focus()}
-          textarea
-          rows={2}
-          cleanable={Boolean(toValue)}
-          onClean={cleanToField}
-          id="delegate-to"
-          label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
-          placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
-          errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
-          style={{
-            resize: 'none'
-          }}
-          containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
-          testID={DelegateFormSelectors.bakerInput}
-        />
+          {resolvedAddress && (
+            <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center px-4">
+              <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
+              <span className="font-normal">{resolvedAddress}</span>
+            </div>
+          )}
 
-        {resolvedAddress && (
-          <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center px-4">
-            <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
-            <span className="font-normal">{resolvedAddress}</span>
-          </div>
-        )}
-
-        <BakerForm
-          baker={baker}
-          submitError={submitError}
-          estimationError={estimationError}
-          estimating={estimating}
-          baseFee={baseFee}
-          toFilled={toFilled}
-          bakerValidating={bakerValidating}
-          control={control}
-          errors={errors}
-          handleFeeFieldChange={handleFeeFieldChange}
-          setValue={setValue}
-          triggerValidation={triggerValidation}
-          formState={formState}
-          restFormDisplayed={restFormDisplayed}
-          toValue={toValue}
-        />
-      </form>
+          <BakerForm
+            baker={baker}
+            submitError={submitError}
+            estimationError={estimationError}
+            estimating={estimating}
+            baseFee={baseFee}
+            toFilled={toFilled}
+            bakerValidating={bakerValidating}
+            control={control}
+            errors={errors}
+            handleFeeFieldChange={handleFeeFieldChange}
+            setValue={setValue}
+            triggerValidation={triggerValidation}
+            formState={formState}
+            restFormDisplayed={restFormDisplayed}
+            toValue={toValue}
+          />
+        </form>
+      )}
     </div>
   );
 };
@@ -440,6 +447,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const testGroupName = useUserTestingGroupNameSelector();
   const assetSymbol = 'ṁ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
+  const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { padding: 0 } : {}) }), [popup]);
 
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
@@ -464,7 +472,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col mt-2">
-      <BakerBannerComponent baker={baker} tzError={tzError} />
+      <BakerBannerComponent baker={baker} tzError={tzError} style={memoizedBakerStyles} />
       <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup && 'mx-4')}>
         <HashChip hash={toValue} type="link" small trim={false} />
       </div>
@@ -510,9 +518,10 @@ const BakerForm: React.FC<BakerFormProps> = ({
 interface BakerBannerComponentProps {
   baker: Baker | null | undefined;
   tzError: any;
+  style?: React.CSSProperties;
 }
 
-export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker }) => {
+export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker, style }) => {
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
@@ -524,7 +533,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   return baker ? (
     <>
       <div className="flex flex-col items-center">
-        <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
+        <BakerBanner bakerPkh={baker.address} style={{ width: undefined, ...style }} />
       </div>
 
       {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
@@ -548,7 +557,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   ) : null;
 };
 
-export const DelegateActionsComponent = () => {
+export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
   const [opened, setOpened] = useState(false);
   const { popup } = useAppEnv();
 
@@ -559,6 +568,11 @@ export const DelegateActionsComponent = () => {
   const open = useCallback(() => {
     setOpened(true);
   }, []);
+
+  const handleReDelegateNavigation = useCallback(() => {
+    avtivateReDelegation();
+    close();
+  }, [avtivateReDelegation, close]);
 
   return (
     <div className="grid gap-3 grid-cols-2">
@@ -576,8 +590,8 @@ export const DelegateActionsComponent = () => {
         title={'Re-delegate To A New Validator'}
         portalClassName="re-delegate-popup"
       >
-        <div className={clsx(popup ? 'px-4' : 'px-6')}>
-          <div className={clsx('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
+        <div className={classNames(popup ? 'px-4' : 'px-6')}>
+          <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
             By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked.
             You'll continue earning rewards from your current validator until the transfer completes, then immediately
             begin earning from the new validator with no interruption in rewards or participation.
@@ -586,7 +600,7 @@ export const DelegateActionsComponent = () => {
             <ButtonRounded size="big" fill={false} onClick={close}>
               <T id="cancel" />
             </ButtonRounded>
-            <ButtonRounded size="big" fill>
+            <ButtonRounded size="big" fill onClick={handleReDelegateNavigation}>
               Re-delegate
             </ButtonRounded>
           </div>
@@ -596,12 +610,15 @@ export const DelegateActionsComponent = () => {
   );
 };
 
-export const AdvancedBakerBannerComponent: React.FC<{ bakerAddress: string }> = ({ bakerAddress }) => {
+export const AdvancedBakerBannerComponent: React.FC<{
+  bakerAddress: string;
+  avtivateReDelegation: () => void;
+}> = ({ bakerAddress, avtivateReDelegation }) => {
   const { data: baker } = useKnownBaker(bakerAddress || null, false);
   const { popup } = useAppEnv();
 
   return baker ? (
-    <div className={clsx(popup && 'px-4')}>
+    <div className={classNames(popup && 'px-4')}>
       <p className="text-white text-base">My Validator</p>
       <div className="flex items-center py-4">
         <BakerBanner bakerPkh={baker.address} style={{ padding: 0 }} />
@@ -609,7 +626,7 @@ export const AdvancedBakerBannerComponent: React.FC<{ bakerAddress: string }> = 
           <ExternalLinkIcon className="w-6 h-6 text-white fill-current" />
         </Anchor>
       </div>
-      <DelegateActionsComponent />
+      <DelegateActionsComponent avtivateReDelegation={avtivateReDelegation} />
       <Divider className="my-6" color="bg-divider" ignoreParent />
     </div>
   ) : null;

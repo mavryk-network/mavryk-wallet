@@ -28,7 +28,10 @@ export const Stake: FC = () => {
         {showStakeScreen ? (
           <UnfamiliarWithDelegationScreen setShowStakeScreen={setShowStakeScreen} />
         ) : (
-          <DelegateForm setToolbarRightSidedComponent={setToolbarRightSidedComponent} />
+          <DelegateForm
+            setToolbarRightSidedComponent={setToolbarRightSidedComponent}
+            unfamiliarWithDelegation={unfamiliarWithDelegation}
+          />
         )}
       </div>
     </PageLayout>

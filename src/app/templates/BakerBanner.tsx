@@ -1,14 +1,15 @@
-import React, { HTMLAttributes, memo, useMemo } from 'react';
+import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 
-import { Identicon, Name, Money, HashChip } from 'app/atoms';
+import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
 import { toLocalFormat, T, getDateFnsLocale } from 'lib/i18n';
+import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
@@ -143,7 +144,7 @@ const BakerBanner = memo<BakerBannerProps>(
       [allAccounts, bakerPkh]
     );
 
-    // const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
+    const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
     // const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
     const feeTableItem: BakerTableData = useMemo(
@@ -261,15 +262,15 @@ const BakerBanner = memo<BakerBannerProps>(
                     }}
                     testID={BakingSectionSelectors.delegatedBakerName}
                   >
-                    {baker.name}
+                    {baker.name || baker.address}
                   </Name>
 
-                  {/* {(isRecommendedBaker || isHelpUkraineBaker) && (
+                  {isRecommendedBaker && (
                     <ABContainer
                       groupAComponent={<SponsoredBaker isRecommendedBaker={isRecommendedBaker} />}
                       groupBComponent={<PromotedBaker isRecommendedBaker={isRecommendedBaker} />}
                     />
-                  )} */}
+                  )}
 
                   {displayAddress && (
                     <div className="ml-2 flex flex-wrap items-center">
@@ -350,19 +351,19 @@ const BakerAccount: React.FC<{
   );
 };
 
-// const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-//   <div
-//     className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
-//     style={{ borderRadius: '10px' }}
-//   >
-//     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
-//   </div>
-// );
-// const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-//   <div
-//     className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
-//     style={{ borderRadius: '10px' }}
-//   >
-//     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
-//   </div>
-// );
+const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
+  <div
+    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+    style={{ borderRadius: '10px' }}
+  >
+    <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
+  </div>
+);
+const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
+  <div
+    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+    style={{ borderRadius: '10px' }}
+  >
+    <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
+  </div>
+);

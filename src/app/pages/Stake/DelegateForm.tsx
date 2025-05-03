@@ -5,12 +5,14 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
 
-import { Alert, Anchor, Button, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
+import { Alert, Anchor, Button, Divider, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -23,6 +25,7 @@ import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { TID, T, t } from 'lib/i18n';
+import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { setDelegate } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -30,6 +33,7 @@ import {
   Baker,
   isDomainNameValid,
   useAccount,
+  useDelegate,
   useKnownBaker,
   useKnownBakers,
   useTezos,
@@ -56,14 +60,12 @@ interface FormData {
   fee: number;
 }
 
-export const RECOMMENDED_BAKER_ADDRESS = 'mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8';
-export const HELP_UKRAINE_BAKER_ADDRESS = 'tz1bMFzs2aECPn4aCRmKQWHSLHF8ZnZbYcah';
-
 type DelegateFormProps = {
+  unfamiliarWithDelegation: boolean;
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
-const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) => {
+const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent, unfamiliarWithDelegation }) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { isDcpNetwork } = useGasToken();
@@ -75,6 +77,8 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   const tezos = useTezos();
 
   const accountPkh = acc.publicKeyHash;
+
+  const { data: myBakerPkh } = useDelegate(accountPkh);
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
@@ -332,6 +336,7 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
 
   return (
     <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
+      {!unfamiliarWithDelegation && myBakerPkh && <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} />}
       {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
@@ -499,6 +504,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   );
 };
 
+// BANNERS --------------------------------
 interface BakerBannerComponentProps {
   baker: Baker | null | undefined;
   tzError: any;
@@ -512,13 +518,6 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const { symbol } = useGasToken();
-  // const { fullPage } = useAppEnv();
-
-  // (
-  //   <div className={classNames(fullPage ? 'py-4' : 'p-4')}>
-  //     <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
-  //   </div>
-  // )
 
   return baker ? (
     <>
@@ -546,6 +545,33 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
     </>
   ) : null;
 };
+
+export const AdvancedBakerBannerComponent: React.FC<{ bakerAddress: string }> = ({ bakerAddress }) => {
+  const { data: baker } = useKnownBaker(bakerAddress || null, false);
+
+  return baker ? (
+    <div>
+      <p className="text-white text-base">My Validator</p>
+      <div className="flex items-center py-4">
+        <BakerBanner bakerPkh={baker.address} style={{ padding: 0 }} />
+        <Anchor href={`${process.env.NODES_URL}/validator/${baker.address}`}>
+          <ExternalLinkIcon className="w-6 h-6 text-white fill-current" />
+        </Anchor>
+      </div>
+      <div className="grid gap-3 grid-cols-2">
+        <ButtonRounded size="xs" fill={false}>
+          Re-delegate
+        </ButtonRounded>
+        <ButtonRounded size="xs" fill>
+          Co-stake
+        </ButtonRounded>
+      </div>
+      <Divider className="my-6" color="bg-divider" ignoreParent />
+    </div>
+  ) : null;
+};
+
+// LIST --------------------------------
 
 const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {
   const knownBakers = useKnownBakers();
@@ -687,6 +713,7 @@ type DelegateErrorAlertProps = {
   error: Error;
 };
 
+// ALERT --------------------------------
 const DelegateErrorAlert: FC<DelegateErrorAlertProps> = ({ type, error }) => {
   const { symbol } = useGasToken();
 

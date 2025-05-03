@@ -98,10 +98,6 @@ type BakerBannerProps = {
 
 const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
   const { data: baker } = useKnownBaker(myBakerPkh ?? null);
-  const { publicKeyHash } = useAccount();
-
-  // TODO hardcoded logic, no api available at the moment
-  if (publicKeyHash && publicKeyHash === 'mv1V4h45W3p4e1sjSBvRkK2uYbvkTnSuHg8g') return null;
 
   const renderBakerData = () => {
     if (myBakerPkh) {
@@ -139,11 +135,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
   };
 
   return (
-    <AlertWithAction
-      btnLabel={t('details')}
-      onClick={handleTagClick}
-      linkTo={`${process.env.NODES_URL}/account/${myBakerPkh ?? ''}`}
-    >
+    <AlertWithAction btnLabel={t('details')} onClick={handleTagClick}>
       {renderBakerData()}
     </AlertWithAction>
   );

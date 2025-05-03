@@ -12,19 +12,21 @@ import ContentContainer from 'app/layouts/ContentContainer';
 import PageLayout from 'app/layouts/PageLayout';
 import AccountBanner from 'app/templates/AccountBanner';
 import { CoStakeBakerBanner } from 'app/templates/BakerBanner';
+import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
-import { t, toLocalFixed } from 'lib/i18n';
+import { T, t, toLocalFixed } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker } from 'lib/temple/front';
+import { useAccount, useDelegate, useKnownBaker, useTezos } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
 import { navigate } from 'lib/woozie';
 
 import { useBakingHistory } from '../Stake/hooks/use-baking-history';
+import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 interface FormData {
   amount: string;
@@ -40,6 +42,7 @@ export const CoStake: FC = () => {
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
+  const tezos = useTezos();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
@@ -47,12 +50,24 @@ export const CoStake: FC = () => {
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
+  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   useEffect(() => {
     if (unfamiliarWithDelegation) {
       navigate('stake');
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash]);
+
+  useEffect(() => {
+    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+      navigate<SuccessStateType>('/success', undefined, {
+        pageTitle: 'coStake',
+        description: 'coStakeDesriptionSuccessMsg',
+        btnText: 'goToMain',
+        subHeader: 'coStakeSubHeaderSuccessMsg'
+      });
+    }
+  }, [operation]);
 
   const amountValue = watch('amount');
   const baseFee = useMemo(() => new BigNumber(RECOMMENDED_ADD_FEE), []);
@@ -87,10 +102,19 @@ export const CoStake: FC = () => {
 
   const onSubmit = useCallback(
     async ({ amount }: FormData) => {
-      if (formState.isSubmitting) return;
+      if (formState.isSubmitting || !myBakerPkh) return;
       formAnalytics.trackSubmit({ amount });
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
+
+        const op = await tezos.wallet
+          .stake({
+            to: myBakerPkh,
+            amount: new BigNumber(amount).toNumber()
+          })
+          .send();
+
+        setOperation(op);
         formAnalytics.trackSubmitSuccess({
           amount
         });
@@ -104,7 +128,7 @@ export const CoStake: FC = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, setSubmitError]
+    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
   return (
@@ -150,6 +174,7 @@ export const CoStake: FC = () => {
                 </div>
               </div>
             </div>
+            {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 px-4" />}
             <FormSubmitButton
               loading={formState.isSubmitting}
               disabled={Boolean(
@@ -157,7 +182,7 @@ export const CoStake: FC = () => {
               )}
               className="my-6"
             >
-              Co-stake
+              <T id="coStake" />
             </FormSubmitButton>
           </form>
         </div>

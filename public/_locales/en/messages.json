@@ -3801,5 +3801,11 @@
   },
   "mavrykPro": {
     "message": "Mavryk Pro"
+  },
+  "coStakeSubHeaderSuccessMsg": {
+    "message": "Co-stake Successful!"
+  },
+  "coStakeDesriptionSuccessMsg": {
+    "message": "Your MVRK has been successfully co-staked and is now actively earning rewards. "
   }
 }

@@ -3,7 +3,12 @@ import BigNumber from 'bignumber.js';
 import { MAV_TOKEN_SLUG, isMavSlug, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
-import { HistoryItemOpTypeEnum, HistoryItemTransactionOp, UserHistoryItem } from 'lib/temple/history/types';
+import {
+  HistoryItemOpTypeEnum,
+  HistoryItemStatus,
+  HistoryItemTransactionOp,
+  UserHistoryItem
+} from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
   if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
@@ -88,3 +93,30 @@ export function getMoneyDiffForMultiple(diffs: MoneyDiff[], previewSize: number)
 
   return Object.values(record).slice(0, previewSize);
 }
+
+export const deriveStatusColorClassName = (status: HistoryItemStatus): [HistoryItemStatus, string] => {
+  let textColorClassName = 'text-primary-info';
+
+  switch (status) {
+    case 'applied':
+      textColorClassName = 'text-primary-success';
+      break;
+    case 'failed':
+      textColorClassName = 'text-primary-error';
+      break;
+    case 'backtracked':
+      textColorClassName = 'text-primary-info';
+      break;
+    case 'skipped':
+      textColorClassName = 'text-gray-700'; // or your neutral color
+      break;
+    case 'pending':
+      textColorClassName = 'text-primary-warning';
+      break;
+    default:
+      textColorClassName = 'text-primary-info';
+      break;
+  }
+
+  return [status, textColorClassName];
+};

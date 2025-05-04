@@ -16,7 +16,7 @@ import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
-import { getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
+import { deriveStatusColorClassName, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
 const popupInteractionOpTextMaxLength = 6;
 
@@ -83,6 +83,8 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     [moneyDiffsBase]
   );
 
+  const [statusToShow, statusTextColor] = useMemo(() => deriveStatusColorClassName(status), [status]);
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -138,6 +140,9 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
           })}
         </div>
       </div>
+      {statusToShow && (
+        <div className={classNames('capitalize text-white text-base-plus', statusTextColor)}>{statusToShow}</div>
+      )}
       {expanded && (
         <div className="px-4 pt-2 pb-2 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">
           {rest.map((item, i, arr) => (

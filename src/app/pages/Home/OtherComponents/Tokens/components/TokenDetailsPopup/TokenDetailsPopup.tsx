@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import { Alert, Anchor, HashChip, Money } from 'app/atoms';
+import { AddBanner } from 'app/atoms/AddBanner';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
@@ -263,7 +264,10 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   return (
     <div className="flex flex-col gap-3 mb-6">
       <div className="text-white text-base-plus flex items-center justify-between">
-        <T id="staking" />
+        <div className="flex items-center gap-2">
+          <T id="staking" />
+          {myBakerPkh && <AddBanner text="delegated" />}
+        </div>
         {myBakerPkh && (
           <Anchor href={process.env.NODES_URL}>
             <ButtonRounded fill={false} size="xs">

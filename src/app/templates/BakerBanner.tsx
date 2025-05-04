@@ -397,15 +397,15 @@ const BakerAccount: React.FC<{
 
 const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+    className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
     style={{ borderRadius: '10px' }}
   >
-    <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
+    <T id={isRecommendedBaker ? 'add' : 'helpUkraine'} />
   </div>
 );
 const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-accent-blue text-white ml-2')}
+    className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
     style={{ borderRadius: '10px' }}
   >
     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />

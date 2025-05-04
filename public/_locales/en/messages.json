@@ -742,6 +742,9 @@
   "notDelegated": {
     "message": "Not delegated"
   },
+  "delegated": {
+    "message": "Delegated"
+  },
   "explore": {
     "message": "Explore"
   },

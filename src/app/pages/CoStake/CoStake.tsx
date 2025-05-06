@@ -18,8 +18,9 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
-import { useAssetMetadata } from 'lib/metadata';
+import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useDelegate, useKnownBaker, useTezos } from 'lib/temple/front';
+import { atomsToTokens } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
@@ -132,6 +133,10 @@ export const CoStake: FC = () => {
     [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
+  const delegatedAmount = useMemo(() => {
+    return atomsToTokens(new BigNumber(baker?.stakedBalance ?? 0), assetMetadata?.decimals || MAVEN_METADATA.decimals);
+  }, [assetMetadata, baker]);
+
   return (
     <PageLayout isTopbarVisible={false} pageTitle={'Co-stake'} removePaddings={popup}>
       <ContentContainer className={clsx('h-full flex-1 flex flex-col text-white', !fullPage && 'pb-8 pt-4')}>
@@ -165,12 +170,13 @@ export const CoStake: FC = () => {
               extraInner={<MaxButton onClick={handleSetMaxAmount} fill={false} className="relative z-10" />}
             />
             <div className="flex text-sm gap-1 mb-6 items-center">
-              <p className="text-secondary-white">Delegated Amount </p>
+              <p className="text-secondary-white">
+                <T id="delegatedAmount" />
+              </p>
               <div className="text-white">
                 <div className="text-white text-sm flex items-center">
                   <div className={clsx('text-sm leading-none', 'text-white')}>
-                    <Money smallFractionFont={false}>{new BigNumber(baker?.stakedBalance ?? 0)}</Money>{' '}
-                    <span>{assetMetadata?.symbol}</span>
+                    <Money smallFractionFont={false}>{delegatedAmount}</Money> <span>{assetMetadata?.symbol}</span>
                   </div>
                 </div>
               </div>

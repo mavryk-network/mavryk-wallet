@@ -560,7 +560,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         return toSort.sort((a, b) => b.freeSpace - a.freeSpace);
 
       case 'staking':
-        return toSort.sort((a, b) => b.stakingBalance - a.stakingBalance);
+        return toSort.sort((a, b) => b.stakedBalance - a.stakedBalance);
 
       case 'rank':
       default:

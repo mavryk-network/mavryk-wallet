@@ -9,7 +9,8 @@ import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
   bakingBadGetBaker,
-  getAllBakersBakingBad
+  getAllBakersBakingBad,
+  getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
 import { useRetryableSWR } from 'lib/swr';
@@ -131,19 +132,21 @@ export function useKnownBaker(address: string | null, suspense = true) {
     try {
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true });
 
+      // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
         return {
           address: bakingBadBaker.address,
           stakedBalance: bakingBadBaker.stakedBalance,
+          delegatedBalance: bakingBadBaker.delegatedBalance,
           balance: bakingBadBaker.balance,
           // name: bakingBadBaker.name,
           // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
-          fee: bakingBadBaker.fee,
-          freeSpace: bakingBadBaker.freeSpace,
+          fee: 0,
+          freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
           // minDelegation: bakingBadBaker.minDelegation,
-          estimatedRoi: bakingBadBaker.estimatedRoi
+          estimatedRoi: 0
           // rewardConfigHistory:
           //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
           //     cycle,
@@ -178,6 +181,27 @@ export function useKnownBaker(address: string | null, suspense = true) {
     suspense
   });
 }
+
+// TODO uncomment the upper section  when new API is available
+// export const useKnownBaker = (address: string | null, suspense = true) => {
+//   const net = useNetwork();
+//   const bakers = useKnownBakers(suspense);
+
+//   const fetchBaker = useCallback(async () => {
+//     if (!address) return null;
+//     try {
+//       return bakers?.find(b => b.address === address);
+//     } catch (_err) {
+//       return null;
+//     }
+//   }, [address]);
+
+//   return useRetryableSWR(net.type === 'main' && address ? ['baker', address] : null, fetchBaker, {
+//     refreshInterval: 120_000,
+//     dedupingInterval: 60_000,
+//     suspense
+//   });
+// };
 
 export function useKnownBakers(suspense = true) {
   const net = useNetwork();

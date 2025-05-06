@@ -10,7 +10,9 @@ import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable'
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
 import { toLocalFormat, T, getDateFnsLocale } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
+import { MAVEN_METADATA } from 'lib/metadata';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
+import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccount } from 'lib/temple/types';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
@@ -149,6 +151,8 @@ const BakerBanner = memo<BakerBannerProps>(
     const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
     // const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
+    const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
+
     const feeTableItem: BakerTableData = useMemo(
       () => ({
         i18nKey: 'fee',
@@ -198,7 +202,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   i18nKey: 'space',
                   child: (
                     <>
-                      <Money>{((baker.freeSpace ?? 0) / 1000).toFixed(0)}</Money>K
+                      <Money smallFractionFont={false}>{bakerSpace}</Money>K
                     </>
                   )
                 },
@@ -322,6 +326,7 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
   const { data: baker } = useKnownBaker(bakerPkh);
 
   const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
+  const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
 
   return baker ? (
     <div className={classNames('w-full', 'p-4', 'bg-gray-910 rounded-2xl-plus')}>
@@ -352,8 +357,13 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
         )}
       </div>
       <div className="text-base-plus text-white flex items-center justify-between">
-        <span>Validator Free Space</span>
-        <span>20,000.00 MVRK</span>
+        <span>
+          <T id="bakerFreeSpace" />
+        </span>
+        <div className="flex items-center gap-1">
+          <Money smallFractionFont={false}>{bakerSpace}</Money>
+          <span>{MAVEN_METADATA.symbol}</span>
+        </div>
       </div>
     </div>
   ) : null;

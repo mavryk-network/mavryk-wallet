@@ -3825,5 +3825,11 @@
   },
   "reDelegateToNewValidatorDescr": {
     "message": "By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked. You'll continue earning rewards from your current validator until the transfer completes, then immediately begin earning from the new validator with no interruption in rewards or participation."
+  },
+  "bakerFreeSpace": {
+    "message": "Validator Free Space"
+  },
+  "delegatedAmount": {
+    "message": "Delegated Amount"
   }
 }

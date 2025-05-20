@@ -141,7 +141,17 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         </div>
       </div>
       {statusToShow && (
-        <div className={classNames('capitalize text-white text-base-plus', statusTextColor)}>{statusToShow}</div>
+        <div className={classNames('capitalize text-white text-sm flex items-center gap-1')}>
+          <div>Status: </div>
+          <div
+            className={classNames(
+              'px-2 py-[2px] rounded ',
+              statusTextColor && `text-${statusTextColor} border border-${statusTextColor}`
+            )}
+          >
+            {statusToShow}
+          </div>
+        </div>
       )}
       {expanded && (
         <div className="px-4 pt-2 pb-2 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">

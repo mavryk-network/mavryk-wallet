@@ -231,7 +231,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <CardContainer className="text-base-plus mb-6 text-white">
           <div className="flex items-center justify-between">
             <T id="status" />
-            <span className={clsx('mb-2 capitalize', statusTextColor)}>{status}</span>
+            <span className={clsx('mb-2 capitalize', statusTextColor && `text-${statusTextColor}`)}>{status}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>

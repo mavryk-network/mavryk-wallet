@@ -95,28 +95,28 @@ export function getMoneyDiffForMultiple(diffs: MoneyDiff[], previewSize: number)
 }
 
 export const deriveStatusColorClassName = (status: HistoryItemStatus): [HistoryItemStatus, string] => {
-  let textColorClassName = 'text-primary-info';
+  let colorolorClassName = 'primary-info';
 
   switch (status) {
     case 'applied':
-      textColorClassName = 'text-primary-success';
+      colorolorClassName = 'primary-success';
       break;
     case 'failed':
-      textColorClassName = 'text-primary-error';
+      colorolorClassName = 'primary-error';
       break;
     case 'backtracked':
-      textColorClassName = 'text-primary-info';
+      colorolorClassName = 'blue-510';
       break;
     case 'skipped':
-      textColorClassName = 'text-gray-700'; // or your neutral color
+      colorolorClassName = 'gray-700'; // or your neutral color
       break;
     case 'pending':
-      textColorClassName = 'text-primary-warning';
+      colorolorClassName = 'orange-600';
       break;
     default:
-      textColorClassName = 'text-primary-info';
+      colorolorClassName = 'primary-info';
       break;
   }
 
-  return [status, textColorClassName];
+  return [status, colorolorClassName];
 };

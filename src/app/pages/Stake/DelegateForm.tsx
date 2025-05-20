@@ -596,7 +596,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, [avtivateReDelegation, close]);
 
   const handleCoStakeNavigation = useCallback(() => {
-    navigate('/co-stake');
+    // navigate('/co-stake');
     close();
   }, [close]);
 
@@ -605,8 +605,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
       <ButtonRounded size="xs" fill={false} onClick={open}>
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation}>
-        <T id="coStake" />
+      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} disabled>
+        <T id="comingSoon" />
       </ButtonRounded>
 
       <PopupModalWithTitle

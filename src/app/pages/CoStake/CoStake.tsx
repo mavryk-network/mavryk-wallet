@@ -56,6 +56,9 @@ export const CoStake: FC = () => {
   useEffect(() => {
     if (unfamiliarWithDelegation) {
       navigate('stake');
+      // TODO remove else block check co-stake is available
+    } else {
+      navigate('/');
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash]);
 

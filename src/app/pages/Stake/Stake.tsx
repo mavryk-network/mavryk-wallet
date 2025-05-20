@@ -177,8 +177,8 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
         <FooterSocials />
       </section>
       <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
-        <ButtonRounded size="big" className={clsx('w-full ')} fill={false} onClick={handleCoStakeNavigation}>
-          <T id="coStake" />
+        <ButtonRounded size="big" className={clsx('w-full ')} fill={false} onClick={handleCoStakeNavigation} disabled>
+          <T id="comingSoon" />
         </ButtonRounded>
 
         <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full')} fill>

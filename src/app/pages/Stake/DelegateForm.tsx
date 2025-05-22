@@ -605,8 +605,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
       <ButtonRounded size="xs" fill={false} onClick={open}>
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} disabled>
-        <T id="comingSoon" />
+      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} invisibleLabel={<T id="comingSoon" />} disabled>
+        <T id="coStake" />
       </ButtonRounded>
 
       <PopupModalWithTitle
@@ -620,7 +620,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
             <T id="reDelegateToNewValidatorDescr" />
           </div>
-          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', popup ? 'px-4' : 'px-12')}>
+          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
             <ButtonRounded size="big" fill={false} onClick={close}>
               <T id="cancel" />
             </ButtonRounded>

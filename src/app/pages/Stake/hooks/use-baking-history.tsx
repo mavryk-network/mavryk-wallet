@@ -106,8 +106,8 @@ export const useBakingHistory = () => {
     [bakingHistory]
   );
 
-  const unfamiliarWithDelegation = bakingHistory ? bakingHistory.length === 0 : false;
-
+  const unfamiliarWithDelegation = myBakerPkh === null;
+  console.log(unfamiliarWithDelegation, 'unfamiliarWithDelegation', myBakerPkh);
   return {
     canDelegate,
     testGroupName,

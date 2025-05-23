@@ -198,14 +198,6 @@ const BakerBanner = memo<BakerBannerProps>(
                 }
               ]
             : [
-                {
-                  i18nKey: 'space',
-                  child: (
-                    <>
-                      <Money smallFractionFont={false}>{bakerSpace}</Money>K
-                    </>
-                  )
-                },
                 { ...feeTableItem },
                 {
                   i18nKey: 'upTime',
@@ -215,6 +207,14 @@ const BakerBanner = memo<BakerBannerProps>(
                         decimalPlaces: 2
                       })}
                       %
+                    </>
+                  )
+                },
+                {
+                  i18nKey: 'space',
+                  child: (
+                    <>
+                      <Money smallFractionFont={false}>{bakerSpace}</Money>K
                     </>
                   )
                 }

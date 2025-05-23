@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -21,13 +21,19 @@ export const Stake: FC = () => {
   const [isReDelegationActive, setIsReDelegationActive] = useState(() => unfamiliarWithDelegation || state?.state);
   const { fullPage, popup } = useAppEnv();
 
-  const label = unfamiliarWithDelegation
-    ? 'stakeAndEarn'
-    : isReDelegationActive
-    ? 'reDelegate'
-    : showStakeScreen
-    ? 'delegate'
-    : 'stake';
+  const label = useMemo(() => {
+    let labelToShow: TID = 'delegate';
+
+    if (unfamiliarWithDelegation && showStakeScreen) {
+      labelToShow = 'stakeAndEarn';
+    } else if (!unfamiliarWithDelegation && !isReDelegationActive) {
+      labelToShow = 'stake';
+    } else if (isReDelegationActive && !unfamiliarWithDelegation) {
+      labelToShow = 'reDelegate';
+    }
+
+    return labelToShow;
+  }, [isReDelegationActive, showStakeScreen, unfamiliarWithDelegation]);
 
   const avtivateReDelegation = useCallback(() => {
     setIsReDelegationActive(true);

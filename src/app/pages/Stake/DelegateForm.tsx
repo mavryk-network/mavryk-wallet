@@ -170,12 +170,14 @@ const DelegateForm: FC<DelegateFormProps> = ({
   );
 
   useEffect(() => {
-    setToolbarRightSidedComponent(AllValidatorsComponent);
+    if (pathname.split('/').pop() === 'stake') {
+      setToolbarRightSidedComponent(AllValidatorsComponent);
+    }
 
     return () => {
       setToolbarRightSidedComponent(null);
     };
-  }, []);
+  }, [pathname]);
 
   const estimateBaseFee = useCallback(async () => {
     try {
@@ -264,7 +266,14 @@ const DelegateForm: FC<DelegateFormProps> = ({
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
-      if (isReDelegationActive) {
+      if (unfamiliarWithDelegation) {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'delegate',
+          description: 'delegateSuccessDescMsg',
+          subHeader: 'delegateSuccessMsg',
+          btnText: 'goToMain'
+        });
+      } else if (isReDelegationActive) {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'reDelegate',
           description: 'reDelegateSuccessDescMsg',
@@ -281,7 +290,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
       }
     }
-  }, [isReDelegationActive, operation]);
+  }, [isReDelegationActive, operation, unfamiliarWithDelegation]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -447,6 +456,7 @@ export enum SortOptions {
   UP_TIME = 'upTime'
 }
 
+const assetSymbol = 'ṁ';
 const BakerForm: React.FC<BakerFormProps> = ({
   baker,
   submitError,
@@ -466,7 +476,6 @@ const BakerForm: React.FC<BakerFormProps> = ({
 }) => {
   const { popup } = useAppEnv();
   const testGroupName = useUserTestingGroupNameSelector();
-  const assetSymbol = 'ṁ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
   const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 

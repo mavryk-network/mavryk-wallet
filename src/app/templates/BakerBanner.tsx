@@ -410,7 +410,7 @@ const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBake
     className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
     style={{ borderRadius: '10px' }}
   >
-    <T id={isRecommendedBaker ? 'add' : 'helpUkraine'} />
+    <T id={isRecommendedBaker ? 'ad' : 'helpUkraine'} />
   </div>
 );
 const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (

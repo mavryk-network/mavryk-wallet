@@ -333,6 +333,12 @@
   "reDelegate": {
     "message": "Re-delegate"
   },
+  "reDelegateSuccessMsg": {
+    "message": "Successfully Re-delegated!"
+  },
+  "reDelegateSuccessDescMsg": {
+    "message": "Your stake is now active and earning rewards."
+  },
   "delegateNow": {
     "message": "Delegate now"
   },
@@ -735,6 +741,9 @@
   },
   "notDelegated": {
     "message": "Not delegated"
+  },
+  "delegated": {
+    "message": "Delegated"
   },
   "explore": {
     "message": "Explore"
@@ -1751,6 +1760,9 @@
   },
   "add": {
     "message": "Add"
+  },
+  "ad": {
+    "message": "Ad"
   },
   "assets": {
     "message": "Assets"
@@ -3432,7 +3444,7 @@
     "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
   },
   "delegateToValidator": {
-    "message": "Delegate to Custom Validator"
+    "message": "Delegate to Specific Validator"
   },
   "delegateToPromotedValidators": {
     "message": "Delegate to Promoted Validators "
@@ -3478,6 +3490,9 @@
   },
   "coStake": {
     "message": "Co-stake"
+  },
+  "coStakeAttentionMsg": {
+    "message": "Before co-staking, delegate your stake to a trusted validator to begin earning rewards."
   },
   "deleteContact": {
     "message": "Delete Contact"
@@ -3801,5 +3816,26 @@
   },
   "mavrykPro": {
     "message": "Mavryk Pro"
+  },
+  "coStakeSubHeaderSuccessMsg": {
+    "message": "Co-stake Successful!"
+  },
+  "coStakeDesriptionSuccessMsg": {
+    "message": "Your MVRK has been successfully co-staked and is now actively earning rewards. "
+  },
+  "reDelegateToNewValidator": {
+    "message": "Re-delegate To A New Validator"
+  },
+  "reDelegateToNewValidatorDescr": {
+    "message": "By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked. You'll continue earning rewards from your current validator until the transfer completes, then immediately begin earning from the new validator with no interruption in rewards or participation."
+  },
+  "bakerFreeSpace": {
+    "message": "Validator Free Space"
+  },
+  "delegatedAmount": {
+    "message": "Delegated Amount"
+  },
+  "delegating": {
+    "message": "Delegating"
   }
 }

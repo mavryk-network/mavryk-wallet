@@ -333,6 +333,12 @@
   "reDelegate": {
     "message": "Re-delegate"
   },
+  "delegateSuccessMsg": {
+    "message": "Successfully Delegated!"
+  },
+  "delegateSuccessDescMsg": {
+    "message": "Your MVRK has been successfully delegated and  is now actively earning rewards. Your first reward should be paid out within the next 7 cycles."
+  },
   "reDelegateSuccessMsg": {
     "message": "Successfully Re-delegated!"
   },
@@ -1760,6 +1766,9 @@
   },
   "add": {
     "message": "Add"
+  },
+  "ad": {
+    "message": "Ad"
   },
   "assets": {
     "message": "Assets"
@@ -3831,5 +3840,8 @@
   },
   "delegatedAmount": {
     "message": "Delegated Amount"
+  },
+  "delegating": {
+    "message": "Delegating"
   }
 }

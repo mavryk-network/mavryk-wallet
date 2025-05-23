@@ -68,7 +68,6 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
       () => classNames(size === 'small' && btnSmall, size === 'big' && btnBig, size === 'xs' && btnXs),
       [size]
     );
-
     return (
       <button
         ref={ref}
@@ -80,10 +79,15 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           size === 'big' && 'rounded-full',
           size === 'xs' && 'rounded-2xl-plus',
           'transition ease-in-out duration-200',
-          fill
-            ? `${bgColor} hover:${bgColorHover} border`
-            : classNames('bg-transparent', size === 'xs' ? 'border' : 'border-2', `border-solid hover:${bgColorHover}`), // fill | outline styles
           disabled ? 'border-transparent' : `border-${borderColor}`, // border color
+          !disabled &&
+            (fill
+              ? `${bgColor} hover:${bgColorHover} border`
+              : classNames(
+                  'bg-transparent',
+                  size === 'xs' ? 'border' : 'border-2',
+                  `border-solid hover:${bgColorHover}`
+                )), // fill | outline styles
           isLoading && ' flex justify-center w-24 align-middle', // loading
           disabled && 'bg-gray-40 text-gray-15', // disabled styles
           !invisibleLabel && disabled && 'pointer-events-none cursor-not-allowed',

@@ -82,6 +82,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const { popup } = useAppEnv();
 
   const { pathname } = useLocation();
+  const isStakeScreenWithBakersList = useMemo(() => pathname.split('/').pop() === 'stake', [pathname]);
 
   const acc = useAccount();
   const tezos = useTezos();
@@ -170,14 +171,14 @@ const DelegateForm: FC<DelegateFormProps> = ({
   );
 
   useEffect(() => {
-    if (pathname.split('/').pop() === 'stake') {
+    if (isStakeScreenWithBakersList) {
       setToolbarRightSidedComponent(AllValidatorsComponent);
     }
 
     return () => {
       setToolbarRightSidedComponent(null);
     };
-  }, [pathname]);
+  }, [isStakeScreenWithBakersList]);
 
   const estimateBaseFee = useCallback(async () => {
     try {
@@ -364,7 +365,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   return (
     <div className={classNames(!restFormDisplayed && popup && 'pt-4 px-4', 'h-full flex-1 flex flex-col')}>
-      {unfamiliarWithDelegation && isFromCoStakeNavigation && (
+      {unfamiliarWithDelegation && isFromCoStakeNavigation && isStakeScreenWithBakersList && (
         <Alert
           type="info"
           title={<T id="attentionExclamation" />}

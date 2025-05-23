@@ -198,7 +198,6 @@ const BakerBanner = memo<BakerBannerProps>(
                 }
               ]
             : [
-                { ...feeTableItem },
                 {
                   i18nKey: 'upTime',
                   child: (
@@ -210,6 +209,7 @@ const BakerBanner = memo<BakerBannerProps>(
                     </>
                   )
                 },
+                { ...feeTableItem },
                 {
                   i18nKey: 'space',
                   child: (

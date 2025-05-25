@@ -41,7 +41,7 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
 /**
  * TODO update current function when API can filter by complex types at the same time
  * (f.e. interaction & sent to ...)
- * Used to merge ONLY specofic params of GetOperationsTransactionsParams
+ * Used to merge ONLY specific params of GetOperationsTransactionsParams
  * @param prevParams createOpParams returned params  object
  * @param params createOpParams returned params  object
  * @returns merged params object
@@ -104,7 +104,6 @@ export const buildTEZOpParams = (
 
   delete internalOperationParams.type;
   delete internalOperationParams.hasInternals;
-  delete defaultTEZpParams['anyof.sender.target.initiator'];
 
   // filter target to get "received" transactions
   if (hasBothTargetAndSender) {

@@ -103,7 +103,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
     if (myBakerPkh) {
       return (
         <div className="flex items-center gap-3">
-          <T id="stakedTo" />
+          <T id="delegatedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
               {/* <img
@@ -128,7 +128,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
 
     return (
       <div className="flex items-center gap-3">
-        <T id="stakedTo" />
+        <T id="delegatedTo" />
         <T id="unknownBakerTitle" />;
       </div>
     );

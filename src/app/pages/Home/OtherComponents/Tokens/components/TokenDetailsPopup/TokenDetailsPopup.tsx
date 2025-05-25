@@ -251,6 +251,9 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
                 <ButtonRounded size="xs" fill={false} onClick={handleButtonClick}>
                   <T id="reDelegate" />
                 </ButtonRounded>
+                <ButtonRounded size="xs" disabled invisibleLabel={<T id="comingSoon" />}>
+                  <T id="coStake" />
+                </ButtonRounded>
               </div>
             }
           />

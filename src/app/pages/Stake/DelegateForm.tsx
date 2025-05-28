@@ -666,9 +666,19 @@ export const AdvancedBakerBannerComponent: React.FC<{
 };
 
 // LIST --------------------------------
+type KnownDelegatorsListProps = {
+  setValue: any;
+  triggerValidation: (payload?: string | string[] | undefined, shouldRender?: boolean | undefined) => Promise<boolean>;
+};
 
-const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {
+const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, triggerValidation }) => {
   const knownBakers = useKnownBakers();
+  const acc = useAccount();
+
+  const accountPkh = acc.publicKeyHash;
+
+  const { data: myBakerPkh = '' } = useDelegate(accountPkh);
+
   const testGroupName = useUserTestingGroupNameSelector();
   const { popup } = useAppEnv();
 
@@ -726,7 +736,10 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
   const sortedKnownBakers = [
     ...sponsoredBakers,
     ...baseSortedKnownBakers.filter(
-      baker => baker.address !== RECOMMENDED_BAKER_ADDRESS && baker.address !== HELP_UKRAINE_BAKER_ADDRESS
+      baker =>
+        baker.address !== RECOMMENDED_BAKER_ADDRESS &&
+        baker.address !== HELP_UKRAINE_BAKER_ADDRESS &&
+        baker.address !== myBakerPkh
     )
   ];
 
@@ -743,11 +756,11 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         </SortPopup>
       </h2>
 
-      <div>
+      {/* <div>
         <AlertWithAction btnLabel={t('promote')}>
           <T id="promoteYourself" />
         </AlertWithAction>
-      </div>
+      </div> */}
 
       <div className="flex flex-col overflow-hidden text-white text-sm mt-1">
         {sortedKnownBakers.map((baker, i, arr) => {

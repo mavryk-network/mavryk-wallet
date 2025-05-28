@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { Alert, Anchor, HashChip, Money } from 'app/atoms';
+import { Alert, HashChip, Money } from 'app/atoms';
 import { AddBanner } from 'app/atoms/AddBanner';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useAppEnv } from 'app/env';
@@ -271,13 +271,6 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
           <T id="staking" />
           {myBakerPkh && <AddBanner text="delegated" />}
         </div>
-        {myBakerPkh && (
-          <Anchor href={process.env.NODES_URL}>
-            <ButtonRounded fill={false} size="xs">
-              <T id="validators" />
-            </ButtonRounded>
-          </Anchor>
-        )}
       </div>
       {myBakerPkh ? StakedBanner : NotStakedBanner}
     </div>

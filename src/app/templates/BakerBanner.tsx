@@ -158,10 +158,11 @@ const BakerBanner = memo<BakerBannerProps>(
         i18nKey: 'fee',
         child: (
           <>
-            {toLocalFormat(new BigNumber(baker?.fee ?? 0).times(100), {
+            {/* {toLocalFormat(new BigNumber(baker?.fee ?? 0).times(100), {
               decimalPlaces: 2
             })}
-            %
+            % */}
+            NA
           </>
         )
       }),
@@ -179,7 +180,8 @@ const BakerBanner = memo<BakerBannerProps>(
                   child: (
                     <>
                       {/* TODO calculate ETD and add symbol */}
-                      <Money>{(baker.stakedBalance / 1000).toFixed(0)}</Money>
+                      {/* <Money>{(baker.stakedBalance / 1000).toFixed(0)}</Money> */}
+                      NA
                     </>
                   )
                 },
@@ -188,11 +190,12 @@ const BakerBanner = memo<BakerBannerProps>(
                   child: (
                     <>
                       {/* TODO calculate baker payout time */}
-                      {formatDistanceToNow(new Date(new Date().getTime() + 90 * 60 * 60 * 1000), {
+                      {/* {formatDistanceToNow(new Date(new Date().getTime() + 90 * 60 * 60 * 1000), {
                         includeSeconds: true,
                         addSuffix: true,
                         locale: getDateFnsLocale()
-                      })}
+                      })} */}
+                      NA
                     </>
                   )
                 }
@@ -202,10 +205,10 @@ const BakerBanner = memo<BakerBannerProps>(
                   i18nKey: 'upTime',
                   child: (
                     <>
-                      {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
+                      {/* {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
                         decimalPlaces: 2
-                      })}
-                      %
+                      })} */}
+                      NA
                     </>
                   )
                 },
@@ -214,7 +217,9 @@ const BakerBanner = memo<BakerBannerProps>(
                   i18nKey: 'space',
                   child: (
                     <>
-                      <Money smallFractionFont={false}>{bakerSpace}</Money>K
+                      <Money smallFractionFont={false} shortened>
+                        {bakerSpace}
+                      </Money>
                     </>
                   )
                 }
@@ -262,14 +267,24 @@ const BakerBanner = memo<BakerBannerProps>(
                     displayAddress && 'justify-between'
                   )}
                 >
-                  <Name
-                    style={{
-                      maxWidth: '8rem'
-                    }}
-                    testID={BakingSectionSelectors.delegatedBakerName}
-                  >
-                    {baker.name || baker.address}
-                  </Name>
+                  {baker.name ? (
+                    <Name
+                      style={{
+                        maxWidth: '8rem'
+                      }}
+                      testID={BakingSectionSelectors.delegatedBakerName}
+                    >
+                      {baker.name}
+                    </Name>
+                  ) : (
+                    <div
+                      style={{
+                        maxWidth: '8rem'
+                      }}
+                    >
+                      <HashChip hash={baker.address} small />
+                    </div>
+                  )}
 
                   {isRecommendedBaker && (
                     <ABContainer
@@ -408,7 +423,7 @@ const BakerAccount: React.FC<{
 const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
     className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
-    style={{ borderRadius: '10px' }}
+    style={{ borderRadius: '4px' }}
   >
     <T id={isRecommendedBaker ? 'ad' : 'helpUkraine'} />
   </div>
@@ -416,7 +431,7 @@ const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBake
 const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
   <div
     className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
-    style={{ borderRadius: '10px' }}
+    style={{ borderRadius: '4px' }}
   >
     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
   </div>

@@ -241,7 +241,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
         <div className="flex flex-col gap-3">
           <BakerBanner
             bakerPkh={myBakerPkh ?? ''}
-            displayAddress
+            // displayAddress
             displayDivider
             alternativeTableData
             displayBg

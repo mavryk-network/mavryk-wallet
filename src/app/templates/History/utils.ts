@@ -94,29 +94,36 @@ export function getMoneyDiffForMultiple(diffs: MoneyDiff[], previewSize: number)
   return Object.values(record).slice(0, previewSize);
 }
 
-export const deriveStatusColorClassName = (status: HistoryItemStatus): [HistoryItemStatus, string] => {
-  let colorolorClassName = 'primary-info';
+export const deriveStatusColorClassName = (status: HistoryItemStatus): [HistoryItemStatus, string, string] => {
+  let textColorClassName = 'text-primary-info';
+  let borderColorClassname = 'border-primary-info';
 
   switch (status) {
     case 'applied':
-      colorolorClassName = 'primary-success';
+      textColorClassName = 'text-primary-success';
+      borderColorClassname = 'border-primary-success';
       break;
     case 'failed':
-      colorolorClassName = 'primary-error';
+      textColorClassName = 'text-primary-error';
+      borderColorClassname = 'border-primary-error';
       break;
     case 'backtracked':
-      colorolorClassName = 'blue-510';
+      textColorClassName = 'text-blue-510';
+      borderColorClassname = 'border-blue-510';
       break;
     case 'skipped':
-      colorolorClassName = 'gray-700'; // or your neutral color
+      textColorClassName = 'text-gray-700';
+      borderColorClassname = 'border-gray-700';
       break;
     case 'pending':
-      colorolorClassName = 'orange-600';
+      textColorClassName = 'text-orange-600';
+      borderColorClassname = 'border-orange-600';
       break;
     default:
-      colorolorClassName = 'primary-info';
+      textColorClassName = 'text-primary-info';
+      borderColorClassname = 'border-primary-info';
       break;
   }
 
-  return [status, colorolorClassName];
+  return [status, textColorClassName, borderColorClassname];
 };

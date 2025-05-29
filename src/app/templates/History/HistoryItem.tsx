@@ -83,7 +83,10 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     [moneyDiffsBase]
   );
 
-  const [statusToShow, statusTextColor] = useMemo(() => deriveStatusColorClassName(status), [status]);
+  const [statusToShow, statusTextColor, statusBorderColor] = useMemo(
+    () => deriveStatusColorClassName(status),
+    [status]
+  );
 
   return (
     <div
@@ -95,51 +98,22 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
-        <div className="flex items-center gap-3">
+      <div
+        onClick={() => handleItemClick(hash)}
+        className="flex items-start justify-between gap-1"
+        style={{ marginBottom: !hasLongInteractionOpText && popup ? -30 : -12 }}
+      >
+        <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
             style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
             className="flex flex-col gap-1 items-start justify-center break-words flex-wrap"
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
-            <div className="flex items-start gap-x-1">
-              <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
-              {rest.length > 0 && (
-                <div className={classNames('flex items-center')}>
-                  <button
-                    className={classNames('flex items-center', 'text-accent-blue hover:underline')}
-                    onClick={e => {
-                      e.stopPropagation();
-                      setExpanded(e => !e);
-                    }}
-                  >
-                    <T id={expanded ? 'showLess' : 'showMore'} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {statusToShow && (
-              <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
-                <div>Status: </div>
-                <div
-                  className={classNames(
-                    'px-2 py-[2px] rounded ',
-                    statusTextColor && `text-${statusTextColor} border border-${statusTextColor}`
-                  )}
-                >
-                  {statusToShow}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        <div
-          className="flex flex-col justify-center items-end gap-1"
-          style={{ marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
-        >
+        <div className="flex flex-col justify-center items-end gap-1">
           {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (
               <MoneyDiffView
@@ -153,6 +127,34 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
             );
           })}
         </div>
+      </div>
+
+      <div className="ml-14">
+        <div className="flex items-start gap-x-1">
+          <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+          {rest.length > 0 && (
+            <div className={classNames('flex items-center')}>
+              <button
+                className={classNames('flex items-center', 'text-accent-blue hover:underline')}
+                onClick={e => {
+                  e.stopPropagation();
+                  setExpanded(e => !e);
+                }}
+              >
+                <T id={expanded ? 'showLess' : 'showMore'} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {statusToShow && (
+          <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
+            <div>Status: </div>
+            <div className={classNames('px-2 py-[2px] rounded border', statusTextColor, statusBorderColor)}>
+              {statusToShow}
+            </div>
+          </div>
+        )}
       </div>
 
       {expanded && (

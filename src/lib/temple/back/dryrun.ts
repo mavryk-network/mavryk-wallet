@@ -110,5 +110,14 @@ export function buildFinalOpParmas(opParams: any[], modifiedTotalFee?: number, m
     opParams[0].storageLimit = modifiedStorageLimit;
   }
 
-  return opParams;
+  return applyDefaultOperationLimits(opParams);
+}
+
+function applyDefaultOperationLimits(opParams: any[]) {
+  return opParams.map(op => ({
+    ...op,
+    fee: op.fee ?? '18000',
+    gasLimit: op.gasLimit ?? '8000',
+    storageLimit: op.storageLimit ?? '800'
+  }));
 }

@@ -54,7 +54,7 @@ export const Alert: FC<AlertProps> = ({
         'relative w-full px-3 pb-3 pt-2',
         'flex items-center gap-3',
         bgColorClassName,
-        'rounded-xl',
+        'rounded-lg',
         className
       )}
       tabIndex={-1}

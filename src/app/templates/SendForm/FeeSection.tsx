@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { FieldError } from 'react-hook-form';
 
 import { Alert } from 'app/atoms';
-import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
+import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import { useGasToken } from 'lib/assets/hooks';
 import { t, T } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';

@@ -53,8 +53,8 @@ export const Alert: FC<AlertProps> = ({
       className={classNames(
         'relative w-full px-3 pb-3 pt-2',
         'flex items-center gap-3',
+        'rounded-md',
         bgColorClassName,
-        'rounded-lg',
         className
       )}
       tabIndex={-1}
@@ -116,7 +116,7 @@ export const AlertWithCollapse: FC<AlertWithCollapseProps> = ({ wrapperClassName
         <Alert {...rest} />
         <button
           className={classNames(
-            'absolute right-4 top-4 flex items-center justify-center w-6 h-6 rounded',
+            'absolute right-4 top-4 flex items-center justify-center w-6 h-6 rounded-lg',
             'text-white transform transition-transform duration-500',
             showDetails && 'rotate-180'
           )}

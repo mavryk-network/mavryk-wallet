@@ -1,8 +1,9 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Estimate } from '@mavrykdynamics/taquito';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
+import { useForm } from 'react-hook-form';
 
 import { Money } from 'app/atoms';
 import PlainAssetInput from 'app/atoms/PlainAssetInput';
@@ -12,6 +13,13 @@ import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
+
+import { AdditionalGasInput } from './AdditionalFeeInput';
+import { gasOptions } from './AdditionalFeeInput/additionalFeeInput.shared';
+
+interface FormData {
+  fee: number;
+}
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
@@ -54,6 +62,53 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   const { symbol } = useGasToken();
   const { popup } = useAppEnv();
 
+  const hasRun = useRef(false);
+
+  const initialFeeValues = useMemo(
+    () => ({
+      gas: modifyFeeAndLimit?.totalFee ?? 0,
+      storage: modifyFeeAndLimit?.storageLimit ?? null
+    }),
+    []
+  );
+
+  const { control } = useForm<FormData>({
+    mode: 'onChange',
+    defaultValues: {
+      fee: gasOptions[1].amount
+    }
+  });
+
+  // muptiple storage and gas fees by selected option [1, 1.5, 2]
+  const handleGasFeeChange = useCallback(
+    (val: [string]) => {
+      if (modifyFeeAndLimit) {
+        const { onStorageLimitChange, onTotalFeeChange } = modifyFeeAndLimit;
+        const { gas, storage } = initialFeeValues;
+        const [stringMultiplier] = val;
+        const multiplier = Number(stringMultiplier);
+
+        onTotalFeeChange(gas * multiplier);
+
+        storage && onStorageLimitChange?.(storage * multiplier);
+      }
+    },
+    [modifyFeeAndLimit, initialFeeValues]
+  );
+
+  // increase default estimated fees
+  useEffect(() => {
+    if (!hasRun.current && modifyFeeAndLimit) {
+      const { onStorageLimitChange, onTotalFeeChange, totalFee, storageLimit } = modifyFeeAndLimit;
+      const multiplier = gasOptions[1].amount as number;
+
+      onTotalFeeChange(totalFee * multiplier);
+      storageLimit && onStorageLimitChange?.(storageLimit * multiplier);
+
+      hasRun.current = true;
+    }
+  }, [modifyFeeAndLimit, handleGasFeeChange]);
+
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
 
@@ -82,8 +137,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     }
 
     const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
     const storageFee = mumavToTz(storageFeeMumav);
+    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
 
     return (
       <div className="w-full flex flex-col gap-3">
@@ -214,7 +269,16 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         ))}
       </div>
     );
-  }, [modifyFeeAndLimit, estimates, hasStableGasFee, includeBurnedFee, gasFeeError, symbol, mainnet]);
+  }, [
+    modifyFeeAndLimit,
+    estimates,
+    hasStableGasFee,
+    includeStorageData,
+    includeBurnedFee,
+    gasFeeError,
+    symbol,
+    mainnet
+  ]);
 
   if (!expenses) {
     return null;
@@ -222,6 +286,9 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
   return modifyFeeAndLimit ? (
     <>
+      <div className="mt-4">
+        <AdditionalGasInput name="fee" control={control} onChange={handleGasFeeChange} id="gas-fee-confirmation" />
+      </div>
       <div className="text-white text-base-plus mt-4 pb-3">
         <T id="networkFees" />
       </div>

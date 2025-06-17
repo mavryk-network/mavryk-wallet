@@ -13,7 +13,7 @@ import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defa
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
+import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';

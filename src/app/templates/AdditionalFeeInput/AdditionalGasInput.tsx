@@ -234,7 +234,7 @@ export const FeeOptionFace: FC<FeeOptionFaceProps> = ({ type, amount, assetSymbo
             onClick={onClick}
             onFocus={onFocus}
             onBlur={onBlur}
-            style={{ caretColor: '#5F58FF', width: 115 }}
+            style={{ caretColor: '#5F58FF', width: 100 }}
             className={classNames(
               'appearance-none',
               'bg-transparent',

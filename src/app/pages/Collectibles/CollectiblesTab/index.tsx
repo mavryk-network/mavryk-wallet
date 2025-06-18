@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -76,6 +76,10 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
     useCollectiblesListingLogic(sortedAssets);
 
+  const clearInput = useCallback(() => {
+    setSearchValue('');
+  }, []);
+
   const shouldScrollToTheTabsBar = paginatedSlugs.length > 0;
 
   useEffect(() => {
@@ -112,7 +116,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
                   containerClassName="mr-2"
                   testID={AssetsSelectors.searchAssetsInputTokens}
                 />
-                <SearchExplorerCloseBtn />
+                <SearchExplorerCloseBtn onClick={clearInput} />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>

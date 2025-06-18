@@ -3843,5 +3843,8 @@
   },
   "delegating": {
     "message": "Delegating"
+  },
+  "highTrafficMsg": {
+    "message": "There is high traffic at the moment, please increase the gas cost to provide a better chance your transaction will go through"
   }
 }

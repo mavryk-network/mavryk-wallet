@@ -333,6 +333,12 @@
   "reDelegate": {
     "message": "Re-delegate"
   },
+  "delegateSuccessMsg": {
+    "message": "Successfully Delegated!"
+  },
+  "delegateSuccessDescMsg": {
+    "message": "Your MVRK has been successfully delegated and  is now actively earning rewards. Your first reward should be paid out within the next 7 cycles."
+  },
   "reDelegateSuccessMsg": {
     "message": "Successfully Re-delegated!"
   },
@@ -3837,5 +3843,8 @@
   },
   "delegating": {
     "message": "Delegating"
+  },
+  "highTrafficMsg": {
+    "message": "There is high traffic at the moment, please increase the gas cost to provide a better chance your transaction will go through"
   }
 }

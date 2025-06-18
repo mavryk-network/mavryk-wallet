@@ -34,6 +34,9 @@ const APP_POPUP_LIMIT = 604;
 const APP_POPUP_WIDTH_LIMIT = 400;
 const APP_POPUP_VALUE_WITH_TOPBAR = 576;
 
+const DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES = 5000;
+const DEFAULT_STORAGE_WHEN_NO_ESTIMATES = 300;
+
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -173,11 +176,11 @@ const ConfirmDAppForm: FC = () => {
   const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useState(
     (payload.type === 'confirm_operations' &&
       payload.opParams.reduce((sum, op) => sum + (op.fee ? +op.fee : 0), 0) + revealFee) ||
-      0
+      DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES
   );
 
   const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useState(
-    (payload.type === 'confirm_operations' && payload.opParams[0].storageLimit) || 0
+    (payload.type === 'confirm_operations' && payload.opParams[0].storageLimit) || DEFAULT_STORAGE_WHEN_NO_ESTIMATES
   );
 
   const confirm = useCallback(
@@ -287,24 +290,24 @@ const ConfirmDAppForm: FC = () => {
     }
   }, [payload.type, payload.origin, error]);
 
-  const modifiedStorageLimitDisplayed = useMemo(
-    () => payload.type === 'confirm_operations' && payload.opParams.length < 2,
-    [payload]
-  );
+  // const modifiedStorageLimitDisplayed = useMemo(
+  //   () => payload.type === 'confirm_operations' && payload.opParams.length < 2,
+  //   [payload]
+  // );
 
   const modifyFeeAndLimit = useMemo<ModifyFeeAndLimit>(
     () => ({
       totalFee: modifiedTotalFeeValue,
       onTotalFeeChange: setModifiedTotalFeeValue,
-      storageLimit: modifiedStorageLimitDisplayed ? modifiedStorageLimitValue : null,
+      storageLimit: modifiedStorageLimitValue,
       onStorageLimitChange: setModifiedStorageLimitValue
     }),
     [
       modifiedTotalFeeValue,
       setModifiedTotalFeeValue,
       modifiedStorageLimitValue,
-      setModifiedStorageLimitValue,
-      modifiedStorageLimitDisplayed
+      setModifiedStorageLimitValue
+      // modifiedStorageLimitDisplayed
     ]
   );
 

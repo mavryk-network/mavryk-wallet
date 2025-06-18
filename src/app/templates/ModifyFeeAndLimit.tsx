@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
-import { Money } from 'app/atoms';
+import { Alert, Money } from 'app/atoms';
 import PlainAssetInput from 'app/atoms/PlainAssetInput';
 import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
@@ -48,6 +48,7 @@ export interface ModifyFeeAndLimit {
 }
 
 const MAX_GAS_FEE = 1000;
+const DEFAULT_MINIMAL_FEE_PER_STORAGE_MUMAV = 250;
 
 export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   expenses,
@@ -121,6 +122,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         let i = 0;
         for (const e of estimates) {
           defaultGasFeeMumav = defaultGasFeeMumav.plus(e.suggestedFeeMumav);
+
           storageFeeMumav = storageFeeMumav.plus(
             Math.ceil(
               (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *
@@ -134,9 +136,18 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       } catch {
         return null;
       }
+    } else {
+      // calculate burned with default state values in case estimation got 404 error response
+      const { totalFee, storageLimit } = modifyFeeAndLimit;
+      burnedFee = new BigNumber(totalFee ?? 0).plus(storageLimit ?? 0).multipliedBy(0.5);
+
+      storageFeeMumav = storageFeeMumav.plus(
+        Math.ceil((modifyFeeAndLimit.storageLimit ?? 0) * DEFAULT_MINIMAL_FEE_PER_STORAGE_MUMAV)
+      );
     }
 
     const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
+
     const storageFee = mumavToTz(storageFeeMumav);
     const defaultGasFee = mumavToTz(defaultGasFeeMumav);
 
@@ -286,7 +297,10 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
   return modifyFeeAndLimit ? (
     <>
-      <div className="mt-4">
+      <div className="my-4">
+        <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
+      </div>
+      <div>
         <AdditionalGasInput name="fee" control={control} onChange={handleGasFeeChange} id="gas-fee-confirmation" />
       </div>
       <div className="text-white text-base-plus mt-4 pb-3">

@@ -174,7 +174,7 @@ export const FeeOptionFace: FC<FeeOption & { assetSymbol?: string }> = ({ type, 
       <span className="capitalize">{type}</span>
       <div className="flex items-center text-secondary-white text-sm">
         {amount && (
-          <Money cryptoDecimals={5} smallFractionFont={false}>
+          <Money cryptoDecimals={5} smallFractionFont={false} tooltip={false}>
             {amount}
           </Money>
         )}
@@ -198,7 +198,7 @@ export const FeeOptionContent: FC<FeeOption & { assetSymbol?: string }> = ({
 
         {amount && (
           <div className="ml-2 text-sm text-secondary-white flex items-baseline">
-            <Money cryptoDecimals={5} smallFractionFont={false}>
+            <Money cryptoDecimals={5} smallFractionFont={false} tooltip={false}>
               {amount}
             </Money>{' '}
             {assetSymbol && <span className="ml-1 text-sm">{assetSymbol}</span>}

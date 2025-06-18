@@ -280,6 +280,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     hasStableGasFee,
     includeStorageData,
     includeBurnedFee,
+    name,
+    id,
     initialFeeValues.gas,
     control,
     handleGasFeeChange,

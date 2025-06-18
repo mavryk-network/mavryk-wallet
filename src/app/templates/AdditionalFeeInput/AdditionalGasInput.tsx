@@ -93,13 +93,13 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
 
   return (
     <Controller
+      id={id}
       name={name}
       as={AdditionalGasFeeInputContent}
       control={control}
       feeOptions={gasOptions}
       defaultOption={defaultOption}
       onChange={handleChange}
-      id={id}
       extraHeight={extraHeight}
       assetSymbol={assetSymbol}
       gasFeeError={gasFeeError}
@@ -138,7 +138,6 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     gasFeeError,
     feeAmount
   } = props;
-  console.log(defaultOption, 'defaultValue');
   const [selectedPreset, setSelectedPreset] = useState<FeeOption['type']>(
     feeOptions.find(({ amount }) => amount === defaultOption)?.type || 'custom'
   );
@@ -168,7 +167,7 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
           dropdownButtonClassName="p-2"
           fontContentWrapperClassname={classNames(gasFeeError && 'border-primary-error', 'bg-primary-bg')}
           DropdownFaceContent={
-            <FeeOptionFace
+            <GasFeeOptionFace
               {...selectedFeeOption}
               amount={getMuMavfeeForUi(selectedFeeOption.amount, feeAmount)}
               assetSymbol={assetSymbol}
@@ -196,13 +195,13 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
   );
 };
 
-type FeeOptionFaceProps = FeeOption & {
+type GasFeeOptionFaceProps = FeeOption & {
   assetSymbol?: string;
   value?: string | number | undefined;
   onChange?: (v?: string) => void | undefined;
 };
 
-export const FeeOptionFace: FC<FeeOptionFaceProps> = ({ type, amount, assetSymbol, value, onChange }) => {
+export const GasFeeOptionFace: FC<GasFeeOptionFaceProps> = ({ type, amount, assetSymbol, value, onChange }) => {
   const [isInputActive, setIsInputActive] = useState(false);
 
   // prevent opening dropdown

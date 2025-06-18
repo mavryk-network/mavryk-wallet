@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { localForger } from '@mavrykdynamics/taquito-local-forging';
 import BigNumber from 'bignumber.js';
@@ -184,13 +184,13 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     return 0;
   }, [payload]);
 
-  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useSafeState(
+  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useState(
     (payload.type === 'operations' &&
       payload.opParams &&
       payload.opParams.reduce((sum, op) => sum + (op.fee ? +op.fee : 0), 0) + revealFee) ||
       0
   );
-  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useSafeState(
+  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useState(
     (payload.type === 'operations' && payload.opParams && payload.opParams[0].storageLimit) || 0
   );
 

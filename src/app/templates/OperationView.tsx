@@ -164,7 +164,7 @@ const OperationView: FC<OperationViewProps> = ({
         modifyFeeAndLimit={modifyFeeAndLimit}
         mainnet={mainnet}
         gasFeeError={gasFeeError}
-        includeBurnedFee={true}
+        includeBurnedFee
       />
     </div>
   );

@@ -64,7 +64,7 @@ if (window.frameElement === null) {
 }
 
 const SENDER = {
-  id: 'cgddkajmbckbjbnondgfcbcojjjdnmji',
+  id: browser.runtime.id,
   name: 'Mavryk Wallet',
   iconUrl: 'https://mavryk.org/logo.png'
 };

@@ -15,7 +15,6 @@ import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 
 import { AdditionalGasInput } from './AdditionalFeeInput';
-import { gasOptions } from './AdditionalFeeInput/additionalFeeInput.shared';
 
 interface FormData {
   fee: number;

@@ -18,7 +18,6 @@ import { ReactComponent as CoffeeIcon } from 'app/icons/coffee.svg';
 import { ReactComponent as CupIcon } from 'app/icons/cup.svg';
 import { ReactComponent as RocketIcon } from 'app/icons/rocket.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
-import { useGasToken } from 'lib/assets/hooks';
 import { TID, T } from 'lib/i18n';
 
 import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
@@ -58,28 +57,6 @@ export const feeOptions: FeeOption[] = [
     ),
     descriptionI18nKey: 'customFeeDescription',
     type: 'custom'
-  }
-];
-
-// used to increase values before operation connfirm
-export const gasOptions: FeeOption[] = [
-  {
-    Icon: CoffeeIcon,
-    descriptionI18nKey: 'minimalFeeDescription',
-    type: 'minimal',
-    amount: 1
-  },
-  {
-    Icon: ({ className, ...rest }) => <CupIcon className={classNames('transform scale-95', className)} {...rest} />,
-    descriptionI18nKey: 'fastFeeDescription',
-    type: 'fast',
-    amount: 1.5
-  },
-  {
-    Icon: RocketIcon,
-    descriptionI18nKey: 'rocketFeeDescription',
-    type: 'rocket',
-    amount: 2
   }
 ];
 

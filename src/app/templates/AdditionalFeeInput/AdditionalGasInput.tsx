@@ -11,6 +11,7 @@ import { ReactComponent as RocketIcon } from 'app/icons/rocket.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { t, TID } from 'lib/i18n';
+import { mumavToTz } from 'lib/temple/helpers';
 
 import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
 
@@ -23,7 +24,7 @@ type FeeOption = {
   Icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   descriptionI18nKey: TID;
   type: 'minimal' | 'fast' | 'rocket' | 'custom';
-  amount: number;
+  amount?: number;
 };
 
 export const gasOptions: FeeOption[] = [
@@ -50,9 +51,7 @@ export const gasOptions: FeeOption[] = [
       <SettingsIcon className={classNames('transform scale-95', className)} {...rest} />
     ),
     descriptionI18nKey: 'customFeeDescription',
-    type: 'custom',
-    // mocked part for type
-    amount: 1
+    type: 'custom'
   }
 ];
 
@@ -69,18 +68,18 @@ type AdditionalGasInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'co
 };
 
 export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
-  const { control, id, name, onChange, extraHeight = 0, assetSymbol, feeAmount, gasFeeError } = props;
-
-  const gasOptionsMemoized: FeeOption[] = useMemo(
-    () =>
-      gasOptions.map(gasOption => {
-        return {
-          ...gasOption,
-          amount: gasOption.amount * feeAmount
-        };
-      }),
-    []
-  );
+  const {
+    control,
+    id,
+    name,
+    onChange,
+    extraHeight = 0,
+    assetSymbol,
+    feeAmount,
+    gasFeeError,
+    valueToShow,
+    onChangeValueToShow
+  } = props;
 
   const { trackEvent } = useAnalytics();
 
@@ -95,17 +94,23 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
       name={name}
       as={AdditionalGasFeeInputContent}
       control={control}
-      feeOptions={gasOptionsMemoized}
+      feeOptions={gasOptions}
       onChange={handleChange}
       id={id}
       extraHeight={extraHeight}
       assetSymbol={assetSymbol}
       gasFeeError={gasFeeError}
+      valueToShow={valueToShow}
+      onChangeValueToShow={onChangeValueToShow}
+      feeAmount={feeAmount}
     />
   );
 };
 
 export const getFeeOptionId = (option: FeeOption) => option.type;
+const getMuMavfeeForUi = (amount: number | undefined, feeAmount: number) => {
+  return mumavToTz((amount ?? 1) * feeAmount).toNumber();
+};
 
 export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'value' | 'onChange' | 'id'> & {
   extraHeight?: number;
@@ -114,6 +119,7 @@ export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'value' | 'on
   valueToShow?: string | number | undefined;
   onChangeValueToShow?: (v?: string) => void | undefined;
   gasFeeError?: boolean;
+  feeAmount: number;
 };
 
 export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
@@ -125,7 +131,8 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     feeOptions,
     valueToShow,
     onChangeValueToShow,
-    gasFeeError
+    gasFeeError,
+    feeAmount
   } = props;
 
   const [selectedPreset, setSelectedPreset] = useState<FeeOption['type']>(
@@ -149,7 +156,7 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
   );
 
   return (
-    <div className="flex flex-col w-full mb-2 flex-grow">
+    <div className="flex flex-col w-full flex-grow">
       <div className="relative flex flex-col items-stretch rounded">
         <DropdownSelect
           optionsListClassName="p-0"
@@ -159,6 +166,7 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
           DropdownFaceContent={
             <FeeOptionFace
               {...selectedFeeOption}
+              amount={getMuMavfeeForUi(selectedFeeOption.amount, feeAmount)}
               assetSymbol={assetSymbol}
               value={valueToShow}
               onChange={onChangeValueToShow}
@@ -169,7 +177,13 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
             options: feeOptions,
             noItemsText: 'No items',
             getKey: getFeeOptionId,
-            renderOptionContent: option => <FeeOptionContent {...option} assetSymbol={assetSymbol} />,
+            renderOptionContent: option => (
+              <FeeOptionContent
+                {...option}
+                amount={option.type !== 'custom' ? getMuMavfeeForUi(option.amount, feeAmount) : undefined}
+                assetSymbol={assetSymbol}
+              />
+            ),
             onOptionChange: option => handlePresetSelected(option.type)
           }}
         />
@@ -220,7 +234,7 @@ export const FeeOptionFace: FC<FeeOptionFaceProps> = ({ type, amount, assetSymbo
             onClick={onClick}
             onFocus={onFocus}
             onBlur={onBlur}
-            style={{ caretColor: '#5F58FF' }}
+            style={{ caretColor: '#5F58FF', width: 115 }}
             className={classNames(
               'appearance-none',
               'bg-transparent',

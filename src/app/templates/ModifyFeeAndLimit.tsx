@@ -6,11 +6,11 @@ import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { Alert, Money } from 'app/atoms';
-import PlainAssetInput from 'app/atoms/PlainAssetInput';
 import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
+import { MAVEN_METADATA } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 
@@ -202,45 +202,22 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
               <>
                 <div className="mr-1">
                   {onChange ? (
-                    <AdditionalGasInput
-                      name="fee"
-                      id="gas-fee-confirmation"
-                      valueToShow={value.toFixed()}
-                      onChangeValueToShow={val => {
-                        onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
-                      }}
-                      feeAmount={selectedFeeMultiplier}
-                      control={control}
-                      onChange={handleGasFeeChange}
-                      gasFeeError={gasFeeError}
-                    />
+                    <div style={{ width: 218 }}>
+                      <AdditionalGasInput
+                        name="fee"
+                        id="gas-fee-confirmation"
+                        valueToShow={value.toFixed()}
+                        onChangeValueToShow={val => {
+                          onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
+                        }}
+                        feeAmount={initialFeeValues.gas}
+                        control={control}
+                        onChange={handleGasFeeChange}
+                        gasFeeError={gasFeeError}
+                        assetSymbol={MAVEN_METADATA.symbol}
+                      />
+                    </div>
                   ) : (
-                    // <>
-                    //   <PlainAssetInput
-                    //     value={value.toFixed()}
-                    //     onChange={val => {
-                    //       onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
-                    //     }}
-                    //     max={MAX_GAS_FEE}
-                    //     placeholder={defaultGasFee.toFixed()}
-                    //     className={classNames(
-                    //       'mr-1',
-                    //       'appearance-none',
-                    //       'w-24',
-                    //       'px-2 py-1',
-                    //       'border',
-                    //       gasFeeError ? 'border-primary-error' : 'border-gray-50',
-                    //       'focus:border-accent-blue',
-                    //       'bg-primary-bg',
-                    //       'transition ease-in-out duration-200',
-                    //       'rounded',
-                    //       'text-right',
-                    //       'text-white text-base-plus',
-                    //       'placeholder-text-secondary-white'
-                    //     )}
-                    //   />
-                    //   <span style={{ maxHeight: 19 }}>{symbol}</span>
-                    // </>
                     <span className="flex items-baseline" style={{ maxHeight: 19 }}>
                       {key === 'feesBurned' && '~'}
                       <Money smallFractionFont={false}>{value}</Money>
@@ -249,16 +226,18 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   )}
                 </div>
 
-                <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet} smallFractionFont={false}>
-                  {({ balance, symbol }) => (
-                    <div className="flex">
-                      <span className="opacity-75">(</span>
-                      <span style={{ maxHeight: 19 }}>{symbol}</span>
-                      {balance}
-                      <span className="opacity-75">)</span>
-                    </div>
-                  )}
-                </InFiat>
+                {!onChange && (
+                  <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet} smallFractionFont={false}>
+                    {({ balance, symbol }) => (
+                      <div className="flex">
+                        <span className="opacity-75">(</span>
+                        <span style={{ maxHeight: 19 }}>{symbol}</span>
+                        {balance}
+                        <span className="opacity-75">)</span>
+                      </div>
+                    )}
+                  </InFiat>
+                )}
               </>
             ) : (
               <div className="flex items-center mr-1">
@@ -306,7 +285,6 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     symbol,
     mainnet
   ]);
-  console.log('render');
 
   if (!expenses) {
     return null;

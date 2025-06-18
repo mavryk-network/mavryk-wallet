@@ -72,12 +72,14 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     []
   );
 
-  const { control } = useForm<FormData>({
+  const { control, watch } = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
       fee: gasOptions[1].amount
     }
   });
+
+  const selectedFeeMultiplier = watch('fee');
 
   // muptiple storage and gas fees by selected option [1, 1.5, 2]
   const handleGasFeeChange = useCallback(
@@ -100,7 +102,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   useEffect(() => {
     if (!hasRun.current && modifyFeeAndLimit) {
       const { onStorageLimitChange, onTotalFeeChange, totalFee, storageLimit } = modifyFeeAndLimit;
-      const multiplier = 1.5;
+      const multiplier = Number(gasOptions[1].amount);
 
       onTotalFeeChange(totalFee * multiplier);
       storageLimit && onStorageLimitChange?.(storageLimit * multiplier);
@@ -200,33 +202,45 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
               <>
                 <div className="mr-1">
                   {onChange ? (
-                    <>
-                      <PlainAssetInput
-                        value={value.toFixed()}
-                        onChange={val => {
-                          onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
-                        }}
-                        max={MAX_GAS_FEE}
-                        placeholder={defaultGasFee.toFixed()}
-                        className={classNames(
-                          'mr-1',
-                          'appearance-none',
-                          'w-24',
-                          'px-2 py-1',
-                          'border',
-                          gasFeeError ? 'border-primary-error' : 'border-gray-50',
-                          'focus:border-accent-blue',
-                          'bg-primary-bg',
-                          'transition ease-in-out duration-200',
-                          'rounded',
-                          'text-right',
-                          'text-white text-base-plus',
-                          'placeholder-text-secondary-white'
-                        )}
-                      />
-                      <span style={{ maxHeight: 19 }}>{symbol}</span>
-                    </>
+                    <AdditionalGasInput
+                      name="fee"
+                      id="gas-fee-confirmation"
+                      valueToShow={value.toFixed()}
+                      onChangeValueToShow={val => {
+                        onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
+                      }}
+                      feeAmount={selectedFeeMultiplier}
+                      control={control}
+                      onChange={handleGasFeeChange}
+                      gasFeeError={gasFeeError}
+                    />
                   ) : (
+                    // <>
+                    //   <PlainAssetInput
+                    //     value={value.toFixed()}
+                    //     onChange={val => {
+                    //       onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
+                    //     }}
+                    //     max={MAX_GAS_FEE}
+                    //     placeholder={defaultGasFee.toFixed()}
+                    //     className={classNames(
+                    //       'mr-1',
+                    //       'appearance-none',
+                    //       'w-24',
+                    //       'px-2 py-1',
+                    //       'border',
+                    //       gasFeeError ? 'border-primary-error' : 'border-gray-50',
+                    //       'focus:border-accent-blue',
+                    //       'bg-primary-bg',
+                    //       'transition ease-in-out duration-200',
+                    //       'rounded',
+                    //       'text-right',
+                    //       'text-white text-base-plus',
+                    //       'placeholder-text-secondary-white'
+                    //     )}
+                    //   />
+                    //   <span style={{ maxHeight: 19 }}>{symbol}</span>
+                    // </>
                     <span className="flex items-baseline" style={{ maxHeight: 19 }}>
                       {key === 'feesBurned' && '~'}
                       <Money smallFractionFont={false}>{value}</Money>
@@ -285,10 +299,14 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     hasStableGasFee,
     includeStorageData,
     includeBurnedFee,
+    selectedFeeMultiplier,
+    control,
+    handleGasFeeChange,
     gasFeeError,
     symbol,
     mainnet
   ]);
+  console.log('render');
 
   if (!expenses) {
     return null;
@@ -299,9 +317,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       <div className="my-4">
         <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
       </div>
-      <div>
-        <AdditionalGasInput name="fee" control={control} onChange={handleGasFeeChange} id="gas-fee-confirmation" />
-      </div>
+
       <div className="text-white text-base-plus mt-4 pb-3">
         <T id="networkFees" />
       </div>

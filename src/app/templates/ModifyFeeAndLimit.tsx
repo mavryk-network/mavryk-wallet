@@ -37,6 +37,8 @@ type ModifyFeeAndLimitProps = {
   includeBurnedFee?: boolean;
   hasStableGasFee?: boolean;
   includeStorageData?: boolean;
+  name: string;
+  id: string;
 };
 
 export interface ModifyFeeAndLimit {
@@ -46,7 +48,6 @@ export interface ModifyFeeAndLimit {
   onStorageLimitChange: (storageLimit: number) => void;
 }
 
-const MAX_GAS_FEE = 1000;
 const DEFAULT_MINIMAL_FEE_PER_STORAGE_MUMAV = 250;
 
 export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
@@ -55,6 +56,8 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   mainnet,
   modifyFeeAndLimit,
   gasFeeError,
+  id,
+  name,
   includeBurnedFee = true,
   hasStableGasFee = false,
   includeStorageData = true
@@ -72,14 +75,12 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     []
   );
 
-  const { control, watch } = useForm<FormData>({
+  const { control } = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
       fee: gasOptions[1].amount
     }
   });
-
-  const selectedFeeMultiplier = watch('fee');
 
   // muptiple storage and gas fees by selected option [1, 1.5, 2]
   const handleGasFeeChange = useCallback(
@@ -204,8 +205,9 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   {onChange ? (
                     <div style={{ width: 218 }}>
                       <AdditionalGasInput
-                        name="fee"
-                        id="gas-fee-confirmation"
+                        name={name}
+                        id={id}
+                        defaultOption={gasOptions[1].amount}
                         valueToShow={value.toFixed()}
                         onChangeValueToShow={val => {
                           onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
@@ -292,7 +294,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
   return modifyFeeAndLimit ? (
     <>
-      <div className="my-4">
+      <div className="mt-4">
         <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
       </div>
 

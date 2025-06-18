@@ -157,6 +157,8 @@ const OperationView: FC<OperationViewProps> = ({
       )}
 
       <ModifyFeeAndLimitComponent
+        id="external-modified-fees-id"
+        name="external-modified-fees"
         expenses={expensesData}
         estimates={estimates}
         modifyFeeAndLimit={modifyFeeAndLimit}

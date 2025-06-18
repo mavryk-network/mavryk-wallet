@@ -379,6 +379,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   )}
 
                   <ModifyFeeAndLimitComponent
+                    id="internal-modified-fees-id"
+                    name="internal-modified-fees"
                     expenses={expensesData}
                     estimates={estimates}
                     modifyFeeAndLimit={modifyFeeAndLimit}

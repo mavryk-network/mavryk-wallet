@@ -65,6 +65,7 @@ type AdditionalGasInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'co
   gasFeeError?: boolean;
   valueToShow?: string | number | undefined;
   onChangeValueToShow?: (v?: string) => void | undefined;
+  defaultOption?: number;
 };
 
 export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
@@ -72,6 +73,7 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
     control,
     id,
     name,
+    defaultOption,
     onChange,
     extraHeight = 0,
     assetSymbol,
@@ -95,6 +97,7 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
       as={AdditionalGasFeeInputContent}
       control={control}
       feeOptions={gasOptions}
+      defaultOption={defaultOption}
       onChange={handleChange}
       id={id}
       extraHeight={extraHeight}
@@ -112,7 +115,7 @@ const getMuMavfeeForUi = (amount: number | undefined, feeAmount: number) => {
   return mumavToTz((amount ?? 1) * feeAmount).toNumber();
 };
 
-export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'value' | 'onChange' | 'id'> & {
+export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'defaultValue' | 'onChange' | 'id'> & {
   extraHeight?: number;
   feeOptions: FeeOption[];
   assetSymbol?: string;
@@ -120,13 +123,14 @@ export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'value' | 'on
   onChangeValueToShow?: (v?: string) => void | undefined;
   gasFeeError?: boolean;
   feeAmount: number;
+  defaultOption?: number;
 };
 
 export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
   const {
     onChange,
     assetSymbol,
-    value,
+    defaultOption,
     extraHeight = 0,
     feeOptions,
     valueToShow,
@@ -134,9 +138,9 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     gasFeeError,
     feeAmount
   } = props;
-
+  console.log(defaultOption, 'defaultValue');
   const [selectedPreset, setSelectedPreset] = useState<FeeOption['type']>(
-    feeOptions.find(({ amount }) => amount === value)?.type || 'custom'
+    feeOptions.find(({ amount }) => amount === defaultOption)?.type || 'custom'
   );
 
   const handlePresetSelected = useCallback(

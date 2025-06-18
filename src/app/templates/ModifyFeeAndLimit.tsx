@@ -14,7 +14,7 @@ import { T, t } from 'lib/i18n';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 
-import { AdditionalGasInput } from './AdditionalFeeInput';
+import { AdditionalGasInput, gasOptions } from './AdditionalFeeInput';
 
 interface FormData {
   fee: number;
@@ -100,7 +100,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   useEffect(() => {
     if (!hasRun.current && modifyFeeAndLimit) {
       const { onStorageLimitChange, onTotalFeeChange, totalFee, storageLimit } = modifyFeeAndLimit;
-      const multiplier = gasOptions[1].amount as number;
+      const multiplier = 1.5;
 
       onTotalFeeChange(totalFee * multiplier);
       storageLimit && onStorageLimitChange?.(storageLimit * multiplier);

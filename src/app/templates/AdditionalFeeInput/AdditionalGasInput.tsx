@@ -35,7 +35,7 @@ type FeeOption = {
 };
 
 // used to increase values before operation connfirm
-const gasOptions: FeeOption[] = [
+export const gasOptions: FeeOption[] = [
   {
     Icon: CoffeeIcon,
     descriptionI18nKey: 'minimalFeeDescription',
@@ -67,11 +67,12 @@ type AdditionalGasInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'co
   error?: FieldError;
   id: string;
   extraHeight?: number;
+  assetSymbol?: string;
   onChange?: (v: [string]) => void;
 };
 
 export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
-  const { control, id, name, onChange, extraHeight = 0 } = props;
+  const { control, id, name, onChange, extraHeight = 0, assetSymbol } = props;
 
   const { trackEvent } = useAnalytics();
 
@@ -89,7 +90,7 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
   return (
     <Controller
       name={name}
-      as={AdditionalFeeInputContent}
+      as={AdditionalGasFeeInputContent}
       control={control}
       customFeeInputRef={customFeeInputRef}
       feeOptions={gasOptions}
@@ -99,6 +100,7 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
       onFocus={focusCustomFeeInput}
       label={t('gasFee')}
       placeholder="0"
+      assetSymbol={assetSymbol}
     />
   );
 };
@@ -162,7 +164,7 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
         <DropdownSelect
           optionsListClassName="p-0"
           dropdownWrapperClassName="border-none rounded-2xl-plus"
-          dropdownButtonClassName="px-4 py-14px"
+          dropdownButtonClassName="p-2"
           DropdownFaceContent={<FeeOptionFace {...selectedFeeOption} assetSymbol={assetSymbol} />}
           extraHeight={extraHeight}
           optionsProps={{
@@ -192,7 +194,7 @@ export const FeeOptionFace: FC<FeeOption & { assetSymbol?: string }> = ({ type, 
   return (
     <section className="flex items-center justify-between w-full text-base-plus text-white">
       <span className="capitalize">{type}</span>
-      <div className="flex items-center text-secondary-white text-sm">
+      <div className="flex items-center">
         {amount && (
           <Money cryptoDecimals={5} smallFractionFont={false} tooltip={false}>
             {amount}

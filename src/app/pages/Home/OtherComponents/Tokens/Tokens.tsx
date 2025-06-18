@@ -2,6 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ChainIds } from '@mavrykdynamics/taquito';
 import clsx from 'clsx';
+import { useForm } from 'react-hook-form';
 
 import { SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -9,6 +10,7 @@ import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
+import { AdditionalGasInput } from 'app/templates/AdditionalFeeInput';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,
@@ -39,6 +41,10 @@ import styles from './Tokens.module.css';
 import { toExploreAssetLink } from './utils';
 
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
+
+interface FormData {
+  fee: number;
+}
 
 export const TokensTab: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -176,6 +182,23 @@ export const TokensTab: FC = () => {
     return () => window.removeEventListener('keyup', handleKeyup);
   }, [activeAssetSlug, setActiveIndex]);
 
+  // Testing -------------
+
+  const { control } = useForm<FormData>({
+    mode: 'onChange',
+    defaultValues: {
+      fee: 1.5
+    }
+  });
+
+  const [totalFee, setTotalFee] = useState(1);
+
+  const handleGasFeeChange = (val: [string]) => {
+    setTotalFee(1 * Number(val));
+  };
+
+  console.log(totalFee, 'totalFee');
+
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
       <div className={clsx('mt-3 w-full', popup && 'mx-4')}>
@@ -213,6 +236,16 @@ export const TokensTab: FC = () => {
             </SearchExplorerClosed>
           </>
         </SearchExplorer>
+
+        <div className="my-5">
+          <AdditionalGasInput
+            name="fee"
+            control={control}
+            onChange={handleGasFeeChange}
+            id="gas-fee-confirmation"
+            assetSymbol={'MVRK'}
+          />
+        </div>
       </div>
 
       {/* {isEnabledAdsBanner && <AcceptAdsBanner />} */}

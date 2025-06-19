@@ -148,6 +148,9 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     feeOptions.find(({ amount }) => amount === defaultOption)?.type || 'custom'
   );
 
+  // Custom input option
+  const [isInputActive, setIsInputActive] = useState(false);
+
   const handlePresetSelected = useCallback(
     (newType: FeeOption['type']) => {
       setSelectedPreset(newType);
@@ -172,7 +175,11 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
           optionsListClassName="p-0"
           dropdownWrapperClassName="border-none rounded-2xl-plus"
           dropdownButtonClassName="p-2"
-          fontContentWrapperClassname={classNames(gasFeeError && 'border-primary-error', 'bg-primary-bg')}
+          fontContentWrapperClassname={classNames(
+            gasFeeError && 'border-primary-error',
+            isInputActive && 'border-accent-blue',
+            'bg-primary-bg'
+          )}
           DropdownFaceContent={
             <GasFeeOptionFace
               {...selectedFeeOption}
@@ -180,6 +187,8 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
               assetSymbol={assetSymbol}
               value={valueToShow}
               onChange={onChangeValueToShow}
+              isInputActive={isInputActive}
+              setIsInputActive={setIsInputActive}
             />
           }
           extraHeight={extraHeight}
@@ -206,11 +215,19 @@ type GasFeeOptionFaceProps = FeeOption & {
   assetSymbol?: string;
   value?: string | number | undefined;
   onChange?: (v?: string) => void | undefined;
+  isInputActive: boolean;
+  setIsInputActive: (v: boolean) => void;
 };
 
-export const GasFeeOptionFace: FC<GasFeeOptionFaceProps> = ({ type, amount, assetSymbol, value, onChange }) => {
-  const [isInputActive, setIsInputActive] = useState(false);
-
+export const GasFeeOptionFace: FC<GasFeeOptionFaceProps> = ({
+  type,
+  amount,
+  assetSymbol,
+  value,
+  onChange,
+  setIsInputActive,
+  isInputActive
+}) => {
   // prevent opening dropdown
   const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     e.stopPropagation();

@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Estimate } from '@mavrykdynamics/taquito';
+import { Modifier } from '@popperjs/core';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
@@ -39,6 +40,7 @@ type ModifyFeeAndLimitProps = {
   includeStorageData?: boolean;
   name: string;
   id: string;
+  poperModifiers?: Partial<Modifier<any, any>>[] | undefined;
 };
 
 export interface ModifyFeeAndLimit {
@@ -58,6 +60,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   gasFeeError,
   id,
   name,
+  poperModifiers,
   includeBurnedFee = true,
   hasStableGasFee = false,
   includeStorageData = true
@@ -205,6 +208,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   {onChange ? (
                     <div style={{ width: 218 }}>
                       <AdditionalGasInput
+                        poperModifiers={poperModifiers}
                         name={name}
                         id={id}
                         defaultOption={gasOptions[1].amount}

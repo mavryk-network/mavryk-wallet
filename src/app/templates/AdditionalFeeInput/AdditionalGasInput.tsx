@@ -1,5 +1,6 @@
 import React, { ComponentType, FC, FunctionComponent, SVGProps, useCallback, useMemo, useState } from 'react';
 
+import { Modifier } from '@popperjs/core';
 import classNames from 'clsx';
 import { Controller, ControllerProps, EventFunction, FieldError } from 'react-hook-form';
 
@@ -10,7 +11,7 @@ import { ReactComponent as CupIcon } from 'app/icons/cup.svg';
 import { ReactComponent as RocketIcon } from 'app/icons/rocket.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
-import { t, TID } from 'lib/i18n';
+import { TID } from 'lib/i18n';
 import { mumavToTz } from 'lib/temple/helpers';
 
 import { DropdownSelect } from '../DropdownSelect/DropdownSelect';
@@ -66,6 +67,7 @@ type AdditionalGasInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'co
   valueToShow?: string | number | undefined;
   onChangeValueToShow?: (v?: string) => void | undefined;
   defaultOption?: number;
+  poperModifiers?: Partial<Modifier<any, any>>[] | undefined;
 };
 
 export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
@@ -80,7 +82,8 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
     feeAmount,
     gasFeeError,
     valueToShow,
-    onChangeValueToShow
+    onChangeValueToShow,
+    poperModifiers
   } = props;
 
   const { trackEvent } = useAnalytics();
@@ -106,6 +109,7 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
       valueToShow={valueToShow}
       onChangeValueToShow={onChangeValueToShow}
       feeAmount={feeAmount}
+      poperModifiers={poperModifiers}
     />
   );
 };
@@ -124,6 +128,7 @@ export type AdditionalFeeInputContentProps = Pick<AssetFieldProps, 'defaultValue
   gasFeeError?: boolean;
   feeAmount: number;
   defaultOption?: number;
+  poperModifiers?: Partial<Modifier<any, any>>[] | undefined;
 };
 
 export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = props => {
@@ -136,7 +141,8 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     valueToShow,
     onChangeValueToShow,
     gasFeeError,
-    feeAmount
+    feeAmount,
+    poperModifiers
   } = props;
   const [selectedPreset, setSelectedPreset] = useState<FeeOption['type']>(
     feeOptions.find(({ amount }) => amount === defaultOption)?.type || 'custom'
@@ -162,6 +168,7 @@ export const AdditionalGasFeeInputContent: FC<AdditionalFeeInputContentProps> = 
     <div className="flex flex-col w-full flex-grow">
       <div className="relative flex flex-col items-stretch rounded">
         <DropdownSelect
+          poperModifiers={poperModifiers}
           optionsListClassName="p-0"
           dropdownWrapperClassName="border-none rounded-2xl-plus"
           dropdownButtonClassName="p-2"

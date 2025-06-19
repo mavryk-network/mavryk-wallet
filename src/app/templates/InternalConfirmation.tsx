@@ -45,6 +45,15 @@ type InternalConfiramtionProps = {
 const MIN_GAS_FEE = 0;
 const bytesStyle = { height: 112, background: '#171717', border: 'none' };
 
+const feePoperModifiers = [
+  {
+    name: 'offset',
+    options: {
+      offset: [0, -50] // shift 40px UP
+    }
+  }
+];
+
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
   const { popup } = useAppEnv();
@@ -378,17 +387,20 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   )}
 
-                  <ModifyFeeAndLimitComponent
-                    id="internal-modified-fees-id"
-                    name="internal-modified-fees"
-                    expenses={expensesData}
-                    estimates={estimates}
-                    modifyFeeAndLimit={modifyFeeAndLimit}
-                    mainnet={mainnet}
-                    gasFeeError={gasFeeError}
-                    includeStorageData={!isStorageDataHidden}
-                    includeBurnedFee
-                  />
+                  <div style={{ marginBottom: 40 }}>
+                    <ModifyFeeAndLimitComponent
+                      id="internal-modified-fees-id"
+                      name="internal-modified-fees"
+                      expenses={expensesData}
+                      estimates={estimates}
+                      modifyFeeAndLimit={modifyFeeAndLimit}
+                      mainnet={mainnet}
+                      gasFeeError={gasFeeError}
+                      includeStorageData={!isStorageDataHidden}
+                      includeBurnedFee
+                      poperModifiers={popup ? feePoperModifiers : undefined}
+                    />
+                  </div>
                 </div>
               )}
             </div>

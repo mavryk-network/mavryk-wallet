@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { Estimate } from '@mavrykdynamics/taquito';
 import { Modifier } from '@popperjs/core';
@@ -68,8 +68,6 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   const { symbol } = useGasToken();
   const { popup } = useAppEnv();
 
-  const hasRun = useRef(false);
-
   const initialFeeValues = useMemo(
     () => ({
       gas: modifyFeeAndLimit?.totalFee ?? 0,
@@ -101,19 +99,6 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     },
     [modifyFeeAndLimit, initialFeeValues]
   );
-
-  // increase default estimated fees
-  useEffect(() => {
-    if (!hasRun.current && modifyFeeAndLimit) {
-      const { onStorageLimitChange, onTotalFeeChange, totalFee, storageLimit } = modifyFeeAndLimit;
-      const multiplier = Number(gasOptions[1].amount);
-
-      onTotalFeeChange(totalFee * multiplier);
-      storageLimit && onStorageLimitChange?.(storageLimit * multiplier);
-
-      hasRun.current = true;
-    }
-  }, [modifyFeeAndLimit, handleGasFeeChange]);
 
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
@@ -284,6 +269,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
     hasStableGasFee,
     includeStorageData,
     includeBurnedFee,
+    poperModifiers,
     name,
     id,
     initialFeeValues.gas,

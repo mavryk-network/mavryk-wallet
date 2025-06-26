@@ -61,7 +61,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
       },
       {
         key: 'viewOnBlockExplorer',
-        linkTo: `https://ghost.tzstats.com/${publicKeyHash}`,
+        linkTo: `https://nexus.mavryk.org/account/${publicKeyHash}`,
         hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer',
@@ -148,7 +148,7 @@ export const SettingsDropdown: FC = () => {
       },
       {
         key: 'viewOnBlockExplorer',
-        linkTo: `https://ghost.tzstats.com/${publicKeyHash}`,
+        linkTo: `https://nexus.mavryk.org/account/${publicKeyHash}`,
         hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer'

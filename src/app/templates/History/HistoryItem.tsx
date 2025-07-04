@@ -4,7 +4,6 @@ import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
-import { useAppEnv } from 'app/env';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
@@ -18,8 +17,6 @@ import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
 import { deriveStatusColorClassName, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
-const popupInteractionOpTextMaxLength = 6;
-
 interface Props {
   historyItem: UserHistoryItem;
   address: string;
@@ -30,7 +27,6 @@ interface Props {
 
 export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, address }) => {
   const [expanded, setExpanded] = useState(false);
-  const { popup } = useAppEnv();
   const [isHovered, setIsHovered] = useState(false);
 
   const { hash, addedAt, status } = historyItem;
@@ -69,11 +65,6 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     [moneyDiffs, isSwapOperation]
   );
 
-  const hasLongInteractionOpText =
-    popup &&
-    historyItem.type === HistoryItemOpTypeEnum.Interaction &&
-    (historyItem.operations[0].entrypoint?.length ?? 0) > popupInteractionOpTextMaxLength;
-
   const filteredMoneyDiffBase = useMemo(
     () =>
       moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
@@ -98,11 +89,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div
-        onClick={() => handleItemClick(hash)}
-        className="flex items-start justify-between gap-1"
-        style={{ marginBottom: !hasLongInteractionOpText && popup ? -30 : -12 }}
-      >
+      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
         <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
@@ -110,6 +97,34 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
             className="flex flex-col gap-1 items-start justify-center break-words flex-wrap"
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+
+            <div>
+              <div className="flex items-start gap-x-1">
+                <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+                {rest.length > 0 && (
+                  <div className={classNames('flex items-center')}>
+                    <button
+                      className={classNames('flex items-center', 'text-accent-blue hover:underline')}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setExpanded(e => !e);
+                      }}
+                    >
+                      <T id={expanded ? 'showLess' : 'showMore'} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {statusToShow && (
+                <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
+                  <div>Status: </div>
+                  <div className={classNames('px-2 py-[2px] rounded border', statusTextColor, statusBorderColor)}>
+                    {statusToShow}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -127,34 +142,6 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
             );
           })}
         </div>
-      </div>
-
-      <div className="ml-14">
-        <div className="flex items-start gap-x-1">
-          <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
-          {rest.length > 0 && (
-            <div className={classNames('flex items-center')}>
-              <button
-                className={classNames('flex items-center', 'text-accent-blue hover:underline')}
-                onClick={e => {
-                  e.stopPropagation();
-                  setExpanded(e => !e);
-                }}
-              >
-                <T id={expanded ? 'showLess' : 'showMore'} />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {statusToShow && (
-          <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
-            <div>Status: </div>
-            <div className={classNames('px-2 py-[2px] rounded border', statusTextColor, statusBorderColor)}>
-              {statusToShow}
-            </div>
-          </div>
-        )}
       </div>
 
       {expanded && (

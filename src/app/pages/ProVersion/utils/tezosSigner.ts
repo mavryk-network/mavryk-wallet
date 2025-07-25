@@ -1,9 +1,11 @@
 import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
+import BigNumber from 'bignumber.js';
 
 import { EnvVars } from 'lib/env';
 import { KYC_CONTRACT } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
+import { tokensToAtoms } from 'lib/temple/helpers';
 
 const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
@@ -44,6 +46,24 @@ export const signKYCAction = async (rpcUrl: string, address: string) => {
     ];
     await contract.methods.setMember(setMemberAction, memberList).send();
   } catch (e) {
+    throw e;
+  }
+};
+
+export const stakeAction = async (rpcUrl: string, amount: BigNumber, decimals = 6) => {
+  try {
+    const tezos = signerTezos(rpcUrl);
+
+    const stakeAmount = tokensToAtoms(amount, decimals).toNumber();
+
+    const op = await tezos.contract.stake({
+      amount: stakeAmount,
+      mumav: false
+    });
+
+    return op;
+  } catch (e) {
+    console.error('Stake failed:', e);
     throw e;
   }
 };

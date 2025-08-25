@@ -2635,7 +2635,7 @@
     "message": "Your address, balance and domain"
   },
   "addressBalanceDescription": {
-    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. If you would like to receive and use MVRK or tokens built on Mavryk, you should use this address."
+    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. The Mavryk wallet address you've been given is the same one you'll use to receive both native MVRK tokens or any other tokens built on the Mavryk network."
   },
   "addressBalanceHint": {
     "message": "You may also use a custom wallet address name from $link$ like alice.mav instead of the alphanumeric wallet address.",

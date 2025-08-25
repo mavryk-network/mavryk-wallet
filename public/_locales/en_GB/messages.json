@@ -3587,10 +3587,10 @@
     "message": "Validators"
   },
   "tokensRwasNFTs": {
-    "message": "Tokens, RWAs, & NFTs"
+    "message": "Access Native Mavryk Tokens, RWAs, & NFTs"
   },
   "tokensDescPart1": {
-    "message": "Your portfolio of tokens is displayed on the ”Tokens” tab. "
+    "message": "You can view all your tokens in the ”Tokens” tab. From here you can send native tokens, check your balances, purchase more or see detailed information about any token by clicking on it."
   },
   "tokensDescPart2": {
     "message": "You can send, check balances, buy more, or view a token’s details by clicking on it in this section."

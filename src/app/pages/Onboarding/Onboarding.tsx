@@ -6,8 +6,8 @@ import { t, T } from 'lib/i18n';
 import { useStorage } from 'lib/temple/front';
 
 import AddressBalancesImg from './assets/first.png';
-import TxActionsImg from './assets/fourth.png';
-import TokensImg from './assets/second.png';
+import TxActionsImg from './assets/step2&4.png';
+import TokensImg from './assets/step2&4.png';
 import AddressesImg from './assets/third.png';
 import CongratsPage from './pages/CongratsPage';
 import FirstStep from './steps/FirstStep';

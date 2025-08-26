@@ -3680,10 +3680,10 @@
     "message": "Magnifying Glass - Search specific details."
   },
   "txActionsDetailsPart3": {
-    "message": "Drop Down - Sort your tokens and viewing arrangement"
+    "message": "Sort Icon - Sort your tokens and viewing arrangement"
   },
   "txActionsDetailsPart4": {
-    "message": "Rewind Icon - Search your transaction history."
+    "message": "Filter Icon - Search your transaction history."
   },
   "welcomeOnboard": {
     "message": "Welcome on board! 👋"

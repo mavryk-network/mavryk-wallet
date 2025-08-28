@@ -1,7 +1,7 @@
 # Mavryk Wallet
 
-Cryptocurrency wallet for [Mavryk blockchain](https://mavryk.org/) as Web Extension for your Browser.<br>
-Providing ability to manage NFT, mav tokens and interact with dApps.
+Cryptocurrency wallet for [Mavryk blockchain](https://mavryk.org/) as a browser extension.<br>
+Provides the ability to manage NFTs and tokens, and to interact with dApps.
 
 ![Mavryk Wallet](https://raw.githubusercontent.com/mavryk-network/mavryk-wallet/dev/public/misc/wallet-readme.svg)
 
@@ -40,7 +40,7 @@ yarn
 
 ### 3) Create `.env` file
 
-Make copy of `.env.dist` and do changes if needed.
+Make a copy of .env.dist and change values if needed.
 
 ### 4) Build
 

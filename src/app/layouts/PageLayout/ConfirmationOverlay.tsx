@@ -56,7 +56,7 @@ const ConfirmationOverlay: FC = () => {
           }}
           unmountOnExit
         >
-          <div className={clsx('fixed inset-0 z-50 overflow-y-auto', memoizedBgClassname)}>
+          <div className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
             {confirmation && (
               <InternalConfirmation
                 payload={confirmation.payload}

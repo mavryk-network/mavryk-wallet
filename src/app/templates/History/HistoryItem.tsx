@@ -4,7 +4,6 @@ import classNames from 'clsx';
 
 import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
-import { useAppEnv } from 'app/env';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
@@ -16,9 +15,7 @@ import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
-import { getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
-
-const popupInteractionOpTextMaxLength = 6;
+import { deriveStatusColorClassName, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -30,7 +27,6 @@ interface Props {
 
 export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, address }) => {
   const [expanded, setExpanded] = useState(false);
-  const { popup } = useAppEnv();
   const [isHovered, setIsHovered] = useState(false);
 
   const { hash, addedAt, status } = historyItem;
@@ -69,11 +65,6 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     [moneyDiffs, isSwapOperation]
   );
 
-  const hasLongInteractionOpText =
-    popup &&
-    historyItem.type === HistoryItemOpTypeEnum.Interaction &&
-    (historyItem.operations[0].entrypoint?.length ?? 0) > popupInteractionOpTextMaxLength;
-
   const filteredMoneyDiffBase = useMemo(
     () =>
       moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
@@ -81,6 +72,11 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         return acc;
       }, []),
     [moneyDiffsBase]
+  );
+
+  const [statusToShow, statusTextColor, statusBorderColor] = useMemo(
+    () => deriveStatusColorClassName(status),
+    [status]
   );
 
   return (
@@ -93,42 +89,51 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
+        <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
             style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
             className="flex flex-col gap-1 items-start justify-center break-words flex-wrap"
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
-            <div className="flex items-start gap-x-1">
-              <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
-              {rest.length > 0 && (
-                <div className={classNames('flex items-center')}>
-                  <button
-                    className={classNames('flex items-center', 'text-accent-blue hover:underline')}
-                    onClick={e => {
-                      e.stopPropagation();
-                      setExpanded(e => !e);
-                    }}
-                  >
-                    <T id={expanded ? 'showLess' : 'showMore'} />
-                  </button>
+
+            <div>
+              <div className="flex items-start gap-x-1">
+                <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+                {rest.length > 0 && (
+                  <div className={classNames('flex items-center')}>
+                    <button
+                      className={classNames('flex items-center', 'text-accent-blue hover:underline')}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setExpanded(e => !e);
+                      }}
+                    >
+                      <T id={expanded ? 'showLess' : 'showMore'} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {statusToShow && (
+                <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
+                  <div>Status: </div>
+                  <div className={classNames('px-2 py-[2px] rounded border', statusTextColor, statusBorderColor)}>
+                    {statusToShow}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div
-          className="flex flex-col justify-center items-end gap-1"
-          style={{ maxWidth: 76, marginTop: hasLongInteractionOpText ? 0 : '4.5px' }}
-        >
+        <div className="flex flex-col justify-center items-end gap-1">
           {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (
               <MoneyDiffView
                 key={i}
-                className="gap-1"
+                className="gap-1 flex-col"
                 assetId={assetSlug}
                 diff={diff}
                 pending={status === 'pending'}
@@ -138,6 +143,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
           })}
         </div>
       </div>
+
       {expanded && (
         <div className="px-4 pt-2 pb-2 mt-3 bg-gray-910 flex flex-col rounded-2xl-plus">
           {rest.map((item, i, arr) => (

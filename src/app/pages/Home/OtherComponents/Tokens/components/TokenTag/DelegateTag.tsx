@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { DelegateResponse } from '@mavrykdynamics/taquito-rpc';
 import classNames from 'clsx';
 
-import { HashChip } from 'app/atoms';
+import { HashChip, Identicon } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
@@ -98,19 +98,15 @@ type BakerBannerProps = {
 
 const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
   const { data: baker } = useKnownBaker(myBakerPkh ?? null);
-  const { publicKeyHash } = useAccount();
-
-  // TODO hardcoded logic, no api available at the moment
-  if (publicKeyHash && publicKeyHash === 'mv1V4h45W3p4e1sjSBvRkK2uYbvkTnSuHg8g') return null;
 
   const renderBakerData = () => {
     if (myBakerPkh) {
       return (
         <div className="flex items-center gap-3">
-          <T id="stakedTo" />
+          <T id="delegatedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
-              <img
+              {/* <img
                 src={baker?.logo}
                 alt={baker?.name}
                 className={classNames('flex-shrink-0', 'bg-white rounded-full')}
@@ -119,8 +115,9 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
                   width: 24,
                   height: 24
                 }}
-              />
-              <span>{baker?.name}</span>
+              /> */}
+              <Identicon hash={myBakerPkh} size={24} className="rounded-full" />
+              <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>
             </div>
           ) : (
             <HashChip hash={myBakerPkh} small />
@@ -131,18 +128,14 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
 
     return (
       <div className="flex items-center gap-3">
-        <T id="stakedTo" />
+        <T id="delegatedTo" />
         <T id="unknownBakerTitle" />;
       </div>
     );
   };
 
   return (
-    <AlertWithAction
-      btnLabel={t('details')}
-      onClick={handleTagClick}
-      linkTo={`${process.env.NODES_URL}/account/${myBakerPkh ?? ''}`}
-    >
+    <AlertWithAction btnLabel={t('details')} onClick={handleTagClick}>
       {renderBakerData()}
     </AlertWithAction>
   );

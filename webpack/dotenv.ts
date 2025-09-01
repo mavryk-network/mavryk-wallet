@@ -13,7 +13,7 @@ const readDotEnvFile = (path: string) => {
   return Dotenv.parse(contentString);
 };
 
-const dotenvDistPath = path.resolve(PATH_CWD, '.env.dist');
+const dotenvDistPath = path.resolve(PATH_CWD, '.env.local');
 
 const distDotEnvFileData = readDotEnvFile(dotenvDistPath);
 

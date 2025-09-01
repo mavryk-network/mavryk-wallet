@@ -27,7 +27,7 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
 }) => {
   const classNameMemo = classNames(
     'relative flex items-center justify-center h-12 gap-x-2',
-    'text-primary-white font-normal rounded-full border-2 border-accent-blue',
+    'text-primary-white font-normal rounded-full',
     'transition duration-200 ease-in-out w-max',
     small ? 'px-6 py-2 text-sm' : 'px-8 py-2.5 text-base',
     loading || disabled

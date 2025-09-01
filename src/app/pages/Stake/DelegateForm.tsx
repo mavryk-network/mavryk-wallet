@@ -5,15 +5,18 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
 
-import { Alert, Anchor, Button, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
+import { Alert, Anchor, Button, Divider, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
-import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
+import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
+import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
@@ -23,6 +26,7 @@ import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { TID, T, t } from 'lib/i18n';
+import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { setDelegate } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -30,6 +34,7 @@ import {
   Baker,
   isDomainNameValid,
   useAccount,
+  useDelegate,
   useKnownBaker,
   useKnownBakers,
   useTezos,
@@ -56,25 +61,35 @@ interface FormData {
   fee: number;
 }
 
-export const RECOMMENDED_BAKER_ADDRESS = 'tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM';
-export const HELP_UKRAINE_BAKER_ADDRESS = 'tz1bMFzs2aECPn4aCRmKQWHSLHF8ZnZbYcah';
-
 type DelegateFormProps = {
+  unfamiliarWithDelegation: boolean;
+  isFromCoStakeNavigation: boolean;
+  isReDelegationActive: boolean;
+  avtivateReDelegation: () => void;
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
-const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) => {
+const DelegateForm: FC<DelegateFormProps> = ({
+  setToolbarRightSidedComponent,
+  unfamiliarWithDelegation,
+  isFromCoStakeNavigation,
+  isReDelegationActive,
+  avtivateReDelegation
+}) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
   const { isDcpNetwork } = useGasToken();
   const { popup } = useAppEnv();
 
   const { pathname } = useLocation();
+  const isStakeScreenWithBakersList = useMemo(() => pathname.split('/').pop() === 'stake', [pathname]);
 
   const acc = useAccount();
   const tezos = useTezos();
 
   const accountPkh = acc.publicKeyHash;
+
+  const { data: myBakerPkh } = useDelegate(accountPkh);
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
@@ -156,12 +171,14 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   );
 
   useEffect(() => {
-    setToolbarRightSidedComponent(AllValidatorsComponent);
+    if (isStakeScreenWithBakersList) {
+      setToolbarRightSidedComponent(AllValidatorsComponent);
+    }
 
     return () => {
       setToolbarRightSidedComponent(null);
     };
-  }, []);
+  }, [isStakeScreenWithBakersList]);
 
   const estimateBaseFee = useCallback(async () => {
     try {
@@ -194,11 +211,11 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       console.error(err);
 
       switch (true) {
-        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
-          return new UnchangedError(err.message);
+        // case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
+        //   return new UnchangedError(err.message);
 
-        case err?.id.includes('unregistered_delegate'):
-          return new UnregisteredDelegateError(err.message);
+        // case err?.id.includes('unregistered_delegate'):
+        //   return new UnregisteredDelegateError(err.message);
 
         default:
           throw err;
@@ -250,15 +267,31 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
-      navigate<SuccessStateType>('/success', undefined, {
-        pageTitle: 'stake',
-        btnText: 'goToMain',
-        contentId: 'hash',
-        contentIdFnProps: { hash, i18nKey: 'staking' },
-        subHeader: 'success'
-      });
+      if (unfamiliarWithDelegation) {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'delegate',
+          description: 'delegateSuccessDescMsg',
+          subHeader: 'delegateSuccessMsg',
+          btnText: 'goToMain'
+        });
+      } else if (isReDelegationActive) {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'reDelegate',
+          description: 'reDelegateSuccessDescMsg',
+          subHeader: 'reDelegateSuccessMsg',
+          btnText: 'goToMain'
+        });
+      } else {
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'stake',
+          btnText: 'goToMain',
+          contentId: 'hash',
+          contentIdFnProps: { hash, i18nKey: 'staking' },
+          subHeader: 'success'
+        });
+      }
     }
-  }, [operation]);
+  }, [isReDelegationActive, operation, unfamiliarWithDelegation]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -331,57 +364,69 @@ const DelegateForm: FC<DelegateFormProps> = ({ setToolbarRightSidedComponent }) 
   const restFormDisplayed = Boolean(toFilled && (baseFee || estimationError));
 
   return (
-    <div className={classNames(!restFormDisplayed && popup && 'pt-4', 'h-full flex-1 flex flex-col')}>
-      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8 px-4" />}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
-        <Controller
-          name="to"
-          as={<NoSpaceField ref={toFieldRef} />}
-          control={control}
-          rules={{ validate: fifoValidateDelegate }}
-          onChange={([v]) => v}
-          onFocus={() => toFieldRef.current?.focus()}
-          textarea
-          rows={2}
-          cleanable={Boolean(toValue)}
-          onClean={cleanToField}
-          id="delegate-to"
-          label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
-          placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
-          errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
-          style={{
-            resize: 'none'
-          }}
-          containerClassName={classNames('mb-4', popup && 'px-4', toFilled && 'hidden')}
-          testID={DelegateFormSelectors.bakerInput}
+    <div className={classNames(!restFormDisplayed && popup && 'pt-4 px-4', 'h-full flex-1 flex flex-col')}>
+      {unfamiliarWithDelegation && isFromCoStakeNavigation && isStakeScreenWithBakersList && (
+        <Alert
+          type="info"
+          title={<T id="attentionExclamation" />}
+          className={classNames('mb-6')}
+          description={<T id="coStakeAttentionMsg" />}
         />
+      )}
+      {!unfamiliarWithDelegation && myBakerPkh && !isReDelegationActive && (
+        <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} avtivateReDelegation={avtivateReDelegation} />
+      )}
+      {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8" />}
+      {isReDelegationActive && (
+        <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
+          <Controller
+            name="to"
+            as={<NoSpaceField ref={toFieldRef} />}
+            control={control}
+            rules={{ validate: fifoValidateDelegate }}
+            onChange={([v]) => v}
+            onFocus={() => toFieldRef.current?.focus()}
+            textarea
+            rows={2}
+            cleanable={Boolean(toValue)}
+            onClean={cleanToField}
+            id="delegate-to"
+            label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
+            placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
+            errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName={classNames('mb-4', toFilled && 'hidden')}
+            testID={DelegateFormSelectors.bakerInput}
+          />
 
-        {resolvedAddress && (
-          <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center px-4">
-            <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
-            <span className="font-normal">{resolvedAddress}</span>
-          </div>
-        )}
+          {resolvedAddress && (
+            <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
+              <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
+              <span className="font-normal">{resolvedAddress}</span>
+            </div>
+          )}
 
-        <BakerForm
-          baker={baker}
-          submitError={submitError}
-          estimationError={estimationError}
-          estimating={estimating}
-          baseFee={baseFee}
-          toFilled={toFilled}
-          bakerValidating={bakerValidating}
-          control={control}
-          errors={errors}
-          handleFeeFieldChange={handleFeeFieldChange}
-          setValue={setValue}
-          triggerValidation={triggerValidation}
-          formState={formState}
-          restFormDisplayed={restFormDisplayed}
-          toValue={toValue}
-        />
-      </form>
+          <BakerForm
+            baker={baker}
+            submitError={submitError}
+            estimationError={estimationError}
+            estimating={estimating}
+            baseFee={baseFee}
+            toFilled={toFilled}
+            bakerValidating={bakerValidating}
+            control={control}
+            errors={errors}
+            handleFeeFieldChange={handleFeeFieldChange}
+            setValue={setValue}
+            triggerValidation={triggerValidation}
+            formState={formState}
+            restFormDisplayed={restFormDisplayed}
+            toValue={toValue}
+          />
+        </form>
+      )}
     </div>
   );
 };
@@ -412,6 +457,7 @@ export enum SortOptions {
   UP_TIME = 'upTime'
 }
 
+const assetSymbol = 'ṁ';
 const BakerForm: React.FC<BakerFormProps> = ({
   baker,
   submitError,
@@ -431,8 +477,8 @@ const BakerForm: React.FC<BakerFormProps> = ({
 }) => {
   const { popup } = useAppEnv();
   const testGroupName = useUserTestingGroupNameSelector();
-  const assetSymbol = 'ṁ';
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
+  const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
@@ -457,7 +503,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col mt-2">
-      <BakerBannerComponent baker={baker} tzError={tzError} />
+      <BakerBannerComponent baker={baker} tzError={tzError} style={memoizedBakerStyles} />
       <div className={classNames('px-3 py-2 bg-primary-card rounded-lg mb-6', popup && 'mx-4')}>
         <HashChip hash={toValue} type="link" small trim={false} />
       </div>
@@ -490,7 +536,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
             message: bakerTestMessage
           }}
         >
-          {t('stake')}
+          {t('delegate')}
         </FormSubmitButton>
       </div>
     </div>
@@ -499,12 +545,14 @@ const BakerForm: React.FC<BakerFormProps> = ({
   );
 };
 
+// BANNERS --------------------------------
 interface BakerBannerComponentProps {
   baker: Baker | null | undefined;
   tzError: any;
+  style?: React.CSSProperties;
 }
 
-export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker }) => {
+export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker, style }) => {
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
@@ -512,21 +560,14 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
   const { symbol } = useGasToken();
-  // const { fullPage } = useAppEnv();
-
-  // (
-  //   <div className={classNames(fullPage ? 'py-4' : 'p-4')}>
-  //     <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
-  //   </div>
-  // )
 
   return baker ? (
     <>
       <div className="flex flex-col items-center">
-        <BakerBanner bakerPkh={baker.address} style={{ width: undefined }} />
+        <BakerBanner bakerPkh={baker.address} style={{ width: undefined, ...style }} />
       </div>
 
-      {!tzError && baker.minDelegation > balanceNum && (
+      {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
         <Alert
           type="warning"
           title={t('minDelegationAmountTitle')}
@@ -535,7 +576,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
               id="minDelegationAmountDescription"
               substitutions={[
                 <span className="font-normal" key="minDelegationsAmount">
-                  <Money>{baker.minDelegation}</Money> <span style={{ fontSize: '0.75em' }}>{symbol}</span>
+                  <Money>{baker.minDelegation ?? 0}</Money> <span style={{ fontSize: '0.75em' }}>{symbol}</span>
                 </span>
               ]}
             />
@@ -547,8 +588,97 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   ) : null;
 };
 
-const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> = ({ setValue, triggerValidation }) => {
+export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
+  const [opened, setOpened] = useState(false);
+  const { popup } = useAppEnv();
+
+  const close = useCallback(() => {
+    setOpened(false);
+  }, []);
+
+  const open = useCallback(() => {
+    setOpened(true);
+  }, []);
+
+  const handleReDelegateNavigation = useCallback(() => {
+    avtivateReDelegation();
+    close();
+  }, [avtivateReDelegation, close]);
+
+  const handleCoStakeNavigation = useCallback(() => {
+    // navigate('/co-stake');
+    close();
+  }, [close]);
+
+  return (
+    <div className="grid gap-3 grid-cols-2">
+      <ButtonRounded size="xs" fill={false} onClick={open}>
+        <T id="reDelegate" />
+      </ButtonRounded>
+      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} invisibleLabel={<T id="comingSoon" />} disabled>
+        <T id="coStake" />
+      </ButtonRounded>
+
+      <PopupModalWithTitle
+        isOpen={opened}
+        contentPosition={popup ? 'bottom' : 'center'}
+        onRequestClose={close}
+        title={<T id="reDelegateToNewValidator" />}
+        portalClassName="re-delegate-popup"
+      >
+        <div className={classNames(popup ? 'px-4' : 'px-6')}>
+          <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
+            <T id="reDelegateToNewValidatorDescr" />
+          </div>
+          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
+            <ButtonRounded size="big" fill={false} onClick={close}>
+              <T id="cancel" />
+            </ButtonRounded>
+            <ButtonRounded size="big" fill onClick={handleReDelegateNavigation}>
+              <T id="reDelegate" />
+            </ButtonRounded>
+          </div>
+        </div>
+      </PopupModalWithTitle>
+    </div>
+  );
+};
+
+export const AdvancedBakerBannerComponent: React.FC<{
+  bakerAddress: string;
+  avtivateReDelegation: () => void;
+}> = ({ bakerAddress, avtivateReDelegation }) => {
+  const { data: baker } = useKnownBaker(bakerAddress || null, false);
+
+  return baker ? (
+    <div>
+      <p className="text-white text-base">My Validator</p>
+      <div className="flex items-center py-4">
+        <BakerBanner bakerPkh={baker.address} style={{ padding: 0 }} />
+        <Anchor href={`${process.env.NODES_URL}/validator/${baker.address}`}>
+          <ExternalLinkIcon className="w-6 h-6 text-white fill-current" />
+        </Anchor>
+      </div>
+      <DelegateActionsComponent avtivateReDelegation={avtivateReDelegation} />
+      <Divider className="my-6" color="bg-divider" ignoreParent />
+    </div>
+  ) : null;
+};
+
+// LIST --------------------------------
+type KnownDelegatorsListProps = {
+  setValue: any;
+  triggerValidation: (payload?: string | string[] | undefined, shouldRender?: boolean | undefined) => Promise<boolean>;
+};
+
+const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, triggerValidation }) => {
   const knownBakers = useKnownBakers();
+  const acc = useAccount();
+
+  const accountPkh = acc.publicKeyHash;
+
+  const { data: myBakerPkh = '' } = useDelegate(accountPkh);
+
   const testGroupName = useUserTestingGroupNameSelector();
   const { popup } = useAppEnv();
 
@@ -586,13 +716,13 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
     const toSort = Array.from(knownBakers);
     switch (sortOption) {
       case SortOptions.AVAILABLE_SPACE:
-        return toSort.sort((a, b) => b.freeSpace - a.freeSpace);
+        return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
 
       case SortOptions.FEE:
-        return toSort.sort((a, b) => a.fee - b.fee);
+        return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
 
       case SortOptions.UP_TIME:
-        return toSort.sort((a, b) => b.estimatedRoi - a.estimatedRoi);
+        return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
 
       default:
         return toSort;
@@ -606,13 +736,16 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
   const sortedKnownBakers = [
     ...sponsoredBakers,
     ...baseSortedKnownBakers.filter(
-      baker => baker.address !== RECOMMENDED_BAKER_ADDRESS && baker.address !== HELP_UKRAINE_BAKER_ADDRESS
+      baker =>
+        baker.address !== RECOMMENDED_BAKER_ADDRESS &&
+        baker.address !== HELP_UKRAINE_BAKER_ADDRESS &&
+        baker.address !== myBakerPkh
     )
   ];
 
   return (
     <div className="flex flex-col">
-      <h2 className=" w-full mb-4 -mt-2 leading-tight flex items-center justify-between px-4">
+      <h2 className=" w-full mb-4 -mt-2 leading-tight flex items-center justify-between">
         <span className="text-base-plus text-white">
           <T id="delegateToPromotedValidators" />
         </span>
@@ -623,11 +756,11 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         </SortPopup>
       </h2>
 
-      <div className="px-4">
+      {/* <div>
         <AlertWithAction btnLabel={t('promote')}>
           <T id="promoteYourself" />
         </AlertWithAction>
-      </div>
+      </div> */}
 
       <div className="flex flex-col overflow-hidden text-white text-sm mt-1">
         {sortedKnownBakers.map((baker, i, arr) => {
@@ -687,6 +820,7 @@ type DelegateErrorAlertProps = {
   error: Error;
 };
 
+// ALERT --------------------------------
 const DelegateErrorAlert: FC<DelegateErrorAlertProps> = ({ type, error }) => {
   const { symbol } = useGasToken();
 

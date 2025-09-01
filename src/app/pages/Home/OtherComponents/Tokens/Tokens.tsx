@@ -149,6 +149,10 @@ export const TokensTab: FC = () => {
   const handleSearchFieldFocus = useCallback(() => void setSearchFocused(true), [setSearchFocused]);
   const handleSearchFieldBlur = useCallback(() => void setSearchFocused(false), [setSearchFocused]);
 
+  const clearInput = useCallback(() => {
+    setSearchValue('');
+  }, []);
+
   useEffect(() => {
     if (!activeAssetSlug) return;
 
@@ -187,7 +191,7 @@ export const TokensTab: FC = () => {
                   containerClassName="mr-2"
                   testID={AssetsSelectors.searchAssetsInputTokens}
                 />
-                <SearchExplorerCloseBtn />
+                <SearchExplorerCloseBtn onClick={clearInput} />
               </div>
             </SearchExplorerOpened>
             <SearchExplorerClosed>

@@ -34,6 +34,9 @@ const APP_POPUP_LIMIT = 604;
 const APP_POPUP_WIDTH_LIMIT = 400;
 const APP_POPUP_VALUE_WITH_TOPBAR = 576;
 
+const DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES = 30000;
+const DEFAULT_STORAGE_WHEN_NO_ESTIMATES = 500;
+
 const ConfirmPage: FC = () => {
   const { ready } = useTempleClient();
 
@@ -170,13 +173,14 @@ const ConfirmDAppForm: FC = () => {
     return 0;
   }, [payload]);
 
-  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useSafeState(
+  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useState(
     (payload.type === 'confirm_operations' &&
       payload.opParams.reduce((sum, op) => sum + (op.fee ? +op.fee : 0), 0) + revealFee) ||
-      0
+      DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES
   );
-  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useSafeState(
-    (payload.type === 'confirm_operations' && payload.opParams[0].storageLimit) || 0
+
+  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useState(
+    (payload.type === 'confirm_operations' && payload.opParams[0].storageLimit) || DEFAULT_STORAGE_WHEN_NO_ESTIMATES
   );
 
   const confirm = useCallback(
@@ -286,24 +290,24 @@ const ConfirmDAppForm: FC = () => {
     }
   }, [payload.type, payload.origin, error]);
 
-  const modifiedStorageLimitDisplayed = useMemo(
-    () => payload.type === 'confirm_operations' && payload.opParams.length < 2,
-    [payload]
-  );
+  // const modifiedStorageLimitDisplayed = useMemo(
+  //   () => payload.type === 'confirm_operations' && payload.opParams.length < 2,
+  //   [payload]
+  // );
 
   const modifyFeeAndLimit = useMemo<ModifyFeeAndLimit>(
     () => ({
       totalFee: modifiedTotalFeeValue,
-      onTotalFeeChange: v => setModifiedTotalFeeValue(v),
-      storageLimit: modifiedStorageLimitDisplayed ? modifiedStorageLimitValue : null,
-      onStorageLimitChange: v => setModifiedStorageLimitValue(v)
+      onTotalFeeChange: setModifiedTotalFeeValue,
+      storageLimit: modifiedStorageLimitValue,
+      onStorageLimitChange: setModifiedStorageLimitValue
     }),
     [
       modifiedTotalFeeValue,
       setModifiedTotalFeeValue,
       modifiedStorageLimitValue,
-      setModifiedStorageLimitValue,
-      modifiedStorageLimitDisplayed
+      setModifiedStorageLimitValue
+      // modifiedStorageLimitDisplayed
     ]
   );
 

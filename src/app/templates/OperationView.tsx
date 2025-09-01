@@ -156,15 +156,18 @@ const OperationView: FC<OperationViewProps> = ({
         />
       )}
 
-      <ModifyFeeAndLimitComponent
-        expenses={expensesData}
-        estimates={estimates}
-        modifyFeeAndLimit={modifyFeeAndLimit}
-        mainnet={mainnet}
-        gasFeeError={gasFeeError}
-        includeBurnedFee={true}
-        hasStableGasFee={true}
-      />
+      <div style={{ marginBottom: 40 }}>
+        <ModifyFeeAndLimitComponent
+          id="external-modified-fees-id"
+          name="external-modified-fees"
+          expenses={expensesData}
+          estimates={estimates}
+          modifyFeeAndLimit={modifyFeeAndLimit}
+          mainnet={mainnet}
+          gasFeeError={gasFeeError}
+          includeBurnedFee
+        />
+      </div>
     </div>
   );
 };

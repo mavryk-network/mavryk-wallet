@@ -106,7 +106,7 @@ export const useBakingHistory = () => {
     [bakingHistory]
   );
 
-  const unfamiliarWithDelegation = bakingHistory ? bakingHistory.length === 0 : false;
+  const unfamiliarWithDelegation = myBakerPkh === null;
 
   return {
     canDelegate,

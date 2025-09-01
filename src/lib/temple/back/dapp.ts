@@ -12,7 +12,7 @@ import {
   MavrykWalletDAppBroadcastResponse,
   MavrykWalletDAppNetwork
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import { TezosOperationError } from '@mavrykdynamics/taquito';
+import { MavrykOperationError } from '@mavrykdynamics/taquito';
 import { localForger } from '@mavrykdynamics/taquito-local-forging';
 import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
 import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
@@ -205,7 +205,7 @@ const handleIntercomRequest = async (
           opHash: op.hash
         });
       } catch (err: any) {
-        if (err instanceof TezosOperationError) {
+        if (err instanceof MavrykOperationError) {
           err.message = MavrykWalletDAppErrorType.TezosOperation;
           reject(err);
         } else {
@@ -345,7 +345,7 @@ export async function requestBroadcast(
       opHash
     };
   } catch (err: any) {
-    throw err instanceof TezosOperationError
+    throw err instanceof MavrykOperationError
       ? (() => {
           err.message = MavrykWalletDAppErrorType.TezosOperation;
           return err;

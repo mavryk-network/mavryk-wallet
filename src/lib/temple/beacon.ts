@@ -229,7 +229,7 @@ export function formatOpParams(op: any) {
 export const PAIRING_RESPONSE_BASE: Partial<PostMessagePairingResponse> = {
   type: MessageType.HandshakeResponse,
   name: 'Mavryk Wallet',
-  icon: 'https://stage.mavryk-network.pages.dev/logo.png',
+  icon: 'https://mavryk.org/logo.png',
   appUrl: browser.runtime.getURL('fullpage.html')
 };
 

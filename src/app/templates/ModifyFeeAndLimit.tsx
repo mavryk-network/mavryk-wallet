@@ -1,17 +1,25 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { Estimate } from '@mavrykdynamics/taquito';
+import { Modifier } from '@popperjs/core';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
+import { useForm } from 'react-hook-form';
 
-import { Money } from 'app/atoms';
-import PlainAssetInput from 'app/atoms/PlainAssetInput';
+import { Alert, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import InFiat from 'app/templates/InFiat';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
+import { MAVEN_METADATA } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses } from 'lib/temple/front';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
+
+import { AdditionalGasInput, gasOptions } from './AdditionalFeeInput';
+
+interface FormData {
+  fee: number;
+}
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
@@ -30,6 +38,9 @@ type ModifyFeeAndLimitProps = {
   includeBurnedFee?: boolean;
   hasStableGasFee?: boolean;
   includeStorageData?: boolean;
+  name: string;
+  id: string;
+  poperModifiers?: Partial<Modifier<any, any>>[] | undefined;
 };
 
 export interface ModifyFeeAndLimit {
@@ -39,7 +50,7 @@ export interface ModifyFeeAndLimit {
   onStorageLimitChange: (storageLimit: number) => void;
 }
 
-const MAX_GAS_FEE = 1000;
+const DEFAULT_MINIMAL_FEE_PER_STORAGE_MUMAV = 250;
 
 export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   expenses,
@@ -47,12 +58,47 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
   mainnet,
   modifyFeeAndLimit,
   gasFeeError,
+  id,
+  name,
+  poperModifiers,
   includeBurnedFee = true,
   hasStableGasFee = false,
   includeStorageData = true
 }) => {
   const { symbol } = useGasToken();
   const { popup } = useAppEnv();
+
+  const initialFeeValues = useMemo(
+    () => ({
+      gas: modifyFeeAndLimit?.totalFee ?? 0,
+      storage: modifyFeeAndLimit?.storageLimit ?? null
+    }),
+    []
+  );
+
+  const { control } = useForm<FormData>({
+    mode: 'onChange',
+    defaultValues: {
+      fee: gasOptions[1].amount
+    }
+  });
+
+  // muptiple storage and gas fees by selected option [1, 1.5, 2]
+  const handleGasFeeChange = useCallback(
+    (val: [string]) => {
+      if (modifyFeeAndLimit) {
+        const { onStorageLimitChange, onTotalFeeChange } = modifyFeeAndLimit;
+        const { gas, storage } = initialFeeValues;
+        const [stringMultiplier] = val;
+        const multiplier = Number(stringMultiplier);
+
+        onTotalFeeChange(gas * multiplier);
+
+        storage && onStorageLimitChange?.(storage * multiplier);
+      }
+    },
+    [modifyFeeAndLimit, initialFeeValues]
+  );
 
   const modifyFeeAndLimitSection = useMemo(() => {
     if (!modifyFeeAndLimit) return null;
@@ -66,6 +112,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         let i = 0;
         for (const e of estimates) {
           defaultGasFeeMumav = defaultGasFeeMumav.plus(e.suggestedFeeMumav);
+
           storageFeeMumav = storageFeeMumav.plus(
             Math.ceil(
               (i === 0 ? modifyFeeAndLimit.storageLimit ?? e.storageLimit : e.storageLimit) *
@@ -79,11 +126,20 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
       } catch {
         return null;
       }
+    } else {
+      // calculate burned with default state values in case estimation got 404 error response
+      const { totalFee, storageLimit } = modifyFeeAndLimit;
+      burnedFee = new BigNumber(totalFee ?? 0).plus(storageLimit ?? 0).multipliedBy(0.5);
+
+      storageFeeMumav = storageFeeMumav.plus(
+        Math.ceil((modifyFeeAndLimit.storageLimit ?? 0) * DEFAULT_MINIMAL_FEE_PER_STORAGE_MUMAV)
+      );
     }
 
     const gasFee = mumavToTz(modifyFeeAndLimit.totalFee);
-    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
+
     const storageFee = mumavToTz(storageFeeMumav);
+    const defaultGasFee = mumavToTz(defaultGasFeeMumav);
 
     return (
       <div className="w-full flex flex-col gap-3">
@@ -135,32 +191,23 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
               <>
                 <div className="mr-1">
                   {onChange ? (
-                    <>
-                      <PlainAssetInput
-                        value={value.toFixed()}
-                        onChange={val => {
+                    <div style={{ width: 218 }}>
+                      <AdditionalGasInput
+                        poperModifiers={poperModifiers}
+                        name={name}
+                        id={id}
+                        defaultOption={gasOptions[1].amount}
+                        valueToShow={value.toFixed()}
+                        onChangeValueToShow={val => {
                           onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());
                         }}
-                        max={MAX_GAS_FEE}
-                        placeholder={defaultGasFee.toFixed()}
-                        className={classNames(
-                          'mr-1',
-                          'appearance-none',
-                          'w-24',
-                          'px-2 py-1',
-                          'border',
-                          gasFeeError ? 'border-primary-error' : 'border-gray-50',
-                          'focus:border-accent-blue',
-                          'bg-primary-bg',
-                          'transition ease-in-out duration-200',
-                          'rounded',
-                          'text-right',
-                          'text-white text-base-plus',
-                          'placeholder-text-secondary-white'
-                        )}
+                        feeAmount={initialFeeValues.gas}
+                        control={control}
+                        onChange={handleGasFeeChange}
+                        gasFeeError={gasFeeError}
+                        assetSymbol={MAVEN_METADATA.symbol}
                       />
-                      <span style={{ maxHeight: 19 }}>{symbol}</span>
-                    </>
+                    </div>
                   ) : (
                     <span className="flex items-baseline" style={{ maxHeight: 19 }}>
                       {key === 'feesBurned' && '~'}
@@ -170,16 +217,18 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                   )}
                 </div>
 
-                <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet} smallFractionFont={false}>
-                  {({ balance, symbol }) => (
-                    <div className="flex">
-                      <span className="opacity-75">(</span>
-                      <span style={{ maxHeight: 19 }}>{symbol}</span>
-                      {balance}
-                      <span className="opacity-75">)</span>
-                    </div>
-                  )}
-                </InFiat>
+                {!onChange && (
+                  <InFiat volume={value} roundingMode={BigNumber.ROUND_UP} mainnet={mainnet} smallFractionFont={false}>
+                    {({ balance, symbol }) => (
+                      <div className="flex">
+                        <span className="opacity-75">(</span>
+                        <span style={{ maxHeight: 19 }}>{symbol}</span>
+                        {balance}
+                        <span className="opacity-75">)</span>
+                      </div>
+                    )}
+                  </InFiat>
+                )}
               </>
             ) : (
               <div className="flex items-center mr-1">
@@ -214,7 +263,22 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
         ))}
       </div>
     );
-  }, [modifyFeeAndLimit, estimates, hasStableGasFee, includeBurnedFee, gasFeeError, symbol, mainnet]);
+  }, [
+    modifyFeeAndLimit,
+    estimates,
+    hasStableGasFee,
+    includeStorageData,
+    includeBurnedFee,
+    poperModifiers,
+    name,
+    id,
+    initialFeeValues.gas,
+    control,
+    handleGasFeeChange,
+    gasFeeError,
+    symbol,
+    mainnet
+  ]);
 
   if (!expenses) {
     return null;
@@ -222,6 +286,10 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
   return modifyFeeAndLimit ? (
     <>
+      <div className="mt-4">
+        <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
+      </div>
+
       <div className="text-white text-base-plus mt-4 pb-3">
         <T id="networkFees" />
       </div>

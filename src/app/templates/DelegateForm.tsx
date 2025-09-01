@@ -12,7 +12,7 @@ import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
-import AdditionalFeeInput from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
+import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import InFiat from 'app/templates/InFiat';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -560,7 +560,7 @@ const KnownDelegatorsList: React.FC<{ setValue: any; triggerValidation: any }> =
         return toSort.sort((a, b) => b.freeSpace - a.freeSpace);
 
       case 'staking':
-        return toSort.sort((a, b) => b.stakingBalance - a.stakingBalance);
+        return toSort.sort((a, b) => b.stakedBalance - a.stakedBalance);
 
       case 'rank':
       default:

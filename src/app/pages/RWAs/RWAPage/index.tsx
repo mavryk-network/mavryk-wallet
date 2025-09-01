@@ -120,7 +120,10 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
                 <CardWithLabel cardContainerClassname={clsx(fullPage && 'min-h-16')} label={<T id={'rwaIssuer'} />}>
                   <div className="flex items-center gap-x-2">
                     <Identicon size={32} hash={address} className="rounded-full" />
-                    <Anchor href={`https://nexus.mavryk.org/contract/${address}`} className="flex items-center gap-x-2">
+                    <Anchor
+                      href={`https://nexus.mavryk.org/explorer/contract/${address}`}
+                      className="flex items-center gap-x-2"
+                    >
                       <span>NextGen Real Estate</span>
                       <ExternalLinkIcon className="w-4 h-4 text-white fill-current" />
                     </Anchor>

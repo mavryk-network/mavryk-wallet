@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { localForger } from '@mavrykdynamics/taquito-local-forging';
 import BigNumber from 'bignumber.js';
@@ -44,6 +44,15 @@ type InternalConfiramtionProps = {
 
 const MIN_GAS_FEE = 0;
 const bytesStyle = { height: 112, background: '#171717', border: 'none' };
+
+const feePoperModifiers = [
+  {
+    name: 'offset',
+    options: {
+      offset: [0, -50] // shift 40px UP
+    }
+  }
+];
 
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
@@ -184,13 +193,13 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     return 0;
   }, [payload]);
 
-  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useSafeState(
+  const [modifiedTotalFeeValue, setModifiedTotalFeeValue] = useState(
     (payload.type === 'operations' &&
       payload.opParams &&
       payload.opParams.reduce((sum, op) => sum + (op.fee ? +op.fee : 0), 0) + revealFee) ||
       0
   );
-  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useSafeState(
+  const [modifiedStorageLimitValue, setModifiedStorageLimitValue] = useState(
     (payload.type === 'operations' && payload.opParams && payload.opParams[0].storageLimit) || 0
   );
 
@@ -378,15 +387,20 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   )}
 
-                  <ModifyFeeAndLimitComponent
-                    expenses={expensesData}
-                    estimates={estimates}
-                    modifyFeeAndLimit={modifyFeeAndLimit}
-                    mainnet={mainnet}
-                    gasFeeError={gasFeeError}
-                    includeStorageData={!isStorageDataHidden}
-                    includeBurnedFee
-                  />
+                  <div style={{ marginBottom: 40 }}>
+                    <ModifyFeeAndLimitComponent
+                      id="internal-modified-fees-id"
+                      name="internal-modified-fees"
+                      expenses={expensesData}
+                      estimates={estimates}
+                      modifyFeeAndLimit={modifyFeeAndLimit}
+                      mainnet={mainnet}
+                      gasFeeError={gasFeeError}
+                      includeStorageData={!isStorageDataHidden}
+                      includeBurnedFee
+                      poperModifiers={popup ? feePoperModifiers : undefined}
+                    />
+                  </div>
                 </div>
               )}
             </div>

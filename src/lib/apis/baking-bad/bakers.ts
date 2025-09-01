@@ -1,64 +1,56 @@
+import BigNumber from 'bignumber.js';
+
 import { api } from './base';
 import { buildQuery } from './build-query';
 
 export const bakingBadGetBaker = buildQuery<BakingBadGetBakerParams, BakingBadGetBakerResponse>(
   api,
   'GET',
-  ({ address }) => `/bakers/${address}`,
-  ['configs', 'insurance', 'contribution', 'type']
+  ({ address }) => `/delegates/${address}`
 );
 
 const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'address'>, BakingBadGetBakerResponse[]>(
   api,
   'GET',
-  '/bakers',
-  ['configs', 'insurance', 'contribution', 'type', 'health']
+  '/delegates',
+  params => ({
+    active: true,
+    'stakedBalance.ne': 0,
+    select: 'address,balance,stakedBalance,delegatedBalance',
+    ...params
+  })
 );
 
+export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
+  return baker ? new BigNumber(baker.stakedBalance).multipliedBy(9).minus(baker.delegatedBalance) : new BigNumber(0);
+};
+
 export async function getAllBakersBakingBad() {
-  const bakers = await bakingBadGetKnownBakers({
-    configs: true,
-    insurance: true,
-    contribution: true,
-    type: 'tezos_only,multiasset,tezos_dune',
-    health: 'active'
-  });
+  const bakers = (await bakingBadGetKnownBakers({})).map(baker => ({
+    ...baker,
+    freeSpace: getBakerSpace(baker).toNumber(),
+    minDelegation: 0,
+    estimatedRoi: 0,
+    fee: 0
+  }));
+
   return bakers.filter(baker => typeof baker !== 'string') as BakingBadBaker[];
 }
 
 type BakingBadGetBakerParams = {
-  address: string;
-  configs?: boolean;
-  insurance?: boolean;
-  contribution?: boolean;
-  type?: string;
-  health?: string;
+  [x: string]: unknown;
 };
 
 export type BakingBadBaker = {
   address: string;
-  name: string;
-  logo: string | null;
   balance: number;
-  stakingBalance: number;
-  stakingCapacity: number;
-  maxStakingBalance: number;
-  freeSpace: number;
-  fee: number;
-  minDelegation: number;
-  payoutDelay: number;
-  payoutPeriod: number;
-  openForDelegation: boolean;
-  estimatedRoi: number;
-  serviceType: 'tezos_only' | 'multiasset' | 'exchange' | 'tezos_dune';
-  serviceHealth: 'active' | 'closed' | 'dead';
-  payoutTiming: 'stable' | 'unstable' | 'suspicious' | 'no_data';
-  payoutAccuracy: 'precise' | 'inaccurate' | 'suspicious' | 'no_data';
-  audit: string;
-  config?: BakingBadBakerConfig;
-  insurance?: BakingBadBakerInsurance | null;
-  insuranceCoverage?: number;
-  contribution?: BakingBadBakerContribution | null;
+  stakedBalance: number;
+  delegatedBalance: number;
+  estimatedRoi?: number;
+  minDelegation?: number;
+  freeSpace?: number;
+  fee?: number;
+  name?: string;
 };
 
 type BakingBadGetBakerResponse = BakingBadBaker | '';
@@ -66,35 +58,4 @@ type BakingBadGetBakerResponse = BakingBadBaker | '';
 export type BakingBadBakerValueHistoryItem<T> = {
   cycle: number;
   value: T;
-};
-
-type BakingBadBakerConfig = {
-  address: string;
-  fee: BakingBadBakerValueHistoryItem<number>[];
-  minDelegation: BakingBadBakerValueHistoryItem<number>[];
-  allocationFee: BakingBadBakerValueHistoryItem<boolean>[];
-  payoutFee: BakingBadBakerValueHistoryItem<boolean>[];
-  payoutDelay: BakingBadBakerValueHistoryItem<number>[];
-  payoutPeriod: BakingBadBakerValueHistoryItem<number>[];
-  minPayout: BakingBadBakerValueHistoryItem<number>[];
-  rewardStruct: BakingBadBakerValueHistoryItem<number>[];
-  payoutRatio: BakingBadBakerValueHistoryItem<number>[];
-  maxStakingThreshold: BakingBadBakerValueHistoryItem<number>[];
-  openForDelegation: BakingBadBakerValueHistoryItem<boolean>[];
-  ignored: string[];
-  sources: string[];
-};
-
-type BakingBadBakerInsurance = {
-  address: string;
-  insuranceAddress: string;
-  insuranceAmount: number;
-  coverage: number;
-};
-
-type BakingBadBakerContribution = {
-  address: string;
-  title: string;
-  link: string;
-  icon: string;
 };

@@ -31,6 +31,7 @@ import { useFormAnalytics } from 'lib/analytics';
 import { isMavSlug, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { useBalance } from 'lib/balances';
+import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
@@ -54,6 +55,7 @@ import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/
 import { useSafeState } from 'lib/ui/hooks';
 import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
 import { delay } from 'lib/utils';
+import { getMaxAmountFiat, getMaxAmountToken } from 'lib/utils/amounts';
 
 import ContactsDropdown, { ContactsDropdownProps } from './ContactsDropdown';
 import { ContactsDropdownItemSecondary } from './ContactsDropdownItem';
@@ -68,8 +70,6 @@ interface FormData {
   fee: number;
 }
 
-const PENNY = 0.000001;
-const RECOMMENDED_ADD_FEE = 0.0001;
 const amountStyle = {
   resize: 'none',
   height: 66,
@@ -667,20 +667,6 @@ interface FeeComponentProps {
   isSubmitting: boolean;
 }
 
-const getMaxAmountFiat = (assetPrice: number | null, maxAmountAsset: BigNumber) =>
-  assetPrice ? maxAmountAsset.times(assetPrice).decimalPlaces(2, BigNumber.ROUND_FLOOR) : new BigNumber(0);
-
-const getMaxAmountToken = (acc: TempleAccount, balance: BigNumber, baseFee: BigNumber, safeFeeValue: number) =>
-  BigNumber.max(
-    acc.type === TempleAccountType.ManagedKT
-      ? balance
-      : balance
-          .minus(baseFee)
-          .minus(safeFeeValue ?? 0)
-          .minus(PENNY),
-    0
-  );
-
 type TransferParamsInvariant =
   | TransferParams
   | {
@@ -740,9 +726,3 @@ const InnerDropDownComponentGuard: React.FC<ContactsDropdownProps> = ({ contacts
 };
 
 const getFilled = (toFilled: boolean | '', toFieldFocused: boolean) => (!toFilled ? toFieldFocused : false);
-
-// const getDomainTextError = (canUseDomainNames: boolean) =>
-//   canUseDomainNames ? 'recipientInputPlaceholderWithDomain' : 'recipientInputPlaceholder';
-
-// const getAssetDomainName = (canUseDomainNames: boolean) =>
-//   canUseDomainNames ? 'tokensRecepientInputDescriptionWithDomain' : 'tokensRecepientInputDescription';

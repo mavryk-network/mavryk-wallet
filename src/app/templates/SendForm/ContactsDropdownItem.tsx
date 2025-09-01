@@ -71,10 +71,10 @@ const ContactsDropdownItem: FC<ContactsDropdownItemProps> = ({ contact, active, 
 
 // for send form dropdown picked account
 export const ContactsDropdownItemSecondary: FC<ContactsDropdownItemProps> = ({ contact, active, onClick, ...rest }) => {
-  const ref = useScrollIntoView<HTMLButtonElement>(active, { behavior: 'smooth', block: 'start' });
+  const ref = useScrollIntoView<HTMLDivElement>(active, { behavior: 'smooth', block: 'start' });
 
   return (
-    <Button
+    <section
       ref={ref}
       type="button"
       testID={SendFormSelectors.contactItemButton}
@@ -127,7 +127,7 @@ export const ContactsDropdownItemSecondary: FC<ContactsDropdownItemProps> = ({ c
           </span>
         </div>
       </div>
-    </Button>
+    </section>
   );
 };
 

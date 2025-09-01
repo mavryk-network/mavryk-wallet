@@ -9,7 +9,8 @@ import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
   bakingBadGetBaker,
-  getAllBakersBakingBad
+  getAllBakersBakingBad,
+  getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
 import { useRetryableSWR } from 'lib/swr';
@@ -96,13 +97,10 @@ type RewardConfig = Record<
   | 'lowPriorityEndorses',
   boolean
 >;
-export type Baker = Pick<
-  BakingBadBaker,
-  'address' | 'name' | 'fee' | 'freeSpace' | 'minDelegation' | 'stakingBalance' | 'estimatedRoi'
-> & {
+export type Baker = BakingBadBaker & {
   logo?: string;
   feeHistory?: BakingBadBakerValueHistoryItem<number>[];
-  rewardConfigHistory: BakingBadBakerValueHistoryItem<RewardConfig>[];
+  rewardConfigHistory?: BakingBadBakerValueHistoryItem<RewardConfig>[];
 };
 
 const defaultRewardConfigHistory = [
@@ -134,37 +132,41 @@ export function useKnownBaker(address: string | null, suspense = true) {
     try {
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true });
 
+      // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
         return {
           address: bakingBadBaker.address,
-          name: bakingBadBaker.name,
-          logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
-          fee: bakingBadBaker.fee,
-          freeSpace: bakingBadBaker.freeSpace,
-          stakingBalance: bakingBadBaker.stakingBalance,
-          feeHistory: bakingBadBaker.config?.fee,
-          minDelegation: bakingBadBaker.minDelegation,
-          estimatedRoi: bakingBadBaker.estimatedRoi,
-          rewardConfigHistory:
-            bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
-              cycle,
-              value: {
-                blocks: (rewardStruct & 1) > 0,
-                endorses: (rewardStruct & 2) > 0,
-                fees: (rewardStruct & 4) > 0,
-                accusationRewards: (rewardStruct & 8) > 0,
-                accusationLostDeposits: (rewardStruct & 16) > 0,
-                accusationLostRewards: (rewardStruct & 32) > 0,
-                accusationLostFees: (rewardStruct & 64) > 0,
-                revelationRewards: (rewardStruct & 128) > 0,
-                revelationLostRewards: (rewardStruct & 256) > 0,
-                revelationLostFees: (rewardStruct & 512) > 0,
-                missedBlocks: (rewardStruct & 1024) > 0,
-                stolenBlocks: (rewardStruct & 2048) > 0,
-                missedEndorses: (rewardStruct & 4096) > 0,
-                lowPriorityEndorses: (rewardStruct & 8192) > 0
-              }
-            })) ?? defaultRewardConfigHistory
+          stakedBalance: bakingBadBaker.stakedBalance,
+          delegatedBalance: bakingBadBaker.delegatedBalance,
+          balance: bakingBadBaker.balance,
+          // name: bakingBadBaker.name,
+          // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
+          fee: 0,
+          freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
+          // stakingBalance: bakingBadBaker.stakingBalance,
+          // feeHistory: bakingBadBaker.config?.fee,
+          // minDelegation: bakingBadBaker.minDelegation,
+          estimatedRoi: 0
+          // rewardConfigHistory:
+          //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
+          //     cycle,
+          //     value: {
+          //       blocks: (rewardStruct & 1) > 0,
+          //       endorses: (rewardStruct & 2) > 0,
+          //       fees: (rewardStruct & 4) > 0,
+          //       accusationRewards: (rewardStruct & 8) > 0,
+          //       accusationLostDeposits: (rewardStruct & 16) > 0,
+          //       accusationLostRewards: (rewardStruct & 32) > 0,
+          //       accusationLostFees: (rewardStruct & 64) > 0,
+          //       revelationRewards: (rewardStruct & 128) > 0,
+          //       revelationLostRewards: (rewardStruct & 256) > 0,
+          //       revelationLostFees: (rewardStruct & 512) > 0,
+          //       missedBlocks: (rewardStruct & 1024) > 0,
+          //       stolenBlocks: (rewardStruct & 2048) > 0,
+          //       missedEndorses: (rewardStruct & 4096) > 0,
+          //       lowPriorityEndorses: (rewardStruct & 8192) > 0
+          //     }
+          //   })) ?? defaultRewardConfigHistory
         };
       }
 
@@ -180,17 +182,39 @@ export function useKnownBaker(address: string | null, suspense = true) {
   });
 }
 
+// TODO uncomment the upper section  when new API is available
+// export const useKnownBaker = (address: string | null, suspense = true) => {
+//   const net = useNetwork();
+//   const bakers = useKnownBakers(suspense);
+
+//   const fetchBaker = useCallback(async () => {
+//     if (!address) return null;
+//     try {
+//       return bakers?.find(b => b.address === address);
+//     } catch (_err) {
+//       return null;
+//     }
+//   }, [address]);
+
+//   return useRetryableSWR(net.type === 'main' && address ? ['baker', address] : null, fetchBaker, {
+//     refreshInterval: 120_000,
+//     dedupingInterval: 60_000,
+//     suspense
+//   });
+// };
+
 export function useKnownBakers(suspense = true) {
-  // const net = useNetwork();
-  // TODO add our baler list
-  // const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
-  const { data: bakers } = useRetryableSWR(null, getAllBakersBakingBad, {
+  const net = useNetwork();
+  const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense
   });
 
-  return useMemo(() => (bakers && bakers.length > 1 ? bakers : null), [bakers]);
+  return useMemo(
+    () => (bakers && bakers.length > 1 ? bakers.filter(baker => !new BigNumber(baker.stakedBalance).isZero()) : null),
+    [bakers]
+  );
 }
 
 type RewardsStatsCalculationParams = {

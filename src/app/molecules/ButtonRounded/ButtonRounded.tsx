@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { useMemo } from 'react';
 
 import classNames from 'clsx';
 
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import { AnalyticsEventCategory, setTestID, TestIDProps, useAnalytics } from 'lib/analytics';
+
+import styles from './buttonRounded.module.css';
 
 export const BTN_PRIMARY = 'primary';
 export const BTN_ERROR = 'error';
@@ -19,11 +22,12 @@ export type ButtonRoundedProps = React.PropsWithRef<
   btnType?: ButtonRoundedType;
   isLoading?: boolean;
   fill?: boolean;
+  invisibleLabel?: React.ReactNode;
 } & TestIDProps;
 
 const btnXs = 'px-4 py-1 text-base-plus text-white rounded-2xl-plus';
-const btnSmall = 'px-4 py-2 text-base-plus text-white rounded-2xl-plus';
-const btnBig = 'px-11 py-3.5 text-base-plus text-white rounded-full';
+const btnSmall = 'px-4 py-2 text-base-plus text-white';
+const btnBig = 'px-4 py-3.5 text-base-plus text-white';
 
 export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedProps>(
   (
@@ -33,6 +37,7 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
       isLoading = false,
       fill = true,
       onClick,
+      invisibleLabel = null,
       className,
       disabled,
       testID,
@@ -59,22 +64,33 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
       }
     })();
 
+    const sizeClass = useMemo(
+      () => classNames(size === 'small' && btnSmall, size === 'big' && btnBig, size === 'xs' && btnXs),
+      [size]
+    );
     return (
       <button
         ref={ref}
         onClick={handleClick}
         disabled={disabled}
         className={classNames(
+          styles.btn,
+          size === 'small' && 'rounded-2xl-plus',
+          size === 'big' && 'rounded-full',
+          size === 'xs' && 'rounded-2xl-plus',
           'transition ease-in-out duration-200',
-          size === 'small' && btnSmall,
-          size === 'big' && btnBig,
-          size === 'xs' && btnXs,
-          fill
-            ? `${bgColor} hover:${bgColorHover} border`
-            : classNames('bg-transparent', size === 'xs' ? 'border' : 'border-2', `border-solid hover:${bgColorHover}`), // fill | outline styles
           disabled ? 'border-transparent' : `border-${borderColor}`, // border color
+          !disabled &&
+            (fill
+              ? `${bgColor} hover:${bgColorHover} border`
+              : classNames(
+                  'bg-transparent',
+                  size === 'xs' ? 'border' : 'border-2',
+                  `border-solid hover:${bgColorHover}`
+                )), // fill | outline styles
           isLoading && ' flex justify-center w-24 align-middle', // loading
-          disabled && 'bg-gray-40 pointer-events-none cursor-not-allowed  text-gray-15', // disabled styles
+          disabled && 'bg-gray-40 text-gray-15', // disabled styles
+          !invisibleLabel && disabled && 'pointer-events-none cursor-not-allowed',
           className
         )}
         {...props}
@@ -85,7 +101,10 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
             <LoadingSvg style={{ width: 16, height: 16 }} />
           </div>
         ) : (
-          children
+          <>
+            <span className={classNames(invisibleLabel && styles.btn__visible, sizeClass)}>{children}</span>
+            {invisibleLabel && <span className={classNames(styles.btn__invisible, sizeClass)}>{invisibleLabel}</span>}
+          </>
         )}
       </button>
     );

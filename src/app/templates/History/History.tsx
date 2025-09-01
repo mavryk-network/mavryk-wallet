@@ -279,7 +279,7 @@ export const HistoryComponent: React.FC<Props> = memo(
                     cleanButtonStyle={searchbtnStyles}
                     placeholder={t('searchTransactions')}
                   />
-                  <SearchExplorerCloseBtn />
+                  <SearchExplorerCloseBtn onClick={clearInput} />
                 </div>
               </SearchExplorerOpened>
               <SearchExplorerClosed>

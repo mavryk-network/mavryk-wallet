@@ -32,6 +32,7 @@ import * as Woozie from 'lib/woozie';
 
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
+import { CoStake } from './pages/CoStake/CoStake';
 import { EditAccount } from './pages/EditAccount';
 import Onboarding from './pages/Onboarding/Onboarding';
 import { ProVersion } from './pages/ProVersion/ProVersion';
@@ -95,6 +96,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/delegate', onlyReady(() => <Delegate />)],
   ['/pro-version', onlyReady(() => <ProVersion />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
+  ['/co-stake/:assetType?', onlyReady(() => <CoStake />)],
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],
   ['/nft/:assetSlug?', onlyReady(({ assetSlug }) => <NFTsPage assetSlug={assetSlug!} />)],

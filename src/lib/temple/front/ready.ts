@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
 import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
 import constate from 'constate';
@@ -116,7 +116,7 @@ function useReadyTemple() {
   }, [networkId, accountPkh]);
 
   /**
-   * tezos = TezosToolkit instance
+   * tezos = MavrykToolkit instance
    */
 
   const tezos = useMemo(() => {
@@ -207,7 +207,7 @@ export function useRelevantAccounts(withExtraTypes = true) {
   return useMemo(() => relevantAccounts, [relevantAccounts]);
 }
 
-export class ReactiveTezosToolkit extends TezosToolkit {
+export class ReactiveTezosToolkit extends MavrykToolkit {
   constructor(rpc: string | RpcClientInterface, public checksum: string) {
     super(rpc);
     this.addExtension(new Tzip16Module());

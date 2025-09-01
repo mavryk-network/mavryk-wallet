@@ -36,7 +36,13 @@ import { HistoryTime } from './HistoryTime';
 import { AssetIconPlaceholder, HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OpertionStackItem } from './OperStackItem';
-import { alterIpfsUrl, getAssetsFromOperations, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
+import {
+  alterIpfsUrl,
+  deriveStatusColorClassName,
+  getAssetsFromOperations,
+  getMoneyDiffForMultiple,
+  getMoneyDiffsForSwap
+} from './utils';
 
 // import { toHistoryTokenSlug } from './utils';
 
@@ -139,6 +145,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [isMultipleOperation, tokensMetadata]
   );
 
+  const [, statusTextColor] = useMemo(() => deriveStatusColorClassName(status), [status]);
   if (!historyItem) return null;
 
   return (
@@ -224,11 +231,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         <CardContainer className="text-base-plus mb-6 text-white">
           <div className="flex items-center justify-between">
             <T id="status" />
-            <span
-              className={clsx('mb-2 capitalize', status === 'failed' ? 'text-primary-error' : 'text-primary-success')}
-            >
-              {status}
-            </span>
+            <span className={clsx('mb-2 capitalize', statusTextColor)}>{status}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>

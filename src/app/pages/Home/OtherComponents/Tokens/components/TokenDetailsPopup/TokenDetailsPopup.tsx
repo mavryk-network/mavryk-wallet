@@ -3,7 +3,8 @@ import React, { FC, useCallback, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { Alert, Anchor, HashChip, Money } from 'app/atoms';
+import { Alert, HashChip, Money } from 'app/atoms';
+import { AddBanner } from 'app/atoms/AddBanner';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
@@ -29,7 +30,7 @@ import { AssetMetadataBase, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { ZERO } from 'lib/utils/numbers';
-import { navigate } from 'lib/woozie';
+import { HistoryAction, navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
 
@@ -217,7 +218,7 @@ type BakerBannerSectionProps = {
 
 const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   const handleButtonClick = useCallback(() => {
-    navigate('/stake');
+    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
   }, []);
 
   const NotStakedBanner = useMemo(
@@ -237,14 +238,26 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   const StakedBanner = useMemo(
     () =>
       myBakerPkh ? (
-        <BakerBanner
-          bakerPkh={myBakerPkh ?? ''}
-          displayAddress
-          displayDivider
-          alternativeTableData
-          displayBg
-          style={{ width: undefined }}
-        />
+        <div className="flex flex-col gap-3">
+          <BakerBanner
+            bakerPkh={myBakerPkh ?? ''}
+            // displayAddress
+            displayDivider
+            alternativeTableData
+            displayBg
+            style={{ width: undefined }}
+            extraComponent={
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <ButtonRounded size="xs" fill={false} onClick={handleButtonClick}>
+                  <T id="reDelegate" />
+                </ButtonRounded>
+                <ButtonRounded size="xs" disabled invisibleLabel={<T id="comingSoon" />}>
+                  <T id="coStake" />
+                </ButtonRounded>
+              </div>
+            }
+          />
+        </div>
       ) : (
         <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),
@@ -254,14 +267,10 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
   return (
     <div className="flex flex-col gap-3 mb-6">
       <div className="text-white text-base-plus flex items-center justify-between">
-        <T id="staking" />
-        {myBakerPkh && (
-          <Anchor href={process.env.NODES_URL}>
-            <ButtonRounded fill={false} size="xs">
-              <T id="validators" />
-            </ButtonRounded>
-          </Anchor>
-        )}
+        <div className="flex items-center gap-2">
+          <T id="staking" />
+          {myBakerPkh && <AddBanner text="delegated" />}
+        </div>
       </div>
       {myBakerPkh ? StakedBanner : NotStakedBanner}
     </div>

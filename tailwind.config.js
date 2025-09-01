@@ -124,6 +124,7 @@ module.exports = {
           300: '#90cdf4',
           400: '#63b3ed',
           500: '#4299e1',
+          510: '#1B96CD',
           600: '#3182ce',
           650: '#007AFF',
           700: '#2b6cb0',
@@ -175,6 +176,7 @@ module.exports = {
         'secondary-white': baseColors.gray[30],
         'accent-blue': baseColors.indigo[700],
         'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
+        'indigo-add': '#5F58FF80',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
         'primary-card-hover': baseColors.gray[890],
@@ -185,6 +187,7 @@ module.exports = {
         'primary-error': '#FF3E3E',
         'primary-warning': '#E68226',
         'primary-info': '#B9EEFE',
+        'primary-info-hover': '#B9EEFE40',
         'accent-orange': baseColors.orange[600],
 
         'list-item-selected': baseColors.gray[710],

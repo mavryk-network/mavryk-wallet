@@ -2,14 +2,14 @@ import { useCallback, useMemo } from 'react';
 
 import { DomainNameValidationResult, isMavrykDomainsSupportedNetwork } from '@mavrykdynamics/mavryk-domains-core';
 import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
-import { TezosToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/taquito';
 
 import { useTypedSWR } from 'lib/swr';
 import { NETWORK_IDS } from 'lib/temple/networks';
 
 import { useTezos, useChainId } from './ready';
 
-function getClient(networkId: 'mainnet' | 'custom', tezos: TezosToolkit) {
+function getClient(networkId: 'mainnet' | 'custom', tezos: MavrykToolkit) {
   return isMavrykDomainsSupportedNetwork(networkId)
     ? new TaquitoMavrykDomainsClient({ network: networkId, tezos })
     : TaquitoMavrykDomainsClient.Unsupported;

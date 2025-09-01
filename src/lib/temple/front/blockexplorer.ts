@@ -44,9 +44,9 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
       [
         TempleChainId.Atlas,
         {
-          account: 'https://nexus.mavryk.org/account/',
-          transaction: 'https://nexus.mavryk.org/operation/',
-          contract: 'https://nexus.mavryk.org/contract/',
+          account: 'https://nexus.mavryk.org/explorer/account/',
+          transaction: 'https://nexus.mavryk.org/explorer/operation/',
+          contract: 'https://nexus.mavryk.org/explorer/contract/',
           api: 'https://atlasnet.api.mavryk.network'
         }
       ],

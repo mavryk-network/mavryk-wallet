@@ -2,12 +2,14 @@ import React, { memo, useMemo } from 'react';
 
 import classNames from 'clsx';
 
+import { AddBanner } from 'app/atoms/AddBanner';
 import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
-import { isTzbtcAsset } from 'lib/assets';
+import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { getAssetName, getAssetSymbol } from 'lib/metadata';
+import { useDelegate } from 'lib/temple/front';
 import { ZERO } from 'lib/utils/numbers';
 
 import { AssetsSelectors } from '../../Assets.selectors';
@@ -26,6 +28,7 @@ interface Props {
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
+  const { data: myBakerPkh } = useDelegate(publicKeyHash);
 
   const classNameMemo = useMemo(
     () =>
@@ -41,9 +44,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
 
   if (metadata == null) return null;
 
+  const isMavToken = assetSlug === MAV_TOKEN_SLUG;
   const assetSymbol = getAssetSymbol(metadata);
   const assetName = getAssetName(metadata);
   const isTzBTC = isTzbtcAsset(assetSlug);
+  const isDelegated = isMavToken && myBakerPkh;
 
   return (
     <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>
@@ -53,6 +58,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
         <div className="flex justify-between w-full mb-1">
           <div className="flex items-center flex-initial">
             <div className={styles['tokenSymbol']}>{assetSymbol}</div>
+            {isDelegated && <AddBanner text="delegated" />}
           </div>
           <CryptoBalance
             value={balance}

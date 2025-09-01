@@ -106,7 +106,10 @@ export const SearchExplorerIconBtn: FC = () => {
 
 export const CLOSE_BUTTON_ID = 'CLOSE_BUTTON_ID';
 
-export const SearchExplorerCloseBtn: FC<{ className?: string }> = ({ className = 'ml-2' }) => {
+export const SearchExplorerCloseBtn: FC<{ className?: string; onClick?: () => void }> = ({
+  className = 'ml-2',
+  onClick
+}) => {
   const { toggleExplorer, explored } = useSearchExplorer();
 
   const tippyProps = useMemo(
@@ -122,7 +125,15 @@ export const SearchExplorerCloseBtn: FC<{ className?: string }> = ({ className =
   const buttonRef = useTippy<HTMLButtonElement>(tippyProps);
 
   return explored ? (
-    <button id={CLOSE_BUTTON_ID} ref={buttonRef} onClick={toggleExplorer} className={className}>
+    <button
+      id={CLOSE_BUTTON_ID}
+      ref={buttonRef}
+      onClick={() => {
+        toggleExplorer();
+        onClick?.();
+      }}
+      className={className}
+    >
       <CloseIcon className="w-6 h-6 fill-white" />
     </button>
   ) : null;

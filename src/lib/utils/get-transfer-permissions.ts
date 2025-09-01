@@ -1,4 +1,4 @@
-import { TezosToolkit, TransferParams } from '@mavrykdynamics/taquito';
+import { MavrykToolkit, TransferParams } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
 
 import { ZERO } from 'lib/utils/numbers';
@@ -10,7 +10,7 @@ interface TokenToSpend {
 }
 
 export const getTransferPermissions = async (
-  tezos: TezosToolkit,
+  tezos: MavrykToolkit,
   spender: string,
   owner: string,
   tokenToSpend: TokenToSpend,

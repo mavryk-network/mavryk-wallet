@@ -333,6 +333,18 @@
   "reDelegate": {
     "message": "Re-delegate"
   },
+  "delegateSuccessMsg": {
+    "message": "Successfully Delegated!"
+  },
+  "delegateSuccessDescMsg": {
+    "message": "Your MVRK has been successfully delegated and  is now actively earning rewards. Your first reward should be paid out within the next 7 cycles."
+  },
+  "reDelegateSuccessMsg": {
+    "message": "Successfully Re-delegated!"
+  },
+  "reDelegateSuccessDescMsg": {
+    "message": "Your stake is now active and earning rewards."
+  },
   "delegateNow": {
     "message": "Delegate now"
   },
@@ -736,6 +748,9 @@
   "notDelegated": {
     "message": "Not delegated"
   },
+  "delegated": {
+    "message": "Delegated"
+  },
   "explore": {
     "message": "Explore"
   },
@@ -1110,6 +1125,9 @@
   "stake": {
     "message": "Stake"
   },
+  "stakeAndEarn": {
+    "message": "Stake & Earn"
+  },
   "recommended": {
     "message": "Recommended"
   },
@@ -1132,7 +1150,7 @@
     "message": "In case you have any questions, write them in our communities"
   },
   "delegationPointsHead1": {
-    "message": "Earn $interest$ rewards on your Mavryk annually for helping to secure the Mavryk Network",
+    "message": "Earn Up to $interest$ Annual Rewards on MVRK. \nHelp secure the Mavryk Network and get rewarded!",
     "description": "Delegation rewards description",
     "placeholders": {
       "interest": {
@@ -1748,6 +1766,9 @@
   },
   "add": {
     "message": "Add"
+  },
+  "ad": {
+    "message": "Ad"
   },
   "assets": {
     "message": "Assets"
@@ -3393,19 +3414,43 @@
     "message": "Disconnect All"
   },
   "stakeListItem1": {
-    "message": "Your first reward on Mavryk will be paid approximately in 21 days. "
+    "message": "Earn your first reward in ~21 days, then receive payouts every ~3 days."
   },
   "stakeListItem2": {
-    "message": "Then, you receive rewards every ~3 days."
+    "message": "Your MVRK tokens stay in your wallet, under your control. Use them anytime!"
   },
-  "stakeListItem3": {
-    "message": "Earn rate varies over time. Check the current rate in your wallet."
+  "delegatePlanListOption1": {
+    "message": "Earn competitive yields that adjust with network activity"
   },
-  "stakeListItem4": {
-    "message": "Your Mavryk tokens always remain liquid in your wallet & under you control. Use anytime!"
+  "delegatePlanListOption2": {
+    "message": "Tokens are 100% liquid and stay in your wallet—use them anytime"
+  },
+  "delegatePlanListOption3": {
+    "message": "No lock-up or waiting periods or restrictions."
+  },
+  "delegatePlanListOption4": {
+    "message": "Your funds are safe from penalties"
+  },
+  "coStakePlanListOption1": {
+    "message": "Earn higher rewards by committing your tokens."
+  },
+  "coStakePlanListOption2": {
+    "message": "Tokens are locked for 14 days when unstaking"
+  },
+  "coStakePlanListOption3": {
+    "message": "Support network security by co-staking with validator bonds"
+  },
+  "coStakePlanListOption4": {
+    "message": "Penalties may apply if validators misbehave"
+  },
+  "stakePlanOption1": {
+    "message": "<b>Delegate</b> - Flexible and instant access to your tokens"
+  },
+  "stakePlanOption2": {
+    "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
   },
   "delegateToValidator": {
-    "message": "Delegate to Custom Validator"
+    "message": "Delegate to Specific Validator"
   },
   "delegateToPromotedValidators": {
     "message": "Delegate to Promoted Validators "
@@ -3443,8 +3488,17 @@
   "stakeYourTokensBannerDescription": {
     "message": "Stake your tokens to trusted validators"
   },
+  "chooseStakingPlanMsg": {
+    "message": "Choose Your Staking Plan:"
+  },
   "reStake": {
     "message": "Re-stake"
+  },
+  "coStake": {
+    "message": "Co-stake"
+  },
+  "coStakeAttentionMsg": {
+    "message": "Before co-staking, delegate your stake to a trusted validator to begin earning rewards."
   },
   "deleteContact": {
     "message": "Delete Contact"
@@ -3768,5 +3822,29 @@
   },
   "mavrykPro": {
     "message": "Mavryk Pro"
+  },
+  "coStakeSubHeaderSuccessMsg": {
+    "message": "Co-stake Successful!"
+  },
+  "coStakeDesriptionSuccessMsg": {
+    "message": "Your MVRK has been successfully co-staked and is now actively earning rewards. "
+  },
+  "reDelegateToNewValidator": {
+    "message": "Re-delegate To A New Validator"
+  },
+  "reDelegateToNewValidatorDescr": {
+    "message": "By re-delegating to a new validator, your funds are seamlessly transferred while remaining actively staked. You'll continue earning rewards from your current validator until the transfer completes, then immediately begin earning from the new validator with no interruption in rewards or participation."
+  },
+  "bakerFreeSpace": {
+    "message": "Validator Free Space"
+  },
+  "delegatedAmount": {
+    "message": "Delegated Amount"
+  },
+  "delegating": {
+    "message": "Delegating"
+  },
+  "highTrafficMsg": {
+    "message": "There is high traffic at the moment, please increase the gas cost to provide a better chance your transaction will go through"
   }
 }

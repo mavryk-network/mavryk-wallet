@@ -95,7 +95,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const canSend = account.type !== TempleAccountType.WatchOnly;
   const sendLink = assetSlug ? `/send/${assetSlug}` : '/send';
 
-  const { data: myBakerPkh } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const isTzBTC = isTzbtcAsset(assetSlug);
 

@@ -17,7 +17,8 @@ import modStyles from '../../Tokens.module.css';
 
 export const DelegateTezosTag: FC = () => {
   const acc = useAccount();
-  const { data: myBakerPkh } = useDelegate(acc.publicKeyHash);
+  const { data: accStats } = useDelegate(acc.publicKeyHash);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
   const { trackEvent } = useAnalytics();
 
   const handleTagClick = useCallback(
@@ -61,7 +62,8 @@ export const DelegateTezosTag: FC = () => {
 
 export const StakeTezosTag: FC = () => {
   const acc = useAccount();
-  const { data: myBakerPkh } = useDelegate(acc.publicKeyHash);
+  const { data: accStats } = useDelegate(acc.publicKeyHash);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
   const { trackEvent } = useAnalytics();
 
   const handleTagClick = useCallback(

@@ -28,7 +28,8 @@ interface Props {
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
-  const { data: myBakerPkh } = useDelegate(publicKeyHash);
+  const { data: accStats } = useDelegate(publicKeyHash);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const classNameMemo = useMemo(
     () =>

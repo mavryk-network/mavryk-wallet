@@ -297,7 +297,7 @@ interface TzktAccountBase {
   unstakedBalance?: number;
 }
 
-interface TzktUserAccount extends TzktAccountBase {
+export interface TzktUserAccount extends TzktAccountBase {
   type: TzktAccountType.User;
   id: number;
   publicKey: string;

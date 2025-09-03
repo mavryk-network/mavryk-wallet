@@ -51,14 +51,15 @@ export function useDelegate(address: string, suspense = true, shouldPreventError
                   return null;
                 case TzktAccountType.User:
                 case TzktAccountType.Contract:
-                  return accountStats.delegate?.address ?? null;
+                  return accountStats ?? {};
               }
             } catch (e) {
               console.error(e);
             }
           }
 
-          return await tezos.rpc.getDelegate(address);
+          const delegateAddress = await tezos.rpc.getDelegate(address);
+          return { delegate: { address: delegateAddress } };
         },
         { retries: 3, minTimeout: 3000, maxTimeout: 5000 }
       );

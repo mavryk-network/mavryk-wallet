@@ -37,7 +37,10 @@ export const CoStake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const { fullPage, popup } = useAppEnv();
   const account = useAccount();
-  const { data: myBakerPkh } = useDelegate(account.publicKeyHash);
+  const { data: accStats } = useDelegate(account.publicKeyHash);
+
+  const myBakerPkh = accStats?.delegate?.address ?? null;
+
   const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);

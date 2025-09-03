@@ -89,7 +89,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const accountPkh = acc.publicKeyHash;
 
-  const { data: myBakerPkh } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
@@ -677,7 +678,8 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
 
   const accountPkh = acc.publicKeyHash;
 
-  const { data: myBakerPkh = '' } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? '';
 
   const testGroupName = useUserTestingGroupNameSelector();
   const { popup } = useAppEnv();

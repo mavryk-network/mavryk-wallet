@@ -49,21 +49,3 @@ export const signKYCAction = async (rpcUrl: string, address: string) => {
     throw e;
   }
 };
-
-export const stakeAction = async (rpcUrl: string, amount: BigNumber, decimals = 6) => {
-  try {
-    const tezos = signerTezos(rpcUrl);
-
-    const stakeAmount = tokensToAtoms(amount, decimals).toNumber();
-
-    const op = await tezos.contract.stake({
-      amount: stakeAmount,
-      mumav: false
-    });
-
-    return op;
-  } catch (e) {
-    console.error('Stake failed:', e);
-    throw e;
-  }
-};

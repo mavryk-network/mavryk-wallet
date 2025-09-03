@@ -10,8 +10,12 @@ import {
   WalletOriginateParams,
   WalletIncreasePaidStorageParams,
   WalletTransferParams,
-  Signer
+  Signer,
+  WalletStakeParams,
+  WalletUnstakeParams,
+  WalletFinalizeUnstakeParams
 } from '@mavrykdynamics/taquito';
+import { FinalizeUnstakeParams, StakeParams, UnstakeParams } from '@mavrykdynamics/taquito/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/taquito-utils';
 import constate from 'constate';
 import { nanoid } from 'nanoid';
@@ -417,13 +421,39 @@ type TaquitoWalletOps = {
   onBeforeSend?: (id: string) => void;
 };
 
-class TaquitoWallet
-  implements
-    Omit<
-      WalletProvider,
-      'mapStakeParamsToWalletParams' | 'mapUnstakeParamsToWalletParams' | 'mapFinalizeUnstakeParamsToWalletParams'
-    >
-{
+export const createStakeOperation = ({ source, amount, fee, gasLimit, storageLimit }: StakeParams) => {
+  return Promise.resolve({
+    kind: 'stake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit,
+    amount
+  });
+};
+
+export const createUnstakeOperation = ({ source, amount, fee, gasLimit, storageLimit }: UnstakeParams) => {
+  return Promise.resolve({
+    kind: 'unstake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit,
+    amount
+  });
+};
+
+export const createFinalizeUnstakeOperation = ({ source, fee, gasLimit, storageLimit }: FinalizeUnstakeParams) => {
+  return Promise.resolve({
+    kind: 'finalize_unstake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit
+  });
+};
+
+class TaquitoWallet implements WalletProvider {
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
 
   async getPKH() {
@@ -452,6 +482,22 @@ class TaquitoWallet
   async mapDelegateParamsToWalletParams(params: () => Promise<WalletDelegateParams>) {
     const walletParams = await params();
     return withoutFeesOverride(walletParams, await createSetDelegateOperation(walletParams as any));
+  }
+
+  // ---- staking methods ----
+  async mapStakeParamsToWalletParams(params: () => Promise<WalletStakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+  }
+
+  async mapUnstakeParamsToWalletParams(params: () => Promise<WalletUnstakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+  }
+
+  async mapFinalizeUnstakeParamsToWalletParams(params: () => Promise<WalletFinalizeUnstakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
   }
 
   async sendOperations(opParams: any[]) {

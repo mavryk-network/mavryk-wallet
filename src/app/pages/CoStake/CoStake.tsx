@@ -19,14 +19,13 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker, useNetwork, useTezos } from 'lib/temple/front';
+import { useAccount, useDelegate, useKnownBaker, useTezos } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
 import { navigate } from 'lib/woozie';
 
-import { stakeAction } from '../ProVersion/utils/tezosSigner';
 import { useBakingHistory } from '../Stake/hooks/use-baking-history';
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
@@ -45,7 +44,6 @@ export const CoStake: FC = () => {
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const tezos = useTezos();
-  const { rpcBaseURL: rpcUrl } = useNetwork();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
@@ -110,29 +108,11 @@ export const CoStake: FC = () => {
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
-        const op = await stakeAction(rpcUrl, new BigNumber(amount), assetMetadata.decimals);
-        // const op = await tezos.wallet
-        //   .transfer({
-        //     to: myBakerPkh, // your own tz1
-        //     amount: 0,
-        //     parameter: {
-        //       entrypoint: 'set_delegate_parameters',
-        //       value: {
-        //         prim: 'Pair',
-        //         args: [
-        //           { int: '9000000' }, // limit_of_staking_over_baking (9x, in millionths)
-        //           {
-        //             prim: 'Pair',
-        //             args: [
-        //               { int: '1000000000' }, // edge_of_baking_over_staking (1.0, in billionths)
-        //               { prim: 'Unit' }
-        //             ]
-        //           }
-        //         ]
-        //       }
-        //     }
-        //   })
-        //   .send();
+        const op = await tezos.wallet
+          .stake({
+            amount: Number(amount)
+          })
+          .send();
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({
@@ -148,7 +128,7 @@ export const CoStake: FC = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, rpcUrl, setOperation, setSubmitError]
+    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
   const delegatedAmount = useMemo(() => {

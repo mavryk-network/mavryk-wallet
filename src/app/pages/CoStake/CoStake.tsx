@@ -19,7 +19,8 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker, useTezos } from 'lib/temple/front';
+import { useAccount, useKnownBaker, useTezos } from 'lib/temple/front';
+import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -37,9 +38,7 @@ export const CoStake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const { fullPage, popup } = useAppEnv();
   const account = useAccount();
-  const { data: accStats } = useDelegate(account.publicKeyHash);
-
-  const myBakerPkh = accStats?.delegate?.address ?? null;
+  const { myBakerPkh, canCostake } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);

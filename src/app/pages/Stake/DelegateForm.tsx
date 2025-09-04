@@ -52,6 +52,9 @@ import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selector
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { DelegateFormSelectors } from './delegateForm.selectors';
+import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
+import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
+import { CO_STAKE, FINALIZE_UNLOCK, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
@@ -592,6 +595,10 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
   const [opened, setOpened] = useState(false);
   const { popup } = useAppEnv();
+  const account = useAccount();
+  const data = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { canRedelegate, canCostake, canUnlock } = data;
+  const delegateLabel = getDelegateLabel(data);
 
   const close = useCallback(() => {
     setOpened(false);
@@ -611,13 +618,29 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     close();
   }, [close]);
 
+  const isStakeButtonDisabled = useMemo(() => {
+    switch (delegateLabel) {
+      case CO_STAKE:
+        return !canCostake;
+      case UNLOCK_STAKE:
+        return !canUnlock;
+      case UNLOCKING:
+        return true;
+      case FINALIZE_UNLOCK:
+        return false;
+      default:
+        return false;
+    }
+  }, [canCostake, canUnlock, delegateLabel]);
+
   return (
     <div className="grid gap-3 grid-cols-2">
-      <ButtonRounded size="xs" fill={false} onClick={open}>
+      <ButtonRounded size="xs" fill={false} onClick={open} disabled={!canRedelegate}>
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation}>
-        <T id="coStake" />
+      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} disabled={isStakeButtonDisabled}>
+        {/* <T id="coStake" /> */}
+        {delegateLabel}
       </ButtonRounded>
 
       <PopupModalWithTitle
@@ -627,6 +650,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
         title={<T id="reDelegateToNewValidator" />}
         portalClassName="re-delegate-popup"
       >
+        {/* TODO here add other popups */}
         <div className={classNames(popup ? 'px-4' : 'px-6')}>
           <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
             <T id="reDelegateToNewValidatorDescr" />

@@ -108,7 +108,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
 
     const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
 
-    const hasUnlockPeriodPassed = (accStats?.unstakedBalance ?? 0) > 0 && unlockWaitTime === 'allowed';
+    const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
 
     const canRedelegate = hasDelegationPeriodPassed && !isInUnlockPeriod && !hasUnlockPeriodPassed;
     const canUnlockStake = delegationWaitTime === 'allowed' && !isInUnlockPeriod;
@@ -125,6 +125,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
   }, [accStats]);
 
   return {
+    myBakerPkh: accStats?.delegate?.address ?? null,
     isDelegated: Boolean(accStats?.delegate?.address),
     isInDelegationPeriod: delegationWaitTime !== 'allowed',
     hasDelegationPeriodPassed: hasDelegationPeriodPassed,

@@ -6,7 +6,6 @@ import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
 
 import { Alert, Anchor, Button, Divider, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
-import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
@@ -16,7 +15,6 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
-import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
@@ -41,6 +39,9 @@ import {
   useTezosDomainsClient,
   validateDelegate
 } from 'lib/temple/front';
+import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
+import { CO_STAKE, FINALIZE_UNLOCK, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
+import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
@@ -52,9 +53,9 @@ import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selector
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { DelegateFormSelectors } from './delegateForm.selectors';
-import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
-import { CO_STAKE, FINALIZE_UNLOCK, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
+import { RedelegatePopup } from './popups/Redelegate.popup';
+import { UnlockPopup } from './popups/Unlock.popup';
+import { UnlockFisrtPopup } from './popups/UnlockFirst.popup';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
@@ -593,30 +594,46 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 };
 
 export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
-  const [opened, setOpened] = useState(false);
-  const { popup } = useAppEnv();
+  const [opened, setOpened] = useState({
+    redelegate: false,
+    unlock: false,
+    firstUnlock: false
+  });
   const account = useAccount();
   const data = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock } = data;
+  const { canRedelegate, canCostake, canUnlock, stakedBalance } = data;
   const delegateLabel = getDelegateLabel(data);
 
-  const close = useCallback(() => {
-    setOpened(false);
+  const close = useCallback((key: keyof typeof opened) => {
+    setOpened(prev => ({ ...prev, [key]: false }));
   }, []);
 
-  const open = useCallback(() => {
-    setOpened(true);
+  const open = useCallback((key: keyof typeof opened) => {
+    setOpened(prev => ({ ...prev, [key]: true }));
   }, []);
 
   const handleReDelegateNavigation = useCallback(() => {
     avtivateReDelegation();
-    close();
+    close('redelegate');
   }, [avtivateReDelegation, close]);
 
-  const handleCoStakeNavigation = useCallback(() => {
-    navigate('/co-stake');
-    close();
-  }, [close]);
+  const handleDelegateClickbasedOnPeriod = useCallback(() => {
+    if (delegateLabel === UNLOCK_STAKE) {
+      return open('unlock');
+    }
+
+    if (delegateLabel === FINALIZE_UNLOCK) {
+      // TODO add finalize unlock action
+    }
+
+    if (delegateLabel === UNLOCKING) {
+      return;
+    }
+
+    if (delegateLabel === CO_STAKE) {
+      return navigate('/co-stake');
+    }
+  }, [delegateLabel, open]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {
@@ -633,38 +650,35 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     }
   }, [canCostake, canUnlock, delegateLabel]);
 
+  const handleRedelegateClick = useCallback(() => {
+    if (!canRedelegate) return;
+    if (delegateLabel === UNLOCK_STAKE) {
+      open('firstUnlock');
+    } else {
+      open('redelegate');
+    }
+  }, [delegateLabel, open, canRedelegate]);
+
   return (
     <div className="grid gap-3 grid-cols-2">
-      <ButtonRounded size="xs" fill={false} onClick={open} disabled={!canRedelegate}>
+      <ButtonRounded size="xs" fill={false} onClick={handleRedelegateClick} disabled={!canRedelegate}>
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} disabled={isStakeButtonDisabled}>
-        {/* <T id="coStake" /> */}
+      <ButtonRounded size="xs" fill onClick={handleDelegateClickbasedOnPeriod} disabled={isStakeButtonDisabled}>
         {delegateLabel}
       </ButtonRounded>
 
-      <PopupModalWithTitle
-        isOpen={opened}
-        contentPosition={popup ? 'bottom' : 'center'}
-        onRequestClose={close}
-        title={<T id="reDelegateToNewValidator" />}
-        portalClassName="re-delegate-popup"
-      >
-        {/* TODO here add other popups */}
-        <div className={classNames(popup ? 'px-4' : 'px-6')}>
-          <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
-            <T id="reDelegateToNewValidatorDescr" />
-          </div>
-          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
-            <ButtonRounded size="big" fill={false} onClick={close}>
-              <T id="cancel" />
-            </ButtonRounded>
-            <ButtonRounded size="big" fill onClick={handleReDelegateNavigation}>
-              <T id="reDelegate" />
-            </ButtonRounded>
-          </div>
-        </div>
-      </PopupModalWithTitle>
+      <RedelegatePopup
+        opened={opened.redelegate}
+        close={close.bind(null, 'redelegate')}
+        handleReDelegateNavigation={handleReDelegateNavigation}
+      />
+      <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} stakedBalance={stakedBalance} />
+      <UnlockFisrtPopup
+        opened={opened.firstUnlock}
+        close={close.bind(null, 'firstUnlock')}
+        openUnlockPopup={open.bind(null, 'unlock')}
+      />
     </div>
   );
 };

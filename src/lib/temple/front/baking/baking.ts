@@ -31,11 +31,14 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
+// returning { delegate: { address: null } } instead of just null
+
+const emptyAccountResponse = { delegate: { address: null } };
 export function useDelegate<T = TzktUserAccount>(
   address: string,
   suspense = true,
   shouldPreventErrorPropagation = true
-): SWRResponse<T | null> {
+): SWRResponse<T | undefined> {
   const tezos = useTezos();
   const chainId = useChainId(suspense);
   const { cache: swrCache } = useSWRConfig();
@@ -55,10 +58,10 @@ export function useDelegate<T = TzktUserAccount>(
 
               switch (accountStats.type) {
                 case TzktAccountType.Empty:
-                  return null;
+                  return emptyAccountResponse;
                 case TzktAccountType.User:
                 case TzktAccountType.Contract:
-                  return accountStats ?? null;
+                  return accountStats;
               }
             } catch (e) {
               console.error(e);
@@ -72,7 +75,7 @@ export function useDelegate<T = TzktUserAccount>(
       );
     } catch (e) {
       if (shouldPreventErrorPropagation) {
-        return null;
+        return emptyAccountResponse;
       }
 
       throw new BoundaryError(

@@ -24,7 +24,8 @@ const allRewardsPerEventKeys: (keyof RewardsPerEventHistoryItem)[] = [
 export const useBakingHistory = () => {
   const acc = useAccount();
   const { data: accStats } = useDelegate(acc.publicKeyHash);
-  const myBakerPkh = accStats?.delegate?.address ?? '';
+
+  const myBakerPkh = accStats?.delegate?.address;
   const canDelegate = acc.type !== TempleAccountType.WatchOnly;
   const chainId = useChainId(true);
   const testGroupName = useUserTestingGroupNameSelector();

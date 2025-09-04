@@ -39,7 +39,8 @@ export async function init() {
   ]);
 
   fetchedLocaleMessages = { target, fallback };
-  cldrLocale = (cldrjsLocales as Record<string, any>)[getCurrentLocale()] || cldrjsLocales.en;
+  cldrLocale = cldrjsLocales.en;
+  // cldrLocale = (cldrjsLocales as Record<string, any>)[getCurrentLocale()] || cldrjsLocales.en;
 }
 
 export function getMessage(messageName: string, substitutions?: Substitutions) {

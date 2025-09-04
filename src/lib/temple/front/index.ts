@@ -27,8 +27,8 @@ export { useContactsActions, searchContacts } from './address-book';
 
 export { useTezosDomainsClient, isDomainNameValid } from './tzdns';
 
-export type { Baker } from './baking';
-export { getRewardsStats, useKnownBaker, useKnownBakers, useDelegate } from './baking';
+export type { Baker } from './baking/baking';
+export { getRewardsStats, useKnownBaker, useKnownBakers, useDelegate } from './baking/baking';
 
 export { activateAccount } from './activate-account';
 

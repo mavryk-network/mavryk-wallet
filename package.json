@@ -124,6 +124,7 @@
     "css-minimizer-webpack-plugin": "^4.2.1",
     "currency-codes": "^2.1.0",
     "date-fns": "2.15.0",
+    "dayjs": "^1.11.18",
     "debounce": "^1.2.1",
     "debounce-promise": "3.1.2",
     "dexie": "3.1.0-alpha.9",

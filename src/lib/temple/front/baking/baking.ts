@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
-import useSWR, { unstable_serialize, useSWRConfig } from 'swr';
+import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
 
 import { BoundaryError } from 'app/ErrorBoundary';
 import {
@@ -13,11 +13,14 @@ import {
   getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
+import type { TzktUserAccount } from 'lib/apis/tzkt/types';
 import { useRetryableSWR } from 'lib/swr';
 import type { ReactiveTezosToolkit } from 'lib/temple/front';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
-import { useChainId, useNetwork, useTezos } from './ready';
+import { useChainId, useNetwork, useTezos } from '../ready';
+
+import { getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
 
 function getDelegateCacheKey(
   tezos: ReactiveTezosToolkit,
@@ -28,7 +31,11 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
-export function useDelegate(address: string, suspense = true, shouldPreventErrorPropagation = true) {
+export function useDelegate<T>(
+  address: string,
+  suspense = true,
+  shouldPreventErrorPropagation = true
+): SWRResponse<T | null> {
   const tezos = useTezos();
   const chainId = useChainId(suspense);
   const { cache: swrCache } = useSWRConfig();
@@ -80,6 +87,60 @@ export function useDelegate(address: string, suspense = true, shouldPreventError
     suspense
   });
 }
+
+export function useAccountDelegatePeriodStats(accountAddress: string) {
+  const { data: accStats } = useDelegate<TzktUserAccount>(accountAddress);
+
+  const {
+    canRedelegate,
+    canUnlockStake,
+    unlockWaitTime,
+    delegationWaitTime,
+    isInUnlockPeriod,
+    hasUnlockPeriodPassed,
+    hasDelegationPeriodPassed
+  } = useMemo(() => {
+    const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
+
+    const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
+
+    const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
+
+    const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
+
+    const hasUnlockPeriodPassed = (accStats?.unstakedBalance ?? 0) > 0 && unlockWaitTime === 'allowed';
+
+    const canRedelegate = hasDelegationPeriodPassed && !isInUnlockPeriod && !hasUnlockPeriodPassed;
+    const canUnlockStake = delegationWaitTime === 'allowed' && !isInUnlockPeriod;
+
+    return {
+      canRedelegate,
+      canUnlockStake,
+      unlockWaitTime,
+      delegationWaitTime,
+      isInUnlockPeriod,
+      hasUnlockPeriodPassed,
+      hasDelegationPeriodPassed
+    };
+  }, [accStats]);
+
+  return {
+    isDelegated: Boolean(accStats?.delegate?.address),
+    isInDelegationPeriod: delegationWaitTime !== 'allowed',
+    hasDelegationPeriodPassed: hasDelegationPeriodPassed,
+    isInUnlockPeriod: isInUnlockPeriod,
+    hasUnlockPeriodPassed: hasUnlockPeriodPassed,
+    canRedelegate: canRedelegate,
+    canCostake: !isInUnlockPeriod && hasDelegationPeriodPassed,
+    canUnlock: canUnlockStake,
+    unlockWaitTime,
+    delegationWaitTime,
+    stakedBalance: accStats?.stakedBalance ?? 0,
+    unstakedBalance: accStats?.unstakedBalance ?? 0
+  };
+}
+
+export type AccDelegatePeriodStats = ReturnType<typeof useAccountDelegatePeriodStats>;
 
 type RewardConfig = Record<
   | 'blocks'

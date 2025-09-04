@@ -242,7 +242,7 @@ const ExtraInner: React.FC<ExtraInnerProps> = ({ useDefaultWrapper, innerCompone
           'pointer-events-none overflow-hidden'
         )}
       >
-        <span className="mx-4 text-base-plus text-secondary-white">{innerComponent}</span>
+        <span className="mx-4 text-base-plus text-secondary-white z-10 relative">{innerComponent}</span>
       </div>
     );
   return <>{innerComponent}</>;

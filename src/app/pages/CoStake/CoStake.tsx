@@ -167,7 +167,12 @@ export const CoStake: FC = () => {
               errorCaption={errors.amount?.message || submitError?.message}
               containerClassName="mb-3"
               autoFocus={Boolean(maxAmount)}
-              extraInner={<MaxButton onClick={handleSetMaxAmount} fill={false} className="relative z-10" />}
+              extraInnerWrapper="unset"
+              extraInner={
+                <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+                  <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+                </div>
+              }
             />
             <div className="flex text-sm gap-1 mb-6 items-center">
               <p className="text-secondary-white">

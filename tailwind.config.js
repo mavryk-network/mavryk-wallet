@@ -177,6 +177,8 @@ module.exports = {
         'accent-blue': baseColors.indigo[700],
         'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
         'indigo-add': '#5F58FF80',
+        'green-add': '#00B71D80',
+        'orange-add': '#F8641280',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
         'primary-card-hover': baseColors.gray[890],

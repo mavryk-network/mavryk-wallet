@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import { AddBanner } from 'app/atoms/AddBanner';
+import { AddBanner, DelegatePeriodBanner } from 'app/atoms/AddBanner';
 import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
@@ -59,7 +59,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
         <div className="flex justify-between w-full mb-1">
           <div className="flex items-center flex-initial">
             <div className={styles['tokenSymbol']}>{assetSymbol}</div>
-            {isDelegated && <AddBanner text="delegated" />}
+            {isDelegated && <DelegatePeriodBanner />}
           </div>
           <CryptoBalance
             value={balance}

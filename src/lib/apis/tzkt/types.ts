@@ -421,7 +421,7 @@ interface TzktDelegateAccount extends TzktAccountBase {
   software: { date: string; version: string | nullish };
 }
 
-interface TzktContractAccount extends TzktAccountBase {
+export interface TzktContractAccount extends TzktAccountBase {
   type: TzktAccountType.Contract;
   id: number;
   kind: 'delegator_contract' | 'smart_contract' | nullish;

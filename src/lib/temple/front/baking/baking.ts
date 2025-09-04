@@ -31,7 +31,7 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
-export function useDelegate<T>(
+export function useDelegate<T = TzktUserAccount>(
   address: string,
   suspense = true,
   shouldPreventErrorPropagation = true
@@ -58,7 +58,7 @@ export function useDelegate<T>(
                   return null;
                 case TzktAccountType.User:
                 case TzktAccountType.Contract:
-                  return accountStats ?? {};
+                  return accountStats ?? null;
               }
             } catch (e) {
               console.error(e);
@@ -82,6 +82,7 @@ export function useDelegate<T>(
     }
   }, [chainId, tezos, address, shouldPreventErrorPropagation, resetDelegateCache]);
 
+  // @ts-expect-error // forced type for delegate address
   return useSWR(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation], getDelegate, {
     dedupingInterval: 20_000,
     suspense

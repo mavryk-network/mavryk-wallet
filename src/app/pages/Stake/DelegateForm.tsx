@@ -600,6 +600,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     firstUnlock: false
   });
   const account = useAccount();
+  const tezos = useTezos();
   const data = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { canRedelegate, canCostake, canUnlock, stakedBalance } = data;
   const delegateLabel = getDelegateLabel(data);
@@ -617,13 +618,25 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     close('redelegate');
   }, [avtivateReDelegation, close]);
 
-  const handleDelegateClickbasedOnPeriod = useCallback(() => {
+  const handleDelegateClickbasedOnPeriod = useCallback(async () => {
     if (delegateLabel === UNLOCK_STAKE) {
       return open('unlock');
     }
 
     if (delegateLabel === FINALIZE_UNLOCK) {
-      // TODO add finalize unlock action
+      try {
+        await tezos.wallet.finalizeUnstake({}).send();
+
+        return navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'unlock',
+          subHeader: 'success',
+          description: 'finalizeUnlockSuccessMsg',
+          btnText: 'backToValidator',
+          btnLink: '/stake'
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     if (delegateLabel === UNLOCKING) {
@@ -633,7 +646,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === CO_STAKE) {
       return navigate('/co-stake');
     }
-  }, [delegateLabel, open]);
+  }, [delegateLabel, open, tezos.wallet]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {

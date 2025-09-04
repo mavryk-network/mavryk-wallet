@@ -3852,5 +3852,8 @@
   },
   "unlockSuccessMsg": {
     "message": "You've successfully started the unlocking process. After 4 cycles (12 days) you will be able to finalized the unlocking of your stake and will have full access to your funds."
+  },
+  "finalizeUnlockSuccessMsg": {
+    "message": "You've fully unlocked your stake. Your funds are now available and ready to be used."
   }
 }

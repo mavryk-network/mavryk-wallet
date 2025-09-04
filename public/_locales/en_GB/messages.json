@@ -3846,5 +3846,60 @@
   },
   "highTrafficMsg": {
     "message": "There is high traffic at the moment, please increase the gas cost to provide a better chance your transaction will go through"
+  },
+  "backToValidator": {
+    "message": "Back to Validator"
+  },
+  "unlockSuccessMsg": {
+    "message": "You've successfully started the unlocking process. After 4 cycles (12 days) you will be able to finalized the unlocking of your stake and will have full access to your funds."
+  },
+  "finalizeUnlockSuccessMsg": {
+    "message": "You've fully unlocked your stake. Your funds are now available and ready to be used."
+  },
+  "delegatingPeriod": {
+    "message": "Delegating - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlockingPeriod": {
+    "message": "Unlocking - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlocked": {
+    "message": "unlocked"
+  },
+  "proceedToUnlock": {
+    "message": "Proceed to Unlock"
+  },
+  "coStaked": {
+    "message": "Co-staked"
+  },
+  "allValidators": {
+    "message": "All Validators"
+  },
+  "unlockYourStake": {
+    "message": "Unlock Your Stake"
+  },
+  "unlockYourStakeFirst": {
+    "message": "Unlock Your Stake First"
+  },
+  "unlockYourStakeDesc": {
+    "message": "Unlocking staked funds initiates a 4 cycles (12 days) waiting period. During this time, your assets remain delegated to your current validator and are inaccessible for withdrawal."
+  },
+  "unlockYourStakeFirstDesc": {
+    "message": " Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
   }
 }

@@ -23,7 +23,7 @@ export const DelegatePeriodBanner = () => {
       return {
         text: (
           <div className="flex items-center">
-            Delegating - <SmallClockIcon /> {delegationWaitTime} left
+            <T id="delegatingPeriod" substitutions={[<SmallClockIcon />, delegationWaitTime]} />
           </div>
         ),
         color: 'bg-orange-add'
@@ -33,7 +33,7 @@ export const DelegatePeriodBanner = () => {
       return {
         text: (
           <div className="flex items-center">
-            Unlocking - <SmallClockIcon /> {unlockWaitTime} left
+            <T id="unlockingPeriod" substitutions={[<SmallClockIcon />, unlockWaitTime]} />
           </div>
         ),
         color: 'bg-orange-add'
@@ -41,13 +41,13 @@ export const DelegatePeriodBanner = () => {
     }
     if (hasUnlockPeriodPassed) {
       return {
-        text: <div>Unlocked</div>,
+        text: <T id="unlocked" />,
         color: 'bg-green-add'
       };
     }
 
     return {
-      text: <div>Delegated</div>,
+      text: <T id="delegated" />,
       color: 'bg-indigo-add'
     };
   }, [hasUnlockPeriodPassed, isInDelegationPeriod, isInUnlockPeriod, unlockWaitTime, delegationWaitTime]);

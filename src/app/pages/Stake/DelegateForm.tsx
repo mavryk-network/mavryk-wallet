@@ -169,7 +169,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const AllValidatorsComponent = useMemo(
     () => (
       <Anchor href={`${process.env.NODES_URL}/validators`} className="text-base-plus text-accent-blue cursor-pointer">
-        All Validators
+        <T id="allValidators" />
       </Anchor>
     ),
     []

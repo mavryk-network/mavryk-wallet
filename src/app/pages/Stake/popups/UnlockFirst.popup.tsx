@@ -28,20 +28,19 @@ export const UnlockFisrtPopup: FC<UnlockFisrtPopupProps> = ({ opened, close, ope
       isOpen={opened}
       contentPosition={popup ? 'bottom' : 'center'}
       onRequestClose={close}
-      title={<>Unlock Your Stake First</>}
+      title={<T id="unlockYourStakeFirst" />}
       portalClassName="re-delegate-popup"
     >
       <div className={classNames(popup ? 'px-4' : 'px-6')}>
         <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
-          Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a
-          new validator.
+          <T id="unlockYourStakeFirstDesc" />
         </div>
         <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
           <ButtonRounded size="big" fill={false} onClick={close}>
             <T id="cancel" />
           </ButtonRounded>
           <ButtonRounded size="big" fill onClick={proceedToUnlock}>
-            Proceed to Unlock
+            <T id="proceedToUnlock" />
           </ButtonRounded>
         </div>
       </div>

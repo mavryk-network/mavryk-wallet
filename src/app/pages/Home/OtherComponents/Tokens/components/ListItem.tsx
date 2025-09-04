@@ -8,6 +8,7 @@ import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
 import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
+import { T } from 'lib/i18n';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -66,7 +67,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
 
     if (isDelegated && !delegatedBalance.isZero()) {
       rows.push({
-        Column1: <div className="text-sm font-normal text-secondary-white truncate flex-1">Delegated</div>,
+        Column1: (
+          <div className="text-sm font-normal text-secondary-white truncate flex-1">
+            <T id="delegated" />
+          </div>
+        ),
         Column2: (
           <CryptoBalance value={delegatedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
         )
@@ -75,7 +80,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
 
     if (stakedBalance && !stakedBalance.isZero()) {
       rows.push({
-        Column1: <div className="text-sm font-normal text-secondary-white truncate flex-1">Co-staked</div>,
+        Column1: (
+          <div className="text-sm font-normal text-secondary-white truncate flex-1">
+            <T id="coStaked" />
+          </div>
+        ),
         Column2: <CryptoBalance value={stakedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
       });
     }

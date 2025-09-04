@@ -51,13 +51,12 @@ export const UnlockPopup: FC<UnlockPopupProps> = ({ opened, close, stakedBalance
       isOpen={opened}
       contentPosition={popup ? 'bottom' : 'center'}
       onRequestClose={close}
-      title={<>Unlock Your Stake</>}
+      title={<T id="unlockYourStake" />}
       portalClassName="re-delegate-popup"
     >
       <div className={classNames(popup ? 'px-4' : 'px-6')}>
         <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
-          Unlocking staked funds initiates a 4 cycles (12 days) waiting period. During this time, your assets remain
-          delegated to your current validator and are inaccessible for withdrawal.
+          <T id="unlockYourStakeDesc" />
         </div>
         <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
           <ButtonRounded size="big" fill={false} onClick={close}>

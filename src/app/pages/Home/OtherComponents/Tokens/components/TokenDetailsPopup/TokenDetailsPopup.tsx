@@ -16,6 +16,7 @@ import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
+import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
@@ -33,7 +34,6 @@ import { ZERO } from 'lib/utils/numbers';
 import { HistoryAction, navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
-import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;

@@ -33,6 +33,7 @@ import { ZERO } from 'lib/utils/numbers';
 import { HistoryAction, navigate } from 'lib/woozie';
 
 import styles from '../../Tokens.module.css';
+import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
 
 type TokenDetailsPopupProps = {
   assetSlug: string;
@@ -236,6 +237,10 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
     [handleButtonClick]
   );
 
+  const handleRedelegateClick = useCallback(() => {
+    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
+  }, []);
+
   const StakedBanner = useMemo(
     () =>
       myBakerPkh ? (
@@ -248,13 +253,8 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
             displayBg
             style={{ width: undefined }}
             extraComponent={
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <ButtonRounded size="xs" fill={false} onClick={handleButtonClick}>
-                  <T id="reDelegate" />
-                </ButtonRounded>
-                <ButtonRounded size="xs">
-                  <T id="coStake" />
-                </ButtonRounded>
+              <div className="mt-3">
+                <DelegateActionsComponent avtivateReDelegation={handleRedelegateClick} />
               </div>
             }
           />
@@ -262,7 +262,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       ) : (
         <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),
-    [myBakerPkh]
+    [handleRedelegateClick, myBakerPkh]
   );
 
   return (

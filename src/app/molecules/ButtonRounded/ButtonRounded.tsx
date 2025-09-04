@@ -89,7 +89,8 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
                   `border-solid hover:${bgColorHover}`
                 )), // fill | outline styles
           isLoading && ' flex justify-center w-24 align-middle', // loading
-          disabled && 'bg-gray-40 text-gray-15', // disabled styles
+          disabled && fill && 'bg-gray-40 text-gray-15', // disabled styles
+          disabled && !fill && 'bg-transparent text-gray-15 border border-gray-40',
           !invisibleLabel && disabled && 'pointer-events-none cursor-not-allowed',
           className
         )}

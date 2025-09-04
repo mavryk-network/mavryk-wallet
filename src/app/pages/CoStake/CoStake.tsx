@@ -49,6 +49,12 @@ export const CoStake: FC = () => {
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
+  useEffect(() => {
+    if (!canCostake) {
+      navigate('stake');
+    }
+  });
+
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
   });

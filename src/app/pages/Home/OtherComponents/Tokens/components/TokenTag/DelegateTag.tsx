@@ -79,7 +79,7 @@ export const StakeTezosTag: FC = () => {
   const NotStakedButton = useMemo(
     () => (
       <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick}>
-        <T id="stakeToEarn" /> 
+        <T id="stakeToEarn" />
         <span>&#x1F525;</span>
       </AlertWithAction>
     ),

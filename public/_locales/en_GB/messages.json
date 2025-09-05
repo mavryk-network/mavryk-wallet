@@ -2656,7 +2656,7 @@
     "message": "Your address, balance and domain"
   },
   "addressBalanceDescription": {
-    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. If you would like to receive and use MVRK or tokens built on Mavryk, you should use this address."
+    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. The Mavryk wallet address you've been given is the same one you'll use to receive both native MVRK tokens or any other tokens built on the Mavryk network."
   },
   "addressBalanceHint": {
     "message": "You may also use a custom wallet address name from $link$ like alice.mav instead of the alphanumeric wallet address.",
@@ -3474,7 +3474,7 @@
     "message": "Payment"
   },
   "stakeToEarn": {
-    "message": "Stake your MVRK and earn rewards!"
+    "message": "Stake MVRK & earn up to 9% APY "
   },
   "stakedTo": {
     "message": "Staked to:"
@@ -3644,10 +3644,10 @@
     "message": "Validators"
   },
   "tokensRwasNFTs": {
-    "message": "Tokens, RWAs, & NFTs"
+    "message": "Access Native Mavryk Tokens, RWAs, & NFTs"
   },
   "tokensDescPart1": {
-    "message": "Your portfolio of tokens is displayed on the ”Tokens” tab. "
+    "message": "You can view all your tokens in the ”Tokens” tab. From here you can send native tokens, check your balances, purchase more or see detailed information about any token by clicking on it."
   },
   "tokensDescPart2": {
     "message": "You can send, check balances, buy more, or view a token’s details by clicking on it in this section."
@@ -3680,10 +3680,10 @@
     "message": "Magnifying Glass - Search specific details."
   },
   "txActionsDetailsPart3": {
-    "message": "Drop Down - Sort your tokens and viewing arrangement"
+    "message": "Sort Icon - Sort your tokens and viewing arrangement"
   },
   "txActionsDetailsPart4": {
-    "message": "Rewind Icon - Search your transaction history."
+    "message": "Filter Icon - Search your transaction history."
   },
   "welcomeOnboard": {
     "message": "Welcome on board! 👋"
@@ -3692,7 +3692,7 @@
     "message": "Now you know the basic & most important functions of the Mavryk wallet."
   },
   "welcomeOnboardDetailsPart2": {
-    "message": "You can learn all features of the Mavryk Wallet by following our explainer posts on social media."
+    "message": "Let's now deposit some $MVRK into your wallet."
   },
   "welcomeOnboardDetailsPart3": {
     "message": "Also, all instructions and guides are available in our documentation."

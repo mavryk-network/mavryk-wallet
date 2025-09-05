@@ -36,9 +36,16 @@ const CongratsPage: FC = () => {
       <p className={clsx(styles['description'], 'mb-4')}>
         <T id={'welcomeOnboardDetailsPart2'} />
       </p>
-      <p className={clsx(styles['description'])}>
-        <T id={'welcomeOnboardDetailsPart3'} />
-      </p>
+
+      <ButtonRounded
+        fill
+        className="w-full mt-8"
+        size="big"
+        onClick={handleGetStartedClick}
+        testID={OnboardingSelectors.congratsStartButton}
+      >
+        <T id={'getStarted'} />
+      </ButtonRounded>
 
       <div className="my-6">
         <p className={clsx(styles['description'], 'text-center flex justify-center mb-4')}>
@@ -51,16 +58,6 @@ const CongratsPage: FC = () => {
       <p className={clsx(styles['description'], 'text-center flex justify-center')}>
         <T id={'goodLuckMsg'} />
       </p>
-
-      <ButtonRounded
-        fill
-        className="w-full mt-8"
-        size="big"
-        onClick={handleGetStartedClick}
-        testID={OnboardingSelectors.congratsStartButton}
-      >
-        <T id={'getStarted'} />
-      </ButtonRounded>
     </>
   );
 };

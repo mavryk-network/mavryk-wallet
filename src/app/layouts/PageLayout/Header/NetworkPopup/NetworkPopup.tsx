@@ -5,6 +5,9 @@ import clsx from 'clsx';
 import { Spinner } from 'app/atoms';
 import { RadioButton } from 'app/atoms/RadioButton';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as AtlasnetSvg } from 'app/icons/atlasnet.svg';
+import { ReactComponent as MainnetSvg } from 'app/icons/mainnet.svg';
+import { ReactComponent as SandboxSvg } from 'app/icons/sandbox.svg';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
@@ -122,10 +125,22 @@ interface NetworkListItemProps {
 const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick }) => {
   const { id, name, color, disabled, nameI18nKey } = network;
 
+  const networkIcons: { [index: string]: ImportedSVGComponent } = {
+    sandbox: SandboxSvg,
+    atlasnet: AtlasnetSvg,
+    mainnet: MainnetSvg
+  };
+
+  const NetworkIcon = networkIcons[id];
+
   return (
     <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
       <div className="flex items-center">
-        <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
+        {NetworkIcon ? (
+          <NetworkIcon className="w-6 h-6 mr-3 rounded-full" />
+        ) : (
+          <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
+        )}
         <span className="text-base-plus text-white">{(nameI18nKey && <T id={nameI18nKey} />) || name}</span>
       </div>
       <RadioButton id={id} checked={selected} disabled={disabled} shouldUseChangeHandler />

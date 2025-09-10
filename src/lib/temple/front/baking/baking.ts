@@ -107,7 +107,6 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
 
     const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
-    console.log(delegationWaitTime, unlockWaitTime);
 
     const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
 

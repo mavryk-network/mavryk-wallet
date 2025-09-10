@@ -1,5 +1,7 @@
 import { fetchWithTimeout } from 'lib/apis/tzkt/utils';
 import { toTokenSlug } from 'lib/assets';
+import { RWA_ASSET_PRICES } from 'lib/constants';
+import { fetchFromStorage, putToStorage } from 'lib/storage';
 
 import { getDodoMavTokenPrices } from './dodoMav';
 import { DodoStorageSchema, DEX_STORAGE_QUERY } from './queries';
@@ -49,9 +51,13 @@ export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => 
 
     const rwasAssetsPricesPair = getDodoMavTokenPrices(parsedData.dodo_mav);
 
+    await putToStorage(RWA_ASSET_PRICES, rwasAssetsPricesPair);
+
     return { ...rwasAssetsPricesPair };
   } catch (e) {
     console.error('Equittez RWA_PRICES_QUERY error', e);
-    return {};
+    const cachedPrices = fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
+    // @ts-expect-error // null as price won't esist
+    return cachedPrices ?? {};
   }
 };

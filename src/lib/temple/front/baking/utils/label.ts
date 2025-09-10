@@ -4,7 +4,7 @@ import { CO_STAKE, FINALIZE_UNLOCK, UNLOCK_STAKE, UNLOCKING } from '../const';
 export const getDelegateLabel = (data: AccDelegatePeriodStats) => {
   if (!data) return CO_STAKE;
 
-  if (data.delegationWaitTime === 'allowed' && data.stakedBalance === 0 && data.unlockWaitTime === null) {
+  if (data.isDelegated && data.stakedBalance === 0 && data.unlockWaitTime === null) {
     return CO_STAKE;
   }
 

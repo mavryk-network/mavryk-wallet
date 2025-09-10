@@ -19,16 +19,6 @@ export const DelegatePeriodBanner = () => {
     useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const labelInfo = useMemo(() => {
-    if (isInDelegationPeriod) {
-      return {
-        text: (
-          <div className="flex items-center">
-            <T id="delegatingPeriod" substitutions={[<SmallClockIcon />, delegationWaitTime]} />
-          </div>
-        ),
-        color: 'bg-orange-add'
-      };
-    }
     if (isInUnlockPeriod) {
       return {
         text: (
@@ -39,6 +29,17 @@ export const DelegatePeriodBanner = () => {
         color: 'bg-orange-add'
       };
     }
+    if (isInDelegationPeriod) {
+      return {
+        text: (
+          <div className="flex items-center">
+            <T id="delegatingPeriod" substitutions={[<SmallClockIcon />, delegationWaitTime]} />
+          </div>
+        ),
+        color: 'bg-orange-add'
+      };
+    }
+
     if (hasUnlockPeriodPassed) {
       return {
         text: <T id="unlocked" />,

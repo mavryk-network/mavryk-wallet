@@ -107,6 +107,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
 
     const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
+    console.log(delegationWaitTime, unlockWaitTime);
 
     const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
 
@@ -136,7 +137,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     isInUnlockPeriod: isInUnlockPeriod,
     hasUnlockPeriodPassed: hasUnlockPeriodPassed,
     canRedelegate: canRedelegate,
-    canCostake: !isInUnlockPeriod && hasDelegationPeriodPassed,
+    canCostake: !isInUnlockPeriod,
     canUnlock: canUnlockStake,
     unlockWaitTime,
     delegationWaitTime,

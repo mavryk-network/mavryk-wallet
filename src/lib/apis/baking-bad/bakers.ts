@@ -22,7 +22,13 @@ const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'addres
 );
 
 export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
-  return baker ? new BigNumber(baker.stakedBalance).multipliedBy(9).minus(baker.delegatedBalance) : new BigNumber(0);
+  if (baker) {
+    const stakedBalance = new BigNumber(baker.stakedBalance).multipliedBy(5);
+    const delegationBalance = stakedBalance.multipliedBy(9);
+    return stakedBalance.plus(delegationBalance);
+  }
+
+  return new BigNumber(0);
 };
 
 export async function getAllBakersBakingBad() {

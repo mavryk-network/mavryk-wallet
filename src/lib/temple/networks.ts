@@ -56,7 +56,7 @@ export const NETWORKS: TempleNetwork[] = [
     description: 'Mavryk mainnet',
     type: 'main',
     rpcBaseURL: 'https://mainnet.rpc.mavryk.network/',
-    color: '#83b300',
+    color: '#131380',
     disabled: false
   },
   // {

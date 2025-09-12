@@ -55,7 +55,7 @@ export const DelegatePeriodBanner = () => {
   return (
     <div
       style={{ paddingBottom: 2, lineHeight: '18px' }}
-      className={clsx('font-normal text-xs px-2 text-white ml-2 rounded ', labelInfo.color)}
+      className={clsx('font-normal text-xs px-2 text-white ml-2 rounded capitalize', labelInfo.color)}
     >
       {labelInfo.text}
     </div>

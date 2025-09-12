@@ -84,14 +84,14 @@ const TABS: Tab[] = [
     testID: SettingsSelectors.dAppsButton,
     fillIcon: false
   },
-  {
-    linkTo: 'synchronization',
-    i18nKey: 'synchronization',
-    Icon: SyncIcon,
-    Component: SyncSettings,
-    testID: SettingsSelectors.synchronizationButton,
-    fillIcon: false
-  },
+  // {
+  //   linkTo: 'synchronization',
+  //   i18nKey: 'synchronization',
+  //   Icon: SyncIcon,
+  //   Component: SyncSettings,
+  //   testID: SettingsSelectors.synchronizationButton,
+  //   fillIcon: false
+  // },
   {
     linkTo: 'connect-ledger',
     i18nKey: 'connectWithLedger',

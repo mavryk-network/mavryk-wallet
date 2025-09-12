@@ -26,7 +26,7 @@ export function getDelegationWaitTime(delegationTime?: string | null): string | 
   if (!delegationTime) return null;
 
   const start = dayjs(delegationTime);
-  const end = start.add(ONE_CYCLE_IN_DAYS * 2, 'day');
+  const end = start.add(ONE_CYCLE_IN_DAYS * 7, 'day');
   const now = dayjs();
 
   const diff = end.diff(now);

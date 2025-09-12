@@ -114,7 +114,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
 
     const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
 
-    const canRedelegate = hasDelegationPeriodPassed && !isInUnlockPeriod && !hasUnlockPeriodPassed;
+    const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed;
     const canUnlockStake = delegationWaitTime === 'allowed' && !isInUnlockPeriod;
 
     return {

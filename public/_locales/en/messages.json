@@ -3417,7 +3417,7 @@
     "message": "Earn your first reward in ~21 days, then receive payouts every ~3 days."
   },
   "stakeListItem2": {
-    "message": "Your MVRK tokens stay in your wallet, under your control. Use them anytime!"
+    "message": "Your MVRK stays in your wallet, under your control. Use them anytime!"
   },
   "delegatePlanListOption1": {
     "message": "Earn competitive yields that adjust with network activity"
@@ -3444,10 +3444,10 @@
     "message": "Penalties may apply if validators misbehave"
   },
   "stakePlanOption1": {
-    "message": "<b>Delegate</b> - Flexible and instant access to your tokens"
+    "message": "<b>Get Started - Delegate</b> - Flexible and instant access to your tokens"
   },
   "stakePlanOption2": {
-    "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
+    "message": "<b>Co-Stake</b> - 2X your rewards 🔥"
   },
   "delegateToValidator": {
     "message": "Delegate to Specific Validator"
@@ -3489,7 +3489,7 @@
     "message": "Stake your tokens to trusted validators"
   },
   "chooseStakingPlanMsg": {
-    "message": "Choose Your Staking Plan:"
+    "message": "Start Staking:"
   },
   "reStake": {
     "message": "Re-stake"

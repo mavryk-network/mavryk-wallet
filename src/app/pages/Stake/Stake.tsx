@@ -161,7 +161,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
   return (
     <div className={clsx(popup && 'px-4 pt-4')}>
       <div className="text-base text-white text-left">
-        <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">5.6%</span>} />
+        <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">15%</span>} />
       </div>
       <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 my-6">
         {unfamiliarDelegateList.map(item => (

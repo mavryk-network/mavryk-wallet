@@ -34,15 +34,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const { delegatedBalance, stakedBalance } = useMemo(() => {
-    const delegatedBalance = accStats?.stakedBalance ?? ZERO;
     const stakedBalance = accStats?.stakedBalance ?? ZERO;
     const unstakedBalance = accStats?.unstakedBalance ?? ZERO;
 
     return {
-      delegatedBalance: atomsToTokens(delegatedBalance, metadata?.decimals ?? 6),
+      delegatedBalance: balance,
       stakedBalance: atomsToTokens(stakedBalance === 0 ? unstakedBalance : stakedBalance, metadata?.decimals ?? 6)
     };
-  }, [accStats?.stakedBalance, accStats?.unstakedBalance, metadata?.decimals]);
+  }, [accStats?.stakedBalance, accStats?.unstakedBalance, balance, metadata?.decimals]);
 
   const classNameMemo = useMemo(
     () =>

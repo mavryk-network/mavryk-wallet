@@ -18,13 +18,13 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
-import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
+import { useAssetMetadata } from 'lib/metadata';
 import { useAccount, useKnownBaker, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens } from 'lib/temple/helpers';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
+import { ZERO } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { useBakingHistory } from '../Stake/hooks/use-baking-history';
@@ -42,10 +42,12 @@ export const CoStake: FC = () => {
 
   const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
-  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
+  const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const tezos = useTezos();
+
+  console.log(baker, 'baker');
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
@@ -139,10 +141,6 @@ export const CoStake: FC = () => {
     [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
-  const delegatedAmount = useMemo(() => {
-    return atomsToTokens(new BigNumber(baker?.stakedBalance ?? 0), assetMetadata?.decimals || MAVEN_METADATA.decimals);
-  }, [assetMetadata, baker]);
-
   return (
     <PageLayout isTopbarVisible={false} pageTitle={'Co-stake'} removePaddings={popup}>
       <ContentContainer className={clsx('h-full flex-1 flex flex-col text-white', !fullPage && 'pb-8 pt-4')}>
@@ -182,7 +180,7 @@ export const CoStake: FC = () => {
               <div className="text-white">
                 <div className="text-white text-sm flex items-center">
                   <div className={clsx('text-sm leading-none', 'text-white')}>
-                    <Money smallFractionFont={false}>{delegatedAmount}</Money> <span>{assetMetadata?.symbol}</span>
+                    <Money smallFractionFont={false}>{balance}</Money> <span>{assetMetadata?.symbol}</span>
                   </div>
                 </div>
               </div>

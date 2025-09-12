@@ -31,8 +31,8 @@ export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
   return new BigNumber(0);
 };
 
-export async function getAllBakersBakingBad() {
-  const bakers = (await bakingBadGetKnownBakers({})).map(baker => ({
+export async function getAllBakersBakingBad(baseUrl: string) {
+  const bakers = (await bakingBadGetKnownBakers({ baseUrl })).map(baker => ({
     ...baker,
     freeSpace: getBakerSpace(baker).toNumber(),
     minDelegation: 0,

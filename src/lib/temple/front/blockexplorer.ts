@@ -28,9 +28,10 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
       [
         TempleChainId.Mainnet,
         {
-          account: 'https://tzkt.io',
-          transaction: 'https://tzkt.io',
-          api: 'https://api.mavryk.network/mainnet'
+          account: 'https://nexus.mavryk.org/explorer/account/',
+          transaction: 'https://nexus.mavryk.org/explorer/operation/',
+          contract: 'https://nexus.mavryk.org/explorer/contract/',
+          api: 'https://api.mavryk.network/v1'
         }
       ],
       [

@@ -196,7 +196,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const bakingBadBaker = await bakingBadGetBaker({ address, configs: true });
+      const bakingBadBaker = await bakingBadGetBaker({ address, baseURL: net.rpcBaseURL, configs: true });
 
       // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
@@ -271,7 +271,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
 
 export function useKnownBakers(suspense = true) {
   const net = useNetwork();
-  const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
+  const { data: bakers } = useRetryableSWR(net.rpcBaseURL, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense

@@ -197,44 +197,57 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UpdateKYCAccountResponse);
   }, []);
 
-  const importAccount = useCallback(async (privateKey: string, encPassword?: string) => {
+  const importAccount = useCallback(async (privateKey: string, rpcUrl: string, encPassword?: string) => {
     const res = await request({
       type: TempleMessageType.ImportAccountRequest,
       privateKey,
+      rpcUrl,
       encPassword
     });
     assertResponse(res.type === TempleMessageType.ImportAccountResponse);
   }, []);
 
-  const importMnemonicAccount = useCallback(async (mnemonic: string, password?: string, derivationPath?: string) => {
-    const res = await request({
-      type: TempleMessageType.ImportMnemonicAccountRequest,
-      mnemonic,
-      password,
-      derivationPath
-    });
-    assertResponse(res.type === TempleMessageType.ImportMnemonicAccountResponse);
-  }, []);
+  const importMnemonicAccount = useCallback(
+    async (mnemonic: string, rpcUrl: string, password?: string, derivationPath?: string) => {
+      const res = await request({
+        type: TempleMessageType.ImportMnemonicAccountRequest,
+        mnemonic,
+        password,
+        rpcUrl,
+        derivationPath
+      });
+      assertResponse(res.type === TempleMessageType.ImportMnemonicAccountResponse);
+    },
+    []
+  );
 
-  const importFundraiserAccount = useCallback(async (email: string, password: string, mnemonic: string) => {
-    const res = await request({
-      type: TempleMessageType.ImportFundraiserAccountRequest,
-      email,
-      password,
-      mnemonic
-    });
-    assertResponse(res.type === TempleMessageType.ImportFundraiserAccountResponse);
-  }, []);
+  const importFundraiserAccount = useCallback(
+    async (email: string, password: string, mnemonic: string, rpcUrl: string) => {
+      const res = await request({
+        type: TempleMessageType.ImportFundraiserAccountRequest,
+        email,
+        password,
+        mnemonic,
+        rpcUrl
+      });
+      assertResponse(res.type === TempleMessageType.ImportFundraiserAccountResponse);
+    },
+    []
+  );
 
-  const importKTManagedAccount = useCallback(async (address: string, chainId: string, owner: string) => {
-    const res = await request({
-      type: TempleMessageType.ImportManagedKTAccountRequest,
-      address,
-      chainId,
-      owner
-    });
-    assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
-  }, []);
+  const importKTManagedAccount = useCallback(
+    async (address: string, chainId: string, owner: string, rpcUrl: string) => {
+      const res = await request({
+        type: TempleMessageType.ImportManagedKTAccountRequest,
+        address,
+        chainId,
+        owner,
+        rpcUrl
+      });
+      assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
+    },
+    []
+  );
 
   const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, accName?: string) => {
     const res = await request({
@@ -247,10 +260,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   }, []);
 
   const createLedgerAccount = useCallback(
-    async (name: string, derivationType?: DerivationType, derivationPath?: string) => {
+    async (name: string, rpcUrl: string, derivationType?: DerivationType, derivationPath?: string) => {
       const res = await request({
         type: TempleMessageType.CreateLedgerAccountRequest,
         name,
+        rpcUrl,
         derivationPath,
         derivationType
       });

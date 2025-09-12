@@ -80,7 +80,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 
   const chainId = useChainIdValue(networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Atlas;
+  const mainnet = chainId === TempleChainId.Mainnet;
 
   const allAccounts = useRelevantAccounts();
   const account = useMemo(

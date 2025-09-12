@@ -38,10 +38,8 @@ export async function getPublicKeyAndHash(privateKey: string) {
   return Promise.all([signer.publicKey(), signer.publicKeyHash()]);
 }
 
-// TODO change later with networks
-export async function getKYCStatus(pkh: string, apiUrl = 'https://atlasnet.api.mavryk.network') {
+export async function getKYCStatus(pkh: string, apiUrl: string) {
   try {
-    // TODO ad chain data
     const storageRes: any = await fetch(`${apiUrl}/v1/contracts/${KYC_CONTRACT}/storage/`);
     const bigMapId = (await storageRes.json()).memberLedger;
 

@@ -348,7 +348,7 @@ export class Vault {
     });
   }
 
-  async importAccount(accPrivateKey: string, encPassword?: string) {
+  async importAccount(accPrivateKey: string, rpcUrl: string, encPassword?: string) {
     const errMessage = 'Failed to import account.\nThis may happen because provided Key is invalid';
 
     return withError(errMessage, async () => {
@@ -360,8 +360,7 @@ export class Vault {
         signer.publicKeyHash()
       ]);
 
-      // TODO get api url from props
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash, rpcUrl);
 
       const newAccount: TempleAccount = {
         type: TempleAccountType.Imported,
@@ -384,7 +383,7 @@ export class Vault {
     });
   }
 
-  async importMnemonicAccount(mnemonic: string, password?: string, derivationPath?: string) {
+  async importMnemonicAccount(mnemonic: string, rpcUrl: string, password?: string, derivationPath?: string) {
     return withError('Failed to import account', async () => {
       let seed;
       try {
@@ -398,24 +397,24 @@ export class Vault {
       }
 
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey);
+      return this.importAccount(privateKey, rpcUrl);
     });
   }
 
-  async importFundraiserAccount(email: string, password: string, mnemonic: string) {
+  async importFundraiserAccount(email: string, password: string, mnemonic: string, rpcUrl: string) {
     return withError('Failed to import fundraiser account', async () => {
       const seed = Bip39.mnemonicToSeedSync(mnemonic, `${email}${password}`);
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey);
+      return this.importAccount(privateKey, rpcUrl);
     });
   }
 
-  async importManagedKTAccount(accPublicKeyHash: string, chainId: string, owner: string) {
+  async importManagedKTAccount(accPublicKeyHash: string, chainId: string, owner: string, rpcUrl: string) {
     return withError('Failed to import Managed KT account', async () => {
       const allAccounts = await this.fetchAccounts();
 
       // TODO get api url from props
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash, rpcUrl);
       const newAccount: TempleAccount = {
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
@@ -458,7 +457,7 @@ export class Vault {
     });
   }
 
-  async createLedgerAccount(name: string, derivationPath?: string, derivationType?: DerivationType) {
+  async createLedgerAccount(name: string, rpcUrl: string, derivationPath?: string, derivationType?: DerivationType) {
     return withError('Failed to connect Ledger account', async () => {
       if (!derivationPath) derivationPath = getMainDerivationPath(0);
 
@@ -468,8 +467,7 @@ export class Vault {
         const accPublicKey = await signer.publicKey();
         const accPublicKeyHash = await signer.publicKeyHash();
 
-        // TODO get api url from props
-        const isKYC = await getKYCStatus(accPublicKeyHash);
+        const isKYC = await getKYCStatus(accPublicKeyHash, rpcUrl);
 
         const newAccount: TempleAccount = {
           type: TempleAccountType.Ledger,

@@ -15,7 +15,7 @@ import { useFormAnalytics } from 'lib/analytics';
 import { getOneUserContracts, TzktRelatedContract, isKnownChainId } from 'lib/apis/tzkt';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
-import { useRelevantAccounts, useTezos, useTempleClient, useChainId } from 'lib/temple/front';
+import { useRelevantAccounts, useTezos, useTempleClient, useChainId, useNetwork } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -36,6 +36,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const formAnalytics = useFormAnalytics(ImportAccountFormType.ManagedKT);
   const chainId = useChainId(true);
   const { popup } = useAppEnv();
+  const { rpcBaseURL: rpcUrl } = useNetwork();
 
   const [error, setError] = useState<ReactNode>(null);
 
@@ -120,7 +121,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         }
 
         const chain = await tezos.rpc.getChainId();
-        await importKTManagedAccount(address, chain, owner);
+        await importKTManagedAccount(address, chain, owner, rpcUrl);
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -133,7 +134,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         setError(err.message);
       }
     },
-    [formState, tezos, accounts, importKTManagedAccount, formAnalytics]
+    [formState, tezos, accounts, importKTManagedAccount, formAnalytics, rpcUrl]
   );
 
   const handleKnownContractSelect = useCallback(

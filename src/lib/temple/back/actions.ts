@@ -185,32 +185,30 @@ export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
   });
 }
 
-// TODO add update KYC
-
-export function importAccount(privateKey: string, encPassword?: string) {
+export function importAccount(privateKey: string, rpcUrl: string, encPassword?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importAccount(privateKey, encPassword);
+    const updatedAccounts = await vault.importAccount(privateKey, rpcUrl, encPassword);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function importMnemonicAccount(mnemonic: string, password?: string, derivationPath?: string) {
+export function importMnemonicAccount(mnemonic: string, rpcUrl: string, password?: string, derivationPath?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importMnemonicAccount(mnemonic, password, derivationPath);
+    const updatedAccounts = await vault.importMnemonicAccount(mnemonic, rpcUrl, password, derivationPath);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function importFundraiserAccount(email: string, password: string, mnemonic: string) {
+export function importFundraiserAccount(email: string, password: string, mnemonic: string, rpcUrl: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic);
+    const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic, rpcUrl);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function importManagedKTAccount(address: string, chainId: string, owner: string) {
+export function importManagedKTAccount(address: string, chainId: string, owner: string, rpcUrl: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importManagedKTAccount(address, chainId, owner);
+    const updatedAccounts = await vault.importManagedKTAccount(address, chainId, owner, rpcUrl);
     accountsUpdated(updatedAccounts);
   });
 }
@@ -222,9 +220,14 @@ export function importWatchOnlyAccount(address: string, chainId?: string, accNam
   });
 }
 
-export function createLedgerAccount(name: string, derivationPath?: string, derivationType?: DerivationType) {
+export function createLedgerAccount(
+  name: string,
+  rpcUrl: string,
+  derivationPath?: string,
+  derivationType?: DerivationType
+) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.createLedgerAccount(name, derivationPath, derivationType);
+    const updatedAccounts = await vault.createLedgerAccount(name, rpcUrl, derivationPath, derivationType);
     accountsUpdated(updatedAccounts);
   });
 }

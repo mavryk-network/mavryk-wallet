@@ -3899,6 +3899,12 @@
   "unlockYourStakeDesc": {
     "message": "Unlocking staked funds initiates a 4 cycles (12 days) waiting period. During this time, your assets remain delegated to your current validator and are inaccessible for withdrawal."
   },
+  "manageMVRK": {
+    "message": "Manage your MVRK Co-Stake"
+  },
+  "choosePortionMVRK": {
+    "message": "You can choose to co-stake a portion of your MVRK, or all of it."
+  },
   "unlockYourStakeFirstDesc": {
     "message": " Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
   }

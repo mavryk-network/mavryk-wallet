@@ -150,12 +150,7 @@ export const CoStake: FC = () => {
         <div>
           <p className="text-base-plus mb-3">Stake to</p>
           {myBakerPkh && <CoStakeBakerBanner bakerPkh={myBakerPkh} />}
-          <Alert
-            type="info"
-            className="my-4"
-            title="Manage, adjust, or co-stake your MVRK"
-            description="You can choose to co-stake only a portion of your MVRK, without needing to commit all of it."
-          />
+          <Alert type="info" className="my-4" title={t('manageMVRK')} description={t('choosePortionMVRK')} />
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="amount"

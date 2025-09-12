@@ -182,7 +182,7 @@ export const UnlockCoStake: FC = () => {
                 </div>
               </div>
             </div>
-            {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 px-4" />}
+            {operation && <OperationStatus typeTitle={'Unlocking'} operation={operation} className="mb-8 px-4" />}
             <FormSubmitButton
               loading={formState.isSubmitting}
               disabled={Boolean(

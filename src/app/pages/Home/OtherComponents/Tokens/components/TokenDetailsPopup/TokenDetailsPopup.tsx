@@ -219,9 +219,14 @@ type BakerBannerSectionProps = {
 };
 
 const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
+  const acc = useAccount();
+
+  const disabled = acc.type === TempleAccountType.WatchOnly;
   const handleButtonClick = useCallback(() => {
-    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
-  }, []);
+    if (!disabled) {
+      navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
+    }
+  }, [disabled]);
 
   const NotStakedBanner = useMemo(
     () => (
@@ -229,17 +234,19 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
         <div className="text-white text-sm">
           <T id="stakeYourTokensBannerDescription" />
         </div>
-        <ButtonRounded size="big" fill onClick={handleButtonClick} className="w-full">
+        <ButtonRounded size="big" fill onClick={handleButtonClick} className="w-full" disabled={disabled}>
           <T id="stake" />
         </ButtonRounded>
       </div>
     ),
-    [handleButtonClick]
+    [handleButtonClick, disabled]
   );
 
   const handleRedelegateClick = useCallback(() => {
-    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
-  }, []);
+    if (!disabled) {
+      navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
+    }
+  }, [disabled]);
 
   const StakedBanner = useMemo(
     () =>

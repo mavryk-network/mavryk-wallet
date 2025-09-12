@@ -10,6 +10,7 @@ import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useAccount, useDelegate, useKnownBaker } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { AssetsSelectors } from '../../../Assets.selectors';
@@ -71,19 +72,24 @@ export const StakeTezosTag: FC = () => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
-      navigate('/stake');
+
+      if (acc.type !== TempleAccountType.WatchOnly) {
+        navigate('/stake');
+      }
     },
-    [trackEvent]
+    [acc.type, trackEvent]
   );
+
+  const isBtnDisabled = acc.type === TempleAccountType.WatchOnly;
 
   const NotStakedButton = useMemo(
     () => (
-      <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick}>
+      <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick} disabled={isBtnDisabled}>
         <T id="stakeToEarn" />
         <span>&#x1F525;</span>
       </AlertWithAction>
     ),
-    [handleTagClick]
+    [handleTagClick, isBtnDisabled]
   );
 
   const StakedButton = useMemo(

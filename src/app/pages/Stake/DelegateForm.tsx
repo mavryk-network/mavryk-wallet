@@ -605,6 +605,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const { canRedelegate, canCostake, canUnlock, stakedBalance } = data;
   const delegateLabel = getDelegateLabel(data);
 
+  const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;
+
   const close = useCallback((key: keyof typeof opened) => {
     setOpened(prev => ({ ...prev, [key]: false }));
   }, []);
@@ -674,10 +676,20 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
 
   return (
     <div className="grid gap-3 grid-cols-2">
-      <ButtonRounded size="xs" fill={false} onClick={handleRedelegateClick} disabled={!canRedelegate}>
+      <ButtonRounded
+        size="xs"
+        fill={false}
+        onClick={handleRedelegateClick}
+        disabled={isWatchOnlyAccount || !canRedelegate}
+      >
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleDelegateClickbasedOnPeriod} disabled={isStakeButtonDisabled}>
+      <ButtonRounded
+        size="xs"
+        fill
+        onClick={handleDelegateClickbasedOnPeriod}
+        disabled={isWatchOnlyAccount || isStakeButtonDisabled}
+      >
         {delegateLabel}
       </ButtonRounded>
 

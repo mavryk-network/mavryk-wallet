@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -10,6 +10,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
 import { useAccount, useNetwork, useTempleClient } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -18,9 +19,15 @@ import { signKYCAction } from './utils/tezosSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
-  const { isKYC = false } = useAccount();
+  const { isKYC = false, type } = useAccount();
   const [navigateToForm, setNavigateToForm] = useState(isKYC);
   const { fullPage, popup } = useAppEnv();
+
+  useEffect(() => {
+    if (type === TempleAccountType.WatchOnly) {
+      navigate('/');
+    }
+  }, [type]);
 
   return (
     <PageLayout

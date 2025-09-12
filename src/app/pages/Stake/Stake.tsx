@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -7,7 +7,9 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
-import { useLocation } from 'lib/woozie';
+import { useAccount } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
+import { navigate, useLocation } from 'lib/woozie';
 
 import DelegateForm from './DelegateForm';
 import { useBakingHistory } from './hooks/use-baking-history';
@@ -20,6 +22,13 @@ export const Stake: FC = () => {
   const { state } = useLocation();
   const [isReDelegationActive, setIsReDelegationActive] = useState(() => unfamiliarWithDelegation || state?.state);
   const { fullPage, popup } = useAppEnv();
+  const account = useAccount();
+
+  useEffect(() => {
+    if (account.type === TempleAccountType.WatchOnly) {
+      navigate('/');
+    }
+  }, [account.type]);
 
   const label = useMemo(() => {
     let labelToShow: TID = 'delegate';

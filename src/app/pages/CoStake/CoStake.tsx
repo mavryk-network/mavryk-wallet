@@ -21,6 +21,7 @@ import { T, t, toLocalFixed } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
 import { useAccount, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
+import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
@@ -61,10 +62,12 @@ export const CoStake: FC = () => {
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   useEffect(() => {
-    if (unfamiliarWithDelegation) {
+    if (account.type === TempleAccountType.WatchOnly) {
+      navigate('/');
+    } else if (unfamiliarWithDelegation) {
       navigate('stake');
     }
-  }, [unfamiliarWithDelegation, account.publicKeyHash]);
+  }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {

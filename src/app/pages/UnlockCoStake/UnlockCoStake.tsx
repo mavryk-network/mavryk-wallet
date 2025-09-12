@@ -15,15 +15,14 @@ import { CoStakeBakerBanner } from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
-import { useBalance } from 'lib/balances';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { atomsToTokens } from 'lib/temple/helpers';
+import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { ZERO } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { useBakingHistory } from '../Stake/hooks/use-baking-history';
@@ -41,8 +40,6 @@ export const UnlockCoStake: FC = () => {
 
   // const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
-  const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
-  const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const tezos = useTezos();
 
@@ -61,10 +58,12 @@ export const UnlockCoStake: FC = () => {
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   useEffect(() => {
-    if (unfamiliarWithDelegation) {
+    if (account.type === TempleAccountType.WatchOnly) {
+      navigate('/');
+    } else if (unfamiliarWithDelegation) {
       navigate('stake');
     }
-  }, [unfamiliarWithDelegation, account.publicKeyHash]);
+  }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {

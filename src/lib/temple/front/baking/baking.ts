@@ -31,8 +31,6 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
-// returning { delegate: { address: null } } instead of just null
-
 const emptyAccountResponse = { delegate: { address: null } };
 export function useDelegate<T = TzktUserAccount>(
   address: string,
@@ -88,6 +86,7 @@ export function useDelegate<T = TzktUserAccount>(
   // @ts-expect-error // forced type for delegate address
   return useSWR(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation], getDelegate, {
     dedupingInterval: 20_000,
+    refreshInterval: 15_000,
     suspense
   });
 }

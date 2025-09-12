@@ -687,11 +687,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
         handleReDelegateNavigation={handleReDelegateNavigation}
       />
       <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} stakedBalance={stakedBalance} />
-      <UnlockFisrtPopup
-        opened={opened.firstUnlock}
-        close={close.bind(null, 'firstUnlock')}
-        openUnlockPopup={open.bind(null, 'unlock')}
-      />
+      <UnlockFisrtPopup opened={opened.firstUnlock} close={close.bind(null, 'firstUnlock')} />
     </div>
   );
 };

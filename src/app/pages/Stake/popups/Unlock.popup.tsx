@@ -4,47 +4,22 @@ import classNames from 'clsx';
 
 import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { MAVEN_METADATA } from 'lib/metadata';
-import { useTezos } from 'lib/temple/front';
-import { atomsToTokens } from 'lib/temple/helpers';
 import { navigate } from 'lib/woozie';
 
 type UnlockPopupProps = {
   opened: boolean;
   close: () => void;
-  stakedBalance: number;
 };
 
-export const UnlockPopup: FC<UnlockPopupProps> = ({ opened, close, stakedBalance }) => {
+export const UnlockPopup: FC<UnlockPopupProps> = ({ opened, close }) => {
   const { popup } = useAppEnv();
-  const tezos = useTezos();
-  const [error, setError] = React.useState<string | null>(null);
 
   const handleUnlock = useCallback(async () => {
-    try {
-      close();
-
-      await tezos.wallet
-        .unstake({
-          amount: atomsToTokens(stakedBalance, MAVEN_METADATA.decimals).toNumber()
-        })
-        .send();
-
-      navigate<SuccessStateType>('/success', undefined, {
-        pageTitle: 'unlock',
-        subHeader: 'success',
-        description: 'unlockSuccessMsg',
-        btnText: 'backToValidator',
-        btnLink: '/stake'
-      });
-    } catch (err) {
-      console.error(err);
-      setError(err.message ?? 'Unable to unlock your stake balance!');
-    }
-  }, [close, stakedBalance, tezos.wallet]);
+    close();
+    navigate('/unlock-stake');
+  }, [close]);
 
   return (
     <PopupModalWithTitle
@@ -63,10 +38,9 @@ export const UnlockPopup: FC<UnlockPopupProps> = ({ opened, close, stakedBalance
             <T id="cancel" />
           </ButtonRounded>
           <ButtonRounded size="big" fill onClick={handleUnlock}>
-            <T id="unlock" />
+            <T id="proceedToUnlock" />
           </ButtonRounded>
         </div>
-        {error && <div className="text-primary-error mt-4 text-center text-base">{error}</div>}
       </div>
     </PopupModalWithTitle>
   );

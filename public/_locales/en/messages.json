@@ -3887,6 +3887,12 @@
   "coStaked": {
     "message": "Co-staked"
   },
+  "unlockStake": {
+    "message": "Unlock Stake"
+  },
+  "stakedAmount": {
+    "message": "Staked Amount"
+  },
   "allValidators": {
     "message": "All Validators"
   },
@@ -3902,10 +3908,13 @@
   "manageMVRK": {
     "message": "Manage your MVRK Co-Stake"
   },
-  "choosePortionMVRK": {
+  "choosePortionMVRKStake": {
     "message": "You can choose to co-stake a portion of your MVRK, or all of it."
   },
+  "choosePortionMVRKUnlock": {
+    "message": "You can choose to unlock a portion of your co-staked MVRK, or all of it."
+  },
   "unlockYourStakeFirstDesc": {
-    "message": " Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
+    "message": "Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
   }
 }

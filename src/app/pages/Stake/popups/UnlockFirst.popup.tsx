@@ -6,22 +6,20 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { delay } from 'lib/utils';
+import { navigate } from 'lib/woozie';
 
 type UnlockFisrtPopupProps = {
   opened: boolean;
   close: () => void;
-  openUnlockPopup: () => void;
 };
 
-export const UnlockFisrtPopup: FC<UnlockFisrtPopupProps> = ({ opened, close, openUnlockPopup }) => {
+export const UnlockFisrtPopup: FC<UnlockFisrtPopupProps> = ({ opened, close }) => {
   const { popup } = useAppEnv();
 
   const proceedToUnlock = useCallback(async () => {
     close();
-    await delay();
-    openUnlockPopup();
-  }, [close, openUnlockPopup]);
+    navigate('/unlock-stake');
+  }, [close]);
 
   return (
     <PopupModalWithTitle

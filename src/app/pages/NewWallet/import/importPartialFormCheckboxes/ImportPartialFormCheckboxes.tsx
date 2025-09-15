@@ -67,16 +67,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
         errorCaption={errors.betaAgreement?.message}
         name="betaAgreement"
         testID={setWalletPasswordSelectors.betaAgreementCheckbox}
-        label={
-          <T
-            id="betaAgreementMsg"
-            substitutions={[
-              <span className="text-accent-blue uppercase">
-                <T id="beta" key="beta" />
-              </span>
-            ]}
-          />
-        }
+        label={<T id="betaAgreementMsg" />}
       />
 
       <FormCheckbox

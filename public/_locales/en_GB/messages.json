@@ -288,12 +288,7 @@
     }
   },
   "betaAgreementMsg": {
-    "message": "I understand that this web extension is in $beta$ and is only connected to the Testnet. I should not send real funds to this wallet.",
-    "placeholders": {
-      "beta": {
-        "content": "$1"
-      }
-    }
+    "message": "I understand that this web extension operates for both Mainnet and Testnet networks for Mavryk. Before sending funds, make to you are sending them on the correct network. Always verify."
   },
   "skipOnboarding": {
     "message": "Skip onboarding"

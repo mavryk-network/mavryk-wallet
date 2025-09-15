@@ -7,7 +7,7 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useNetwork, useTempleClient } from 'lib/temple/front';
+import { useChainId, useTempleClient } from 'lib/temple/front';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
 
@@ -23,7 +23,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
   const { importAccount } = useTempleClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
-  const { rpcBaseURL: rpcUrl } = useNetwork();
+  const chainId = useChainId();
 
   const { register, handleSubmit, errors, formState, watch } = useForm<ByPrivateKeyFormData>();
   const [error, setError] = useState<ReactNode>(null);
@@ -35,7 +35,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
       formAnalytics.trackSubmit();
       setError(null);
       try {
-        await importAccount(privateKey.replace(/\s/g, ''), rpcUrl, encPassword);
+        await importAccount(privateKey.replace(/\s/g, ''), chainId!, encPassword);
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -48,7 +48,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
         setError(err.message);
       }
     },
-    [importAccount, formState.isSubmitting, setError, formAnalytics, rpcUrl]
+    [importAccount, formState.isSubmitting, setError, formAnalytics, chainId]
   );
 
   const keyValue = watch('privateKey') ?? '';

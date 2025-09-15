@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { t } from 'lib/i18n';
-import { useNetwork, useTempleClient } from 'lib/temple/front';
+import { useChainId, useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 
 import { defaultNumberOfWords } from './constants';
@@ -28,7 +28,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const [error, setError] = useState<ReactNode>(null);
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Fundraiser);
   const { popup } = useAppEnv();
-  const { rpcBaseURL: rpcUrl } = useNetwork();
+  const chainId = useChainId();
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [seedError, setSeedError] = useState('');
@@ -43,7 +43,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
         formAnalytics.trackSubmit();
         setError(null);
         try {
-          await importFundraiserAccount(data.email, data.password, formatMnemonic(seedPhrase), rpcUrl);
+          await importFundraiserAccount(data.email, data.password, formatMnemonic(seedPhrase), chainId!);
 
           formAnalytics.trackSubmitSuccess();
         } catch (err: any) {
@@ -59,16 +59,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
         setSeedError(t('mnemonicWordsAmountConstraint', [numberOfWords]) as string);
       }
     },
-    [
-      seedPhrase,
-      importFundraiserAccount,
-      formState.isSubmitting,
-      setError,
-      seedError,
-      formAnalytics,
-      numberOfWords,
-      rpcUrl
-    ]
+    [formState.isSubmitting, seedError, seedPhrase, formAnalytics, importFundraiserAccount, chainId, numberOfWords]
   );
 
   const resetSeedPhrase = useCallback(() => void setSeedPhrase(''), []);

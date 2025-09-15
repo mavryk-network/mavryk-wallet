@@ -10,7 +10,7 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useNetwork, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import { useChainId, useTempleClient, validateDerivationPath } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 
 import { defaultNumberOfWords } from './constants';
@@ -37,7 +37,7 @@ interface ByMnemonicFormData {
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
   const { importMnemonicAccount } = useTempleClient();
-  const { rpcBaseURL: rpcUrl } = useNetwork();
+  const chainId = useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -66,7 +66,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
         try {
           await importMnemonicAccount(
             formatMnemonic(seedPhrase),
-            rpcUrl,
+            chainId!,
             password || undefined,
             derivationPath === 'custom' ? customDerivationPath || undefined : DEFAULT_DERIVATION_PATH
           );
@@ -94,7 +94,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       derivationPath,
       formAnalytics,
       numberOfWords,
-      rpcUrl
+      chainId
     ]
   );
 

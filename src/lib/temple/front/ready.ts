@@ -5,7 +5,7 @@ import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
 import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
 import constate from 'constate';
 
-import { useInitialKYC } from 'app/pages/Home/hooks/useInitialKYC';
+import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
@@ -16,7 +16,8 @@ import {
   TempleStatus,
   TempleState,
   TempleNotification,
-  TempleMessageType
+  TempleMessageType,
+  TempleAccount
 } from 'lib/temple/types';
 
 import { intercom, useTempleClient } from './client';
@@ -104,7 +105,7 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
-  useInitialKYC(account);
+  useInitialKYC(account, templeFront.updateAccountKYCStatus);
 
   /**
    * Error boundary reset
@@ -156,7 +157,7 @@ function useReadyTemple() {
 
 export function useChainId(suspense?: boolean) {
   const tezos = useTezos();
-  const rpcUrl = useMemo(() => tezos.rpc.getRpcUrl(), [tezos]);
+  const rpcUrl = useMemo(() => tezos?.rpc?.getRpcUrl(), [tezos]);
 
   const { data: chainId } = useChainIdLoading(rpcUrl, suspense);
 
@@ -206,6 +207,23 @@ export function useRelevantAccounts(withExtraTypes = true) {
 
   return useMemo(() => relevantAccounts, [relevantAccounts]);
 }
+
+export const useInitialKYC = (
+  acc: TempleAccount,
+  updateAccountKYCStatus: (accountPublicKeyHash: string, isKYC: boolean) => Promise<void>
+) => {
+  const chainId = useChainId();
+
+  useEffect(() => {
+    if (chainId) {
+      (async function () {
+        const isKYC = await getKYCStatus(acc.publicKeyHash, chainId);
+
+        await updateAccountKYCStatus(acc.publicKeyHash, isKYC);
+      })();
+    }
+  }, [acc.publicKeyHash, chainId, updateAccountKYCStatus]);
+};
 
 export class ReactiveTezosToolkit extends MavrykToolkit {
   constructor(rpc: string | RpcClientInterface, public checksum: string) {

@@ -197,23 +197,23 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UpdateKYCAccountResponse);
   }, []);
 
-  const importAccount = useCallback(async (privateKey: string, rpcUrl: string, encPassword?: string) => {
+  const importAccount = useCallback(async (privateKey: string, chainId: string, encPassword?: string) => {
     const res = await request({
       type: TempleMessageType.ImportAccountRequest,
       privateKey,
-      rpcUrl,
+      chainId,
       encPassword
     });
     assertResponse(res.type === TempleMessageType.ImportAccountResponse);
   }, []);
 
   const importMnemonicAccount = useCallback(
-    async (mnemonic: string, rpcUrl: string, password?: string, derivationPath?: string) => {
+    async (mnemonic: string, chainId: string, password?: string, derivationPath?: string) => {
       const res = await request({
         type: TempleMessageType.ImportMnemonicAccountRequest,
         mnemonic,
         password,
-        rpcUrl,
+        chainId,
         derivationPath
       });
       assertResponse(res.type === TempleMessageType.ImportMnemonicAccountResponse);
@@ -222,32 +222,28 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   );
 
   const importFundraiserAccount = useCallback(
-    async (email: string, password: string, mnemonic: string, rpcUrl: string) => {
+    async (email: string, password: string, mnemonic: string, chainId: string) => {
       const res = await request({
         type: TempleMessageType.ImportFundraiserAccountRequest,
         email,
         password,
         mnemonic,
-        rpcUrl
+        chainId
       });
       assertResponse(res.type === TempleMessageType.ImportFundraiserAccountResponse);
     },
     []
   );
 
-  const importKTManagedAccount = useCallback(
-    async (address: string, chainId: string, owner: string, rpcUrl: string) => {
-      const res = await request({
-        type: TempleMessageType.ImportManagedKTAccountRequest,
-        address,
-        chainId,
-        owner,
-        rpcUrl
-      });
-      assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
-    },
-    []
-  );
+  const importKTManagedAccount = useCallback(async (address: string, chainId: string, owner: string) => {
+    const res = await request({
+      type: TempleMessageType.ImportManagedKTAccountRequest,
+      address,
+      chainId,
+      owner
+    });
+    assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
+  }, []);
 
   const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, accName?: string) => {
     const res = await request({
@@ -260,11 +256,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   }, []);
 
   const createLedgerAccount = useCallback(
-    async (name: string, rpcUrl: string, derivationType?: DerivationType, derivationPath?: string) => {
+    async (name: string, chainId: string, derivationType?: DerivationType, derivationPath?: string) => {
       const res = await request({
         type: TempleMessageType.CreateLedgerAccountRequest,
         name,
-        rpcUrl,
+        chainId,
         derivationPath,
         derivationType
       });

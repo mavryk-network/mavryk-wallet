@@ -13,6 +13,7 @@ import {
   getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
+import { TZKT_API_BASE_URLS, TzktApiChainId } from 'lib/apis/tzkt/api';
 import type { TzktUserAccount } from 'lib/apis/tzkt/types';
 import { useRetryableSWR } from 'lib/swr';
 import type { ReactiveTezosToolkit } from 'lib/temple/front';
@@ -139,23 +140,6 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     };
   }, [accStats]);
 
-  console.log({
-    myBakerPkh: accStats?.delegate?.address ?? null,
-    isDelegated: Boolean(accStats?.delegate?.address),
-    isInDelegationPeriod: delegationWaitTime !== 'allowed',
-    isInCostakePeriod,
-    hasDelegationPeriodPassed: hasDelegationPeriodPassed,
-    isInUnlockPeriod: isInUnlockPeriod,
-    hasUnlockPeriodPassed: hasUnlockPeriodPassed,
-    canRedelegate: canRedelegate,
-    canCostake: !isInUnlockPeriod,
-    canUnlock: canUnlockStake,
-    unlockWaitTime,
-    costakeWaitTime,
-    delegationWaitTime,
-    stakedBalance: accStats?.stakedBalance ?? 0,
-    unstakedBalance: accStats?.unstakedBalance ?? 0
-  });
   return {
     myBakerPkh: accStats?.delegate?.address ?? null,
     isDelegated: Boolean(accStats?.delegate?.address),
@@ -224,10 +208,13 @@ const defaultRewardConfigHistory = [
 
 export function useKnownBaker(address: string | null, suspense = true) {
   const net = useNetwork();
+  const chainId = useChainId();
+
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const bakingBadBaker = await bakingBadGetBaker({ address, baseURL: net.rpcBaseURL, configs: true });
+      const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
+      const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
       // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
@@ -301,8 +288,12 @@ export function useKnownBaker(address: string | null, suspense = true) {
 // };
 
 export function useKnownBakers(suspense = true) {
-  const net = useNetwork();
-  const { data: bakers } = useRetryableSWR(net.rpcBaseURL, getAllBakersBakingBad, {
+  const chainId = useChainId();
+
+  // eslint-disable-next-line no-type-assertion/no-type-assertion
+  const baseApiUrl = chainId ? TZKT_API_BASE_URLS[chainId as TzktApiChainId] : '';
+
+  const { data: bakers } = useRetryableSWR(baseApiUrl, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense

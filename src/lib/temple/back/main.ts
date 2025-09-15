@@ -115,25 +115,25 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.ImportAccountRequest:
-      await Actions.importAccount(req.privateKey, req.rpcUrl, req.encPassword);
+      await Actions.importAccount(req.privateKey, req.chainId, req.encPassword);
       return {
         type: TempleMessageType.ImportAccountResponse
       };
 
     case TempleMessageType.ImportMnemonicAccountRequest:
-      await Actions.importMnemonicAccount(req.mnemonic, req.rpcUrl, req.password, req.derivationPath);
+      await Actions.importMnemonicAccount(req.mnemonic, req.chainId, req.password, req.derivationPath);
       return {
         type: TempleMessageType.ImportMnemonicAccountResponse
       };
 
     case TempleMessageType.ImportFundraiserAccountRequest:
-      await Actions.importFundraiserAccount(req.email, req.password, req.mnemonic, req.rpcUrl);
+      await Actions.importFundraiserAccount(req.email, req.password, req.mnemonic, req.chainId);
       return {
         type: TempleMessageType.ImportFundraiserAccountResponse
       };
 
     case TempleMessageType.ImportManagedKTAccountRequest:
-      await Actions.importManagedKTAccount(req.address, req.chainId, req.owner, req.rpcUrl);
+      await Actions.importManagedKTAccount(req.address, req.chainId, req.owner);
       return {
         type: TempleMessageType.ImportManagedKTAccountResponse
       };
@@ -145,7 +145,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.CreateLedgerAccountRequest:
-      await Actions.createLedgerAccount(req.name, req.rpcUrl, req.derivationPath, req.derivationType);
+      await Actions.createLedgerAccount(req.name, req.chainId, req.derivationPath, req.derivationType);
       return {
         type: TempleMessageType.CreateLedgerAccountResponse
       };

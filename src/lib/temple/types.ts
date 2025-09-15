@@ -517,7 +517,7 @@ interface TempleUpdateKYCAccountResponse extends TempleMessageBase {
 
 interface TempleImportAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportAccountRequest;
-  rpcUrl: string;
+  chainId: string;
   privateKey: string;
   encPassword?: string;
 }
@@ -529,7 +529,7 @@ interface TempleImportAccountResponse extends TempleMessageBase {
 interface TempleImportMnemonicAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportMnemonicAccountRequest;
   mnemonic: string;
-  rpcUrl: string;
+  chainId: string;
   password?: string;
   derivationPath?: string;
 }
@@ -543,7 +543,7 @@ interface TempleImportFundraiserAccountRequest extends TempleMessageBase {
   email: string;
   password: string;
   mnemonic: string;
-  rpcUrl: string;
+  chainId: string;
 }
 
 interface TempleImportFundraiserAccountResponse extends TempleMessageBase {
@@ -555,7 +555,6 @@ interface TempleImportManagedKTAccountRequest extends TempleMessageBase {
   address: string;
   chainId: string;
   owner: string;
-  rpcUrl: string;
 }
 
 interface TempleImportManagedKTAccountResponse extends TempleMessageBase {
@@ -576,7 +575,7 @@ interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
 interface TempleCreateLedgerAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateLedgerAccountRequest;
   name: string;
-  rpcUrl: string;
+  chainId: string;
   derivationPath?: string;
   derivationType?: DerivationType;
 }

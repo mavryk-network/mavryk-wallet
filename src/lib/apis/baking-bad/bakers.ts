@@ -40,6 +40,7 @@ export async function getAllBakersBakingBad(baseUrl: string) {
     fee: 0
   }));
 
+  // eslint-disable-next-line no-type-assertion/no-type-assertion
   return bakers.filter(baker => typeof baker !== 'string') as BakingBadBaker[];
 }
 

@@ -64,6 +64,7 @@ function useReadyTemple() {
    */
 
   const defaultNet = allNetworks[0];
+
   const [networkId, setNetworkId] = usePassiveStorage('network_id', defaultNet.id);
 
   useEffect(() => {
@@ -105,8 +106,6 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
-  useInitialKYC(account, templeFront.updateAccountKYCStatus);
-
   /**
    * Error boundary reset
    */
@@ -132,6 +131,18 @@ function useReadyTemple() {
 
     return t;
   }, [createTaquitoSigner, createTaquitoWallet, network, account]);
+
+  // Get user KYC status ---------------
+  useEffect(() => {
+    (async function () {
+      const rpcUrl = tezos?.rpc?.getRpcUrl();
+
+      const chainId = await loadChainId(rpcUrl).catch(() => null);
+      const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
+
+      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+    })();
+  }, [tezos, account, templeFront.updateAccountKYCStatus, templeFront]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {
@@ -160,7 +171,6 @@ export function useChainId(suspense?: boolean) {
   const rpcUrl = useMemo(() => tezos?.rpc?.getRpcUrl(), [tezos]);
 
   const { data: chainId } = useChainIdLoading(rpcUrl, suspense);
-
   return chainId;
 }
 
@@ -207,23 +217,6 @@ export function useRelevantAccounts(withExtraTypes = true) {
 
   return useMemo(() => relevantAccounts, [relevantAccounts]);
 }
-
-export const useInitialKYC = (
-  acc: TempleAccount,
-  updateAccountKYCStatus: (accountPublicKeyHash: string, isKYC: boolean) => Promise<void>
-) => {
-  const chainId = useChainId();
-
-  useEffect(() => {
-    if (chainId) {
-      (async function () {
-        const isKYC = await getKYCStatus(acc.publicKeyHash, chainId);
-
-        await updateAccountKYCStatus(acc.publicKeyHash, isKYC);
-      })();
-    }
-  }, [acc.publicKeyHash, chainId, updateAccountKYCStatus]);
-};
 
 export class ReactiveTezosToolkit extends MavrykToolkit {
   constructor(rpc: string | RpcClientInterface, public checksum: string) {

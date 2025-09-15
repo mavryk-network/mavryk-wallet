@@ -338,14 +338,14 @@ export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string
   try {
     if (chainId && isKnownChainId(chainId)) {
       const storageRes = await fetchGet<any>(chainId, `/contracts/${KYC_CONTRACT}/storage/`);
-      const bigMapId = (await storageRes.json()).memberLedger;
+      const bigMapId = storageRes.memberLedger;
 
       const contractData = await fetchGet<any>(chainId, `/bigmaps/${bigMapId}/keys/${pkh}`);
 
       // if no data than no KYCed user
-      if (contractData.status === 204) return false;
+      if (!contractData) return false;
 
-      const isKYCAddress = await contractData.json();
+      const isKYCAddress = contractData;
 
       return Boolean(isKYCAddress);
     }

@@ -20,7 +20,7 @@ import { getOnlineStatus } from 'lib/ui/get-online-status';
 
 import { useChainId, useNetwork, useTezos } from '../ready';
 
-import { getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
+import { getCoStakeWaitTime, getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
 
 function getDelegateCacheKey(
   tezos: ReactiveTezosToolkit,
@@ -97,40 +97,53 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
   const {
     canRedelegate,
     canUnlockStake,
+    costakeWaitTime,
     unlockWaitTime,
     delegationWaitTime,
     isInUnlockPeriod,
     hasUnlockPeriodPassed,
-    hasDelegationPeriodPassed
+    hasDelegationPeriodPassed,
+    isInCostakePeriod
   } = useMemo(() => {
     const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
+
+    const costakeWaitTime = getCoStakeWaitTime(
+      accStats?.lastActivityTime,
+      accStats?.stakedBalance,
+      accStats?.unstakedBalance
+    );
 
     const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
 
     const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
 
+    const isInCostakePeriod = costakeWaitTime !== 'allowed' && typeof costakeWaitTime === 'string';
+
     const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
 
     const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
 
-    const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed;
-    const canUnlockStake = !isInUnlockPeriod;
+    const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed && !isInCostakePeriod;
+    const canUnlockStake = !isInUnlockPeriod && !isInCostakePeriod;
 
     return {
       canRedelegate,
       canUnlockStake,
       unlockWaitTime,
       delegationWaitTime,
+      costakeWaitTime,
       isInUnlockPeriod,
+      isInCostakePeriod,
       hasUnlockPeriodPassed,
       hasDelegationPeriodPassed
     };
   }, [accStats]);
 
-  return {
+  console.log({
     myBakerPkh: accStats?.delegate?.address ?? null,
     isDelegated: Boolean(accStats?.delegate?.address),
     isInDelegationPeriod: delegationWaitTime !== 'allowed',
+    isInCostakePeriod,
     hasDelegationPeriodPassed: hasDelegationPeriodPassed,
     isInUnlockPeriod: isInUnlockPeriod,
     hasUnlockPeriodPassed: hasUnlockPeriodPassed,
@@ -138,6 +151,24 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     canCostake: !isInUnlockPeriod,
     canUnlock: canUnlockStake,
     unlockWaitTime,
+    costakeWaitTime,
+    delegationWaitTime,
+    stakedBalance: accStats?.stakedBalance ?? 0,
+    unstakedBalance: accStats?.unstakedBalance ?? 0
+  });
+  return {
+    myBakerPkh: accStats?.delegate?.address ?? null,
+    isDelegated: Boolean(accStats?.delegate?.address),
+    isInDelegationPeriod: delegationWaitTime !== 'allowed',
+    isInCostakePeriod,
+    hasDelegationPeriodPassed: hasDelegationPeriodPassed,
+    isInUnlockPeriod: isInUnlockPeriod,
+    hasUnlockPeriodPassed: hasUnlockPeriodPassed,
+    canRedelegate: canRedelegate,
+    canCostake: !isInUnlockPeriod,
+    canUnlock: canUnlockStake,
+    unlockWaitTime,
+    costakeWaitTime,
     delegationWaitTime,
     stakedBalance: accStats?.stakedBalance ?? 0,
     unstakedBalance: accStats?.unstakedBalance ?? 0

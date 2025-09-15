@@ -3867,6 +3867,17 @@
       }
     }
   },
+  "costakePeriod": {
+    "message": "Co-staking - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
   "unlockingPeriod": {
     "message": "Unlocking - $icon$ $daysLeft$ left",
     "placeholders": {

@@ -21,7 +21,7 @@ function formatTimeLeft(ms: number): string {
   return `${seconds}s`;
 }
 
-// 1) Delegation warm-up (6 days)
+// 1) Delegation warm-up (21 days)
 export function getDelegationWaitTime(delegationTime?: string | null): string | null {
   if (!delegationTime) return null;
 
@@ -46,4 +46,26 @@ export function getUnlockWaitTime(lastActivityTime?: string | null, unstakedBala
   const diff = end.diff(now);
 
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
+}
+
+// 3) Co-stake lock period (6 days = 2 cycles)
+export function getCoStakeWaitTime(
+  lastActivityTime?: string | null,
+  stakedBalance?: number,
+  unstakedBalance?: number
+): string | null {
+  if (!lastActivityTime) return null;
+
+  // Lock applies only if stake > 0 and no unstake in progress
+  if ((stakedBalance ?? 0) > 0 && (unstakedBalance ?? 0) === 0) {
+    const start = dayjs(lastActivityTime); // stake operation time
+    const end = start.add(ONE_CYCLE_IN_DAYS * 2, 'day'); // 2 cycles = 6 days
+    const now = dayjs();
+
+    const diff = end.diff(now);
+
+    return diff > 0 ? formatTimeLeft(diff) : 'allowed';
+  }
+
+  return null;
 }

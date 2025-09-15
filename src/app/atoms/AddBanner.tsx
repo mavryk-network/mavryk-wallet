@@ -15,10 +15,27 @@ export const AddBanner: FC<{ text: TID }> = ({ text }) => (
 
 export const DelegatePeriodBanner = () => {
   const account = useAccount();
-  const { isInDelegationPeriod, isInUnlockPeriod, hasUnlockPeriodPassed, unlockWaitTime, delegationWaitTime } =
-    useAccountDelegatePeriodStats(account.publicKeyHash);
+  const {
+    isInDelegationPeriod,
+    isInUnlockPeriod,
+    hasUnlockPeriodPassed,
+    unlockWaitTime,
+    delegationWaitTime,
+    isInCostakePeriod,
+    costakeWaitTime
+  } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const labelInfo = useMemo(() => {
+    if (isInCostakePeriod) {
+      return {
+        text: (
+          <div className="flex items-center">
+            <T id="costakePeriod" substitutions={[<SmallClockIcon />, costakeWaitTime]} />
+          </div>
+        ),
+        color: 'bg-orange-add'
+      };
+    }
     if (isInUnlockPeriod) {
       return {
         text: (
@@ -51,7 +68,15 @@ export const DelegatePeriodBanner = () => {
       text: <T id="delegated" />,
       color: 'bg-indigo-add'
     };
-  }, [hasUnlockPeriodPassed, isInDelegationPeriod, isInUnlockPeriod, unlockWaitTime, delegationWaitTime]);
+  }, [
+    isInCostakePeriod,
+    isInUnlockPeriod,
+    isInDelegationPeriod,
+    hasUnlockPeriodPassed,
+    costakeWaitTime,
+    unlockWaitTime,
+    delegationWaitTime
+  ]);
   return (
     <div
       style={{ paddingBottom: 2, lineHeight: '18px' }}

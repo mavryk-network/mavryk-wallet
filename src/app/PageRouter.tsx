@@ -3,9 +3,9 @@ import React, { FC, useLayoutEffect, useMemo } from 'react';
 import RootSuspenseFallback from 'app/a11y/RootSuspenseFallback';
 import { OpenInFullPage, useAppEnv } from 'app/env';
 import AddAsset from 'app/pages/AddAsset/AddAsset';
-import { Buy } from 'app/pages/Buy/Buy';
-import Exolix from 'app/pages/Buy/Crypto/Exolix/Exolix';
-import { BuyWithCreditCard } from 'app/pages/BuyWithCreditCard/BuyWithCreditCard';
+// import { Buy } from 'app/pages/Buy/Buy';
+// import Exolix from 'app/pages/Buy/Crypto/Exolix/Exolix';
+// import { BuyWithCreditCard } from 'app/pages/BuyWithCreditCard/BuyWithCreditCard';
 import NFTsPage from 'app/pages/Collectibles/CollectiblePage';
 import ConnectLedger from 'app/pages/ConnectLedger/ConnectLedger';
 import CreateAccount from 'app/pages/CreateAccount/CreateAccount';
@@ -16,17 +16,17 @@ import ImportAccount from 'app/pages/ImportAccount';
 import ManageAssets from 'app/pages/ManageAssets/ManageAssets';
 import { CreateWallet } from 'app/pages/NewWallet/CreateWallet';
 import { ImportWallet } from 'app/pages/NewWallet/ImportWallet';
-import AttentionPage from 'app/pages/Onboarding/pages/AttentionPage';
+// import AttentionPage from 'app/pages/Onboarding/pages/AttentionPage';
 import Receive from 'app/pages/Receive/Receive';
 import Send from 'app/pages/Send';
 import Settings from 'app/pages/Settings/Settings';
-import { Swap } from 'app/pages/Swap/Swap';
+// import { Swap } from 'app/pages/Swap/Swap';
 import Unlock from 'app/pages/Unlock/Unlock';
 import Welcome from 'app/pages/Welcome/Welcome';
-import { AliceBobWithdraw } from 'app/pages/Withdraw/Debit/AliceBob/AliceBobWithdraw';
-import { Withdraw } from 'app/pages/Withdraw/Withdraw';
+// import { AliceBobWithdraw } from 'app/pages/Withdraw/Debit/AliceBob/AliceBobWithdraw';
+// import { Withdraw } from 'app/pages/Withdraw/Withdraw';
 import { usePageRouterAnalytics } from 'lib/analytics';
-import { Notifications, NotificationsItem } from 'lib/notifications/components';
+// import { Notifications, NotificationsItem } from 'lib/notifications/components';
 import { useTempleClient } from 'lib/temple/front';
 import * as Woozie from 'lib/woozie';
 
@@ -93,7 +93,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/connect-ledger', onlyReady(() => <ConnectLedger />)],
   ['/receive', onlyReady(() => <Receive />)],
   ['/send/:assetSlug?', onlyReady(({ assetSlug }) => <Send assetSlug={assetSlug} />)],
-  ['/swap', onlyReady(() => <Swap />)],
+  // ['/swap', onlyReady(() => <Swap />)],
   ['/delegate', onlyReady(() => <Delegate />)],
   ['/pro-version', onlyReady(() => <ProVersion />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
@@ -106,15 +106,15 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/add-asset', onlyReady(() => <AddAsset />)],
   ['/settings/:tabSlug?', onlyReady(({ tabSlug }) => <Settings tabSlug={tabSlug} />)],
   ['/add-network', onlyReady(() => <AddNetworkScreen />)],
-  ['/buy', onlyReady(onlyInFullPage(() => <Buy />))],
-  ['/buy/crypto/exolix', onlyReady(onlyInFullPage(() => <Exolix />))],
-  ['/buy/debit', onlyReady(onlyInFullPage(() => <BuyWithCreditCard />))],
-  ['/withdraw', onlyReady(onlyInFullPage(() => <Withdraw />))],
-  ['/withdraw/debit/alice-bob', onlyReady(onlyInFullPage(() => <AliceBobWithdraw />))],
-  ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
+  // ['/buy', onlyReady(onlyInFullPage(() => <Buy />))],
+  // ['/buy/crypto/exolix', onlyReady(onlyInFullPage(() => <Exolix />))],
+  // ['/buy/debit', onlyReady(onlyInFullPage(() => <BuyWithCreditCard />))],
+  // ['/withdraw', onlyReady(onlyInFullPage(() => <Withdraw />))],
+  // ['/withdraw/debit/alice-bob', onlyReady(onlyInFullPage(() => <AliceBobWithdraw />))],
+  // ['/attention', onlyReady(onlyInFullPage(() => <AttentionPage />))],
   ['/onboarding', onlyReady(onlyInFullPage(() => <Onboarding />))],
-  ['/notifications', onlyReady(() => <Notifications />)],
-  ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
+  // ['/notifications', onlyReady(() => <Notifications />)],
+  // ['/notifications/:id', onlyReady(({ id }) => <NotificationsItem id={Number(id) ?? 0} />)],
   ['/success', onlyReady(() => <SuccessScreen />)],
   ['*', () => <Woozie.Redirect to="/" />]
 ]);

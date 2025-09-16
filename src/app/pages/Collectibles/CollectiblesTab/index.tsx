@@ -164,7 +164,7 @@ const buildEmptySection = (isSyncing: boolean) =>
       <p className={'text-white text-base-plus text-center'}>
         <T id="zeroNFTText" />
       </p>
-      <ButtonRounded type="button" size="small" fill style={buttonStyle}>
+      <ButtonRounded type="button" size="small" fill style={buttonStyle} disabled>
         <T id="getNFTs" />
       </ButtonRounded>
     </div>

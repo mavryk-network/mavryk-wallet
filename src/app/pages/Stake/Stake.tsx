@@ -168,7 +168,7 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
   }, [setIsFromCoStakeNavigation, setShowStakeScreen]);
 
   return (
-    <div className={clsx(popup && 'px-4 pt-4')}>
+    <div className={clsx(popup && 'px-4 pt-4', 'flex flex-col flex-1')}>
       <div className="text-base text-white text-left">
         <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">15%</span>} />
       </div>
@@ -185,17 +185,8 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
           <StakePlanListItem key={item.i18nKey} {...item} />
         ))}
       </div>
-      <section className="flex flex-col items-center">
-        <div className="mb-3 text-sm text-white text-center">
-          <T id="aboutFooterDescription" />
-        </div>
-        <FooterSocials />
-      </section>
-      <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
-        <ButtonRounded size="big" className={clsx('w-full ')} fill={false} onClick={handleCoStakeNavigation}>
-          <T id="coStake" />
-        </ButtonRounded>
 
+      <div className={clsx('flex justify-center mb-8', popup ? 'mt-40px' : 'mt-auto')}>
         <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full')} fill>
           <T id="delegate" />
         </ButtonRounded>

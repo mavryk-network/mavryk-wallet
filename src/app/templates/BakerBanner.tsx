@@ -281,6 +281,7 @@ const BakerBanner = memo<BakerBannerProps>(
                       }}
                     >
                       <HashChip hash={baker.address} small />
+                      111
                     </div>
                   )}
 

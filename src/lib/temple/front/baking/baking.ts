@@ -21,6 +21,7 @@ import { getOnlineStatus } from 'lib/ui/get-online-status';
 
 import { useChainId, useNetwork, useTezos } from '../ready';
 
+import { PREDEFINED_BAKERS_NAMES_MAINNET } from './const';
 import { getCoStakeWaitTime, getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
 
 function getDelegateCacheKey(
@@ -227,6 +228,8 @@ export function useKnownBaker(address: string | null, suspense = true) {
           // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
           fee: 0,
           freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
+          // @ts-ignore // predifined validators list
+          name: PREDEFINED_BAKERS_NAMES_MAINNET[bakingBadBaker.address] ?? undefined,
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
           // minDelegation: bakingBadBaker.minDelegation,

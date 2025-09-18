@@ -16,8 +16,7 @@ import {
   TempleStatus,
   TempleState,
   TempleNotification,
-  TempleMessageType,
-  TempleAccount
+  TempleMessageType
 } from 'lib/temple/types';
 
 import { intercom, useTempleClient } from './client';

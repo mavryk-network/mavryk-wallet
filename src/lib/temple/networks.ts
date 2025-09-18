@@ -42,21 +42,21 @@ export const MAV_RPC_NETWORK = 'https://atlasnet.rpc.mavryk.network';
 
 export const NETWORKS: TempleNetwork[] = [
   {
-    id: 'atlasnet', // used as default one if no selected RPC
-    name: 'Mavryk Atlasnet',
-    description: 'Mavryk Atlasnet',
-    type: 'main',
-    rpcBaseURL: MAV_RPC_NETWORK,
-    color: '#83b300',
-    disabled: false
-  },
-  {
-    id: 'mainnet',
+    id: 'mainnet', // used as default one if no selected RPC
     nameI18nKey: 'mavrykMainnet',
     description: 'Mavryk mainnet',
     type: 'main',
     rpcBaseURL: 'https://mainnet.rpc.mavryk.network',
     color: '#131380',
+    disabled: false
+  },
+  {
+    id: 'atlasnet',
+    name: 'Mavryk Atlasnet',
+    description: 'Mavryk Atlasnet',
+    type: 'test',
+    rpcBaseURL: MAV_RPC_NETWORK,
+    color: '#83b300',
     disabled: false
   },
 

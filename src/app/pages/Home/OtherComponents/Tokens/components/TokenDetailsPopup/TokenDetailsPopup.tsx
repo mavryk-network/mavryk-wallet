@@ -177,14 +177,16 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
           </div>
         </div>
         {/* market price section */}
-        <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
-          <T id="marketPrice" />
-          <div className="p-4 bg-gray-910 text-left flex items-center rounded-2xl-plus text-white text-base-plus">
-            <span className="mr-1">≈</span>
-            {selectedFiatCurrency.symbol}
-            <Money smallFractionFont={false}>{price}</Money>
+        {!isMainToken && (
+          <div className="flex flex-col gap-3 mb-6 text-white text-base-plus">
+            <T id="marketPrice" />
+            <div className="p-4 bg-gray-910 text-left flex items-center rounded-2xl-plus text-white text-base-plus">
+              <span className="mr-1">≈</span>
+              {selectedFiatCurrency.symbol}
+              <Money smallFractionFont={false}>{price}</Money>
+            </div>
           </div>
-        </div>
+        )}
         {/* staking section */}
         {isMainToken ? (
           <BakerBannerSection myBakerPkh={myBakerPkh} />

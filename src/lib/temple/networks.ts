@@ -54,7 +54,7 @@ export const NETWORKS: TempleNetwork[] = [
     id: 'atlasnet',
     name: 'Mavryk Atlasnet',
     description: 'Mavryk Atlasnet',
-    type: 'test',
+    type: 'main',
     rpcBaseURL: MAV_RPC_NETWORK,
     color: '#F86412',
     disabled: false

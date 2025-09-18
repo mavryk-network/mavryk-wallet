@@ -47,7 +47,7 @@ export const NETWORKS: TempleNetwork[] = [
     description: 'Mavryk mainnet',
     type: 'main',
     rpcBaseURL: 'https://mainnet.rpc.mavryk.network',
-    color: '#131380',
+    color: '#5F58FF',
     disabled: false
   },
   {
@@ -56,7 +56,7 @@ export const NETWORKS: TempleNetwork[] = [
     description: 'Mavryk Atlasnet',
     type: 'test',
     rpcBaseURL: MAV_RPC_NETWORK,
-    color: '#83b300',
+    color: '#F86412',
     disabled: false
   },
 
@@ -129,7 +129,7 @@ export const NETWORKS: TempleNetwork[] = [
     description: 'Local Sandbox',
     type: 'test',
     rpcBaseURL: 'http://localhost:8732',
-    color: '#e9e1cc',
+    color: '#10DEEB',
     disabled: false
   },
   // Hidden

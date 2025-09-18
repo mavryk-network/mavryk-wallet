@@ -9,7 +9,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
-import { useAccount, useNetwork, useTempleClient } from 'lib/temple/front';
+import { useAccount, useChainId, useNetwork, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
@@ -91,6 +91,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
   const { publicKeyHash } = useAccount();
+  const chainId = useChainId();
   const [formState, setFormState] = useState<FormData>({
     submitting: false,
     error: null
@@ -101,7 +102,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       setFormState({ ...formState, submitting: true });
 
       // make account a KYC account
-      await signKYCAction(rpcUrl, publicKeyHash);
+      await signKYCAction(rpcUrl, publicKeyHash, chainId);
 
       setFormState({ ...formState, submitting: false });
       setNavigateToForm(false);
@@ -122,7 +123,7 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
       // show err on ui
       setFormState({ ...formState, error: getErrorMsgByCode(e.message) });
     }
-  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus]);
+  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus, chainId]);
 
   return (
     <div className={clsx(popup && 'px-4 py-4', popup && formState?.error && 'overflow-y-scroll')}>

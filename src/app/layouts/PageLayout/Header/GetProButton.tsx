@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { Spinner } from 'app/atoms';
 import { T } from 'lib/i18n';
-import { useAccount } from 'lib/temple/front';
+import { useAccount, useNetwork } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { Link } from 'lib/woozie';
 
@@ -12,8 +12,9 @@ import { AccountDropdownSelectors } from './selectors';
 
 export const GetProlabel: FC = () => {
   const { isKYC = undefined, type } = useAccount();
+  const net = useNetwork();
 
-  const disabled = type === TempleAccountType.WatchOnly;
+  const disabled = type === TempleAccountType.WatchOnly || net.id === 'mainnet';
 
   return (
     <Link

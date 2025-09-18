@@ -141,7 +141,7 @@ function useReadyTemple() {
 
       await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
     })();
-  }, [tezos, account, templeFront.updateAccountKYCStatus, templeFront]);
+  }, [account.publicKeyHash, tezos?.rpc]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {

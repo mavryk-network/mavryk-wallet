@@ -3,7 +3,7 @@ import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
 
 import { toTokenSlug } from 'lib/assets';
-import { KYC_CONTRACT } from 'lib/route3/constants';
+import { KYC_CONTRACTS } from 'lib/route3/constants';
 import { TempleChainId } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
@@ -337,7 +337,8 @@ export const getAccountStatsFromTzkt = async (account: string, chainId: TzktApiC
 export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string | null | undefined) => {
   try {
     if (chainId && isKnownChainId(chainId)) {
-      const storageRes = await fetchGet<any>(chainId, `/contracts/${KYC_CONTRACT}/storage/`);
+      const kycAdress = KYC_CONTRACTS.get(chainId);
+      const storageRes = await fetchGet<any>(chainId, `/contracts/${kycAdress}/storage/`);
       const bigMapId = storageRes.memberLedger;
 
       const contractData = await fetchGet<any>(chainId, `/bigmaps/${bigMapId}/keys/${pkh}`);

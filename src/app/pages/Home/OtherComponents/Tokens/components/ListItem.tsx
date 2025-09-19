@@ -121,7 +121,6 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           </div>
           <div className="flex flex-col items-end gap-1">
             <FiatBalance
-              className={classNames(isMavToken && 'opacity-0 pointer-events-none')}
               assetSlug={assetSlug}
               value={balance}
               testID={AssetsSelectors.assetItemFiatBalanceButton}

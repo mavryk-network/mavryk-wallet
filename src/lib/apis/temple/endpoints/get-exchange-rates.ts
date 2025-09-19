@@ -1,6 +1,6 @@
 import { fetchWithTimeout } from 'lib/apis/tzkt/utils';
 import { toTokenSlug } from 'lib/assets';
-import { RWA_ASSET_PRICES } from 'lib/constants';
+import { MVRK_PRICE, RWA_ASSET_PRICES } from 'lib/constants';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 
 import { getDodoMavTokenPrices } from './dodoMav';
@@ -13,21 +13,49 @@ interface GetExchangeRatesResponseItem {
   exchangeRate: string;
 }
 
-export const fetchUsdToTokenRates = () =>
-  templeWalletApi.get<GetExchangeRatesResponseItem[]>('/exchange-rates').then(({ data }) => {
-    const prices: StringRecord = {};
+export const fetchUsdToTokenRates = async () => {
+  const prices: StringRecord = {};
+  const mvrkPrice = await getCMCPrice(process.env.CMC_PRICE_API_KEY ?? '');
+  prices.mav = mvrkPrice;
 
+  return templeWalletApi.get<GetExchangeRatesResponseItem[]>('/exchange-rates').then(({ data }) => {
     for (const { tokenAddress, tokenId, exchangeRate } of data) {
       if (tokenAddress) {
         prices[toTokenSlug(tokenAddress, tokenId)] = exchangeRate;
-      } else {
-        prices.mav = exchangeRate;
       }
     }
 
     return prices;
   });
+};
 
+async function getCMCPrice(apiKey: string, symbol = '$MVRK', convert = 'USD') {
+  const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}&convert=${convert}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'X-CMC_PRO_API_KEY': apiKey
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status} ${res.statusText}`);
+    }
+
+    const { data } = (await res.json()) as { data: Record<string, any> };
+    const tokenPrice = data?.[symbol]?.quote?.[convert]?.price ?? null;
+
+    await putToStorage(MVRK_PRICE, tokenPrice);
+
+    return tokenPrice;
+  } catch (err) {
+    console.error('Error fetching price:', err);
+
+    const cachedPrice = fetchFromStorage<StringRecord<string>>(MVRK_PRICE);
+    return cachedPrice ?? 0;
+  }
+}
 // api rwa metadata utils
 export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => {
   try {

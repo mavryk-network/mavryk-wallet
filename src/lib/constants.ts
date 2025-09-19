@@ -14,6 +14,8 @@ export const ALL_ADS_RULES_STORAGE_KEY = 'ALL_ADS_RULES';
 
 export const RWA_ASSET_PRICES = 'RWA_ASSET_PRICES';
 
+export const MVRK_PRICE = 'MVRK_PRICE';
+
 export const ADS_RULES_UPDATE_INTERVAL = 5 * 60 * 1000;
 
 export const TEMPLE_WALLET_AD_ATTRIBUTE_NAME = 'twa';

@@ -217,6 +217,9 @@ export function useKnownBaker(address: string | null, suspense = true) {
       const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
+      // @ts-ignore // predifined validators list
+      const predefinedBaker = PREDEFINED_BAKERS_NAMES_MAINNET[bakingBadBaker?.address];
+
       // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
         return {
@@ -225,11 +228,10 @@ export function useKnownBaker(address: string | null, suspense = true) {
           delegatedBalance: bakingBadBaker.delegatedBalance,
           balance: bakingBadBaker.balance,
           // name: bakingBadBaker.name,
-          // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
-          fee: 0,
+          logo: predefinedBaker ? predefinedBaker.logo : undefined,
+          fee: predefinedBaker ? predefinedBaker.fee : 0,
           freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
-          // @ts-ignore // predifined validators list
-          name: PREDEFINED_BAKERS_NAMES_MAINNET[bakingBadBaker.address] ?? undefined,
+          name: predefinedBaker ? predefinedBaker.name : undefined,
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
           // minDelegation: bakingBadBaker.minDelegation,

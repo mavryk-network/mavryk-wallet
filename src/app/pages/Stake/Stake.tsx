@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
@@ -161,11 +160,6 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
     // skip delegate onboarding screen
     setShowStakeScreen(false);
   }, [setShowStakeScreen]);
-
-  const handleCoStakeNavigation = useCallback(() => {
-    setIsFromCoStakeNavigation(true);
-    setShowStakeScreen(false);
-  }, [setIsFromCoStakeNavigation, setShowStakeScreen]);
 
   return (
     <div className={clsx(popup && 'px-4 pt-4', 'flex flex-col flex-1')}>

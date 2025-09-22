@@ -10,12 +10,12 @@ export const FINALIZE_UNLOCK = 'Finalize Unlock';
 
 export const PREDEFINED_BAKERS_NAMES_MAINNET = {
   mv1DeXVziJ3ygDBFEteUi9jrpWudPUhSBHgP: {
-    logo: '/krypstar.png',
+    logo: ValidatorsLogo,
     name: 'Kryptstar',
     fee: 0.1
   },
   mv1C9zN9ZzP1KicMHjBXk9ctJ4k7xq8J9gqU: {
-    logo: '/republicCrypto.png',
+    logo: ValidatorsLogo,
     name: 'Republic Crypto',
     fee: 0.1
   },

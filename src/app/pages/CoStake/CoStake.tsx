@@ -188,9 +188,10 @@ export const CoStake: FC = () => {
             {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 px-4" />}
             <FormSubmitButton
               loading={formState.isSubmitting}
-              disabled={Boolean(
-                formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
-              )}
+              // disabled={Boolean(
+              //   formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
+              // )}
+              disabled
               className="my-6"
             >
               <T id="coStake" />

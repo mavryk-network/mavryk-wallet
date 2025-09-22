@@ -653,7 +653,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {
       case CO_STAKE:
-        return !canCostake;
+        return true;
+      // return !canCostake;
       case UNLOCK_STAKE:
         return !canUnlock;
       case UNLOCKING:

@@ -9,6 +9,16 @@ export const UNLOCKING = 'Unlocking';
 export const FINALIZE_UNLOCK = 'Finalize Unlock';
 
 export const PREDEFINED_BAKERS_NAMES_MAINNET = {
+  mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
+    logo: MavrykDynamicsLogo,
+    name: 'Mavryk Dynamics 1',
+    fee: 0.1
+  },
+  mv1C2iEY1WuBeFQqS9ihxtunHkbUJ28HyeN6: {
+    logo: MavrykDynamicsLogo,
+    name: 'Mavryk Dynamics 2',
+    fee: 0.1
+  },
   mv1DeXVziJ3ygDBFEteUi9jrpWudPUhSBHgP: {
     logo: ValidatorsLogo,
     name: 'Kryptstar',
@@ -58,15 +68,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET = {
     logo: ValidatorsLogo,
     name: 'Foundation 8',
     fee: 0.1
-  },
-  mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
-    logo: MavrykDynamicsLogo,
-    name: 'Mavryk Dynamics 1',
-    fee: 0.1
-  },
-  mv1C2iEY1WuBeFQqS9ihxtunHkbUJ28HyeN6: {
-    logo: MavrykDynamicsLogo,
-    name: 'Mavryk Dynamics 2',
-    fee: 0.1
   }
 };
+
+export const SORTED_PREDEFINED_SPONSORED_BAKERS = Object.keys(PREDEFINED_BAKERS_NAMES_MAINNET);

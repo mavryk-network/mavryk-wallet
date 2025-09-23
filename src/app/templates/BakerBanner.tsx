@@ -283,7 +283,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   {baker.name ? (
                     <Name
                       style={{
-                        maxWidth: '8rem'
+                        maxWidth: '9rem'
                       }}
                       testID={BakingSectionSelectors.delegatedBakerName}
                     >

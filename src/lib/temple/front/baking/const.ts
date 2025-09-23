@@ -9,6 +9,9 @@ export const UNLOCKING = 'Unlocking';
 export const FINALIZE_UNLOCK = 'Finalize Unlock';
 
 export const PREDEFINED_BAKERS_NAMES_MAINNET = {
+  mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
+    name: 'Kryptstar'
+  },
   mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
     logo: MavrykDynamicsLogo,
     name: 'Mavryk Dynamics 1',

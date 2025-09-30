@@ -13,7 +13,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET = {
   mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
     logo: kryptstarLogo,
     name: 'Kryptstar',
-    fee: 0.1
+    fee: 0.08
   },
   mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
     logo: MavrykDynamicsLogo,

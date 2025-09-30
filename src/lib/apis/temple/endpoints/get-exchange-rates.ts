@@ -1,20 +1,12 @@
 import { fetchWithTimeout } from 'lib/apis/tzkt/utils';
-import { toTokenSlug } from 'lib/assets';
 import { MVRK_PRICE, RWA_ASSET_PRICES } from 'lib/constants';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 
 import { getDodoMavTokenPrices } from './dodoMav';
 import { DodoStorageSchema, DEX_STORAGE_QUERY } from './queries';
-import { templeWalletApi } from './templewallet.api';
 
 const coingecko_api = process.env.COINGECKO_API;
 const coingecko_api_key = process.env.COINGECKO_API_KEY;
-
-interface GetExchangeRatesResponseItem {
-  tokenAddress?: string;
-  tokenId?: number;
-  exchangeRate: string;
-}
 
 export type CMCResponse = {
   [symbol: string]: {
@@ -27,15 +19,7 @@ export const fetchUsdToTokenRates = async () => {
   const mvrkPrice = await getCoingeckoPrice();
   prices.mav = mvrkPrice;
 
-  return templeWalletApi.get<GetExchangeRatesResponseItem[]>('/exchange-rates').then(({ data }) => {
-    for (const { tokenAddress, tokenId, exchangeRate } of data) {
-      if (tokenAddress) {
-        prices[toTokenSlug(tokenAddress, tokenId)] = exchangeRate;
-      }
-    }
-
-    return prices;
-  });
+  return prices;
 };
 
 export const COINGECKO_MVRK_ID = 'mavryk-network';
@@ -47,7 +31,7 @@ export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD'
     const res = await fetch(url, {
       // @ts-expect-error // api key
       headers: {
-        'x-cg-demo-api-key': coingecko_api_key
+        'x-cg-pro-api-key': coingecko_api_key
       }
     });
 

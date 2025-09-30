@@ -39,5 +39,6 @@ export const EnvVars = {
   NODES_URL: process.env.NODES_URL!,
   SUPER_ADMIN_PRIVATE_KEY: process.env.SUPER_ADMIN_PRIVATE_KEY!,
   KYC_CONTRACT: process.env.KYC_CONTRACT!,
-  CMC_PRICE_API_KEY: process.env.CMC_PRICE_API_KEY!
+  COINGECKO_API_KEY: process.env.COINGECKO_API_KEY!,
+  COINGECKO_API: process.env.COINGECKO_API!
 } as const;

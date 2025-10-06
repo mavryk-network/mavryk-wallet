@@ -17,7 +17,7 @@ export type CMCResponse = {
 export const fetchUsdToTokenRates = async () => {
   const prices: StringRecord = {};
   const mvrkPrice = await getCoingeckoPrice();
-  prices.mav = mvrkPrice;
+  prices.mav = String(mvrkPrice);
 
   return prices;
 };
@@ -41,11 +41,11 @@ export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD'
 
     await putToStorage(MVRK_PRICE, tokenPrice);
 
-    return tokenPrice;
+    return tokenPrice || 0;
   } catch (err) {
     console.error('Error fetching price:', err);
-    const cachedPrice = fetchFromStorage<StringRecord<string>>(MVRK_PRICE);
-    return cachedPrice ?? 0;
+    const cachedPrice = await fetchFromStorage<string>(MVRK_PRICE);
+    return Number(cachedPrice) || 0;
   }
 }
 

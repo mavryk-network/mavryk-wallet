@@ -3,7 +3,7 @@ import React, { ReactNode, memo } from 'react';
 import clsx from 'clsx';
 
 import { HashChip } from 'app/atoms';
-import { TID, T, t } from 'lib/i18n';
+import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
@@ -57,7 +57,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
         <Component
           {...componentBaseProps}
           titleNode={stakingMessage.titleNode}
-          argsNode={<StackItemArgs i18nKey="emptyKey" args={stakingMessage.args} />}
+          argsNode={<StackItemArgs args={stakingMessage.args} />}
         />
       );
     case HistoryItemOpTypeEnum.Delegation:
@@ -75,12 +75,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           <Component
             {...componentBaseProps}
             titleNode={isDelegatorLeft ? 'Delegator' : 'New delegator'}
-            argsNode={
-              <StackItemArgs
-                i18nKey="emptyKey"
-                args={[sourceAddress ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
-              />
-            }
+            argsNode={<StackItemArgs args={[sourceAddress ?? 'unknown', isDelegatorLeft ? <> left</> : '']} />}
           />
         );
       }
@@ -92,7 +87,6 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           titleNode={isPrevDelegate ? 'Left delegate' : 'Delegate to'}
           argsNode={
             <StackItemArgs
-              i18nKey="emptyKey"
               args={
                 isPrevDelegate
                   ? [
@@ -283,7 +277,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
 };
 
 interface StackItemArgsProps {
-  i18nKey: TID;
+  i18nKey?: TID;
   args: (string | ReactNode | Element)[];
 }
 
@@ -292,27 +286,18 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
     e.stopPropagation();
   };
 
+  const ArgsPart = args.map((value, index) => {
+    return typeof value === 'string' ? (
+      <span key={index} onClick={handleHashClick}>
+        <HashChip className="text-blue-200" firstCharsCount={5} key={index} hash={value} type="link" showIcon={false} />
+      </span>
+    ) : (
+      // @ts-expect-error // reactNode
+      <React.Fragment>{value}</React.Fragment>
+    );
+  });
+
   return (
-    <span className="text-white break-all">
-      <T
-        id={i18nKey}
-        substitutions={args.map((value, index) => {
-          return typeof value === 'string' ? (
-            <span key={index} onClick={handleHashClick}>
-              <HashChip
-                className="text-blue-200"
-                firstCharsCount={5}
-                key={index}
-                hash={value}
-                type="link"
-                showIcon={false}
-              />
-            </span>
-          ) : (
-            value
-          );
-        })}
-      />
-    </span>
+    <span className="text-white break-word">{!i18nKey ? ArgsPart : <T id={i18nKey} substitutions={ArgsPart} />}</span>
   );
 });

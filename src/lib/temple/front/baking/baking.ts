@@ -227,14 +227,13 @@ export function useKnownBaker(address: string | null, suspense = true) {
           stakedBalance: bakingBadBaker.stakedBalance,
           delegatedBalance: bakingBadBaker.delegatedBalance,
           balance: bakingBadBaker.balance,
-          // name: bakingBadBaker.name,
           logo: predefinedBaker ? predefinedBaker.logo : undefined,
           fee: predefinedBaker ? predefinedBaker.fee : 0,
           freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
           name: predefinedBaker ? predefinedBaker.name : undefined,
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
-          // minDelegation: bakingBadBaker.minDelegation,
+          minDelegation: predefinedBaker ? predefinedBaker.minDelegation : undefined,
           estimatedRoi: 0
           // rewardConfigHistory:
           //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({

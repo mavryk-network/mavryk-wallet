@@ -5,9 +5,6 @@ import clsx from 'clsx';
 import { Spinner } from 'app/atoms';
 import { RadioButton } from 'app/atoms/RadioButton';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as AtlasnetSvg } from 'app/icons/atlasnet.svg';
-import { ReactComponent as MainnetSvg } from 'app/icons/mainnet.svg';
-import { ReactComponent as SandboxSvg } from 'app/icons/sandbox.svg';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T } from 'lib/i18n';
@@ -22,6 +19,7 @@ import {
 import { loadChainId } from 'lib/temple/helpers';
 import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
 
+import { networkIcons } from './network.const';
 import { NetworkSelectors } from './NetworkPoopup.selectors';
 
 type NetworkPopupProps = {
@@ -124,12 +122,6 @@ interface NetworkListItemProps {
 
 const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick }) => {
   const { id, name, color, disabled, nameI18nKey } = network;
-
-  const networkIcons: { [index: string]: ImportedSVGComponent } = {
-    sandbox: SandboxSvg,
-    atlasnet: AtlasnetSvg,
-    mainnet: MainnetSvg
-  };
 
   const NetworkIcon = networkIcons[id];
 

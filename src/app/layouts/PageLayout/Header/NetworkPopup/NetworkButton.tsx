@@ -3,11 +3,15 @@ import React, { FC, HTMLAttributes } from 'react';
 import classNames from 'clsx';
 
 import { ReactComponent as ArrowIcon } from 'app/icons/chevron-down.svg';
-import { ReactComponent as LogoIcon } from 'app/misc/mavryk/logo-small.svg';
+import { useNetwork } from 'lib/temple/front';
 
+import { networkIcons } from './network.const';
 import styles from './style.module.css';
 
 export const NetworkButton: FC<HTMLAttributes<HTMLDivElement>> = ({ onClick, className, ...rest }) => {
+  const currentNetwork = useNetwork();
+
+  const NetworkIcon = networkIcons[currentNetwork?.id];
   return (
     <section
       {...rest}
@@ -15,7 +19,7 @@ export const NetworkButton: FC<HTMLAttributes<HTMLDivElement>> = ({ onClick, cla
       onClick={onClick}
     >
       <div className="flex gap-1">
-        <LogoIcon className="w-4 h-4" />
+        <NetworkIcon className="w-4 h-4" />
         <ArrowIcon className="w-4 h-4 stroke-2" />
       </div>
     </section>

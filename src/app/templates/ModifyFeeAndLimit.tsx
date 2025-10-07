@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 
 import { Alert, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { useNetworkOverload } from 'app/hooks/use-network-overload';
 import InFiat from 'app/templates/InFiat';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
@@ -67,6 +68,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 }) => {
   const { symbol } = useGasToken();
   const { popup } = useAppEnv();
+  const { isOverloaded } = useNetworkOverload();
 
   const initialFeeValues = useMemo(
     () => ({
@@ -286,9 +288,11 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
 
   return modifyFeeAndLimit ? (
     <>
-      <div className="mt-4">
-        <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
-      </div>
+      {isOverloaded && (
+        <div className="mt-4">
+          <Alert type="warning" title={t('attention')} description={<T id="highTrafficMsg" />} />
+        </div>
+      )}
 
       <div className="text-white text-base-plus mt-4 pb-3">
         <T id="networkFees" />

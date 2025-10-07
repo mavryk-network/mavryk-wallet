@@ -7,6 +7,7 @@ import {
   HistoryItemOpTypeEnum,
   HistoryItemStatus,
   HistoryItemTransactionOp,
+  StakingActions,
   UserHistoryItem
 } from 'lib/temple/history/types';
 
@@ -127,3 +128,59 @@ export const deriveStatusColorClassName = (status: HistoryItemStatus): [HistoryI
 
   return [status, textColorClassName, borderColorClassname];
 };
+
+interface StakingMessage {
+  titleNode: string;
+  args: (string | JSX.Element)[];
+}
+
+export function getStakingMessage(
+  updateType: StakingActions,
+  isValidator: boolean,
+  senderAddress?: string,
+  bakerAddress?: string
+): StakingMessage {
+  const sender = senderAddress ?? 'unknown';
+  const baker = bakerAddress ?? 'unknown';
+
+  switch (updateType) {
+    case StakingActions.stake:
+      return {
+        titleNode: isValidator ? 'Received stake from' : 'Staked to',
+        args: [isValidator ? sender : baker]
+      };
+
+    case StakingActions.unstake:
+      return {
+        titleNode: isValidator ? 'Stake withdrawn by' : 'Unstaked from',
+        args: [isValidator ? sender : baker]
+      };
+
+    case StakingActions.restake:
+      return {
+        titleNode: isValidator ? 'Received restake from' : 'Restaked to',
+        args: [isValidator ? sender : baker]
+      };
+
+    case StakingActions.finalize:
+      return {
+        titleNode: isValidator ? 'Unstake finalized for' : 'Finalized unstake from',
+        args: [isValidator ? sender : baker]
+      };
+
+    case StakingActions.slash_staked:
+      return {
+        titleNode: isValidator ? 'Slashed stake from' : 'Slashed on',
+        args: [isValidator ? sender : baker]
+      };
+
+    case StakingActions.slash_unstaked:
+      return {
+        titleNode: isValidator ? 'Slashed pending unstake from' : 'Slashed (pending unstake) on',
+        args: [isValidator ? sender : baker]
+      };
+
+    default:
+      return { titleNode: 'Staking', args: [] };
+  }
+}

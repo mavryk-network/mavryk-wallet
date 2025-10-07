@@ -103,6 +103,12 @@ export const HistoryComponent: React.FC<Props> = memo(
                 nameI18nKey: 'delegation'
               },
               {
+                id: HistoryItemOpTypeEnum.Staking.toString(),
+                selected: filterOptions.includes(HistoryItemOpTypeEnum.Staking),
+
+                nameI18nKey: 'staking'
+              },
+              {
                 id: HistoryItemOpTypeEnum.Origination.toString(),
                 selected: filterOptions.includes(HistoryItemOpTypeEnum.Origination),
 

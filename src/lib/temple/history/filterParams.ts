@@ -9,6 +9,9 @@ export const createOpParams = (accountAddress: string): StringRecord<ExtendedGet
   [HistoryItemOpTypeEnum.Origination.toString()]: {
     type: 'origination'
   },
+  [HistoryItemOpTypeEnum.Staking.toString()]: {
+    type: 'staking'
+  },
   [HistoryItemOpTypeEnum.Interaction.toString()]: {
     type: 'transaction',
     'entrypoint.ne': 'transfer',

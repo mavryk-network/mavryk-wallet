@@ -14,11 +14,12 @@ import {
   HistoryItemTransactionOp,
   HistoryItemOtherOp,
   UserHistoryItem,
-  HistoryItemOriginationOp
+  HistoryItemOriginationOp,
+  HistoryItemStakingOp
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from './MoneyDiffView';
-import { getAssetsFromOperations } from './utils';
+import { getAssetsFromOperations, getStakingMessage } from './utils';
 
 interface Props {
   item: IndividualHistoryItem;
@@ -42,19 +43,67 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
 
   switch (item.type) {
-    case HistoryItemOpTypeEnum.Delegation:
-      const opDelegate = item as HistoryItemDelegationOp;
-
-      const isDelegateTo = userAddress.toLocaleLowerCase() !== 'mv1V4h45W3p4e1sjSBvRkK2uYbvkTnSuHg8g'.toLowerCase();
-
-      const i18nkey: TID = isDelegateTo ? 'delegationToSmb' : 'delegationFromSmb';
-      const address = isDelegateTo ? opDelegate.newDelegate?.address : opDelegate.source?.address;
+    case HistoryItemOpTypeEnum.Staking:
+      const opStaking = item as HistoryItemStakingOp;
+      const isValidator = opStaking.baker?.address === userAddress;
+      const stakingMessage = getStakingMessage(
+        opStaking.action,
+        isValidator,
+        opStaking.sender?.address ?? 'unknown',
+        opStaking.baker?.address ?? 'unknown'
+      );
 
       return (
         <Component
           {...componentBaseProps}
-          titleNode={isDelegateTo ? HistoryItemOpTypeTexts[item.type] : t('delegationReceived')}
-          argsNode={<StackItemArgs i18nKey={i18nkey} args={[address ?? 'unknown']} />}
+          titleNode={stakingMessage.titleNode}
+          argsNode={<StackItemArgs i18nKey="emptyKey" args={stakingMessage.args} />}
+        />
+      );
+    case HistoryItemOpTypeEnum.Delegation:
+      const opDelegate = item as HistoryItemDelegationOp;
+
+      const sourceAddress = opDelegate.source?.address;
+      const isDelegator =
+        opDelegate.prevDelegate?.address === userAddress || opDelegate.newDelegate?.address === userAddress;
+
+      if (isDelegator) {
+        const isDelegatorLeft =
+          opDelegate.prevDelegate?.address === userAddress && opDelegate.newDelegate?.address !== userAddress;
+
+        return (
+          <Component
+            {...componentBaseProps}
+            titleNode={isDelegatorLeft ? 'Delegator' : 'New delegator'}
+            argsNode={
+              <StackItemArgs
+                i18nKey="emptyKey"
+                args={[sourceAddress ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
+              />
+            }
+          />
+        );
+      }
+
+      const isPrevDelegate = opDelegate.prevDelegate?.address;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={isPrevDelegate ? 'Left delegate' : 'Delegate to'}
+          argsNode={
+            <StackItemArgs
+              i18nKey="emptyKey"
+              args={
+                isPrevDelegate
+                  ? [
+                      opDelegate.prevDelegate?.address ?? 'unknown',
+                      <> and re-delegate to </>,
+                      opDelegate.newDelegate?.address
+                    ]
+                  : [opDelegate.newDelegate?.address]
+              }
+            />
+          }
         />
       );
 

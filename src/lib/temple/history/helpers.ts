@@ -11,6 +11,7 @@ import {
   HistoryItemOperationBase,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemStakingOp,
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from './types';
@@ -82,6 +83,19 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
         });
         break;
 
+      case HistoryItemOpTypeEnum.Staking:
+        const opStaking = oper as HistoryItemStakingOp;
+
+        opStack.push({
+          ...basicFields,
+          sender: opStaking.sender,
+          amount: opStaking.amount,
+          action: opStaking.action,
+          baker: opStaking.baker,
+          type: HistoryItemOpTypeEnum.Staking
+        });
+        break;
+
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = oper as HistoryItemTransactionOp;
 
@@ -106,6 +120,7 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
           type: HistoryItemOpTypeEnum.Delegation
         });
         break;
+
       case HistoryItemOpTypeEnum.Reveal:
         // const opReveal = oper as HistoryItemOpReveal;
         opStack.push({
@@ -174,6 +189,7 @@ const txHasToken = (txType: HistoryItemOpTypeEnum) => {
     case HistoryItemOpTypeEnum.TransferTo:
     case HistoryItemOpTypeEnum.TransferFrom:
     case HistoryItemOpTypeEnum.Delegation:
+    case HistoryItemOpTypeEnum.Staking:
     case HistoryItemOpTypeEnum.Swap:
       return true;
     case HistoryItemOpTypeEnum.Interaction:

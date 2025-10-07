@@ -24,6 +24,7 @@ import {
   HistoryItemOpTypeEnum,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemStakingOp,
   HistoryItemStatus,
   HistoryItemTransactionOp,
   IndividualHistoryItem
@@ -374,6 +375,8 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
   const item = historyItem.operations[0];
   const swappedOpItem = historyItem.operations[historyItem.operations.length - 1];
 
+  console.log(historyItem, 'historyItem');
+
   const getTxOpLabelAndAddress = useMemo(() => {
     switch (historyItem.type) {
       case HistoryItemOpTypeEnum.Delegation:
@@ -381,6 +384,12 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         return {
           label: HistoryItemTypeLabels[historyItem.type],
           address: opDelegate.newDelegate?.address || opDelegate.source.address
+        };
+      case HistoryItemOpTypeEnum.Staking:
+        const opStaking = item as HistoryItemStakingOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opStaking.sender?.address || opStaking.source.address
         };
 
       case HistoryItemOpTypeEnum.Origination:

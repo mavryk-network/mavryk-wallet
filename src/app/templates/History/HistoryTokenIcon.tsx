@@ -46,13 +46,15 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
   ]);
 
   const renderOperationIcon = () => {
-    // TODO add withdraw. new stake, vote yay, buy
+    // TODO add withdraw. vote yay, buy
     switch (type) {
       case HistoryItemOpTypeEnum.TransferFrom:
         return <ReceiveIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.TransferTo:
         return <SendIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Delegation:
+        return <StakeIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
+      case HistoryItemOpTypeEnum.Staking:
         return <StakeIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;
       case HistoryItemOpTypeEnum.Swap:
         return <SwapIcon className="rounded-full overflow-hidden" style={{ width: size, height: size }} />;

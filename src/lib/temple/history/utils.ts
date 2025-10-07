@@ -23,12 +23,14 @@ import {
   HistoryItemOpTypeEnum,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemStakingOp,
   HistoryItemStatus,
   HistoryItemTokenTransfer,
   HistoryItemTransactionOp,
   HistoryMember,
   IndividualHistoryItem,
   RecipientInfo,
+  StakingActions,
   TokenType,
   UserHistoryItem
 } from './types';
@@ -83,6 +85,17 @@ function reduceOneTzktOperation(
   switch (operation.type) {
     case 'transaction':
       return reduceOneTzktTransactionOperation(address, operation, index);
+
+    case 'staking':
+      const stakingOpBase = buildHistoryItemOpBase(operation, address, operation.amount || 0, operation.sender, index);
+      const stakingOp: HistoryItemStakingOp = {
+        ...stakingOpBase,
+        action: operation.action,
+        sender: operation.sender,
+        type: HistoryItemOpTypeEnum.Staking,
+        baker: operation.baker
+      };
+      return stakingOp;
     case 'delegation': {
       const delegationOpBase = buildHistoryItemOpBase(operation, address, 0, operation.sender, index);
       const delegationOp: HistoryItemDelegationOp = {
@@ -228,6 +241,59 @@ function reduceOneTzktTransactionOperation(
   }
 }
 
+// Money utils ------------------------------------------
+function getDelegationAmountSigned(operation: TzktOperation, address: string, amount: number) {
+  return operation.type === 'delegation' &&
+    operation.newDelegate?.address !== address &&
+    operation.prevDelegate?.address === address
+    ? `-${amount}`
+    : `${amount}`;
+}
+
+function getStakingAmountSigned(operation: TzktOperation, address: string, amount: number) {
+  if (operation.type !== 'staking') return '';
+  let isMinus: boolean;
+  const isValidator = address === operation.baker?.address;
+
+  switch (operation.action) {
+    case StakingActions.stake:
+      isMinus = !isValidator; // account (-), validator (+)
+      break;
+
+    case StakingActions.unstake:
+      isMinus = isValidator; // account (+), validator (-)
+      break;
+
+    case StakingActions.restake:
+      isMinus = !isValidator; // account (-), validator (+)
+      break;
+
+    case StakingActions.finalize:
+      isMinus = isValidator; // account (+), validator (-)
+      break;
+
+    case StakingActions.slash_staked:
+    case StakingActions.slash_unstaked:
+      isMinus = true; // account (-), validator (-)
+      break;
+
+    default:
+      isMinus = false;
+  }
+
+  return `${isMinus ? '-' : ''}${amount}`;
+}
+
+function getAmountSigned(operation: TzktOperation, address: string, amount: number, source: HistoryMember) {
+  if (operation.type === 'delegation') return getDelegationAmountSigned(operation, address, amount);
+
+  if (operation.type === 'staking') return getStakingAmountSigned(operation, address, amount);
+
+  return source.address === address ? `-${amount}` : `${amount}`;
+}
+
+// END OF Money utils ------------------------------------------
+
 function buildHistoryItemOpBase(
   operation: TzktOperation,
   address: string,
@@ -240,7 +306,7 @@ function buildHistoryItemOpBase(
     id,
     level,
     source,
-    amountSigned: source.address === address ? `-${amount}` : `${amount}`,
+    amountSigned: getAmountSigned(operation, address, amount, source),
     status: stringToHistoryItemStatus(operation.status),
     addedAt,
     block,
@@ -345,6 +411,8 @@ function deriveHistoryItemType(
     return HistoryItemOpTypeEnum.Other;
   } else if (firstOperation.type === 'delegation') {
     return HistoryItemOpTypeEnum.Delegation;
+  } else if (firstOperation.type === 'staking') {
+    return HistoryItemOpTypeEnum.Staking;
   } else if (firstOperation.type === 'origination') {
     return HistoryItemOpTypeEnum.Origination;
   } else if (firstOperation.type === 'reveal') {

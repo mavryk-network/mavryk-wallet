@@ -195,7 +195,7 @@ async function fetchOperations_Any(
   const limit = pseudoLimit;
 
   const accOperations = await TZKT.fetchGetAccountOperations(chainId, accountAddress, {
-    type: ['delegation', 'origination', 'transaction'],
+    type: ['delegation', 'origination', 'transaction', 'staking'],
     ...buildOlderThanParam(olderThan),
     ...operationParams,
     limit,

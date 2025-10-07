@@ -99,7 +99,15 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
       case 'approve':
         return t('approveToken');
       case 'delegation':
-        return item.delegate ? t('delegating') : t('unStaking');
+        return t('delegating');
+      case 'staking':
+        return t('staking');
+      case 'finalize_unstake':
+        return t('finalizeUnstake');
+      case 'stake':
+        return t('coStake');
+      case 'unstake':
+        return t('unstake');
       default:
         return item.isEntrypointInteraction ? <T id="interaction" /> : t('transactionOfSomeType', item.type);
     }
@@ -150,6 +158,23 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         }
 
         return {};
+      case 'finalize_unstake':
+      case 'staking':
+      case 'stake':
+        return {
+          argumentDisplayProps: {
+            i18nKey: 'doSthToSmb',
+            arg: [item.contractAddress!]
+          }
+        };
+
+      case 'unstake':
+        return {
+          argumentDisplayProps: {
+            i18nKey: item.delegate ? 'doSthFromSmb' : 'doSthToSmb',
+            arg: [item.delegate || item.contractAddress!]
+          }
+        };
 
       default:
         return item.isEntrypointInteraction
@@ -256,7 +281,6 @@ const OperationVolumeDisplay = memo<OperationVolumeDisplayProps>(({ expense, vol
   return (
     <div className="flex flex-col items-start gap-1">
       <span className="text-base-plus text-white flex items-center">
-        {/* {withdrawal && "-"} */}
         <span>
           <Money>{finalVolume || 0}</Money>
         </span>

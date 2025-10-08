@@ -19,7 +19,8 @@ import {
   TzktGetRewardsResponse,
   TzktRelatedContract,
   TzktAccount,
-  TzktHubConnection
+  TzktHubConnection,
+  SetDelegateParametersOperation
 } from './types';
 import { calcTzktAccountSpendableTezBalance } from './utils';
 
@@ -355,5 +356,27 @@ export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string
   } catch (e) {
     console.log(e);
     return false;
+  }
+};
+
+export const fetchBakerDelegateParameters = async (
+  bakerAddress: string,
+  chainId: TzktApiChainId | string | null | undefined
+) => {
+  try {
+    if (chainId && isKnownChainId(chainId)) {
+      const storageRes = await fetchGet<SetDelegateParametersOperation[]>(
+        chainId,
+        `/operations/set_delegate_parameters`,
+        { sender: bakerAddress }
+      );
+
+      return storageRes[0] ?? null;
+    }
+
+    return null;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
 };

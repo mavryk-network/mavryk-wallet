@@ -1,3 +1,4 @@
+import { OperationStatus } from '@mavrykdynamics/taquito';
 import { HubConnection } from '@microsoft/signalr';
 
 import { StakingActions } from 'lib/temple/history/types';
@@ -648,3 +649,23 @@ export interface TzktHubConnection extends HubConnection {
   off(method: TzktSubscriptionChannel.Operations): void;
   off(method: TzktSubscriptionChannel.Operations, cb: (msg: TzktOperationsSubscriptionMessage) => void): void;
 }
+
+export type SetDelegateParametersOperation = {
+  type: 'set_delegate_parameters';
+  id: number;
+  level: number;
+  timestamp: string; // ISO date string
+  hash: string;
+  sender: {
+    address: string;
+  };
+  counter: number;
+  gasLimit: number;
+  gasUsed: number;
+  storageLimit: number;
+  bakerFee: number;
+  limitOfStakingOverBaking: number;
+  edgeOfBakingOverStaking: number;
+  activationCycle: number;
+  status: OperationStatus;
+};

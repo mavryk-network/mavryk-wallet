@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
@@ -13,7 +13,7 @@ import {
   getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
-import { TZKT_API_BASE_URLS, TzktApiChainId } from 'lib/apis/tzkt/api';
+import { fetchBakerDelegateParameters, TZKT_API_BASE_URLS, TzktApiChainId } from 'lib/apis/tzkt/api';
 import type { TzktUserAccount } from 'lib/apis/tzkt/types';
 import { useRetryableSWR } from 'lib/swr';
 import type { ReactiveTezosToolkit } from 'lib/temple/front';
@@ -95,6 +95,33 @@ export function useDelegate<T = TzktUserAccount>(
 
 export function useAccountDelegatePeriodStats(accountAddress: string) {
   const { data: accStats } = useDelegate<TzktUserAccount>(accountAddress);
+  const tezos = useTezos();
+  const chainid = useChainId();
+
+  const [cyclesData, setCyclesData] = useState(() => ({
+    currentCycle: 0,
+    delegateCycle: -1
+  }));
+
+  useEffect(() => {
+    (async function () {
+      try {
+        if (accStats?.delegate?.address) {
+          const [blockMetadata, setDelegateParameters] = await Promise.all([
+            tezos.rpc.getBlockMetadata(),
+            fetchBakerDelegateParameters(accStats?.delegate?.address, chainid)
+          ]);
+
+          const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
+          const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
+
+          setCyclesData({ currentCycle, delegateCycle });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [tezos.rpc, accStats?.delegate?.address, chainid]);
 
   const {
     canRedelegate,
@@ -110,6 +137,8 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
 
     const costakeWaitTime = getCoStakeWaitTime(
+      cyclesData.currentCycle,
+      cyclesData.delegateCycle,
       accStats?.lastActivityTime,
       accStats?.stakedBalance,
       accStats?.unstakedBalance
@@ -139,7 +168,14 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
       hasUnlockPeriodPassed,
       hasDelegationPeriodPassed
     };
-  }, [accStats]);
+  }, [
+    accStats?.delegationTime,
+    accStats?.lastActivityTime,
+    accStats?.stakedBalance,
+    accStats?.unstakedBalance,
+    cyclesData.currentCycle,
+    cyclesData.delegateCycle
+  ]);
 
   return {
     myBakerPkh: accStats?.delegate?.address ?? null,
@@ -150,7 +186,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     isInUnlockPeriod: isInUnlockPeriod,
     hasUnlockPeriodPassed: hasUnlockPeriodPassed,
     canRedelegate: canRedelegate,
-    canCostake: !isInUnlockPeriod,
+    canCostake: !isInUnlockPeriod && !isInCostakePeriod,
     canUnlock: canUnlockStake,
     unlockWaitTime,
     costakeWaitTime,

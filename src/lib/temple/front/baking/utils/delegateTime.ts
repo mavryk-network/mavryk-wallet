@@ -50,22 +50,30 @@ export function getUnlockWaitTime(lastActivityTime?: string | null, unstakedBala
 
 // 3) Co-stake lock period (6 days = 2 cycles)
 export function getCoStakeWaitTime(
+  currentCycle?: number | null,
+  delegateCycle?: number | null,
   lastActivityTime?: string | null,
   stakedBalance?: number,
   unstakedBalance?: number
 ): string | null {
-  if (!lastActivityTime) return null;
-
-  // Lock applies only if stake > 0 and no unstake in progress
-  if ((stakedBalance ?? 0) > 0 && (unstakedBalance ?? 0) === 0) {
-    const start = dayjs(lastActivityTime); // stake operation time
-    const end = start.add(ONE_CYCLE_IN_DAYS * 2, 'day'); // 2 cycles = 6 days
-    const now = dayjs();
-
-    const diff = end.diff(now);
-
-    return diff > 0 ? formatTimeLeft(diff) : 'allowed';
+  if (
+    currentCycle == null ||
+    delegateCycle == null ||
+    !lastActivityTime ||
+    (stakedBalance ?? 0) <= 0 ||
+    (unstakedBalance ?? 0) > 0
+  ) {
+    return null;
   }
 
-  return null;
+  const cyclesLeft = delegateCycle - currentCycle;
+
+  // already reached or passed required cycle
+  if (cyclesLeft <= 0) return 'allowed';
+
+  const start = dayjs();
+  const end = start.add(cyclesLeft * ONE_CYCLE_IN_DAYS, 'day');
+  const diff = end.diff(start);
+
+  return formatTimeLeft(diff);
 }

@@ -293,7 +293,7 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
       </span>
     ) : (
       // @ts-expect-error // reactNode
-      <React.Fragment>{value}</React.Fragment>
+      <React.Fragment key={index}>{value}</React.Fragment>
     );
   });
 

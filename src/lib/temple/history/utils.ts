@@ -12,7 +12,6 @@ import { isTruthy } from 'lib/utils';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
-import { OperationsGroup } from '../activity-new/types';
 
 import { getMoneyDiff, isZero } from './helpers';
 import {
@@ -29,6 +28,7 @@ import {
   HistoryItemTransactionOp,
   HistoryMember,
   IndividualHistoryItem,
+  OperationsGroup,
   RecipientInfo,
   StakingActions,
   TokenType,

@@ -14,7 +14,7 @@ import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
 import { TinySavedAccountInfo } from './TinySavedAccountInfo';
-// import { HistoryTokenIcon } from '../History/HistoryTokenIcon';
+import { getPredefinedBakerName } from './utils';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;
@@ -152,7 +152,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
           return {
             argumentDisplayProps: {
               i18nKey: 'delegationToSmb',
-              arg: [item.delegate]
+              arg: [getPredefinedBakerName(item.delegate)]
             }
           };
         }
@@ -164,7 +164,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         return {
           argumentDisplayProps: {
             i18nKey: 'doSthToSmb',
-            arg: [item.contractAddress!]
+            arg: [getPredefinedBakerName(item.contractAddress!)]
           }
         };
 
@@ -172,7 +172,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         return {
           argumentDisplayProps: {
             i18nKey: item.delegate ? 'doSthFromSmb' : 'doSthToSmb',
-            arg: [item.delegate || item.contractAddress!]
+            arg: [getPredefinedBakerName(item.delegate || item.contractAddress!)]
           }
         };
 

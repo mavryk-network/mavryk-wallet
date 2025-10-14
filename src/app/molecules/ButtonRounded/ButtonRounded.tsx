@@ -50,9 +50,11 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
     const { trackEvent } = useAnalytics();
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
+      if (!disabled) {
+        testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
 
-      return onClick?.(e);
+        return onClick?.(e);
+      }
     };
 
     const [bgColor, bgColorHover, borderColor] = (() => {

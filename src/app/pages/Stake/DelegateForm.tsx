@@ -608,7 +608,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const account = useAccount();
   const tezos = useTezos();
   const data = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock, stakedBalance } = data;
+  const { canRedelegate, canCostake, canUnlock } = data;
   const delegateLabel = getDelegateLabel(data);
 
   const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;

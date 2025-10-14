@@ -25,7 +25,7 @@ import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
 import { ZERO } from 'lib/utils/numbers';
-import { navigate } from 'lib/woozie';
+import { goBack, navigate, useLocation } from 'lib/woozie';
 
 import {
   ManageStakeUnderTextFieldBalance,
@@ -37,6 +37,7 @@ interface FormData {
 }
 
 export const IncreaseStake = () => {
+  const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
   const { myBakerPkh, canCostake, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
@@ -163,6 +164,14 @@ export const IncreaseStake = () => {
     ];
   }, [assetMetadata, balance, stakedAmount]);
 
+  const navigateBack = useCallback(() => {
+    if (historyPosition === 0) {
+      navigate('/');
+    } else {
+      goBack();
+    }
+  }, [historyPosition]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
       <Controller
@@ -200,7 +209,7 @@ export const IncreaseStake = () => {
       </div>
       {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 px-4" />}
       <div className="grid grid-cols-2 gap-3 w-full mt-6">
-        <ButtonRounded size="big" fill={false} onClick={() => navigate('/stake')}>
+        <ButtonRounded size="big" fill={false} onClick={navigateBack} type="button">
           <T id="cancel" />
         </ButtonRounded>
         <FormSubmitButton

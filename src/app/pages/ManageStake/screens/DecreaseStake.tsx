@@ -1,7 +1,6 @@
 import React, { FC, FocusEventHandler, useCallback, useEffect, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
-import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { FormSubmitButton, Money } from 'app/atoms';
@@ -13,6 +12,7 @@ import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
+import { useBalance } from 'lib/balances';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useTezos } from 'lib/temple/front';
@@ -21,7 +21,13 @@ import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { ZERO } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
+
+import {
+  ManageStakeUnderTextFieldBalance,
+  ManagStakeBalancetype
+} from '../components/ManageStakeUnderTextFieldBalance';
 
 interface FormData {
   amount: string;
@@ -31,6 +37,8 @@ export const DecreaseStake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
   const { myBakerPkh, canUnlock, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
+  const balance = balanceData!;
 
   // const { data: baker } = useKnownBaker(myBakerPkh ?? null);
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
@@ -131,6 +139,23 @@ export const DecreaseStake: FC = () => {
     [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
+  const balancesData: ManagStakeBalancetype[] = useMemo(() => {
+    return [
+      {
+        id: 1,
+        balance: maxAmount,
+        i18nkey: 'stakedAmount',
+        assetMetadata
+      },
+      {
+        id: 2,
+        balance,
+        i18nkey: 'delegatedAmount',
+        assetMetadata
+      }
+    ];
+  }, [assetMetadata, balance, maxAmount]);
+
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -153,7 +178,7 @@ export const DecreaseStake: FC = () => {
           }
           placeholder={'Enter amount'}
           errorCaption={errors.amount?.message || submitError?.message}
-          containerClassName="mb-3"
+          containerClassName="mb-1"
           autoFocus={Boolean(maxAmount)}
           extraInnerWrapper="unset"
           extraInner={
@@ -162,17 +187,10 @@ export const DecreaseStake: FC = () => {
             </div>
           }
         />
-        <div className="flex text-sm gap-1 mb-6 items-center">
-          <p className="text-secondary-white">
-            <T id="stakedAmount" />
-          </p>
-          <div className="text-white">
-            <div className="text-white text-sm flex items-center">
-              <div className={clsx('text-sm leading-none', 'text-white')}>
-                <Money smallFractionFont={false}>{maxAmount}</Money> <span>{assetMetadata?.symbol}</span>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col gap-1">
+          {balancesData.map(({ id, ...rest }) => (
+            <ManageStakeUnderTextFieldBalance key={id} {...rest} />
+          ))}
         </div>
         {operation && <OperationStatus typeTitle={'Unlocking'} operation={operation} className="mb-8 px-4" />}
         <FormSubmitButton

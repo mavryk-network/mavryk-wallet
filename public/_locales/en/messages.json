@@ -3948,10 +3948,16 @@
   "manageYourCoStake": {
     "message": "Manage Your Co-stake"
   },
+  "increaseCostakeDesc": {
+    "message": "Increasing your co-stake boosts rewards and participation. \nNote: The increased amount will take 5 cycles (~15 days) to become active and start earning rewards."
+  },
   "increaseCostake": {
     "message": "Increase Co-Stake"
   },
   "decreaseCostake": {
     "message": "Decrease Co-Stake"
+  },
+  "decreaseCostakeDesc": {
+    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 4 cycles (~12 days) for your funds to fully unlock, after which they will become liquid for use."
   }
 }

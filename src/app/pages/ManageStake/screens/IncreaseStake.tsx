@@ -1,4 +1,4 @@
-import React, { FC, FocusEventHandler, useCallback, useEffect, useMemo } from 'react';
+import React, { FocusEventHandler, useCallback, useEffect, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
@@ -7,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { FormSubmitButton, Money } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
+import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -148,7 +149,11 @@ export const IncreaseStake = () => {
           onFocus={() => amountFieldRef.current?.focus()}
           id="co-stake-amount"
           assetDecimals={assetMetadata?.decimals ?? 0}
-          label={'Co-stake Amount'}
+          label={
+            <InfoTooltip content={<T id="increaseCostakeDesc" />}>
+              <T id="increaseCostake" />
+            </InfoTooltip>
+          }
           placeholder={'Enter amount'}
           errorCaption={errors.amount?.message || submitError?.message}
           containerClassName="mb-3"

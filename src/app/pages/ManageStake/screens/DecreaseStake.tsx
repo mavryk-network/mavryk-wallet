@@ -7,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { FormSubmitButton, Money } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
+import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -144,7 +145,12 @@ export const DecreaseStake: FC = () => {
           onFocus={() => amountFieldRef.current?.focus()}
           id="co-stake-amount"
           assetDecimals={assetMetadata?.decimals ?? 0}
-          label={'Amount to Unlock'}
+          label={
+            <div className="flex items-center gap-1">
+              <T id="decreaseCostake" />
+              <InfoTooltip content={<T id="decreaseCostakeDesc" />} />
+            </div>
+          }
           placeholder={'Enter amount'}
           errorCaption={errors.amount?.message || submitError?.message}
           containerClassName="mb-3"

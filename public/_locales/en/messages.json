@@ -3944,5 +3944,8 @@
   },
   "unstake": {
     "message": "Unstake"
+  },
+  "manageYourCoStake": {
+    "message": "Manage Your Co-stake"
   }
 }

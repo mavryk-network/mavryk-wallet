@@ -34,6 +34,7 @@ import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
 import { CoStake } from './pages/CoStake/CoStake';
 import { EditAccount } from './pages/EditAccount';
+import { ManageStake } from './pages/ManageStake/ManageStake';
 import Onboarding from './pages/Onboarding/Onboarding';
 import { ProVersion } from './pages/ProVersion/ProVersion';
 import RWAPage from './pages/RWAs/RWAPage';
@@ -97,6 +98,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/delegate', onlyReady(() => <Delegate />)],
   ['/pro-version', onlyReady(() => <ProVersion />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
+  ['/manage-stake/:tabSlug?', onlyReady(() => <ManageStake />)],
   ['/co-stake/:assetType?', onlyReady(() => <CoStake />)],
   ['/unlock-stake/:assetType?', onlyReady(() => <UnlockCoStake />)],
   ['/dapps', onlyReady(() => <DApps />)],

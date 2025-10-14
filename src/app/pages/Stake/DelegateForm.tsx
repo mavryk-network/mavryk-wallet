@@ -42,6 +42,7 @@ import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import {
   CO_STAKE,
   FINALIZE_UNLOCK,
+  MANAGE_STAKE,
   SORTED_PREDEFINED_SPONSORED_BAKERS,
   UNLOCK_STAKE,
   UNLOCKING
@@ -626,8 +627,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, [avtivateReDelegation, close]);
 
   const handleDelegateClickbasedOnPeriod = useCallback(async () => {
-    if (delegateLabel === UNLOCK_STAKE) {
-      return open('unlock');
+    if (delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE) {
+      return navigate('/manage-stake');
     }
 
     if (delegateLabel === FINALIZE_UNLOCK) {
@@ -649,11 +650,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === UNLOCKING) {
       return;
     }
-
-    if (delegateLabel === CO_STAKE) {
-      return navigate('/co-stake');
-    }
-  }, [delegateLabel, open, tezos.wallet]);
+  }, [delegateLabel, tezos.wallet]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {
@@ -679,6 +676,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     }
   }, [delegateLabel, open, canRedelegate]);
 
+  const delegationLabelToShow = useMemo(() => {
+    return delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE ? MANAGE_STAKE : delegateLabel;
+  }, [delegateLabel]);
+
   return (
     <div className="grid gap-3 grid-cols-2">
       <ButtonRounded
@@ -695,7 +696,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
         onClick={handleDelegateClickbasedOnPeriod}
         disabled={isWatchOnlyAccount || isStakeButtonDisabled}
       >
-        {delegateLabel}
+        {delegationLabelToShow}
       </ButtonRounded>
 
       <RedelegatePopup

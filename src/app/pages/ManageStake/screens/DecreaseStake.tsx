@@ -3,9 +3,10 @@ import React, { FC, FocusEventHandler, useCallback, useEffect, useMemo } from 'r
 import BigNumber from 'bignumber.js';
 import { Controller, useForm } from 'react-hook-form';
 
-import { FormSubmitButton, Money } from 'app/atoms';
+import { FormSubmitButton } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
@@ -157,52 +158,54 @@ export const DecreaseStake: FC = () => {
   }, [assetMetadata, balance, maxAmount]);
 
   return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="amount"
-          as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
-          control={control}
-          rules={{
-            validate: validateAmount
-          }}
-          onChange={([v]) => v}
-          onFocus={() => amountFieldRef.current?.focus()}
-          id="co-stake-amount"
-          assetDecimals={assetMetadata?.decimals ?? 0}
-          label={
-            <div className="flex items-center gap-1">
-              <T id="decreaseCostake" />
-              <InfoTooltip content={<T id="decreaseCostakeDesc" />} />
-            </div>
-          }
-          placeholder={'Enter amount'}
-          errorCaption={errors.amount?.message || submitError?.message}
-          containerClassName="mb-1"
-          autoFocus={Boolean(maxAmount)}
-          extraInnerWrapper="unset"
-          extraInner={
-            <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
-              <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
-            </div>
-          }
-        />
-        <div className="flex flex-col gap-1">
-          {balancesData.map(({ id, ...rest }) => (
-            <ManageStakeUnderTextFieldBalance key={id} {...rest} />
-          ))}
-        </div>
-        {operation && <OperationStatus typeTitle={'Unlocking'} operation={operation} className="mb-8 px-4" />}
+    <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
+      <Controller
+        name="amount"
+        as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
+        control={control}
+        rules={{
+          validate: validateAmount
+        }}
+        onChange={([v]) => v}
+        onFocus={() => amountFieldRef.current?.focus()}
+        id="co-stake-amount"
+        assetDecimals={assetMetadata?.decimals ?? 0}
+        label={
+          <div className="flex items-center gap-1">
+            <T id="decreaseCostake" />
+            <InfoTooltip content={<T id="decreaseCostakeDesc" />} />
+          </div>
+        }
+        placeholder={'Enter amount'}
+        errorCaption={errors.amount?.message || submitError?.message}
+        containerClassName="mb-1"
+        autoFocus={Boolean(maxAmount)}
+        extraInnerWrapper="unset"
+        extraInner={
+          <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+            <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+          </div>
+        }
+      />
+      <div className="flex flex-col gap-1 flex-1">
+        {balancesData.map(({ id, ...rest }) => (
+          <ManageStakeUnderTextFieldBalance key={id} {...rest} />
+        ))}
+      </div>
+      {operation && <OperationStatus typeTitle={'Unlocking'} operation={operation} className="mb-8 px-4" />}
+      <div className="grid grid-cols-2 gap-3 w-full mt-6">
+        <ButtonRounded size="big" fill={false} onClick={() => navigate('/stake')}>
+          <T id="cancel" />
+        </ButtonRounded>
         <FormSubmitButton
           loading={formState.isSubmitting}
           disabled={Boolean(
             formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
           )}
-          className="my-6"
         >
           <T id="unlock" />
         </FormSubmitButton>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };

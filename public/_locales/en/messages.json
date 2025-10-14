@@ -3951,6 +3951,12 @@
   "increaseCostakeDesc": {
     "message": "Increasing your co-stake boosts rewards and participation. \nNote: The increased amount will take 5 cycles (~15 days) to become active and start earning rewards."
   },
+  "increase": {
+    "message": "Increase"
+  },
+  "decrease": {
+    "message": "Decrease"
+  },
   "increaseCostake": {
     "message": "Increase Co-Stake"
   },

@@ -2042,6 +2042,22 @@
       }
     }
   },
+  "doSthToSmb": {
+    "message": "to $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "doSthFromSmb": {
+    "message": "from $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
   "delegationFromSmb": {
     "message": "from $delegate$",
     "placeholders": {
@@ -3922,5 +3938,20 @@
   },
   "unlockYourStakeFirstDesc": {
     "message": "Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
+  },
+  "finalizeUnstake": {
+    "message": "Finalize unstake"
+  },
+  "unstake": {
+    "message": "Unstake"
+  },
+  "manageYourCoStake": {
+    "message": "Manage Your Co-stake"
+  },
+  "increaseCostake": {
+    "message": "Increase Co-Stake"
+  },
+  "decreaseCostake": {
+    "message": "Decrease Co-Stake"
   }
 }

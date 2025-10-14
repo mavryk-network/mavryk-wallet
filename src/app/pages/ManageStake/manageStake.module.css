@@ -1,0 +1,7 @@
+.tabContainerClassName {
+  display: grid;
+  grid-template-columns: repeat(2, min-content);
+  margin-inline: auto;
+  justify-content: center;
+  margin-bottom: 16px;
+}

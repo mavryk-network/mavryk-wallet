@@ -3947,5 +3947,11 @@
   },
   "manageYourCoStake": {
     "message": "Manage Your Co-stake"
+  },
+  "increaseCostake": {
+    "message": "Increase Co-Stake"
+  },
+  "decreaseCostake": {
+    "message": "Decrease Co-Stake"
   }
 }

@@ -32,7 +32,6 @@ import * as Woozie from 'lib/woozie';
 
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
-import { CoStake } from './pages/CoStake/CoStake';
 import { EditAccount } from './pages/EditAccount';
 import { ManageStake } from './pages/ManageStake/ManageStake';
 import Onboarding from './pages/Onboarding/Onboarding';
@@ -40,7 +39,6 @@ import { ProVersion } from './pages/ProVersion/ProVersion';
 import RWAPage from './pages/RWAs/RWAPage';
 import { Stake } from './pages/Stake/Stake';
 import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
-import { UnlockCoStake } from './pages/UnlockCoStake/UnlockCoStake';
 import { WithDataLoading } from './WithDataLoading';
 
 interface RouteContext {
@@ -99,8 +97,6 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/pro-version', onlyReady(() => <ProVersion />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
   ['/manage-stake/:tabSlug?', onlyReady(() => <ManageStake />)],
-  ['/co-stake/:assetType?', onlyReady(() => <CoStake />)],
-  ['/unlock-stake/:assetType?', onlyReady(() => <UnlockCoStake />)],
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],
   ['/nft/:assetSlug?', onlyReady(({ assetSlug }) => <NFTsPage assetSlug={assetSlug!} />)],

@@ -627,8 +627,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, [avtivateReDelegation, close]);
 
   const handleDelegateClickbasedOnPeriod = useCallback(async () => {
-    if (delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE) {
-      return navigate('/manage-stake');
+    if (delegateLabel === CO_STAKE) {
+      return navigate('/manage-stake?tab=stake');
+    } else if (delegateLabel === UNLOCK_STAKE) {
+      return navigate('/manage-stake?tab=unlock');
     }
 
     if (delegateLabel === FINALIZE_UNLOCK) {

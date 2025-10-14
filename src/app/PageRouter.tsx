@@ -32,6 +32,7 @@ import * as Woozie from 'lib/woozie';
 
 import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
+import { CoStake } from './pages/CoStake/CoStake';
 import { EditAccount } from './pages/EditAccount';
 import { ManageStake } from './pages/ManageStake/ManageStake';
 import Onboarding from './pages/Onboarding/Onboarding';
@@ -93,9 +94,10 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/receive', onlyReady(() => <Receive />)],
   ['/send/:assetSlug?', onlyReady(({ assetSlug }) => <Send assetSlug={assetSlug} />)],
   // ['/swap', onlyReady(() => <Swap />)],
-  ['/delegate', onlyReady(() => <Delegate />)],
   ['/pro-version', onlyReady(() => <ProVersion />)],
+  ['/delegate', onlyReady(() => <Delegate />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
+  ['/co-stake/:assetType?', onlyReady(() => <CoStake />)],
   ['/manage-stake/:tabSlug?', onlyReady(() => <ManageStake />)],
   ['/dapps', onlyReady(() => <DApps />)],
   ['/manage-assets/:assetType?', onlyReady(({ assetType }) => <ManageAssets assetType={assetType!} />)],

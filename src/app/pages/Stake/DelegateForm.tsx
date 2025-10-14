@@ -608,8 +608,9 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const account = useAccount();
   const tezos = useTezos();
   const data = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock } = data;
+  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance } = data;
   const delegateLabel = getDelegateLabel(data);
+  const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
   const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;
 
@@ -627,6 +628,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, [avtivateReDelegation, close]);
 
   const handleDelegateClickbasedOnPeriod = useCallback(async () => {
+    if (hasZeroStakingBalance && delegateLabel === CO_STAKE) {
+      return navigate('/co-stake');
+    }
+
     if (delegateLabel === CO_STAKE) {
       return navigate('/manage-stake?tab=stake');
     } else if (delegateLabel === UNLOCK_STAKE) {
@@ -652,7 +657,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === UNLOCKING) {
       return;
     }
-  }, [delegateLabel, tezos.wallet]);
+  }, [delegateLabel, hasZeroStakingBalance, tezos.wallet]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {
@@ -679,8 +684,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, [delegateLabel, open, canRedelegate]);
 
   const delegationLabelToShow = useMemo(() => {
-    return delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE ? MANAGE_STAKE : delegateLabel;
-  }, [delegateLabel]);
+    return (delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE) && !hasZeroStakingBalance
+      ? MANAGE_STAKE
+      : delegateLabel;
+  }, [delegateLabel, hasZeroStakingBalance]);
 
   return (
     <div className="grid gap-3 grid-cols-2">

@@ -387,7 +387,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   )}
 
-                  <div style={{ marginBottom: 40 }}>
+                  <div style={{ marginBottom: 12 }}>
                     <ModifyFeeAndLimitComponent
                       id="internal-modified-fees-id"
                       name="internal-modified-fees"

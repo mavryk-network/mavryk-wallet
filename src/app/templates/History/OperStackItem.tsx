@@ -124,6 +124,10 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
 
+      if (!opInteract.entrypoint) {
+        console.log(opInteract, 'opInteract');
+      }
+
       return (
         <Component
           {...componentBaseProps}
@@ -294,7 +298,14 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
   const ArgsPart = args.map((value, index) => {
     return typeof value === 'string' ? (
       <span key={index} onClick={handleHashClick}>
-        <HashChip className="text-blue-200" firstCharsCount={5} key={index} hash={value} type="link" showIcon={false} />
+        <HashChip
+          className="text-blue-200"
+          firstCharsCount={5}
+          key={`${value}${index}`}
+          hash={value}
+          type="link"
+          showIcon={false}
+        />
       </span>
     ) : (
       // @ts-expect-error // reactNode

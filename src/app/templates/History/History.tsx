@@ -343,8 +343,8 @@ export const HistoryComponent: React.FC<Props> = memo(
                 </div>
               }
             >
-              {historyToshow.map(historyItem => (
-                <Fragment key={historyItem.hash}>
+              {historyToshow.map((historyItem, idx) => (
+                <Fragment key={historyItem.hash + idx}>
                   <HistoryItem
                     address={accountAddress}
                     historyItem={historyItem}

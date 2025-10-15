@@ -31,18 +31,25 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   const { hash, addedAt, status } = historyItem;
 
+  const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
+  const isInteractionOperation =
+    historyItem.type === HistoryItemOpTypeEnum.Multiple || historyItem.type === HistoryItemOpTypeEnum.Interaction;
+
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
 
   const base = useMemo(
-    () => operStack.filter((_, i) => i < OP_STACK_PREVIEW_SIZE).map(op => ({ ...op, type: Number(historyItem.type) })),
-    [historyItem.type, operStack]
+    () =>
+      operStack
+        .filter((_, i) => i < OP_STACK_PREVIEW_SIZE)
+        .map(op => ({
+          ...op,
+          type:
+            historyItem.type === HistoryItemOpTypeEnum.Multiple || isSwapOperation ? Number(historyItem.type) : op.type
+        })),
+    [historyItem.type, isSwapOperation, operStack]
   );
-
-  const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
-  const isInteractionOperation =
-    historyItem.type === HistoryItemOpTypeEnum.Multiple || historyItem.type === HistoryItemOpTypeEnum.Interaction;
 
   const rest = useMemo(
     () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),

@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
+import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
 import {
@@ -75,7 +76,11 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           <Component
             {...componentBaseProps}
             titleNode={isDelegatorLeft ? 'Delegator' : 'New delegator'}
-            argsNode={<StackItemArgs args={[sourceAddress ?? 'unknown', isDelegatorLeft ? <> left</> : '']} />}
+            argsNode={
+              <StackItemArgs
+                args={[getPredefinedBakerName(sourceAddress) ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
+              />
+            }
           />
         );
       }
@@ -90,11 +95,11 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
               args={
                 isPrevDelegate
                   ? [
-                      opDelegate.prevDelegate?.address ?? 'unknown',
+                      getPredefinedBakerName(opDelegate.prevDelegate?.address) ?? 'unknown',
                       <> and re-delegate to </>,
-                      opDelegate.newDelegate?.address
+                      getPredefinedBakerName(opDelegate.newDelegate?.address)
                     ]
-                  : [opDelegate.newDelegate?.address]
+                  : [getPredefinedBakerName(opDelegate.newDelegate?.address)]
               }
             />
           }

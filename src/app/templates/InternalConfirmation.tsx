@@ -351,14 +351,14 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     )}
                   </div>
 
-                  {/* {payload.type === 'operations' && spFormat.key === 'raw' && (
+                  {payload.type === 'operations' && spFormat.key === 'raw' && (
                     <OperationsBanner
                       opParams={payload.rawToSign ?? payload.opParams}
                       jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
                       modifiedTotalFee={modifiedTotalFeeValue}
                       modifiedStorageLimit={modifiedStorageLimitValue}
                     />
-                  )} */}
+                  )}
 
                   {payload.type === 'sign' && spFormat.key === 'bytes' && (
                     <>

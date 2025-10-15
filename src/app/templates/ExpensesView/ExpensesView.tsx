@@ -10,11 +10,11 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses, useAllAccounts } from 'lib/temple/front';
+import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
 import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
 import { TinySavedAccountInfo } from './TinySavedAccountInfo';
-import { getPredefinedBakerName } from './utils';
 
 type OperationAssetExpense = Omit<RawOperationAssetExpense, 'tokenAddress'> & {
   assetSlug: string;

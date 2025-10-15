@@ -3,7 +3,6 @@ import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import * as Ed25519 from 'ed25519-hd-key';
 
-import { KYC_CONTRACT } from 'lib/route3/constants';
 import { TempleAccount } from 'lib/temple/types';
 
 import { PublicError } from '../PublicError';
@@ -36,27 +35,6 @@ export function fetchNewAccountName(
 export async function getPublicKeyAndHash(privateKey: string) {
   const signer = await createMemorySigner(privateKey);
   return Promise.all([signer.publicKey(), signer.publicKeyHash()]);
-}
-
-// TODO change later with networks
-export async function getKYCStatus(pkh: string, apiUrl = 'https://atlasnet.api.mavryk.network') {
-  try {
-    // TODO ad chain data
-    const storageRes: any = await fetch(`${apiUrl}/v1/contracts/${KYC_CONTRACT}/storage/`);
-    const bigMapId = (await storageRes.json()).memberLedger;
-
-    const contractData = await fetch(`${apiUrl}/v1/bigmaps/${bigMapId}/keys/${pkh}`);
-
-    // if no data than no KYCed user
-    if (contractData.status === 204) return false;
-
-    const isKYCAddress = await contractData.json();
-
-    return Boolean(isKYCAddress);
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
 }
 
 export async function createMemorySigner(privateKey: string, encPassword?: string) {

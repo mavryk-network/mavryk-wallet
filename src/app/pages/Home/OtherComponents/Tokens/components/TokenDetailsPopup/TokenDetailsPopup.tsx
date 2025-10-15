@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import { Alert, HashChip, Money } from 'app/atoms';
-import { AddBanner } from 'app/atoms/AddBanner';
+import { DelegatePeriodBanner } from 'app/atoms/AddBanner';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
@@ -16,6 +16,7 @@ import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
+import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
 import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
@@ -95,7 +96,8 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
   const canSend = account.type !== TempleAccountType.WatchOnly;
   const sendLink = assetSlug ? `/send/${assetSlug}` : '/send';
 
-  const { data: myBakerPkh } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const isTzBTC = isTzbtcAsset(assetSlug);
 
@@ -217,9 +219,14 @@ type BakerBannerSectionProps = {
 };
 
 const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
+  const acc = useAccount();
+
+  const disabled = acc.type === TempleAccountType.WatchOnly;
   const handleButtonClick = useCallback(() => {
-    navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
-  }, []);
+    if (!disabled) {
+      navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
+    }
+  }, [disabled]);
 
   const NotStakedBanner = useMemo(
     () => (
@@ -227,13 +234,19 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
         <div className="text-white text-sm">
           <T id="stakeYourTokensBannerDescription" />
         </div>
-        <ButtonRounded size="big" fill onClick={handleButtonClick} className="w-full">
+        <ButtonRounded size="big" fill onClick={handleButtonClick} className="w-full" disabled={disabled}>
           <T id="stake" />
         </ButtonRounded>
       </div>
     ),
-    [handleButtonClick]
+    [handleButtonClick, disabled]
   );
+
+  const handleRedelegateClick = useCallback(() => {
+    if (!disabled) {
+      navigate('/stake', HistoryAction.Replace, { state: { redelegate: true } });
+    }
+  }, [disabled]);
 
   const StakedBanner = useMemo(
     () =>
@@ -247,13 +260,8 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
             displayBg
             style={{ width: undefined }}
             extraComponent={
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <ButtonRounded size="xs" fill={false} onClick={handleButtonClick}>
-                  <T id="reDelegate" />
-                </ButtonRounded>
-                <ButtonRounded size="xs" disabled invisibleLabel={<T id="comingSoon" />}>
-                  <T id="coStake" />
-                </ButtonRounded>
+              <div className="mt-3">
+                <DelegateActionsComponent avtivateReDelegation={handleRedelegateClick} />
               </div>
             }
           />
@@ -261,7 +269,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       ) : (
         <Alert type="warning" title={t('unknownBakerTitle')} description={t('unknownBakerDescription')} />
       ),
-    [myBakerPkh]
+    [handleRedelegateClick, myBakerPkh]
   );
 
   return (
@@ -269,7 +277,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
       <div className="text-white text-base-plus flex items-center justify-between">
         <div className="flex items-center gap-2">
           <T id="staking" />
-          {myBakerPkh && <AddBanner text="delegated" />}
+          {myBakerPkh && <DelegatePeriodBanner />}
         </div>
       </div>
       {myBakerPkh ? StakedBanner : NotStakedBanner}

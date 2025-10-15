@@ -120,7 +120,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         }
 
         const chain = await tezos.rpc.getChainId();
-        await importKTManagedAccount(address, chain, owner);
+        await importKTManagedAccount(address, chain, owner, chainId!);
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -133,7 +133,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         setError(err.message);
       }
     },
-    [formState, tezos, accounts, importKTManagedAccount, formAnalytics]
+    [formState, tezos, accounts, importKTManagedAccount, formAnalytics, chainId]
   );
 
   const handleKnownContractSelect = useCallback(

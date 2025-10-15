@@ -18,12 +18,14 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
-import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useDelegate, useKnownBaker, useTezos } from 'lib/temple/front';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { useAssetMetadata } from 'lib/metadata';
+import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
+import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getMaxAmountToken } from 'lib/utils/amounts';
+import { ZERO } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { useBakingHistory } from '../Stake/hooks/use-baking-history';
@@ -37,15 +39,21 @@ export const CoStake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const { fullPage, popup } = useAppEnv();
   const account = useAccount();
-  const { data: myBakerPkh } = useDelegate(account.publicKeyHash);
-  const { data: baker } = useKnownBaker(myBakerPkh ?? null);
+  const { myBakerPkh, canCostake } = useAccountDelegatePeriodStats(account.publicKeyHash);
+
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
-  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
+  const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const tezos = useTezos();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
+
+  useEffect(() => {
+    if (!canCostake) {
+      navigate('stake');
+    }
+  });
 
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
@@ -54,13 +62,12 @@ export const CoStake: FC = () => {
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   useEffect(() => {
-    if (unfamiliarWithDelegation) {
-      navigate('stake');
-      // TODO remove else block check co-stake is available
-    } else {
+    if (account.type === TempleAccountType.WatchOnly) {
       navigate('/');
+    } else if (unfamiliarWithDelegation) {
+      navigate('stake');
     }
-  }, [unfamiliarWithDelegation, account.publicKeyHash]);
+  }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
@@ -113,9 +120,7 @@ export const CoStake: FC = () => {
 
         const op = await tezos.wallet
           .stake({
-            to: myBakerPkh,
-            amount: new BigNumber(amount).toNumber(),
-            mumav: true
+            amount: Number(amount)
           })
           .send();
 
@@ -136,24 +141,15 @@ export const CoStake: FC = () => {
     [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
   );
 
-  const delegatedAmount = useMemo(() => {
-    return atomsToTokens(new BigNumber(baker?.stakedBalance ?? 0), assetMetadata?.decimals || MAVEN_METADATA.decimals);
-  }, [assetMetadata, baker]);
-
   return (
     <PageLayout isTopbarVisible={false} pageTitle={'Co-stake'} removePaddings={popup}>
       <ContentContainer className={clsx('h-full flex-1 flex flex-col text-white', !fullPage && 'pb-8 pt-4')}>
         <AccountBanner account={account} showMVRK className="mb-4" />
-        <div>
-          <p className="text-base-plus mb-3">Stake to</p>
-          {myBakerPkh && <CoStakeBakerBanner bakerPkh={myBakerPkh} />}
-          <Alert
-            type="info"
-            className="my-4"
-            title="Manage, adjust, or co-stake your MVRK"
-            description="You can choose to co-stake only a portion of your MVRK, without needing to commit all of it."
-          />
-          <form onSubmit={handleSubmit(onSubmit)}>
+        <p className="text-base-plus mb-3">Stake to</p>
+        {myBakerPkh && <CoStakeBakerBanner bakerPkh={myBakerPkh} />}
+        <Alert type="info" className="my-4" title={t('manageMVRK')} description={t('choosePortionMVRKStake')} />
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
+          <div className="flex-1">
             <Controller
               name="amount"
               as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
@@ -168,34 +164,39 @@ export const CoStake: FC = () => {
               label={'Co-stake Amount'}
               placeholder={'Enter amount'}
               errorCaption={errors.amount?.message || submitError?.message}
-              containerClassName="mb-3"
+              containerClassName="mb-1"
               autoFocus={Boolean(maxAmount)}
-              extraInner={<MaxButton onClick={handleSetMaxAmount} fill={false} className="relative z-10" />}
+              extraInnerWrapper="unset"
+              extraInner={
+                <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+                  <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+                </div>
+              }
             />
-            <div className="flex text-sm gap-1 mb-6 items-center">
+            <div className="flex text-sm gap-1 items-center">
               <p className="text-secondary-white">
                 <T id="delegatedAmount" />
               </p>
               <div className="text-white">
                 <div className="text-white text-sm flex items-center">
                   <div className={clsx('text-sm leading-none', 'text-white')}>
-                    <Money smallFractionFont={false}>{delegatedAmount}</Money> <span>{assetMetadata?.symbol}</span>
+                    <Money smallFractionFont={false}>{balance}</Money> <span>{assetMetadata?.symbol}</span>
                   </div>
                 </div>
               </div>
             </div>
-            {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 px-4" />}
-            <FormSubmitButton
-              loading={formState.isSubmitting}
-              disabled={Boolean(
-                formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
-              )}
-              className="my-6"
-            >
-              <T id="coStake" />
-            </FormSubmitButton>
-          </form>
-        </div>
+            {operation && <OperationStatus typeTitle={'Co-staking'} operation={operation} className="mb-8 mt-6 px-4" />}
+          </div>
+          <FormSubmitButton
+            loading={formState.isSubmitting}
+            disabled={Boolean(
+              formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
+            )}
+            className="mt-6"
+          >
+            <T id="coStake" />
+          </FormSubmitButton>
+        </form>
       </ContentContainer>
     </PageLayout>
   );

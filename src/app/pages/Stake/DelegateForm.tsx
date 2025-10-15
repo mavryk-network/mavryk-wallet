@@ -6,7 +6,6 @@ import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
 
 import { Alert, Anchor, Button, Divider, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
-import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import Money from 'app/atoms/Money';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
@@ -16,8 +15,6 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
-import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
@@ -41,6 +38,16 @@ import {
   useTezosDomainsClient,
   validateDelegate
 } from 'lib/temple/front';
+import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
+import {
+  CO_STAKE,
+  FINALIZE_UNLOCK,
+  MANAGE_STAKE,
+  SORTED_PREDEFINED_SPONSORED_BAKERS,
+  UNLOCK_STAKE,
+  UNLOCKING
+} from 'lib/temple/front/baking/const';
+import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
@@ -52,6 +59,9 @@ import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selector
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
 import { DelegateFormSelectors } from './delegateForm.selectors';
+import { RedelegatePopup } from './popups/Redelegate.popup';
+import { UnlockPopup } from './popups/Unlock.popup';
+import { UnlockFisrtPopup } from './popups/UnlockFirst.popup';
 
 const PENNY = 0.000001;
 const RECOMMENDED_ADD_FEE = 0.0001;
@@ -89,7 +99,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const accountPkh = acc.publicKeyHash;
 
-  const { data: myBakerPkh } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
@@ -164,7 +175,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const AllValidatorsComponent = useMemo(
     () => (
       <Anchor href={`${process.env.NODES_URL}/validators`} className="text-base-plus text-accent-blue cursor-pointer">
-        All Validators
+        <T id="allValidators" />
       </Anchor>
     ),
     []
@@ -589,57 +600,121 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 };
 
 export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
-  const [opened, setOpened] = useState(false);
-  const { popup } = useAppEnv();
+  const [opened, setOpened] = useState({
+    redelegate: false,
+    unlock: false,
+    firstUnlock: false
+  });
+  const account = useAccount();
+  const tezos = useTezos();
+  const data = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance } = data;
+  const delegateLabel = getDelegateLabel(data);
+  const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
-  const close = useCallback(() => {
-    setOpened(false);
+  const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;
+
+  const close = useCallback((key: keyof typeof opened) => {
+    setOpened(prev => ({ ...prev, [key]: false }));
   }, []);
 
-  const open = useCallback(() => {
-    setOpened(true);
+  const open = useCallback((key: keyof typeof opened) => {
+    setOpened(prev => ({ ...prev, [key]: true }));
   }, []);
 
   const handleReDelegateNavigation = useCallback(() => {
     avtivateReDelegation();
-    close();
+    close('redelegate');
   }, [avtivateReDelegation, close]);
 
-  const handleCoStakeNavigation = useCallback(() => {
-    // navigate('/co-stake');
-    close();
-  }, [close]);
+  const handleDelegateClickbasedOnPeriod = useCallback(async () => {
+    if (hasZeroStakingBalance && delegateLabel === CO_STAKE) {
+      return navigate('/co-stake');
+    }
+
+    if (delegateLabel === CO_STAKE) {
+      return navigate('/manage-stake?tab=stake');
+    } else if (delegateLabel === UNLOCK_STAKE) {
+      return navigate('/manage-stake?tab=unlock');
+    }
+
+    if (delegateLabel === FINALIZE_UNLOCK) {
+      try {
+        await tezos.wallet.finalizeUnstake({}).send();
+
+        return navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'unlock',
+          subHeader: 'success',
+          description: 'finalizeUnlockSuccessMsg',
+          btnText: 'backToValidator',
+          btnLink: '/stake'
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (delegateLabel === UNLOCKING) {
+      return;
+    }
+  }, [delegateLabel, hasZeroStakingBalance, tezos.wallet]);
+
+  const isStakeButtonDisabled = useMemo(() => {
+    switch (delegateLabel) {
+      case CO_STAKE:
+        return !canCostake;
+      case UNLOCK_STAKE:
+        return !canUnlock;
+      case UNLOCKING:
+        return true;
+      case FINALIZE_UNLOCK:
+        return false;
+      default:
+        return false;
+    }
+  }, [canCostake, canUnlock, delegateLabel]);
+
+  const handleRedelegateClick = useCallback(() => {
+    if (!canRedelegate) return;
+    if (delegateLabel === UNLOCK_STAKE) {
+      open('firstUnlock');
+    } else {
+      open('redelegate');
+    }
+  }, [delegateLabel, open, canRedelegate]);
+
+  const delegationLabelToShow = useMemo(() => {
+    return (delegateLabel === CO_STAKE || delegateLabel === UNLOCK_STAKE) && !hasZeroStakingBalance
+      ? MANAGE_STAKE
+      : delegateLabel;
+  }, [delegateLabel, hasZeroStakingBalance]);
 
   return (
     <div className="grid gap-3 grid-cols-2">
-      <ButtonRounded size="xs" fill={false} onClick={open}>
+      <ButtonRounded
+        size="xs"
+        fill={false}
+        onClick={handleRedelegateClick}
+        disabled={isWatchOnlyAccount || !canRedelegate}
+      >
         <T id="reDelegate" />
       </ButtonRounded>
-      <ButtonRounded size="xs" fill onClick={handleCoStakeNavigation} invisibleLabel={<T id="comingSoon" />} disabled>
-        <T id="coStake" />
+      <ButtonRounded
+        size="xs"
+        fill
+        onClick={handleDelegateClickbasedOnPeriod}
+        disabled={isWatchOnlyAccount || isStakeButtonDisabled}
+      >
+        {delegationLabelToShow}
       </ButtonRounded>
 
-      <PopupModalWithTitle
-        isOpen={opened}
-        contentPosition={popup ? 'bottom' : 'center'}
-        onRequestClose={close}
-        title={<T id="reDelegateToNewValidator" />}
-        portalClassName="re-delegate-popup"
-      >
-        <div className={classNames(popup ? 'px-4' : 'px-6')}>
-          <div className={classNames('flex flex-col text-white ', popup ? 'text-sm' : 'text-base')}>
-            <T id="reDelegateToNewValidatorDescr" />
-          </div>
-          <div className={classNames('mt-8 grid grid-cols-2 gap-4 justify-center', !popup && 'px-12')}>
-            <ButtonRounded size="big" fill={false} onClick={close}>
-              <T id="cancel" />
-            </ButtonRounded>
-            <ButtonRounded size="big" fill onClick={handleReDelegateNavigation}>
-              <T id="reDelegate" />
-            </ButtonRounded>
-          </div>
-        </div>
-      </PopupModalWithTitle>
+      <RedelegatePopup
+        opened={opened.redelegate}
+        close={close.bind(null, 'redelegate')}
+        handleReDelegateNavigation={handleReDelegateNavigation}
+      />
+      <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} />
+      <UnlockFisrtPopup opened={opened.firstUnlock} close={close.bind(null, 'firstUnlock')} />
     </div>
   );
 };
@@ -677,62 +752,95 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
 
   const accountPkh = acc.publicKeyHash;
 
-  const { data: myBakerPkh = '' } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh);
+  const myBakerPkh = accStats?.delegate?.address ?? '';
 
   const testGroupName = useUserTestingGroupNameSelector();
-  const { popup } = useAppEnv();
+  // const { popup } = useAppEnv();
 
-  const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
+  // const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
 
-  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-    () => [
-      {
-        id: SortOptions.AVAILABLE_SPACE,
-        selected: sortOption === SortOptions.AVAILABLE_SPACE,
-        onClick: () => {
-          setSortOption(SortOptions.AVAILABLE_SPACE);
-        },
-        nameI18nKey: 'availableSpace'
-      },
-      {
-        id: SortOptions.FEE,
-        selected: sortOption === SortOptions.FEE,
-        onClick: () => setSortOption(SortOptions.FEE),
-        nameI18nKey: 'fee'
-      },
-      {
-        id: SortOptions.UP_TIME,
-        selected: sortOption === SortOptions.UP_TIME,
-        onClick: () => setSortOption(SortOptions.UP_TIME),
-        nameI18nKey: 'upTime'
-      }
-    ],
-    [sortOption]
-  );
+  // const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
+  //   () => [
+  //     {
+  //       id: SortOptions.AVAILABLE_SPACE,
+  //       selected: sortOption === SortOptions.AVAILABLE_SPACE,
+  //       onClick: () => {
+  //         setSortOption(SortOptions.AVAILABLE_SPACE);
+  //       },
+  //       nameI18nKey: 'availableSpace'
+  //     },
+  //     {
+  //       id: SortOptions.FEE,
+  //       selected: sortOption === SortOptions.FEE,
+  //       onClick: () => setSortOption(SortOptions.FEE),
+  //       nameI18nKey: 'fee'
+  //     },
+  //     {
+  //       id: SortOptions.UP_TIME,
+  //       selected: sortOption === SortOptions.UP_TIME,
+  //       onClick: () => setSortOption(SortOptions.UP_TIME),
+  //       nameI18nKey: 'upTime'
+  //     }
+  //   ],
+  //   [sortOption]
+  // );
+
+  // const baseSortedKnownBakers = useMemo(() => {
+  //   if (!knownBakers) return null;
+
+  //   const toSort = Array.from(knownBakers);
+  //   // SORTED_PREDEFINED_SPONSORED_BAKERS
+  //   return toSort.sort((a, b) => {
+  //     return (
+  //       SORTED_PREDEFINED_SPONSORED_BAKERS.includes(a.address) || SORTED_PREDEFINED_SPONSORED_BAKERS.includes(b.address)
+  //     );
+  //   });
+  // switch (sortOption) {
+  //   case SortOptions.AVAILABLE_SPACE:
+  //     return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
+
+  //   case SortOptions.FEE:
+  //     return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
+
+  //   case SortOptions.UP_TIME:
+  //     return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
+
+  //   default:
+  //     return toSort;
+  // }
+  // }, [knownBakers]);
 
   const baseSortedKnownBakers = useMemo(() => {
     if (!knownBakers) return null;
 
     const toSort = Array.from(knownBakers);
-    switch (sortOption) {
-      case SortOptions.AVAILABLE_SPACE:
-        return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
 
-      case SortOptions.FEE:
-        return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
+    return toSort.sort((a, b) => {
+      const idxA = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(a.address);
+      const idxB = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(b.address);
 
-      case SortOptions.UP_TIME:
-        return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
+      const aIsKnown = idxA !== -1;
+      const bIsKnown = idxB !== -1;
 
-      default:
-        return toSort;
-    }
-  }, [knownBakers, sortOption]);
+      // unknowns first
+      if (!aIsKnown && bIsKnown) return -1;
+      if (aIsKnown && !bIsKnown) return 1;
+
+      // both unknown
+      if (!aIsKnown && !bIsKnown) return 0;
+
+      // both known follow predefined order from SORTED_PREDEFINED_SPONSORED_BAKERS
+      return idxA - idxB;
+    });
+  }, [knownBakers]);
 
   if (!baseSortedKnownBakers) return null;
+
   const sponsoredBakers = baseSortedKnownBakers.filter(
     baker => baker.address === RECOMMENDED_BAKER_ADDRESS || baker.address === HELP_UKRAINE_BAKER_ADDRESS
   );
+
   const sortedKnownBakers = [
     ...sponsoredBakers,
     ...baseSortedKnownBakers.filter(
@@ -750,10 +858,10 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
           <T id="delegateToPromotedValidators" />
         </span>
 
-        <SortPopup>
+        {/* <SortPopup>
           <SortButton className="-mr-1" />
           <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
-        </SortPopup>
+        </SortPopup> */}
       </h2>
 
       {/* <div>

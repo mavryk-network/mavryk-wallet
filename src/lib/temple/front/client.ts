@@ -10,8 +10,12 @@ import {
   WalletOriginateParams,
   WalletIncreasePaidStorageParams,
   WalletTransferParams,
-  Signer
+  Signer,
+  WalletStakeParams,
+  WalletUnstakeParams,
+  WalletFinalizeUnstakeParams
 } from '@mavrykdynamics/taquito';
+import { FinalizeUnstakeParams, StakeParams, UnstakeParams } from '@mavrykdynamics/taquito/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/taquito-utils';
 import constate from 'constate';
 import { nanoid } from 'nanoid';
@@ -193,34 +197,43 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UpdateKYCAccountResponse);
   }, []);
 
-  const importAccount = useCallback(async (privateKey: string, encPassword?: string) => {
+  const importAccount = useCallback(async (privateKey: string, chainId: string, encPassword?: string) => {
     const res = await request({
       type: TempleMessageType.ImportAccountRequest,
       privateKey,
+      chainId,
       encPassword
     });
     assertResponse(res.type === TempleMessageType.ImportAccountResponse);
   }, []);
 
-  const importMnemonicAccount = useCallback(async (mnemonic: string, password?: string, derivationPath?: string) => {
-    const res = await request({
-      type: TempleMessageType.ImportMnemonicAccountRequest,
-      mnemonic,
-      password,
-      derivationPath
-    });
-    assertResponse(res.type === TempleMessageType.ImportMnemonicAccountResponse);
-  }, []);
+  const importMnemonicAccount = useCallback(
+    async (mnemonic: string, chainId: string, password?: string, derivationPath?: string) => {
+      const res = await request({
+        type: TempleMessageType.ImportMnemonicAccountRequest,
+        mnemonic,
+        password,
+        chainId,
+        derivationPath
+      });
+      assertResponse(res.type === TempleMessageType.ImportMnemonicAccountResponse);
+    },
+    []
+  );
 
-  const importFundraiserAccount = useCallback(async (email: string, password: string, mnemonic: string) => {
-    const res = await request({
-      type: TempleMessageType.ImportFundraiserAccountRequest,
-      email,
-      password,
-      mnemonic
-    });
-    assertResponse(res.type === TempleMessageType.ImportFundraiserAccountResponse);
-  }, []);
+  const importFundraiserAccount = useCallback(
+    async (email: string, password: string, mnemonic: string, chainId: string) => {
+      const res = await request({
+        type: TempleMessageType.ImportFundraiserAccountRequest,
+        email,
+        password,
+        mnemonic,
+        chainId
+      });
+      assertResponse(res.type === TempleMessageType.ImportFundraiserAccountResponse);
+    },
+    []
+  );
 
   const importKTManagedAccount = useCallback(async (address: string, chainId: string, owner: string) => {
     const res = await request({
@@ -243,10 +256,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   }, []);
 
   const createLedgerAccount = useCallback(
-    async (name: string, derivationType?: DerivationType, derivationPath?: string) => {
+    async (name: string, chainId: string, derivationType?: DerivationType, derivationPath?: string) => {
       const res = await request({
         type: TempleMessageType.CreateLedgerAccountRequest,
         name,
+        chainId,
         derivationPath,
         derivationType
       });
@@ -417,13 +431,39 @@ type TaquitoWalletOps = {
   onBeforeSend?: (id: string) => void;
 };
 
-class TaquitoWallet
-  implements
-    Omit<
-      WalletProvider,
-      'mapStakeParamsToWalletParams' | 'mapUnstakeParamsToWalletParams' | 'mapFinalizeUnstakeParamsToWalletParams'
-    >
-{
+export const createStakeOperation = ({ source, amount, fee, gasLimit, storageLimit }: StakeParams) => {
+  return Promise.resolve({
+    kind: 'stake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit,
+    amount
+  });
+};
+
+export const createUnstakeOperation = ({ source, amount, fee, gasLimit, storageLimit }: UnstakeParams) => {
+  return Promise.resolve({
+    kind: 'unstake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit,
+    amount
+  });
+};
+
+export const createFinalizeUnstakeOperation = ({ source, fee, gasLimit, storageLimit }: FinalizeUnstakeParams) => {
+  return Promise.resolve({
+    kind: 'finalize_unstake',
+    source,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit
+  });
+};
+
+class TaquitoWallet implements WalletProvider {
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
 
   async getPKH() {
@@ -452,6 +492,22 @@ class TaquitoWallet
   async mapDelegateParamsToWalletParams(params: () => Promise<WalletDelegateParams>) {
     const walletParams = await params();
     return withoutFeesOverride(walletParams, await createSetDelegateOperation(walletParams as any));
+  }
+
+  // ---- staking methods ----
+  async mapStakeParamsToWalletParams(params: () => Promise<WalletStakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+  }
+
+  async mapUnstakeParamsToWalletParams(params: () => Promise<WalletUnstakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+  }
+
+  async mapFinalizeUnstakeParamsToWalletParams(params: () => Promise<WalletFinalizeUnstakeParams>) {
+    const walletParams = await params();
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
   }
 
   async sendOperations(opParams: any[]) {

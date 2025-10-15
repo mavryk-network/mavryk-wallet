@@ -1,8 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
-import useSWR, { unstable_serialize, useSWRConfig } from 'swr';
+import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
 
 import { BoundaryError } from 'app/ErrorBoundary';
 import {
@@ -13,11 +13,16 @@ import {
   getBakerSpace
 } from 'lib/apis/baking-bad';
 import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
+import { fetchBakerDelegateParameters, TZKT_API_BASE_URLS, TzktApiChainId } from 'lib/apis/tzkt/api';
+import type { TzktUserAccount } from 'lib/apis/tzkt/types';
 import { useRetryableSWR } from 'lib/swr';
 import type { ReactiveTezosToolkit } from 'lib/temple/front';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
-import { useChainId, useNetwork, useTezos } from './ready';
+import { useChainId, useNetwork, useTezos } from '../ready';
+
+import { PREDEFINED_BAKERS_NAMES_MAINNET } from './const';
+import { getCoStakeWaitTime, getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
 
 function getDelegateCacheKey(
   tezos: ReactiveTezosToolkit,
@@ -28,7 +33,12 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
-export function useDelegate(address: string, suspense = true, shouldPreventErrorPropagation = true) {
+const emptyAccountResponse = { delegate: { address: null } };
+export function useDelegate<T = TzktUserAccount>(
+  address: string,
+  suspense = true,
+  shouldPreventErrorPropagation = true
+): SWRResponse<T | undefined> {
   const tezos = useTezos();
   const chainId = useChainId(suspense);
   const { cache: swrCache } = useSWRConfig();
@@ -48,23 +58,24 @@ export function useDelegate(address: string, suspense = true, shouldPreventError
 
               switch (accountStats.type) {
                 case TzktAccountType.Empty:
-                  return null;
+                  return emptyAccountResponse;
                 case TzktAccountType.User:
                 case TzktAccountType.Contract:
-                  return accountStats.delegate?.address ?? null;
+                  return accountStats;
               }
             } catch (e) {
               console.error(e);
             }
           }
 
-          return await tezos.rpc.getDelegate(address);
+          const delegateAddress = await tezos.rpc.getDelegate(address);
+          return { delegate: { address: delegateAddress } };
         },
         { retries: 3, minTimeout: 3000, maxTimeout: 5000 }
       );
     } catch (e) {
       if (shouldPreventErrorPropagation) {
-        return null;
+        return emptyAccountResponse;
       }
 
       throw new BoundaryError(
@@ -74,11 +85,118 @@ export function useDelegate(address: string, suspense = true, shouldPreventError
     }
   }, [chainId, tezos, address, shouldPreventErrorPropagation, resetDelegateCache]);
 
+  // @ts-expect-error // forced type for delegate address
   return useSWR(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation], getDelegate, {
     dedupingInterval: 20_000,
+    refreshInterval: 15_000,
     suspense
   });
 }
+
+export function useAccountDelegatePeriodStats(accountAddress: string) {
+  const { data: accStats } = useDelegate<TzktUserAccount>(accountAddress);
+  const tezos = useTezos();
+  const chainid = useChainId();
+
+  const [cyclesData, setCyclesData] = useState(() => ({
+    currentCycle: 0,
+    delegateCycle: -1
+  }));
+
+  useEffect(() => {
+    (async function () {
+      try {
+        if (accStats?.delegate?.address) {
+          const [blockMetadata, setDelegateParameters] = await Promise.all([
+            tezos.rpc.getBlockMetadata(),
+            fetchBakerDelegateParameters(accStats?.delegate?.address, chainid)
+          ]);
+
+          const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
+          const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
+
+          setCyclesData({ currentCycle, delegateCycle });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [tezos.rpc, accStats?.delegate?.address, chainid]);
+
+  const {
+    canRedelegate,
+    canUnlockStake,
+    costakeWaitTime,
+    unlockWaitTime,
+    delegationWaitTime,
+    isInUnlockPeriod,
+    hasUnlockPeriodPassed,
+    hasDelegationPeriodPassed,
+    isInCostakePeriod
+  } = useMemo(() => {
+    const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
+
+    const costakeWaitTime = getCoStakeWaitTime(
+      cyclesData.currentCycle,
+      cyclesData.delegateCycle,
+      accStats?.lastActivityTime,
+      accStats?.stakedBalance,
+      accStats?.unstakedBalance
+    );
+
+    const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
+
+    const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
+
+    const isInCostakePeriod = costakeWaitTime !== 'allowed' && typeof costakeWaitTime === 'string';
+
+    const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
+
+    const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
+
+    const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed && !isInCostakePeriod;
+    const canUnlockStake = !isInUnlockPeriod && !isInCostakePeriod;
+
+    return {
+      canRedelegate,
+      canUnlockStake,
+      unlockWaitTime,
+      delegationWaitTime,
+      costakeWaitTime,
+      isInUnlockPeriod,
+      isInCostakePeriod,
+      hasUnlockPeriodPassed,
+      hasDelegationPeriodPassed
+    };
+  }, [
+    accStats?.delegationTime,
+    accStats?.lastActivityTime,
+    accStats?.stakedBalance,
+    accStats?.unstakedBalance,
+    cyclesData.currentCycle,
+    cyclesData.delegateCycle
+  ]);
+
+  return {
+    myBakerPkh: accStats?.delegate?.address ?? null,
+    isDelegated: Boolean(accStats?.delegate?.address),
+    isInDelegationPeriod: delegationWaitTime !== 'allowed',
+    isInCostakePeriod,
+    hasDelegationPeriodPassed: hasDelegationPeriodPassed,
+    isInUnlockPeriod: isInUnlockPeriod,
+    hasUnlockPeriodPassed: hasUnlockPeriodPassed,
+    canRedelegate: canRedelegate,
+    canCostake: !isInUnlockPeriod && !isInCostakePeriod,
+    canUnlock: canUnlockStake,
+    unlockWaitTime,
+    costakeWaitTime,
+    delegationWaitTime,
+    stakedBalance: accStats?.stakedBalance ?? 0,
+    unstakedBalance: accStats?.unstakedBalance ?? 0
+  };
+}
+
+export type AccDelegatePeriodStats = ReturnType<typeof useAccountDelegatePeriodStats>;
 
 type RewardConfig = Record<
   | 'blocks'
@@ -127,10 +245,16 @@ const defaultRewardConfigHistory = [
 
 export function useKnownBaker(address: string | null, suspense = true) {
   const net = useNetwork();
+  const chainId = useChainId();
+
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const bakingBadBaker = await bakingBadGetBaker({ address, configs: true });
+      const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
+      const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
+
+      // @ts-ignore // predifined validators list
+      const predefinedBaker = PREDEFINED_BAKERS_NAMES_MAINNET[bakingBadBaker?.address];
 
       // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
@@ -139,13 +263,13 @@ export function useKnownBaker(address: string | null, suspense = true) {
           stakedBalance: bakingBadBaker.stakedBalance,
           delegatedBalance: bakingBadBaker.delegatedBalance,
           balance: bakingBadBaker.balance,
-          // name: bakingBadBaker.name,
-          // logo: bakingBadBaker.logo ? bakingBadBaker.logo : undefined,
-          fee: 0,
+          logo: predefinedBaker ? predefinedBaker.logo : undefined,
+          fee: predefinedBaker ? predefinedBaker.fee : 0,
           freeSpace: getBakerSpace(bakingBadBaker).toNumber(),
+          name: predefinedBaker ? predefinedBaker.name : undefined,
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
-          // minDelegation: bakingBadBaker.minDelegation,
+          minDelegation: predefinedBaker ? predefinedBaker.minDelegation : undefined,
           estimatedRoi: 0
           // rewardConfigHistory:
           //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
@@ -204,8 +328,12 @@ export function useKnownBaker(address: string | null, suspense = true) {
 // };
 
 export function useKnownBakers(suspense = true) {
-  const net = useNetwork();
-  const { data: bakers } = useRetryableSWR(net.type === 'main' ? 'all-bakers' : null, getAllBakersBakingBad, {
+  const chainId = useChainId();
+
+  // eslint-disable-next-line no-type-assertion/no-type-assertion
+  const baseApiUrl = chainId ? TZKT_API_BASE_URLS[chainId as TzktApiChainId] : '';
+
+  const { data: bakers } = useRetryableSWR(baseApiUrl, getAllBakersBakingBad, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,
     suspense

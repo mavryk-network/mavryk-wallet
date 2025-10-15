@@ -19,6 +19,7 @@ import {
 import { loadChainId } from 'lib/temple/helpers';
 import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
 
+import { networkIcons } from './network.const';
 import { NetworkSelectors } from './NetworkPoopup.selectors';
 
 type NetworkPopupProps = {
@@ -122,10 +123,16 @@ interface NetworkListItemProps {
 const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick }) => {
   const { id, name, color, disabled, nameI18nKey } = network;
 
+  const NetworkIcon = networkIcons[id];
+
   return (
     <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
       <div className="flex items-center">
-        <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
+        {NetworkIcon ? (
+          <NetworkIcon className="w-6 h-6 mr-3 rounded-full" />
+        ) : (
+          <span className="w-6 h-6 mr-3 rounded-full" style={{ backgroundColor: color }}></span>
+        )}
         <span className="text-base-plus text-white">{(nameI18nKey && <T id={nameI18nKey} />) || name}</span>
       </div>
       <RadioButton id={id} checked={selected} disabled={disabled} shouldUseChangeHandler />

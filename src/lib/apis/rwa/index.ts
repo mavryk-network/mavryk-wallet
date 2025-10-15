@@ -7,6 +7,7 @@ import { TzktRWAAssetMetadata } from '../tzkt/types';
 import { fetchWithTimeout } from '../tzkt/utils';
 
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
+import { MOCK_RWA_CONFIG, MOCKED_RWA_ASSETS } from './mock';
 import { RWA_ASSETS_CONTRACTS_QUERY, RWA_TOKEN_METADATA_QUERY } from './queries';
 import { dodoAssetsContractsSchema } from './rwa.schema';
 
@@ -23,7 +24,12 @@ export async function fetchRwaAssetsContracts() {
     });
 
     if (!response.ok) {
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
+      console.error(`GraphQL request failed: ${response.statusText}`);
+
+      return MOCK_RWA_CONFIG.dodo_mav.reduce<string[]>((acc, item) => {
+        acc.push(item.base_token.address);
+        return acc;
+      }, []);
     }
     const { data } = await response.json();
     const parsedAssetsResponse = dodoAssetsContractsSchema.validateSync(data, { abortEarly: false });
@@ -56,7 +62,8 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[
   });
 
   if (!response.ok) {
-    throw new Error(`GraphQL request failed: ${response.statusText}`);
+    console.error(`GraphQL request failed: ${response.statusText}`);
+    return MOCKED_RWA_ASSETS;
   }
   // TODO add zod schema // HERE
   const { data } = await response.json();

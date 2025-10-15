@@ -1,12 +1,13 @@
 import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
 
+import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
-import { T } from 'lib/i18n';
+import { T, toLocalFormat } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
@@ -156,11 +157,16 @@ const BakerBanner = memo<BakerBannerProps>(
         i18nKey: 'fee',
         child: (
           <>
-            {/* {toLocalFormat(new BigNumber(baker?.fee ?? 0).times(100), {
-              decimalPlaces: 2
-            })}
-            % */}
-            NA
+            {baker?.fee ? (
+              <>
+                {toLocalFormat(new BigNumber(baker?.fee ?? 0).times(100), {
+                  decimalPlaces: 2
+                })}
+                %
+              </>
+            ) : (
+              <>NA</>
+            )}
           </>
         )
       }),
@@ -238,22 +244,31 @@ const BakerBanner = memo<BakerBannerProps>(
           <>
             <div className={classNames('flex items-center', 'text-white')}>
               <div>
-                {/* <img
-                  src={baker.logo}
-                  alt={baker.address}
-                  className={classNames('flex-shrink-0', 'bg-white rounded-full')}
-                  style={{
-                    minHeight: '2rem',
-                    width: 59,
-                    height: 59
-                  }}
-                /> */}
-                <Identicon
-                  type="bottts"
-                  hash={baker.address}
-                  size={59}
-                  className="shadow-xs rounded-full flex-shrink-0"
-                />
+                {baker.logo ? (
+                  <>
+                    {typeof baker.logo === 'string' ? (
+                      <img
+                        src={baker.logo}
+                        alt={baker.address}
+                        className="flex-shrink-0 bg-white rounded-full"
+                        style={{ minHeight: '2rem', width: 59, height: 59 }}
+                      />
+                    ) : (
+                      // @ts-expect-error // hardcoded svg logos for the time being
+                      <baker.logo
+                        className="flex-shrink-0 bg-white rounded-full"
+                        style={{ minHeight: '2rem', width: 59, height: 59 }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <Identicon
+                    type="bottts"
+                    hash={baker.address}
+                    size={59}
+                    className="shadow-xs rounded-full flex-shrink-0"
+                  />
+                )}
               </div>
 
               <div className="flex flex-col items-start flex-1 ml-4 relative">
@@ -268,7 +283,7 @@ const BakerBanner = memo<BakerBannerProps>(
                   {baker.name ? (
                     <Name
                       style={{
-                        maxWidth: '8rem'
+                        maxWidth: '9rem'
                       }}
                       testID={BakingSectionSelectors.delegatedBakerName}
                     >

@@ -27,9 +27,6 @@ const SecondStep: FC<Props> = ({ setStep, image }) => {
       <p className={clsx(styles['description'], 'mb-4')}>
         <T id={'tokensDescPart1'} />
       </p>
-      <p className={styles['description']}>
-        <T id={'tokensDescPart2'} />
-      </p>
       <div className="my-8" style={style}>
         {image}
       </div>

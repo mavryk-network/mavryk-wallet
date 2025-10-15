@@ -1,9 +1,12 @@
+import { OperationStatus } from '@mavrykdynamics/taquito';
 import { HubConnection } from '@microsoft/signalr';
+
+import { StakingActions } from 'lib/temple/history/types';
 
 /**
  * Actually, there is a bunch of other types but only these will be used for now
  */
-export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination' | 'other';
+export type TzktOperationType = 'delegation' | 'transaction' | 'reveal' | 'origination' | 'staking' | 'other';
 
 export type TzktQuoteCurrency = 'None' | 'Btc' | 'Eur' | 'Usd' | 'Cny' | 'Jpy' | 'Krw';
 
@@ -65,6 +68,17 @@ interface TzktDelegationOperation extends TzktOperationBase {
   newDelegate?: TzktAlias | null;
 }
 
+interface TzktStakingOperation extends TzktOperationBase {
+  type: 'staking';
+  amount?: number;
+  action: StakingActions;
+  requestedAmount: number;
+  baker?: TzktAlias | null;
+  stakingUpdatesCount: number;
+  status: TzktOperationStatus;
+  kind: string;
+}
+
 export interface TzktTransactionOperation extends TzktOperationBase {
   type: 'transaction';
   initiator?: TzktAlias;
@@ -100,6 +114,7 @@ export type TzktOperation =
   | TzktTransactionOperation
   | TzktRevealOperation
   | TzktOriginationOperation
+  | TzktStakingOperation
   | TzkOtherOperation;
 
 type TzktDelegateInfo = {
@@ -297,7 +312,7 @@ interface TzktAccountBase {
   unstakedBalance?: number;
 }
 
-interface TzktUserAccount extends TzktAccountBase {
+export interface TzktUserAccount extends TzktAccountBase {
   type: TzktAccountType.User;
   id: number;
   publicKey: string;
@@ -421,7 +436,7 @@ interface TzktDelegateAccount extends TzktAccountBase {
   software: { date: string; version: string | nullish };
 }
 
-interface TzktContractAccount extends TzktAccountBase {
+export interface TzktContractAccount extends TzktAccountBase {
   type: TzktAccountType.Contract;
   id: number;
   kind: 'delegator_contract' | 'smart_contract' | nullish;
@@ -634,3 +649,23 @@ export interface TzktHubConnection extends HubConnection {
   off(method: TzktSubscriptionChannel.Operations): void;
   off(method: TzktSubscriptionChannel.Operations, cb: (msg: TzktOperationsSubscriptionMessage) => void): void;
 }
+
+export type SetDelegateParametersOperation = {
+  type: 'set_delegate_parameters';
+  id: number;
+  level: number;
+  timestamp: string; // ISO date string
+  hash: string;
+  sender: {
+    address: string;
+  };
+  counter: number;
+  gasLimit: number;
+  gasUsed: number;
+  storageLimit: number;
+  bakerFee: number;
+  limitOfStakingOverBaking: number;
+  edgeOfBakingOverStaking: number;
+  activationCycle: number;
+  status: OperationStatus;
+};

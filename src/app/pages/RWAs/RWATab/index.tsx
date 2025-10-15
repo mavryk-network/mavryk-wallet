@@ -167,7 +167,7 @@ const buildEmptySection = (isSyncing: boolean) =>
       <p className={'text-white text-base-plus text-center'}>
         <T id="noRWAs" />
       </p>
-      <ButtonRounded type="button" size="small" fill style={buttonStyle}>
+      <ButtonRounded type="button" size="small" fill style={buttonStyle} disabled>
         <T id="getAssets" />
       </ButtonRounded>
     </div>

@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
-import { goBack } from 'lib/woozie';
+import { goBack, navigate } from 'lib/woozie';
 
 import { readNotificationsItemAction } from '../../store/actions';
 import { useNotificationsItemSelector } from '../../store/selectors';
@@ -26,6 +26,10 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
   const dispatch = useDispatch();
   const notification = useNotificationsItemSelector(id);
   useEffect(() => void dispatch(readNotificationsItemAction(notification?.id ?? 0)), [notification?.id]);
+
+  useEffect(() => {
+    navigate('/');
+  }, []);
 
   if (notification == null) {
     return null;

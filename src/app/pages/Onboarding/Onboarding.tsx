@@ -6,8 +6,7 @@ import { t, T } from 'lib/i18n';
 import { useStorage } from 'lib/temple/front';
 
 import AddressBalancesImg from './assets/first.png';
-import TxActionsImg from './assets/fourth.png';
-import TokensImg from './assets/second.png';
+import TokensImg from './assets/step2&4.png';
 import AddressesImg from './assets/third.png';
 import CongratsPage from './pages/CongratsPage';
 import FirstStep from './steps/FirstStep';
@@ -27,7 +26,7 @@ const Onboarding: FC = () => {
       0: <img src={AddressBalancesImg} alt="AddressBalancesImg" />,
       1: <img src={TokensImg} alt="TokensImg" />,
       2: <img src={AddressesImg} className="object-contain mx-auto" alt="ProfileAddressesImg" />,
-      3: <img src={TxActionsImg} alt="ProfileRpcImg" />
+      3: <img src={TokensImg} alt="ProfileRpcImg" />
     }),
     []
   );

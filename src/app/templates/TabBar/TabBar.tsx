@@ -12,6 +12,7 @@ interface Props {
   activeTabName: string;
   tabs: TabInterface[];
   withOutline?: boolean;
+  tabContainerClassName?: string;
 }
 
 type TabInterface = Partial<TestIDProps> & {
@@ -19,13 +20,15 @@ type TabInterface = Partial<TestIDProps> & {
   titleI18nKey: TID;
 };
 
-export const TabsBar = React.forwardRef<HTMLDivElement, Props>(({ activeTabName, tabs, withOutline }, ref) => (
-  <div ref={ref} className={clsx('w-full gap-4 px-4', styles.tabbar)}>
-    {tabs.map(tab => (
-      <TabButton key={tab.name} active={tab.name === activeTabName} withOutline={withOutline} {...tab} />
-    ))}
-  </div>
-));
+export const TabsBar = React.forwardRef<HTMLDivElement, Props>(
+  ({ activeTabName, tabs, withOutline, tabContainerClassName = styles.tabbar }, ref) => (
+    <div ref={ref} className={clsx('w-full gap-4 px-4', tabContainerClassName)}>
+      {tabs.map(tab => (
+        <TabButton key={tab.name} active={tab.name === activeTabName} withOutline={withOutline} {...tab} />
+      ))}
+    </div>
+  )
+);
 
 interface TabButtonProps extends TestIDProps {
   name: string;

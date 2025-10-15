@@ -50,9 +50,11 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
     const { trackEvent } = useAnalytics();
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
+      if (!disabled) {
+        testID && trackEvent(testID, AnalyticsEventCategory.ButtonPress, testIDProperties);
 
-      return onClick?.(e);
+        return onClick?.(e);
+      }
     };
 
     const [bgColor, bgColorHover, borderColor] = (() => {
@@ -68,11 +70,12 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
       () => classNames(size === 'small' && btnSmall, size === 'big' && btnBig, size === 'xs' && btnXs),
       [size]
     );
+
     return (
       <button
         ref={ref}
-        onClick={handleClick}
-        disabled={disabled}
+        onClick={disabled || isLoading ? undefined : handleClick}
+        disabled={disabled || isLoading}
         className={classNames(
           styles.btn,
           size === 'small' && 'rounded-2xl-plus',
@@ -88,8 +91,9 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
                   size === 'xs' ? 'border' : 'border-2',
                   `border-solid hover:${bgColorHover}`
                 )), // fill | outline styles
-          isLoading && ' flex justify-center w-24 align-middle', // loading
-          disabled && 'bg-gray-40 text-gray-15', // disabled styles
+          isLoading && 'flex justify-center w-24 align-middle', // loading
+          disabled && fill && 'bg-gray-40 text-gray-15', // disabled styles
+          disabled && !fill && 'bg-transparent text-gray-15 border border-gray-40',
           !invisibleLabel && disabled && 'pointer-events-none cursor-not-allowed',
           className
         )}
@@ -97,7 +101,7 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
         {...setTestID(testID)}
       >
         {isLoading ? (
-          <div className="animate-spin">
+          <div className={classNames('animate-spin', sizeClass)}>
             <LoadingSvg style={{ width: 16, height: 16 }} />
           </div>
         ) : (

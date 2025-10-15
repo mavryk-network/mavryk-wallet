@@ -1,13 +1,14 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID } from 'lib/i18n';
-import { useLocation } from 'lib/woozie';
+import { useAccount } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
+import { navigate, useLocation } from 'lib/woozie';
 
 import DelegateForm from './DelegateForm';
 import { useBakingHistory } from './hooks/use-baking-history';
@@ -20,6 +21,13 @@ export const Stake: FC = () => {
   const { state } = useLocation();
   const [isReDelegationActive, setIsReDelegationActive] = useState(() => unfamiliarWithDelegation || state?.state);
   const { fullPage, popup } = useAppEnv();
+  const account = useAccount();
+
+  useEffect(() => {
+    if (account.type === TempleAccountType.WatchOnly) {
+      navigate('/');
+    }
+  }, [account.type]);
 
   const label = useMemo(() => {
     let labelToShow: TID = 'delegate';
@@ -153,15 +161,10 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
     setShowStakeScreen(false);
   }, [setShowStakeScreen]);
 
-  const handleCoStakeNavigation = useCallback(() => {
-    setIsFromCoStakeNavigation(true);
-    setShowStakeScreen(false);
-  }, [setIsFromCoStakeNavigation, setShowStakeScreen]);
-
   return (
-    <div className={clsx(popup && 'px-4 pt-4')}>
+    <div className={clsx(popup && 'px-4 pt-4', 'flex flex-col flex-1')}>
       <div className="text-base text-white text-left">
-        <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">5.6%</span>} />
+        <T id="delegationPointsHead1" substitutions={<span className="text-orange-600 font-bold">15%</span>} />
       </div>
       <div className="bg-primary-card rounded-2xl-plus py-6 px-4 flex flex-col gap-6 my-6">
         {unfamiliarDelegateList.map(item => (
@@ -176,24 +179,8 @@ const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = 
           <StakePlanListItem key={item.i18nKey} {...item} />
         ))}
       </div>
-      <section className="flex flex-col items-center">
-        <div className="mb-3 text-sm text-white text-center">
-          <T id="aboutFooterDescription" />
-        </div>
-        <FooterSocials />
-      </section>
-      <div className={clsx('grid grid-cols-2 gap-3 mb-8', popup ? 'mt-40px' : 'mt-18')}>
-        <ButtonRounded
-          size="big"
-          className={clsx('w-full ')}
-          fill={false}
-          onClick={handleCoStakeNavigation}
-          invisibleLabel={<T id="comingSoon" />}
-          disabled
-        >
-          <T id="coStake" />
-        </ButtonRounded>
 
+      <div className={clsx('flex justify-center mb-8', popup ? 'mt-40px' : 'mt-auto')}>
         <ButtonRounded onClick={handleBtnClick} size="big" className={clsx('w-full')} fill>
           <T id="delegate" />
         </ButtonRounded>

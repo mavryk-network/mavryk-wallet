@@ -80,7 +80,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 
   const chainId = useChainIdValue(networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Atlas;
+  const mainnet = chainId === TempleChainId.Mainnet;
 
   const allAccounts = useRelevantAccounts();
   const account = useMemo(
@@ -387,7 +387,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   )}
 
-                  <div style={{ marginBottom: 40 }}>
+                  <div style={{ marginBottom: 12 }}>
                     <ModifyFeeAndLimitComponent
                       id="internal-modified-fees-id"
                       name="internal-modified-fees"

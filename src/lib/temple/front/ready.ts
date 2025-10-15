@@ -5,7 +5,7 @@ import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
 import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
 import constate from 'constate';
 
-import { useInitialKYC } from 'app/pages/Home/hooks/useInitialKYC';
+import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
@@ -63,6 +63,7 @@ function useReadyTemple() {
    */
 
   const defaultNet = allNetworks[0];
+
   const [networkId, setNetworkId] = usePassiveStorage('network_id', defaultNet.id);
 
   useEffect(() => {
@@ -104,8 +105,6 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
-  useInitialKYC(account);
-
   /**
    * Error boundary reset
    */
@@ -132,6 +131,18 @@ function useReadyTemple() {
     return t;
   }, [createTaquitoSigner, createTaquitoWallet, network, account]);
 
+  // Get user KYC status ---------------
+  useEffect(() => {
+    (async function () {
+      const rpcUrl = tezos?.rpc?.getRpcUrl();
+
+      const chainId = await loadChainId(rpcUrl).catch(() => null);
+      const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
+
+      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+    })();
+  }, [account.publicKeyHash, tezos?.rpc]);
+
   useEffect(() => {
     if (IS_DEV_ENV) {
       (window as any).tezos = tezos;
@@ -156,10 +167,9 @@ function useReadyTemple() {
 
 export function useChainId(suspense?: boolean) {
   const tezos = useTezos();
-  const rpcUrl = useMemo(() => tezos.rpc.getRpcUrl(), [tezos]);
+  const rpcUrl = useMemo(() => tezos?.rpc?.getRpcUrl(), [tezos]);
 
   const { data: chainId } = useChainIdLoading(rpcUrl, suspense);
-
   return chainId;
 }
 

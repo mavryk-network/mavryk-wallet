@@ -1,30 +1,53 @@
 import { fetchWithTimeout } from 'lib/apis/tzkt/utils';
-import { toTokenSlug } from 'lib/assets';
+import { MVRK_PRICE, RWA_ASSET_PRICES } from 'lib/constants';
+import { fetchFromStorage, putToStorage } from 'lib/storage';
 
 import { getDodoMavTokenPrices } from './dodoMav';
 import { DodoStorageSchema, DEX_STORAGE_QUERY } from './queries';
-import { templeWalletApi } from './templewallet.api';
 
-interface GetExchangeRatesResponseItem {
-  tokenAddress?: string;
-  tokenId?: number;
-  exchangeRate: string;
-}
+const coingecko_api = process.env.COINGECKO_API;
+const coingecko_api_key = process.env.COINGECKO_API_KEY;
 
-export const fetchUsdToTokenRates = () =>
-  templeWalletApi.get<GetExchangeRatesResponseItem[]>('/exchange-rates').then(({ data }) => {
-    const prices: StringRecord = {};
+export type CMCResponse = {
+  [symbol: string]: {
+    [currency: string]: number;
+  };
+};
 
-    for (const { tokenAddress, tokenId, exchangeRate } of data) {
-      if (tokenAddress) {
-        prices[toTokenSlug(tokenAddress, tokenId)] = exchangeRate;
-      } else {
-        prices.mav = exchangeRate;
+export const fetchUsdToTokenRates = async () => {
+  const prices: StringRecord = {};
+  const mvrkPrice = await getCoingeckoPrice();
+  prices.mav = String(mvrkPrice);
+
+  return prices;
+};
+
+export const COINGECKO_MVRK_ID = 'mavryk-network';
+
+export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD') {
+  const url = `${coingecko_api}/simple/price?vs_currencies=${currency}&ids=${id}`;
+
+  try {
+    const res = await fetch(url, {
+      // @ts-expect-error // api key
+      headers: {
+        'x-cg-pro-api-key': coingecko_api_key
       }
-    }
+    });
 
-    return prices;
-  });
+    const {
+      [COINGECKO_MVRK_ID]: { usd: tokenPrice }
+    } = (await res.json()) as CMCResponse;
+
+    await putToStorage(MVRK_PRICE, tokenPrice);
+
+    return tokenPrice || 0;
+  } catch (err) {
+    console.error('Error fetching price:', err);
+    const cachedPrice = await fetchFromStorage<string>(MVRK_PRICE);
+    return Number(cachedPrice) || 0;
+  }
+}
 
 // api rwa metadata utils
 export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => {
@@ -49,9 +72,13 @@ export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => 
 
     const rwasAssetsPricesPair = getDodoMavTokenPrices(parsedData.dodo_mav);
 
+    await putToStorage(RWA_ASSET_PRICES, rwasAssetsPricesPair);
+
     return { ...rwasAssetsPricesPair };
   } catch (e) {
     console.error('Equittez RWA_PRICES_QUERY error', e);
-    return {};
+    const cachedPrices = fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
+    // @ts-expect-error // null as price won't esist
+    return cachedPrices ?? {};
   }
 };

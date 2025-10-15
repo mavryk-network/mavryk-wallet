@@ -3,6 +3,7 @@ import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
 
 import { toTokenSlug } from 'lib/assets';
+import { KYC_CONTRACTS } from 'lib/route3/constants';
 import { TempleChainId } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
@@ -18,12 +19,13 @@ import {
   TzktGetRewardsResponse,
   TzktRelatedContract,
   TzktAccount,
-  TzktHubConnection
+  TzktHubConnection,
+  SetDelegateParametersOperation
 } from './types';
 import { calcTzktAccountSpendableTezBalance } from './utils';
 
-const TZKT_API_BASE_URLS = {
-  [TempleChainId.Mainnet]: 'https://api.mavryk.network/mainnet/v1',
+export const TZKT_API_BASE_URLS = {
+  [TempleChainId.Mainnet]: 'https://api.mavryk.network/v1',
   [TempleChainId.Atlas]: 'https://atlasnet.api.mavryk.network/v1',
   [TempleChainId.Basenet]: 'https://api.mavryk.network/basenet/v1',
   [TempleChainId.Weekly]: 'https://api.mavryk.network/weeklynet/v1'
@@ -332,3 +334,49 @@ const fetchAssetsBalancesFromTzktOnce = (account: string, chainId: TzktApiChainI
 
 export const getAccountStatsFromTzkt = async (account: string, chainId: TzktApiChainId) =>
   fetchGet<TzktAccount>(chainId, `/accounts/${account}`);
+
+export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string | null | undefined) => {
+  try {
+    if (chainId && isKnownChainId(chainId)) {
+      const kycAdress = KYC_CONTRACTS.get(chainId);
+      const storageRes = await fetchGet<any>(chainId, `/contracts/${kycAdress}/storage/`);
+      const bigMapId = storageRes.memberLedger;
+
+      const contractData = await fetchGet<any>(chainId, `/bigmaps/${bigMapId}/keys/${pkh}`);
+
+      // if no data than no KYCed user
+      if (!contractData) return false;
+
+      const isKYCAddress = contractData;
+
+      return Boolean(isKYCAddress);
+    }
+
+    return false;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const fetchBakerDelegateParameters = async (
+  bakerAddress: string,
+  chainId: TzktApiChainId | string | null | undefined
+) => {
+  try {
+    if (chainId && isKnownChainId(chainId)) {
+      const storageRes = await fetchGet<SetDelegateParametersOperation[]>(
+        chainId,
+        `/operations/set_delegate_parameters`,
+        { sender: bakerAddress }
+      );
+
+      return storageRes[0] ?? null;
+    }
+
+    return null;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};

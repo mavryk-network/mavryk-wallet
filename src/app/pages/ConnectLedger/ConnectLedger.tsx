@@ -12,7 +12,13 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
-import { useAllAccounts, useSetAccountPkh, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import {
+  useAllAccounts,
+  useChainId,
+  useSetAccountPkh,
+  useTempleClient,
+  validateDerivationPath
+} from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -65,6 +71,7 @@ const ConnectLedger: FC = () => {
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
   const { popup } = useAppEnv();
+  const chainId = useChainId();
 
   const allLedgers = useMemo(() => allAccounts.filter(acc => acc.type === TempleAccountType.Ledger), [allAccounts]);
 
@@ -131,6 +138,7 @@ const ConnectLedger: FC = () => {
       try {
         await createLedgerAccount(
           name,
+          chainId!,
           derivationType,
           customDerivationPath ?? (accountNumber && `m/44'/1729'/${accountNumber - 1}'/0'`)
         );
@@ -146,7 +154,7 @@ const ConnectLedger: FC = () => {
         setError(err.message);
       }
     },
-    [submitting, createLedgerAccount, setError, formAnalytics]
+    [submitting, formAnalytics, createLedgerAccount, chainId]
   );
 
   return (

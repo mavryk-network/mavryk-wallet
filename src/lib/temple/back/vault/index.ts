@@ -6,6 +6,7 @@ import * as TaquitoUtils from '@mavrykdynamics/taquito-utils';
 import * as Bip39 from 'bip39';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
+import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { formatOpParamsBeforeSend, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
@@ -26,8 +27,7 @@ import {
   createMemorySigner,
   getMainDerivationPath,
   getPublicKeyAndHash,
-  withError,
-  getKYCStatus
+  withError
 } from './misc';
 import {
   encryptAndSaveMany,
@@ -348,7 +348,7 @@ export class Vault {
     });
   }
 
-  async importAccount(accPrivateKey: string, encPassword?: string) {
+  async importAccount(accPrivateKey: string, chainId: string, encPassword?: string) {
     const errMessage = 'Failed to import account.\nThis may happen because provided Key is invalid';
 
     return withError(errMessage, async () => {
@@ -360,8 +360,7 @@ export class Vault {
         signer.publicKeyHash()
       ]);
 
-      // TODO get api url from props
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
 
       const newAccount: TempleAccount = {
         type: TempleAccountType.Imported,
@@ -384,7 +383,7 @@ export class Vault {
     });
   }
 
-  async importMnemonicAccount(mnemonic: string, password?: string, derivationPath?: string) {
+  async importMnemonicAccount(mnemonic: string, chainId: string, password?: string, derivationPath?: string) {
     return withError('Failed to import account', async () => {
       let seed;
       try {
@@ -398,15 +397,15 @@ export class Vault {
       }
 
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey);
+      return this.importAccount(privateKey, chainId);
     });
   }
 
-  async importFundraiserAccount(email: string, password: string, mnemonic: string) {
+  async importFundraiserAccount(email: string, password: string, mnemonic: string, chainId: string) {
     return withError('Failed to import fundraiser account', async () => {
       const seed = Bip39.mnemonicToSeedSync(mnemonic, `${email}${password}`);
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey);
+      return this.importAccount(privateKey, chainId);
     });
   }
 
@@ -414,8 +413,7 @@ export class Vault {
     return withError('Failed to import Managed KT account', async () => {
       const allAccounts = await this.fetchAccounts();
 
-      // TODO get api url from props
-      const isKYC = await getKYCStatus(accPublicKeyHash);
+      const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
       const newAccount: TempleAccount = {
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
@@ -458,7 +456,7 @@ export class Vault {
     });
   }
 
-  async createLedgerAccount(name: string, derivationPath?: string, derivationType?: DerivationType) {
+  async createLedgerAccount(name: string, chainId: string, derivationPath?: string, derivationType?: DerivationType) {
     return withError('Failed to connect Ledger account', async () => {
       if (!derivationPath) derivationPath = getMainDerivationPath(0);
 
@@ -468,8 +466,7 @@ export class Vault {
         const accPublicKey = await signer.publicKey();
         const accPublicKeyHash = await signer.publicKeyHash();
 
-        // TODO get api url from props
-        const isKYC = await getKYCStatus(accPublicKeyHash);
+        const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
 
         const newAccount: TempleAccount = {
           type: TempleAccountType.Ledger,

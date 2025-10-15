@@ -55,70 +55,70 @@ export const SIRS_TOKEN_METADATA: TokenMetadata = {
 };
 
 const PREDEFINED_MAINNET_TOKENS_METADATA: TokenMetadata[] = [
-  {
-    id: '0',
-    address: 'KT1VaEsVNiBoA56eToEK6n6BcPgh1tdx9eXi',
-    name: 'Temple Key',
-    symbol: 'TKEY',
-    decimals: 18,
-    thumbnailUri: 'https://ipfs.io/ipfs/Qmb9QUXYn1PW8e7E2CwpBMgEur7gFAPPpq2Zh7H2D7eQcT',
-    standard: TokenStandardsEnum.Fa2
-  },
-  {
-    id: '0',
-    address: 'KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o',
-    name: 'Tether USD',
-    symbol: 'USDt',
-    decimals: 6,
-    thumbnailUri: 'https://ipfs.io/ipfs/QmRymVGWEudMfLrbjaEiXxngCRTDgWCsscjQMwizy4ZJjX',
-    standard: TokenStandardsEnum.Fa2
-  },
-  {
-    id: '0',
-    address: 'KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW',
-    name: 'youves uUSD',
-    symbol: 'uUSD',
-    decimals: 12,
-    thumbnailUri: 'https://ipfs.io/ipfs/QmbvhanNCxydZEbGu1RdqkG3LcpNGv7XYsCHgzWBXnmxRd',
-    standard: TokenStandardsEnum.Fa2
-  },
-  {
-    id: '0',
-    address: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
-    name: 'Kolibri',
-    symbol: 'kUSD',
-    decimals: 18,
-    thumbnailUri: 'https://kolibri-data.s3.amazonaws.com/logo.png',
-    standard: TokenStandardsEnum.Fa12
-  },
-  TZBTC_TOKEN_METADATA,
-  {
-    id: '2',
-    address: 'KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW',
-    name: 'youves uBTC',
-    symbol: 'uBTC',
-    decimals: 12,
-    thumbnailUri: 'https://ipfs.io/ipfs/Qmbev41h4axBqVzxsXP2NSaAF996bJjJBPb8FFZVqTvJTY',
-    standard: TokenStandardsEnum.Fa2
-  },
-  {
-    id: '0',
-    address: 'KT193D4vozYnhGJQVtw7CoxxqphqUEEwK6Vb',
-    name: 'Quipuswap governance token',
-    symbol: 'QUIPU',
-    decimals: 6,
-    thumbnailUri: 'https://ipfs.io/ipfs/Qmb2GiHN9EjcrN29J6y9PsXu3ZDosXTv6uLUWGZfRRSzS2/quipu.png',
-    standard: TokenStandardsEnum.Fa2
-  },
-  {
-    id: '0',
-    address: 'KT1Xobej4mc6XgEjDoJoHtTKgbD1ELMvcQuL',
-    name: 'youves YOU Governance',
-    symbol: 'YOU',
-    decimals: 12,
-    thumbnailUri: 'https://ipfs.io/ipfs/QmYAJaJvEJuwvMEgRbBoAUKrTxRTT22nCC9RuY7Jy4L4Gc',
-    standard: TokenStandardsEnum.Fa2
-  }
+  // {
+  //   id: '0',
+  //   address: 'KT1VaEsVNiBoA56eToEK6n6BcPgh1tdx9eXi',
+  //   name: 'Temple Key',
+  //   symbol: 'TKEY',
+  //   decimals: 18,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/Qmb9QUXYn1PW8e7E2CwpBMgEur7gFAPPpq2Zh7H2D7eQcT',
+  //   standard: TokenStandardsEnum.Fa2
+  // },
+  // {
+  //   id: '0',
+  //   address: 'KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o',
+  //   name: 'Tether USD',
+  //   symbol: 'USDt',
+  //   decimals: 6,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/QmRymVGWEudMfLrbjaEiXxngCRTDgWCsscjQMwizy4ZJjX',
+  //   standard: TokenStandardsEnum.Fa2
+  // },
+  // {
+  //   id: '0',
+  //   address: 'KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW',
+  //   name: 'youves uUSD',
+  //   symbol: 'uUSD',
+  //   decimals: 12,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/QmbvhanNCxydZEbGu1RdqkG3LcpNGv7XYsCHgzWBXnmxRd',
+  //   standard: TokenStandardsEnum.Fa2
+  // },
+  // {
+  //   id: '0',
+  //   address: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
+  //   name: 'Kolibri',
+  //   symbol: 'kUSD',
+  //   decimals: 18,
+  //   thumbnailUri: 'https://kolibri-data.s3.amazonaws.com/logo.png',
+  //   standard: TokenStandardsEnum.Fa12
+  // },
+  // TZBTC_TOKEN_METADATA,
+  // {
+  //   id: '2',
+  //   address: 'KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW',
+  //   name: 'youves uBTC',
+  //   symbol: 'uBTC',
+  //   decimals: 12,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/Qmbev41h4axBqVzxsXP2NSaAF996bJjJBPb8FFZVqTvJTY',
+  //   standard: TokenStandardsEnum.Fa2
+  // },
+  // {
+  //   id: '0',
+  //   address: 'KT193D4vozYnhGJQVtw7CoxxqphqUEEwK6Vb',
+  //   name: 'Quipuswap governance token',
+  //   symbol: 'QUIPU',
+  //   decimals: 6,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/Qmb2GiHN9EjcrN29J6y9PsXu3ZDosXTv6uLUWGZfRRSzS2/quipu.png',
+  //   standard: TokenStandardsEnum.Fa2
+  // },
+  // {
+  //   id: '0',
+  //   address: 'KT1Xobej4mc6XgEjDoJoHtTKgbD1ELMvcQuL',
+  //   name: 'youves YOU Governance',
+  //   symbol: 'YOU',
+  //   decimals: 12,
+  //   thumbnailUri: 'https://ipfs.io/ipfs/QmYAJaJvEJuwvMEgRbBoAUKrTxRTT22nCC9RuY7Jy4L4Gc',
+  //   standard: TokenStandardsEnum.Fa2
+  // }
 ];
 
 // const DCP_TOKENS_METADATA: TokenMetadata[] = [

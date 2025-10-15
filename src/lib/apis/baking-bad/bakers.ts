@@ -1,5 +1,7 @@
 import BigNumber from 'bignumber.js';
 
+import { PREDEFINED_BAKERS_NAMES_MAINNET } from 'lib/temple/front/baking/const';
+
 import { api } from './base';
 import { buildQuery } from './build-query';
 
@@ -22,18 +24,32 @@ const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'addres
 );
 
 export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
-  return baker ? new BigNumber(baker.stakedBalance).multipliedBy(9).minus(baker.delegatedBalance) : new BigNumber(0);
+  if (baker) {
+    const stakedBalance = new BigNumber(baker.stakedBalance).multipliedBy(5);
+    const delegationBalance = stakedBalance.multipliedBy(9);
+    return stakedBalance.plus(delegationBalance);
+  }
+
+  return new BigNumber(0);
 };
 
-export async function getAllBakersBakingBad() {
-  const bakers = (await bakingBadGetKnownBakers({})).map(baker => ({
-    ...baker,
-    freeSpace: getBakerSpace(baker).toNumber(),
-    minDelegation: 0,
-    estimatedRoi: 0,
-    fee: 0
-  }));
+export async function getAllBakersBakingBad(baseUrl: string) {
+  const bakers = (await bakingBadGetKnownBakers({ baseURL: baseUrl })).map(baker => {
+    // @ts-expect-error // predifined validators list
+    const predefinedBaker = PREDEFINED_BAKERS_NAMES_MAINNET[baker?.address];
 
+    return {
+      ...baker,
+      freeSpace: getBakerSpace(baker).toNumber(),
+      minDelegation: 0,
+      estimatedRoi: 0,
+      fee: predefinedBaker ? predefinedBaker.fee : 0,
+      name: predefinedBaker ? predefinedBaker.name : undefined,
+      logo: predefinedBaker ? predefinedBaker.logo : undefined
+    };
+  });
+
+  // eslint-disable-next-line no-type-assertion/no-type-assertion
   return bakers.filter(baker => typeof baker !== 'string') as BakingBadBaker[];
 }
 

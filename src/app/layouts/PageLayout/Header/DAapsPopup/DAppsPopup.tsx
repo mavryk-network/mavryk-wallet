@@ -38,7 +38,7 @@ export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
     revalidateOnReconnect: false
   });
 
-  const dAppSessions = useMemo(() => data! ?? {}, [data]);
+  const dAppSessions = data! ?? {};
 
   const [activeUrl, setActiveUrl] = useState<string | undefined>('');
 

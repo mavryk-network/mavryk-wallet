@@ -33,7 +33,17 @@ export enum HistoryItemOpTypeEnum {
   Other,
   Swap,
   Reveal,
-  Multiple
+  Multiple,
+  Staking
+}
+
+export enum StakingActions {
+  stake = 'stake',
+  finalize = 'finalize',
+  unstake = 'unstake',
+  restake = 'restake',
+  slash_staked = 'slash_staked',
+  slash_unstaked = 'slash_unstaked'
 }
 
 export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
@@ -81,6 +91,14 @@ export interface HistoryItemDelegationOp extends HistoryItemOperationBase {
   type: HistoryItemOpTypeEnum.Delegation;
 }
 
+export interface HistoryItemStakingOp extends HistoryItemOperationBase {
+  amount?: number;
+  action: StakingActions;
+  sender?: HistoryMember;
+  baker?: HistoryMember | null;
+  type: HistoryItemOpTypeEnum.Staking;
+}
+
 export interface HistoryItemOriginationOp extends HistoryItemOperationBase {
   isHighlighted: boolean;
   originatedContract?: HistoryMember;
@@ -99,7 +117,8 @@ export type IndividualHistoryItem =
   | HistoryItemOriginationOp
   | HistoryItemOpReveal
   | HistoryItemOtherOp
-  | HistoryItemSwapOp;
+  | HistoryItemSwapOp
+  | HistoryItemStakingOp;
 
 export interface UserHistory {
   items: UserHistoryItem[];

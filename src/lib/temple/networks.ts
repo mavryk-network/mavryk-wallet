@@ -41,24 +41,25 @@ export const MAV_RPC_NETWORK = 'https://atlasnet.rpc.mavryk.network';
 // ];
 
 export const NETWORKS: TempleNetwork[] = [
-  // {
-  //   id: 'mainnet',
-  //   nameI18nKey: 'mavrykMainnet',
-  //   description: 'Mavryk mainnet',
-  //   type: 'main',
-  //   rpcBaseURL: 'https://rpc.mavryk.network/mainnet',
-  //   color: '#83b300',
-  //   disabled: false
-  // },
+  {
+    id: 'mainnet', // used as default one if no selected RPC
+    nameI18nKey: 'mavrykMainnet',
+    description: 'Mavryk mainnet',
+    type: 'main',
+    rpcBaseURL: 'https://mainnet.rpc.mavryk.network',
+    color: '#5F58FF',
+    disabled: false
+  },
   {
     id: 'atlasnet',
     name: 'Mavryk Atlasnet',
     description: 'Mavryk Atlasnet',
     type: 'main',
     rpcBaseURL: MAV_RPC_NETWORK,
-    color: '#83b300',
+    color: '#F86412',
     disabled: false
   },
+
   // {
   //   id: 'marigold-mainnet',
   //   nameI18nKey: 'marigoldMainnet',
@@ -128,7 +129,7 @@ export const NETWORKS: TempleNetwork[] = [
     description: 'Local Sandbox',
     type: 'test',
     rpcBaseURL: 'http://localhost:8732',
-    color: '#e9e1cc',
+    color: '#10DEEB',
     disabled: false
   },
   // Hidden

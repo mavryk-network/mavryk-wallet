@@ -156,7 +156,7 @@ const OperationView: FC<OperationViewProps> = ({
         />
       )}
 
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 12 }}>
         <ModifyFeeAndLimitComponent
           id="external-modified-fees-id"
           name="external-modified-fees"

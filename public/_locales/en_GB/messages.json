@@ -288,12 +288,7 @@
     }
   },
   "betaAgreementMsg": {
-    "message": "I understand that this web extension is in $beta$ and is only connected to the Testnet. I should not send real funds to this wallet.",
-    "placeholders": {
-      "beta": {
-        "content": "$1"
-      }
-    }
+    "message": "I understand that this web extension operates for both Mainnet and Testnet networks for Mavryk. Before sending funds, make to you are sending them on the correct network. Always verify."
   },
   "skipOnboarding": {
     "message": "Skip onboarding"
@@ -2047,6 +2042,22 @@
       }
     }
   },
+  "doSthToSmb": {
+    "message": "to $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "doSthFromSmb": {
+    "message": "from $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
   "delegationFromSmb": {
     "message": "from $delegate$",
     "placeholders": {
@@ -2656,7 +2667,7 @@
     "message": "Your address, balance and domain"
   },
   "addressBalanceDescription": {
-    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. If you would like to receive and use MVRK or tokens built on Mavryk, you should use this address."
+    "message": "After creating an account, you’ll get a unique address - your personal account identifier in the Mavryk blockchain. The Mavryk wallet address you've been given is the same one you'll use to receive both native MVRK tokens or any other tokens built on the Mavryk network."
   },
   "addressBalanceHint": {
     "message": "You may also use a custom wallet address name from $link$ like alice.mav instead of the alphanumeric wallet address.",
@@ -3417,7 +3428,7 @@
     "message": "Earn your first reward in ~21 days, then receive payouts every ~3 days."
   },
   "stakeListItem2": {
-    "message": "Your MVRK tokens stay in your wallet, under your control. Use them anytime!"
+    "message": "Your MVRK stays in your wallet, under your control. Use them anytime!"
   },
   "delegatePlanListOption1": {
     "message": "Earn competitive yields that adjust with network activity"
@@ -3444,10 +3455,10 @@
     "message": "Penalties may apply if validators misbehave"
   },
   "stakePlanOption1": {
-    "message": "<b>Delegate</b> - Flexible and instant access to your tokens"
+    "message": "<b>Get Started - Delegate</b> - Flexible and instant access to your tokens"
   },
   "stakePlanOption2": {
-    "message": "<b>Co-Stake</b> - Higher rewards and long-term commitment"
+    "message": "<b>Co-Stake</b> - 2X your rewards 🔥"
   },
   "delegateToValidator": {
     "message": "Delegate to Specific Validator"
@@ -3489,7 +3500,7 @@
     "message": "Stake your tokens to trusted validators"
   },
   "chooseStakingPlanMsg": {
-    "message": "Choose Your Staking Plan:"
+    "message": "Start Staking:"
   },
   "reStake": {
     "message": "Re-stake"
@@ -3644,10 +3655,10 @@
     "message": "Validators"
   },
   "tokensRwasNFTs": {
-    "message": "Tokens, RWAs, & NFTs"
+    "message": "Access Native Mavryk Tokens, RWAs, & NFTs"
   },
   "tokensDescPart1": {
-    "message": "Your portfolio of tokens is displayed on the ”Tokens” tab. "
+    "message": "You can view all your tokens in the ”Tokens” tab. From here you can send native tokens, check your balances, purchase more or see detailed information about any token by clicking on it."
   },
   "tokensDescPart2": {
     "message": "You can send, check balances, buy more, or view a token’s details by clicking on it in this section."
@@ -3680,10 +3691,10 @@
     "message": "Magnifying Glass - Search specific details."
   },
   "txActionsDetailsPart3": {
-    "message": "Drop Down - Sort your tokens and viewing arrangement"
+    "message": "Sort Icon - Sort your tokens and viewing arrangement"
   },
   "txActionsDetailsPart4": {
-    "message": "Rewind Icon - Search your transaction history."
+    "message": "Filter Icon - Search your transaction history."
   },
   "welcomeOnboard": {
     "message": "Welcome on board! 👋"
@@ -3692,7 +3703,7 @@
     "message": "Now you know the basic & most important functions of the Mavryk wallet."
   },
   "welcomeOnboardDetailsPart2": {
-    "message": "You can learn all features of the Mavryk Wallet by following our explainer posts on social media."
+    "message": "Let's now deposit some $MVRK into your wallet."
   },
   "welcomeOnboardDetailsPart3": {
     "message": "Also, all instructions and guides are available in our documentation."
@@ -3846,5 +3857,101 @@
   },
   "highTrafficMsg": {
     "message": "There is high traffic at the moment, please increase the gas cost to provide a better chance your transaction will go through"
+  },
+  "backToValidator": {
+    "message": "Back to Validator"
+  },
+  "unlockSuccessMsg": {
+    "message": "You've successfully started the unlocking process. After 4 cycles (12 days) you will be able to finalized the unlocking of your stake and will have full access to your funds."
+  },
+  "finalizeUnlockSuccessMsg": {
+    "message": "You've fully unlocked your stake. Your funds are now available and ready to be used."
+  },
+  "delegatingPeriod": {
+    "message": "Delegating - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "costakePeriod": {
+    "message": "Co-staking - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlockingPeriod": {
+    "message": "Unlocking - $icon$ $daysLeft$ left",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlocked": {
+    "message": "unlocked"
+  },
+  "proceedToUnlock": {
+    "message": "Proceed to Unlock"
+  },
+  "coStaked": {
+    "message": "Co-staked"
+  },
+  "unlockStake": {
+    "message": "Unlock Stake"
+  },
+  "stakedAmount": {
+    "message": "Staked Amount"
+  },
+  "allValidators": {
+    "message": "All Validators"
+  },
+  "unlockYourStake": {
+    "message": "Unlock Your Stake"
+  },
+  "unlockYourStakeFirst": {
+    "message": "Unlock Your Stake First"
+  },
+  "unlockYourStakeDesc": {
+    "message": "Unlocking staked funds initiates a 4 cycles (12 days) waiting period. During this time, your assets remain delegated to your current validator and are inaccessible for withdrawal."
+  },
+  "manageMVRK": {
+    "message": "Manage your MVRK Co-Stake"
+  },
+  "choosePortionMVRKStake": {
+    "message": "You can choose to co-stake a portion of your MVRK, or all of it."
+  },
+  "choosePortionMVRKUnlock": {
+    "message": "You can choose to unlock a portion of your co-staked MVRK, or all of it."
+  },
+  "unlockYourStakeFirstDesc": {
+    "message": "Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
+  },
+  "finalizeUnstake": {
+    "message": "Finalize unstake"
+  },
+  "unstake": {
+    "message": "Unstake"
+  },
+  "manageYourCoStake": {
+    "message": "Manage Your Co-stake"
+  },
+  "increaseCostake": {
+    "message": "Increase Co-Stake"
+  },
+  "decreaseCostake": {
+    "message": "Decrease Co-Stake"
   }
 }

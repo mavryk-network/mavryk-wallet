@@ -81,7 +81,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
   modifyFeeAndLimit
 }) => {
   const chainId = useChainIdValue(payload.networkRpc, true)!;
-  const mainnet = chainId === TempleChainId.Atlas;
+  const mainnet = chainId === TempleChainId.Mainnet;
 
   return payload.type === 'connect' ? (
     <div className="w-full flex flex-col">

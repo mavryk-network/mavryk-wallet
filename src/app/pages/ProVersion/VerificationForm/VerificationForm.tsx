@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useNetwork, useTezos, validateContractAddress } from 'lib/temple/front';
+import { useChainId, useNetwork, useTezos, validateContractAddress } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -32,6 +32,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
   const tezos = useTezos();
+  const chainId = useChainId();
 
   /**
    * Form
@@ -71,7 +72,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         if (isAddressVerified !== true) throw new Error(t('verifyAddressErrMsg'));
 
         // make account a KYC account
-        await signKYCAction(rpcUrl, to);
+        await signKYCAction(rpcUrl, to, chainId);
 
         reset({ to: '' });
 
@@ -101,7 +102,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         setSubmitError(err);
       }
     },
-    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, rpcUrl, reset]
+    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, rpcUrl, reset, chainId]
   );
 
   return (

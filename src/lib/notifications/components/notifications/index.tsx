@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { useDispatch } from 'react-redux';
 
@@ -10,6 +10,7 @@ import { PartnersPromotion, PartnersPromotionVariant } from 'app/templates/partn
 import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
 import { useTimeout } from 'lib/ui/hooks';
+import { navigate } from 'lib/woozie';
 
 import { viewAllNotificationsAction } from '../../store/actions';
 import { useNotificationsSelector } from '../../store/selectors';
@@ -27,6 +28,10 @@ export const Notifications = () => {
 
   useTimeout(viewAllNotifications, VIEW_ALL_NOTIFICATIONS_TIMEOUT, true, [notifications]);
   useLoadPartnersPromo();
+
+  useEffect(() => {
+    navigate('/');
+  }, []);
 
   return (
     <PageLayout

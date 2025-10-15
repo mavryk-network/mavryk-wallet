@@ -37,7 +37,7 @@ export interface TempleState {
 }
 
 export enum TempleChainId {
-  Mainnet = 'NetXdQprcVkpaWU',
+  Mainnet = 'NetXXAAR1wWQhhe',
   Basenet = 'NetXJMfAoC7pZSW',
   Weekly = 'NetXRp4kyGKJTuB',
   Atlas = 'NetXUrNc8uioxP8'
@@ -517,6 +517,7 @@ interface TempleUpdateKYCAccountResponse extends TempleMessageBase {
 
 interface TempleImportAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportAccountRequest;
+  chainId: string;
   privateKey: string;
   encPassword?: string;
 }
@@ -528,6 +529,7 @@ interface TempleImportAccountResponse extends TempleMessageBase {
 interface TempleImportMnemonicAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportMnemonicAccountRequest;
   mnemonic: string;
+  chainId: string;
   password?: string;
   derivationPath?: string;
 }
@@ -541,6 +543,7 @@ interface TempleImportFundraiserAccountRequest extends TempleMessageBase {
   email: string;
   password: string;
   mnemonic: string;
+  chainId: string;
 }
 
 interface TempleImportFundraiserAccountResponse extends TempleMessageBase {
@@ -572,6 +575,7 @@ interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
 interface TempleCreateLedgerAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateLedgerAccountRequest;
   name: string;
+  chainId: string;
   derivationPath?: string;
   derivationType?: DerivationType;
 }

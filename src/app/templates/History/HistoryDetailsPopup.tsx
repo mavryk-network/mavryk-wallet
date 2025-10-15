@@ -24,6 +24,7 @@ import {
   HistoryItemOpTypeEnum,
   HistoryItemOriginationOp,
   HistoryItemOtherOp,
+  HistoryItemStakingOp,
   HistoryItemStatus,
   HistoryItemTransactionOp,
   IndividualHistoryItem
@@ -381,6 +382,12 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         return {
           label: HistoryItemTypeLabels[historyItem.type],
           address: opDelegate.newDelegate?.address || opDelegate.source.address
+        };
+      case HistoryItemOpTypeEnum.Staking:
+        const opStaking = item as HistoryItemStakingOp;
+        return {
+          label: HistoryItemTypeLabels[historyItem.type],
+          address: opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address
         };
 
       case HistoryItemOpTypeEnum.Origination:

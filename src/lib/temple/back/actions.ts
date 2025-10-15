@@ -185,25 +185,23 @@ export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
   });
 }
 
-// TODO add update KYC
-
-export function importAccount(privateKey: string, encPassword?: string) {
+export function importAccount(privateKey: string, chainId: string, encPassword?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importAccount(privateKey, encPassword);
+    const updatedAccounts = await vault.importAccount(privateKey, chainId, encPassword);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function importMnemonicAccount(mnemonic: string, password?: string, derivationPath?: string) {
+export function importMnemonicAccount(mnemonic: string, chainId: string, password?: string, derivationPath?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importMnemonicAccount(mnemonic, password, derivationPath);
+    const updatedAccounts = await vault.importMnemonicAccount(mnemonic, chainId, password, derivationPath);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function importFundraiserAccount(email: string, password: string, mnemonic: string) {
+export function importFundraiserAccount(email: string, password: string, mnemonic: string, chainId: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic);
+    const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic, chainId);
     accountsUpdated(updatedAccounts);
   });
 }
@@ -222,9 +220,14 @@ export function importWatchOnlyAccount(address: string, chainId?: string, accNam
   });
 }
 
-export function createLedgerAccount(name: string, derivationPath?: string, derivationType?: DerivationType) {
+export function createLedgerAccount(
+  name: string,
+  chainId: string,
+  derivationPath?: string,
+  derivationType?: DerivationType
+) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.createLedgerAccount(name, derivationPath, derivationType);
+    const updatedAccounts = await vault.createLedgerAccount(name, chainId, derivationPath, derivationType);
     accountsUpdated(updatedAccounts);
   });
 }

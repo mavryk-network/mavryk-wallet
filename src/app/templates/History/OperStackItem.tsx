@@ -3,8 +3,9 @@ import React, { ReactNode, memo } from 'react';
 import clsx from 'clsx';
 
 import { HashChip } from 'app/atoms';
-import { TID, T, t } from 'lib/i18n';
+import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
+import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
 import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
 import {
@@ -14,11 +15,12 @@ import {
   HistoryItemTransactionOp,
   HistoryItemOtherOp,
   UserHistoryItem,
-  HistoryItemOriginationOp
+  HistoryItemOriginationOp,
+  HistoryItemStakingOp
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from './MoneyDiffView';
-import { getAssetsFromOperations } from './utils';
+import { getAssetsFromOperations, getStakingMessage } from './utils';
 
 interface Props {
   item: IndividualHistoryItem;
@@ -42,19 +44,65 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
 
   switch (item.type) {
-    case HistoryItemOpTypeEnum.Delegation:
-      const opDelegate = item as HistoryItemDelegationOp;
-
-      const isDelegateTo = userAddress.toLocaleLowerCase() !== 'mv1V4h45W3p4e1sjSBvRkK2uYbvkTnSuHg8g'.toLowerCase();
-
-      const i18nkey: TID = isDelegateTo ? 'delegationToSmb' : 'delegationFromSmb';
-      const address = isDelegateTo ? opDelegate.newDelegate?.address : opDelegate.source?.address;
+    case HistoryItemOpTypeEnum.Staking:
+      const opStaking = item as HistoryItemStakingOp;
+      const isValidator = opStaking.baker?.address === userAddress;
+      const stakingMessage = getStakingMessage(
+        opStaking.action,
+        isValidator,
+        opStaking.sender?.address ?? 'unknown',
+        opStaking.baker?.address ?? 'unknown'
+      );
 
       return (
         <Component
           {...componentBaseProps}
-          titleNode={isDelegateTo ? HistoryItemOpTypeTexts[item.type] : t('delegationReceived')}
-          argsNode={<StackItemArgs i18nKey={i18nkey} args={[address ?? 'unknown']} />}
+          titleNode={stakingMessage.titleNode}
+          argsNode={<StackItemArgs args={stakingMessage.args} />}
+        />
+      );
+    case HistoryItemOpTypeEnum.Delegation:
+      const opDelegate = item as HistoryItemDelegationOp;
+
+      const sourceAddress = opDelegate.source?.address;
+      const isDelegator =
+        opDelegate.prevDelegate?.address === userAddress || opDelegate.newDelegate?.address === userAddress;
+
+      if (isDelegator) {
+        const isDelegatorLeft =
+          opDelegate.prevDelegate?.address === userAddress && opDelegate.newDelegate?.address !== userAddress;
+
+        return (
+          <Component
+            {...componentBaseProps}
+            titleNode={isDelegatorLeft ? 'Delegator' : 'New delegator'}
+            argsNode={
+              <StackItemArgs
+                args={[getPredefinedBakerName(sourceAddress) ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
+              />
+            }
+          />
+        );
+      }
+
+      const isPrevDelegate = opDelegate.prevDelegate?.address;
+      return (
+        <Component
+          {...componentBaseProps}
+          titleNode={isPrevDelegate ? 'Left delegate' : 'Delegate to'}
+          argsNode={
+            <StackItemArgs
+              args={
+                isPrevDelegate
+                  ? [
+                      getPredefinedBakerName(opDelegate.prevDelegate?.address) ?? 'unknown',
+                      <> and re-delegate to </>,
+                      getPredefinedBakerName(opDelegate.newDelegate?.address)
+                    ]
+                  : [getPredefinedBakerName(opDelegate.newDelegate?.address)]
+              }
+            />
+          }
         />
       );
 
@@ -75,6 +123,10 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
+
+      if (!opInteract.entrypoint) {
+        console.log(opInteract, 'opInteract');
+      }
 
       return (
         <Component
@@ -234,7 +286,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
 };
 
 interface StackItemArgsProps {
-  i18nKey: TID;
+  i18nKey?: TID;
   args: (string | ReactNode | Element)[];
 }
 
@@ -243,27 +295,25 @@ const StackItemArgs = memo<StackItemArgsProps>(({ i18nKey, args }) => {
     e.stopPropagation();
   };
 
+  const ArgsPart = args.map((value, index) => {
+    return typeof value === 'string' ? (
+      <span key={index} onClick={handleHashClick}>
+        <HashChip
+          className="text-blue-200"
+          firstCharsCount={5}
+          key={`${value}${index}`}
+          hash={value}
+          type="link"
+          showIcon={false}
+        />
+      </span>
+    ) : (
+      // @ts-expect-error // reactNode
+      <React.Fragment key={index}>{value}</React.Fragment>
+    );
+  });
+
   return (
-    <span className="text-white break-all">
-      <T
-        id={i18nKey}
-        substitutions={args.map((value, index) => {
-          return typeof value === 'string' ? (
-            <span key={index} onClick={handleHashClick}>
-              <HashChip
-                className="text-blue-200"
-                firstCharsCount={5}
-                key={index}
-                hash={value}
-                type="link"
-                showIcon={false}
-              />
-            </span>
-          ) : (
-            value
-          );
-        })}
-      />
-    </span>
+    <span className="text-white break-word">{!i18nKey ? ArgsPart : <T id={i18nKey} substitutions={ArgsPart} />}</span>
   );
 });

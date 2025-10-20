@@ -637,7 +637,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === CO_STAKE) {
       return navigate('/manage-stake?tab=stake');
     } else if (delegateLabel === UNLOCK_STAKE) {
-      return navigate('/manage-stake?tab=unlock');
+      return navigate('/manage-stake?tab=stake');
     }
 
     if (delegateLabel === FINALIZE_UNLOCK) {

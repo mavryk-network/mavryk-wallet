@@ -1,32 +1,80 @@
-.tabbar {
-  display: grid;
-  grid-template-columns: repeat(4, min-content);
+html {
+  interpolate-size: allow-keywords;
 }
 
-.tab {
+nav.tabsNav {
   position: relative;
-  padding-bottom: 8px;
-}
+  width: fit-content;
+  isolation: isolate;
 
-.tab::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 21px;
-  height: 2px;
-  border-radius: 100px;
-  background-color: #5f58ff;
+  /* anchor target for the underline */
+  anchor-name: --active-tab;
 
-  animation: revealTabUnderscore 300ms ease-in-out;
-}
-
-@keyframes revealTabUnderscore {
-  from {
-    opacity: 0;
+  li:hover {
+    anchor-name: --active-tab;
   }
-  to {
-    opacity: 1;
+
+  /* when nothing is hovered, anchor follows .active tab */
+  &:not(:has(a:hover)) li:has(a.active) {
+    anchor-name: --active-tab;
+  }
+
+  /* underline */
+  &::after {
+    content: '';
+    position: absolute;
+    position-anchor: --active-tab;
+
+    left: anchor(left);
+    right: anchor(right);
+    top: calc(anchor(bottom) - 2px);
+
+    height: 2px;
+    background-color: #5f58ff;
+    border-radius: 3px;
+
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  /* layout */
+  > ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+  }
+
+  a {
+    display: block;
+    padding: 6px 8px;
+    text-decoration: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  a:hover {
+    background-color: rgba(95, 88, 255, 0.5);
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+  }
+
+  a:focus,
+  a:focus-visible,
+  a:active {
+    outline: none;
+    box-shadow: none;
+  }
+
+  a:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: #5f58ff;
+  }
+
+  a:hover,
+  a.active {
+    color: #fff;
   }
 }

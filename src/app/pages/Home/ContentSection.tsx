@@ -37,7 +37,7 @@ export const ContentSection: FC<Props> = ({ className }) => {
   const { fullPage } = useAppEnv();
   const tabSlug = useTabSlug();
 
-  const tabBarElemRef = useRef<HTMLDivElement>(null);
+  const tabBarElemRef = useRef<HTMLUListElement>(null);
 
   const scrollToTheTabsBar = useCallback(() => {
     if (!tabBarElemRef.current) return;

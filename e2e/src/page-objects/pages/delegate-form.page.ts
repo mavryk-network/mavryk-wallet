@@ -1,4 +1,4 @@
-import { DelegateFormSelectors } from 'src/app/templates/DelegateForm.selectors';
+import { DelegateFormSelectors } from 'src/app/pages/Stake/delegateForm.selectors';
 
 import { Page } from '../../classes/page.class';
 import { createPageElement } from '../../utils/search.utils';

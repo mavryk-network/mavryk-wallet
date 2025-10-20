@@ -250,7 +250,7 @@
     }
   },
   "minDelegationAmountDescription": {
-    "message": "Your current balance is less than a minimal delegation amount of this baker. That means while the balance is less than $minAmount$ - there will be no payouts.",
+    "message": "Please note, the min delegation requirement of this validator is $minAmount$ and your balance is less than that so you will receive no payouts. Please either buy more MVRK or delegate to a different validator that has a lower min delegation requirement.",
     "placeholders": {
       "minAmount": {
         "content": "$1"

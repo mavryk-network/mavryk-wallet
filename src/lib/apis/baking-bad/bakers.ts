@@ -41,7 +41,7 @@ export async function getAllBakersBakingBad(baseUrl: string) {
     return {
       ...baker,
       freeSpace: getBakerSpace(baker).toNumber(),
-      minDelegation: 0,
+      minDelegation: predefinedBaker ? predefinedBaker.minDelegation : 0,
       estimatedRoi: 0,
       fee: predefinedBaker ? predefinedBaker.fee : 0,
       name: predefinedBaker ? predefinedBaker.name : undefined,

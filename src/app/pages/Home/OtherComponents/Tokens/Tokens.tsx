@@ -178,11 +178,11 @@ export const TokensTab: FC = () => {
 
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
-      <div className={clsx('mt-3 w-full flex justify-end', popup && 'px-4')}>
+      <div className={clsx('mt-3 w-full flex justify-end')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
-              <div className={clsx('w-full flex justify-end', styles.searchWrapper)}>
+              <div className={clsx('w-full flex justify-end', popup && 'px-4', styles.searchWrapper)}>
                 <SearchExplorerFinder
                   value={searchValue}
                   onValueChange={setSearchValue}

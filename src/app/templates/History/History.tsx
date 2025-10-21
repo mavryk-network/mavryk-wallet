@@ -264,11 +264,18 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     return (
       <div className={classNames('w-full mx-auto h-full relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
-        <div className={classNames('mt-3 w-full flex justify-end', popup && 'px-4')}>
+        <div className={classNames('mt-3 w-full flex justify-end')}>
           <SearchExplorer>
             <>
               <SearchExplorerOpened>
-                <div className={classNames('w-full flex justify-end', styles.searchWrapper, searchWrapperClassname)}>
+                <div
+                  className={classNames(
+                    'w-full flex justify-end',
+                    styles.searchWrapper,
+                    popup && 'px-4',
+                    searchWrapperClassname
+                  )}
+                >
                   <SearchExplorerFinder
                     value={searchValue}
                     onValueChange={onChange}

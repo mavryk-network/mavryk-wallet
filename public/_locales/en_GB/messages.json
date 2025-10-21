@@ -250,7 +250,7 @@
     }
   },
   "minDelegationAmountDescription": {
-    "message": "Your current balance is less than a minimal delegation amount of this baker. That means while the balance is less than $minAmount$ - there will be no payouts.",
+    "message": "Please note, the min delegation requirement of this validator is $minAmount$ and your balance is less than that so you will receive no payouts. Please either buy more MVRK or delegate to a different validator that has a lower min delegation requirement.",
     "placeholders": {
       "minAmount": {
         "content": "$1"
@@ -3948,10 +3948,22 @@
   "manageYourCoStake": {
     "message": "Manage Your Co-stake"
   },
+  "increaseCostakeDesc": {
+    "message": "Increasing your co-stake boosts rewards and participation. \nNote: The increased amount will take 5 cycles (~15 days) to become active and start earning rewards."
+  },
+  "increase": {
+    "message": "Increase"
+  },
+  "decrease": {
+    "message": "Decrease"
+  },
   "increaseCostake": {
     "message": "Increase Co-Stake"
   },
   "decreaseCostake": {
     "message": "Decrease Co-Stake"
+  },
+  "decreaseCostakeDesc": {
+    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 4 cycles (~12 days) for your funds to fully unlock, after which they will become liquid for use."
   }
 }

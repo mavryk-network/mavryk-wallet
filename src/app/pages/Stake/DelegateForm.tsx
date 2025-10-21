@@ -24,6 +24,7 @@ import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { TID, T, t } from 'lib/i18n';
 import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
+import { MAVEN_METADATA } from 'lib/metadata';
 import { setDelegate } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -49,10 +50,11 @@ import {
 } from 'lib/temple/front/baking/const';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { atomsToTokens, hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
+import { ZERO } from 'lib/utils/numbers';
 import { navigate, useLocation } from 'lib/woozie';
 
 import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
@@ -468,7 +470,6 @@ export enum SortOptions {
   UP_TIME = 'upTime'
 }
 
-const assetSymbol = 'ṁ';
 const BakerForm: React.FC<BakerFormProps> = ({
   baker,
   submitError,
@@ -525,7 +526,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
             name="fee"
             control={control}
             onChange={handleFeeFieldChange}
-            assetSymbol={assetSymbol}
+            assetSymbol={MAVEN_METADATA.symbol}
             baseFee={baseFee}
             error={errors.fee}
             id="delegate-fee"
@@ -570,7 +571,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
-  const { symbol } = useGasToken();
+  const { metadata } = useGasToken();
 
   return baker ? (
     <>
@@ -587,7 +588,8 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
               id="minDelegationAmountDescription"
               substitutions={[
                 <span className="font-normal" key="minDelegationsAmount">
-                  <Money>{baker.minDelegation ?? 0}</Money> <span style={{ fontSize: '0.75em' }}>{symbol}</span>
+                  <Money>{atomsToTokens(baker.minDelegation || ZERO, metadata.decimals)}</Money>{' '}
+                  <span>{metadata.symbol}</span>
                 </span>
               ]}
             />
@@ -635,7 +637,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === CO_STAKE) {
       return navigate('/manage-stake?tab=stake');
     } else if (delegateLabel === UNLOCK_STAKE) {
-      return navigate('/manage-stake?tab=unlock');
+      return navigate('/manage-stake?tab=stake');
     }
 
     if (delegateLabel === FINALIZE_UNLOCK) {

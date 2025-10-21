@@ -15,7 +15,8 @@ import {
   useChainId,
   ReactiveTezosToolkit,
   useChainIdLoading,
-  useOnBlock
+  useOnBlock,
+  useDelegate
 } from 'lib/temple/front';
 import { michelEncoder, loadFastRpcClient, atomsToTokens } from 'lib/temple/helpers';
 
@@ -150,14 +151,27 @@ export function useRawBalance(
 
 export function useBalance(assetSlug: string, address: string, networkRpc?: string) {
   const { value: rawValue, isSyncing, error, refresh } = useRawBalance(assetSlug, address, networkRpc);
+  const { data: accStats } = useDelegate(address);
   const assetMetadata = useAssetMetadata(assetSlug);
 
+  // Include staking balance to the final value
+  const rawsValuePlusStakingBalance = useMemo(() => {
+    if (accStats) {
+      const { stakedBalance = 0, unstakedBalance = 0 } = accStats;
+      return new BigNumber(rawValue ?? 0).plus(stakedBalance).plus(unstakedBalance).toString();
+    }
+    return rawValue;
+  }, [accStats, rawValue]);
+
   const value = useMemo(
-    () => (rawValue && assetMetadata ? atomsToTokens(new BigNumber(rawValue), assetMetadata.decimals) : undefined),
-    [rawValue, assetMetadata]
+    () =>
+      rawsValuePlusStakingBalance && assetMetadata
+        ? atomsToTokens(new BigNumber(rawsValuePlusStakingBalance), assetMetadata.decimals)
+        : undefined,
+    [rawsValuePlusStakingBalance, assetMetadata]
   );
 
-  return { rawValue, value, isSyncing, error, refresh, assetMetadata };
+  return { rawValue: rawsValuePlusStakingBalance, value, isSyncing, error, refresh, assetMetadata };
 }
 
 const buildTezosToolkit = memoizee(

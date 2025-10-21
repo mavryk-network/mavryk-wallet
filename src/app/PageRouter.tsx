@@ -10,7 +10,6 @@ import NFTsPage from 'app/pages/Collectibles/CollectiblePage';
 import ConnectLedger from 'app/pages/ConnectLedger/ConnectLedger';
 import CreateAccount from 'app/pages/CreateAccount/CreateAccount';
 import DApps from 'app/pages/DApps';
-import Delegate from 'app/pages/Delegate';
 import Home from 'app/pages/Home/Home';
 import ImportAccount from 'app/pages/ImportAccount';
 import ManageAssets from 'app/pages/ManageAssets/ManageAssets';
@@ -95,7 +94,6 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/send/:assetSlug?', onlyReady(({ assetSlug }) => <Send assetSlug={assetSlug} />)],
   // ['/swap', onlyReady(() => <Swap />)],
   ['/pro-version', onlyReady(() => <ProVersion />)],
-  ['/delegate', onlyReady(() => <Delegate />)],
   ['/stake/:assetType?', onlyReady(() => <Stake />)],
   ['/co-stake/:assetType?', onlyReady(() => <CoStake />)],
   ['/manage-stake/:tabSlug?', onlyReady(() => <ManageStake />)],

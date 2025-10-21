@@ -20,13 +20,17 @@ type TabInterface = Partial<TestIDProps> & {
   titleI18nKey: TID;
 };
 
-export const TabsBar = React.forwardRef<HTMLDivElement, Props>(
+export const TabsBar = React.forwardRef<HTMLUListElement, Props>(
   ({ activeTabName, tabs, withOutline, tabContainerClassName = styles.tabbar }, ref) => (
-    <div ref={ref} className={clsx('w-full gap-4 px-4', tabContainerClassName)}>
-      {tabs.map(tab => (
-        <TabButton key={tab.name} active={tab.name === activeTabName} withOutline={withOutline} {...tab} />
-      ))}
-    </div>
+    <nav className={clsx(styles.tabsNav, tabContainerClassName)}>
+      <ul ref={ref} className={'w-full'}>
+        {tabs.map(tab => (
+          <li key={tab.name}>
+            <TabButton active={tab.name === activeTabName} withOutline={withOutline} {...tab} />
+          </li>
+        ))}
+      </ul>
+    </nav>
   )
 );
 
@@ -41,10 +45,9 @@ interface TabButtonProps extends TestIDProps {
 const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, testID, testIDProperties, disabled = false }) => {
   const baseProps = {
     className: clsx(
-      'flex1 w-full text-center cursor-pointer pb-2',
+      'text-center cursor-pointer',
       'text-base-plus truncate',
-      'transition ease-in-out duration-300',
-      active ? clsx('text-white', styles.tab) : 'text-secondary-white',
+      active ? clsx('text-white', styles.active) : 'text-secondary-white hover:text-white',
       disabled && 'opacity-75 pointer-events-none'
     ),
     children: (
@@ -54,9 +57,7 @@ const TabButton: FC<TabButtonProps> = ({ name, titleI18nKey, active, testID, tes
     )
   };
 
-  return disabled ? (
-    <div {...baseProps} />
-  ) : (
+  return (
     <Link
       to={lctn => ({ ...lctn, search: `?tab=${name}` })}
       replace

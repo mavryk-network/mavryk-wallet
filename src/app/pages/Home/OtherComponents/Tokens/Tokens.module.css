@@ -41,9 +41,20 @@
 
 .searchWrapper {
   position: absolute;
-  right: 1px;
+  right: 0;
   top: -45px;
   z-index: 2;
+
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+
+  @apply bg-primary-bg;
+}
+
+.searchWrapper.closed {
+  width: auto;
+  max-width: unset;
 }
 
 .searchWrapperPopup {

@@ -37,7 +37,7 @@ export const ContentSection: FC<Props> = ({ className }) => {
   const { fullPage } = useAppEnv();
   const tabSlug = useTabSlug();
 
-  const tabBarElemRef = useRef<HTMLDivElement>(null);
+  const tabBarElemRef = useRef<HTMLUListElement>(null);
 
   const scrollToTheTabsBar = useCallback(() => {
     if (!tabBarElemRef.current) return;
@@ -87,7 +87,7 @@ export const ContentSection: FC<Props> = ({ className }) => {
 
   return (
     <div className={clsx('-mx-4 shadow-top-light h-full relative', fullPage && 'rounded-t-md', className)}>
-      <div className="flex items-center relative">
+      <div className="flex items-center">
         <TabsBar ref={tabBarElemRef} tabs={tabs} activeTabName={name} />
       </div>
 

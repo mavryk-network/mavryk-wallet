@@ -108,7 +108,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm ' : 'max-w-screen-xxs')}>
-      <div className={clsx('my-3 w-full flex justify-end')}>
+      <div className={clsx('my-3 w-full', popup && 'mx-4')}>
         <SearchExplorer>
           <>
             <SearchExplorerOpened>

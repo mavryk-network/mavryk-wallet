@@ -18,20 +18,20 @@
 @keyframes revealSearch {
   from {
     opacity: 0;
-    width: 0px;
-    max-width: 0px;
+    width: 0;
+    max-width: 0;
   }
   to {
     opacity: 1;
     width: 100%;
-    max-width: 600px;
+    max-width: 100%;
   }
 }
 
 @keyframes hideSearch {
   from {
-    width: 315px;
-    max-width: 600px;
+    width: 100%;
+    max-width: 100%;
     background-color: #202020;
   }
   to {

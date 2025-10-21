@@ -23,7 +23,7 @@ type TabInterface = Partial<TestIDProps> & {
 export const TabsBar = React.forwardRef<HTMLUListElement, Props>(
   ({ activeTabName, tabs, withOutline, tabContainerClassName = styles.tabbar }, ref) => (
     <nav className={clsx(styles.tabsNav, tabContainerClassName)}>
-      <ul ref={ref} className={'w-full px-4'}>
+      <ul ref={ref} className={'w-full'}>
         {tabs.map(tab => (
           <li key={tab.name}>
             <TabButton active={tab.name === activeTabName} withOutline={withOutline} {...tab} />

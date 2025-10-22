@@ -78,7 +78,23 @@ export default function useHistory(
       console.error('Logging error in History Hook after fetching history items:', error);
       return;
     }
-    setUserHistory(historyItems.concat(newHistoryItems));
+
+    setUserHistory(prev => {
+      // Filter out items that already exist in prev
+      const newUniqueItems = newHistoryItems.filter(item => !prev.some(prevItem => prevItem.hash === item.hash));
+
+      // If nothing new to add, we've reached the end
+      if (newUniqueItems.length === 0) {
+        setReachedTheEnd(true);
+        return prev;
+      }
+
+      // Merge and deduplicate just in case
+      const merged = [...prev, ...newUniqueItems];
+      const unique = Array.from(new Map(merged.map(item => [item.hash, item])).values());
+
+      return unique;
+    });
     setLoading(false);
     if (newHistoryItems.length === 0) setReachedTheEnd(true);
   }

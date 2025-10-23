@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 
+import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import { DelegatePeriodBanner } from 'app/atoms/AddBanner';
@@ -29,7 +30,11 @@ interface Props {
 
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
-  const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
+  const {
+    value: balance = ZERO,
+    rawValue: rawBalance = ZERO,
+    assetMetadata: metadata
+  } = useBalance(assetSlug, publicKeyHash);
   const { data: accStats } = useDelegate(publicKeyHash);
   const myBakerPkh = accStats?.delegate?.address ?? null;
 
@@ -38,10 +43,10 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
     const unstakedBalance = accStats?.unstakedBalance ?? ZERO;
 
     return {
-      delegatedBalance: balance,
+      delegatedBalance: new BigNumber(rawBalance).minus(stakedBalance).minus(unstakedBalance),
       stakedBalance: atomsToTokens(stakedBalance === 0 ? unstakedBalance : stakedBalance, metadata?.decimals ?? 6)
     };
-  }, [accStats?.stakedBalance, accStats?.unstakedBalance, balance, metadata?.decimals]);
+  }, [accStats?.stakedBalance, accStats?.unstakedBalance, metadata?.decimals, rawBalance]);
 
   const classNameMemo = useMemo(
     () =>

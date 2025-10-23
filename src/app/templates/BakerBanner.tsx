@@ -250,13 +250,13 @@ const BakerBanner = memo<BakerBannerProps>(
                       <img
                         src={baker.logo}
                         alt={baker.address}
-                        className="flex-shrink-0 bg-white rounded-full"
+                        className="flex-shrink-0 bg-transparent rounded-full"
                         style={{ minHeight: '2rem', width: 59, height: 59 }}
                       />
                     ) : (
                       // @ts-expect-error // hardcoded svg logos for the time being
                       <baker.logo
-                        className="flex-shrink-0 bg-white rounded-full"
+                        className="flex-shrink-0 bg-transparent rounded-full"
                         style={{ minHeight: '2rem', width: 59, height: 59 }}
                       />
                     )}

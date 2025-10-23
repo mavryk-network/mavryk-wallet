@@ -120,11 +120,14 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
                     />
                   ) : (
                     // @ts-expect-error // hardcoded svg logos for the time being
-                    <baker.logo className="flex-shrink-0 bg-white rounded-full" style={{ width: 24, height: 24 }} />
+                    <baker.logo
+                      className="flex-shrink-0 bg-transparent rounded-full"
+                      style={{ width: 24, height: 24 }}
+                    />
                   )}
                 </>
               ) : (
-                <Identicon hash={myBakerPkh} size={24} className="rounded-full" />
+                <Identicon type="bottts" hash={myBakerPkh} size={24} className="rounded-full" />
               )}
 
               <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>

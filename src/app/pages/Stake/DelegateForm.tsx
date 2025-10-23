@@ -573,6 +573,7 @@ interface BakerBannerComponentProps {
 }
 
 export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker, style }) => {
+  const { popup } = useAppEnv();
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
@@ -588,22 +589,24 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
       </div>
 
       {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
-        <Alert
-          type="info"
-          title={t('minDelegationAmountTitle')}
-          description={
-            <T
-              id="minDelegationAmountDescription"
-              substitutions={[
-                <span className="font-normal" key="minDelegationsAmount">
-                  <Money>{atomsToTokens(baker.minDelegation || ZERO, metadata.decimals)}</Money>{' '}
-                  <span>{metadata.symbol}</span>
-                </span>
-              ]}
-            />
-          }
-          className="mb-6"
-        />
+        <div className={classNames('pb-6', popup && 'px-4')}>
+          <Alert
+            type="info"
+            title={t('minDelegationAmountTitle')}
+            description={
+              <T
+                id="minDelegationAmountDescription"
+                substitutions={[
+                  <span className="font-normal" key="minDelegationsAmount">
+                    <Money>{atomsToTokens(baker.minDelegation || ZERO, metadata.decimals)}</Money>{' '}
+                    <span>{metadata.symbol}</span>
+                  </span>
+                ]}
+              />
+            }
+            className={classNames('mt-6')}
+          />
+        </div>
       )}
     </>
   ) : null;

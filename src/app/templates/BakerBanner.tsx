@@ -205,17 +205,17 @@ const BakerBanner = memo<BakerBannerProps>(
                 }
               ]
             : [
-                {
-                  i18nKey: 'upTime',
-                  child: (
-                    <>
-                      {/* {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
-                        decimalPlaces: 2
-                      })} */}
-                      NA
-                    </>
-                  )
-                },
+                // {
+                //   i18nKey: 'upTime',
+                //   child: (
+                //     <>
+                //       {/* {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
+                //         decimalPlaces: 2
+                //       })} */}
+                //       NA
+                //     </>
+                //   )
+                // },
                 { ...feeTableItem },
                 {
                   i18nKey: 'space',

@@ -224,11 +224,11 @@ const DelegateForm: FC<DelegateFormProps> = ({
       console.error(err);
 
       switch (true) {
-        // case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
-        //   return new UnchangedError(err.message);
+        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
+          return new UnchangedError(err.message);
 
-        // case err?.id.includes('unregistered_delegate'):
-        //   return new UnregisteredDelegateError(err.message);
+        case err?.id.includes('unregistered_delegate'):
+          return new UnregisteredDelegateError(err.message);
 
         default:
           throw err;
@@ -492,6 +492,13 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
   const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 
+  const acc = useAccount();
+  const accountPkh = acc.publicKeyHash;
+
+  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
+  const balance = balanceData!;
+  const balanceNum = balance.toNumber();
+
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
       return 'Unknown Delegate Button';
@@ -512,6 +519,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
     );
   }
   const tzError = submitError || estimationError;
+  const hasLowBalance = (baker?.minDelegation ?? 0) > balanceNum;
 
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col mt-2">
@@ -541,7 +549,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 
         <FormSubmitButton
           loading={formState.isSubmitting}
-          disabled={Boolean(estimationError)}
+          disabled={Boolean(estimationError) || hasLowBalance}
           className="mt-6"
           testID={DelegateFormSelectors.bakerDelegateButton}
           testIDProperties={{

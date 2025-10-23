@@ -25,9 +25,13 @@ const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'addres
 
 export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
   if (baker) {
-    const stakedBalance = new BigNumber(baker.stakedBalance).multipliedBy(5);
-    const delegationBalance = stakedBalance.multipliedBy(9);
-    return stakedBalance.plus(delegationBalance);
+    const stakedBalance = new BigNumber(baker.stakedBalance);
+
+    const costakingCapacity = stakedBalance.multipliedBy(5);
+    const delegationCapacity = stakedBalance.multipliedBy(9);
+    const totalCapacity = costakingCapacity.plus(delegationCapacity);
+
+    return totalCapacity.minus(baker?.stakedBalance ?? 0).minus(baker?.delegatedBalance ?? 0);
   }
 
   return new BigNumber(0);

@@ -26,11 +26,16 @@ nav.tabsNav {
     position: absolute;
     position-anchor: --active-tab;
 
-    left: anchor(left);
-    right: anchor(right);
+    /* Center under anchor horizontally */
+    left: calc(anchor(center));
     top: calc(anchor(bottom) - 2px);
+    transform: translateX(-50%);
 
+    /* Size */
+    width: 100%;
+    max-width: 21px;
     height: 2px;
+
     background-color: #5f58ff;
     border-radius: 3px;
 

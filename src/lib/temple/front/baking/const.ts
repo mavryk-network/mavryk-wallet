@@ -15,11 +15,6 @@ export const UNLOCKING = 'Unlocking';
 export const FINALIZE_UNLOCK = 'Finalize Unlock';
 
 export const PREDEFINED_BAKERS_NAMES_MAINNET = {
-  // mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
-  //   logo: kryptstarLogo,
-  //   name: 'Kryptstar',
-  //   fee: 0.08
-  // },
   mv1Tgom8dLnEuq37rTBKDXFZBLS7YU5iSXtW: {
     logo: SimplyStakingLogo,
     name: 'Simply Staking',
@@ -41,7 +36,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET = {
     minDelegation: 10000000,
     minPayout: 1000
   },
-  mv1DeXVziJ3ygDBFEteUi9jrpWudPUhSBHgP: {
+  mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
     logo: kryptstarLogo,
     name: 'Kryptstar',
     fee: 0.1,

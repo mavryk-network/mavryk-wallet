@@ -581,7 +581,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 
       {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
         <Alert
-          type="warning"
+          type="info"
           title={t('minDelegationAmountTitle')}
           description={
             <T
@@ -690,6 +690,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
       ? MANAGE_STAKE
       : delegateLabel;
   }, [delegateLabel, hasZeroStakingBalance]);
+
+  if (isWatchOnlyAccount) return null;
 
   return (
     <div className="grid gap-3 grid-cols-2">

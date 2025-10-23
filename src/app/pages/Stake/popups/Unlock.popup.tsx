@@ -18,7 +18,7 @@ export const UnlockPopup: FC<UnlockPopupProps> = ({ opened, close }) => {
 
   const handleUnlock = useCallback(async () => {
     close();
-    navigate('/manage-stake');
+    navigate('/manage-stake?tab-unlock');
   }, [close]);
 
   return (

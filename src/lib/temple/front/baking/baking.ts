@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { UnstakeRequestsResponse } from '@mavrykdynamics/taquito-rpc';
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
@@ -22,9 +21,15 @@ import { getOnlineStatus } from 'lib/ui/get-online-status';
 
 import { useChainId, useNetwork, useTezos } from '../ready';
 
-import { DEFAULT_CYCLE_DURATION_MS, PREDEFINED_BAKERS_NAMES_MAINNET } from './const';
+import {
+  DEFAULT_CYCLE_DURATION_MS,
+  emptyAccountResponse,
+  emptydelegateStatsResponse,
+  PREDEFINED_BAKERS_NAMES_MAINNET
+} from './const';
 import { getCoStakeWaitTime, getDelegationWaitTime, getOneCycleinMs, getUnlockWaitTime } from './utils/delegateTime';
 
+// serializers
 function getDelegateCacheKey(
   tezos: ReactiveTezosToolkit,
   address: string,
@@ -34,7 +39,17 @@ function getDelegateCacheKey(
   return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
 }
 
-const emptyAccountResponse = { delegate: { address: null } };
+function getDelegateStatsCacheKey(
+  tezos: ReactiveTezosToolkit,
+  address: string,
+  chainId: string | nullish,
+  shouldPreventErrorPropagation: boolean
+) {
+  return unstable_serialize(['delegate_stats', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
+}
+
+// -----------------------------------------
+
 export function useDelegate<T = TzktUserAccount>(
   address: string,
   suspense = true,
@@ -94,145 +109,135 @@ export function useDelegate<T = TzktUserAccount>(
   });
 }
 
-export function useAccountDelegatePeriodStats(accountAddress: string) {
+export function useAccountDelegatePeriodStats(
+  accountAddress: string,
+  suspense = true,
+  shouldPreventErrorPropagation = true
+) {
   const { data: accStats } = useDelegate<TzktUserAccount>(accountAddress);
   const tezos = useTezos();
-  const chainid = useChainId();
+  const chainId = useChainId();
+  const { cache: swrCache } = useSWRConfig();
 
-  const [stakingInfo, setAdditionalStakingInfo] = useState<{
-    currentCycle: number;
-    delegateCycle: number;
-    unstakeRequests: UnstakeRequestsResponse | null;
-    cycleDurationMs: number;
-    limitOfStakingOverBaking: number;
-  }>(() => ({
-    currentCycle: 0,
-    delegateCycle: -1,
-    cycleDurationMs: 0,
-    unstakeRequests: null,
-    limitOfStakingOverBaking: 0
-  }));
+  const resetDelegateStatsCache = useCallback(() => {
+    swrCache.delete(getDelegateStatsCacheKey(tezos, accountAddress, chainId, shouldPreventErrorPropagation));
+  }, [accountAddress, tezos, chainId, swrCache, shouldPreventErrorPropagation]);
 
-  useEffect(() => {
-    (async function () {
-      try {
-        if (accStats?.delegate?.address && accStats?.address) {
-          const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
-            tezos.rpc.getBlockMetadata(),
-            fetchBakerDelegateParameters(accStats.delegate?.address, chainid),
-            tezos.rpc.getUnstakeRequests(accStats.address)
-          ]);
+  // ----------------------- delegate Stats -----------------------------
 
-          const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
-          const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
-
-          // ~2.8 days for mainnet
-          let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
-
+  const getDelegateStats = useCallback(async () => {
+    try {
+      return await retry(
+        async () => {
           try {
-            const constants = await tezos.rpc.getConstants();
-            cycleDurationMs = getOneCycleinMs(constants);
-          } catch {
-            console.log('Error getting RPC default constants');
+            if (accStats?.delegate?.address) {
+              const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
+                tezos.rpc.getBlockMetadata(),
+                fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
+                tezos.rpc.getUnstakeRequests(accountAddress)
+              ]);
+
+              const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
+              const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
+              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 0;
+
+              // ~2.8 days for mainnet // get cycle in Ms ------<
+              let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
+
+              try {
+                const constants = await tezos.rpc.getConstants();
+                cycleDurationMs = getOneCycleinMs(constants);
+              } catch {
+                console.log('Error getting RPC default constants');
+              }
+              // -----------------------------------
+
+              const isFinalizableUnstakeRequest = Boolean(
+                unstakeRequests?.finalizable?.find(item => item.delegate === accStats?.delegate?.address)
+              );
+
+              const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
+              const costakeWaitTime = getCoStakeWaitTime(
+                cycleDurationMs,
+                currentCycle,
+                delegateCycle,
+                accStats?.lastActivityTime,
+                accStats?.stakedBalance,
+                accStats?.unstakedBalance
+              );
+              const unlockWaitTime = getUnlockWaitTime(
+                cycleDurationMs,
+                isFinalizableUnstakeRequest,
+                accStats?.lastActivityTime,
+                accStats?.unstakedBalance
+              );
+
+              const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
+              const isInCostakePeriod = costakeWaitTime !== 'allowed' && typeof costakeWaitTime === 'string';
+              const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
+              const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
+              const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed && !isInCostakePeriod;
+              const canUnlockStake = !isInUnlockPeriod && !isInCostakePeriod;
+
+              return {
+                myBakerPkh: accStats?.delegate?.address ?? null,
+                isDelegated: Boolean(accStats?.delegate?.address),
+                isInDelegationPeriod: delegationWaitTime !== 'allowed',
+                isInCostakePeriod,
+                hasDelegationPeriodPassed: hasDelegationPeriodPassed,
+                isInUnlockPeriod: isInUnlockPeriod,
+                hasUnlockPeriodPassed: hasUnlockPeriodPassed,
+                canRedelegate: canRedelegate,
+                canCostake: !isInUnlockPeriod && !isInCostakePeriod && limitOfStakingOverBaking > 0,
+                canUnlock: canUnlockStake,
+                unlockWaitTime,
+                costakeWaitTime,
+                delegationWaitTime,
+                stakedBalance: accStats?.stakedBalance ?? 0,
+                unstakedBalance: accStats?.unstakedBalance ?? 0
+              };
+            }
+          } catch (e) {
+            console.log(e);
           }
 
-          setAdditionalStakingInfo({
-            currentCycle,
-            delegateCycle,
-            unstakeRequests,
-            cycleDurationMs,
-            limitOfStakingOverBaking: setDelegateParameters?.limitOfStakingOverBaking ?? 0
-          });
-        }
-      } catch (e) {
-        console.error(e);
+          return emptydelegateStatsResponse;
+        },
+        { retries: 3, minTimeout: 3000, maxTimeout: 5000 }
+      );
+    } catch (e) {
+      if (shouldPreventErrorPropagation) {
+        return emptydelegateStatsResponse;
       }
-    })();
-  }, [tezos.rpc, accStats?.delegate?.address, chainid, accStats]);
 
-  const {
-    canRedelegate,
-    canUnlockStake,
-    costakeWaitTime,
-    unlockWaitTime,
-    delegationWaitTime,
-    isInUnlockPeriod,
-    hasUnlockPeriodPassed,
-    hasDelegationPeriodPassed,
-    isInCostakePeriod
-  } = useMemo(() => {
-    const { currentCycle, delegateCycle, unstakeRequests, cycleDurationMs } = stakingInfo;
-
-    const isFinalizableUnstakeRequest = Boolean(
-      unstakeRequests?.finalizable?.find(item => item.delegate === accStats?.delegate?.address)
-    );
-
-    const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
-
-    const costakeWaitTime = getCoStakeWaitTime(
-      cycleDurationMs,
-      currentCycle,
-      delegateCycle,
-      accStats?.lastActivityTime,
-      accStats?.stakedBalance,
-      accStats?.unstakedBalance
-    );
-
-    const unlockWaitTime = getUnlockWaitTime(
-      cycleDurationMs,
-      isFinalizableUnstakeRequest,
-      accStats?.lastActivityTime,
-      accStats?.unstakedBalance
-    );
-
-    const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
-
-    const isInCostakePeriod = costakeWaitTime !== 'allowed' && typeof costakeWaitTime === 'string';
-
-    const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
-
-    const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
-
-    const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed && !isInCostakePeriod;
-    const canUnlockStake = !isInUnlockPeriod && !isInCostakePeriod;
-
-    return {
-      canRedelegate,
-      canUnlockStake,
-      unlockWaitTime,
-      delegationWaitTime,
-      costakeWaitTime,
-      isInUnlockPeriod,
-      isInCostakePeriod,
-      hasUnlockPeriodPassed,
-      hasDelegationPeriodPassed
-    };
+      throw new BoundaryError(
+        getOnlineStatus() ? 'errorGettingBakerAddressMessageOnline' : 'errorGettingBakerAddressMessage',
+        resetDelegateStatsCache
+      );
+    }
   }, [
     accStats?.delegate?.address,
     accStats?.delegationTime,
     accStats?.lastActivityTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    stakingInfo
+    tezos.rpc,
+    chainId,
+    accountAddress,
+    shouldPreventErrorPropagation,
+    resetDelegateStatsCache
   ]);
 
-  return {
-    myBakerPkh: accStats?.delegate?.address ?? null,
-    isDelegated: Boolean(accStats?.delegate?.address),
-    isInDelegationPeriod: delegationWaitTime !== 'allowed',
-    isInCostakePeriod,
-    hasDelegationPeriodPassed: hasDelegationPeriodPassed,
-    isInUnlockPeriod: isInUnlockPeriod,
-    hasUnlockPeriodPassed: hasUnlockPeriodPassed,
-    canRedelegate: canRedelegate,
-    canCostake: !isInUnlockPeriod && !isInCostakePeriod && stakingInfo.limitOfStakingOverBaking > 0,
-    canUnlock: canUnlockStake,
-    unlockWaitTime,
-    costakeWaitTime,
-    delegationWaitTime,
-    stakedBalance: accStats?.stakedBalance ?? 0,
-    unstakedBalance: accStats?.unstakedBalance ?? 0
-  };
+  return useSWR(
+    ['delegate_stats', tezos.checksum, accountAddress, chainId, shouldPreventErrorPropagation],
+    getDelegateStats,
+    {
+      dedupingInterval: 20_000,
+      refreshInterval: 15_000,
+      suspense,
+      fallbackData: emptydelegateStatsResponse
+    }
+  );
 }
 
 export type AccDelegatePeriodStats = ReturnType<typeof useAccountDelegatePeriodStats>;

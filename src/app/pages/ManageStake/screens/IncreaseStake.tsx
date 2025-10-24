@@ -40,7 +40,9 @@ export const IncreaseStake = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
-  const { myBakerPkh, canCostake, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const {
+    data: { myBakerPkh, canCostake, stakedBalance }
+  } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);

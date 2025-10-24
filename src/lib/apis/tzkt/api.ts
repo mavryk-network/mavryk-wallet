@@ -339,6 +339,8 @@ export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string
   try {
     if (chainId && isKnownChainId(chainId)) {
       const kycAdress = KYC_CONTRACTS.get(chainId);
+
+      if (!kycAdress) return false;
       const storageRes = await fetchGet<any>(chainId, `/contracts/${kycAdress}/storage/`);
       const bigMapId = storageRes.memberLedger;
 

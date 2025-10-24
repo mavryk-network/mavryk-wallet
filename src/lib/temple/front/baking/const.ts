@@ -127,3 +127,25 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET = {
 };
 
 export const SORTED_PREDEFINED_SPONSORED_BAKERS = Object.keys(PREDEFINED_BAKERS_NAMES_MAINNET);
+
+// Delegate data ------------------------
+
+export const emptyAccountResponse = { delegate: { address: null } };
+
+export const emptydelegateStatsResponse = {
+  myBakerPkh: null,
+  isDelegated: false,
+  isInDelegationPeriod: false,
+  isInCostakePeriod: false,
+  hasDelegationPeriodPassed: false,
+  isInUnlockPeriod: false,
+  hasUnlockPeriodPassed: false,
+  canRedelegate: false,
+  canCostake: false,
+  canUnlock: false,
+  unlockWaitTime: null,
+  costakeWaitTime: null,
+  delegationWaitTime: null,
+  stakedBalance: 0,
+  unstakedBalance: 0
+};

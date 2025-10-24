@@ -620,7 +620,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   });
   const account = useAccount();
   const tezos = useTezos();
-  const data = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance } = data;
   const delegateLabel = getDelegateLabel(data);
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;

@@ -38,7 +38,7 @@ export const DecreaseStake: FC = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
-  const { myBakerPkh, canUnlock, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { data: { myBakerPkh, canUnlock, stakedBalance } = {} } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
 

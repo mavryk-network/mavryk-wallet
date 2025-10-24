@@ -50,12 +50,6 @@ export const IncreaseStake = () => {
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
-  useEffect(() => {
-    if (!canCostake) {
-      navigate('stake');
-    }
-  });
-
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
   });
@@ -119,7 +113,7 @@ export const IncreaseStake = () => {
 
   const onSubmit = useCallback(
     async ({ amount }: FormData) => {
-      if (formState.isSubmitting || !myBakerPkh) return;
+      if (formState.isSubmitting || !myBakerPkh || !canCostake) return;
       formAnalytics.trackSubmit({ amount });
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
@@ -144,7 +138,16 @@ export const IncreaseStake = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
+    [
+      assetMetadata,
+      formAnalytics,
+      formState.isSubmitting,
+      myBakerPkh,
+      setOperation,
+      setSubmitError,
+      tezos.wallet,
+      canCostake
+    ]
   );
 
   const balancesData: ManagStakeBalancetype[] = useMemo(() => {
@@ -215,7 +218,12 @@ export const IncreaseStake = () => {
         <FormSubmitButton
           loading={formState.isSubmitting}
           disabled={Boolean(
-            formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
+            formState.isSubmitting ||
+              errors.amount ||
+              !formState.isValid ||
+              !amountValue ||
+              amountValue === '0' ||
+              !canCostake
           )}
         >
           <T id="increase" />

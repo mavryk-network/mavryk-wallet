@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { UnstakeRequestsResponse } from '@mavrykdynamics/taquito-rpc';
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
@@ -21,8 +22,8 @@ import { getOnlineStatus } from 'lib/ui/get-online-status';
 
 import { useChainId, useNetwork, useTezos } from '../ready';
 
-import { PREDEFINED_BAKERS_NAMES_MAINNET } from './const';
-import { getCoStakeWaitTime, getDelegationWaitTime, getUnlockWaitTime } from './utils/delegateTime';
+import { DEFAULT_CYCLE_DURATION_MS, PREDEFINED_BAKERS_NAMES_MAINNET } from './const';
+import { getCoStakeWaitTime, getDelegationWaitTime, getOneCycleinMs, getUnlockWaitTime } from './utils/delegateTime';
 
 function getDelegateCacheKey(
   tezos: ReactiveTezosToolkit,
@@ -98,30 +99,48 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
   const tezos = useTezos();
   const chainid = useChainId();
 
-  const [cyclesData, setCyclesData] = useState(() => ({
+  const [stakingInfo, setAdditionalStakingInfo] = useState<{
+    currentCycle: number;
+    delegateCycle: number;
+    unstakeRequests: UnstakeRequestsResponse | null;
+    cycleDurationMs: number;
+  }>(() => ({
     currentCycle: 0,
-    delegateCycle: -1
+    delegateCycle: -1,
+    cycleDurationMs: 0,
+    unstakeRequests: null
   }));
 
   useEffect(() => {
     (async function () {
       try {
-        if (accStats?.delegate?.address) {
-          const [blockMetadata, setDelegateParameters] = await Promise.all([
+        if (accStats?.delegate?.address && accStats?.address) {
+          const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
             tezos.rpc.getBlockMetadata(),
-            fetchBakerDelegateParameters(accStats?.delegate?.address, chainid)
+            fetchBakerDelegateParameters(accStats.delegate?.address, chainid),
+            tezos.rpc.getUnstakeRequests(accStats.address)
           ]);
 
           const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
           const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
 
-          setCyclesData({ currentCycle, delegateCycle });
+          // ~2.8 days for mainnet
+          let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
+
+          try {
+            const constants = await tezos.rpc.getConstants();
+            cycleDurationMs = getOneCycleinMs(constants);
+          } catch {
+            console.log('Error getting RPC default constants');
+          }
+
+          setAdditionalStakingInfo({ currentCycle, delegateCycle, unstakeRequests, cycleDurationMs });
         }
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [tezos.rpc, accStats?.delegate?.address, chainid]);
+  }, [tezos.rpc, accStats?.delegate?.address, chainid, accStats]);
 
   const {
     canRedelegate,
@@ -134,17 +153,29 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     hasDelegationPeriodPassed,
     isInCostakePeriod
   } = useMemo(() => {
-    const delegationWaitTime = getDelegationWaitTime(accStats?.delegationTime || '');
+    const { currentCycle, delegateCycle, unstakeRequests, cycleDurationMs } = stakingInfo;
+
+    const isFinalizableUnstakeRequest = Boolean(
+      unstakeRequests?.finalizable?.find(item => item.delegate === accStats?.delegate?.address)
+    );
+
+    const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
 
     const costakeWaitTime = getCoStakeWaitTime(
-      cyclesData.currentCycle,
-      cyclesData.delegateCycle,
+      cycleDurationMs,
+      currentCycle,
+      delegateCycle,
       accStats?.lastActivityTime,
       accStats?.stakedBalance,
       accStats?.unstakedBalance
     );
 
-    const unlockWaitTime = getUnlockWaitTime(accStats?.lastActivityTime, accStats?.unstakedBalance);
+    const unlockWaitTime = getUnlockWaitTime(
+      cycleDurationMs,
+      isFinalizableUnstakeRequest,
+      accStats?.lastActivityTime,
+      accStats?.unstakedBalance
+    );
 
     const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
 
@@ -169,12 +200,12 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
       hasDelegationPeriodPassed
     };
   }, [
+    accStats?.delegate?.address,
     accStats?.delegationTime,
     accStats?.lastActivityTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    cyclesData.currentCycle,
-    cyclesData.delegateCycle
+    stakingInfo
   ]);
 
   return {
@@ -253,7 +284,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
       const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
-      // @ts-ignore // predifined validators list
+      // @ts-expect-error // predifined validators list
       const predefinedBaker = PREDEFINED_BAKERS_NAMES_MAINNET[bakingBadBaker?.address];
 
       // TODO add necessary fields to the Baker type when new API is available

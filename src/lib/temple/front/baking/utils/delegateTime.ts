@@ -1,7 +1,9 @@
+import { ConstantsResponse } from '@mavrykdynamics/taquito-rpc';
+import BigNumber from 'bignumber.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
-import { ONE_CYCLE_IN_DAYS } from '../const';
+import { DEFAULT_BLOCK_DELAY } from '../const';
 
 dayjs.extend(duration);
 
@@ -21,12 +23,22 @@ function formatTimeLeft(ms: number): string {
   return `${seconds}s`;
 }
 
-// 1) Delegation warm-up (21 days)
-export function getDelegationWaitTime(delegationTime?: string | null): string | null {
+export function getOneCycleinMs(constants: ConstantsResponse) {
+  const { blocks_per_cycle, minimal_block_delay = DEFAULT_BLOCK_DELAY } = constants;
+
+  const blocksPerCycle = new BigNumber(blocks_per_cycle);
+  const minimalBlockDelay = new BigNumber(minimal_block_delay);
+  const cycleDurationMs = blocksPerCycle.multipliedBy(minimalBlockDelay).multipliedBy(1000).toNumber();
+
+  return cycleDurationMs;
+}
+
+// 1) Delegation warm-up ~ (21 days)
+export function getDelegationWaitTime(cycleDurationMs: number, delegationTime?: string | null): string | null {
   if (!delegationTime) return null;
 
   const start = dayjs(delegationTime);
-  const end = start.add(ONE_CYCLE_IN_DAYS * 7, 'day');
+  const end = start.add(cycleDurationMs * 7, 'millisecond');
   const now = dayjs();
 
   const diff = end.diff(now);
@@ -34,22 +46,32 @@ export function getDelegationWaitTime(delegationTime?: string | null): string | 
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
 }
 
-// 2) Unlock stake (12 days)
-export function getUnlockWaitTime(lastActivityTime?: string | null, unstakedBalance?: number): string | null {
+// 2) Unlock stake ~ (9 days)
+export function getUnlockWaitTime(
+  cycleDurationMs: number,
+  isFinalizableUnstakeRequest: boolean,
+  lastActivityTime?: string | null,
+  unstakedBalance?: number
+): string | null {
   // Only compute cooldown if there is actually an unlock in progress
   if (!lastActivityTime || !unstakedBalance || unstakedBalance === 0) return null;
 
-  const start = dayjs(lastActivityTime); // unlock operation time
-  const end = start.add(12, 'day');
-  const now = dayjs();
+  if (isFinalizableUnstakeRequest) return 'allowed';
 
+  const start = dayjs(lastActivityTime); // unlock operation time
+
+  // For Tezos, unlock stake usually requires ~3 cycles
+  const end = start.add(cycleDurationMs * 3, 'millisecond'); // 3 cycles
+
+  const now = dayjs();
   const diff = end.diff(now);
 
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
 }
 
-// 3) Co-stake lock period (6 days = 2 cycles)
+// 3) Co-stake lock period ~ (6 days = 2 cycles)
 export function getCoStakeWaitTime(
+  cycleDurationMs: number,
   currentCycle?: number | null,
   delegateCycle?: number | null,
   lastActivityTime?: string | null,
@@ -72,7 +94,7 @@ export function getCoStakeWaitTime(
   if (cyclesLeft <= 0) return 'allowed';
 
   const start = dayjs();
-  const end = start.add(cyclesLeft * ONE_CYCLE_IN_DAYS, 'day');
+  const end = start.add(cyclesLeft * cycleDurationMs, 'millisecond');
   const diff = end.diff(start);
 
   return formatTimeLeft(diff);

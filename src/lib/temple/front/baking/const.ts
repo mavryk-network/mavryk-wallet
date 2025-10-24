@@ -1,4 +1,6 @@
 // import { ReactComponent as kryptstarLogo } from 'app/icons/kryptstar.svg';
+import BigNumber from 'bignumber.js';
+
 import { ReactComponent as MavrykDynamicsLogo } from 'app/icons/mavrykDynamicsLogo.svg';
 import { ReactComponent as NodeLogo } from 'app/icons/nodeLogo.svg';
 import { ReactComponent as PopsLogo } from 'app/icons/p-ops.svg';
@@ -7,7 +9,8 @@ import { ReactComponent as SimplyStakingLogo } from 'app/icons/simplyStaking.svg
 import { ReactComponent as ValidatorsLogo } from 'app/icons/validatorsLogo.svg';
 import KryptstarLogo from 'app/misc/bakers/krypstar.png';
 
-export const ONE_CYCLE_IN_DAYS = 3;
+export const DEFAULT_CYCLE_DURATION_MS = new BigNumber(245721600); // ~ 2.8 days as default value if RPC call fails
+export const DEFAULT_BLOCK_DELAY = 10; // ~ 2.8 days as default value if RPC call fails
 
 export const MANAGE_STAKE = 'Manage Stake';
 export const CO_STAKE = 'Co-stake';

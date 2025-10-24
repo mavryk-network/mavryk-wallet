@@ -298,6 +298,8 @@ export function useKnownBaker(address: string | null, suspense = true) {
       // TODO add necessary fields to the Baker type when new API is available
       if (typeof bakingBadBaker === 'object') {
         return {
+          estimatedRoi: 0,
+          ...bakingBadBaker,
           address: bakingBadBaker.address,
           stakedBalance: bakingBadBaker.stakedBalance,
           delegatedBalance: bakingBadBaker.delegatedBalance,
@@ -308,8 +310,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
           name: predefinedBaker ? predefinedBaker.name : undefined,
           // stakingBalance: bakingBadBaker.stakingBalance,
           // feeHistory: bakingBadBaker.config?.fee,
-          minDelegation: predefinedBaker ? predefinedBaker.minDelegation : undefined,
-          estimatedRoi: 0
+          minDelegation: predefinedBaker ? predefinedBaker.minDelegation : undefined
           // rewardConfigHistory:
           //   bakingBadBaker.config?.rewardStruct.map(({ cycle, value: rewardStruct }) => ({
           //     cycle,

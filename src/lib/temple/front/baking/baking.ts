@@ -104,11 +104,13 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     delegateCycle: number;
     unstakeRequests: UnstakeRequestsResponse | null;
     cycleDurationMs: number;
+    limitOfStakingOverBaking: number;
   }>(() => ({
     currentCycle: 0,
     delegateCycle: -1,
     cycleDurationMs: 0,
-    unstakeRequests: null
+    unstakeRequests: null,
+    limitOfStakingOverBaking: 0
   }));
 
   useEffect(() => {
@@ -134,7 +136,13 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
             console.log('Error getting RPC default constants');
           }
 
-          setAdditionalStakingInfo({ currentCycle, delegateCycle, unstakeRequests, cycleDurationMs });
+          setAdditionalStakingInfo({
+            currentCycle,
+            delegateCycle,
+            unstakeRequests,
+            cycleDurationMs,
+            limitOfStakingOverBaking: setDelegateParameters?.limitOfStakingOverBaking ?? 0
+          });
         }
       } catch (e) {
         console.error(e);
@@ -217,7 +225,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string) {
     isInUnlockPeriod: isInUnlockPeriod,
     hasUnlockPeriodPassed: hasUnlockPeriodPassed,
     canRedelegate: canRedelegate,
-    canCostake: !isInUnlockPeriod && !isInCostakePeriod,
+    canCostake: !isInUnlockPeriod && !isInCostakePeriod && stakingInfo.limitOfStakingOverBaking > 0,
     canUnlock: canUnlockStake,
     unlockWaitTime,
     costakeWaitTime,

@@ -66,6 +66,11 @@ export function getUnlockWaitTime(
   const now = dayjs();
   const diff = end.diff(now);
 
+  // case when unlock period time has passed but isFinalizableUnstakeRequest is not yet true
+  if (diff <= 0 && !isFinalizableUnstakeRequest) {
+    return 'pending';
+  }
+
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
 }
 

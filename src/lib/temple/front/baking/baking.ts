@@ -175,7 +175,7 @@ export function useAccountDelegatePeriodStats(
               const hasDelegationPeriodPassed = delegationWaitTime === 'allowed';
               const isInCostakePeriod = costakeWaitTime !== 'allowed' && typeof costakeWaitTime === 'string';
               const isInUnlockPeriod = unlockWaitTime !== 'allowed' && typeof unlockWaitTime === 'string';
-              const hasUnlockPeriodPassed = accStats?.unstakedBalance && unlockWaitTime === 'allowed';
+              const hasUnlockPeriodPassed = Boolean(accStats?.unstakedBalance) && unlockWaitTime === 'allowed';
               const canRedelegate = !isInUnlockPeriod && !hasUnlockPeriodPassed && !isInCostakePeriod;
               const canUnlockStake = !isInUnlockPeriod && !isInCostakePeriod;
 

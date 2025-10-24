@@ -45,7 +45,11 @@ export const DelegatePeriodBanner = () => {
       return {
         text: (
           <div className="flex items-center">
-            <T id="unlockingPeriod" substitutions={[<SmallClockIcon />, unlockWaitTime]} />
+            {unlockWaitTime === 'pending' ? (
+              <T id="unlocking" />
+            ) : (
+              <T id="unlockingPeriod" substitutions={[<SmallClockIcon />, unlockWaitTime]} />
+            )}
           </div>
         ),
         color: 'bg-orange-add'

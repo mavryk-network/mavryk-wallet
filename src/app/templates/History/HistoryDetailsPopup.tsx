@@ -15,6 +15,7 @@ import { MAV_TOKEN_SLUG, tokenToSlug } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
@@ -44,8 +45,6 @@ import {
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
 } from './utils';
-
-// import { toHistoryTokenSlug } from './utils';
 
 const TX_HISTORY_PREVIEW_IDX = 2;
 
@@ -379,15 +378,24 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
     switch (historyItem.type) {
       case HistoryItemOpTypeEnum.Delegation:
         const opDelegate = item as HistoryItemDelegationOp;
+
+        const delegateAddressToShow = getPredefinedBakerProperty(
+          opDelegate.newDelegate?.address || opDelegate.source.address
+        );
+
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opDelegate.newDelegate?.address || opDelegate.source.address
+          address: delegateAddressToShow
         };
       case HistoryItemOpTypeEnum.Staking:
         const opStaking = item as HistoryItemStakingOp;
+
+        const stakingAddressToShow = getPredefinedBakerProperty(
+          opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address
+        );
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address
+          address: stakingAddressToShow
         };
 
       case HistoryItemOpTypeEnum.Origination:
@@ -399,9 +407,11 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
 
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = item as HistoryItemTransactionOp;
+
+        const interactionAddressToShow = getPredefinedBakerProperty(opInteract.destination.address);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opInteract.destination.address
+          address: interactionAddressToShow
         };
       case HistoryItemOpTypeEnum.Swap:
         const opSwap = swappedOpItem as HistoryItemTransactionOp;
@@ -413,16 +423,19 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
 
       case HistoryItemOpTypeEnum.TransferFrom:
         const opFrom = item as HistoryItemTransactionOp;
+
+        const transferFromAddressToShow = getPredefinedBakerProperty(opFrom.source.address);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opFrom.source.address
+          address: transferFromAddressToShow
         };
 
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = item as HistoryItemTransactionOp;
+        const transferToAddressToShow = getPredefinedBakerProperty(opTo.destination.address);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opTo.destination.address
+          address: transferToAddressToShow
         };
       case HistoryItemOpTypeEnum.Reveal:
         const opReveal = item as HistoryItemTransactionOp;
@@ -434,17 +447,25 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       // Other
       default:
         const opOther = item as HistoryItemOtherOp;
+
+        const otherAddressToShow = getPredefinedBakerProperty(
+          opOther.destination?.address || opOther.source.address || opOther.hash
+        );
+
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opOther.destination?.address || opOther.source.address || opOther.hash
+          address: otherAddressToShow
         };
     }
   }, [historyItem.type, item, swappedOpItem]);
+
+  // TODO here -----------------------------------------------
 
   return (
     <CardContainer className="mb-6 text-base-plus text-white">
       <span className="mb-2">{getTxOpLabelAndAddress.label}</span>
       <div className="flex items-center gap-3">
+        {/* TODO add baker logo if possible */}
         <Identicon
           type="bottts"
           size={24}

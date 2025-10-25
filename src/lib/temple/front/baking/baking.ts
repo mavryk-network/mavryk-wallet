@@ -309,6 +309,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
           stakedBalance: bakingBadBaker.stakedBalance,
           delegatedBalance: bakingBadBaker.delegatedBalance,
           balance: bakingBadBaker.balance,
+          // @ts-expect-error // predifined validators list contains hardcoded svg logos
           logo: predefinedBaker ? predefinedBaker.logo : undefined,
           fee: predefinedBaker ? predefinedBaker.fee : 0,
           freeSpace: getBakerSpace(bakingBadBaker).toNumber(),

@@ -10,7 +10,7 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses, useAllAccounts } from 'lib/temple/front';
-import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
@@ -152,7 +152,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
           return {
             argumentDisplayProps: {
               i18nKey: 'delegationToSmb',
-              arg: [getPredefinedBakerName(item.delegate)]
+              arg: [getPredefinedBakerProperty(item.delegate)]
             }
           };
         }
@@ -164,7 +164,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         return {
           argumentDisplayProps: {
             i18nKey: 'doSthToSmb',
-            arg: [getPredefinedBakerName(item.contractAddress!)]
+            arg: [getPredefinedBakerProperty(item.contractAddress!)]
           }
         };
 
@@ -172,7 +172,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         return {
           argumentDisplayProps: {
             i18nKey: item.delegate ? 'doSthFromSmb' : 'doSthToSmb',
-            arg: [getPredefinedBakerName(item.delegate || item.contractAddress!)]
+            arg: [getPredefinedBakerProperty(item.delegate || item.contractAddress!)]
           }
         };
 

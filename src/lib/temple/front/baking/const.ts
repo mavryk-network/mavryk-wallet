@@ -18,7 +18,15 @@ export const UNLOCK_STAKE = 'Unlock Stake';
 export const UNLOCKING = 'Unlocking';
 export const FINALIZE_UNLOCK = 'Finalize Unlock';
 
-export const PREDEFINED_BAKERS_NAMES_MAINNET = {
+export type PredefinedBakerData = {
+  logo: React.FunctionComponent<React.SVGProps<SVGSVGElement>> | string | undefined;
+  name: string;
+  fee: number;
+  minDelegation: number;
+  minPayout: number;
+};
+
+export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> = {
   mv1Tgom8dLnEuq37rTBKDXFZBLS7YU5iSXtW: {
     logo: SimplyStakingLogo,
     name: 'Simply Staking',

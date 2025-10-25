@@ -48,6 +48,7 @@ import {
   UNLOCK_STAKE,
   UNLOCKING
 } from 'lib/temple/front/baking/const';
+import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { atomsToTokens, hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
@@ -499,6 +500,15 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const balance = balanceData!;
   const balanceNum = balance.toNumber();
 
+  const { delegatedFreeSpace } = useMemo(() => {
+    const { stakedBalance, delegatedBalance, externalStakedBalance } = baker ?? {
+      stakedBalance: 0,
+      delegatedBalance: 0,
+      externalStakedBalance: 0
+    };
+    return calculateCapacities({ stakedBalance, delegatedBalance, externalStakedBalance });
+  }, [baker]);
+
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
       return 'Unknown Delegate Button';
@@ -520,6 +530,8 @@ const BakerForm: React.FC<BakerFormProps> = ({
   }
   const tzError = submitError || estimationError;
   const hasLowBalance = (baker?.minDelegation ?? 0) > balanceNum;
+  const isBakerOverDelegated = delegatedFreeSpace < 0;
+  const isDelegateBtnDisabled = Boolean(estimationError) || hasLowBalance || isBakerOverDelegated;
 
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col mt-2">
@@ -549,7 +561,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 
         <FormSubmitButton
           loading={formState.isSubmitting}
-          disabled={Boolean(estimationError) || hasLowBalance}
+          disabled={isDelegateBtnDisabled}
           className="mt-6"
           testID={DelegateFormSelectors.bakerDelegateButton}
           testIDProperties={{

@@ -18,3 +18,7 @@ export function getPredefinedBakerProperty<K extends BakerProperty = 'name'>(
   // If address not predefined, return it (string)
   return address;
 }
+
+export const getPredefinedBaker = (address: string) => {
+  return PREDEFINED_BAKERS_NAMES_MAINNET[address] || null;
+};

@@ -22,7 +22,7 @@ interface AccountItemProps {
 
 export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick }) => {
   const { name, publicKeyHash, type } = account;
-  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash);
+  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash, true);
 
   const {
     selectedFiatCurrency: { symbol: fiatSymbol }

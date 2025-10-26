@@ -32,7 +32,7 @@ const AccountBanner = memo<AccountBannerProps>(
     showMVRK = false,
     className
   }) => {
-    const totalBalanceInFiat = useTotalBalance();
+    const totalBalanceInFiat = useTotalBalance(true);
     // const { value: gasBalance } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
 
     const {

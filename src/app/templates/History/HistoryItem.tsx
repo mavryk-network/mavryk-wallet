@@ -45,10 +45,9 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         .filter((_, i) => i < OP_STACK_PREVIEW_SIZE)
         .map(op => ({
           ...op,
-          type:
-            historyItem.type === HistoryItemOpTypeEnum.Multiple || isSwapOperation ? Number(historyItem.type) : op.type
+          type: Number(historyItem.type)
         })),
-    [historyItem.type, isSwapOperation, operStack]
+    [historyItem.type, operStack]
   );
 
   const rest = useMemo(

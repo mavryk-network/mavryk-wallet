@@ -49,7 +49,7 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => {
 };
 
 const BalanceInfo: FC = () => {
-  const totalBalanceInFiat = useTotalBalance();
+  const totalBalanceInFiat = useTotalBalance(true);
 
   const {
     selectedFiatCurrency: { symbol: fiatSymbol }

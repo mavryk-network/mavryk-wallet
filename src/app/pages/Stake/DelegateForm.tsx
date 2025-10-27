@@ -15,6 +15,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
+import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
@@ -468,7 +469,7 @@ interface BakerFormProps {
 export enum SortOptions {
   AVAILABLE_SPACE = 'availableSpace',
   FEE = 'fee',
-  UP_TIME = 'upTime'
+  DEFAULT = 'default'
 }
 
 const BakerForm: React.FC<BakerFormProps> = ({
@@ -783,84 +784,70 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
   const myBakerPkh = accStats?.delegate?.address ?? '';
 
   const testGroupName = useUserTestingGroupNameSelector();
-  // const { popup } = useAppEnv();
+  const { popup } = useAppEnv();
 
-  // const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
+  const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.DEFAULT);
 
-  // const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-  //   () => [
-  //     {
-  //       id: SortOptions.AVAILABLE_SPACE,
-  //       selected: sortOption === SortOptions.AVAILABLE_SPACE,
-  //       onClick: () => {
-  //         setSortOption(SortOptions.AVAILABLE_SPACE);
-  //       },
-  //       nameI18nKey: 'availableSpace'
-  //     },
-  //     {
-  //       id: SortOptions.FEE,
-  //       selected: sortOption === SortOptions.FEE,
-  //       onClick: () => setSortOption(SortOptions.FEE),
-  //       nameI18nKey: 'fee'
-  //     },
-  //     {
-  //       id: SortOptions.UP_TIME,
-  //       selected: sortOption === SortOptions.UP_TIME,
-  //       onClick: () => setSortOption(SortOptions.UP_TIME),
-  //       nameI18nKey: 'upTime'
-  //     }
-  //   ],
-  //   [sortOption]
-  // );
-
-  // const baseSortedKnownBakers = useMemo(() => {
-  //   if (!knownBakers) return null;
-
-  //   const toSort = Array.from(knownBakers);
-  //   // SORTED_PREDEFINED_SPONSORED_BAKERS
-  //   return toSort.sort((a, b) => {
-  //     return (
-  //       SORTED_PREDEFINED_SPONSORED_BAKERS.includes(a.address) || SORTED_PREDEFINED_SPONSORED_BAKERS.includes(b.address)
-  //     );
-  //   });
-  // switch (sortOption) {
-  //   case SortOptions.AVAILABLE_SPACE:
-  //     return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
-
-  //   case SortOptions.FEE:
-  //     return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
-
-  //   case SortOptions.UP_TIME:
-  //     return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
-
-  //   default:
-  //     return toSort;
-  // }
-  // }, [knownBakers]);
+  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
+    () => [
+      {
+        id: SortOptions.DEFAULT,
+        selected: sortOption === SortOptions.DEFAULT,
+        onClick: () => setSortOption(SortOptions.DEFAULT),
+        nameI18nKey: 'default'
+      },
+      {
+        id: SortOptions.AVAILABLE_SPACE,
+        selected: sortOption === SortOptions.AVAILABLE_SPACE,
+        onClick: () => {
+          setSortOption(SortOptions.AVAILABLE_SPACE);
+        },
+        nameI18nKey: 'availableSpace'
+      },
+      {
+        id: SortOptions.FEE,
+        selected: sortOption === SortOptions.FEE,
+        onClick: () => setSortOption(SortOptions.FEE),
+        nameI18nKey: 'fee'
+      }
+    ],
+    [sortOption]
+  );
 
   const baseSortedKnownBakers = useMemo(() => {
     if (!knownBakers) return null;
 
     const toSort = Array.from(knownBakers);
 
-    return toSort.sort((a, b) => {
-      const idxA = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(a.address);
-      const idxB = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(b.address);
+    switch (sortOption) {
+      case SortOptions.AVAILABLE_SPACE:
+        return toSort.sort((a, b) => (b.freeSpace ?? 0) - (a.freeSpace ?? 0));
 
-      const aIsKnown = idxA !== -1;
-      const bIsKnown = idxB !== -1;
+      case SortOptions.FEE:
+        return toSort.sort((a, b) => (b.fee ?? 0) - (a.fee ?? 0));
 
-      // unknowns first
-      if (!aIsKnown && bIsKnown) return -1;
-      if (aIsKnown && !bIsKnown) return 1;
+      case SortOptions.DEFAULT:
+      default:
+        // SORTED_PREDEFINED_SPONSORED_BAKERS
+        return toSort.sort((a, b) => {
+          const idxA = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(a.address);
+          const idxB = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(b.address);
 
-      // both unknown
-      if (!aIsKnown && !bIsKnown) return 0;
+          const aIsKnown = idxA !== -1;
+          const bIsKnown = idxB !== -1;
 
-      // both known follow predefined order from SORTED_PREDEFINED_SPONSORED_BAKERS
-      return idxA - idxB;
-    });
-  }, [knownBakers]);
+          // unknowns first
+          if (!aIsKnown && bIsKnown) return -1;
+          if (aIsKnown && !bIsKnown) return 1;
+
+          // both unknown
+          if (!aIsKnown && !bIsKnown) return 0;
+
+          // both known follow predefined order from SORTED_PREDEFINED_SPONSORED_BAKERS
+          return idxA - idxB;
+        });
+    }
+  }, [knownBakers, sortOption]);
 
   if (!baseSortedKnownBakers) return null;
 
@@ -885,10 +872,10 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
           <T id="delegateToPromotedValidators" />
         </span>
 
-        {/* <SortPopup>
+        <SortPopup>
           <SortButton className="-mr-1" />
           <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
-        </SortPopup> */}
+        </SortPopup>
       </h2>
 
       {/* <div>

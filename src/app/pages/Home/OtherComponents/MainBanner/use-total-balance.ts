@@ -50,7 +50,7 @@ export const useTotalBalance = (isStakingBalanceIncluded = false) => {
 };
 
 export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalanceIncluded = false) => {
-  const { data: accStats } = useDelegate(accountPkh);
+  const { data: accStats } = useDelegate(accountPkh, false);
   const metadata = useGasTokenMetadata();
   const tokensSlugs = useEnabledOtherAccountTokensSlugs(accountPkh);
 
@@ -74,7 +74,7 @@ export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalance
     }
 
     return dollarValue.toString();
-  }, [slugs, getBalance, allUsdToTokenRates]);
+  }, [slugs, getBalance, isStakingBalanceIncluded, allUsdToTokenRates, accStats, metadata.decimals]);
 };
 
 export const upgradeBalanceWithStakingBalance = (balance?: BigNumber, acc?: TzktUserAccount, decimals = 6) => {

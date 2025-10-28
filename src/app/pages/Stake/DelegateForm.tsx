@@ -497,9 +497,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const acc = useAccount();
   const accountPkh = acc.publicKeyHash;
 
-  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
-  const balance = balanceData!;
-  const balanceNum = balance.toNumber();
+  const { rawValue } = useBalance(MAV_TOKEN_SLUG, accountPkh);
 
   const { delegatedFreeSpace } = useMemo(() => {
     const { stakedBalance, delegatedBalance, externalStakedBalance } = baker ?? {
@@ -530,7 +528,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
     );
   }
   const tzError = submitError || estimationError;
-  const hasLowBalance = (baker?.minDelegation ?? 0) > balanceNum;
+  const hasLowBalance = new BigNumber(rawValue ?? 0).isLessThan(baker?.minDelegation ?? 0);
   const isBakerOverDelegated = delegatedFreeSpace < 0;
   const isDelegateBtnDisabled = Boolean(estimationError) || hasLowBalance || isBakerOverDelegated;
 
@@ -590,9 +588,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
-  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
-  const balance = balanceData!;
-  const balanceNum = balance.toNumber();
+  const { rawValue } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const { metadata } = useGasToken();
 
   return baker ? (
@@ -600,8 +596,7 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
       <div className="flex flex-col items-center">
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined, ...style }} />
       </div>
-
-      {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
+      {!tzError && new BigNumber(rawValue ?? 0).isLessThan(baker.minDelegation ?? 0) && (
         <div className={classNames('pb-6', popup && 'px-4')}>
           <Alert
             type="info"

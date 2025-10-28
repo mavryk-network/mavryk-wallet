@@ -15,6 +15,7 @@ import { atomsToTokens } from 'lib/temple/helpers';
 import { ZERO } from 'lib/utils/numbers';
 
 import { AssetsSelectors } from '../../Assets.selectors';
+import { upgradeBalanceWithStakingBalance } from '../../MainBanner/use-total-balance';
 import styles from '../Tokens.module.css';
 
 import { CryptoBalance, FiatBalance } from './Balance';
@@ -91,6 +92,10 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
     return rows.length > 0 ? rows : null;
   }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals]);
 
+  const balanceToDisplay = useMemo(() => {
+    return isMavToken ? upgradeBalanceWithStakingBalance(balance, accStats) : balance;
+  }, [accStats, balance, isMavToken]);
+
   if (metadata == null) return null;
 
   return (
@@ -104,7 +109,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             {isDelegated && <DelegatePeriodBanner />}
           </div>
           <CryptoBalance
-            value={balance}
+            value={balanceToDisplay ?? ZERO}
             cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
             testID={AssetsSelectors.assetItemCryptoBalanceButton}
             testIDProperties={{ assetSlug }}
@@ -122,7 +127,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           <div className="flex flex-col items-end gap-1">
             <FiatBalance
               assetSlug={assetSlug}
-              value={balance}
+              value={balanceToDisplay ?? ZERO}
               testID={AssetsSelectors.assetItemFiatBalanceButton}
               testIDProperties={{ assetSlug }}
             />

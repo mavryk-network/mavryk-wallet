@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { ReactComponent as MavrykDynamicsLogo } from 'app/icons/mavrykDynamicsLogo.svg';
 import { ReactComponent as NodeLogo } from 'app/icons/nodeLogo.svg';
 import { ReactComponent as PopsLogo } from 'app/icons/p-ops.svg';
-import { ReactComponent as RepublicCryptoLogo } from 'app/icons/republicCrypto.svg';
+// import { ReactComponent as RepublicCryptoLogo } from 'app/icons/republicCrypto.svg';
 import { ReactComponent as SimplyStakingLogo } from 'app/icons/simplyStaking.svg';
 import { ReactComponent as ValidatorsLogo } from 'app/icons/validatorsLogo.svg';
 import KryptstarLogo from 'app/misc/bakers/krypstar.png';
@@ -24,13 +24,46 @@ export type PredefinedBakerData = {
   fee: number;
   minDelegation: number;
   minPayout: number;
+  links?: { link: string; icon: string }[];
 };
 
 export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> = {
+  mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
+    logo: KryptstarLogo,
+    name: 'Kryptstar',
+    fee: 0.1,
+    links: [
+      {
+        link: 'https://t.me/kryptstar',
+        icon: 'telegram'
+      }
+    ],
+    minDelegation: 1000000,
+    minPayout: 1000
+  },
+  mv1C9zN9ZzP1KicMHjBXk9ctJ4k7xq8J9gqU: {
+    logo: 'https://raw.githubusercontent.com/republic-crypto/eigenlayer-metadata/main/mainnet/logo.png',
+    name: 'Republic',
+    fee: 0.1,
+    links: [
+      {
+        link: 'https://republic.com/',
+        icon: 'website'
+      }
+    ],
+    minDelegation: 1000000,
+    minPayout: 1000
+  },
   mv1Tgom8dLnEuq37rTBKDXFZBLS7YU5iSXtW: {
     logo: SimplyStakingLogo,
     name: 'Simply Staking',
     fee: 0.1,
+    links: [
+      {
+        link: 'https://simplystaking.com/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 10000000,
     minPayout: 1000
   },
@@ -38,6 +71,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: PopsLogo,
     name: 'P-OPS Team',
     fee: 0,
+    links: [
+      {
+        link: 'https://pops.one/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 10000000,
     minPayout: 1000
   },
@@ -45,34 +84,38 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: NodeLogo,
     name: 'Node.Monster',
     fee: 0.1,
+    links: [
+      {
+        link: 'https://www.node.monster/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 10000000,
     minPayout: 1000
   },
-  mv1KryptaWtsDi7EozpfoBjKbKbf4zgMvpj8: {
-    logo: KryptstarLogo,
-    name: 'Kryptstar',
-    fee: 0.1,
-    minDelegation: 1000000,
-    minPayout: 1000
-  },
-  mv1C9zN9ZzP1KicMHjBXk9ctJ4k7xq8J9gqU: {
-    logo: RepublicCryptoLogo,
-    name: 'Republic Crypto',
-    fee: 0.1,
-    minDelegation: 1000000,
-    minPayout: 1000
-  },
-  mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
-    logo: MavrykDynamicsLogo,
-    name: 'Mavryk Dynamics 1',
-    fee: 0.1,
+  mv1CxRfFHnGoq497Y1MAfiMHZk6zGS9wftyF: {
+    logo: 'https://raw.githubusercontent.com/nansen-ai/nansen-staking-public/refs/heads/main/logo/Nansen.png',
+    name: 'Nansen',
+    fee: 0.15,
+    links: [
+      {
+        link: 'https://www.nansen.ai',
+        icon: 'website'
+      }
+    ],
     minDelegation: 10000000,
     minPayout: 1000
   },
-  mv1C2iEY1WuBeFQqS9ihxtunHkbUJ28HyeN6: {
-    logo: MavrykDynamicsLogo,
-    name: 'Mavryk Dynamics 2',
+  mv1CFD46HP5aReuWZqUhWHNWKNpr6dsKqgux: {
+    logo: 'https://snapshots.rhinostake.com/rhinoshare/RhinoLogoFilled.Dark.png',
+    name: 'RHINO 🦏',
     fee: 0.1,
+    links: [
+      {
+        link: 'https://rhinostake.com/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 10000000,
     minPayout: 1000
   },
@@ -80,6 +123,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 1',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -87,6 +136,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 2',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -94,6 +149,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 3',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -101,6 +162,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 4',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -108,6 +175,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 5',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -115,6 +188,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 6',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -122,6 +201,12 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 7',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
     minPayout: 1000
   },
@@ -129,7 +214,39 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: ValidatorsLogo,
     name: 'Foundation 8',
     fee: 0.15,
+    links: [
+      {
+        link: 'https://mavryk.org/',
+        icon: 'website'
+      }
+    ],
     minDelegation: 100000000,
+    minPayout: 1000
+  },
+  mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
+    logo: MavrykDynamicsLogo,
+    name: 'Mavryk Dynamics 1',
+    fee: 0.1,
+    links: [
+      {
+        link: 'https://mavrykdynamics.com/',
+        icon: 'website'
+      }
+    ],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+  mv1C2iEY1WuBeFQqS9ihxtunHkbUJ28HyeN6: {
+    logo: MavrykDynamicsLogo,
+    name: 'Mavryk Dynamics 2',
+    fee: 0.1,
+    links: [
+      {
+        link: 'https://mavrykdynamics.com/',
+        icon: 'website'
+      }
+    ],
+    minDelegation: 10000000,
     minPayout: 1000
   }
 };

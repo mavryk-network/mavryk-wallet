@@ -198,7 +198,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                         poperModifiers={poperModifiers}
                         name={name}
                         id={id}
-                        defaultOption={gasOptions[1].amount}
+                        defaultOption={gasOptions[0].amount}
                         valueToShow={value.toFixed()}
                         onChangeValueToShow={val => {
                           onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());

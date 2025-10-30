@@ -33,6 +33,7 @@ import {
   Baker,
   isDomainNameValid,
   useAccount,
+  useChainId,
   useDelegate,
   useKnownBaker,
   useKnownBakers,
@@ -53,6 +54,7 @@ import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { atomsToTokens, hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { buildPendingOperationObject, buildStorageKeyForTx, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
@@ -111,6 +113,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const balanceNum = balance.toNumber();
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
+  const chainId = useChainId();
 
   /**
    * Form
@@ -339,6 +342,18 @@ const DelegateForm: FC<DelegateFormProps> = ({
           opHash = op.opHash;
         }
 
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'delegation',
+          sender: accountPkh,
+          to,
+          newDelegate: to,
+          prevDelegate: myBakerPkh,
+          estimation: estmtn
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
+
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
@@ -370,9 +385,11 @@ const DelegateForm: FC<DelegateFormProps> = ({
       getEstimation,
       acc.type,
       acc.publicKeyHash,
+      accountPkh,
+      myBakerPkh,
+      chainId,
       reset,
-      tezos,
-      accountPkh
+      tezos
     ]
   );
 

@@ -1,6 +1,8 @@
+import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
 import { BigNumber } from 'bignumber.js';
+import dayjs from 'dayjs';
 
-import { TzktAlias, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
+import { isKnownChainId, TzktAlias, TzktApiChainId, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
 import {
   isTzktOperParam,
   isTzktOperParam_Fa12,
@@ -8,6 +10,7 @@ import {
   isTzktOperParam_LiquidityBaking,
   ParameterFa2
 } from 'lib/apis/tzkt/utils';
+import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { isTruthy } from 'lib/utils';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
@@ -525,3 +528,92 @@ function getDestinationAddress(operation: TzktTransactionOperation) {
     ? { address: operation.parameter.value[0].txs[0].to_ }
     : operation.target;
 }
+
+// For custom pending transactions stored in browser storage
+export const buildStorageKeyForTx = (pkh: string, chainId: TzktApiChainId) => {
+  return `${pkh}_${chainId}_pending_transactions`;
+};
+
+type BuildPendingOperationObjecttype = {
+  operation?: ((TransactionOperation | WalletOperation) & { opHash?: string; hash?: string }) | null;
+  type: string;
+  sender: string;
+  to?: string;
+  amount?: number;
+  newDelegate?: string | null;
+  prevDelegate?: string | null;
+  estimation?: Estimate;
+};
+export async function buildPendingOperationObject({
+  operation,
+  type,
+  sender,
+  to,
+  amount,
+  newDelegate,
+  prevDelegate,
+  estimation
+}: BuildPendingOperationObjecttype) {
+  if (!operation) return null;
+
+  const now = dayjs().toISOString();
+
+  const baseOperationFoelds = {
+    type,
+    id: Date.now(),
+    level: null,
+    timestamp: now,
+    allocationFee: estimation?.suggestedFeeMumav,
+    block: null,
+    hash: operation.opHash || operation.hash,
+    counter: null,
+    sender: { address: sender },
+    destination: to ? { address: to } : undefined,
+    gasLimit: estimation?.gasLimit,
+    gasUsed: estimation?.consumedMilligas ? Math.ceil(Number(estimation.consumedMilligas) / 1000) : null,
+    storageLimit: estimation?.storageLimit,
+    amount: amount ?? 0,
+    status: 'pending',
+    isPending: true
+  };
+
+  switch (type) {
+    case 'delegation':
+      return {
+        ...baseOperationFoelds,
+        newDelegate: {
+          address: newDelegate
+        },
+        prevDelegate: {
+          address: prevDelegate
+        },
+        bakerFee: estimation?.suggestedFeeMumav ?? null
+      };
+    case 'staking':
+    case 'transaction':
+    case 'origination':
+    case 'reveal':
+    default:
+      return {
+        ...baseOperationFoelds
+      };
+  }
+}
+
+export type CustomPendingOperation = Awaited<ReturnType<typeof buildPendingOperationObject>>;
+
+export const putOperationIntoStorage = async (
+  chainId: string | null | undefined,
+  accountPkh: string,
+  pendingOpObject: CustomPendingOperation
+) => {
+  try {
+    if (chainId && isKnownChainId(chainId)) {
+      const storageKey = buildStorageKeyForTx(accountPkh, chainId);
+      const operations = (await fetchFromStorage<CustomPendingOperation[]>(storageKey)) ?? [];
+      await putToStorage(storageKey, [...operations, pendingOpObject]);
+    }
+  } catch (e) {
+    console.log('Error putting pending operation into browser storage');
+  }
+};

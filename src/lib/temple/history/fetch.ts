@@ -3,13 +3,14 @@ import * as TZKT from 'lib/apis/tzkt';
 import { fetchGetAccountOperationByHash, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { detectTokenStandard } from 'lib/assets/standards';
+import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { filterUnique } from 'lib/utils';
 
 import { build_Token_Fa_1_2OpParams, build_Token_Fa_2OpParams, buildTEZOpParams } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
-import { operationsGroupToHistoryItem } from './utils';
+import { buildStorageKeyForTx, CustomPendingOperation, operationsGroupToHistoryItem } from './utils';
 
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
@@ -39,6 +40,9 @@ export default async function fetchUserHistory(
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
   try {
+    let pendingOperations =
+      (await fetchFromStorage<CustomPendingOperation[]>(buildStorageKeyForTx(account.publicKeyHash, chainId))) ?? [];
+
     const operations = await fetchOperations(
       chainId,
       account,
@@ -48,19 +52,23 @@ export default async function fetchUserHistory(
       olderThan,
       operationParams
     );
-    // console.log('Logging operations in the fetchUserHistory function:', operations);
-    if (!operations.length) return [];
-    const groups = await reduceOperationsGroups(operations, chainId);
 
-    // if (operations.length >= pseudoLimit) {
-    //   groups = await reduceOperationsGroups(operations, chainId);
-    // } else {
-    //   console.log('tx fetching waterfall');
-    //   groups = await fetchOperGroupsForOperations(chainId, operations);
-    // }
-    // const groups = await fetchOperGroupsForOperations(chainId, operations);
+    if (!operations.length && !pendingOperations.length) return [];
 
-    // console.log('Logging groups in the fetchUserHistory function:', groups);
+    if (operations.length && pendingOperations.length) {
+      const confirmedHashes = new Set(operations.map(op => op.hash));
+      const filteredPending = pendingOperations.filter(op => !confirmedHashes.has(op?.hash ?? ''));
+
+      // If any pending ops were confirmed, update storage
+      if (filteredPending.length !== pendingOperations.length) {
+        const storageKey = buildStorageKeyForTx(account.publicKeyHash, chainId);
+        await putToStorage(storageKey, filteredPending);
+      }
+
+      pendingOperations = filteredPending;
+    }
+    const groups = await reduceOperationsGroups([...pendingOperations, ...operations] as TzktOperation[], chainId);
+
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
     return arr;
   } catch (e) {
@@ -68,6 +76,23 @@ export default async function fetchUserHistory(
     return [];
   }
 }
+
+// export const fetchPendingTransactions = async (
+//   chainId: TzktApiChainId,
+//   account: TempleAccount
+// ): Promise<UserHistoryItem[]> => {
+//   try {
+//     const operations = (await fetchFromStorage(buildStorageKeyForTx(account.publicKeyHash, chainId))) ?? [];
+//     if (!operations.length) return [];
+
+//     const groups = await reduceOperationsGroups(operations, chainId, true);
+//     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
+//     return arr;
+//   } catch (e) {
+//     console.error('Error while fetching user history:', e);
+//     return [];
+//   }
+// };
 
 /**
  * Returned items are sorted new-to-old.
@@ -303,7 +328,7 @@ async function fetchOperGroupsForOperations(
   return groups;
 }
 
-const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId) => {
+const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId, isPending = false) => {
   const groups = Object.values(
     operations.reduce<StringRecord<{ hash: string; operations: TzktOperation[] }>>((acc, item) => {
       if (!acc[item.hash]) {
@@ -317,7 +342,7 @@ const reduceOperationsGroups = async (operations: TzktOperation[], chainId: Tzkt
       return acc;
     }, {})
   );
-  if (groups.length > 0) {
+  if (groups.length > 0 && !isPending) {
     const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
     groups[groups.length - 1] = lastGroup[0];
   }

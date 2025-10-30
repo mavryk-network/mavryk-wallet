@@ -1,0 +1,3976 @@
+{
+  "appName": {
+    "message": "Dompet Mavryk"
+  },
+  "showIncomingTransactions": {
+    "message": "Tampilkan Transaksi Masuk"
+  },
+  "appDesc": {
+    "message": "🔐💰Dompet ekosistem ekstensi web untuk Blockchain Mavryk."
+  },
+  "createAccount": {
+    "message": "Tambah Akun"
+  },
+  "importAccount": {
+    "message": "Impor akun"
+  },
+  "faucetFileTitle": {
+    "message": "File Faucet"
+  },
+  "faucetFile": {
+    "message": "File Faucet"
+  },
+  "settings": {
+    "message": "Pengaturan"
+  },
+  "openNewTab": {
+    "message": "Buka tab baru"
+  },
+  "maximiseView": {
+    "message": "Maksimalkan tampilan"
+  },
+  "selectFile": {
+    "message": "Pilih file"
+  },
+  "selectFileOfFormat": {
+    "message": "Pilih file $format$",
+    "placeholders": {
+      "format": {
+        "content": "$1"
+      }
+    }
+  },
+  "authorizedDApps": {
+    "message": "dApps Resmi",
+    "description": "DApps = Aplikasi Terdesentralisasi"
+  },
+  "clickIconToResetPermissions": {
+    "message": "Klik ikon X untuk mengatur ulang izin."
+  },
+  "versionLabel": {
+    "message": "Versi: $version$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "branchName": {
+    "message": "cabang: $branch$",
+    "placeholders": {
+      "branch": {
+        "content": "$1"
+      }
+    }
+  },
+  "madeWithLove": {
+    "message": "Dibuat dengan $loveIcon$ oleh $companyName$",
+    "placeholders": {
+      "loveIcon": {
+        "content": "$1"
+      },
+      "companyName": {
+        "content": "$2"
+      }
+    }
+  },
+  "feeInputDescription": {
+    "message": "Biaya dasar untuk operasi ini adalah $fee$",
+    "placeholders": {
+      "fee": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetPermissionsConfirmation": {
+    "message": "Apakah Anda yakin ingin menghapus \n$origin$?",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "protectedFormField": {
+    "message": "Dilindungi"
+  },
+  "clickToRevealField": {
+    "message": "Klik untuk menampilkan bidang ini"
+  },
+  "clickToReveal": {
+    "message": "Klik untuk menampilkan"
+  },
+  "copiedHash": {
+    "message": "Tersalin"
+  },
+  "copyHashToClipboard": {
+    "message": "Salin ke clipboard"
+  },
+  "showInGasOrFiat": {
+    "message": "Tampilkan dalam $gasToken$/$fiatCurrency$",
+    "placeholders": {
+      "gasToken": {
+        "content": "$1"
+      },
+      "fiatCurrency": {
+        "content": "$2"
+      }
+    }
+  },
+  "accounts": {
+    "message": "Akun"
+  },
+  "selectAccount": {
+    "message": "Pilih Akun"
+  },
+  "addRestoreAccount": {
+    "message": "Tambah atau Pulihkan Akun"
+  },
+  "lock": {
+    "message": "Kunci"
+  },
+  "importedAccount": {
+    "message": "Diimpor"
+  },
+  "networks": {
+    "message": "Jaringan"
+  },
+  "here": {
+    "message": "di sini"
+  },
+  "back": {
+    "message": "Kembali"
+  },
+  "skip": {
+    "message": "Lewati"
+  },
+  "skipAd": {
+    "message": "LEWATI IKLAN"
+  },
+  "checkNow": {
+    "message": "Periksa sekarang"
+  },
+  "theLendingProtocol": {
+    "message": "Protokol pinjaman di Mavryk."
+  },
+  "alreadyLaunched": {
+    "message": "Sudah Diluncurkan!"
+  },
+  "borrowLandEarn": {
+    "message": "Pinjam, Pinjamkan, dan Dapatkan hasil dari token favorit Anda!"
+  },
+  "tokensAreSupported": {
+    "message": "Mav, cMAV, kUSD, tzBTC, uUSD, dan uBTC didukung."
+  },
+  "independenceDayOfUkraine": {
+    "message": "Hari Kemerdekaan Ukraina"
+  },
+  "zeroSwapCommissionTitle": {
+    "message": "Komisi Swap Nol selama dua minggu - rayakan $text$ bersama kami!",
+    "placeholders": {
+      "text": {
+        "content": "$1"
+      }
+    }
+  },
+  "zeroSwapCommissionDescription": {
+    "message": "Dari $date1$ hingga $date2$, pengguna Temple dapat melakukan perdagangan melalui router kami di bagian $text$ tanpa komisi developer kami.\n\nNikmati nilai tukar yang paling menguntungkan dan berdagang tanpa biaya di satu tempat."
+  },
+  "okGotIt": {
+    "message": "Oke, mengerti"
+  },
+  "changelogTitle": {
+    "message": "Dompet Temple diperbarui"
+  },
+  "changelogDescription": {
+    "message": "Dalam pembaruan ini"
+  },
+  "update": {
+    "message": "Perbarui"
+  },
+  "addNewToken": {
+    "message": "Tambah Token baru"
+  },
+  "hideSomeToken": {
+    "message": "Sembunyikan token \"$tokenName$\"",
+    "placeholders": {
+      "tokenName": {
+        "content": "$1"
+      }
+    }
+  },
+  "copySomeTokenAddress": {
+    "message": "Salin alamat \"$tokenSymbol$\"",
+    "placeholders": {
+      "tokenSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "copySomeTokenId": {
+    "message": "Salin ID \"$tokenSymbol$\"",
+    "placeholders": {
+      "tokenSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "originLabel": {
+    "message": "$origin$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "networkLabel": {
+    "message": "Jaringan: $network$",
+    "placeholders": {
+      "network": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkhLabel": {
+    "message": "Akun: $pkh$",
+    "placeholders": {
+      "pkh": {
+        "content": "$1"
+      }
+    }
+  },
+  "minDelegationAmountDescription": {
+    "message": "Harap dicatat, persyaratan delegasi minimum validator ini adalah $minAmount$ dan saldo Anda lebih kecil dari itu sehingga Anda tidak akan menerima pembayaran. Silakan beli lebih banyak MVRK atau delegasikan ke validator lain yang memiliki persyaratan delegasi min lebih rendah.",
+    "placeholders": {
+      "minAmount": {
+        "content": "$1"
+      }
+    }
+  },
+  "clickOnBakerPrompt": {
+    "message": "Klik pada Baker yang ingin Anda delegasikan dananya. Daftar ini didukung oleh $link$.",
+    "placeholders": {
+      "link": {
+        "content": "$1"
+      }
+    }
+  },
+  "highestIsBetter": {
+    "message": "semakin tinggi semakin baik"
+  },
+  "unlockWalletPrompt": {
+    "message": "Jika Anda ingin menyimpan sesuatu dari dompet yang sudah ada - $link$ dan buka kuncinya.",
+    "placeholders": {
+      "link": {
+        "content": "$1"
+      }
+    }
+  },
+  "acceptTermsInputDescription": {
+    "message": "Saya telah membaca dan menyetujui $termsOfUsageLink$ dan $privacyPolicyLink$",
+    "placeholders": {
+      "termsOfUsageLink": {
+        "content": "$1"
+      },
+      "privacyPolicyLink": {
+        "content": "$2"
+      }
+    }
+  },
+  "betaAgreementMsg": {
+    "message": "Saya mengerti bahwa ekstensi web ini beroperasi untuk jaringan Mainnet dan Testnet Mavryk. Sebelum mengirim dana, pastikan Anda mengirimkannya di jaringan yang benar. Selalu verifikasi."
+  },
+  "skipOnboarding": {
+    "message": "Lewati orientasi"
+  },
+  "advancedUser": {
+    "message": "Saya pengguna ahli"
+  },
+  "analytics": {
+    "message": "Analitik"
+  },
+  "analyticsCollecting": {
+    "message": "pengumpulan informasi anonim"
+  },
+  "analyticsInputDescription": {
+    "message": "Saya setuju dengan $analyticsLink$",
+    "placeholders": {
+      "analyticsLink": {
+        "content": "$1"
+      }
+    }
+  },
+  "copiedTokenAddress": {
+    "message": "Tersalin"
+  },
+  "copiedTokenId": {
+    "message": "Tersalin"
+  },
+  "delegatedTo": {
+    "message": "Didelegasikan ke:"
+  },
+  "dcpDelegatingMotivation": {
+    "message": "Mendelegasikan dana Anda ke produsen adalah cara yang bagus untuk mendapatkan bunga atas saldo Anda"
+  },
+  "delegatingMotivation": {
+    "message": "Mendelegasikan dana Anda ke baker adalah cara yang bagus untuk mendapatkan bunga atas saldo Anda"
+  },
+  "reDelegate": {
+    "message": "Delegasi ulang"
+  },
+  "delegateSuccessMsg": {
+    "message": "Berhasil Didelegasikan!"
+  },
+  "delegateSuccessDescMsg": {
+    "message": "MVRK Anda telah berhasil didelegasikan dan sekarang aktif menghasilkan imbalan. Imbalan pertama Anda akan dibayarkan dalam 7 siklus ke depan."
+  },
+  "reDelegateSuccessMsg": {
+    "message": "Berhasil Didelegasikan Ulang!"
+  },
+  "reDelegateSuccessDescMsg": {
+    "message": "Stake Anda sekarang aktif dan menghasilkan imbalan."
+  },
+  "delegateNow": {
+    "message": "Delegasikan sekarang"
+  },
+  "cancel": {
+    "message": "Batal"
+  },
+  "save": {
+    "message": "Simpan"
+  },
+  "edit": {
+    "message": "Ubah"
+  },
+  "useCoinSwitch": {
+    "message": "Gunakan CoinSwitch",
+    "description": "CoinSwitch = https://coinswitch.co/"
+  },
+  "mavenFaucet": {
+    "message": "Faucet Maven"
+  },
+  "mavenFaucetAlpha": {
+    "message": "Faucet Maven (Alpha)"
+  },
+  "depositToWallet": {
+    "message": "Deposit ke dompet Anda"
+  },
+  "depositToWalletDescription": {
+    "message": "Klik metode deposit untuk mendapatkan uang di dompet Anda. Gunakan faucet untuk mendapatkan koin gratis!"
+  },
+  "addToken": {
+    "message": "Tambah Aset"
+  },
+  "addAsset": {
+    "message": "Tambah Aset"
+  },
+  "contractNotAvailable": {
+    "message": "Kontrak di alamat ini tidak tersedia. Apakah itu ada di jaringan ini?"
+  },
+  "noTransferMethod": {
+    "message": "Tidak ada metode transfer"
+  },
+  "tokenDoesNotMatchStandard": {
+    "message": "Kontrak aset yang diberikan tidak sesuai dengan standar $standard$",
+    "placeholders": {
+      "standard": {
+        "content": "$1"
+      }
+    }
+  },
+  "error": {
+    "message": "Kesalahan"
+  },
+  "warning": {
+    "message": "Peringatan"
+  },
+  "tokenType": {
+    "message": "Jenis token"
+  },
+  "tokenId": {
+    "message": "ID Token"
+  },
+  "assetId": {
+    "message": "ID Aset"
+  },
+  "tokenIdInputDescription": {
+    "message": "Nomor bilangan bulat non-negatif yang mengidentifikasi aset di dalam kontrak FA2"
+  },
+  "comingSoon": {
+    "message": "Segera hadir"
+  },
+  "comingSoonComment": {
+    "message": "(segera hadir)"
+  },
+  "soon": {
+    "message": "segera"
+  },
+  "required": {
+    "message": "Wajib"
+  },
+  "cardNumberIsInvalid": {
+    "message": "Nomor kartu tidak valid"
+  },
+  "cardNumberLengthValidation": {
+    "message": "Nomor kartu harus memiliki total 16 digit"
+  },
+  "weakKeystorePassword": {
+    "message": "Kata sandi \"file keystore\" terlalu lemah untuk digunakan sebagai kata sandi ekstensi. Anda perlu mengatur yang baru."
+  },
+  "address": {
+    "message": "Alamat"
+  },
+  "myAddress": {
+    "message": "Alamat saya"
+  },
+  "addressOfDeployedTokenContract": {
+    "message": "Alamat kontrak aset yang diterapkan"
+  },
+  "tokenContractPlaceholder": {
+    "message": "misalnya KT1v9CmPy..."
+  },
+  "tokenSymbolPatternDescription": {
+    "message": "Hanya karakter a-z, A-Z, 0-9 yang diizinkan, panjang 2-10"
+  },
+  "symbol": {
+    "message": "Simbol"
+  },
+  "tokenSymbolInputDescription": {
+    "message": "Simbol aset, seperti 'USD' untuk Dolar Amerika Serikat"
+  },
+  "tokenSymbolInputPlaceholder": {
+    "message": "misalnya WEW, BOW, LAL dll."
+  },
+  "tokenNamePatternDescription": {
+    "message": "panjang 3-25"
+  },
+  "name": {
+    "message": "Nama"
+  },
+  "tokenNameInputDescription": {
+    "message": "Nama aset, seperti 'Bitcoin' untuk aset BTC."
+  },
+  "tokenNameInputPlaceholder": {
+    "message": "misalnya MySuperToken"
+  },
+  "nonNegativeIntMessage": {
+    "message": "Bilangan bulat, 0 atau lebih besar"
+  },
+  "mustBeNonNegative": {
+    "message": "Harus non-negatif"
+  },
+  "positiveIntMessage": {
+    "message": "Bilangan bulat, 1 atau lebih besar"
+  },
+  "decimals": {
+    "message": "Desimal"
+  },
+  "decimalsInputDescription": {
+    "message": "Jumlah tempat desimal setelah titik. Misalnya: 8 untuk BTC, 2 untuk USD."
+  },
+  "orIPFSImageURL": {
+    "message": "Atau URL gambar IPFS"
+  },
+  "validImageURL": {
+    "message": "URL gambar valid"
+  },
+  "onlyHTTPS": {
+    "message": "Hanya HTTPS"
+  },
+  "formatsAllowed": {
+    "message": "Hanya gambar .png, .jpg, .jpeg, .gif, .webp yang diizinkan"
+  },
+  "iconURL": {
+    "message": "URL Ikon"
+  },
+  "optionalComment": {
+    "message": "(opsional)"
+  },
+  "iconURLInputDescription": {
+    "message": "URL gambar untuk logo aset."
+  },
+  "invalidAddress": {
+    "message": "Alamat tidak valid"
+  },
+  "contractNotExistOnNetwork": {
+    "message": "Kontrak pintar ini tidak ada di jaringan saat ini"
+  },
+  "onlyKTContractAddressAllowed": {
+    "message": "Hanya alamat kontrak KT... yang diizinkan",
+    "description": "KT tidak diterjemahkan"
+  },
+  "operationHash": {
+    "message": "Hash Operasi"
+  },
+  "alert": {
+    "message": "Peringatan"
+  },
+  "accountNameInputTitle": {
+    "message": "1-16 karakter, tanpa karakter khusus"
+  },
+  "defaultAccountName": {
+    "message": "Akun $accountNumber$",
+    "placeholders": {
+      "accountNumber": {
+        "content": "$1"
+      }
+    }
+  },
+  "defaultManagedKTAccountName": {
+    "message": "KT Terkelola $accountNumber$",
+    "description": "KT tidak diterjemahkan",
+    "placeholders": {
+      "accountNumber": {
+        "content": "$1"
+      }
+    }
+  },
+  "defaultWatchOnlyAccountName": {
+    "message": "Hanya-lihat $accountNumber$",
+    "placeholders": {
+      "accountNumber": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountsToRemoveConstraint": {
+    "message": "Akun ini tidak dapat dihapus. Akun Hierarchical Deterministic tidak dapat dihapus."
+  },
+  "doNotSharePrivateKey": {
+    "message": "JANGAN bagikan ini kepada siapa pun! Ini dapat digunakan untuk mencuri akun Anda saat ini."
+  },
+  "appWouldLikeToConnectToYourWallet": {
+    "message": "$origin$ ingin terhubung ke dompet Anda",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "appRequestOperationToYou": {
+    "message": "$origin$ meminta operasi kepada Anda",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "reject": {
+    "message": "Tolak"
+  },
+  "signAction": {
+    "message": "Tanda tangani"
+  },
+  "appRequestsToSign": {
+    "message": "$origin$ meminta Anda untuk menandatangani",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "alpha": {
+    "message": "Alpha"
+  },
+  "viewAccountAddressWarning": {
+    "message": "Situs ini meminta akses untuk melihat alamat akun Anda. Selalu pastikan Anda mempercayai situs yang berinteraksi dengan Anda."
+  },
+  "account": {
+    "message": "Akun"
+  },
+  "toBeConnectedWithDApp": {
+    "message": "untuk terhubung dengan dApp."
+  },
+  "requirements": {
+    "message": "Persyaratan:"
+  },
+  "atLeast8Characters": {
+    "message": "Minimal 8 karakter - semakin banyak karakter, semakin baik."
+  },
+  "mixtureOfUppercaseAndLowercaseLetters": {
+    "message": "Campuran huruf besar dan huruf kecil."
+  },
+  "mixtureOfLettersAndNumbers": {
+    "message": "Campuran huruf dan angka."
+  },
+  "atLeast1SpecialCharacter": {
+    "message": "Penyertaan setidaknya satu karakter khusus, mis., ! @ # ? ] - (opsional, disarankan)."
+  },
+  "mnemonicWordsAmountConstraint": {
+    "message": "Frasa seed harus berisi $number$ kata",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "mnemonicWordsError": {
+    "message": "Pastikan kata-kata dieja dengan benar"
+  },
+  "seedInputNumberOfWords": {
+    "message": "Frasa Seed saya terdiri dari $count$ kata",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "justValidPreGeneratedMnemonic": {
+    "message": "Frasa seed tidak cocok dengan akun yang ada. Harap verifikasi Anda memasukkan frasa seed dengan benar."
+  },
+  "seedPasteFailedTooManyWords": {
+    "message": "Penempelan gagal karena berisi lebih dari 24 kata."
+  },
+  "seedPhraseAttention": {
+    "message": "Kami tidak melacak jalur derivasi Anda pada akun yang diimpor"
+  },
+  "seedPhraseTip": {
+    "message": "Anda dapat menempelkan seluruh Frasa Seed rahasia Anda ke bidang apa pun"
+  },
+  "oops": {
+    "message": "Oops!"
+  },
+  "smthWentWrongWhile": {
+    "message": "Terjadi kesalahan saat $action$",
+    "placeholders": {
+      "action": {
+        "content": "$1"
+      }
+    }
+  },
+  "mayHappenBecauseYouAreOffline": {
+    "message": "Ini mungkin terjadi karena Anda sedang offline"
+  },
+  "tryAgain": {
+    "message": "Coba lagi"
+  },
+  "mavrykMainnet": {
+    "message": "Mavryk Mainnet",
+    "description": "Mainnet = jaringan utama"
+  },
+  "templeWalletOptions": {
+    "message": "Dompet Mavryk | Opsi"
+  },
+  "resetExtension": {
+    "message": "Setel Ulang Ekstensi"
+  },
+  "resetExtensionConfirmation": {
+    "message": "Apakah Anda yakin ingin mengatur ulang Dompet Temple?\nAkibatnya, semua data Anda akan dihapus."
+  },
+  "failedToResetExtension": {
+    "message": "Gagal mengatur ulang ekstensi: $errorMessage$",
+    "placeholders": {
+      "errorMessage": {
+        "content": "$1"
+      }
+    }
+  },
+  "ledger": {
+    "message": "Ledger",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "retry": {
+    "message": "Coba Ulang"
+  },
+  "privateKeyCannotBeRevealed": {
+    "message": "Kunci pribadi tidak dapat diungkap"
+  },
+  "youCannotGetPrivateKeyFromThisAccountType": {
+    "message": "Anda tidak dapat memperoleh kunci pribadi dari akun $accountType$.",
+    "placeholders": {
+      "accountType": {
+        "content": "$1"
+      }
+    }
+  },
+  "maximalAmount": {
+    "message": "Maksimal: $amount$",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "amountMustBePositive": {
+    "message": "Harus positif"
+  },
+  "assetMustBeSelected": {
+    "message": "Aset harus dipilih"
+  },
+  "gasFeeMustBePositive": {
+    "message": "Biaya gas harus positif"
+  },
+  "accountName": {
+    "message": "Nama Akun"
+  },
+  "newAccountName": {
+    "message": "Nama Akun Baru"
+  },
+  "enterAccountName": {
+    "message": "Masukkan Nama Akun"
+  },
+  "enterAddress": {
+    "message": "Masukkan Alamat"
+  },
+  "enterAmount": {
+    "message": "Masukkan jumlah"
+  },
+  "accountNameInputDescription": {
+    "message": "Apa nama akun baru?"
+  },
+  "accountNameAlternativeInputDescription": {
+    "message": "Apa nama akunnya?"
+  },
+  "createNewWallet": {
+    "message": "Buat Dompet baru"
+  },
+  "createNewWalletDescription": {
+    "message": "Baru di Dompet Temple? Mari kita atur! Ini akan membuat dompet dan frasa seed baru"
+  },
+  "delegate": {
+    "message": "Delegasi"
+  },
+  "notDelegated": {
+    "message": "Tidak didelegasikan"
+  },
+  "delegated": {
+    "message": "Didelegasikan"
+  },
+  "explore": {
+    "message": "Jelajahi"
+  },
+  "assetsWhileMessage": {
+    "message": "mengambil data aset"
+  },
+  "receive": {
+    "message": "Terima"
+  },
+  "send": {
+    "message": "Kirim"
+  },
+  "floorPrice": {
+    "message": "Harga Dasar"
+  },
+  "sellFor": {
+    "message": "Jual seharga"
+  },
+  "noOffersYet": {
+    "message": "Belum ada penawaran"
+  },
+  "get": {
+    "message": "Dapatkan"
+  },
+  "exolixWarningNote": {
+    "message": "Harap, deposit hanya jaringan transfer $currencyName$ $networkName$. Jika tidak, Anda mungkin kehilangan aset Anda secara permanen.",
+    "placeholders": {
+      "currencyName": {
+        "content": "$1"
+      },
+      "networkName": {
+        "content": "$2"
+      }
+    }
+  },
+  "baking": {
+    "message": "Baking"
+  },
+  "operations": {
+    "message": "Operasi"
+  },
+  "operation": {
+    "message": "Operasi"
+  },
+  "delegationInfoWhileMessage": {
+    "message": "mengambil atau memproses info delegasi Anda"
+  },
+  "operationHistoryWhileMessage": {
+    "message": "mengambil atau memproses riwayat operasi"
+  },
+  "privateKey": {
+    "message": "Kunci Pribadi"
+  },
+  "mnemonic": {
+    "message": "Mnemonic"
+  },
+  "fundraiser": {
+    "message": "Penggalangan Dana"
+  },
+  "privateKeyInputDescription": {
+    "message": "Kunci Rahasia Akun yang ingin Anda impor."
+  },
+  "privateKeyInputPlaceholder": {
+    "message": "misalnya edsk3wfiPMu..."
+  },
+  "password": {
+    "message": "Kata Sandi"
+  },
+  "isPrivateKeyEncrypted": {
+    "message": "Apakah kunci pribadi Anda dalam format terenkripsi?"
+  },
+  "customDerivationPath": {
+    "message": "Jalur derivasi kustom"
+  },
+  "mnemonicInputLabel": {
+    "message": "Frasa Seed"
+  },
+  "mnemonicInputWarning": {
+    "message": "Kami tidak menyimpan frasa seed Anda. Jangan sampai hilang!"
+  },
+  "passwordInputDescription": {
+    "message": "Itu BUKAN kata sandi dompet.\nDigunakan untuk derivasi mnemonic tambahan."
+  },
+  "derivation": {
+    "message": "Derivasi"
+  },
+  "addDerivationPathPrompt": {
+    "message": "Secara default derivasi tidak digunakan. Klik 'Jalur derivasi kustom' untuk menambahkannya."
+  },
+  "derivationPathMustStartWithM": {
+    "message": "Harus dimulai dengan 'm'"
+  },
+  "derivationSeparatorMustBeSlash": {
+    "message": "Pemisah harus '/'"
+  },
+  "invalidPath": {
+    "message": "Jalur tidak valid"
+  },
+  "email": {
+    "message": "Email"
+  },
+  "unexpectedOrInvalidFile": {
+    "message": "File tidak terduga atau tidak valid"
+  },
+  "requestSent": {
+    "message": "Permintaan $type$ terkirim! Mengkonfirmasi...",
+    "placeholders": {
+      "type": {
+        "content": "$1"
+      }
+    }
+  },
+  "success": {
+    "message": "Sukses"
+  },
+  "smthWentWrong": {
+    "message": "Terjadi kesalahan"
+  },
+  "faucetFileInputPrompt": {
+    "message": "Seret & lepas file atau pilih secara manual dengan mengklik area di bawah. Anda dapat mengunduhnya dari $link$.",
+    "placeholders": {
+      "link": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Memproses..."
+  },
+  "importWallet": {
+    "message": "Impor Dompet Anda"
+  },
+  "createWallet": {
+    "message": "Buat Dompet Anda"
+  },
+  "errorImportingKukaiWallet": {
+    "message": "Kesalahan saat mengimpor dompet Kukai"
+  },
+  "selectedFileFormatNotSupported": {
+    "message": "Format file yang dipilih tidak didukung"
+  },
+  "fileHasSyntaxError": {
+    "message": "File memiliki kesalahan sintaks. Pastikan file tersebut benar."
+  },
+  "entropyDecryptionError": {
+    "message": "Gagal mendekripsi entropi. Pastikan kata sandi benar"
+  },
+  "kukaiFileVersionError": {
+    "message": "Hanya file versi 3 yang dapat diproses"
+  },
+  "kukaiWalletTypeError": {
+    "message": "Tidak dapat mengungkapkan frasa seed untuk jenis dompet ini"
+  },
+  "accountAddressLabel": {
+    "message": "Alamat akun Anda saat ini. Bagikan untuk menerima dana."
+  },
+  "copiedAddress": {
+    "message": "Tersalin"
+  },
+  "copyAddressToClipboard": {
+    "message": "Salin ke clipboard"
+  },
+  "qrCode": {
+    "message": "Kode QR"
+  },
+  "revealPrivateKey": {
+    "message": "Ungkap Kunci Pribadi"
+  },
+  "revealPrivateKeyDescription": {
+    "message": "Juga dikenal sebagai \"Ekspor Akun\", mengungkapkan kunci pribadi untuk akun yang Anda pilih."
+  },
+  "revealSeedPhrase": {
+    "message": "Ungkap Frasa Seed"
+  },
+  "revealSeedPhraseDescription": {
+    "message": "Juga dikenal sebagai \"Ekspor Dompet\", Anda mungkin memerlukan frasa seed ini untuk mengakses dompet dan akun Anda di perangkat lain."
+  },
+  "dApps": {
+    "message": "DApps",
+    "description": "DApps = Aplikasi Terdesentralisasi"
+  },
+  "dAppsDescription": {
+    "message": "Di bagian ini Anda dapat mengaktifkan kemampuan untuk berinteraksi dengan aplikasi terdesentralisasi yang mendukung Dompet Temple."
+  },
+  "networksDescription": {
+    "message": "Di bagian ini Anda dapat menambah atau menghapus jaringan Mavryk kustom.",
+    "description": "Mavryk = nama blockchain"
+  },
+  "activateAccount": {
+    "message": "Aktifkan Akun"
+  },
+  "activateAccountDescription": {
+    "message": "Ini mungkin diperlukan untuk akun ICO/Penggalangan Dana atau faucet testnet."
+  },
+  "removeAccount": {
+    "message": "Hapus Akun"
+  },
+  "removeAccountDescription": {
+    "message": "Gunakan bagian ini untuk menghapus akun yang Anda pilih. Hanya akun yang diimpor yang dapat dihapus."
+  },
+  "about": {
+    "message": "Tentang"
+  },
+  "info": {
+    "message": "Info"
+  },
+  "unlockWallet": {
+    "message": "Buka kunci Dompet untuk melanjutkan"
+  },
+  "toContinue": {
+    "message": "untuk melanjutkan"
+  },
+  "unlockPasswordInputDescription": {
+    "message": "Kata sandi digunakan untuk melindungi dompet."
+  },
+  "unlockPasswordErrorDelay": {
+    "message": "Anda telah memasukkan kata sandi yang salah tiga kali. Dompet Anda sedang diblokir selama"
+  },
+  "unlock": {
+    "message": "Buka kunci"
+  },
+  "importNewAccountTitle": {
+    "message": "Pulihkan Akun? Ingin masuk dengan akun lain?"
+  },
+  "importWalletUsingSeedPhrase": {
+    "message": "Impor Dompet menggunakan Frasa Seed"
+  },
+  "connectLedger": {
+    "message": "Hubungkan Ledger",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "connectWithLedger": {
+    "message": "Hubungkan dengan Ledger ",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "importExistingWallet": {
+    "message": "Impor dompet yang ada"
+  },
+  "importExistingWalletDescription": {
+    "message": "Sudah punya akun? Impor menggunakan Frasa Seed Anda atau file keystore terenkripsi"
+  },
+  "links": {
+    "message": "Tautan"
+  },
+  "website": {
+    "message": "Situs web"
+  },
+  "repo": {
+    "message": "Repositori"
+  },
+  "privacyPolicy": {
+    "message": "Kebijakan Privasi"
+  },
+  "termsOfUse": {
+    "message": "Ketentuan Penggunaan"
+  },
+  "contact": {
+    "message": "Kontak"
+  },
+  "accountAlreadyActivated": {
+    "message": "Akun Anda sudah diaktifkan."
+  },
+  "accountActivated": {
+    "message": "Akun Anda berhasil diaktifkan!"
+  },
+  "failureSecretMayBeInvalid": {
+    "message": "Gagal. Ini mungkin terjadi karena Rahasia yang diberikan tidak valid"
+  },
+  "accountToBeActivated": {
+    "message": "Akun yang akan diaktifkan."
+  },
+  "ifYouWantToActivateAnotherAccount": {
+    "message": "Jika Anda ingin mengaktifkan akun lain - silakan pilih di menu dropdown kanan atas."
+  },
+  "activateAccountSecret": {
+    "message": "Rahasia"
+  },
+  "activateAccountSecretDescription": {
+    "message": "Bidang ini berasal dari Akun Penggalangan Dana atau Faucet"
+  },
+  "activateAccountSecretPlaceholder": {
+    "message": "Masukkan rahasia"
+  },
+  "activate": {
+    "message": "Aktifkan"
+  },
+  "minimalFeeDescription": {
+    "message": "Minimal"
+  },
+  "fastFeeDescription": {
+    "message": "Cepat"
+  },
+  "rocketFeeDescription": {
+    "message": "Roket"
+  },
+  "customFeeDescription": {
+    "message": "Kustom"
+  },
+  "additionalFee": {
+    "message": "Biaya Tambahan"
+  },
+  "networkFee": {
+    "message": "Biaya Jaringan"
+  },
+  "asset": {
+    "message": "Aset"
+  },
+  "selectAnotherAssetPrompt": {
+    "message": "Klik pada area untuk memilih aset atau token lain."
+  },
+  "disable": {
+    "message": "nonaktifkan"
+  },
+  "enable": {
+    "message": "aktifkan"
+  },
+  "payMeForEveryAdISee": {
+    "message": "Bayar saya untuk setiap iklan yang saya lihat"
+  },
+  "noThanks": {
+    "message": "Tidak, terima kasih"
+  },
+  "acceptAdsBannerTitle_A": {
+    "message": "Dapatkan bayaran untuk menemukan layanan dan dApps menarik!"
+  },
+  "acceptAdsBannerText_A": {
+    "message": "Begini kesepakatannya: bagikan beberapa data dengan kami (alamat dompet, IP) untuk melihat iklan yang paling relevan dan kami akan *membayar Anda* bagian yang adil setiap bulan. Dengan melakukannya, Anda mendukung pengembang Dompet Temple. Berubah pikiran? Nonaktifkan berbagi dengan mudah di pengaturan.\n\nAyo mulai hasilkan sekarang!"
+  },
+  "dAppsCheckmarkPrompt": {
+    "message": "Bagian ini memungkinkan Anda mengontrol aplikasi terdesentralisasi yang terhubung ke dompet Anda.",
+    "description": "DApps = Aplikasi Terdesentralisasi",
+    "placeholders": {
+      "action": {
+        "content": "$1"
+      }
+    }
+  },
+  "dAppsInteraction": {
+    "message": "Interaksi dApps",
+    "description": "DApps = Aplikasi Terdesentralisasi"
+  },
+  "enabled": {
+    "message": "Diaktifkan"
+  },
+  "disabled": {
+    "message": "Dinonaktifkan"
+  },
+  "enablePopup": {
+    "message": "Aktifkan popup"
+  },
+  "popupEnabled": {
+    "message": "Diaktifkan"
+  },
+  "popupDisabled": {
+    "message": "Dinonaktifkan"
+  },
+  "delete": {
+    "message": "Hapus"
+  },
+  "rank": {
+    "message": "Peringkat"
+  },
+  "fee": {
+    "message": "Biaya"
+  },
+  "routingFee": {
+    "message": "Biaya Perutean"
+  },
+  "routingFeeTooltip": {
+    "message": "Untuk memilih rute pertukaran yang paling menguntungkan di antara DEX Mavryk. Komisi DEX tidak termasuk."
+  },
+  "space": {
+    "message": "Ruang"
+  },
+  "staking": {
+    "message": "Staking"
+  },
+  "unStaking": {
+    "message": "Unstaking"
+  },
+  "stake": {
+    "message": "Stake"
+  },
+  "stakeAndEarn": {
+    "message": "Stake & Hasilkan"
+  },
+  "recommended": {
+    "message": "Direkomendasikan"
+  },
+  "helpUkraine": {
+    "message": "Bantu Ukraina \uD83C\uDDFA\uD83C\uDDE6"
+  },
+  "partnership": {
+    "message": "Kemitraan"
+  },
+  "delegation": {
+    "message": "Delegasi"
+  },
+  "delegationGuide": {
+    "message": "Panduan video lengkap"
+  },
+  "delegationGuideLink": {
+    "message": "Cara Mendelegasikan XTZ"
+  },
+  "delegationComunity": {
+    "message": "Jika Anda memiliki pertanyaan, tuliskan di komunitas kami"
+  },
+  "delegationPointsHead1": {
+    "message": "Dapatkan Imbalan Tahunan Hingga $interest$ di MVRK. \nBantu amankan Jaringan Mavryk dan dapatkan imbalan!",
+    "description": "Deskripsi imbalan delegasi",
+    "placeholders": {
+      "interest": {
+        "content": "$1"
+      }
+    }
+  },
+  "delegationPointsHead2": {
+    "message": "pada Mavryk Anda"
+  },
+  "delegationPointsHead3": {
+    "message": "setiap tahun dari imbalan Baking"
+  },
+  "delegationPoint1": {
+    "message": "Imbalan pertama Anda di Mavryk akan dibayarkan sekitar 36 hari."
+  },
+  "delegationPoint2": {
+    "message": "Kemudian, Anda menerima imbalan setiap 3 hari."
+  },
+  "delegationPoint3": {
+    "message": "Tingkat penghasilan bervariasi dari waktu ke waktu. Periksa kurs saat ini di Dompet Anda."
+  },
+  "delegationPoint4": {
+    "message": "Token Mavryk Anda tidak pernah terkunci. Kirim kapan saja!"
+  },
+  "baker": {
+    "message": "Baker"
+  },
+  "bakerInputDescription": {
+    "message": "Alamat baker terdaftar."
+  },
+  "producer": {
+    "message": "Produsen"
+  },
+  "producerInputDescription": {
+    "message": "Alamat produsen terdaftar."
+  },
+  "bakerInputDescriptionWithDomain": {
+    "message": "Alamat atau nama domain dari baker terdaftar."
+  },
+  "bakerInputPlaceholder": {
+    "message": "misalnya mv1V4h45W3p4e..."
+  },
+  "minDelegationAmountTitle": {
+    "message": "Jumlah delegasi minimal"
+  },
+  "unknownBakerTitle": {
+    "message": "Baker tidak dikenal"
+  },
+  "unknownBakerDescription": {
+    "message": "Alamat yang diberikan tidak kami kenal sebagai baker! Hanya delegasikan dana ke sana atas risiko Anda sendiri."
+  },
+  "delegateToRecommendedBakers": {
+    "message": "Delegasikan ke Baker yang Direkomendasikan"
+  },
+  "sortBy": {
+    "message": "Urutkan berdasarkan"
+  },
+  "cycles_one": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "cycles_zero": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "cycles_two": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "cycles_few": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "cycles_many": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "cycles_other": {
+    "message": "$amount$ siklus",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "insufficientMavBalance": {
+    "message": "Saldo MAV tidak mencukupi"
+  },
+  "notEnoughFunds": {
+    "message": "Dana tidak cukup"
+  },
+  "helpUkraineDisclainerTitle": {
+    "message": "Baker Ini Membantu Ukraina \uD83C\uDDFA\uD83C\uDDE6"
+  },
+  "helpUkraineDisclainerDescription": {
+    "message": "Dengan mendelegasikan ke Baker ini, Anda setuju bahwa semua imbalan Anda akan digunakan untuk mendukung Ukraina.\nTerima kasih atas kontribusi Anda!"
+  },
+  "notEnoughCurrencyFunds": {
+    "message": "Dana $currency$ tidak mencukupi",
+    "placeholders": {
+      "currency": {
+        "content": "$1"
+      }
+    }
+  },
+  "notAllowed": {
+    "message": "Tidak diizinkan"
+  },
+  "failed": {
+    "message": "Gagal"
+  },
+  "yourBalanceIsZero": {
+    "message": "Saldo Anda nol."
+  },
+  "minimalFeeGreaterThanBalance": {
+    "message": "Biaya minimal untuk transaksi ini lebih besar dari saldo Anda."
+  },
+  "alreadyDelegatedFundsToBaker": {
+    "message": "Sudah mendelegasikan dana ke baker ini. Delegasi ulang tidak dimungkinkan."
+  },
+  "bakerNotRegistered": {
+    "message": "Baker yang ditentukan tidak terdaftar."
+  },
+  "unableToPerformActionToBaker": {
+    "message": "Tidak dapat $action$ ke Baker yang disediakan.",
+    "placeholders": {
+      "action": {
+        "content": "$1"
+      }
+    }
+  },
+  "estimateDelegation": {
+    "message": "Perkirakan delegasi"
+  },
+  "thisMayHappenBecause": {
+    "message": "Ini mungkin terjadi karena:"
+  },
+  "minimalFeeGreaterThanBalanceVerbose": {
+    "message": "Biaya minimal untuk transaksi ini lebih besar dari saldo Anda. Biaya besar mungkin diperlukan karena Anda mengirim dana ke akun Manajer yang kosong. Itu membutuhkan biaya burn satu kali sebesar 0.06425 $gasTokenSymbol$;",
+    "placeholders": {
+      "gasTokenSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "networkOrOtherIssue": {
+    "message": "Jaringan atau masalah teknis lainnya."
+  },
+  "unableToDelegateToKTAddress": {
+    "message": "Tidak dapat mendelegasikan ke alamat kontrak KT..."
+  },
+  "confirmAction": {
+    "message": "Konfirmasi $action$",
+    "placeholders": {
+      "action": {
+        "content": "$1"
+      }
+    }
+  },
+  "payloadToSign": {
+    "message": "Payload untuk ditandatangani"
+  },
+  "decline": {
+    "message": "Tolak"
+  },
+  "confirm": {
+    "message": "Konfirmasi"
+  },
+  "network": {
+    "message": "Jaringan"
+  },
+  "unknownNetwork": {
+    "message": "Tidak dikenal:"
+  },
+  "backupNewSeedPhrase": {
+    "message": "Cadangkan Frasa Seed baru"
+  },
+  "attentionExclamation": {
+    "message": "Perhatian!"
+  },
+  "lockedWalletAlreadyExists": {
+    "message": "Dompet terkunci <b>sudah ada</b>.\nMengimpor yang baru akan <b>menghancurkan yang sudah ada</b>."
+  },
+  "backToUnlockPage": {
+    "message": "kembali ke halaman Buka Kunci"
+  },
+  "mustBeEqualToPasswordAbove": {
+    "message": "Harus sama dengan kata sandi di atas"
+  },
+  "repeatPassword": {
+    "message": "Ulangi Kata Sandi"
+  },
+  "repeatPasswordInputDescription": {
+    "message": "Harap masukkan kata sandi lagi."
+  },
+  "confirmTermsError": {
+    "message": "Tidak dapat melanjutkan tanpa mengkonfirmasi Ketentuan Penggunaan"
+  },
+  "confirmBetaError": {
+    "message": "Harap konfirmasi bahwa Anda mengetahui dompet ini dalam versi BETA dan hanya untuk Testnet"
+  },
+  "acceptTerms": {
+    "message": "Terima ketentuan"
+  },
+  "termsOfUsage": {
+    "message": "Ketentuan Penggunaan"
+  },
+  "file": {
+    "message": "File"
+  },
+  "keystoreFile": {
+    "message": "File Keystore"
+  },
+  "keystoreFileFieldDescription": {
+    "message": "Impor dompet Anda dari file keystore terenkripsi (.mav)."
+  },
+  "filePassword": {
+    "message": "Kata Sandi File"
+  },
+  "filePasswordInputPlaceholder": {
+    "message": "Masukkan kata sandi file"
+  },
+  "useKeystorePassword": {
+    "message": "Gunakan Kata Sandi File sebagai kata sandi Ekstensi"
+  },
+  "create": {
+    "message": "Buat"
+  },
+  "import": {
+    "message": "Impor"
+  },
+  "revealNewSeedPhrase": {
+    "message": "<b>Klik</b> area di bawah untuk mengungkapkan Frasa Seed baru Anda. Kemudian, catat frasa ini dan simpan di lokasi yang aman."
+  },
+  "doNotSharePhrase": {
+    "message": "<b>JANGAN</b> bagikan frasa ini kepada siapa pun! Ini dapat digunakan untuk mencuri semua akun Anda."
+  },
+  "youWillNeedThisSeedPhrase": {
+    "message": "Jika Anda pernah beralih antar browser atau perangkat, Anda akan memerlukan frasa seed ini untuk mengakses akun Anda."
+  },
+  "unableToContinueWithoutConfirming": {
+    "message": "Tidak dapat melanjutkan tanpa mengkonfirmasi"
+  },
+  "backupedInputLabel": {
+    "message": "Saya telah menyimpan Frasa Seed saya dengan aman dan saya menerima risiko bahwa jika saya kehilangan frasa tersebut, dana saya akan hilang."
+  },
+  "backupedInputDescription": {
+    "message": "Dan terima risiko bahwa jika saya kehilangan frasa,\ndana saya mungkin hilang."
+  },
+  "continue": {
+    "message": "Lanjutkan"
+  },
+  "noOperationsFound": {
+    "message": "Anda belum melakukan transaksi apa pun"
+  },
+  "pending": {
+    "message": "tertunda..."
+  },
+  "applied": {
+    "message": "Diterapkan"
+  },
+  "skipped": {
+    "message": "Dilewati"
+  },
+  "backtracked": {
+    "message": "dilacak balik"
+  },
+  "operationSuccessfullyProcessed": {
+    "message": "$type$ berhasil diproses dan dikonfirmasi!",
+    "placeholders": {
+      "type": {
+        "content": "$1"
+      }
+    }
+  },
+  "timedOutOperationConfirmation": {
+    "message": "Konfirmasi operasi waktu habis. Anda dapat menunggu lebih lama atau mencoba lagi nanti."
+  },
+  "accountToBeRemoved": {
+    "message": "Akun yang akan dihapus."
+  },
+  "ifYouWantToRemoveAnotherAccount": {
+    "message": "Jika Anda ingin menghapus akun lain - pilih di menu dropdown kanan atas."
+  },
+  "cannotBeRemoved": {
+    "message": "Tidak dapat dihapus"
+  },
+  "importedPlural": {
+    "message": "diimpor"
+  },
+  "enterPasswordToRemoveAccount": {
+    "message": "Masukkan kata sandi untuk menghapus Akun."
+  },
+  "remove": {
+    "message": "Hapus"
+  },
+  "ifYouWantToRevealPrivateKeyFromOtherAccount": {
+    "message": "Jika Anda ingin mengungkapkan kunci pribadi dari akun lain - Anda harus memilihnya di menu dropdown kanan atas."
+  },
+  "privateKeyFieldDescription": {
+    "message": "Kunci akun saat ini. Jaga kerahasiaannya."
+  },
+  "derivationPath": {
+    "message": "Jalur Derivasi"
+  },
+  "derivationType": {
+    "message": "Jenis derivasi"
+  },
+  "derivationTypeFieldDescription": {
+    "message": "Kurva eliptis yang akan digunakan akun."
+  },
+  "pathForHDAccounts": {
+    "message": "Ini untuk akun HD. Ini adalah hal yang Anda gunakan untuk memulihkan semua akun Anda dari frasa seed Anda."
+  },
+  "derivationPathExample": {
+    "message": "m/44'/1729'/<account_index>'/0'"
+  },
+  "derivationPathExample2": {
+    "message": "misalnya m/44'/1729'/..."
+  },
+  "keepSeedPhraseSecret": {
+    "message": "Jaga kerahasiaannya."
+  },
+  "revealSecretPasswordInputDescription": {
+    "message": "Masukkan kata sandi untuk mengungkapkan $secretName$.",
+    "placeholders": {
+      "secretName": {
+        "content": "$1"
+      }
+    }
+  },
+  "reveal": {
+    "message": "Ungkap"
+  },
+  "transaction": {
+    "message": "Transaksi"
+  },
+  "recipient": {
+    "message": "Penerima"
+  },
+  "tokensRecepientInputDescription": {
+    "message": "Alamat untuk mengirim dana $assetSymbol$."
+  },
+  "tokensRecepientInputDescriptionWithDomain": {
+    "message": "Alamat atau domain Mavryk untuk mengirim dana $assetSymbol$.",
+    "placeholders": {
+      "assetSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "addressInputDescription": {
+    "message": "Alamat atau domain Mavryk dari akun atau kontrak pintar"
+  },
+  "addressInputDescriptionWithDomain": {
+    "message": "Alamat atau domain Mavryk dari akun atau kontrak pintar"
+  },
+  "recipientInputPlaceholder": {
+    "message": "misalnya mv1V4h45W3p4e..."
+  },
+  "recipientInputPlaceholderWithDomain": {
+    "message": "misalnya alice.mav atau mv1V4h45W3p4e...",
+    "description": "alice.mav = domain seperti google.com"
+  },
+  "tryingToTransferToYourself": {
+    "message": "Anda mencoba mentransfer dana ke diri sendiri.\nHarap pastikan bahwa itu persis seperti yang Anda inginkan."
+  },
+  "tryingToTransferToContract": {
+    "message": "Anda mencoba mentransfer dana ke kontrak.\nHarap pastikan bahwa itu persis seperti yang Anda inginkan."
+  },
+  "amount": {
+    "message": "Jumlah"
+  },
+  "availableToSend": {
+    "message": "Maks untuk dikirim:"
+  },
+  "inFiat": {
+    "message": "dalam Fiat"
+  },
+  "inAsset": {
+    "message": "dalam $assetSymbol$",
+    "placeholders": {
+      "assetSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "amountPlaceholder": {
+    "message": "misalnya 123.45"
+  },
+  "sendToMyAccounts": {
+    "message": "Kirim ke Akun Saya"
+  },
+  "myAccount": {
+    "message": "Akun Saya"
+  },
+  "clickOnRecipientAccount": {
+    "message": "Klik Akun yang ingin Anda kirimi dana."
+  },
+  "mainAssetBalanceIsZero": {
+    "message": "Saldo mav (aset utama) Anda adalah nol. Dana ꝳ diperlukan untuk biaya."
+  },
+  "unableToSendTransactionAction": {
+    "message": "Tidak dapat mengirim transaksi ke Penerima yang disediakan."
+  },
+  "unableToEstimateTransactionAction": {
+    "message": "Tidak dapat memperkirakan transaksi ke Penerima yang disediakan."
+  },
+  "makeSureToBackupSeedPhrase": {
+    "message": "Pastikan untuk mencadangkan frasa seed Anda!"
+  },
+  "exploreMore": {
+    "message": "Jelajahi lebih lanjut..."
+  },
+  "selfComment": {
+    "message": "(diri sendiri)"
+  },
+  "deleteNetworkConfirm": {
+    "message": "Apakah Anda yakin ingin menghapus jaringan ini?"
+  },
+  "networkNamePlaceholder": {
+    "message": "Masukkan nama jaringan"
+  },
+  "mustBeValidURL": {
+    "message": "Harus berupa URL yang valid"
+  },
+  "rpcBaseURL": {
+    "message": "URL dasar RPC",
+    "description": "RPC = Remote Procedure Call (https://en.wikipedia.org/wiki/Remote_procedure_call)"
+  },
+  "mustBeUnique": {
+    "message": "Harus unik"
+  },
+  "addNetwork": {
+    "message": "Tambah Jaringan"
+  },
+  "currentNetworks": {
+    "message": "Jaringan saat ini"
+  },
+  "deleteNetworkHint": {
+    "message": "Klik ikon X untuk menghapus jaringan. Jika Anda ingin mengedit jaringan, cukup hapus dan tambahkan yang lain dengan parameter baru."
+  },
+  "preview": {
+    "message": "Pratinjau"
+  },
+  "raw": {
+    "message": "Mentah"
+  },
+  "fetchingConfirmationDetails": {
+    "message": "mengambil detail konfirmasi"
+  },
+  "notIdentified": {
+    "message": "Tidak teridentifikasi"
+  },
+  "connection": {
+    "message": "Koneksi"
+  },
+  "connect": {
+    "message": "Hubungkan"
+  },
+  "confirmActionOnDevice": {
+    "message": "Konfirmasi tindakan di"
+  },
+  "deviceName": {
+    "message": "perangkat $device$",
+    "placeholders": {
+      "device": {
+        "content": "$1"
+      }
+    }
+  },
+  "ledgerNano": {
+    "message": "Ledger Nano",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "defaultLedgerName": {
+    "message": "Ledger $number$",
+    "description": "Ledger = https://www.ledger.com/",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "ledgerNameConstraint": {
+    "message": "1-16 karakter, tanpa karakter khusus"
+  },
+  "ledgerNameInputDescription": {
+    "message": "Apa nama akun Ledger baru?",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "defaultDerivationPathLabel": {
+    "message": "Secara default, derivasi $path$ digunakan.",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "clickOnCustomDerivationPath": {
+    "message": "Klik 'Jalur derivasi kustom' untuk menyesuaikannya."
+  },
+  "addLedgerAccount": {
+    "message": "Tambah Akun Ledger",
+    "description": "Ledger = https://www.ledger.com/"
+  },
+  "firefoxLedgerConnectionError": {
+    "message": "$sorry$ Koneksi ke perangkat $device$ melalui $browser$ untuk sementara $unavailable$.",
+    "placeholders": {
+      "sorry": {
+        "content": "$1"
+      },
+      "device": {
+        "content": "$2"
+      },
+      "browser": {
+        "content": "$3"
+      },
+      "unavailable": {
+        "content": "$4"
+      }
+    }
+  },
+  "connectionUnavailable": {
+    "message": "Tidak Tersedia"
+  },
+  "sorry": {
+    "message": "Maaf!"
+  },
+  "upload": {
+    "message": "Unggah"
+  },
+  "languageAndCountry": {
+    "message": "Bahasa Saat Ini"
+  },
+  "fiatCurrency": {
+    "message": "Konversi Mata Uang"
+  },
+  "generalSettings": {
+    "message": "Umum"
+  },
+  "generalSettingsDescription": {
+    "message": "Di sini Anda dapat mengelola preferensi bahasa dan mode tampilan."
+  },
+  "swapNoun": {
+    "message": "Tukar"
+  },
+  "transfers": {
+    "message": "Transfer"
+  },
+  "someUnknownToken": {
+    "message": "token tidak dikenal $token$",
+    "placeholders": {
+      "token": {
+        "content": "$1"
+      }
+    }
+  },
+  "interactionWithSomeEntrypoint": {
+    "message": "Interaksi dengan entrypoint '$entrypoint$' dari kontrak $contractAddress$",
+    "placeholders": {
+      "entrypoint": {
+        "content": "$1"
+      },
+      "contractAddress": {
+        "content": "$2"
+      }
+    }
+  },
+  "transactionOfSomeType": {
+    "message": "Transaksi jenis '$type$'",
+    "placeholders": {
+      "type": {
+        "content": "$1"
+      }
+    }
+  },
+  "approveToken": {
+    "message": "Setujui Token"
+  },
+  "add": {
+    "message": "Tambah"
+  },
+  "ad": {
+    "message": "Iklan"
+  },
+  "assets": {
+    "message": "Aset"
+  },
+  "tokens": {
+    "message": "Token"
+  },
+  "activity": {
+    "message": "Aktivitas"
+  },
+  "manage": {
+    "message": "Kelola"
+  },
+  "manageTokens": {
+    "message": "Kelola Token"
+  },
+  "manageAssets": {
+    "message": "Kelola Aset"
+  },
+  "manageAssetsList": {
+    "message": "Kelola daftar aset"
+  },
+  "noItemsWithPositiveBalance": {
+    "message": "Tidak ada item dengan saldo positif"
+  },
+  "noAssetsFound": {
+    "message": "Tidak ada aset ditemukan"
+  },
+  "tokenNotFound": {
+    "message": "Token tidak ditemukan..."
+  },
+  "currencyNotFound": {
+    "message": "Mata uang tidak ditemukan"
+  },
+  "ifYouDontSeeYourAsset": {
+    "message": "Jika Anda tidak melihat aset Anda,\ncoba klik $toClick$.",
+    "placeholders": {
+      "toClick": {
+        "content": "$1"
+      }
+    }
+  },
+  "addressOfTokenContract": {
+    "message": "Alamat kontrak token $assetSymbol$.",
+    "placeholders": {
+      "assetSymbol": {
+        "content": "$1"
+      }
+    }
+  },
+  "searchAssets": {
+    "message": "Cari aset..."
+  },
+  "searchTransactions": {
+    "message": "Cari transaksi..."
+  },
+  "searchByName": {
+    "message": "Cari berdasarkan nama..."
+  },
+  "deployNew": {
+    "message": "Terapkan baru"
+  },
+  "managedKTAccount": {
+    "message": "KT Terkelola"
+  },
+  "watchOnlyAccount": {
+    "message": "Hanya-Lihat"
+  },
+  "disabledForWatchOnlyAccount": {
+    "message": "Dinonaktifkan untuk akun hanya-lihat"
+  },
+  "activationOperationType": {
+    "message": "Aktivasi"
+  },
+  "youAreNotContractManager": {
+    "message": "Anda bukan manajer kontrak"
+  },
+  "contract": {
+    "message": "Kontrak"
+  },
+  "contractAddressInputDescription": {
+    "message": "Alamat kontrak yang akan dihubungkan."
+  },
+  "contractAddressInputPlaceholder": {
+    "message": "misalnya KT1a9w1S7hN5s..."
+  },
+  "addKnownManagedContract": {
+    "message": "Tambah kontrak Terkelola yang dikenal"
+  },
+  "clickOnContractToImport": {
+    "message": "Klik Kontrak yang ingin Anda impor."
+  },
+  "notContractAddress": {
+    "message": "Bukan alamat kontrak"
+  },
+  "contractAlreadyImported": {
+    "message": "Kontrak ini sudah diimpor"
+  },
+  "waitWhileContractBeingDeployed": {
+    "message": "Harap jangan tinggalkan halaman ini atau tutup jendela saat kontrak sedang diterapkan, ini mungkin memakan waktu. Formulir dan peringatan ini akan hilang segera setelah berhasil diterapkan."
+  },
+  "justAMinute": {
+    "message": "Tunggu sebentar..."
+  },
+  "referredByTokenContactAddressInvalid": {
+    "message": "Alamat kontrak $address$, yang dirujuk oleh kontrak token, tidak valid.",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "someNetworkIsNotCurrent": {
+    "message": "Jaringan $network$ ditentukan, yang bukan jaringan saat ini",
+    "placeholders": {
+      "network": {
+        "content": "$1"
+      }
+    }
+  },
+  "someNetworkWithChainIdIsNotCurrent": {
+    "message": "Chain ID $chainId$ ditentukan, yang bukan chain ID dari jaringan saat ini",
+    "placeholders": {
+      "chainId": {
+        "content": "$1"
+      }
+    }
+  },
+  "fullScreenSettings": {
+    "message": "Mode Layar Penuh"
+  },
+  "fullScreenSettingsDescription": {
+    "message": "Dompet muncul sebagai tab browser baru daripada popup browser web"
+  },
+  "analyticsSettings": {
+    "message": "Analitik Anonim"
+  },
+  "analyticsSettingsDescription": {
+    "message": "Izinkan pengiriman analitik anonim yang membantu Mavryk meningkatkan produk"
+  },
+  "managedContract": {
+    "message": "Kontrak Terkelola"
+  },
+  "referredByTokenContractNotFound": {
+    "message": "Kontrak $address$, yang dirujuk oleh kontrak token, tidak ditemukan.",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "tokenContractNotFound": {
+    "message": "Kontrak tidak ditemukan."
+  },
+  "failedToParseMetadata": {
+    "message": "Gagal mem-parsing metadata"
+  },
+  "unknownParseErrorOccurred": {
+    "message": "Terjadi kesalahan parsing yang tidak diketahui."
+  },
+  "errorWhileFetchingUrl": {
+    "message": "Terjadi kesalahan saat mengambil dari $url$",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidManagedContract": {
+    "message": "Kontrak terkelola tidak valid"
+  },
+  "someMethodNotDefinedInContract": {
+    "message": "Metode '$name$' tidak ditentukan dalam kontrak.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "someMethodSignatureDoesNotMatchStandard": {
+    "message": "Tanda tangan metode '$name$' tidak sesuai dengan standar.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "failedToLoadChainID": {
+    "message": "Gagal memuat chain ID untuk jaringan ini"
+  },
+  "makeSureTokenIdIsCorrect": {
+    "message": "Harap pastikan bahwa ID aset benar."
+  },
+  "unknownErrorCheckingSomeEntrypoint": {
+    "message": "Terjadi kesalahan yang tidak diketahui saat memeriksa entrypoint '$name$'.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "incorrectTokenIdErrorMessage": {
+    "message": "Gagal saat memproses aset dengan data yang diberikan. Harap pastikan bahwa ID aset benar."
+  },
+  "transfer": {
+    "message": "Transfer"
+  },
+  "origination": {
+    "message": "Origination"
+  },
+  "transferFromSmb": {
+    "message": "dari $sender$",
+    "placeholders": {
+      "sender": {
+        "content": "$1"
+      }
+    }
+  },
+  "transferToSmb": {
+    "message": "ke $receiver$",
+    "placeholders": {
+      "receiver": {
+        "content": "$1"
+      }
+    }
+  },
+  "revealOperationType": {
+    "message": "$receiver$",
+    "placeholders": {
+      "receiver": {
+        "content": "$1"
+      }
+    }
+  },
+  "interaction": {
+    "message": "Interaksi"
+  },
+  "interactionOnContract": {
+    "message": "$noun$ pada $contract$",
+    "placeholders": {
+      "noun": {
+        "content": "$1"
+      },
+      "contract": {
+        "content": "$2"
+      }
+    }
+  },
+  "multipleInteractionOnContract": {
+    "message": "$contract$ dengan $count$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "originationOnContract": {
+    "message": "$contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
+  "swappedContract": {
+    "message": "$contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
+  "delegationToSmb": {
+    "message": "ke $delegate$",
+    "placeholders": {
+      "delegate": {
+        "content": "$1"
+      }
+    }
+  },
+  "doSthToSmb": {
+    "message": "ke $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "doSthFromSmb": {
+    "message": "dari $address$",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "delegationFromSmb": {
+    "message": "dari $delegate$",
+    "placeholders": {
+      "delegate": {
+        "content": "$1"
+      }
+    }
+  },
+  "delegationReceived": {
+    "message": "Delegasi diterima"
+  },
+  "fa2TokenAlreadyExists": {
+    "message": "Token dengan alamat $address$ dan ID $tokenId$ sudah ada.",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      },
+      "tokenId": {
+        "content": "$2"
+      }
+    }
+  },
+  "nonFa2TokenAlreadyExists": {
+    "message": "Token dengan alamat $address$ sudah ada.",
+    "placeholders": {
+      "address": {
+        "content": "$1"
+      }
+    }
+  },
+  "approveForSmb": {
+    "message": "untuk $spender$",
+    "placeholders": {
+      "spender": {
+        "content": "$1"
+      }
+    }
+  },
+  "undelegation": {
+    "message": "Undelegasi"
+  },
+  "bytes": {
+    "message": "Byte"
+  },
+  "clean": {
+    "message": "Bersih"
+  },
+  "errorChangingAccountName": {
+    "message": "Terjadi kesalahan saat mengubah nama akun"
+  },
+  "ok": {
+    "message": "OK"
+  },
+  "yes": {
+    "message": "Ya"
+  },
+  "no": {
+    "message": "Tidak"
+  },
+  "actionConfirmation": {
+    "message": "Konfirmasi tindakan"
+  },
+  "closePartnersPromotion": {
+    "message": "Apakah Anda yakin ingin mematikan semua iklan?"
+  },
+  "domainDoesntResolveToAddress": {
+    "message": "Domain \"$value$\" tidak merujuk ke alamat",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidAddressOrDomain": {
+    "message": "Alamat atau nama domain tidak valid"
+  },
+  "otherNetworkAddressError": {
+    "message": "Anda memasukkan alamat jaringan $network$. Harap masukkan alamat jaringan Mavryk",
+    "placeholders": {
+      "network": {
+        "content": "$1"
+      }
+    }
+  },
+  "resolvedAddress": {
+    "message": "Alamat yang diselesaikan"
+  },
+  "invalidRpcCantGetChainId": {
+    "message": "RPC tidak valid: Tidak dapat memperoleh chain id",
+    "description": "RPC = Remote Procedure Call (https://en.wikipedia.org/wiki/Remote_procedure_call)"
+  },
+  "invalidRpcNotSupported": {
+    "message": "RPC yang tidak didukung terdeteksi. Fungsionalitas dompet mungkin terganggu"
+  },
+  "contractNotOriginated": {
+    "message": "Kontrak tidak di-originate"
+  },
+  "welcomeTo": {
+    "message": "Shalom untuk"
+  },
+  "domain": {
+    "message": "Domain"
+  },
+  "hash": {
+    "message": "Hash"
+  },
+  "defaultAccount": {
+    "message": "Akun default (yang pertama)"
+  },
+  "loadMore": {
+    "message": "Muat lebih banyak"
+  },
+  "tryLoadAgain": {
+    "message": "Coba muat lagi"
+  },
+  "submit": {
+    "message": "Kirim"
+  },
+  "invalidJsonInput": {
+    "message": "JSON tidak valid"
+  },
+  "notFaucetJson": {
+    "message": "Bukan JSON faucet"
+  },
+  "faucetJson": {
+    "message": "JSON Faucet"
+  },
+  "faucetJsonDescription": {
+    "message": "Anda dapat menempelkan JSON di sini alih-alih menambahkan file"
+  },
+  "unknownErrorFromRPC": {
+    "message": "Gagal mengirim permintaan ke $url$. Permintaan yang diberikan tidak valid atau node RPC untuk sementara tidak dapat dijangkau.",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "emptyImplicitContract": {
+    "message": "Akun Anda kosong. Setor sejumlah mav ke akun ini untuk mengaktifkannya"
+  },
+  "balanceTooLow": {
+    "message": "Saldo token gas terlalu rendah"
+  },
+  "swap": {
+    "message": "Tukar"
+  },
+  "accountNumber": {
+    "message": "Nomor akun"
+  },
+  "noExchangersAvailable": {
+    "message": "Maaf, tidak ada penukar yang tersedia untuk jaringan saat ini."
+  },
+  "noResults": {
+    "message": "Tidak Ada Hasil"
+  },
+  "mavenApy": {
+    "message": "APY: 6%"
+  },
+  "tokenApy": {
+    "message": "APY"
+  },
+  "max": {
+    "message": "Maks"
+  },
+  "balance": {
+    "message": "Saldo"
+  },
+  "from": {
+    "message": "Dari"
+  },
+  "toAsset": {
+    "message": "Ke"
+  },
+  "via": {
+    "message": "Melalui"
+  },
+  "swapRoute": {
+    "message": "Rute Tukar"
+  },
+  "exchangeRate": {
+    "message": "Nilai Tukar"
+  },
+  "priceImpact": {
+    "message": "Dampak Harga"
+  },
+  "slippageTolerance": {
+    "message": "Toleransi Slippage"
+  },
+  "minimumReceived": {
+    "message": "Minimum Diterima"
+  },
+  "inputOutputAssetsCannotBeSame": {
+    "message": "Aset input dan output tidak boleh sama"
+  },
+  "amountMustBeReservedForNetworkFees": {
+    "message": "$amount$ harus dicadangkan untuk membayar biaya jaringan",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "helpAndCommunity": {
+    "message": "Bantuan & Komunitas"
+  },
+  "communityResourcesTitle": {
+    "message": "Anda selalu dapat menemukan info tambahan tentang dompet Temple atau meminta bantuan di sumber daya berikutnya."
+  },
+  "helpAndCommunityDescription": {
+    "message": "Gunakan bagian ini jika Anda ingin menjadi bagian dari komunitas kami atau butuh bantuan."
+  },
+  "joinPrompt": {
+    "message": "Jangan ragu untuk bergabung dan mengajukan pertanyaan Anda 😊"
+  },
+  "blockExplorer": {
+    "message": "Penjelajah Blockchain"
+  },
+  "viewOnBlockExplorer": {
+    "message": "Lihat Di Penjelajah Blok"
+  },
+  "specifyTokenId": {
+    "message": "Tentukan ID token"
+  },
+  "notWhitelistedTokenWarning": {
+    "message": "Perhatian! Salah satu token yang Anda coba tukar tidak ada dalam daftar putih. Anda dapat berinteraksi dengannya atas risiko Anda sendiri."
+  },
+  "tvl": {
+    "message": "TVL"
+  },
+  "promoted": {
+    "message": "Dipromosikan"
+  },
+  "searchDApps": {
+    "message": "Cari dApps"
+  },
+  "game": {
+    "message": "Game"
+  },
+  "social": {
+    "message": "Sosial"
+  },
+  "marketplace": {
+    "message": "Marketplace"
+  },
+  "farming": {
+    "message": "Farming"
+  },
+  "other": {
+    "message": "Lainnya"
+  },
+  "current": {
+    "message": "Saat ini"
+  },
+  "noMatchingDAppsFound": {
+    "message": "Tidak ada dApps yang cocok ditemukan"
+  },
+  "thousandFormat": {
+    "message": "$thousand$K",
+    "placeholders": {
+      "thousand": {
+        "content": "$1"
+      }
+    }
+  },
+  "millionFormat": {
+    "message": "$million$Jt",
+    "placeholders": {
+      "million": {
+        "content": "$1"
+      }
+    }
+  },
+  "billionFormat": {
+    "message": "$billion$M",
+    "placeholders": {
+      "billion": {
+        "content": "$1"
+      }
+    }
+  },
+  "gasFee": {
+    "message": "Biaya Gas"
+  },
+  "storageFee": {
+    "message": "Biaya Penyimpanan"
+  },
+  "templeWalletFeeWarning": {
+    "message": "Dompet Temple tidak menerapkan biaya apa pun untuk pertukaran saat ini tetapi mungkin akan menerapkannya di masa mendatang."
+  },
+  "poolExchangeFee": {
+    "message": "Biaya pertukaran pool"
+  },
+  "PriceImpactInfo": {
+    "message": "Perbedaan antara harga pasar dan harga perkiraan karena ukuran perdagangan"
+  },
+  "selectToken": {
+    "message": "Pilih Token"
+  },
+  "viewAll": {
+    "message": "Lihat semua"
+  },
+  "rewardsForBlocks": {
+    "message": "$reward$ untuk $blocksAmount$ $blocks$ $feesAmount$ biaya",
+    "placeholders": {
+      "reward": {
+        "content": "$1"
+      },
+      "blocksAmount": {
+        "content": "$2"
+      },
+      "blocks": {
+        "content": "$3"
+      },
+      "feesAmount": {
+        "content": "$4"
+      }
+    }
+  },
+  "blocks_one": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "blocks_zero": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "blocks_two": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "blocks_few": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "blocks_many": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "blocks_other": {
+    "message": "$amount$ blok",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "rewardsForSlots": {
+    "message": "$reward$ untuk $slotsAmount$ $slots$",
+    "placeholders": {
+      "reward": {
+        "content": "$1"
+      },
+      "slotsAmount": {
+        "content": "$2"
+      },
+      "slots": {
+        "content": "$3"
+      }
+    }
+  },
+  "slots_one": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "slots_zero": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "slots_two": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "slots_few": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "slots_many": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "slots_other": {
+    "message": "$amount$ slot",
+    "description": "Untuk bentuk jamak",
+    "placeholders": {
+      "amount": {
+        "content": "$1"
+      }
+    }
+  },
+  "storageFeeMax": {
+    "message": "Biaya Penyimpanan (maks)"
+  },
+  "interactionWithContract": {
+    "message": "dengan $contract$",
+    "placeholders": {
+      "contract": {
+        "content": "$1"
+      }
+    }
+  },
+  "storageLimit": {
+    "message": "Sesuaikan Batas Penyimpanan"
+  },
+  "txIsLikelyToFail": {
+    "message": "Peringatan! Transaksi kemungkinan akan gagal."
+  },
+  "copyErrorLogs": {
+    "message": "Salin Log Kesalahan"
+  },
+  "dAppsListTvlDescription": {
+    "message": "Total Value Locked. Nilai dalam mav adalah jumlah total mav yang terkunci di dApps. Nilai dalam USD adalah jumlah total mav dan token yang terkunci di sana."
+  },
+  "noFavoriteDApps": {
+    "message": "Anda tidak memiliki dApps favorit"
+  },
+  "more": {
+    "message": "lebih",
+    "description": "Tampilkan lebih banyak"
+  },
+  "showMore": {
+    "message": "Tampilkan Lebih Banyak",
+    "description": "Tampilkan lebih banyak"
+  },
+  "less": {
+    "message": "sedikit",
+    "description": "Tampilkan lebih sedikit"
+  },
+  "showLess": {
+    "message": "Tampilkan Lebih Sedikit",
+    "description": "Tampilkan lebih sedikit"
+  },
+  "showInfo": {
+    "message": "Tampilkan info"
+  },
+  "hideZeroBalance": {
+    "message": "Sembunyikan saldo 0"
+  },
+  "recentDestinations": {
+    "message": "Tujuan terkini"
+  },
+  "unknownAccount": {
+    "message": "Akun tidak dikenal"
+  },
+  "ledgerBridgeGuide": {
+    "message": "Untuk menghubungkan Ledger, harap aktifkan perangkat Anda dan buka aplikasi Dompet Mavryk."
+  },
+  "noExchangerFoundForToken": {
+    "message": "Tidak ada penukar yang ditemukan untuk token $symbol$ ($name$).",
+    "placeholders": {
+      "symbol": {
+        "content": "$1"
+      },
+      "name": {
+        "content": "$2"
+      }
+    }
+  },
+  "addressBook": {
+    "message": "Buku Alamat"
+  },
+  "addressBookDescription": {
+    "message": "Tambah, hapus, dan kelola kontak Anda."
+  },
+  "contactName": {
+    "message": "Nama Kontak"
+  },
+  "publicAddress": {
+    "message": "Alamat Publik"
+  },
+  "addNewContact": {
+    "message": "Tambah kontak baru"
+  },
+  "addContact": {
+    "message": "Tambah Kontak"
+  },
+  "newContactPlaceholder": {
+    "message": "Masukkan nama kontak"
+  },
+  "addressContactPlaceholder": {
+    "message": "Masukkan alamat kontak"
+  },
+  "addressContractPlaceholder": {
+    "message": "Masukkan alamat kontrak"
+  },
+  "enterPublicAddressPlaceholder": {
+    "message": "Masukkan alamat publik"
+  },
+  "contactWithTheSameAddressAlreadyExists": {
+    "message": "Kontak dengan alamat yang sama sudah ada"
+  },
+  "currentContacts": {
+    "message": "Kontak saat ini"
+  },
+  "updateContactDescription": {
+    "message": "Untuk memperbarui kontak yang ada, cukup hapus\ndan tambahkan yang baru."
+  },
+  "deleteContactConfirm": {
+    "message": "Apakah Anda yakin ingin menghapus kontak ini?"
+  },
+  "closePartnersPromoConfirm": {
+    "message": "Perhatikan: Anda dapat menerima cashback dalam token USDt untuk mengaktifkan iklan di dompet kami. Jika Anda mematikan IKLAN, Anda selalu dapat mengaktifkannya di pengaturan."
+  },
+  "enablePartnersPromotionConfirm": {
+    "message": "Dukung tim pengembang dan dapatkan token dengan melihat iklan di dalam dompet."
+  },
+  "enablePartnersPromotionDescriptionConfirm": {
+    "message": "Untuk mengaktifkan fitur ini, kami meminta izin Anda untuk melacak Alamat Dompet dan alamat IP Anda. Anda selalu dapat menonaktifkan iklan di pengaturan."
+  },
+  "ownAccount": {
+    "message": "Milik"
+  },
+  "counterErrorDescription": {
+    "message": "Anda tidak dapat melakukan operasi saat ini!\nHarap tunggu saat operasi Anda sebelumnya diterapkan dan coba lagi."
+  },
+  "swapDisclaimerTitle": {
+    "message": "Penafian. Versi beta, baca sebelum menggunakan bagian TUKAR."
+  },
+  "swapDisclaimerContent": {
+    "message": "Dompet Temple hanya menyediakan antarmuka untuk berinteraksi dengan Dexes Mavryk. \n\nKami tidak bertanggung jawab atas: masalah DEX, token yang ditampilkan, harga, nilai tukar, dan keputusan perdagangan pengguna. \n\nSebelum menggunakan Bagian Tukar ini, Anda harus meninjau dokumentasi yang relevan untuk memahami cara kerja protokol DEX(AMM). \n\nMenggunakan bagian ini sepenuhnya menjadi tanggung jawab pengguna."
+  },
+  "noContactsFound": {
+    "message": "Tidak ada kontak ditemukan"
+  },
+  "addThisAddressToContacts": {
+    "message": "Tambahkan alamat ini ke kontak?"
+  },
+  "verifySeedPhrase": {
+    "message": "Verifikasi Frasa Seed"
+  },
+  "verifySeedPhraseDescription": {
+    "message": "Isi bidang kosong dengan kata-kata untuk memverifikasi cadangan Frasa Seed Anda"
+  },
+  "word": {
+    "message": "Kata $number$",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "finish": {
+    "message": "Selesai"
+  },
+  "welcomeToOnboarding": {
+    "message": "Selamat Datang di Onboarding"
+  },
+  "onboarding": {
+    "message": "Onboarding"
+  },
+  "next": {
+    "message": "Berikutnya"
+  },
+  "done": {
+    "message": "Selesai!"
+  },
+  "standWithUkraine": {
+    "message": "Bela Ukraina"
+  },
+  "addressBalanceDetails": {
+    "message": "Alamat, saldo, dan domain Anda"
+  },
+  "addressBalanceDescription": {
+    "message": "Setelah membuat akun, Anda akan mendapatkan alamat unik - pengidentifikasi akun pribadi Anda di blockchain Mavryk. Alamat dompet Mavryk yang Anda berikan sama dengan yang akan Anda gunakan untuk menerima token MVRK asli atau token lain yang dibangun di jaringan Mavryk."
+  },
+  "addressBalanceHint": {
+    "message": "Anda juga dapat menggunakan nama alamat dompet kustom dari $link$ seperti alice.mav alih-alih alamat dompet alfanumerik.",
+    "placeholders": {
+      "link": {
+        "content": "$1"
+      }
+    }
+  },
+  "howToStartDetails": {
+    "message": "Bagaimana memulai"
+  },
+  "howToStartDescription1": {
+    "message": "Untuk mulai menggunakan dompet Anda dan berinteraksi dengan ekosistem dApps Mavryk, saldo akun harus positif. Untuk melakukan ini, isi alamat Anda dengan MAV."
+  },
+  "howToStartDescription2": {
+    "message": "Anda dapat menggunakan tombol \"Beli\" untuk menukar\nmata uang kripto Anda, serta mengisi saldo Anda menggunakan mata uang fiat untuk menerima MAV atau USDt."
+  },
+  "howToStartHint": {
+    "message": "Selain itu, Anda dapat menyalin alamat Anda dan mengirim koin ke sana dari dompet atau Bursa lain. Untuk menyalin alamat, klik di layar dompet utama atau gunakan \"Terima\"."
+  },
+  "tokensNFTsDetails": {
+    "message": "Token & NFT"
+  },
+  "profileRpcDetails": {
+    "message": "Profil & RPC"
+  },
+  "profileRpcDescription": {
+    "message": "Di bagian atas antarmuka, Anda dapat melihat ikon robo akun Anda. Dengan mengkliknya, Anda akan melihat parameter untuk interaksi dengan akun, tombol pengaturan, dan mode tampilan ekstensi."
+  },
+  "profileRpcHint1": {
+    "message": "Selanjutnya, Anda akan melihat pemilih \"Jaringan\", yang memungkinkan Anda memilih node (RPC) tempat ekstensi Temple Anda akan terhubung."
+  },
+  "profileRpcHint2": {
+    "message": "Jika saldo Anda tidak ditampilkan, coba ubah node."
+  },
+  "profileRpcHint3": {
+    "message": "Anda dapat memilih dari daftar yang telah ditentukan atau menambahkan RPC secara manual dengan mengikuti ini "
+  },
+  "congrats": {
+    "message": "Selamat!"
+  },
+  "instructions": {
+    "message": "instruksi."
+  },
+  "start": {
+    "message": "Mulai"
+  },
+  "thanks": {
+    "message": "Ok, terima kasih!"
+  },
+  "browserVersionIsOutOfDate": {
+    "message": "Versi browser Anda sudah kedaluwarsa, kami sangat menyarankan untuk memperbarui ke versi terbaru!"
+  },
+  "congratsDescription1": {
+    "message": "Terima kasih atas perhatian Anda!"
+  },
+  "congratsDescription2": {
+    "message": "Sekarang Anda tahu tentang fungsi dasar dan terpenting dari dompet Temple."
+  },
+  "congratsDescription3": {
+    "message": "Anda dapat mempelajari semua fitur Temple dari \"Seri Edukasi\" kami di YouTube."
+  },
+  "congratsDescription4": {
+    "message": "Juga, instruksi dan panduan tersedia di basis pengetahuan kami."
+  },
+  "congratsDescription5": {
+    "message": "Bergabunglah dengan komunitas kami di Telegram dan Discord."
+  },
+  "congratsDescription6": {
+    "message": "PS: Semoga berhasil menjelajahi dunia Mavryk!"
+  },
+  "attention": {
+    "message": "Perhatian"
+  },
+  "attentionDescription": {
+    "message": "Jangan pernah dan dalam alasan apa pun membagikan kunci pribadi dan frasa seed Anda kepada pihak ketiga."
+  },
+  "attentionListTitle1": {
+    "message": "Juga, ingat:"
+  },
+  "attentionListItem1": {
+    "message": "Dompet Anda dapat ditargetkan melalui 0days browser atau melalui ekstensi berbahaya lain yang diinstal;"
+  },
+  "attentionListItem2": {
+    "message": "Layar berpotensi dimanipulasi oleh perangkat lunak berbahaya yang diinstal di sistem;"
+  },
+  "attentionListItem3": {
+    "message": "Mesin host pengguna dapat ditargetkan oleh malware untuk mencuri dompet terenkripsi;"
+  },
+  "attentionListItem4": {
+    "message": "Memilih kata sandi yang lemah dapat mengurangi kemampuan dompet untuk menahan brute-force musuh."
+  },
+  "attentionListTitle2": {
+    "message": "Untuk menjaga keamanan aset Anda, kami sarankan:"
+  },
+  "attentionListItem5": {
+    "message": "Pindahkan dana Anda dari dompet \"panas\" ke \"dingin\" sesegera mungkin (dompet Temple mendukung integrasi dengan perangkat \"Ledger Nano\");"
+  },
+  "attentionListItem6": {
+    "message": "Gunakan browser terpisah untuk berselancar web dan mengoperasikan dompet;"
+  },
+  "attentionListItem7": {
+    "message": "Gunakan satu tab browser sekaligus untuk melakukan transaksi;"
+  },
+  "attentionListItem8": {
+    "message": "Jaga agar dompet tetap terkunci saat tidak digunakan."
+  },
+  "takeCare": {
+    "message": "Jaga keamanan Anda di dunia kripto!"
+  },
+  "readMore": {
+    "message": "Baca lebih lanjut oleh "
+  },
+  "deleteTokenConfirm": {
+    "message": "Apakah Anda yakin ingin menghapus token ini?"
+  },
+  "lockUpSettings": {
+    "message": "Keluar Otomatis"
+  },
+  "lockUpSettingsDescription": {
+    "message": "Dompet akan secara otomatis meminta kata sandi setelah 5 menit tidak aktif"
+  },
+  "partnersPromoSettings": {
+    "message": "Iklan"
+  },
+  "cashBack": {
+    "message": "cash back"
+  },
+  "partnersPromoDescription": {
+    "message": "Izinkan menampilkan iklan di Dompet Mavryk"
+  },
+  "partnersPromoDescriptionP2": {
+    "message": "di Temple Keys untuk melihat iklan"
+  },
+  "totalEquityValue": {
+    "message": "Total Nilai Ekuitas"
+  },
+  "totalBalance": {
+    "message": "Total Saldo"
+  },
+  "buyButton": {
+    "message": "Beli"
+  },
+  "withdraw": {
+    "message": "Tarik"
+  },
+  "toCard": {
+    "message": "Ke kartu"
+  },
+  "enterCardNumber": {
+    "message": "Masukkan nomor kartu"
+  },
+  "onlyForCountryBankingCards": {
+    "message": "Hanya untuk kartu bank $country$",
+    "placeholders": {
+      "country": {
+        "content": "$1"
+      }
+    }
+  },
+  "buyWithCrypto": {
+    "message": "Beli dengan Kripto"
+  },
+  "buyWithExolix": {
+    "message": "Beli Dengan Exolix"
+  },
+  "buyWithRamp": {
+    "message": "Beli Dengan Ramp"
+  },
+  "buyWithRampDescription": {
+    "message": "Beli MAV menggunakan Visa, Mastercard, dan semua kartu debit dan kredit utama. Ramp tersedia di 160+ negara dan wilayah."
+  },
+  "sellWithAliceBob": {
+    "message": "Jual MAV dengan Alice-Bob"
+  },
+  "sellWithAliceBobDescription": {
+    "message": "Pertukaran MAV yang cepat dan hemat biaya."
+  },
+  "selectPaymentProvider": {
+    "message": "Pilih penyedia pembayaran"
+  },
+  "pleaseSelectPaymentProvider": {
+    "message": "Harap pilih penyedia pembayaran"
+  },
+  "topUpBuy": {
+    "message": "Beli"
+  },
+  "buyWithCard": {
+    "message": "Beli dengan Kartu Debit/Kredit"
+  },
+  "sellMav": {
+    "message": "Jual MAV"
+  },
+  "topUpDescription": {
+    "message": "Temple mengintegrasikan solusi pihak ketiga untuk membeli MAV atau mata uang lain dengan kartu Debit/Kredit."
+  },
+  "noTopUpOptionsAvailable": {
+    "message": "Tidak ada opsi isi ulang yang tersedia"
+  },
+  "errorWhileCreatingOrder": {
+    "message": "Terjadi kesalahan saat membuat pesanan: $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorWhileGettingOutputEstimation": {
+    "message": "Terjadi kesalahan saat mendapatkan estimasi output dari $provider$: $error$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorWhileGettingCurrenciesList": {
+    "message": "Terjadi kesalahan saat mendapatkan daftar mata uang dari $provider$: $error$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorWhileUpdatingPairLimits": {
+    "message": "Terjadi kesalahan saat memperbarui batas pasangan untuk pasangan yang ditentukan dari $provider$: $error$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "noKycRequired": {
+    "message": "Tidak perlu KYC"
+  },
+  "supportsUsdt": {
+    "message": "Mendukung USDT"
+  },
+  "bestPrice": {
+    "message": "Harga terbaik"
+  },
+  "withdrawDescription": {
+    "message": "Temple mengintegrasikan solusi pihak ketiga untuk menjual MAV. Pilih penyedia, ikuti panduan, \n dapatkan fiat ke kartu Debit/Kredit Anda"
+  },
+  "topUpCrypto": {
+    "message": "Kripto"
+  },
+  "topUpDebit": {
+    "message": "Kartu Debit/Kredit"
+  },
+  "overdueTransaction": {
+    "message": "Transaksi terlambat"
+  },
+  "overdueTransactionMessage": {
+    "message": "Harap, buat pertukaran baru kecuali \n Anda telah mengirim dana. \n Jika dana telah dikirim, harap tunggu konfirmasi dari sistem."
+  },
+  "topUpAgain": {
+    "message": "Isi Ulang Lagi"
+  },
+  "topUp": {
+    "message": "Isi Ulang"
+  },
+  "newTopUp": {
+    "message": "Isi Ulang Baru"
+  },
+  "exchangeDetails": {
+    "message": "Masukkan detail pertukaran"
+  },
+  "exchangeDetailsDescription": {
+    "message": "Isi ulang saldo MAV atau USDT Mavryk Anda secara instan dengan $number$ mata uang kripto",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "sellMavDetails": {
+    "message": "Detail jual MAV"
+  },
+  "sellDetailsDescription": {
+    "message": "Jual MAV ke fiat. Dapatkan fiat ke kartu Visa, Mastercard."
+  },
+  "privacyAndPolicyLinks": {
+    "message": "Dengan mengklik $buttonContent$ Anda setuju dengan $termsOfUse$ dan $privacyPolicy$",
+    "placeholders": {
+      "buttonContent": {
+        "content": "$1"
+      },
+      "termsOfUse": {
+        "content": "$2"
+      },
+      "privacyPolicy": {
+        "content": "$3"
+      }
+    }
+  },
+  "depositAddressText": {
+    "message": "Alamat deposit $depositAddress$:",
+    "placeholders": {
+      "depositAddress": {
+        "content": "$1"
+      }
+    }
+  },
+  "support": {
+    "message": "Dukungan"
+  },
+  "deposit": {
+    "message": "Deposit"
+  },
+  "depositDescription": {
+    "message": "Kirim dana ke alamat di bawah. Segera setelah deposit diterima, proses pertukaran akan dimulai secara otomatis"
+  },
+  "sendByOneTransaction": {
+    "message": "Kirim dengan satu transaksi"
+  },
+  "youGet": {
+    "message": "Anda mendapatkan:"
+  },
+  "fixedRate": {
+    "message": "Nilai tetap:"
+  },
+  "transactionId": {
+    "message": "ID Transaksi"
+  },
+  "atomDepositMemo": {
+    "message": "Memo Deposit Atom"
+  },
+  "recipientAddress": {
+    "message": "Alamat penerima:"
+  },
+  "recipientXtzAddress": {
+    "message": "Alamat XTZ penerima:"
+  },
+  "inputHash": {
+    "message": "Hash input:"
+  },
+  "youSend": {
+    "message": "Anda mengirim:"
+  },
+  "sell": {
+    "message": "Jual"
+  },
+  "newSell": {
+    "message": "Penjualan baru"
+  },
+  "youSell": {
+    "message": "Anda menjual:"
+  },
+  "sendTime": {
+    "message": "Waktu kirim:"
+  },
+  "completedDescription": {
+    "message": "Harap, periksa dana Anda di dompet Anda.\nProses pertukaran selesai."
+  },
+  "completed": {
+    "message": "Selesai"
+  },
+  "youReceive": {
+    "message": "Anda menerima:"
+  },
+  "waitMessage": {
+    "message": "Harap tunggu. Proses konversi akan memakan waktu 15 menit hingga 2 jam."
+  },
+  "confirmation": {
+    "message": "Konfirmasi"
+  },
+  "exchanging": {
+    "message": "Menukar"
+  },
+  "step": {
+    "message": "Langkah"
+  },
+  "waitingStatusDescription": {
+    "message": "Menunggu deposit klien."
+  },
+  "exchangingStatusDescription": {
+    "message": "Pertukaran sedang dilakukan."
+  },
+  "sendingStatusDescription": {
+    "message": "Dalam proses pembayaran ke klien."
+  },
+  "completedStatusDescription": {
+    "message": "Pesanan berhasil diselesaikan."
+  },
+  "expiredStatusDescription": {
+    "message": "Pesanan tidak dibayar dalam waktu yang dialokasikan."
+  },
+  "canceledStatusDescription": {
+    "message": "Pesanan dibatalkan."
+  },
+  "failedStatusDescription": {
+    "message": "Dalam proses pelaksanaan pesanan, terjadi kesalahan."
+  },
+  "holdedStatusDescription": {
+    "message": "Surat perintah ditangguhkan untuk memeriksa KYC."
+  },
+  "refundedStatusDescription": {
+    "message": "Uang dikembalikan ke klien."
+  },
+  "preparedStatusDescription": {
+    "message": "Pesanan siap untuk menjual kripto."
+  },
+  "NFTs": {
+    "message": "NFT"
+  },
+  "attentionSendAmount": {
+    "message": "Anda perlu mengirim jumlah mata uang kripto yang tepat ke alamat deposit. Jika tidak, transaksi akan gagal dan Anda harus menghubungi $support$",
+    "placeholders": {
+      "support": {
+        "content": "$1"
+      }
+    }
+  },
+  "important": {
+    "message": "Penting"
+  },
+  "id": {
+    "message": "ID"
+  },
+  "manageNFTs": {
+    "message": "Kelola NFT"
+  },
+  "manageRWAs": {
+    "message": "Kelola RWA"
+  },
+  "deleteNFTConfirm": {
+    "message": "Apakah Anda yakin ingin menghapus NFT ini?"
+  },
+  "deleteRWAConfirm": {
+    "message": "Apakah Anda yakin ingin menghapus RWA ini?"
+  },
+  "zeroNFTText": {
+    "message": "Anda belum memiliki NFT"
+  },
+  "getNFTs": {
+    "message": "Dapatkan NFT"
+  },
+  "min": {
+    "message": "Min:"
+  },
+  "exolixWarningTopUpServiceMessage": {
+    "message": "Fitur pertukaran token disediakan oleh Exolix sebagai penyedia pihak ketiga. Dompet Temple tidak bertanggung jawab atas pekerjaan layanan pihak ketiga."
+  },
+  "warningTopUpServiceMessage": {
+    "message": "Fitur pertukaran token disediakan oleh pihak ketiga. Dompet Temple tidak bertanggung jawab atas pekerjaan layanan pihak ketiga."
+  },
+  "selectTokensToSwap": {
+    "message": "Harap, pilih token untuk ditukar"
+  },
+  "enterSwapAmount": {
+    "message": "Harap, masukkan jumlah tukar"
+  },
+  "noQuotesAvailable": {
+    "message": "Tidak ada kuotasi tersedia"
+  },
+  "swapRouteLoadingHasFailed": {
+    "message": "Pemuatan data nilai tukar gagal. \nMuat ulang halaman ini atau coba lagi nanti."
+  },
+  "swapTokenSearchInputPlaceholder": {
+    "message": "Masukkan nama atau alamat"
+  },
+  "sync": {
+    "message": "Sinkronkan"
+  },
+  "synchronization": {
+    "message": "Sinkronkan Dengan Seluler"
+  },
+  "synchronizationSettingsDescription": {
+    "message": "Sinkronkan dengan Dompet Temple Seluler."
+  },
+  "syncSettingsTitle": {
+    "message": "Sinkronkan dengan Dompet Temple Seluler"
+  },
+  "syncSettingsDescription": {
+    "message": "Anda dapat menyinkronkan Frasa Seed dan akun (HD) Anda dengan perangkat seluler Anda. Jika Anda baru saja membuka aplikasi Mavryk Mobile untuk pertama kalinya, klik tombol 'Sinkronkan' dan ikuti langkah-langkah di ponsel Anda."
+  },
+  "syncPasswordDescription": {
+    "message": "Gunakan kata sandi dompet Anda saat ini untuk memulai sinkronisasi."
+  },
+  "syncSettingsAlert": {
+    "message": "Pastikan tidak ada orang lain yang melihat layar Anda saat Anda memindai kode ini."
+  },
+  "scanQRWithTempleMobile": {
+    "message": "Pindai kode QR ini dari aplikasi Mavryk Mobile Anda"
+  },
+  "serviceIsUnavailable": {
+    "message": "Maaf, layanan sementara tidak tersedia. Coba lagi nanti!"
+  },
+  "buyWithChainBits": {
+    "message": "Beli dengan ChainBits"
+  },
+  "buyWithChainBitsDescription": {
+    "message": "Membeli Kripto Tidak Pernah Semudah Ini"
+  },
+  "news": {
+    "message": "Berita"
+  },
+  "notifications": {
+    "message": "Notifikasi"
+  },
+  "notificationsSettingsDescription": {
+    "message": "Izinkan notifikasi untuk Dompet Mavryk"
+  },
+  "notificationsNotFound": {
+    "message": "Notifikasi tidak ditemukan"
+  },
+  "readInOriginal": {
+    "message": "Baca dalam bahasa asli"
+  },
+  "route3ChainsDexes": {
+    "message": "$chainsCount$ chain / $dexesCount$ dex",
+    "placeholders": {
+      "chainsCount": {
+        "content": "$1"
+      },
+      "dexesCount": {
+        "content": "$2"
+      }
+    }
+  },
+  "swapRoute3Description": {
+    "message": "Dompet Temple menyediakan antarmuka untuk berinteraksi dengan"
+  },
+  "swapRoute3Link": {
+    "message": "Agregator DEX 3route."
+  },
+  "searchingTheBestRoute": {
+    "message": "Mencari rute terbaik"
+  },
+  "noRoutesFound": {
+    "message": "Tidak ada rute ditemukan"
+  },
+  "swapCashback": {
+    "message": "Cashback"
+  },
+  "swapCashbackDescription": {
+    "message": "Tukar lebih dari 10$ dan terima 0,175% dari jumlah yang ditukar dalam token TKEY sebagai cashback"
+  },
+  "jumpInMaven": {
+    "message": "Langsung ke Mavryk sekarang!"
+  },
+  "onRampDesription": {
+    "message": "Beli MAV menggunakan $text$ dan mulai bekerja dengan blockchain Mavryk segera.",
+    "placeholders": {
+      "text": {
+        "content": "$1"
+      }
+    }
+  },
+  "customAmount": {
+    "message": "Jumlah kustom"
+  },
+  "close": {
+    "message": "Tutup"
+  },
+  "thirdParty": {
+    "message": "Fitur pertukaran token disediakan oleh pihak ketiga."
+  },
+  "creditCard": {
+    "message": "kartu kredit"
+  },
+  "creator": {
+    "message": "Pembuat"
+  },
+  "creators": {
+    "message": "Pembuat"
+  },
+  "subscribeToNewsletter": {
+    "message": "Berlangganan Newsletter kami"
+  },
+  "keepLatestNews": {
+    "message": "Ikuti berita terbaru dari Mavryk Dynamics"
+  },
+  "unknownError": {
+    "message": "Kesalahan tidak dikenal"
+  },
+  "cannotSellToYourself": {
+    "message": "Tidak dapat menjual kepada diri sendiri"
+  },
+  "selectedAccountCannotSignTx": {
+    "message": "Akun yang dipilih tidak dapat menandatangani transaksi"
+  },
+  "attributes": {
+    "message": "Atribut"
+  },
+  "properties": {
+    "message": "Properti"
+  },
+  "viewAds": {
+    "message": "Lihat Iklan"
+  },
+  "viewAdsDescription": {
+    "message": "Saya setuju untuk membagikan data (alamat dompet, IP) dan mendapatkan cashback di Temple Keys untuk melihat iklan"
+  },
+  "goToMain": {
+    "message": "Pergi ke Utama"
+  },
+  "createAccountSuccess": {
+    "message": "Akun baru Anda berhasil ditambahkan"
+  },
+  "restoreAccountSuccess": {
+    "message": "Akun Anda berhasil dipulihkan"
+  },
+  "words": {
+    "message": "$count$ kata",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "restoreAccount": {
+    "message": "Pulihkan Akun"
+  },
+  "fileInputPromptPart1": {
+    "message": "Seret dan lepas atau "
+  },
+  "fileInputPromptPart2": {
+    "message": "Pilih file"
+  },
+  "fileInputPromptPart3": {
+    "message": " untuk mengunggah"
+  },
+  "uploadFile": {
+    "message": "Unggah file"
+  },
+  "useSamePassword": {
+    "message": "Gunakan Kata Sandi File sebagai Kata Sandi Ekstensi"
+  },
+  "connectedSites": {
+    "message": "Situs terhubung"
+  },
+  "connectedSitesDesc": {
+    "message": "Akun ini terhubung ke situs-situs ini. Mereka dapat melihat alamat akun Anda. "
+  },
+  "disconnect": {
+    "message": "Putuskan"
+  },
+  "activeSites": {
+    "message": "Situs Aktif"
+  },
+  "networkSelect": {
+    "message": "Pilih Jaringan"
+  },
+  "connectedAcc": {
+    "message": "$name$ terhubung ke situs ini.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "addNetworkSuccessMsg": {
+    "message": "Jaringan berhasil ditambahkan"
+  },
+  "baseUrlPlaceholder": {
+    "message": "Masukkan URL dasar"
+  },
+  "highToLow": {
+    "message": "Nilai: Tinggi ke Rendah"
+  },
+  "lowToHigh": {
+    "message": "Nilai: Rendah ke Tinggi"
+  },
+  "byName": {
+    "message": "Nama"
+  },
+  "hideZeroBalances": {
+    "message": "Sembunyikan Saldo Nol"
+  },
+  "networkMustBeUnique": {
+    "message": "Jaringan ini sudah ada di jaringan yang Anda tambahkan. Harap tambahkan jaringan yang berbeda."
+  },
+  "enterTheWord": {
+    "message": "Masukkan kata"
+  },
+  "createWalletPassword": {
+    "message": "Buat kata sandi dompet"
+  },
+  "confirmWalletPassword": {
+    "message": "Konfirmasi kata sandi dompet"
+  },
+  "restore": {
+    "message": "Pulihkan"
+  },
+  "confirmPassword": {
+    "message": "Konfirmasi Kata Sandi"
+  },
+  "seedPhrase": {
+    "message": "Frasa Seed"
+  },
+  "accountDetails": {
+    "message": "Detail akun"
+  },
+  "expandView": {
+    "message": "Perluas tampilan"
+  },
+  "logout": {
+    "message": "Keluar"
+  },
+  "general": {
+    "message": "Umum"
+  },
+  "enterWalletPassword": {
+    "message": "Masukkan kata sandi dompet Anda"
+  },
+  "connectLedgerDesc": {
+    "message": "Hubungkan perangkat ledger Anda untuk mengakses dana Anda dari aplikasi dompet ini."
+  },
+  "noContacts": {
+    "message": "Tidak Ada Kontak"
+  },
+  "addAddress": {
+    "message": "Tambah Alamat"
+  },
+  "addAddresesDesc": {
+    "message": "Kontak & akun yang telah Anda tambahkan akan muncul di sini."
+  },
+  "goToAddressBook": {
+    "message": "Pergi ke Buku Alamat"
+  },
+  "addContactSuccessDesc": {
+    "message": "Kontak baru berhasil ditambahkan ke \nBuku Alamat Anda"
+  },
+  "aboutDescription": {
+    "message": "Dompet Mavryk adalah platform pilihan Anda untuk mengendalikan kebebasan finansial Anda melalui aset dunia nyata dan DeFi. Dompet Mavryk sepenuhnya non-kustodial, memastikan kontrol eksklusif atas aset Anda. Selamat datang di era baru pemberdayaan finansial."
+  },
+  "ourWebsite": {
+    "message": "Situs Web Kami"
+  },
+  "contactUs": {
+    "message": "Hubungi Kami"
+  },
+  "aboutFooterDescription": {
+    "message": "Jika Anda memiliki pertanyaan, hubungi\n komunitas!"
+  },
+  "activateAccountParagraph": {
+    "message": "Mungkin perlu mengaktifkan akun Anda dari Penggalangan Dana. Anda dapat melakukannya di bawah. "
+  },
+  "removeAccountParagraph": {
+    "message": "Anda menghapus akun ini dari dompet Anda. Pastikan Anda telah mengamankan frasa pemulihan Anda."
+  },
+  "removeAccountMessage": {
+    "message": "Jangan hapus akun ini sampai Anda benar-benar yakin telah mencadangkan frasa seed/kunci pribadi Anda."
+  },
+  "getPro": {
+    "message": "Dapatkan Pro"
+  },
+  "disconnectAll": {
+    "message": "Putuskan Semua"
+  },
+  "stakeListItem1": {
+    "message": "Dapatkan imbalan pertama Anda dalam ~21 hari, lalu terima pembayaran setiap ~3 hari."
+  },
+  "stakeListItem2": {
+    "message": "MVRK Anda tetap di dompet Anda, di bawah kendali Anda. Gunakan kapan saja!"
+  },
+  "delegatePlanListOption1": {
+    "message": "Dapatkan hasil kompetitif yang menyesuaikan dengan aktivitas jaringan"
+  },
+  "delegatePlanListOption2": {
+    "message": "Token 100% likuid dan tetap di dompet Anda—gunakan kapan saja"
+  },
+  "delegatePlanListOption3": {
+    "message": "Tidak ada penguncian atau periode tunggu atau batasan."
+  },
+  "delegatePlanListOption4": {
+    "message": "Dana Anda aman dari penalti"
+  },
+  "coStakePlanListOption1": {
+    "message": "Dapatkan imbalan lebih tinggi dengan mengkomitkan token Anda."
+  },
+  "coStakePlanListOption2": {
+    "message": "Token dikunci selama 14 hari saat unstaking"
+  },
+  "coStakePlanListOption3": {
+    "message": "Dukung keamanan jaringan dengan co-staking dengan ikatan validator"
+  },
+  "coStakePlanListOption4": {
+    "message": "Penalti mungkin berlaku jika validator berperilaku buruk"
+  },
+  "stakePlanOption1": {
+    "message": "<b>Mulai - Delegasi</b> - Akses fleksibel dan instan ke token Anda"
+  },
+  "stakePlanOption2": {
+    "message": "<b>Co-Stake</b> - 2X imbalan Anda 🔥"
+  },
+  "delegateToValidator": {
+    "message": "Delegasi ke Validator Tertentu"
+  },
+  "delegateToPromotedValidators": {
+    "message": "Delegasi ke Validator yang Dipromosikan "
+  },
+  "promote": {
+    "message": "Promosikan"
+  },
+  "promoteYourself": {
+    "message": "Apakah Anda seorang validator? Promosikan diri Anda!"
+  },
+  "availableSpace": {
+    "message": "Ruang Tersedia"
+  },
+  "upTime": {
+    "message": "Waktu Aktif"
+  },
+  "confirmOperation": {
+    "message": "Konfirmasi Operasi"
+  },
+  "payment": {
+    "message": "Pembayaran"
+  },
+  "stakeToEarn": {
+    "message": "Stake MVRK Anda dan dapatkan imbalan!"
+  },
+  "stakedTo": {
+    "message": "Di-stake ke:"
+  },
+  "details": {
+    "message": "Detail"
+  },
+  "marketPrice": {
+    "message": "Harga Pasar"
+  },
+  "stakeYourTokensBannerDescription": {
+    "message": "Stake token Anda ke validator tepercaya"
+  },
+  "chooseStakingPlanMsg": {
+    "message": "Mulai Staking:"
+  },
+  "reStake": {
+    "message": "Stake Ulang"
+  },
+  "coStake": {
+    "message": "Co-stake"
+  },
+  "coStakeAttentionMsg": {
+    "message": "Sebelum co-staking, delegasikan stake Anda ke validator tepercaya untuk mulai mendapatkan imbalan."
+  },
+  "deleteContact": {
+    "message": "Hapus Kontak"
+  },
+  "history": {
+    "message": "Riwayat"
+  },
+  "unknown": {
+    "message": "Tidak dikenal"
+  },
+  "deleteDapp": {
+    "message": "Hapus dApp"
+  },
+  "ETD": {
+    "message": "E.T.D"
+  },
+  "nextPayout": {
+    "message": "Pembayaran berikutnya"
+  },
+  "tokenAddress": {
+    "message": "Alamat Token"
+  },
+  "status": {
+    "message": "Status"
+  },
+  "addOrImportAccount": {
+    "message": "Tambah atau Impor Akun"
+  },
+  "addOrImportAccountDescfiption": {
+    "message": " Di sini Anda dapat membuat akun baru, mengimpor akun lama yang sedang Anda gunakan di platform berbeda atau memulihkan akun yang tidak lagi Anda miliki aksesnya tetapi telah menyimpan frasa seed atau file keystore."
+  },
+  "addNewAccount": {
+    "message": "Tambah Akun Baru"
+  },
+  "chooseImportMethod": {
+    "message": "Pilih metode impor "
+  },
+  "impoprtAccSuccessMessage": {
+    "message": "Akun Anda berhasil diimpor"
+  },
+  "createPasswordPlaceholder": {
+    "message": "Buat Kata Sandi"
+  },
+  "enterEmailPlaceholder": {
+    "message": "Masukkan Email"
+  },
+  "enterPasswordPlaceholder": {
+    "message": "Masukkan Kata Sandi"
+  },
+  "enterSecretKey": {
+    "message": "Masukkan Kunci Rahasia"
+  },
+  "selectedCount": {
+    "message": "$count$ Dipilih",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "selectAll": {
+    "message": "Pilih Semua"
+  },
+  "selectHidden": {
+    "message": "Pilih Tersembunyi"
+  },
+  "deleteAssets": {
+    "message": "Hapus Aset"
+  },
+  "areYousureAssetModalDeleteAction": {
+    "message": "Apakah Anda yakin ingin menghapus aset?"
+  },
+  "assetsModalDeleteDescr": {
+    "message": "Aset akan dihapus dari daftar tetapi akan tetap ada di dompet Anda."
+  },
+  "assetAddedSuccessMsg": {
+    "message": "Aset Anda berhasil ditambahkan"
+  },
+  "editAccount": {
+    "message": "Ubah Akun Anda"
+  },
+  "editContact": {
+    "message": "Ubah Kontak"
+  },
+  "editAccountName": {
+    "message": "Ubah Nama Akun"
+  },
+  "editContactName": {
+    "message": "Ubah Nama Kontak"
+  },
+  "hideUnhide": {
+    "message": "Sembunyikan/Tampilkan"
+  },
+  "manageAddresses": {
+    "message": "Kelola Alamat"
+  },
+  "receiveAlert": {
+    "message": "Harap verifikasi bahwa alamat yang Anda inginkan untuk menerima token sudah benar. Terutama saat menggunakan kode QR"
+  },
+  "sendTo": {
+    "message": "Kirim Ke"
+  },
+  "sendSuccessMsg": {
+    "message": "Permintaan kirim terkirim!"
+  },
+  "token": {
+    "message": "Token"
+  },
+  "useMax": {
+    "message": "Gunakan Maks"
+  },
+  "receivedFrom": {
+    "message": "Diterima dari"
+  },
+  "networkFees": {
+    "message": "Biaya Jaringan"
+  },
+  "burnedFromFees": {
+    "message": "Dibakar Dari Biaya 🔥"
+  },
+  "feesBurned": {
+    "message": "Biaya Dibakar 🔥"
+  },
+  "transferFrom": {
+    "message": "Transfer Dari"
+  },
+  "transferTo": {
+    "message": "Transfer Ke"
+  },
+  "maxAmountErrorMsg": {
+    "message": "Jumlah yang Anda masukkan melebihi saldo yang tersedia"
+  },
+  "chooseAccToConnectMsg": {
+    "message": "Pilih akun yang akan dihubungkan"
+  },
+  "noTransactionsFound": {
+    "message": "Tidak ada transaksi ditemukan"
+  },
+  "filterBy": {
+    "message": "Filter berdasarkan"
+  },
+  "validators": {
+    "message": "Validator"
+  },
+  "tokensRwasNFTs": {
+    "message": "Akses Token Mavryk Asli, RWA, & NFT"
+  },
+  "tokensDescPart1": {
+    "message": "Anda dapat melihat semua token Anda di tab ”Token”. Dari sini Anda dapat mengirim token asli, memeriksa saldo Anda, membeli lebih banyak, atau melihat informasi terperinci tentang token apa pun dengan mengkliknya."
+  },
+  "tokensDescPart2": {
+    "message": "Anda dapat mengirim, memeriksa saldo, membeli lebih banyak, atau melihat detail token dengan mengkliknya di bagian ini."
+  },
+  "tokensHint": {
+    "message": "Token Non-Fungible (NFT) Anda ditampilkan di tab “NFT”. Di sini Anda dapat berinteraksi dengan NFT Anda, melihat tampilan penuhnya, ID, dan detail token."
+  },
+  "profileAndAccounts": {
+    "message": "Profil dan banyak akun"
+  },
+  "profileAndAccountsDesc": {
+    "message": "Anda dapat memiliki banyak akun dalam satu dompet! Di bagian atas layar, Anda dapat melihat ikon akun Anda. Dengan mengkliknya, Anda akan melihat akun Anda yang lain terhubung ke dompet ini."
+  },
+  "profileAndAccountsHintPart1": {
+    "message": "Di kanan atas Anda dapat melihat tombol pengaturan, pemilih jaringan, dan ikon situs terhubung. Pemilih jaringan memungkinkan Anda memilih node tempat dompet Mavryk akan terhubung."
+  },
+  "profileAndAccountsHintPart2": {
+    "message": "Jika saldo Anda tidak ditampilkan, coba ubah node. "
+  },
+  "profileAndAccountsHintPart3": {
+    "message": "Anda dapat memilih dari daftar default atau menambahkan RPC kustom secara manual dengan mengikuti instruksi."
+  },
+  "txActionsTitle": {
+    "message": "Cari, Urutkan, & Lihat Riwayat Transaksi"
+  },
+  "txActionsDetailsPart1": {
+    "message": "Gunakan tiga ikon di sebelah kanan untuk menemukan informasi spesifik."
+  },
+  "txActionsDetailsPart2": {
+    "message": "Kaca Pembesar - Cari detail spesifik."
+  },
+  "txActionsDetailsPart3": {
+    "message": "Ikon Urutkan - Urutkan token Anda dan pengaturan tampilan"
+  },
+  "txActionsDetailsPart4": {
+    "message": "Ikon Filter - Cari riwayat transaksi Anda."
+  },
+  "welcomeOnboard": {
+    "message": "Selamat bergabung! 👋"
+  },
+  "welcomeOnboardDetailsPart1": {
+    "message": "Sekarang Anda tahu fungsi dasar & terpenting dari dompet Mavryk."
+  },
+  "welcomeOnboardDetailsPart2": {
+    "message": "Sekarang mari kita setor beberapa $MVRK$ ke dompet Anda."
+  },
+  "welcomeOnboardDetailsPart3": {
+    "message": "Juga, semua instruksi dan panduan tersedia di dokumentasi kami."
+  },
+  "joinCommunity": {
+    "message": "Bergabunglah dengan komunitas kami!"
+  },
+  "goodLuckMsg": {
+    "message": "Semoga berhasil menjelajahi Ekosistem Mavryk!"
+  },
+  "getStarted": {
+    "message": "Memulai"
+  },
+  "welcome": {
+    "message": "Selamat datang di Dompet Mavryk!"
+  },
+  "createNewAccount": {
+    "message": "Buat Akun baru"
+  },
+  "createNewAccountDescription": {
+    "message": "Baru di Mavryk? Mari kita atur! Buat akun baru dan Frasa Seed pribadi"
+  },
+  "spellingError": {
+    "message": "Kesalahan ejaan"
+  },
+  "transactionDetails": {
+    "message": "Detail Transaksi"
+  },
+  "txHistoryendMsg": {
+    "message": "🤩 Hore! Anda telah mencapai semuanya!"
+  },
+  "rwas": {
+    "message": "RWA"
+  },
+  "marigoldMainnet": {
+    "message": "Marigold Mainnet"
+  },
+  "dropdownNoItems": {
+    "message": "Tidak ada item"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "apply": {
+    "message": "Terapkan"
+  },
+  "getAssets": {
+    "message": "Dapatkan Aset"
+  },
+  "noRWAs": {
+    "message": "Anda belum memiliki RWA"
+  },
+  "rwaIssuer": {
+    "message": "Penerbit RWA"
+  },
+  "yourTokens": {
+    "message": "Token Anda"
+  },
+  "estMarketPrice": {
+    "message": "Perk. Harga Pasar"
+  },
+  "lastSale": {
+    "message": "Penjualan Terakhir"
+  },
+  "totalValue": {
+    "message": "Total nilai"
+  },
+  "unrecognizedRPC": {
+    "message": "Node RPC tidak dikenal. Ini mungkin tidak berfungsi dengan baik dengan dompet, harap verifikasi url node."
+  },
+  "proVersion": {
+    "message": "Versi Pro"
+  },
+  "joinMavryk": {
+    "message": "Bergabunglah dengan Mavryk Pro dan Buka Peluang Baru!"
+  },
+  "proSreenItem1": {
+    "message": "Verifikasi sekali, gunakan di seluruh ekosistem. Versi dompet pro menawarkan verifikasi alamat."
+  },
+  "proSreenItem2": {
+    "message": "Berinteraksi secara mulus dengan Aset Dunia Nyata semua di dalam dompet Anda."
+  },
+  "proSreenItem3": {
+    "message": "Gunakan RWA dengan mudah di DeFi; berdagang, meminjamkan, & meminjam."
+  },
+  "proSreenItem4": {
+    "message": "Non-kustodial: kendalikan masa depan keuangan Anda dan kelola portofolio Anda."
+  },
+  "mavopolySuccessMsg": {
+    "message": "Alamat dompet Anda telah diverifikasi. Anda sekarang dapat memegang dan berinteraksi dengan token RWA di dompet ini."
+  },
+  "addressVerificationMsg": {
+    "message": "Anda dapat mengakses layar verifikasi ini kapan saja melalui tab Mavryk Pro di Layar Utama dompet Anda."
+  },
+  "continueToVerifyAddressesMsg": {
+    "message": "Lanjutkan untuk Memverifikasi Alamat"
+  },
+  "goToMavopoly": {
+    "message": "Pergi Ke Mavopoly"
+  },
+  "addressVerification": {
+    "message": "Verifikasi Alamat"
+  },
+  "addressVerificationDescr": {
+    "message": "Verifikasi alamat kontrak vault Anda di sini. Sebagai bagian dari Testnet, Anda diharuskan menggunakan vault di Maven Finance untuk memanfaatkan RWA Anda. Agar itu terjadi, mereka perlu diverifikasi untuk keperluan permainan. Anda dapat melakukannya di sini."
+  },
+  "contractAddress": {
+    "message": "Alamat Kontrak"
+  },
+  "enterContractAddressPlaceholder": {
+    "message": "Masukkan alamat kontrak"
+  },
+  "veridyAddressSuccessMsg": {
+    "message": "Alamat telah berhasil diverifikasi. "
+  },
+  "verify": {
+    "message": "Verifikasi"
+  },
+  "verifyAddress": {
+    "message": "Verifikasi Alamat"
+  },
+  "verifyAddressErrMsg": {
+    "message": "Alamat tidak valid. Harap periksa lagi atau coba yang lain."
+  },
+  "mavopoly": {
+    "message": "Mavopoly"
+  },
+  "mavrykPro": {
+    "message": "Mavryk Pro"
+  },
+  "coStakeSubHeaderSuccessMsg": {
+    "message": "Co-stake Berhasil!"
+  },
+  "coStakeDesriptionSuccessMsg": {
+    "message": "MVRK Anda telah berhasil di-co-stake dan sekarang aktif menghasilkan imbalan. "
+  },
+  "reDelegateToNewValidator": {
+    "message": "Delegasi Ulang Ke Validator Baru"
+  },
+  "reDelegateToNewValidatorDescr": {
+    "message": "Dengan mendelegasikan ulang ke validator baru, dana Anda ditransfer dengan mulus sambil tetap aktif di-stake. Anda akan terus mendapatkan imbalan dari validator Anda saat ini hingga transfer selesai, kemudian segera mulai mendapatkan dari validator baru tanpa gangguan imbalan atau partisipasi."
+  },
+  "bakerFreeSpace": {
+    "message": "Ruang Validator Tersedia"
+  },
+  "delegatedAmount": {
+    "message": "Jumlah Didelegasikan"
+  },
+  "delegating": {
+    "message": "Mendelegasikan"
+  },
+  "highTrafficMsg": {
+    "message": "Saat ini lalu lintas sedang padat, harap tingkatkan biaya gas untuk memberikan peluang lebih baik transaksi Anda akan berhasil"
+  },
+  "backToValidator": {
+    "message": "Kembali ke Validator"
+  },
+  "unlockSuccessMsg": {
+    "message": "Anda telah berhasil memulai proses pembukaan kunci. Setelah 4 siklus (12 hari) Anda akan dapat menyelesaikan pembukaan kunci stake Anda dan akan memiliki akses penuh ke dana Anda."
+  },
+  "finalizeUnlockSuccessMsg": {
+    "message": "Anda telah sepenuhnya membuka kunci stake Anda. Dana Anda sekarang tersedia dan siap digunakan."
+  },
+  "delegatingPeriod": {
+    "message": "Mendelegasikan - $icon$ $daysLeft$ tersisa",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "costakePeriod": {
+    "message": "Co-staking - $icon$ $daysLeft$ tersisa",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlockingPeriod": {
+    "message": "Membuka Kunci - $icon$ $daysLeft$ tersisa",
+    "placeholders": {
+      "icon": {
+        "content": "$1"
+      },
+      "daysLeft": {
+        "content": "$2"
+      }
+    }
+  },
+  "unlocked": {
+    "message": "terbuka"
+  },
+  "proceedToUnlock": {
+    "message": "Lanjutkan untuk Membuka Kunci"
+  },
+  "coStaked": {
+    "message": "Di-co-stake"
+  },
+  "unlockStake": {
+    "message": "Buka Kunci Stake"
+  },
+  "stakedAmount": {
+    "message": "Jumlah Di-stake"
+  },
+  "allValidators": {
+    "message": "Semua Validator"
+  },
+  "unlockYourStake": {
+    "message": "Buka Kunci Stake Anda"
+  },
+  "unlockYourStakeFirst": {
+    "message": "Buka Kunci Stake Anda Terlebih Dahulu"
+  },
+  "unlockYourStakeDesc": {
+    "message": "Membuka kunci dana yang di-stake memulai periode tunggu 4 siklus (12 hari). Selama waktu ini, aset Anda tetap didelegasikan ke validator Anda saat ini dan tidak dapat diakses untuk ditarik."
+  },
+  "manageMVRK": {
+    "message": "Kelola Co-Stake MVRK Anda"
+  },
+  "choosePortionMVRKStake": {
+    "message": "Anda dapat memilih untuk co-stake sebagian MVRK Anda, atau seluruhnya."
+  },
+  "choosePortionMVRKUnlock": {
+    "message": "Anda dapat memilih untuk membuka kunci sebagian MVRK Anda yang di-co-stake, atau seluruhnya."
+  },
+  "unlockYourStakeFirstDesc": {
+    "message": "Sebelum mendelegasikan ulang, Anda perlu membuka kunci aset Anda terlebih dahulu. Setelah periode buka kunci X hari, Anda dapat memilih validator baru."
+  },
+  "finalizeUnstake": {
+    "message": "Selesaikan unstake"
+  },
+  "unstake": {
+    "message": "Unstake"
+  },
+  "manageYourCoStake": {
+    "message": "Kelola Co-stake Anda"
+  },
+  "increaseCostakeDesc": {
+    "message": "Meningkatkan co-stake Anda meningkatkan imbalan dan partisipasi. \nCatatan: Jumlah yang ditingkatkan akan memakan waktu 5 siklus (~15 hari) untuk menjadi aktif dan mulai mendapatkan imbalan."
+  },
+  "increase": {
+    "message": "Tambah"
+  },
+  "decrease": {
+    "message": "Kurangi"
+  },
+  "increaseCostake": {
+    "message": "Tambah Co-Stake"
+  },
+  "decreaseCostake": {
+    "message": "Kurangi Co-Stake"
+  },
+  "decreaseCostakeDesc": {
+    "message": "Mengurangi co-stake Anda memulai proses unstaking. \nCatatan: Ini akan memakan waktu 4 siklus (~12 hari) agar dana Anda terbuka sepenuhnya, setelah itu akan menjadi likuid untuk digunakan."
+  }
+}

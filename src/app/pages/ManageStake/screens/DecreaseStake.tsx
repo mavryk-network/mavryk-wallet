@@ -16,9 +16,10 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -38,6 +39,7 @@ export const DecreaseStake: FC = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
+  const chainId = useChainId();
   const { data: { myBakerPkh, canUnlock, stakedBalance } = {} } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
@@ -78,7 +80,7 @@ export const DecreaseStake: FC = () => {
   const amountValue = watch('amount');
 
   const maxAmount = useMemo(
-    () => atomsToTokens(stakedBalance, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),
+    () => atomsToTokens(stakedBalance ?? 0, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),
     [stakedBalance, assetMetadata?.decimals]
   );
 
@@ -112,11 +114,25 @@ export const DecreaseStake: FC = () => {
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
+        const estmtn = await tezos.estimate.unstake({ amount: Number(amount) });
+
         const op = await tezos.wallet
           .unstake({
             amount: Number(amount)
           })
           .send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          amount: tokensToAtoms(amount, assetMetadata?.decimals ?? MAVEN_METADATA.decimals).toString(),
+          estimation: estmtn,
+          baker: myBakerPkh,
+          kind: 'unstake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({
@@ -133,14 +149,17 @@ export const DecreaseStake: FC = () => {
       }
     },
     [
-      assetMetadata,
-      formAnalytics,
       formState.isSubmitting,
       myBakerPkh,
-      setOperation,
-      setSubmitError,
+      canUnlock,
+      formAnalytics,
+      assetMetadata,
+      tezos.estimate,
       tezos.wallet,
-      canUnlock
+      account.publicKeyHash,
+      chainId,
+      setOperation,
+      setSubmitError
     ]
   );
 

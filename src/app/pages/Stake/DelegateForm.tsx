@@ -644,9 +644,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     firstUnlock: false
   });
   const account = useAccount();
+  const chainId = useChainId();
   const tezos = useTezos();
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance } = data;
+  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance, myBakerPkh } = data;
   const delegateLabel = getDelegateLabel(data);
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
@@ -678,7 +679,19 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
 
     if (delegateLabel === FINALIZE_UNLOCK) {
       try {
-        await tezos.wallet.finalizeUnstake({}).send();
+        const estmtn = await tezos.estimate.finalizeUnstake({});
+        const op = await tezos.wallet.finalizeUnstake({}).send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          estimation: estmtn,
+          baker: myBakerPkh,
+          kind: 'finalize_unstake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         return navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'unlock',
@@ -695,7 +708,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === UNLOCKING) {
       return;
     }
-  }, [delegateLabel, hasZeroStakingBalance, tezos.wallet]);
+  }, [account.publicKeyHash, chainId, delegateLabel, hasZeroStakingBalance, myBakerPkh, tezos.estimate, tezos.wallet]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {

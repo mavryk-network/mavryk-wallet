@@ -47,10 +47,12 @@ import {
   useTezos,
   useTezosDomainsClient,
   useFilteredContacts,
-  validateRecipient
+  validateRecipient,
+  useChainId
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tokensToAtoms, tzToMumav } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
@@ -94,6 +96,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   const network = useNetwork();
   const acc = useAccount();
   const tezos = useTezos();
+  const chainId = useChainId();
   const domainsClient = useTezosDomainsClient();
   const { popup } = useAppEnv();
 
@@ -364,7 +367,19 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           const addFee = tzToMumav(feeVal ?? 0);
           const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
           op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
+
+          // create pending delegate operation
+          const pendingOpObject = await buildPendingOperationObject({
+            operation: op,
+            type: 'transaction',
+            sender: acc.publicKeyHash,
+            estimation: estmtn,
+            amount: tokensToAtoms(actualAmount, assetMetadata?.decimals).toString(),
+            to: toResolved
+          });
+          if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }
+
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 

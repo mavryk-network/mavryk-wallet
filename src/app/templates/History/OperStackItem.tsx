@@ -124,10 +124,6 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
 
-      if (!opInteract.entrypoint) {
-        console.log(opInteract, 'opInteract');
-      }
-
       return (
         <Component
           {...componentBaseProps}

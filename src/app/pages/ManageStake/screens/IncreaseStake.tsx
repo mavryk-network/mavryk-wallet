@@ -17,9 +17,10 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -40,6 +41,7 @@ export const IncreaseStake = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
+  const chainId = useChainId();
   const {
     data: { myBakerPkh, canCostake, stakedBalance }
   } = useAccountDelegatePeriodStats(account.publicKeyHash);
@@ -119,12 +121,25 @@ export const IncreaseStake = () => {
       formAnalytics.trackSubmit({ amount });
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
+        const estmtn = await tezos.estimate.stake({ amount: Number(amount) });
 
         const op = await tezos.wallet
           .stake({
             amount: Number(amount)
           })
           .send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          amount: tokensToAtoms(amount, assetMetadata?.decimals ?? MAVEN_METADATA.decimals).toString(),
+          estimation: estmtn,
+          baker: myBakerPkh,
+          kind: 'stake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({
@@ -141,14 +156,17 @@ export const IncreaseStake = () => {
       }
     },
     [
-      assetMetadata,
-      formAnalytics,
       formState.isSubmitting,
       myBakerPkh,
-      setOperation,
-      setSubmitError,
+      canCostake,
+      formAnalytics,
+      assetMetadata,
+      tezos.estimate,
       tezos.wallet,
-      canCostake
+      account.publicKeyHash,
+      chainId,
+      setOperation,
+      setSubmitError
     ]
   );
 

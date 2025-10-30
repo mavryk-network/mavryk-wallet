@@ -539,9 +539,11 @@ type BuildPendingOperationObjecttype = {
   type: string;
   sender: string;
   to?: string;
-  amount?: number;
+  amount?: number | string;
   newDelegate?: string | null;
   prevDelegate?: string | null;
+  baker?: string | null;
+  kind?: string;
   estimation?: Estimate;
 };
 export async function buildPendingOperationObject({
@@ -552,7 +554,9 @@ export async function buildPendingOperationObject({
   amount,
   newDelegate,
   prevDelegate,
-  estimation
+  estimation,
+  kind,
+  baker
 }: BuildPendingOperationObjecttype) {
   if (!operation) return null;
 
@@ -568,6 +572,7 @@ export async function buildPendingOperationObject({
     hash: operation.opHash || operation.hash,
     counter: null,
     sender: { address: sender },
+    source: { address: sender },
     destination: to ? { address: to } : undefined,
     gasLimit: estimation?.gasLimit,
     gasUsed: estimation?.consumedMilligas ? Math.ceil(Number(estimation.consumedMilligas) / 1000) : null,
@@ -590,7 +595,20 @@ export async function buildPendingOperationObject({
         bakerFee: estimation?.suggestedFeeMumav ?? null
       };
     case 'staking':
+      return {
+        ...baseOperationFoelds,
+        kind,
+        baker: {
+          address: baker
+        }
+      };
     case 'transaction':
+      return {
+        ...baseOperationFoelds,
+        target: {
+          address: to
+        }
+      };
     case 'origination':
     case 'reveal':
     default:

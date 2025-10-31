@@ -23,3 +23,5 @@ export const HistoryItemTypeLabels = {
   8: 'Interaction with',
   9: 'Staking'
 };
+
+export const safetyMultiplier = 1.4;

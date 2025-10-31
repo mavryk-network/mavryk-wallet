@@ -16,6 +16,7 @@ import { isTruthy } from 'lib/utils';
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 
+import { safetyMultiplier } from './consts';
 import { getMoneyDiff, isZero } from './helpers';
 import {
   Fa2TransferSummaryArray,
@@ -579,8 +580,8 @@ export async function buildPendingOperationObject({
     storageLimit: estimation?.storageLimit ?? 0,
     amount: amount ?? 0,
     storageUsed: estimation?.storageLimit ?? 0,
-    bakerFee: estimation?.suggestedFeeMumav ?? 0,
-    storageFee: estimation?.burnFeeMumav ?? 0,
+    bakerFee: Math.ceil((estimation?.suggestedFeeMumav ?? 0) * safetyMultiplier),
+    storageFee: Math.ceil((estimation?.burnFeeMumav ?? 0) * safetyMultiplier),
     status: 'pending',
     isPending: true
   };

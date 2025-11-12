@@ -11,7 +11,20 @@ import styles from './successScreen.module.css';
 export const successContentData = {
   hash: ({ i18nKey, hash }: { i18nKey: TID; hash: string }) => (
     <div className="flex flex-col gap-1 text-center items-center">
-      <T id="requestSent" substitutions={t(i18nKey)} />
+      <p className="text-base-plus  font-bold">Send transaction submitted</p>
+      <p className="text-xl  font-bold">-2,500.00 MVRK</p>
+      {/* <T id="requestSent" substitutions={t(i18nKey)} /> */}
+      <div className="bg-primary-card rounded-lg p-3 w-full">
+        <div className="flex items-center justify-between">
+          <span>Addres:</span>
+          <span>mv1PeZx7FXy7QRuMREGXGxeipb24RsMMzUNe</span>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <span>Fees</span>
+          <span>0.01 MVRK</span>
+        </div>
+      </div>
+      <div className="mt-3">You can track this transaction’s status in the History tab or Nexus Block Explorer</div>
       <div className="flex items-center text-white">
         <T id="operationHash" />:
         <HashChip
@@ -39,3 +52,5 @@ export const successContentData = {
     </div>
   )
 };
+
+// chrome-extension://hijkcblfoamgeomngnjhffoafbkbeabe/fullpage.html#/success

@@ -3969,8 +3969,10 @@
   "decreaseCostakeDesc": {
     "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 3 cycles (~9 days) for your funds to fully unlock, after which they will become liquid for use."
   },
-
   "default": {
     "message": "Default"
+  },
+  "viewHistoryTab": {
+    "message": "View History Tab"
   }
 }

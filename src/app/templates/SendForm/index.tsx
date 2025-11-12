@@ -59,8 +59,9 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
   const navigateProps = useMemo(
     () => ({
       pageTitle: 'send',
-      btnText: 'goToMain',
+      btnText: 'viewHistoryTab',
       contentId: 'hash',
+      btnLink: '?tab=history',
       // @ts-expect-error
       contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'send' },
       subHeader: 'success'

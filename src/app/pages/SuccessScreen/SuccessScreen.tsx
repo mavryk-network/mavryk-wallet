@@ -17,7 +17,7 @@ import { SuccessScreenSelectors } from './SuccessScreen.selectors';
 
 export type SuccessStateType = {
   pageTitle: TID;
-  subHeader: TID;
+  subHeader?: TID;
   description?: TID;
   contentID?: string;
   btnText: TID;

@@ -6,15 +6,16 @@ import { HashChip, Money } from 'app/atoms';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
-import { T, TID, t } from 'lib/i18n';
+import { T } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
 
 import styles from './successScreen.module.css';
+import { DelegationOperation } from './templates/DelegationOperations';
 
+// ------------------NAVIGATE STATE PROPS -----------------------------
 // send -> // amount, token, hash, fees, address
 // swap -> // token1, token2, amount1, amount2, rate, min received, fees, hash
-// delegate | re-delegate | co-stake | unlock -> // amount, token, baker address, hash
-// finalize -> // amount, token, hash
+// delegate | re-delegate | co-stake | unlock | finalize -> // amount, token, baker address, hash
 
 type SendOperation = {
   amount: number;
@@ -74,6 +75,7 @@ export const successContentData = {
       </div>
     );
   },
+  DelegationOperation,
   verifySuccess: () => (
     <div className={clsx('flex flex-col gap-1 text-left self-start mx-5 mt-6', styles.verifyAddress)}>
       {/* <T id="requestSent" substitutions={t(i18nKey)} /> */}

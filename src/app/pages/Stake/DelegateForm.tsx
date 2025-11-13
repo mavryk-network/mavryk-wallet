@@ -54,7 +54,7 @@ import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { atomsToTokens, hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
-import { buildPendingOperationObject, buildStorageKeyForTx, putOperationIntoStorage } from 'lib/temple/history/utils';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
@@ -285,31 +285,38 @@ const DelegateForm: FC<DelegateFormProps> = ({
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
+      const delegationBaseStateProps = {
+        hash,
+        assetSlug: MAV_TOKEN_SLUG,
+        amount: balanceNum,
+        validateAddress: myBakerPkh
+      };
+
       if (unfamiliarWithDelegation) {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'delegate',
-          description: 'delegateSuccessDescMsg',
-          subHeader: 'delegateSuccessMsg',
-          btnText: 'goToMain'
-        });
-      } else if (isReDelegationActive) {
-        navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'reDelegate',
-          description: 'reDelegateSuccessDescMsg',
-          subHeader: 'reDelegateSuccessMsg',
-          btnText: 'goToMain'
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
+          contentIdFnProps: {
+            ...delegationBaseStateProps,
+            type: 'delegate'
+          }
         });
       } else {
         navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'stake',
-          btnText: 'goToMain',
-          contentId: 'hash',
-          contentIdFnProps: { hash, i18nKey: 'staking' },
-          subHeader: 'success'
+          pageTitle: 'reDelegate',
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
+          contentIdFnProps: {
+            ...delegationBaseStateProps,
+            type: 'reDelegate'
+          }
         });
       }
     }
-  }, [isReDelegationActive, operation, unfamiliarWithDelegation]);
+  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -694,11 +701,16 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
         if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         return navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'unlock',
-          subHeader: 'success',
-          description: 'finalizeUnlockSuccessMsg',
-          btnText: 'backToValidator',
-          btnLink: '/stake'
+          pageTitle: 'finalizeUnlock',
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentIdFnProps: {
+            hash: pendingOpObject?.hash,
+            assetSlug: MAV_TOKEN_SLUG,
+            amount: pendingOpObject?.amount,
+            validateAddress: myBakerPkh,
+            type: 'finalize'
+          }
         });
       } catch (error) {
         console.log(error);

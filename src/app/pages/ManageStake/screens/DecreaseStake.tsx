@@ -65,19 +65,25 @@ export const DecreaseStake: FC = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
+  const amountValue = watch('amount');
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+      const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'unlock',
-        subHeader: 'success',
-        description: 'unlockSuccessMsg',
-        btnText: 'backToValidator',
-        btnLink: '/stake'
+        btnText: 'viewHistoryTab',
+        btnLink: '?tab=history',
+        contentId: 'DelegationOperation',
+        contentIdFnProps: {
+          hash,
+          assetSlug: MAV_TOKEN_SLUG,
+          amount: amountValue,
+          validateAddress: myBakerPkh,
+          type: 'unlock'
+        }
       });
     }
-  }, [operation]);
-
-  const amountValue = watch('amount');
+  }, [amountValue, myBakerPkh, operation]);
 
   const maxAmount = useMemo(
     () => atomsToTokens(stakedBalance ?? 0, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),

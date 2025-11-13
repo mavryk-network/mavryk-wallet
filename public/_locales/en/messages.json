@@ -3974,5 +3974,8 @@
   },
   "viewHistoryTab": {
     "message": "View History Tab"
+  },
+  "finalizeUnlock": {
+    "message": "Finalize Unlock"
   }
 }

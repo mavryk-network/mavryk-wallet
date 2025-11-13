@@ -68,18 +68,26 @@ export const IncreaseStake = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
+  const amountValue = watch('amount');
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+      const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'coStake',
-        description: 'coStakeDesriptionSuccessMsg',
-        btnText: 'goToMain',
-        subHeader: 'coStakeSubHeaderSuccessMsg'
+        btnText: 'viewHistoryTab',
+        btnLink: '?tab=history',
+        contentId: 'DelegationOperation',
+        contentIdFnProps: {
+          hash,
+          assetSlug: MAV_TOKEN_SLUG,
+          amount: amountValue,
+          validateAddress: myBakerPkh,
+          type: 'stake'
+        }
       });
     }
-  }, [operation]);
+  }, [amountValue, myBakerPkh, operation]);
 
-  const amountValue = watch('amount');
   const baseFee = useMemo(() => new BigNumber(RECOMMENDED_ADD_FEE), []);
 
   const maxAmount = useMemo(

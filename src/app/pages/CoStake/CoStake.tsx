@@ -76,6 +76,7 @@ export const CoStake: FC = () => {
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
       const hash = operation.hash || operation.opHash;
+
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'coStake',
         btnText: 'viewHistoryTab',

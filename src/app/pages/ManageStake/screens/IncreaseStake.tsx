@@ -69,6 +69,8 @@ export const IncreaseStake = () => {
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
   const amountValue = watch('amount');
+
+  console.log(amountValue, 'amountValue');
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
       const hash = operation.hash || operation.opHash;

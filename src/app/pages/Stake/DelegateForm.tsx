@@ -288,7 +288,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       const delegationBaseStateProps = {
         hash,
         assetSlug: MAV_TOKEN_SLUG,
-        amount: balanceNum,
+        amount: atomsToTokens(balanceNum, MAVEN_METADATA.decimals),
         validatorAddress: myBakerPkh
       };
 
@@ -708,7 +708,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           contentIdFnProps: {
             hash: pendingOpObject?.hash,
             assetSlug: MAV_TOKEN_SLUG,
-            amount: pendingOpObject?.amount,
+            amount: atomsToTokens(unstakedBalance, MAVEN_METADATA.decimals),
             validatorAddress: myBakerPkh,
             type: 'finalize'
           }
@@ -721,7 +721,16 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === UNLOCKING) {
       return;
     }
-  }, [account.publicKeyHash, chainId, delegateLabel, hasZeroStakingBalance, myBakerPkh, tezos.estimate, tezos.wallet]);
+  }, [
+    account.publicKeyHash,
+    chainId,
+    delegateLabel,
+    hasZeroStakingBalance,
+    myBakerPkh,
+    tezos.estimate,
+    tezos.wallet,
+    unstakedBalance
+  ]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {

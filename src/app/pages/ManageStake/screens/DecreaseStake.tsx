@@ -78,7 +78,7 @@ export const DecreaseStake: FC = () => {
           hash,
           assetSlug: MAV_TOKEN_SLUG,
           amount: amountValue,
-          validateAddress: myBakerPkh,
+          validatorAddress: myBakerPkh,
           type: 'unlock'
         }
       });

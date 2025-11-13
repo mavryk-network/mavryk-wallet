@@ -38,7 +38,7 @@ const delegationTextData = {
 
 type DelegationType = 'delegate' | 'reDelegate' | 'stake' | 'unlock' | 'finalize';
 
-type DelegationOperationProps = {
+export type DelegationOperationProps = {
   amount: number;
   assetSlug: string;
   validatorAddress?: string;

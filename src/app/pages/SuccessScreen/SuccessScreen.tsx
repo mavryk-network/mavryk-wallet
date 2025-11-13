@@ -31,7 +31,7 @@ export type SuccessStateType = {
 
 const defaultStateValues: SuccessStateType = {
   pageTitle: 'operations',
-  subHeader: 'success',
+  subHeader: undefined,
   description: undefined,
   bottomDescription: undefined,
   contentId: undefined,

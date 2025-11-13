@@ -10,7 +10,7 @@ import { T } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
 
 import styles from './successScreen.module.css';
-import { DelegationOperation } from './templates/DelegationOperations';
+import { DelegationOperation, DelegationOperationProps } from './templates/DelegationOperations';
 
 // ------------------NAVIGATE STATE PROPS -----------------------------
 // send -> // amount, token, hash, fees, address
@@ -75,7 +75,7 @@ export const successContentData = {
       </div>
     );
   },
-  DelegationOperation,
+  DelegationOperation: (props: DelegationOperationProps) => <DelegationOperation {...props} />,
   verifySuccess: () => (
     <div className={clsx('flex flex-col gap-1 text-left self-start mx-5 mt-6', styles.verifyAddress)}>
       {/* <T id="requestSent" substitutions={t(i18nKey)} /> */}

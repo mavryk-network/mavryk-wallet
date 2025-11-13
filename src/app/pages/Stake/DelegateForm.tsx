@@ -289,7 +289,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         hash,
         assetSlug: MAV_TOKEN_SLUG,
         amount: balanceNum,
-        validateAddress: myBakerPkh
+        validatorAddress: myBakerPkh
       };
 
       if (unfamiliarWithDelegation) {
@@ -704,11 +704,12 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           pageTitle: 'finalizeUnlock',
           btnText: 'viewHistoryTab',
           btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
           contentIdFnProps: {
             hash: pendingOpObject?.hash,
             assetSlug: MAV_TOKEN_SLUG,
             amount: pendingOpObject?.amount,
-            validateAddress: myBakerPkh,
+            validatorAddress: myBakerPkh,
             type: 'finalize'
           }
         });

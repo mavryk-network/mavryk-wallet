@@ -68,9 +68,11 @@ export const SuccessScreen = () => {
           </div>
           {/* content */}
           <section aria-label="success-message ">
-            <div className="text-xl leading-5 text-center mb-2">
-              <T id={state.subHeader} />!
-            </div>
+            {state.subHeader && (
+              <div className="text-xl leading-5 text-center mb-2">
+                <T id={state.subHeader} />!
+              </div>
+            )}
 
             {state.description && (
               <div className="text-sm text-center mb-2">

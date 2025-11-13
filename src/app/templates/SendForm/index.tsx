@@ -60,14 +60,19 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
     () => ({
       pageTitle: 'send',
       btnText: 'viewHistoryTab',
-      contentId: 'hash',
+      contentId: 'SendOperation',
       btnLink: '?tab=history',
-      // @ts-expect-error
-      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'send' },
-      subHeader: 'success'
+      contentIdFnProps: {
+        // @ts-expect-error
+        hash: operation?.opHash ?? operation?.hash,
+        assetSlug,
+        amount: 0,
+        address: 'testHashAddress',
+        fees: 0
+      }
     }),
     // @ts-expect-error
-    [operation?.hash, operation?.opHash]
+    [assetSlug, operation?.hash, operation?.opHash]
   );
 
   // @ts-expect-error

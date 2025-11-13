@@ -85,9 +85,9 @@ export const SuccessScreen = () => {
               </div>
             )}
           </section>
-          <div className="w-full flex flex-col gap-2">
+          <div className="w-full flex flex-col gap-2" style={{ maxWidth: 'fit-content' }}>
             <ButtonLink linkTo={state.btnLink ?? '/'} testID={SuccessScreenSelectors.buttonSuccess} replace>
-              <ButtonRounded size="big" fill className="w-full">
+              <ButtonRounded size="big" fill className="w-full px-7">
                 <T id={state.btnText} />
               </ButtonRounded>
             </ButtonLink>

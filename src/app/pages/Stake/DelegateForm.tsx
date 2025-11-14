@@ -288,7 +288,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       const delegationBaseStateProps = {
         hash,
         assetSlug: MAV_TOKEN_SLUG,
-        amount: atomsToTokens(balanceNum, MAVEN_METADATA.decimals),
+        amount: atomsToTokens(balanceNum ?? 0, MAVEN_METADATA.decimals).toNumber(),
         validatorAddress: myBakerPkh
       };
 
@@ -708,7 +708,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           contentIdFnProps: {
             hash: pendingOpObject?.hash,
             assetSlug: MAV_TOKEN_SLUG,
-            amount: atomsToTokens(unstakedBalance, MAVEN_METADATA.decimals),
+            amount: atomsToTokens(unstakedBalance ?? 0, MAVEN_METADATA.decimals).toNumber(),
             validatorAddress: myBakerPkh,
             type: 'finalize'
           }

@@ -1,12 +1,17 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { HashChip, Identicon, Money } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
 import { useKnownBaker } from 'lib/temple/front';
+
+import styles from '../successScreen.module.css';
 
 const delegationTextData = {
   delegate: {
@@ -55,6 +60,7 @@ export type DelegationOperationProps = {
 
 export const DelegationOperation: FC<DelegationOperationProps> = props => {
   const { type, hash, amount, assetSlug, validatorAddress } = props;
+  const { popup } = useAppEnv();
   const assetMetadata = useAssetMetadata(assetSlug ?? MAV_TOKEN_SLUG);
   const { data: baker } = useKnownBaker(validatorAddress ?? null);
 
@@ -96,10 +102,14 @@ export const DelegationOperation: FC<DelegationOperationProps> = props => {
                     <Identicon type="bottts" hash={validatorAddress ?? ''} size={24} className="rounded-full" />
                   )}
 
-                  <span>{baker?.name ?? <HashChip hash={validatorAddress ?? ''} small />}</span>
+                  <span>
+                    {baker?.name ?? (
+                      <HashChip hash={validatorAddress ?? ''} className={clsx(popup && styles.breakHash)} small />
+                    )}
+                  </span>
                 </div>
               ) : (
-                <HashChip hash={validatorAddress ?? ''} small />
+                <HashChip hash={validatorAddress ?? ''} className={clsx(popup && styles.breakHash)} small />
               )}
             </div>
           </section>

@@ -1,11 +1,16 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { HashChip, Money } from 'app/atoms';
+import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
+
+import styles from '../successScreen.module.css';
 
 export type SendOperationProps = {
   amount: number;
@@ -17,6 +22,7 @@ export type SendOperationProps = {
 
 export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash, address, fees }) => {
   const assetMetadata = useAssetMetadata(assetSlug ?? MAV_TOKEN_SLUG);
+  const { popup } = useAppEnv();
 
   return (
     <div className="flex flex-col text-center items-center">
@@ -33,7 +39,7 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
       <div className="bg-primary-card rounded-lg p-3 w-full mt-4">
         <div className="flex items-center justify-between">
           <span className="text-secondary-white">Addres:</span>
-          <HashChip hash={address} small />
+          <HashChip hash={address} small trim={false} className={clsx(popup && styles.breakHash)} />
         </div>
         <div className="flex items-center justify-between mt-2">
           <div className="text-secondary-white">Fees</div>

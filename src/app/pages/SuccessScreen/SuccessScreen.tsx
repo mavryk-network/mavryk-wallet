@@ -67,7 +67,7 @@ export const SuccessScreen = () => {
             <SuccessIcon className="w-6 h-auto stroke-current" />
           </div>
           {/* content */}
-          <section aria-label="success-message ">
+          <section className="w-full" aria-label="success-message">
             {state.subHeader && (
               <div className="text-xl leading-5 text-center mb-2">
                 <T id={state.subHeader} />!

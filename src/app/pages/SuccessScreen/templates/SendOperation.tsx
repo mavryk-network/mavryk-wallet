@@ -46,7 +46,9 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
         </div>
       </div>
       <div className="mt-3 mb-2">
-        You can track this transaction’s status in the History tab or Nexus Block Explorer
+        You can track this transaction’s status in the History tab or&nbsp;
+        <br className="hidden xxs:block" />
+        Nexus Block Explorer
       </div>
       <div className="flex items-center text-white">
         <T id="operationHash" />:

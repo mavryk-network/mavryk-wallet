@@ -13,14 +13,22 @@ const delegationTextData = {
     label: 'Delegation',
     descr: (
       <>
-        The delegation will become active in ~21 days (7 network cycles). Once active, your stake will start supporting
+        The delegation will become active in&nbsp; <br className="hidden xxs:block" />
+        ~21 days (7 network cycles). Once active, your stake will start supporting&nbsp;
+        <br className="hidden xxs:block" />
         the validator. The first rewards are expected ~3 days after activation.
       </>
     )
   },
   reDelegate: {
     label: 'Re-Delegation',
-    descr: <>Your stake will become active and continue earning rewards once confirmed.</>
+    descr: (
+      <>
+        Your stake will become active and continue earning rewards&nbsp;
+        <br className="hidden xxs:block" />
+        once confirmed.
+      </>
+    )
   },
   stake: {
     label: 'Co-Stake',
@@ -100,7 +108,11 @@ export const DelegationOperation: FC<DelegationOperationProps> = props => {
 
       <div className="mt-3 mb-2 flex flex-col gap-2">
         <p>{delegationTextData[type].descr}</p>
-        <p>You can track this transaction’s status in the History tab or Nexus Block Explorer</p>
+        <p>
+          You can track this transaction’s status in the History tab or&nbsp;
+          <br className="hidden xxs:block" />
+          Nexus Block Explorer
+        </p>
       </div>
       <div className="flex items-center text-white">
         <T id="operationHash" />:

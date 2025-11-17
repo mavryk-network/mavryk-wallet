@@ -169,7 +169,7 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
         gecko: {
           id: '{c0abd1ce-af67-42b6-a5a9-a4dfb36d46f8}',
           data_collection_permissions: {
-            collects_data: false
+            required: ['none']
           }
         }
       }

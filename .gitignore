@@ -13,7 +13,7 @@ node_modules/
 
 # Env
 .env*
-!.env.dist
+!.env.production
 
 # misc
 .DS_Store

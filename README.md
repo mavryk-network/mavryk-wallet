@@ -38,9 +38,11 @@ git clone https://github.com/mavryk-network/mavryk-wallet && cd mavryk-wallet
 yarn
 ```
 
-### 3) Create `.env` file
+### 3) Fill the `.env.production` file with your actual variables
 
-Make copy of `.env.dist` and do changes if needed.
+Or copy `.env.production` to `.env.local` to use the same configuration in your local environment.
+
+> You can still build the extension without filling in the ".env" file, but it won’t work properly.
 
 ### 4) Build
 

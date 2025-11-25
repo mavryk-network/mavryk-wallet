@@ -152,23 +152,20 @@ export function useAccountDelegatePeriodStats(
               }
               // -----------------------------------
 
-              const isFinalizableUnstakeRequest = Boolean(
-                unstakeRequests?.finalizable?.find(item => item.delegate === accStats?.delegate?.address)
-              );
-
               const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
               const costakeWaitTime = getCoStakeWaitTime(
                 cycleDurationMs,
                 currentCycle,
                 delegateCycle,
-                accStats?.lastActivityTime,
                 accStats?.stakedBalance,
                 accStats?.unstakedBalance
               );
+
               const unlockWaitTime = getUnlockWaitTime(
                 cycleDurationMs,
-                isFinalizableUnstakeRequest,
-                accStats?.lastActivityTime,
+                currentCycle,
+                unstakeRequests,
+                accStats?.delegate?.address,
                 accStats?.unstakedBalance
               );
 
@@ -218,7 +215,6 @@ export function useAccountDelegatePeriodStats(
   }, [
     accStats?.delegate?.address,
     accStats?.delegationTime,
-    accStats?.lastActivityTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
     tezos.rpc,

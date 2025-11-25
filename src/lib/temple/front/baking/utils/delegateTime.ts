@@ -1,4 +1,4 @@
-import { ConstantsResponse } from '@mavrykdynamics/taquito-rpc';
+import { ConstantsResponse, UnstakeRequestsResponse } from '@mavrykdynamics/taquito-rpc';
 import BigNumber from 'bignumber.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -49,29 +49,37 @@ export function getDelegationWaitTime(cycleDurationMs: number, delegationTime?: 
 // 2) Unlock stake ~ (9 days)
 export function getUnlockWaitTime(
   cycleDurationMs: number,
-  isFinalizableUnstakeRequest: boolean,
-  lastActivityTime?: string | null,
+  currentCycle: number,
+  unstakeRequests?: UnstakeRequestsResponse | null,
+  delegateAddress?: string | null,
   unstakedBalance?: number
 ): string | null {
-  // Only compute cooldown if there is actually an unlock in progress
-  if (!lastActivityTime || !unstakedBalance || unstakedBalance === 0) return null;
+  // No unstake in progress
+  if (!unstakeRequests || !unstakedBalance || unstakedBalance === 0) return null;
 
-  if (isFinalizableUnstakeRequest) return 'allowed';
+  // If any finalizable request exists for this delegate
+  const hasFinalizable =
+    Array.isArray(unstakeRequests.finalizable) &&
+    unstakeRequests.finalizable.some(item => item.delegate === delegateAddress);
 
-  const start = dayjs(lastActivityTime); // unlock operation time
+  if (hasFinalizable) return 'allowed';
 
-  // For Tezos, unlock stake usually requires ~3 cycles
-  const end = start.add(cycleDurationMs * 3, 'millisecond'); // 3 cycles
+  // check unfinalizable requests to get period info
+  const requests = unstakeRequests.unfinalizable?.requests ?? [];
+  if (!requests.length) return null;
 
-  const now = dayjs();
-  const diff = end.diff(now);
+  // Use the most recent / maximal cycle among requests
+  const unstakeCycle = requests.reduce((max, r) => Math.max(max, Number(r.cycle)), -Infinity);
+  if (!isFinite(unstakeCycle) || unstakeCycle < 0) return null;
 
-  // case when unlock period time has passed but isFinalizableUnstakeRequest is not yet true
-  if (diff <= 0 && !isFinalizableUnstakeRequest) {
-    return 'pending';
-  }
+  const unlockCycle = unstakeCycle + 3; // unlock after 3 full cycles
+  const cyclesLeft = unlockCycle - currentCycle;
 
-  return diff > 0 ? formatTimeLeft(diff) : 'allowed';
+  // If cycles passed but RPC hasn't yet reported finalizable
+  if (cyclesLeft <= 0) return 'pending';
+
+  const diffMs = cyclesLeft * cycleDurationMs;
+  return formatTimeLeft(diffMs);
 }
 
 // 3) Co-stake lock period ~ (6 days = 2 cycles)
@@ -79,17 +87,10 @@ export function getCoStakeWaitTime(
   cycleDurationMs: number,
   currentCycle?: number | null,
   delegateCycle?: number | null,
-  lastActivityTime?: string | null,
   stakedBalance?: number,
   unstakedBalance?: number
 ): string | null {
-  if (
-    currentCycle == null ||
-    delegateCycle == null ||
-    !lastActivityTime ||
-    (stakedBalance ?? 0) <= 0 ||
-    (unstakedBalance ?? 0) > 0
-  ) {
+  if (currentCycle == null || delegateCycle == null || (stakedBalance ?? 0) <= 0 || (unstakedBalance ?? 0) > 0) {
     return null;
   }
 

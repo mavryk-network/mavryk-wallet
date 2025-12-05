@@ -38,7 +38,9 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
       {/* <T id="requestSent" substitutions={t(i18nKey)} /> */}
       <div className="bg-primary-card rounded-lg p-3 w-full mt-4">
         <div className="flex items-center justify-between">
-          <span className="text-secondary-white">Addres:</span>
+          <span className="text-secondary-white">
+            <T id="address" />:
+          </span>
           <HashChip hash={address} small trim={false} className={clsx(popup && styles.breakHash)} />
         </div>
         <div className="flex items-center justify-between mt-2">

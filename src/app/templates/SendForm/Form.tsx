@@ -164,6 +164,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const toValue = watch('to');
   const amountValue = watch('amount');
+  const [finalAmount, setFinalAmount] = useSafeState('0');
   const feeValue = watch('fee') ?? RECOMMENDED_ADD_FEE;
 
   const amountFieldRef = useRef<HTMLInputElement>(null);
@@ -228,13 +229,13 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         // @ts-expect-error
         hash: operation?.opHash ?? operation?.hash,
         assetSlug,
-        amount: amountValue,
+        amount: finalAmount,
         address: receiverAddressToPass,
         fees: feeValue
       }
     }),
     // @ts-expect-error
-    [amountValue, assetSlug, feeValue, operation?.hash, operation?.opHash, receiverAddressToPass]
+    [finalAmount, assetSlug, feeValue, operation?.hash, operation?.opHash, receiverAddressToPass]
   );
 
   // @ts-expect-error
@@ -413,6 +414,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
           if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }
 
+        setFinalAmount(amount);
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
@@ -444,7 +446,8 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       toResolved,
       shoudUseFiat,
       toAssetAmount,
-      formAnalytics
+      formAnalytics,
+      chainId
     ]
   );
 

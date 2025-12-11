@@ -102,7 +102,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
-        <div className={classNames('flex justify-between mx-auto w-full pb-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
+        <div className={classNames('flex justify-center mx-auto w-full pb-4 gap-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
           <ActionButton
             label={<T id="receive" />}
             Icon={ReceiveIcon}
@@ -110,7 +110,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             testID={HomeSelectors.receiveButton}
           />
 
-          <ActionButton
+          {/* <ActionButton
             label={<T id="buyButton" />}
             Icon={BuyIcon}
             to={network.type === 'dcp' ? 'https://buy.chainbits.com' : '/buy'}
@@ -118,7 +118,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             // disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
             disabled
             testID={HomeSelectors.buyButton}
-          />
+          /> */}
           <ActionButton
             label={<T id="swap" />}
             Icon={SwapIcon}
@@ -130,14 +130,14 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             disabled
             testID={HomeSelectors.swapButton}
           />
-          <ActionButton
+          {/* <ActionButton
             label={<T id="withdraw" />}
             Icon={WithdrawIcon}
             to="/withdraw"
             // disabled={!canSend || network.type !== 'main'}
             disabled
             testID={HomeSelectors.withdrawButton}
-          />
+          /> */}
           <ActionButton
             label={<T id="send" />}
             Icon={SendIcon}

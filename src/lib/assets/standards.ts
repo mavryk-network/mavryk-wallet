@@ -1,5 +1,5 @@
-import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import { MavrykToolkit, WalletContract, Contract, ChainIds } from '@mavrykdynamics/webmavryk';
+import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import retry from 'async-retry';
 
 import { getMessage } from 'lib/i18n';

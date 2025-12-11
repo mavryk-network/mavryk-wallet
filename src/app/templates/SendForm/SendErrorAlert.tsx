@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
+import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 
 import { Alert } from 'app/atoms';
 import { NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';

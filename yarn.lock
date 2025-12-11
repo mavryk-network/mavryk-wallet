@@ -1853,89 +1853,6 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.0.0"
 
-"@mavrykdynamics/beacon-core@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-core/-/beacon-core-4.2.3.tgz#6d6bbf57303fe6ceff32365d3131d15e33f50dc2"
-  integrity sha512-+/T0j/5MFX1kQHhtay39NB2rrlRXJVjBSQkS3mPwiUpzW+a/cEQN4v1+vKcBrxdcZoRqKmlEkmQcO2naRK0JXg==
-  dependencies:
-    "@mavrykdynamics/beacon-types" "^4.2.3"
-    "@mavrykdynamics/beacon-utils" "^4.2.3"
-    "@stablelib/ed25519" "^1.0.3"
-    "@stablelib/nacl" "^1.0.4"
-    "@stablelib/utf8" "^1.0.1"
-    "@stablelib/x25519-session" "^1.0.4"
-    bs58check "2.1.2"
-
-"@mavrykdynamics/beacon-dapp@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-dapp/-/beacon-dapp-4.2.3.tgz#ca8523c3599c56f2a6f00d3715a8b94f018764f7"
-  integrity sha512-2N8mjPfq/+IEOZokYohNrQhmzWujdpflaY7PNjB3oEFFMnPbsutoeixGlANhEIcZNAwXQbNg/AiRZzkupU4VJg==
-  dependencies:
-    "@mavrykdynamics/beacon-core" "^4.2.3"
-    "@mavrykdynamics/beacon-transport-matrix" "^4.2.3"
-    "@mavrykdynamics/beacon-transport-postmessage" "^4.2.3"
-    "@mavrykdynamics/beacon-transport-walletconnect" "^4.2.3"
-    "@mavrykdynamics/beacon-ui" "^4.2.3"
-
-"@mavrykdynamics/beacon-transport-matrix@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-transport-matrix/-/beacon-transport-matrix-4.2.3.tgz#36e4b5e57ee20e6baaeab729c4312e5508b1867e"
-  integrity sha512-A4ta6ooH1+FfaVB68QipBzs+Wk2lU5IwnxBNuyEFKTwfrhVeQ3AHEtIuQW98DlCVvS7cLK4QUPWC7PqGGwxxbw==
-  dependencies:
-    "@mavrykdynamics/beacon-core" "^4.2.3"
-    "@mavrykdynamics/beacon-utils" "^4.2.3"
-    axios "^1.6.2"
-
-"@mavrykdynamics/beacon-transport-postmessage@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-transport-postmessage/-/beacon-transport-postmessage-4.2.3.tgz#7e9889eeb69af49e9458ad37cf198d6f8ea8688c"
-  integrity sha512-gBHbxlAkTjr/BtMcYiVy8Qw8aZmIE2FGEaGGzqqcFfTfnsCMkWblveDnY2JwyIs/c7OEifrX1d1bbtRhwRU+/A==
-  dependencies:
-    "@mavrykdynamics/beacon-core" "^4.2.3"
-    "@mavrykdynamics/beacon-types" "^4.2.3"
-    "@mavrykdynamics/beacon-utils" "^4.2.3"
-
-"@mavrykdynamics/beacon-transport-walletconnect@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-transport-walletconnect/-/beacon-transport-walletconnect-4.2.3.tgz#72c2d5ede6a898e07a3376c882d08a188a81385f"
-  integrity sha512-lqPyJ88/ttMFpqAEGmneEQt/wsVlO3qLi8r9GlIqDkaw9iw36K7XtyVuWP//G3W0ASjpJp0D/2jW/qiTlYqosg==
-  dependencies:
-    "@mavrykdynamics/beacon-core" "^4.2.3"
-    "@mavrykdynamics/beacon-types" "^4.2.3"
-    "@mavrykdynamics/beacon-utils" "^4.2.3"
-    "@walletconnect/sign-client" "^2.11.2"
-
-"@mavrykdynamics/beacon-types@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-types/-/beacon-types-4.2.3.tgz#8f5975ac37ad17aa97b0cf7ce40fbe9934cbf01b"
-  integrity sha512-OMgOffkA/gVBhME2EqrCsnmbX7qZhQxsW3Ufr/Q/QQY7aYzg9xwqISGgBa5EFiHywMzeCzPPyxmHZ7JogqOnyg==
-  dependencies:
-    "@types/chrome" "0.0.246"
-
-"@mavrykdynamics/beacon-ui@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-ui/-/beacon-ui-4.2.3.tgz#837d9e955853a24e422309d918480ac21668e97a"
-  integrity sha512-hR/LP0t6Kofs1S7wkraLv5hWRLR9HA8an5MMLVciFlTa1IKuK/UxvUqATiSPaL5m8kN7FwAjSPnRgkeA8xp7Aw==
-  dependencies:
-    "@mavrykdynamics/beacon-core" "^4.2.3"
-    "@mavrykdynamics/beacon-transport-postmessage" "^4.2.3"
-    "@mavrykdynamics/beacon-types" "^4.2.3"
-    "@mavrykdynamics/beacon-utils" "^4.2.3"
-    "@walletconnect/utils" "2.11.2"
-    qrcode-svg "^1.1.0"
-    solid-js "^1.7.11"
-
-"@mavrykdynamics/beacon-utils@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/beacon-utils/-/beacon-utils-4.2.3.tgz#24ac4b84cbab3ed8ffed528cac7daa027f7dad71"
-  integrity sha512-oPsYSu7vBh65mqTR4E6l+Ul2ECx1/L8PK5rMYo4BVUtge5zdb8XgAfclWx+U3JhmSUp1wTYDHiU2UuYQAx4pOw==
-  dependencies:
-    "@stablelib/ed25519" "^1.0.3"
-    "@stablelib/nacl" "^1.0.4"
-    "@stablelib/random" "^1.0.2"
-    "@stablelib/utf8" "^1.0.1"
-    bs58check "2.1.2"
-
 "@mavrykdynamics/mavryk-domains-core@1.26.1", "@mavrykdynamics/mavryk-domains-core@^1.26.1":
   version "1.26.1"
   resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-core/-/mavryk-domains-core-1.26.1.tgz#97bccf1fe1d547e574616383fde1e9830f8fa0c4"
@@ -1990,123 +1907,6 @@
   integrity sha512-YzMzM++33pvGwYDk1ugwRGhBVW5V376nY7rsfnqPNdEw+MPeNu8wKtF5A4/gUIB316DXl0tQqVCAw0oSjF8pVg==
   dependencies:
     nanoid "^3.1.30"
-
-"@mavrykdynamics/taquito-beacon-wallet@20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-beacon-wallet/-/taquito-beacon-wallet-20.1.0.tgz#b68680259b72192f9dc6f0e7271796bfdf70c1ce"
-  integrity sha512-IoSASomV+D2XAqoFupe60yEJ9lpuvEpVbfqvSQXEo7TgGFz1B3Knyb6q5umdPJftEpRwc9bc3GHye4S5kXGLzQ==
-  dependencies:
-    "@mavrykdynamics/beacon-dapp" "^4.2.3"
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-
-"@mavrykdynamics/taquito-contracts-library@20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-contracts-library/-/taquito-contracts-library-20.1.0.tgz#0ac40c996f10c094d111c387d23dea0b565fbcba"
-  integrity sha512-MWArGbrqm3eCXkO5V/gHelk2a/tL1UOFCp53V5YgfiE5hMt2+gH9+cPnVl1RMff3h7HgKU4uTIRC9BhU71R7gg==
-  dependencies:
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-rpc" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-
-"@mavrykdynamics/taquito-core@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-core/-/taquito-core-20.1.0.tgz#78fc0a57d0bd2458d0040de74b8e79d9b07bd1c5"
-  integrity sha512-lz/dEElnXLOfevv/5ASy9WtwDmJlq1DOtvfQcor/EuMJShIGclc3Mqxtco22bJTfLi2izN8gvyiKe+s2pbp8Lg==
-  dependencies:
-    json-stringify-safe "^5.0.1"
-
-"@mavrykdynamics/taquito-http-utils@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-http-utils/-/taquito-http-utils-20.1.0.tgz#e4f6d4cabf29ca9329e4b5e6c3ae25c19b5f3b9c"
-  integrity sha512-dL53043Uwx7GnMtvIKN/7CoZJgEdi7U8K42i/+7Kc/tYbgXx97oR7IPjXPa1kYvNod+LgfBaSeYhoIuhRkuUTw==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    node-fetch "^2.7.0"
-
-"@mavrykdynamics/taquito-local-forging@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-local-forging/-/taquito-local-forging-20.1.0.tgz#74dd35270107e94f1c12a2c52339e4857e21a973"
-  integrity sha512-AguOIR1SEv89N5XMimGw0kBS9pvxrSaAnEB8M9AzMSfiXnN1zBygQmgtlSw43D2rZnuUDmLtDk5xwG031LFffQ==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-
-"@mavrykdynamics/taquito-michel-codec@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-michel-codec/-/taquito-michel-codec-20.1.0.tgz#4aba020f4fc7fba0a74263529e52a7552506906e"
-  integrity sha512-F0CRqfAiD+0hMV2SoMzX3EUVygXn0nk1Azp99YjDBcQ8xpNaQPyFQxf90BHID7Mpv4N59KFBfeW1+knMOYxpxA==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-
-"@mavrykdynamics/taquito-michelson-encoder@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-michelson-encoder/-/taquito-michelson-encoder-20.1.0.tgz#48c31754cfc5c858093b6398cde9a3e7f056a3b5"
-  integrity sha512-OscV4GHrP05f8Gr4aev3PnKLPxY3IjBJ/X3z14i25jDvr1punyfClfjFYRMxNj0uzaZAlyM/0Axqc3EgaV0ALw==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-rpc" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-    fast-json-stable-stringify "^2.1.0"
-
-"@mavrykdynamics/taquito-rpc@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-rpc/-/taquito-rpc-20.1.0.tgz#6d4e43ecd177be67162be910aa291be0178100fc"
-  integrity sha512-dBbfjDEmwqYpoqIQbTTwX/K3UMPOlKRJeLpZsb9MD1OG+78/99/UNniHw4iPGFoNtx9XrXskeyo+TcBqgqfV6Q==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-http-utils" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-
-"@mavrykdynamics/taquito-tzip16@20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-tzip16/-/taquito-tzip16-20.1.0.tgz#6b241770c1f831e894a8b08202a8f6d1353d3a1a"
-  integrity sha512-klpPrYK+gRfLVdv75HzfwKWUpCLXihhu0WyQ2+busicTvvwR+6MEgIjJ07DuJ0hQdl1Q1PgmkP3HCGCGIXoY/A==
-  dependencies:
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-http-utils" "^20.1.0"
-    "@mavrykdynamics/taquito-michelson-encoder" "^20.1.0"
-    "@mavrykdynamics/taquito-rpc" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-    crypto-js "^4.2.0"
-
-"@mavrykdynamics/taquito-utils@20.1.0", "@mavrykdynamics/taquito-utils@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-utils/-/taquito-utils-20.1.0.tgz#0a9f0d214c5a5aff7d4f1cd70360083ac6d70fe1"
-  integrity sha512-63Rxfpl+8V+5Uz5IMyO48DYq2S5odddSVXs5DmheSkGK8hiwxHTwfu0lSmqb7clTaTs8PX74xt04Lo3UXYZ3CA==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@stablelib/blake2b" "^1.0.1"
-    "@stablelib/ed25519" "^1.0.3"
-    "@types/bs58check" "^2.1.0"
-    bignumber.js "^9.1.2"
-    blakejs "^1.2.1"
-    bs58check "^3.0.1"
-    buffer "^6.0.3"
-    elliptic "^6.5.4"
-    typedarray-to-buffer "^4.0.0"
-
-"@mavrykdynamics/taquito@20.1.0", "@mavrykdynamics/taquito@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito/-/taquito-20.1.0.tgz#817a25c222bd457010c97bc8432a306c9bc7bfff"
-  integrity sha512-gux1iZBiZ27s5j1BAAGcoogcIQR8lnmbzopLUEXQtUxbDQHR6r0EHc78mW2iXIYBeRvAWbBRQvmWgst27l3YZQ==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-http-utils" "^20.1.0"
-    "@mavrykdynamics/taquito-local-forging" "^20.1.0"
-    "@mavrykdynamics/taquito-michel-codec" "^20.1.0"
-    "@mavrykdynamics/taquito-michelson-encoder" "^20.1.0"
-    "@mavrykdynamics/taquito-rpc" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    bignumber.js "^9.1.2"
-    rxjs "^7.8.1"
 
 "@mavrykdynamics/webmavryk-core@^2.0.0":
   version "2.0.0"
@@ -3926,29 +3726,6 @@
     lodash.isequal "4.5.0"
     uint8arrays "^3.1.0"
 
-"@walletconnect/core@2.12.1":
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/@walletconnect/core/-/core-2.12.1.tgz#e905e42f6c2a5117a1166c1a1d35e40aa98e76d3"
-  integrity sha512-CIxWNRNvmFNwn+8kPbKyBXS1JHBFJpDE8f73dXtUIElVnZhmXzEOSE5fug91EX57wTrv4/qW66H9kNB3c7Pp5g==
-  dependencies:
-    "@walletconnect/heartbeat" "1.2.1"
-    "@walletconnect/jsonrpc-provider" "1.0.13"
-    "@walletconnect/jsonrpc-types" "1.0.3"
-    "@walletconnect/jsonrpc-utils" "1.0.8"
-    "@walletconnect/jsonrpc-ws-connection" "1.0.14"
-    "@walletconnect/keyvaluestorage" "^1.1.1"
-    "@walletconnect/logger" "^2.1.0"
-    "@walletconnect/relay-api" "^1.0.9"
-    "@walletconnect/relay-auth" "^1.0.4"
-    "@walletconnect/safe-json" "^1.0.2"
-    "@walletconnect/time" "^1.0.2"
-    "@walletconnect/types" "2.12.1"
-    "@walletconnect/utils" "2.12.1"
-    events "^3.3.0"
-    isomorphic-unfetch "3.1.0"
-    lodash.isequal "4.5.0"
-    uint8arrays "^3.1.0"
-
 "@walletconnect/environment@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@walletconnect/environment/-/environment-1.0.1.tgz#1d7f82f0009ab821a2ba5ad5e5a7b8ae3b214cd7"
@@ -4018,7 +3795,7 @@
     idb-keyval "^6.2.1"
     unstorage "^1.9.0"
 
-"@walletconnect/logger@^2.0.1", "@walletconnect/logger@^2.1.0":
+"@walletconnect/logger@^2.0.1":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@walletconnect/logger/-/logger-2.1.2.tgz#813c9af61b96323a99f16c10089bfeb525e2a272"
   integrity sha512-aAb28I3S6pYXZHQm5ESB+V6rDqIYfsnHaQyzFbwUUBFY4H0OXx/YtTl8lvhUNhMMfb9UxbwEBS253TlXUYJWSw==
@@ -4068,21 +3845,6 @@
     "@walletconnect/utils" "2.11.2"
     events "^3.3.0"
 
-"@walletconnect/sign-client@^2.11.2":
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/@walletconnect/sign-client/-/sign-client-2.12.1.tgz#a10f316f5681b7547db2714666a159574f31126f"
-  integrity sha512-6PegtNZgqmOX2G022fyrHjyN3PW6Ov2GVFvG8f+80uqikEO3IAL3dgazlnUYtuaUNYs+Hx7sSvjNVanMiJsE1Q==
-  dependencies:
-    "@walletconnect/core" "2.12.1"
-    "@walletconnect/events" "^1.0.1"
-    "@walletconnect/heartbeat" "1.2.1"
-    "@walletconnect/jsonrpc-utils" "1.0.8"
-    "@walletconnect/logger" "^2.0.1"
-    "@walletconnect/time" "^1.0.2"
-    "@walletconnect/types" "2.12.1"
-    "@walletconnect/utils" "2.12.1"
-    events "^3.3.0"
-
 "@walletconnect/time@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@walletconnect/time/-/time-1.0.2.tgz#6c5888b835750ecb4299d28eecc5e72c6d336523"
@@ -4094,18 +3856,6 @@
   version "2.11.2"
   resolved "https://registry.yarnpkg.com/@walletconnect/types/-/types-2.11.2.tgz#d0359dd4106fcaa1634241a00428d3ea08d0d3c7"
   integrity sha512-p632MFB+lJbip2cvtXPBQslpUdiw1sDtQ5y855bOlAGquay+6fZ4h1DcDePeKQDQM3P77ax2a9aNPZxV6y/h1Q==
-  dependencies:
-    "@walletconnect/events" "^1.0.1"
-    "@walletconnect/heartbeat" "1.2.1"
-    "@walletconnect/jsonrpc-types" "1.0.3"
-    "@walletconnect/keyvaluestorage" "^1.1.1"
-    "@walletconnect/logger" "^2.0.1"
-    events "^3.3.0"
-
-"@walletconnect/types@2.12.1":
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/@walletconnect/types/-/types-2.12.1.tgz#a3cb49bdac43f5cff1d9543bcdbb65f75e19cacc"
-  integrity sha512-mPzGj5ssgcOJKqwn8qsdCr+J9swsjTmDPAV10CghXIe3GGQKOb4noTUhOofb4LDbFaio1GBql8+Xfy+6bulobw==
   dependencies:
     "@walletconnect/events" "^1.0.1"
     "@walletconnect/heartbeat" "1.2.1"
@@ -4128,26 +3878,6 @@
     "@walletconnect/safe-json" "^1.0.2"
     "@walletconnect/time" "^1.0.2"
     "@walletconnect/types" "2.11.2"
-    "@walletconnect/window-getters" "^1.0.1"
-    "@walletconnect/window-metadata" "^1.0.1"
-    detect-browser "5.3.0"
-    query-string "7.1.3"
-    uint8arrays "^3.1.0"
-
-"@walletconnect/utils@2.12.1":
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/@walletconnect/utils/-/utils-2.12.1.tgz#5fced674e0a732eb62f30391943e79abbf3d5d1f"
-  integrity sha512-v2Oc8mTb+3y8MW94Rnj9hxVjJU3wdnE1g8eLZXmcNf7zAvsm1iJPtHl7ZxZsjpVpo1Vg79Oo1rS9gWq9z0kKKw==
-  dependencies:
-    "@stablelib/chacha20poly1305" "1.0.1"
-    "@stablelib/hkdf" "1.0.1"
-    "@stablelib/random" "^1.0.2"
-    "@stablelib/sha256" "1.0.1"
-    "@stablelib/x25519" "^1.0.3"
-    "@walletconnect/relay-api" "^1.0.9"
-    "@walletconnect/safe-json" "^1.0.2"
-    "@walletconnect/time" "^1.0.2"
-    "@walletconnect/types" "2.12.1"
     "@walletconnect/window-getters" "^1.0.1"
     "@walletconnect/window-metadata" "^1.0.1"
     detect-browser "5.3.0"

@@ -1,5 +1,5 @@
-import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
 import { CompositeForger, RpcForger, Signer, MavrykOperationError, MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
 import * as TaquitoUtils from '@mavrykdynamics/webmavryk-utils';

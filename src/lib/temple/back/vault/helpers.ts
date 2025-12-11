@@ -1,4 +1,4 @@
-import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
+import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import browser from 'webextension-polyfill';
 
 // (!) Only importing from `lib/i18n/${'helpers' | 'types'}` directly here

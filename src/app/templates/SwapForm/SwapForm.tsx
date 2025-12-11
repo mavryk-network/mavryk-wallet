@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { TransferParams } from '@mavrykdynamics/taquito';
+import { TransferParams } from '@mavrykdynamics/webmavryk';
 import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';

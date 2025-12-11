@@ -1,4 +1,4 @@
-import type { EntrypointsResponse } from '@mavrykdynamics/taquito-rpc';
+import type { EntrypointsResponse } from '@mavrykdynamics/webmavryk-rpc';
 import debounce from 'debounce';
 
 interface CachedEntrypointsItem {

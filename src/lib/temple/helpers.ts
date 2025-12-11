@@ -1,6 +1,6 @@
-import { MichelCodecPacker } from '@mavrykdynamics/taquito';
-import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
-import { validateAddress, ValidationResult } from '@mavrykdynamics/taquito-utils';
+import { MichelCodecPacker } from '@mavrykdynamics/webmavryk';
+import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
+import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-utils';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 

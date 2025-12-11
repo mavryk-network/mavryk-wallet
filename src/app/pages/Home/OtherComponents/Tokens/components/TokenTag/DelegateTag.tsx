@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { DelegateResponse } from '@mavrykdynamics/taquito-rpc';
+import { DelegateResponse } from '@mavrykdynamics/webmavryk-rpc';
 import classNames from 'clsx';
 
 import { HashChip, Identicon } from 'app/atoms';

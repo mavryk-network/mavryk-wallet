@@ -1,6 +1,6 @@
-import { compose, Context, ContractAbstraction, ContractProvider, MavrykToolkit } from '@mavrykdynamics/taquito';
-import { TokenMetadata, tzip12 } from '@mavrykdynamics/taquito-tzip12';
-import { DEFAULT_HANDLERS, MetadataInterface, MetadataProvider, tzip16 } from '@mavrykdynamics/taquito-tzip16';
+import { compose, Context, ContractAbstraction, ContractProvider, MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { TokenMetadata, tzip12 } from '@mavrykdynamics/webmavryk-tzip12';
+import { DEFAULT_HANDLERS, MetadataInterface, MetadataProvider, tzip16 } from '@mavrykdynamics/webmavryk-tzip16';
 import retry from 'async-retry';
 
 import { isValidContractAddress } from 'lib/temple/helpers';

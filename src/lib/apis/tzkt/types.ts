@@ -1,4 +1,4 @@
-import { OperationStatus } from '@mavrykdynamics/taquito';
+import { OperationStatus } from '@mavrykdynamics/webmavryk';
 import { HubConnection } from '@microsoft/signalr';
 
 import { StakingActions } from 'lib/temple/history/types';

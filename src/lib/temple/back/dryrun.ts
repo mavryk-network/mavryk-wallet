@@ -1,6 +1,6 @@
-import { Estimate, MavrykToolkit } from '@mavrykdynamics/taquito';
-import { localForger } from '@mavrykdynamics/taquito-local-forging';
-import { ForgeOperationsParams } from '@mavrykdynamics/taquito-rpc';
+import { Estimate, MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
+import { ForgeOperationsParams } from '@mavrykdynamics/webmavryk-rpc';
 
 import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import { ReadOnlySigner } from 'lib/temple/read-only-signer';

@@ -1,4 +1,4 @@
-import { ConstantsResponse, UnstakeRequestsResponse } from '@mavrykdynamics/taquito-rpc';
+import { ConstantsResponse, UnstakeRequestsResponse } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';

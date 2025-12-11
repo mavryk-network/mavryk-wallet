@@ -1,6 +1,6 @@
 import type { MavrykWalletDAppMetadata, MavrykWalletDAppNetwork } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import type { Estimate } from '@mavrykdynamics/taquito';
-import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import type { Estimate } from '@mavrykdynamics/webmavryk';
+import type { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 
 import type { TID } from 'lib/i18n/types';
 

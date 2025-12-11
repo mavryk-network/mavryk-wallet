@@ -1,5 +1,5 @@
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
-import { InMemorySigner } from '@mavrykdynamics/taquito-signer';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { InMemorySigner } from '@mavrykdynamics/webmavryk-signer';
 
 import { EnvVars } from 'lib/env';
 import { KYC_CONTRACTS } from 'lib/route3/constants';

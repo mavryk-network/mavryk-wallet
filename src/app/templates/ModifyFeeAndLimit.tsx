@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Estimate } from '@mavrykdynamics/taquito';
+import { Estimate } from '@mavrykdynamics/webmavryk';
 import { Modifier } from '@popperjs/core';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';

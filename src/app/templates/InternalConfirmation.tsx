@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { localForger } from '@mavrykdynamics/taquito-local-forging';
+import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';

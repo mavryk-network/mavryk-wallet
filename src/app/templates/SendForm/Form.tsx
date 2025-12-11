@@ -17,8 +17,8 @@ import {
   TransactionWalletOperation,
   TransactionOperation,
   WalletOperation
-} from '@mavrykdynamics/taquito';
-import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
+} from '@mavrykdynamics/webmavryk';
+import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';

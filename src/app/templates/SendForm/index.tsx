@@ -1,6 +1,6 @@
 import React, { FC, Suspense, useCallback, useMemo, useState } from 'react';
 
-import type { WalletOperation } from '@mavrykdynamics/taquito';
+import type { WalletOperation } from '@mavrykdynamics/webmavryk';
 
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';

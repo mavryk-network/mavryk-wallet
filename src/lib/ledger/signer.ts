@@ -1,4 +1,4 @@
-import { LedgerSigner, LedgerTransport, DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { LedgerSigner, LedgerTransport, DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import {
   b58cdecode,
   b58cencode,
@@ -7,7 +7,7 @@ import {
   isValidPrefix,
   mergebuf,
   prefix
-} from '@mavrykdynamics/taquito-utils';
+} from '@mavrykdynamics/webmavryk-utils';
 import * as elliptic from 'elliptic';
 import * as sodium from 'libsodium-wrappers';
 import { crypto_sign_verify_detached, crypto_generichash } from 'libsodium-wrappers';

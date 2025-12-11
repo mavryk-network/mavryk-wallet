@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
+import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';

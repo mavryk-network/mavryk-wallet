@@ -1687,6 +1687,16 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@ledgerhq/devices@8.7.0":
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-8.7.0.tgz#39e011c484c4251c92769f92cf8c23b8a0b4ce39"
+  integrity sha512-3pSOULPUhClk2oOxa6UnoyXW8+05FK7r6cpq2WiTey4kyIUjmIraO7AX9lhz9IU73dGVtBMdU+NCPPO2RYJaTQ==
+  dependencies:
+    "@ledgerhq/errors" "^6.27.0"
+    "@ledgerhq/logs" "^6.13.0"
+    rxjs "^7.8.1"
+    semver "^7.3.5"
+
 "@ledgerhq/devices@^5.34.0", "@ledgerhq/devices@^5.51.1":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.51.1.tgz#d741a4a5d8f17c2f9d282fd27147e6fe1999edb7"
@@ -1717,16 +1727,6 @@
     rxjs "^7.8.1"
     semver "^7.3.5"
 
-"@ledgerhq/devices@^8.4.4":
-  version "8.4.4"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-8.4.4.tgz#0d195c1650fe57da2fad7f0d9074a0190947cd6f"
-  integrity sha512-sz/ryhe/R687RHtevIE9RlKaV8kkKykUV4k29e7GAVwzHX1gqG+O75cu1NCJUHLbp3eABV5FdvZejqRUlLis9A==
-  dependencies:
-    "@ledgerhq/errors" "^6.19.1"
-    "@ledgerhq/logs" "^6.12.0"
-    rxjs "^7.8.1"
-    semver "^7.3.5"
-
 "@ledgerhq/errors@^5.34.0", "@ledgerhq/errors@^5.50.0":
   version "5.50.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.50.0.tgz#e3a6834cb8c19346efca214c1af84ed28e69dad9"
@@ -1742,10 +1742,10 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.16.4.tgz#a38baffe8b096d9fff3ad839cadb55704c8d8e7b"
   integrity sha512-M57yFaLYSN+fZCX0E0zUqOmrV6eipK+s5RhijHoUNlHUqrsvUz7iRQgpd5gRgHB5VkIjav7KdaZjKiWGcHovaQ==
 
-"@ledgerhq/errors@^6.19.1":
-  version "6.19.1"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.19.1.tgz#d9ac45ad4ff839e468b8f63766e665537aaede58"
-  integrity sha512-75yK7Nnit/Gp7gdrJAz0ipp31CCgncRp+evWt6QawQEtQKYEDfGo10QywgrrBBixeRxwnMy1DP6g2oCWRf1bjw==
+"@ledgerhq/errors@^6.27.0":
+  version "6.27.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.27.0.tgz#3acc978ed1dbbdd8049dcedccccf4a96968f583a"
+  integrity sha512-EE2hATONHdNP3YWFe3rZwwpSEzI5oN+q/xTjOulnjHZo84TLjungegEJ54A/Pzld0woulkkeVA27FbW5SAO1aA==
 
 "@ledgerhq/hw-transport-http@6.27.8":
   version "6.27.8"
@@ -1817,13 +1817,13 @@
     events "^3.3.0"
 
 "@ledgerhq/hw-transport@^6.30.5":
-  version "6.31.4"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.31.4.tgz#9b23a6de4a4caaa5c24b149c2dea8adde46f0eb1"
-  integrity sha512-6c1ir/cXWJm5dCWdq55NPgCJ3UuKuuxRvf//Xs36Bq9BwkV2YaRQhZITAkads83l07NAdR16hkTWqqpwFMaI6A==
+  version "6.31.13"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.31.13.tgz#87e4a53bdcca257eeea6cbcc7a662c449a0cfa92"
+  integrity sha512-MrJRDk74wY980ofiFPRpTHQBbRw1wDuKbdag1zqlO1xtJglymwwY03K2kvBNvkm1RTSCPUp/nAoNG+WThZuuew==
   dependencies:
-    "@ledgerhq/devices" "^8.4.4"
-    "@ledgerhq/errors" "^6.19.1"
-    "@ledgerhq/logs" "^6.12.0"
+    "@ledgerhq/devices" "8.7.0"
+    "@ledgerhq/errors" "^6.27.0"
+    "@ledgerhq/logs" "^6.13.0"
     events "^3.3.0"
 
 "@ledgerhq/logs@^5.30.0", "@ledgerhq/logs@^5.50.0":
@@ -1835,6 +1835,11 @@
   version "6.12.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-6.12.0.tgz#ad903528bf3687a44da435d7b2479d724d374f5d"
   integrity sha512-ExDoj1QV5eC6TEbMdLUMMk9cfvNKhhv5gXol4SmULRVCx/3iyCPhJ74nsb3S0Vb+/f+XujBEj3vQn5+cwS0fNA==
+
+"@ledgerhq/logs@^6.13.0":
+  version "6.13.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-6.13.0.tgz#0b083af64b6b85db0630c7b940a0ed74ff6262b6"
+  integrity sha512-4+qRW2Pc8V+btL0QEmdB2X+uyx0kOWMWE1/LWsq5sZy3Q5tpi4eItJS6mB0XL3wGW59RQ+8bchNQQ1OW/va8Og==
 
 "@lit-labs/ssr-dom-shim@^1.0.0", "@lit-labs/ssr-dom-shim@^1.1.0":
   version "1.2.0"
@@ -2021,18 +2026,6 @@
     "@mavrykdynamics/taquito-core" "^20.1.0"
     node-fetch "^2.7.0"
 
-"@mavrykdynamics/taquito-ledger-signer@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-ledger-signer/-/taquito-ledger-signer-20.1.0.tgz#f9103e7cfa2d77c6b3efe7deca4bf445726acdd5"
-  integrity sha512-pcCRSDH+WS6lBSvAQiqSsn6J6x0qx3acbrcQwLsS7zG+5vd1ueKXCZ6r15R6vQnB3X+9cv3RzwCuwK6u9nAo2A==
-  dependencies:
-    "@ledgerhq/hw-transport" "^6.30.5"
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    "@stablelib/blake2b" "^1.0.1"
-    buffer "^6.0.3"
-
 "@mavrykdynamics/taquito-local-forging@^20.1.0":
   version "20.1.0"
   resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-local-forging/-/taquito-local-forging-20.1.0.tgz#74dd35270107e94f1c12a2c52339e4857e21a973"
@@ -2070,37 +2063,7 @@
     "@mavrykdynamics/taquito-utils" "^20.1.0"
     bignumber.js "^9.1.2"
 
-"@mavrykdynamics/taquito-signer@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-signer/-/taquito-signer-20.1.0.tgz#c5f087fe544442507342929a8f986dfab7f641a4"
-  integrity sha512-NXkfEB3Fff8OXM6vr18/NUzoPGVhTQWIh8zc3CAq4xTylboVDTemgdLnNJxfcyq33SePC9n/XcN9lvnz4HwdvQ==
-  dependencies:
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-utils" "^20.1.0"
-    "@stablelib/blake2b" "^1.0.1"
-    "@stablelib/ed25519" "^1.0.3"
-    "@stablelib/hmac" "^1.0.1"
-    "@stablelib/nacl" "^1.0.4"
-    "@stablelib/pbkdf2" "^1.0.1"
-    "@stablelib/sha512" "^1.0.1"
-    "@types/bn.js" "^5.1.2"
-    bip39 "3.1.0"
-    elliptic "^6.5.4"
-    pbkdf2 "^3.1.2"
-    typedarray-to-buffer "^4.0.0"
-
-"@mavrykdynamics/taquito-tzip12@^20.1.0":
-  version "20.1.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-tzip12/-/taquito-tzip12-20.1.0.tgz#f129975924266db42507a20b8e2dea1f11ad15f4"
-  integrity sha512-Rdp8lCPovSiE35UCpRcFmrOjotBnvJk/see4O1Vy8sxLl+w/68GsnLbpubPt8AJE1qAaev8Wcuy9bx16v5P5Dg==
-  dependencies:
-    "@mavrykdynamics/taquito" "^20.1.0"
-    "@mavrykdynamics/taquito-core" "^20.1.0"
-    "@mavrykdynamics/taquito-michelson-encoder" "^20.1.0"
-    "@mavrykdynamics/taquito-tzip16" "^20.1.0"
-
-"@mavrykdynamics/taquito-tzip16@20.1.0", "@mavrykdynamics/taquito-tzip16@^20.1.0":
+"@mavrykdynamics/taquito-tzip16@20.1.0":
   version "20.1.0"
   resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-tzip16/-/taquito-tzip16-20.1.0.tgz#6b241770c1f831e894a8b08202a8f6d1353d3a1a"
   integrity sha512-klpPrYK+gRfLVdv75HzfwKWUpCLXihhu0WyQ2+busicTvvwR+6MEgIjJ07DuJ0hQdl1Q1PgmkP3HCGCGIXoY/A==
@@ -2142,6 +2105,145 @@
     "@mavrykdynamics/taquito-michelson-encoder" "^20.1.0"
     "@mavrykdynamics/taquito-rpc" "^20.1.0"
     "@mavrykdynamics/taquito-utils" "^20.1.0"
+    bignumber.js "^9.1.2"
+    rxjs "^7.8.1"
+
+"@mavrykdynamics/webmavryk-core@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-core/-/webmavryk-core-2.0.0.tgz#7b5401e47031f1170a3b999945ac8cbcf8e9736c"
+  integrity sha512-oV9xdlre67+Vo7kTiHriY61Z7RtQezwW5dDi4+XNzCl66F/kh+5cE9zLFJ4WdNUx4Szx4e1qt/PXbRnKZb9FrQ==
+  dependencies:
+    json-stringify-safe "^5.0.1"
+
+"@mavrykdynamics/webmavryk-http-utils@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-http-utils/-/webmavryk-http-utils-2.0.0.tgz#035380909c20823dc76cf4d1617300329ad0f2b8"
+  integrity sha512-xoIP4bUynpi732BIittGOnrd+YoUArJZyS4lpLsT1l1g+FDMhnCe9OuR0ZcG3fqpnGq055+Du2HXhah14PyD3g==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    node-fetch "^2.7.0"
+
+"@mavrykdynamics/webmavryk-ledger-signer@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-ledger-signer/-/webmavryk-ledger-signer-2.0.0.tgz#a68d45462b5ba81dc119af2f84b6852bac547754"
+  integrity sha512-AGhUw/huukUL63cc9QbyWNF/Ii/ZDZuJlf1ODgXiagDISc5aW9ceTPv6ubksCH1ME9//WfYGbUHGxVC99H7o2w==
+  dependencies:
+    "@ledgerhq/hw-transport" "^6.30.5"
+    "@mavrykdynamics/webmavryk" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@stablelib/blake2b" "^1.0.1"
+    buffer "^6.0.3"
+
+"@mavrykdynamics/webmavryk-local-forging@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-local-forging/-/webmavryk-local-forging-2.0.0.tgz#725c3336a993cdc506d2f9b5fac7c259a425d24f"
+  integrity sha512-P/7BKdGcjR8OkmvEr0dQKh64cW7jRJp6Pyn8RFC4EnsimMQRgxiOVPJPadSKKmSsCg1iu7Ry9PwlXN3vReENhg==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    bignumber.js "^9.1.2"
+
+"@mavrykdynamics/webmavryk-michel-codec@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michel-codec/-/webmavryk-michel-codec-2.0.0.tgz#bedefc23b1a50591ffd2943628d8a6f7f14ea763"
+  integrity sha512-/RLlLbBBE5fTd91atwxhyKWSctnRbxD/oDRuQaNygnSqxAXWDLXHwKkVUVmUQCTBZvGt6WzgGxmNfhwQx0TGiw==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+
+"@mavrykdynamics/webmavryk-michelson-encoder@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michelson-encoder/-/webmavryk-michelson-encoder-2.0.0.tgz#18dac13b67f42357835479a2be5e39d83004ccaa"
+  integrity sha512-AohxHepYelNa973a3xmjg5aVzAQSZBZkoroteA5Q6f49pM7tT+N/UczwpIbNPpDOhiyo3/e0/DdliKMQRpI/Xg==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    bignumber.js "^9.1.2"
+    fast-json-stable-stringify "^2.1.0"
+
+"@mavrykdynamics/webmavryk-rpc@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-rpc/-/webmavryk-rpc-2.0.0.tgz#766a5739c216819dd49bd7ce951cb58cc8f06106"
+  integrity sha512-cqjHTi/JInXgPvQ1IWtRdgZH7CKTS+m4CcD4++aeUxvuuEqHrDqd2kLs6W+zyFNAr03Mhy1oWsfdNHu6gC/COw==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    bignumber.js "^9.1.2"
+
+"@mavrykdynamics/webmavryk-signer@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-signer/-/webmavryk-signer-2.0.0.tgz#28f31f1b19df8d7ecb1f2a76792199bbd5ec40eb"
+  integrity sha512-6gsIRT8yJ/buzfOWDAE4888tKOcphNMz40X4exQ9EV4cGhVRqFViBEI8MxTCIqH1xInSsWvGMsL/WLuNqWS1Ng==
+  dependencies:
+    "@mavrykdynamics/webmavryk" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@stablelib/blake2b" "^1.0.1"
+    "@stablelib/ed25519" "^1.0.3"
+    "@stablelib/hmac" "^1.0.1"
+    "@stablelib/nacl" "^1.0.4"
+    "@stablelib/pbkdf2" "^1.0.1"
+    "@stablelib/sha512" "^1.0.1"
+    "@types/bn.js" "^5.1.2"
+    bip39 "3.1.0"
+    elliptic "^6.5.4"
+    pbkdf2 "^3.1.2"
+    typedarray-to-buffer "^4.0.0"
+
+"@mavrykdynamics/webmavryk-tzip12@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip12/-/webmavryk-tzip12-2.0.0.tgz#4535a823392cd5773b4d603ba579e7ad63091a50"
+  integrity sha512-YANEMJ2Y+g6Ap1SEMUcqLqIMC4ZzIqix8jdZamyQaG54+YfZSqV/oA9Aewzn9d2K0SGTyJC89w8AmCyGoYIBSQ==
+  dependencies:
+    "@mavrykdynamics/webmavryk" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
+    "@mavrykdynamics/webmavryk-tzip16" "^2.0.0"
+
+"@mavrykdynamics/webmavryk-tzip16@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip16/-/webmavryk-tzip16-2.0.0.tgz#99ec45a650aaa4c6739bd2bfa335cbc2d0ab37d5"
+  integrity sha512-9jcPZ+QQ9yiBNIvnF+xGfy8fidaIh8ONFLZ56Jm8sk/5p2bwKqmdVPwhVpdrWr116faw5l1FFDGVL+FAF7OIMw==
+  dependencies:
+    "@mavrykdynamics/webmavryk" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    bignumber.js "^9.1.2"
+    crypto-js "^4.2.0"
+
+"@mavrykdynamics/webmavryk-utils@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-utils/-/webmavryk-utils-2.0.0.tgz#2dca8f088c1e3af0d8cdcd6e58c904ac84a9c7ab"
+  integrity sha512-AAd+RieOBwPniNDmQd9vMnKmf9dOjSpcy7EdWqO4Gk8Dbpu6n/TxjxiHP/ossUt/mMO71BfeXobGivk7ESQ2Ng==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@stablelib/blake2b" "^1.0.1"
+    "@stablelib/ed25519" "^1.0.3"
+    "@types/bs58check" "^2.1.0"
+    bignumber.js "^9.1.2"
+    blakejs "^1.2.1"
+    bs58check "^3.0.1"
+    buffer "^6.0.3"
+    elliptic "^6.5.4"
+    typedarray-to-buffer "^4.0.0"
+
+"@mavrykdynamics/webmavryk@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk/-/webmavryk-2.0.0.tgz#c52cfe2b273348e5089fd5c9d89b595add077301"
+  integrity sha512-h6u6PhjVrSg+/XF3SKnXh5nP5WO23OMIOeP/Z3rKK4Wc+KdcaY2I4KFMyRyml891LyENt2kkUoy11TGRPGwf5w==
+  dependencies:
+    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-local-forging" "^2.0.0"
+    "@mavrykdynamics/webmavryk-michel-codec" "^2.0.0"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
     bignumber.js "^9.1.2"
     rxjs "^7.8.1"
 
@@ -3124,10 +3226,17 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
-"@types/bn.js@*", "@types/bn.js@^5.1.2":
+"@types/bn.js@*":
   version "5.1.5"
   resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-5.1.5.tgz#2e0dacdcce2c0f16b905d20ff87aedbc6f7b4bf0"
   integrity sha512-V46N0zwKRF5Q00AZ6hWtN0T8gGmDUaUzLWQvHFo5yThtVwK/VCenFY3wXVbOvNfajEpsTfQM4IN9k/d6gUVX3A==
+  dependencies:
+    "@types/node" "*"
+
+"@types/bn.js@^5.1.2":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-5.2.0.tgz#4349b9710e98f9ab3cdc50f1c5e4dcbd8ef29c80"
+  integrity sha512-DLbJ1BPqxvQhIGbeu8VbUC1DiAiahHtAYvA0ZEAa4P31F7IaArc8z3C3BRQdWX4mtLQuABG4yzp76ZrS02Ui1Q==
   dependencies:
     "@types/node" "*"
 

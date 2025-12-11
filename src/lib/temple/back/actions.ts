@@ -4,9 +4,9 @@ import {
   MavrykWalletDAppRequest,
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import { MavrykOperationError } from '@mavrykdynamics/taquito';
-import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
-import { char2Bytes } from '@mavrykdynamics/taquito-utils';
+import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
+import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
+import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { BACKGROUND_IS_WORKER } from 'lib/env';

@@ -1,4 +1,4 @@
-import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
+import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import { BigNumber } from 'bignumber.js';
 import dayjs from 'dayjs';
 

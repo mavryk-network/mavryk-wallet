@@ -1,6 +1,6 @@
 import React, { FC, memo, useMemo } from 'react';
 
-import { Estimate } from '@mavrykdynamics/taquito';
+import { Estimate } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 

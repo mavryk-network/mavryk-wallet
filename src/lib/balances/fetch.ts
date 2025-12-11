@@ -1,4 +1,4 @@
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 
 import { isFA2Token, MAV_TOKEN_SLUG } from 'lib/assets';

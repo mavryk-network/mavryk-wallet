@@ -12,10 +12,10 @@ import {
   MavrykWalletDAppBroadcastResponse,
   MavrykWalletDAppNetwork
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import { valueDecoder } from '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
-import { Uint8ArrayConsumer } from '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
 import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
+import { valueDecoder } from '@mavrykdynamics/webmavryk-local-forging/dist/lib/michelson/codec';
+import { Uint8ArrayConsumer } from '@mavrykdynamics/webmavryk-local-forging/dist/lib/uint8array-consumer';
 import { emitMicheline } from '@mavrykdynamics/webmavryk-michel-codec';
 import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { nanoid } from 'nanoid';

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { FinalizeUnstakeParams, StakeParams, UnstakeParams } from '@mavrykdynamics/taquito/dist/types/operations/types';
 import {
   WalletProvider,
   createOriginationOperation,
@@ -16,6 +15,11 @@ import {
   WalletUnstakeParams,
   WalletFinalizeUnstakeParams
 } from '@mavrykdynamics/webmavryk';
+import {
+  FinalizeUnstakeParams,
+  StakeParams,
+  UnstakeParams
+} from '@mavrykdynamics/webmavryk/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/webmavryk-utils';
 import constate from 'constate';
 import { nanoid } from 'nanoid';

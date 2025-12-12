@@ -1,2 +1,2 @@
-declare module '@mavrykdynamics/taquito-local-forging/dist/lib/michelson/codec';
-declare module '@mavrykdynamics/taquito-local-forging/dist/lib/uint8array-consumer';
+declare module '@mavrykdynamics/webmavryk-local-forging/dist/lib/michelson/codec';
+declare module '@mavrykdynamics/webmavryk-local-forging/dist/lib/uint8array-consumer';

@@ -85,7 +85,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
       <PopupModalWithTitle
         isOpen={showAccountsPopup}
         onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
-        title={<T id="selectAccount" />}
+        title={<>My Accounts</>}
         portalClassName="accounts-popup"
         contentPosition={popup ? 'bottom' : 'center'}
         leftSidedComponent={

@@ -3,6 +3,8 @@ import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 import classNames from 'clsx';
 
 import { useAppEnv } from 'app/env';
+import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
+import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField/SearchField';
@@ -13,6 +15,7 @@ import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/fr
 import { AccountDropdownSelectors } from '../selectors';
 
 import { AccountItem } from './AccountItem';
+import { WalletCard } from './components/WalletCard';
 
 type AccountPopupProps = {
   opened: boolean;
@@ -68,28 +71,48 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
     [setOpened]
   );
 
+  const icons = useMemo(() => {
+    return [
+      {
+        id: 1,
+        Icon: SettingsIcon
+      },
+      {
+        id: 2,
+        Icon: PlusIcon
+      }
+    ];
+  }, []);
+
   return (
     <div className={classNames(popup ? 'my-2' : 'px-12')}>
-      {isShowSearch && (
-        <SearchField
-          value={searchValue}
-          className={classNames(
-            'py-2 pl-8 pr-4',
-            'bg-secondary-card',
-            'focus:outline-none',
-            'transition ease-in-out duration-200',
-            'text-white text-sm leading-tight',
-            'placeholder-primary-white placeholder-opacity-50 rounded-lg'
-          )}
-          placeholder={t('searchByName')}
-          searchIconClassName="h-5 w-auto"
-          searchIconWrapperClassName="px-2 text-white opacity-50"
-          cleanButtonStyle={{ backgroundColor: 'transparent' }}
-          containerClassName={'mb-4 px-4'}
-          onValueChange={setSearchValue}
-        />
-      )}
-
+      <div className="flex items-center justify-end mb-3 px-4 gap-3">
+        {isShowSearch && (
+          <SearchField
+            value={searchValue}
+            className={classNames(
+              'py-2 pl-8 pr-4',
+              'bg-secondary-card',
+              'focus:outline-none',
+              'transition ease-in-out duration-200',
+              'text-white text-sm leading-tight',
+              'placeholder-primary-white placeholder-opacity-50 rounded-lg'
+            )}
+            placeholder={t('searchByName')}
+            searchIconClassName="h-5 w-auto"
+            searchIconWrapperClassName="px-2 text-white opacity-50"
+            cleanButtonStyle={{ backgroundColor: 'transparent' }}
+            onValueChange={setSearchValue}
+          />
+        )}
+        <div className="flex gap-2">
+          {icons.map(item => (
+            <div key={item.id} className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
+              <item.Icon className="w-6 h-6" />
+            </div>
+          ))}
+        </div>
+      </div>
       <div
         className={classNames(
           'overflow-y-auto shadow-inner no-scrollbar',
@@ -106,21 +129,21 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
               <T id="noResults" />
             </p>
           ) : (
-            filteredAccounts.map(acc => (
-              <AccountItem
-                key={acc.publicKeyHash}
-                account={acc}
-                selected={acc.publicKeyHash === account.publicKeyHash}
-                gasTokenName={gasTokenName}
-                attractSelf={attractSelectedAccount}
-                onClick={() => handleAccountClick(acc.publicKeyHash)}
-              />
-            ))
+            // filteredAccounts.map(acc => (
+            //   <AccountItem
+            //     key={acc.publicKeyHash}
+            //     account={acc}
+            //     selected={acc.publicKeyHash === account.publicKeyHash}
+            //     gasTokenName={gasTokenName}
+            //     attractSelf={attractSelectedAccount}
+            //     onClick={() => handleAccountClick(acc.publicKeyHash)}
+            //   />
+            // ))
+            <WalletCard name="My Wallet" accounts={filteredAccounts} />
           )}
         </div>
       </div>
-
-      {!onlyAccSelect && (
+      {/* {!onlyAccSelect && (
         <div className={classNames('w-full flex justify-cente', popup ? 'px-4 mt-4' : 'mt-8')}>
           <ButtonLink {...action}>
             <ButtonRounded size="big" fill={false} className="w-full">
@@ -128,7 +151,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
             </ButtonRounded>
           </ButtonLink>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

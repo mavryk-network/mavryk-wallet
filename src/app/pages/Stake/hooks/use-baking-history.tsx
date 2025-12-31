@@ -79,19 +79,20 @@ export const useBakingHistory = () => {
     });
   }, [bakingHistory]);
   const fallbackRewardsPerEvents = useMemo(() => {
-    return rewardsPerEventHistory.map(historyItem =>
-      allRewardsPerEventKeys.reduce(
-        (fallbackRewardsItem, key, index) => {
-          return reduceFunction(fallbackRewardsItem, key, index, historyItem, rewardsPerEventHistory);
-        },
-        {
-          rewardPerOwnBlock: new BigNumber(0),
-          rewardPerEndorsement: new BigNumber(0),
-          rewardPerFutureBlock: new BigNumber(0),
-          rewardPerFutureEndorsement: new BigNumber(0)
-        }
-      )
-    );
+    return [];
+    // return rewardsPerEventHistory.map(historyItem =>
+    //   allRewardsPerEventKeys.reduce(
+    //     (fallbackRewardsItem, key, index) => {
+    //       return reduceFunction(fallbackRewardsItem, key, index, historyItem, rewardsPerEventHistory);
+    //     },
+    //     {
+    //       rewardPerOwnBlock: new BigNumber(0),
+    //       rewardPerEndorsement: new BigNumber(0),
+    //       rewardPerFutureBlock: new BigNumber(0),
+    //       rewardPerFutureEndorsement: new BigNumber(0)
+    //     }
+    //   )
+    // );
   }, [rewardsPerEventHistory]);
   const currentCycle = useMemo(
     () =>

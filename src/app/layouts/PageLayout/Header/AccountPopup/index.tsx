@@ -102,7 +102,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
   }, [settingsRef, plusRef]);
 
   return (
-    <div className={classNames(popup ? 'my-2' : 'px-12')}>
+    <div className={classNames(popup ? 'my-2 px-4' : 'px-12')}>
       <div className="flex items-center justify-end mb-3 px-4 gap-3">
         {isShowSearch && (
           <SearchField

@@ -11,9 +11,10 @@ import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/L
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useAccount, useFilteredContacts } from 'lib/temple/front';
-import { Link } from 'lib/woozie';
+import { TempleAccountType } from 'lib/temple/types';
 
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
+import { RemoveAccountPopup } from './popups/RemoveAccountPopup';
 
 export type EditAccountProps = {
   accHash?: string | null;
@@ -26,6 +27,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
   const { popup } = useAppEnv();
 
   const [showEditNamePopup, setShowEditNamePopup] = useState(false);
+  const [showRemoveAccountPopup, setShowRemoveAccountPopup] = useState(false);
 
   const handleEditAccountOpen = useCallback(() => {
     setShowEditNamePopup(true);
@@ -33,6 +35,14 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
 
   const handleEditAccountClose = useCallback(() => {
     setShowEditNamePopup(false);
+  }, []);
+
+  const handleRemoveAccountOpen = useCallback(() => {
+    setShowRemoveAccountPopup(true);
+  }, []);
+
+  const handleRemoveAccountClose = useCallback(() => {
+    setShowRemoveAccountPopup(false);
   }, []);
 
   const accToChange = filteredContacts.find(acc => acc.address === accHash);
@@ -79,11 +89,12 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
           ))}
         </ul>
       </div>
-      <Link to="/settings/remove-account" className="w-full mt-auto">
-        <ButtonRounded size="big" fill={false} className="w-full">
+      {account.type !== TempleAccountType.HD && (
+        <ButtonRounded size="big" fill={false} className="w-full" onClick={handleRemoveAccountOpen}>
           <T id="deleteAccount" />
         </ButtonRounded>
-      </Link>
+      )}
+
       <EditAccountNamePopup
         opened={showEditNamePopup}
         close={handleEditAccountClose}
@@ -92,6 +103,8 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
         isOwn={isOwn}
         accToChange={accToChange}
       />
+
+      <RemoveAccountPopup opened={showRemoveAccountPopup} close={handleRemoveAccountClose} />
     </PageLayout>
   );
 };

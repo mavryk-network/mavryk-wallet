@@ -108,13 +108,13 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
           popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs'
         )}
       >
-        <div className="flex flex-col gap-1 mb-4">
+        <div className="flex flex-col gap-1">
           <AccountBanner account={account} restrictAccountSelect />
         </div>
 
         <ul className={clsx('flex flex-col pb-4')}>
           {accountOptions.map(({ ...option }) => (
-            <ListItemWithNavigate key={option.i18nKey} {...option} />
+            <ListItemWithNavigate key={option.i18nKey} {...option} paddingClassName="py-4" fullWidthDivider />
           ))}
         </ul>
       </div>

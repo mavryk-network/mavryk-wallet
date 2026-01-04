@@ -3975,6 +3975,9 @@
   "viewHistoryTab": {
     "message": "View History Tab"
   },
+  "manageAccounts": {
+    "message": "Manage Accounts"
+  },
   "finalizeUnlock": {
     "message": "Finalize Unlock"
   }

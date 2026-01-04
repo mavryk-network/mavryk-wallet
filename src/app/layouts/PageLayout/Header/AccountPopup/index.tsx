@@ -90,7 +90,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
         id: 1,
         Icon: SettingsIcon,
         ref: settingsRef,
-        linkTo: '/settings/accounts'
+        linkTo: '/manage-accounts'
       },
       {
         id: 2,
@@ -145,7 +145,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
         style={{ height: isShowSearch && filteredAccounts.length > 5 ? 320 : 'auto' }}
         // style={{ height: isShowSearch && popup ? (filteredAccounts.length > 5 ? 328 : 397) : 'auto' }}
       >
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-4">
           {filteredAccounts.length === 0 ? (
             <p className="text-center text-white text-base">
               <T id="noResults" />

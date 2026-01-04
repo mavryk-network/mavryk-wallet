@@ -3980,5 +3980,8 @@
   },
   "finalizeUnlock": {
     "message": "Finalize Unlock"
+  },
+  "editName": {
+    "message": "Edit Name"
   }
 }

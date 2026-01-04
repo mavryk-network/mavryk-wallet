@@ -11,6 +11,8 @@ import SearchField from 'app/templates/SearchField/SearchField';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
+import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
+import { Link } from 'lib/woozie';
 
 import { AccountDropdownSelectors } from '../selectors';
 
@@ -29,6 +31,27 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
   const account = useAccount();
   const setAccountPkh = useSetAccountPkh();
   const { assetName: gasTokenName } = useGasToken();
+
+  const settingsTippyOptions = useMemo<UseTippyOptions>(
+    () => ({
+      trigger: 'mouseenter',
+      hideOnClick: false,
+      content: 'Manage Accounts',
+      animation: 'shift-away-subtle'
+    }),
+    []
+  );
+
+  const plusTippyOptions = useMemo<UseTippyOptions>(
+    () => ({
+      ...settingsTippyOptions,
+      content: 'Import Account'
+    }),
+    [settingsTippyOptions]
+  );
+
+  const settingsRef = useTippy<HTMLAnchorElement>(settingsTippyOptions);
+  const plusRef = useTippy<HTMLAnchorElement>(plusTippyOptions);
 
   const [searchValue, setSearchValue] = useState('');
   const [attractSelectedAccount, setAttractSelectedAccount] = useState(true);
@@ -61,28 +84,22 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
     else if (opened === false) setAttractSelectedAccount(true);
   }, [opened, searchValue]);
 
-  const action = useMemo(
-    () => ({
-      key: 'add-or-import-account',
-      linkTo: '/add-or-import-account',
-      testID: AccountDropdownSelectors.addorImportAccountButton,
-      onClick: () => setOpened(false)
-    }),
-    [setOpened]
-  );
-
   const icons = useMemo(() => {
     return [
       {
         id: 1,
-        Icon: SettingsIcon
+        Icon: SettingsIcon,
+        ref: settingsRef,
+        linkTo: '/settings/accounts'
       },
       {
         id: 2,
-        Icon: PlusIcon
+        Icon: PlusIcon,
+        ref: plusRef,
+        linkTo: '/add-or-import-account'
       }
     ];
-  }, []);
+  }, [settingsRef, plusRef]);
 
   return (
     <div className={classNames(popup ? 'my-2' : 'px-12')}>
@@ -107,9 +124,14 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
         )}
         <div className="flex gap-2">
           {icons.map(item => (
-            <div key={item.id} className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
+            <Link
+              key={item.id}
+              ref={item.ref}
+              to={item.linkTo}
+              className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card"
+            >
               <item.Icon className="w-6 h-6" />
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -129,17 +151,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
               <T id="noResults" />
             </p>
           ) : (
-            // filteredAccounts.map(acc => (
-            //   <AccountItem
-            //     key={acc.publicKeyHash}
-            //     account={acc}
-            //     selected={acc.publicKeyHash === account.publicKeyHash}
-            //     gasTokenName={gasTokenName}
-            //     attractSelf={attractSelectedAccount}
-            //     onClick={() => handleAccountClick(acc.publicKeyHash)}
-            //   />
-            // ))
-            <WalletCard name="My Wallet" accounts={filteredAccounts} />
+            <WalletCard name="Wallet A" accounts={filteredAccounts} handleAccountClick={handleAccountClick} />
           )}
         </div>
       </div>

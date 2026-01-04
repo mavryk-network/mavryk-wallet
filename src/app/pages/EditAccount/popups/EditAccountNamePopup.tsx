@@ -71,6 +71,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
             await editContact(accountHash, { name: newName });
           }
 
+          close();
           formAnalytics.trackSubmitSuccess();
         } catch (err: any) {
           formAnalytics.trackSubmitFail();
@@ -84,7 +85,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
         }
       })();
     },
-    [formAnalytics, accountName, isOwn, editAccountName, accountHash, editContact, customAlert]
+    [formAnalytics, accountName, isOwn, close, editAccountName, accountHash, editContact, customAlert]
   );
 
   const handleEditFieldFocus = useCallback(() => {
@@ -115,7 +116,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
             placeholder={t('enterAccountName')}
             pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
             title={t('accountNameInputTitle')}
-            spellCheck={false}
+            spellCheck
             onFocus={handleEditFieldFocus}
           />
 

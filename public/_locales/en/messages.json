@@ -3983,5 +3983,8 @@
   },
   "editName": {
     "message": "Edit Name"
+  },
+  "deleteAccount": {
+    "message": "Delete Account"
   }
 }

@@ -32,220 +32,151 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     logo: KryptstarLogo,
     name: 'Kryptstar',
     fee: 0.1,
-    links: [
-      {
-        link: 'https://t.me/kryptstar',
-        icon: 'telegram'
-      }
-    ],
+    links: [{ link: 'https://t.me/kryptstar', icon: 'telegram' }],
     minDelegation: 1000000,
     minPayout: 1000
   },
+
   mv1C9zN9ZzP1KicMHjBXk9ctJ4k7xq8J9gqU: {
     logo: 'https://raw.githubusercontent.com/republic-crypto/eigenlayer-metadata/main/mainnet/logo.png',
     name: 'Republic',
     fee: 0.1,
-    links: [
-      {
-        link: 'https://republic.com/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://republic.com/', icon: 'website' }],
     minDelegation: 1000000,
     minPayout: 1000
   },
-  mv1Tgom8dLnEuq37rTBKDXFZBLS7YU5iSXtW: {
-    logo: SimplyStakingLogo,
-    name: 'Simply Staking',
-    fee: 0.1,
-    links: [
-      {
-        link: 'https://simplystaking.com/',
-        icon: 'website'
-      }
-    ],
-    minDelegation: 10000000,
-    minPayout: 1000
-  },
-  mv1MtuibrK2PZpbJLhe1zkxfLq9HXwRsFWuZ: {
-    logo: PopsLogo,
-    name: 'P-OPS Team',
-    fee: 0,
-    links: [
-      {
-        link: 'https://pops.one/',
-        icon: 'website'
-      }
-    ],
-    minDelegation: 10000000,
-    minPayout: 1000
-  },
-  mv1AJ6Xu1mPFbxFintz1hoQ1aGC98knXsTni: {
-    logo: NodeLogo,
-    name: 'Node.Monster',
-    fee: 0.1,
-    links: [
-      {
-        link: 'https://www.node.monster/',
-        icon: 'website'
-      }
-    ],
-    minDelegation: 10000000,
-    minPayout: 1000
-  },
-  mv1CxRfFHnGoq497Y1MAfiMHZk6zGS9wftyF: {
-    logo: 'https://raw.githubusercontent.com/nansen-ai/nansen-staking-public/refs/heads/main/logo/Nansen.png',
-    name: 'Nansen',
-    fee: 0.15,
-    links: [
-      {
-        link: 'https://www.nansen.ai',
-        icon: 'website'
-      }
-    ],
-    minDelegation: 10000000,
-    minPayout: 1000
-  },
-  mv1CFD46HP5aReuWZqUhWHNWKNpr6dsKqgux: {
-    logo: 'https://snapshots.rhinostake.com/rhinoshare/RhinoLogoFilled.Dark.png',
-    name: 'RHINO 🦏',
-    fee: 0.1,
-    links: [
-      {
-        link: 'https://rhinostake.com/',
-        icon: 'website'
-      }
-    ],
-    minDelegation: 10000000,
-    minPayout: 1000
-  },
+
   mv1T9xoFWkkNgy6wH5xeDg9XgdwnqznpuDXs: {
     logo: ValidatorsLogo,
     name: 'Foundation 1',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1CjNm5kcHDBKs5ZwaejxzMUcMVvNGyLC9D: {
     logo: ValidatorsLogo,
     name: 'Foundation 2',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1Bm6GciQqJiKHvm7BvCZoFsZ4YejxTpVpY: {
     logo: ValidatorsLogo,
     name: 'Foundation 3',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1KscSac2FXLeksvSChMMaHB8o1p7eJccg3: {
     logo: ValidatorsLogo,
     name: 'Foundation 4',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1FLSR4ExbtVk4DSdq9N9hFnQ8GxSFQQuov: {
     logo: ValidatorsLogo,
     name: 'Foundation 5',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1KYxgSRtC4E9WK5bdUVbxXRmfwLMq5PqZU: {
     logo: ValidatorsLogo,
     name: 'Foundation 6',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1F1uHGUvp6DwfokBqMddz6mPZ7imjjg9X5: {
     logo: ValidatorsLogo,
     name: 'Foundation 7',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1FWz2yj1J46kNnw4NkUcuaJdRgZp1tUkz2: {
     logo: ValidatorsLogo,
     name: 'Foundation 8',
     fee: 0.15,
-    links: [
-      {
-        link: 'https://mavryk.org/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavryk.org/', icon: 'website' }],
     minDelegation: 100000000,
     minPayout: 1000
   },
+
   mv1DYzNBa1zgmgQieaQKzLxU1sV3aQSArNJ2: {
     logo: MavrykDynamicsLogo,
     name: 'Mavryk Dynamics 1',
     fee: 0.1,
-    links: [
-      {
-        link: 'https://mavrykdynamics.com/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavrykdynamics.com/', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   },
+
   mv1C2iEY1WuBeFQqS9ihxtunHkbUJ28HyeN6: {
     logo: MavrykDynamicsLogo,
     name: 'Mavryk Dynamics 2',
     fee: 0.1,
-    links: [
-      {
-        link: 'https://mavrykdynamics.com/',
-        icon: 'website'
-      }
-    ],
+    links: [{ link: 'https://mavrykdynamics.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1Tgom8dLnEuq37rTBKDXFZBLS7YU5iSXtW: {
+    logo: SimplyStakingLogo,
+    name: 'Simply Staking',
+    fee: 0.1,
+    links: [{ link: 'https://simplystaking.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1MtuibrK2PZpbJLhe1zkxfLq9HXwRsFWuZ: {
+    logo: 'https://pops.one/img/pops-logo.png',
+    name: 'P-OPS Team',
+    fee: 0,
+    links: [{ link: 'https://pops.one/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1AJ6Xu1mPFbxFintz1hoQ1aGC98knXsTni: {
+    logo: NodeLogo,
+    name: 'Node.Monster',
+    fee: 0.1,
+    links: [{ link: 'https://www.node.monster/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1CxRfFHnGoq497Y1MAfiMHZk6zGS9wftyF: {
+    logo: 'https://raw.githubusercontent.com/nansen-ai/nansen-staking-public/refs/heads/main/logo/Nansen.png',
+    name: 'Nansen',
+    fee: 0.15,
+    links: [{ link: 'https://www.nansen.ai', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1CFD46HP5aReuWZqUhWHNWKNpr6dsKqgux: {
+    logo: 'https://snapshots.rhinostake.com/rhinoshare/RhinoLogoFilled.Dark.png',
+    name: 'RHINO 🦏',
+    fee: 0.1,
+    links: [{ link: 'https://rhinostake.com/', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

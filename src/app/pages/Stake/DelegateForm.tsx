@@ -877,21 +877,23 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
       default:
         // SORTED_PREDEFINED_SPONSORED_BAKERS
         return toSort.sort((a, b) => {
-          const idxA = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(a.address);
-          const idxB = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(b.address);
+          const { totalFreSpace: aTotalFreeSpace, totalCapacity: aTotalCapacity } = calculateCapacities({
+            stakedBalance: a.stakedBalance,
+            delegatedBalance: a.delegatedBalance,
+            externalStakedBalance: a.externalStakedBalance
+          });
 
-          const aIsKnown = idxA !== -1;
-          const bIsKnown = idxB !== -1;
+          const { totalFreSpace: bTotalFreeSpace, totalCapacity: bTotalCapacity } = calculateCapacities({
+            stakedBalance: b.stakedBalance,
+            delegatedBalance: b.delegatedBalance,
+            externalStakedBalance: b.externalStakedBalance
+          });
 
-          // unknowns first
-          if (!aIsKnown && bIsKnown) return -1;
-          if (aIsKnown && !bIsKnown) return 1;
+          const aTotalFreeSpacePercent = aTotalCapacity > 0 ? (aTotalFreeSpace / aTotalCapacity) * 100 : 0;
 
-          // both unknown
-          if (!aIsKnown && !bIsKnown) return 0;
+          const bTotalFreeSpacePercent = bTotalCapacity > 0 ? (bTotalFreeSpace / bTotalCapacity) * 100 : 0;
 
-          // both known follow predefined order from SORTED_PREDEFINED_SPONSORED_BAKERS
-          return idxA - idxB;
+          return bTotalFreeSpacePercent - aTotalFreeSpacePercent;
         });
     }
   }, [knownBakers, sortOption]);

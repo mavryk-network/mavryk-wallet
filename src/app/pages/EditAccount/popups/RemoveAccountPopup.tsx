@@ -5,7 +5,7 @@ import { OnSubmit, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useTempleClient } from 'lib/temple/front';
@@ -86,6 +86,7 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close 
 
           <div className="w-full grid grid-cols-2 gap-3">
             <ButtonRounded
+              btnType={BTN_ERROR}
               type="button"
               size="big"
               fill={false}
@@ -96,6 +97,7 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close 
               <T id="cancel" />
             </ButtonRounded>
             <FormSubmitButton
+              btnType={BTN_ERROR}
               loading={submitting}
               disabled={submitting || !password.length}
               testID={EditableTitleSelectors.removeButton}

@@ -6,11 +6,11 @@ import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useAccount, useAllAccounts, useFilteredContacts } from 'lib/temple/front';
+import { useAllAccounts, useFilteredContacts } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
@@ -94,7 +94,7 @@ export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
         </ul>
       </div>
       {account.type !== TempleAccountType.HD && (
-        <ButtonRounded size="big" fill={false} className="w-full" onClick={handleRemoveAccountOpen}>
+        <ButtonRounded btnType={BTN_ERROR} size="big" fill={false} className="w-full" onClick={handleRemoveAccountOpen}>
           <T id="deleteAccount" />
         </ButtonRounded>
       )}

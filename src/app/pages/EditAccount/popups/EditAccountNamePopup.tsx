@@ -14,6 +14,7 @@ import { TempleContact } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 
 import { EditableTitleSelectors } from '../editAccount.selectors';
+import { useAccountNameInputHandlers } from '../hooks';
 
 type EditAccountNamePopupPeops = {
   opened: boolean;
@@ -43,6 +44,8 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
   const autoCancelTimeoutRef = useRef<number>();
 
   const accountName = useMemo(() => (accToChange ? accToChange.name : name), [accToChange, name]);
+
+  const { value, handleChange, handleClean } = useAccountNameInputHandlers(accountName, editAccNameFieldRef);
 
   useEffect(() => {
     accNamePrevRef.current = accountName;
@@ -105,7 +108,8 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
           <FormField
             ref={editAccNameFieldRef}
             name="name"
-            defaultValue={accountName}
+            value={value}
+            onChange={handleChange}
             maxLength={16}
             label={
               <div className="flex flex-col gap-1">
@@ -118,6 +122,9 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
             title={t('accountNameInputTitle')}
             spellCheck
             onFocus={handleEditFieldFocus}
+            cleanBtnBottomOffset="27%"
+            onClean={handleClean}
+            cleanable={Boolean(value)}
           />
 
           <ButtonRounded size="big" className="w-full capitalize mt-auto" testID={EditableTitleSelectors.saveButton}>

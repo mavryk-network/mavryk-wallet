@@ -14,42 +14,19 @@ import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/L
 import AccountBanner from 'app/templates/AccountBanner';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import {
-  useAccount,
-  useAllAccounts,
-  useContactsActions,
-  useFilteredContacts,
-  useSetAccountPkh,
-  useTempleClient
-} from 'lib/temple/front';
+import { useAccount, useAllAccounts, useContactsActions, useSetAccountPkh, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
 import { EditableTitleSelectors } from './editAccount.selectors';
+import { useAccountNameInputHandlers, useAccountOwnership, usePopupState } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
 import { RemoveAccountPopup } from './popups/RemoveAccountPopup';
 
 export type EditAccountProps = {
   accHash?: string | null;
-};
-
-const useAccountOwnership = (accHash?: string | null) => {
-  const { allContacts: filteredContacts } = useFilteredContacts();
-
-  const accToChange = useMemo(() => filteredContacts.find(acc => acc.address === accHash), [filteredContacts, accHash]);
-
-  const isOwn = !!accToChange?.accountInWallet;
-
-  return { accToChange, isOwn };
-};
-
-const usePopupState = (initial = false) => {
-  const [opened, setOpened] = useState(initial);
-  const open = useCallback(() => setOpened(true), []);
-  const close = useCallback(() => setOpened(false), []);
-  return { opened, open, close };
 };
 
 export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
@@ -141,6 +118,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
 
   const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
 
+  const { value, handleChange, handleClean } = useAccountNameInputHandlers(accountName, editAccNameFieldRef);
   useEffect(() => {
     accNamePrevRef.current = accountName;
   }, [accountName]);
@@ -246,7 +224,8 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
           <FormField
             ref={editAccNameFieldRef}
             name="name"
-            defaultValue={accountName}
+            value={value}
+            onChange={handleChange}
             maxLength={16}
             label={isOwn ? t('editAccountName') : t('editContactName')}
             placeholder={t('enterAccountName')}
@@ -254,6 +233,9 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             title={t('accountNameInputTitle')}
             spellCheck={false}
             onFocus={handleEditFieldFocus}
+            cleanBtnBottomOffset="27%"
+            onClean={handleClean}
+            cleanable={Boolean(value)}
           />
 
           <ButtonRounded size="big" className="w-full capitalize" testID={EditableTitleSelectors.saveButton}>

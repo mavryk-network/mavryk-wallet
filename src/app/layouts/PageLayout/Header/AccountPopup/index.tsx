@@ -16,10 +16,11 @@ import { WalletCard } from './components/WalletCard';
 type AccountPopupProps = {
   opened: boolean;
   setOpened: (v: boolean) => void;
-  onlyAccSelect?: boolean;
 };
 
-const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect = false }) => {
+const LIST_HEIGHT = 320;
+
+const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
   const allAccounts = useRelevantAccounts();
   const { popup } = useAppEnv();
   const account = useAccount();
@@ -56,7 +57,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
       return allAccounts;
     } else {
       const lowerCaseSearchValue = searchValue.toLowerCase();
-
       return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
     }
   }, [searchValue, allAccounts]);
@@ -115,6 +115,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
             onValueChange={setSearchValue}
           />
         )}
+
         <div className="flex gap-2">
           {icons.map(item => (
             <Link
@@ -128,15 +129,15 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
           ))}
         </div>
       </div>
+
       <div
         className={classNames(
           'overflow-y-auto shadow-inner no-scrollbar',
-          // popup && 'max-h-80',
+          popup && 'max-h-80',
           isShowSearch && 'border-t-0 rounded-t-none',
           !popup && filteredAccounts.length > 5 && 'pr-4'
         )}
-        style={{ height: isShowSearch && filteredAccounts.length > 5 ? 320 : 'auto' }}
-        // style={{ height: isShowSearch && popup ? (filteredAccounts.length > 5 ? 328 : 397) : 'auto' }}
+        style={isShowSearch ? { height: LIST_HEIGHT } : undefined}
       >
         <div className="flex flex-col gap-4">
           {filteredAccounts.length === 0 ? (
@@ -148,15 +149,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
           )}
         </div>
       </div>
-      {/* {!onlyAccSelect && (
-        <div className={classNames('w-full flex justify-cente', popup ? 'px-4 mt-4' : 'mt-8')}>
-          <ButtonLink {...action}>
-            <ButtonRounded size="big" fill={false} className="w-full">
-              <T id="addOrImportAccount" />
-            </ButtonRounded>
-          </ButtonLink>
-        </div>
-      )} */}
     </div>
   );
 };

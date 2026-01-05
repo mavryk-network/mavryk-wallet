@@ -25,7 +25,6 @@ export type AccountButtonProps = {
   child?: JSX.Element;
   iconSize?: number;
   account: TempleAccount;
-  onlyAccSelect?: boolean;
   restrictAccountSelect?: boolean;
 };
 
@@ -38,7 +37,6 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   account,
   child,
   iconSize = 24,
-  onlyAccSelect = false,
   restrictAccountSelect = false
 }) => {
   const { popup } = useAppEnv();
@@ -100,7 +98,7 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
           </button>
         }
       >
-        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} onlyAccSelect={onlyAccSelect} />
+        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
       </PopupModalWithTitle>
     </div>
   );

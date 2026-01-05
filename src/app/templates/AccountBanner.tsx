@@ -51,7 +51,6 @@ const AccountBanner = memo<AccountBannerProps>(
             <AccountPopupButton
               account={account}
               iconSize={32}
-              onlyAccSelect
               restrictAccountSelect={restrictAccountSelect}
               child={
                 <div className="flex items-center mt-1">

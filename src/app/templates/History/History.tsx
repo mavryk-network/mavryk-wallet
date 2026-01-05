@@ -36,6 +36,7 @@ import { HistoryItem } from './HistoryItem';
 
 const INITIAL_NUMBER = 30;
 const LOAD_STEP = 30;
+const LIST_MIN_HEIGHT = 320;
 
 const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
 
@@ -319,45 +320,44 @@ export const HistoryComponent: React.FC<Props> = memo(
           </SearchExplorer>
         </div>
 
-        {!historyToshow.length && !loading ? (
-          <div
-            className={classNames('h-full my-auto py-16', 'flex flex-col items-center justify-center', 'text-white')}
-          >
-            <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
-
-            <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
-              <T id="noTransactionsFound" />
-            </h3>
-          </div>
-        ) : (
-          <div className={classNames('flex flex-col')}>
-            <InfiniteScroll
-              dataLength={userHistory.length}
-              hasMore={reachedTheEnd === false}
-              next={loadNext}
-              loader={loading && <SyncSpinner className="mt-4" />}
-              onScroll={onScroll}
-              scrollableTarget={scrollableTarget}
-              endMessage={
-                <div className={classNames('mx-auto text-center text-sm text-white', lastItemDividerClassName)}>
-                  <T id="txHistoryendMsg" />
-                </div>
-              }
-            >
-              {historyToshow.map((historyItem, idx) => (
-                <Fragment key={historyItem.hash + idx}>
-                  <HistoryItem
-                    address={accountAddress}
-                    historyItem={historyItem}
-                    slug={assetSlug}
-                    handleItemClick={handleItemClick}
-                    last={false}
-                  />
-                </Fragment>
-              ))}
-            </InfiniteScroll>
-          </div>
-        )}
+        <div className="flex flex-col" style={{ minHeight: LIST_MIN_HEIGHT }}>
+          {!historyToshow.length && !loading ? (
+            <div className="flex flex-1 flex-col items-center justify-center py-16 text-white">
+              <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
+              <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
+                <T id="noTransactionsFound" />
+              </h3>
+            </div>
+          ) : (
+            <div className="flex flex-1 flex-col">
+              <InfiniteScroll
+                dataLength={userHistory.length}
+                hasMore={reachedTheEnd === false}
+                next={loadNext}
+                loader={loading && <SyncSpinner className="mt-4" />}
+                onScroll={onScroll}
+                scrollableTarget={scrollableTarget}
+                endMessage={
+                  <div className={classNames('mx-auto text-center text-sm text-white', lastItemDividerClassName)}>
+                    <T id="txHistoryendMsg" />
+                  </div>
+                }
+              >
+                {historyToshow.map((historyItem, idx) => (
+                  <Fragment key={historyItem.hash + idx}>
+                    <HistoryItem
+                      address={accountAddress}
+                      historyItem={historyItem}
+                      slug={assetSlug}
+                      handleItemClick={handleItemClick}
+                      last={false}
+                    />
+                  </Fragment>
+                ))}
+              </InfiniteScroll>
+            </div>
+          )}
+        </div>
 
         <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} historyItem={activeHistoryItem} />
       </div>

@@ -67,7 +67,7 @@ export const ManageAccounts: FC = () => {
               <T id="noResults" />
             </p>
           ) : (
-            <WalletCard name="Wallet A" accounts={filteredAccounts} handleAccountClick={() => {}} />
+            <WalletCard name="Wallet A" accounts={filteredAccounts} />
           )}
         </div>
       </div>

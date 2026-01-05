@@ -10,7 +10,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useAccount, useFilteredContacts } from 'lib/temple/front';
+import { useAccount, useAllAccounts, useFilteredContacts } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
@@ -22,7 +22,11 @@ export type EditAccountProps = {
 
 export const EditAccount: FC<EditAccountProps> = ({ accHash }) => {
   const { allContacts: filteredContacts } = useFilteredContacts();
-  const account = useAccount();
+  const accounts = useAllAccounts();
+  const account = useMemo(
+    () => (accHash ? accounts.find(acc => acc.publicKeyHash === accHash)! : accounts[0]),
+    [accHash, accounts]
+  );
 
   const { popup } = useAppEnv();
 

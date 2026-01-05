@@ -3,6 +3,7 @@ import React from 'react';
 import { useGasToken } from 'lib/assets/hooks';
 import { useAllAccounts } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
+import { navigate } from 'lib/woozie';
 
 import { AccountItem } from '../AccountItem';
 import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
@@ -10,12 +11,15 @@ import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
 type WalletCardProps = {
   name: string;
   accounts: TempleAccount[];
-  handleAccountClick: (publicKeyHash: string) => void;
 };
 
-export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardProps) => {
+export const WalletCard = ({ name, accounts }: WalletCardProps) => {
   const { assetName: gasTokenName } = useGasToken();
   const allAccounts = useAllAccounts();
+
+  const handleAccountClick = (publicKeyHash: string) => {
+    navigate(`edit-account/${publicKeyHash}`);
+  };
 
   return (
     <section className="bg-primary-card pt-2 flex flex-col rounded-lg overflow-hidden">

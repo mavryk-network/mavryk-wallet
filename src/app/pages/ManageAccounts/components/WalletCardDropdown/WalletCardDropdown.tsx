@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import clsx from 'clsx';
 import { nanoid } from 'nanoid';
@@ -7,16 +7,40 @@ import { ReactComponent as PenIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-open-secondary.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
+import { t } from 'lib/i18n';
+import { useAllAccounts, useTempleClient } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
 import { translateYModifiers } from 'lib/ui/general-modifiers';
 
 export const WalletCardDropdown: FC = () => {
+  const { createAccount } = useTempleClient();
+  const allAccounts = useAllAccounts();
+
+  const allHDOrImported = useMemo(
+    () => allAccounts.filter(acc => [TempleAccountType.HD, TempleAccountType.Imported].includes(acc.type)),
+    [allAccounts]
+  );
+
+  const defaultName = useMemo(
+    () => t('defaultAccountName', String(allHDOrImported.length + 1)),
+    [allHDOrImported.length]
+  );
+
+  const addAccount = useCallback(async () => {
+    try {
+      await createAccount(defaultName);
+    } catch (err: any) {
+      console.error(err);
+    }
+  }, [createAccount, defaultName]);
+
   const settingsListData: RenderOptionContentType[] = useMemo(
     () => [
       {
         id: nanoid(),
         Icon: PlusIcon,
-        label: 'Add Account'
-        // onClick: toggleAccountPopup
+        label: 'Add Account',
+        onClick: addAccount
       },
       {
         id: nanoid(),
@@ -32,7 +56,7 @@ export const WalletCardDropdown: FC = () => {
         // onClick: handleMaximiseViewClick
       }
     ],
-    []
+    [addAccount]
   );
 
   return (

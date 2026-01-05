@@ -4,6 +4,7 @@ import { useGasToken } from 'lib/assets/hooks';
 import { TempleAccount } from 'lib/temple/types';
 
 import { AccountItem } from '../AccountItem';
+import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
 
 type WalletCardProps = {
   name: string;
@@ -20,7 +21,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
         <p className="text-base-plus text-white font-bold">{name}</p>
         <p className="text-sm text-secondary-white">{accounts?.length ?? 0} Accounts</p>
         <p className="ml-auto text-white flex items-center gap-0.5">
-          <Dots />
+          <WalletCardDropdown />
         </p>
       </div>
       <div className="flex flex-col">
@@ -35,23 +36,5 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
         ))}
       </div>
     </section>
-  );
-};
-
-const Dots = () => {
-  return (
-    <div className="h-6 flex items-center gap-1 cursor-pointer">
-      {[0, 1, 2].map((_, i) => (
-        <span
-          key={i}
-          style={{
-            width: 3,
-            height: 3,
-            borderRadius: '50%'
-          }}
-          className="bg-current block"
-        />
-      ))}
-    </div>
   );
 };

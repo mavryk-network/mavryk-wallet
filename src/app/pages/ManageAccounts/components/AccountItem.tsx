@@ -2,28 +2,22 @@ import React, { useMemo } from 'react';
 
 import classNames from 'clsx';
 
-import { Name, Button, HashShortView, Identicon, Money } from 'app/atoms';
+import { Name, Button, HashShortView, Identicon } from 'app/atoms';
 import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+import { ReactComponent as KeyIcon } from 'app/icons/acc-key.svg';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
-import { useOtherAccountTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
-import { useFiatCurrency } from 'lib/fiat-currency';
 import { TempleAccount } from 'lib/temple/types';
-import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
 
 interface AccountItemProps {
   account: TempleAccount;
   gasTokenName: string;
   attractSelf: boolean;
   onClick: () => void;
+  isMainAcc?: boolean;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, attractSelf, onClick }) => {
-  const { name, publicKeyHash, type } = account;
-  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash, true);
-
-  const {
-    selectedFiatCurrency: { symbol: fiatSymbol }
-  } = useFiatCurrency();
+export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, isMainAcc }) => {
+  const { name, publicKeyHash } = account;
 
   const classNameMemo = useMemo(
     () =>
@@ -49,6 +43,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, attractSelf, 
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
           <AccountTypeBadge account={account} />
+          {isMainAcc && <KeyIcon />}
         </div>
 
         <div className="text-xs text-blue-200 mt-1">

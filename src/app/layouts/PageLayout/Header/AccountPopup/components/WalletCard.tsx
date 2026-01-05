@@ -31,6 +31,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
             attractSelf={true}
             selected={account.publicKeyHash === publicKeyHash}
             onClick={() => handleAccountClick(account.publicKeyHash)}
+            isMainAcc={account.publicKeyHash === accounts[0]?.publicKeyHash}
           />
         ))}
       </div>

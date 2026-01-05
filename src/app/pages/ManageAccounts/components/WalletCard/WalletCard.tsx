@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useGasToken } from 'lib/assets/hooks';
+import { useAllAccounts } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
 import { AccountItem } from '../AccountItem';
@@ -14,6 +15,7 @@ type WalletCardProps = {
 
 export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardProps) => {
   const { assetName: gasTokenName } = useGasToken();
+  const allAccounts = useAllAccounts();
 
   return (
     <section className="bg-primary-card pt-2 flex flex-col rounded-lg overflow-hidden">
@@ -32,6 +34,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
             gasTokenName={gasTokenName}
             attractSelf={true}
             onClick={() => handleAccountClick(account.publicKeyHash)}
+            isMainAcc={account.publicKeyHash === allAccounts[0]?.publicKeyHash}
           />
         ))}
       </div>

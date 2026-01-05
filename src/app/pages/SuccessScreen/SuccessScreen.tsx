@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import CustomPopup, { CustomPopupProps } from 'app/atoms/CustomPopup';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as SuccessIcon } from 'app/icons/m_chevron-down.svg';
+import { ReactComponent as WarningIcon } from 'app/icons/warning.svg';
 import { BgImageLayout } from 'app/layouts/BgImageLayout/BgImageLayout';
 import PageLayout from 'app/layouts/PageLayout';
 import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
@@ -27,6 +28,7 @@ export type SuccessStateType = {
   contentId?: keyof typeof successContentData;
   contentIdFnProps?: any;
   bottomDescription?: TID;
+  iconType?: 'success' | 'warning';
 };
 
 const defaultStateValues: SuccessStateType = {
@@ -39,7 +41,13 @@ const defaultStateValues: SuccessStateType = {
   btnText: 'goToMain',
   btnLink: '/',
   secondaryBtnText: undefined,
-  secondaryBtnLink: undefined
+  secondaryBtnLink: undefined,
+  iconType: 'success'
+};
+
+const IconToShow = {
+  success: SuccessIcon,
+  warning: WarningIcon
 };
 
 export const SuccessScreen = () => {
@@ -49,6 +57,8 @@ export const SuccessScreen = () => {
 
   const bgSrc = useMemo(() => (popup ? '/misc/success-bg.webp' : '/misc/success-bg-full-view.webp'), [popup]);
   const memoizedContainerStyle = useMemo(() => ({ padding: 0 }), []);
+
+  const Icon = IconToShow[state.iconType || 'success'];
 
   return (
     <PageLayout
@@ -63,9 +73,14 @@ export const SuccessScreen = () => {
       <BgImageLayout src={bgSrc} className="flex justify-center items-center flex-1 h-full">
         <div className={clsx('text-white w-full py-8 flex flex-col items-center gap-6', popup ? 'px-4' : 'px-20')}>
           {/* icon */}
-          <div className="w-11 h-11 rounded-full bg-accent-blue flex items-center justify-center">
-            <SuccessIcon className="w-6 h-auto stroke-current" />
-          </div>
+          {state.iconType === 'success' ? (
+            <div className="w-11 h-11 rounded-full bg-accent-blue flex items-center justify-center">
+              <Icon className="w-6 h-auto stroke-current" />
+            </div>
+          ) : (
+            <Icon className="w-12 h-12" />
+          )}
+
           {/* content */}
           <section className="w-full" aria-label="success-message">
             {state.subHeader && (

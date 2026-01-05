@@ -6,11 +6,13 @@ import { nanoid } from 'nanoid';
 import { ReactComponent as PenIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-open-secondary.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
+import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { t } from 'lib/i18n';
 import { useAllAccounts, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { translateYModifiers } from 'lib/ui/general-modifiers';
+import { navigate } from 'lib/woozie';
 
 export const WalletCardDropdown: FC = () => {
   const { createAccount } = useTempleClient();
@@ -34,6 +36,17 @@ export const WalletCardDropdown: FC = () => {
     }
   }, [createAccount, defaultName]);
 
+  const revesalSeedPhrase = useCallback(() => {
+    navigate<SuccessStateType>('/success', undefined, {
+      pageTitle: 'revealSeedPhrase',
+      btnText: 'proceedToReveal',
+      btnLink: '/settings/reveal-seed-phrase',
+      description: 'proceedToRevealMsg',
+      subHeader: 'pleaseNote',
+      iconType: 'warning'
+    });
+  }, []);
+
   const settingsListData: RenderOptionContentType[] = useMemo(
     () => [
       {
@@ -52,11 +65,10 @@ export const WalletCardDropdown: FC = () => {
         id: nanoid(),
         label: 'Reveal Seed Phrase',
         Icon: EyeIcon,
-        disabled: true
-        // onClick: handleMaximiseViewClick
+        onClick: revesalSeedPhrase
       }
     ],
-    [addAccount]
+    [addAccount, revesalSeedPhrase]
   );
 
   return (

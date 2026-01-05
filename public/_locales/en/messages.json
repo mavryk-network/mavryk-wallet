@@ -914,6 +914,12 @@
   "revealSeedPhrase": {
     "message": "Reveal Seed Phrase"
   },
+  "proceedToReveal": {
+    "message": "Proceed To Reveal"
+  },
+  "proceedToRevealMsg": {
+    "message": "You can view the seed phrase only for wallets created in the app. For security reasons, seed phrases for imported wallets aren’t available."
+  },
   "revealSeedPhraseDescription": {
     "message": "Also known as \"Export Wallet\", you may need this seed phrase to access your wallet and accounts on other devices."
   },
@@ -3986,5 +3992,8 @@
   },
   "deleteAccount": {
     "message": "Delete Account"
+  },
+  "pleaseNote": {
+    "message": "Please Note"
   }
 }

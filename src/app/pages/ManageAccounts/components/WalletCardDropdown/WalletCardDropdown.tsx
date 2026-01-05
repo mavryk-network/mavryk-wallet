@@ -11,7 +11,7 @@ import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { t } from 'lib/i18n';
 import { useAllAccounts, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
-import { translateYModifiers } from 'lib/ui/general-modifiers';
+import { translateYModifiersNegative } from 'lib/ui/general-modifiers';
 import { navigate } from 'lib/woozie';
 
 export const WalletCardDropdown: FC = () => {
@@ -80,7 +80,7 @@ export const WalletCardDropdown: FC = () => {
         fontContentWrapperClassname="border-none bg-transparent"
         DropdownFaceContent={<Dots />}
         showIcon={false}
-        poperModifiers={translateYModifiers}
+        poperModifiers={translateYModifiersNegative}
         poperPlacement="bottom-end"
         optionsProps={{
           options: settingsListData,

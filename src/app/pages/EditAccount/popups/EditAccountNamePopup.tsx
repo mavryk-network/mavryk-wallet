@@ -114,7 +114,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
               </div>
             }
             placeholder={t('enterAccountName')}
-            pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
+            pattern={ACCOUNT_NAME_PATTERN.toString()}
             title={t('accountNameInputTitle')}
             spellCheck
             onFocus={handleEditFieldFocus}

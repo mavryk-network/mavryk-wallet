@@ -48,7 +48,7 @@ import {
 } from './store';
 import { Vault } from './vault';
 
-const ACCOUNT_NAME_PATTERN = /^.{0,16}$/;
+const ACCOUNT_NAME_PATTERN = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
 const AUTODECLINE_AFTER = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;

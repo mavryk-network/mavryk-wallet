@@ -250,7 +250,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             maxLength={16}
             label={isOwn ? t('editAccountName') : t('editContactName')}
             placeholder={t('enterAccountName')}
-            pattern={ACCOUNT_NAME_PATTERN.toString().slice(1, -1)}
+            pattern={ACCOUNT_NAME_PATTERN.toString()}
             title={t('accountNameInputTitle')}
             spellCheck={false}
             onFocus={handleEditFieldFocus}

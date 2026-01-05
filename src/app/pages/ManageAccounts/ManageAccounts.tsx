@@ -1,11 +1,31 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
+
+import clsx from 'clsx';
 
 import { useAppEnv } from 'app/env';
+import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { T } from 'lib/i18n';
+import SearchField from 'app/templates/SearchField';
+import { t, T } from 'lib/i18n';
+import { useRelevantAccounts } from 'lib/temple/front';
+
+import { WalletCard } from './components/WalletCard/WalletCard';
 
 export const ManageAccounts: FC = () => {
   const { popup } = useAppEnv();
+  const allAccounts = useRelevantAccounts();
+
+  const [searchValue, setSearchValue] = useState('');
+
+  const filteredAccounts = useMemo(() => {
+    if (searchValue.length === 0) {
+      return allAccounts;
+    } else {
+      const lowerCaseSearchValue = searchValue.toLowerCase();
+
+      return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
+    }
+  }, [searchValue, allAccounts]);
 
   const memoizedContentContainerStyle = useMemo(() => (popup ? { padding: 0 } : {}), [popup]);
 
@@ -19,7 +39,38 @@ export const ManageAccounts: FC = () => {
       isTopbarVisible={false}
       contentContainerStyle={memoizedContentContainerStyle}
     >
-      Manage Accounts
+      <div className={clsx(popup && 'px-4 my-4')}>
+        <div className={clsx('flex items-center justify-end mb-3 gap-3')}>
+          <SearchField
+            value={searchValue}
+            className={clsx(
+              'py-2 pl-8 pr-4',
+              'bg-secondary-card',
+              'focus:outline-none',
+              'transition ease-in-out duration-200',
+              'text-white text-sm leading-tight',
+              'placeholder-primary-white placeholder-opacity-50 rounded-lg'
+            )}
+            placeholder={t('searchByName')}
+            searchIconClassName="h-5 w-auto"
+            searchIconWrapperClassName="px-2 text-white opacity-50"
+            cleanButtonStyle={{ backgroundColor: 'transparent' }}
+            onValueChange={setSearchValue}
+          />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
+            <PlusIcon className="w-6 h-6 stroke-2" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          {filteredAccounts.length === 0 ? (
+            <p className="text-center text-white text-base">
+              <T id="noResults" />
+            </p>
+          ) : (
+            <WalletCard name="Wallet A" accounts={filteredAccounts} handleAccountClick={() => {}} />
+          )}
+        </div>
+      </div>
     </PageLayout>
   );
 };

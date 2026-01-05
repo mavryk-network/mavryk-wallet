@@ -5,18 +5,12 @@ import classNames from 'clsx';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
-import { ButtonLink } from 'app/molecules/ButtonLink/ButtonLink';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import SearchField from 'app/templates/SearchField/SearchField';
-import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
 import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 import { Link } from 'lib/woozie';
 
-import { AccountDropdownSelectors } from '../selectors';
-
-import { AccountItem } from './AccountItem';
 import { WalletCard } from './components/WalletCard';
 
 type AccountPopupProps = {
@@ -30,7 +24,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened, onlyAccSelect 
   const { popup } = useAppEnv();
   const account = useAccount();
   const setAccountPkh = useSetAccountPkh();
-  const { assetName: gasTokenName } = useGasToken();
 
   const settingsTippyOptions = useMemo<UseTippyOptions>(
     () => ({

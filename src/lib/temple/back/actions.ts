@@ -48,7 +48,8 @@ import {
 } from './store';
 import { Vault } from './vault';
 
-export const ACCOUNT_NAME_PATTERN = new RegExp('^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$', 'u');
+export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
+export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const AUTODECLINE_AFTER = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;

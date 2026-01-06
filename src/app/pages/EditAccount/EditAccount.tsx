@@ -3,7 +3,7 @@ import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef, u
 import clsx from 'clsx';
 
 import { FormField, HashChip } from 'app/atoms';
-import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
@@ -229,7 +229,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             maxLength={16}
             label={isOwn ? t('editAccountName') : t('editContactName')}
             placeholder={t('enterAccountName')}
-            pattern={ACCOUNT_NAME_PATTERN.toString()}
+            pattern={ACCOUNT_NAME_PATTERN_STR}
             title={t('accountNameInputTitle')}
             spellCheck={false}
             onFocus={handleEditFieldFocus}

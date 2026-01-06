@@ -3,7 +3,7 @@ import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef } 
 import clsx from 'clsx';
 
 import { FormField } from 'app/atoms';
-import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
@@ -118,7 +118,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
               </div>
             }
             placeholder={t('enterAccountName')}
-            pattern={ACCOUNT_NAME_PATTERN.toString()}
+            pattern={ACCOUNT_NAME_PATTERN_STR}
             title={t('accountNameInputTitle')}
             spellCheck
             onFocus={handleEditFieldFocus}

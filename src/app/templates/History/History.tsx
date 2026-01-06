@@ -96,7 +96,8 @@ export const HistoryComponent: React.FC<Props> = memo(
 
         ...(assetSlug
           ? ([] as SortListItemType[])
-          : ([
+          : // eslint-disable-next-line no-type-assertion/no-type-assertion
+            ([
               {
                 id: HistoryItemOpTypeEnum.Delegation.toString(),
                 selected: filterOptions.includes(HistoryItemOpTypeEnum.Delegation),

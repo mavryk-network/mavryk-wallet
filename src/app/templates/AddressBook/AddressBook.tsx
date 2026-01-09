@@ -23,7 +23,7 @@ type ContactActions = {
 };
 
 export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
-  const { allContacts: filteredContacts } = useFilteredContacts();
+  const { outsideWalletContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
   const { popup } = useAppEnv();
 
@@ -42,7 +42,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   );
 
   // There is always one account (the current one)
-  const isContactsEmpty = allContacts.length === 1;
+  const isContactsEmpty = allContacts.length === 0;
 
   const handleAddContactClick = useCallback(() => {
     navigate('/settings/add-contact');

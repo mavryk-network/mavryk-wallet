@@ -94,7 +94,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addContact',
           btnText: 'goToAddressBook',
-          btnLink: '/settings/address-book',
+          btnLink: '/settings/contacts',
           description: 'addContactSuccessDesc',
           subHeader: 'success'
         });

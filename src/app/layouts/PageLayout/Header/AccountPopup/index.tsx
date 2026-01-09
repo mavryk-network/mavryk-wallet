@@ -19,6 +19,7 @@ type AccountPopupProps = {
 };
 
 const LIST_HEIGHT = 320;
+const isShowSearch = true;
 
 const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
   const allAccounts = useRelevantAccounts();
@@ -49,8 +50,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
 
   const [searchValue, setSearchValue] = useState('');
   const [attractSelectedAccount, setAttractSelectedAccount] = useState(true);
-
-  const isShowSearch = useMemo(() => allAccounts.length > 5, [allAccounts.length]);
 
   const filteredAccounts = useMemo(() => {
     if (searchValue.length === 0) {

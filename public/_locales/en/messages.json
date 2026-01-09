@@ -2570,6 +2570,9 @@
   "addressBook": {
     "message": "Address Book"
   },
+  "contacts": {
+    "message": "Contacts"
+  },
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."
   },

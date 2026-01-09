@@ -17,7 +17,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
   const { publicKeyHash } = useAccount();
 
   return (
-    <section className="bg-tertiary-card pt-2 flex flex-col rounded-lg">
+    <section className="bg-tertiary-card pt-2 flex flex-col rounded-lg overflow-hidden">
       <div className="flex items-center gap-2 p-2 sticky top-0 z-10 bg-tertiary-card rounded-lg">
         <p className="text-base-plus text-white font-bold">{name}</p>
         <p className="text-sm text-secondary-white">{accounts?.length ?? 0} Accounts</p>

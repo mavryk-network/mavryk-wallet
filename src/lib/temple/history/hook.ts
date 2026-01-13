@@ -4,6 +4,8 @@ import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/a
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
+import { TempleAccount } from '../types';
+
 import fetchUserHistory from './fetch';
 import { UserHistoryItem } from './types';
 
@@ -26,11 +28,15 @@ type TLoading = 'init' | 'more' | false;
 export default function useHistory(
   initialPseudoLimit: number,
   assetSlug?: string,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: GetOperationsTransactionsParams,
+  differentAccount?: TempleAccount
 ) {
   const tezos = useTezos();
   const chainId = useChainId(true);
-  const account = useAccount();
+  const originalAccount = useAccount();
+
+  const account = differentAccount ? differentAccount : originalAccount;
+
   const accountAddress = account.publicKeyHash;
 
   const [loading, setLoading] = useSafeState<TLoading>(isKnownChainId(chainId) && 'init');

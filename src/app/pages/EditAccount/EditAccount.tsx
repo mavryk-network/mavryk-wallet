@@ -24,7 +24,7 @@ import {
 } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import useHistory from 'lib/temple/history/hook';
-import { TempleAccountType } from 'lib/temple/types';
+import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
@@ -113,11 +113,6 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   const { account: explorerBaseUrl } = useExplorerBaseUrls();
 
   const { accToChange, isOwn } = useAccountOwnership(accHash);
-  const { loading: userHistoryLoading, list: userHistory } = useHistory(3);
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
-
-  const editNamePopup = usePopupState(false);
 
   const accountHash = useMemo(
     () => (accToChange ? accToChange.address : account.publicKeyHash),
@@ -125,6 +120,17 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   );
 
   const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
+
+  const accountObj: TempleAccount = useMemo(
+    () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly }),
+    [accountHash, accountName]
+  );
+
+  const { loading: userHistoryLoading, list: userHistory } = useHistory(3, undefined, undefined, accountObj);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
+
+  const editNamePopup = usePopupState(false);
 
   const autoCancelTimeoutRef = useRef<number>();
 
@@ -219,6 +225,13 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
               <>
                 <SyncSpinner className="mt-4" />
               </>
+            ) : !userHistory.length ? (
+              <div
+                style={{ height: popup ? 200 : 300 }}
+                className="text-sm text-secondary-white flex items-center justify-center "
+              >
+                No recent transfers yet
+              </div>
             ) : (
               userHistory.map((historyItem, idx) => (
                 <Fragment key={historyItem.hash + idx}>
@@ -239,7 +252,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             btnType={BTN_ERROR}
             size="big"
             fill={false}
-            className="w-full"
+            className={clsx('w-full', popup && 'mb-8')}
             onClick={handleRemoveContactClick}
           >
             <T id="deleteContact" />

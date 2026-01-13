@@ -13,6 +13,7 @@ export interface ConfirmationModalProps extends PopupModalWithTitlePropsProps {
   onConfirm: () => void;
   comfirmButtonText?: string;
   confirmButtonType?: ButtonRoundedType;
+  cancelButtonType?: ButtonRoundedType;
 }
 
 const ConfirmationModal: FC<ConfirmationModalProps> = props => {
@@ -22,6 +23,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
     onConfirm,
     comfirmButtonText = t('ok'),
     confirmButtonType = BTN_PRIMARY,
+    cancelButtonType = BTN_PRIMARY,
     ...restProps
   } = props;
 
@@ -38,6 +40,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = props => {
         <div className={clsx('text-white text-sm text-center', fullPage ? 'mb-8' : 'mb-11 mt-7')}>{children}</div>
         <div className="grid grid-cols-2 gap-x-3">
           <ButtonRounded
+            btnType={cancelButtonType}
             size="big"
             fill={false}
             onClick={onRequestClose}

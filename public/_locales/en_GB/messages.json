@@ -914,6 +914,12 @@
   "revealSeedPhrase": {
     "message": "Reveal Seed Phrase"
   },
+  "proceedToReveal": {
+    "message": "Proceed To Reveal"
+  },
+  "proceedToRevealMsg": {
+    "message": "You can view the seed phrase only for wallets created in the app. For security reasons, seed phrases for imported wallets aren’t available."
+  },
   "revealSeedPhraseDescription": {
     "message": "Also known as \"Export Wallet\", you may need this seed phrase to access your wallet and accounts on other devices."
   },
@@ -2277,6 +2283,14 @@
     "message": "Blockchain Explorer"
   },
   "viewOnBlockExplorer": { "message": "View On Block Explorer" },
+  "viewOnBlockExplorerName": {
+    "message": "View On $name$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
   "specifyTokenId": {
     "message": "Specify token ID"
   },
@@ -2544,6 +2558,9 @@
   "recentDestinations": {
     "message": "Recent destinations"
   },
+  "recentTransfers": {
+    "message": "Recent Transfers"
+  },
   "unknownAccount": {
     "message": "Unknown account"
   },
@@ -2563,6 +2580,12 @@
   },
   "addressBook": {
     "message": "Address Book"
+  },
+  "contacts": {
+    "message": "Contacts"
+  },
+  "contactInfo": {
+    "message": "Contact Info"
   },
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."
@@ -3589,7 +3612,7 @@
     "message": "Your asset was successfully added"
   },
   "editAccount": {
-    "message": "Edit Your Account"
+    "message": "Edit Account"
   },
   "editContact": {
     "message": "Edit Contact"
@@ -3980,5 +4003,14 @@
   },
   "finalizeUnlock": {
     "message": "Finalize Unlock"
+  },
+  "editName": {
+    "message": "Edit Name"
+  },
+  "deleteAccount": {
+    "message": "Delete Account"
+  },
+  "pleaseNote": {
+    "message": "Please Note"
   }
 }

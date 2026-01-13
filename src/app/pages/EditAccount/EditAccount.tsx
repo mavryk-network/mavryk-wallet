@@ -1,27 +1,34 @@
-import React, { FC, FormEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { FormField, HashChip } from 'app/atoms';
-import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
+import { ExternalLinkChip, HashChip, Identicon, Name, SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
-import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { ReactComponent as EllipsePurple } from 'app/misc/Ellipse-purple.svg';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
-import { useFormAnalytics } from 'lib/analytics';
+import { HistoryDetailsPopup } from 'app/templates/History/HistoryDetailsPopup';
+import { HistoryItem } from 'app/templates/History/HistoryItem';
 import { T, t } from 'lib/i18n';
-import { useAccount, useAllAccounts, useContactsActions, useSetAccountPkh, useTempleClient } from 'lib/temple/front';
+import {
+  useAccount,
+  useAllAccounts,
+  useBlockExplorer,
+  useContactsActions,
+  useExplorerBaseUrls,
+  useSetAccountPkh
+} from 'lib/temple/front';
+import { UserHistoryItem } from 'lib/temple/history';
+import useHistory from 'lib/temple/history/hook';
 import { TempleAccountType } from 'lib/temple/types';
-import { useAlert } from 'lib/ui';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
-import { EditableTitleSelectors } from './editAccount.selectors';
-import { useAccountNameInputHandlers, useAccountOwnership, usePopupState } from './hooks';
+import { useAccountOwnership, usePopupState } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
 import { RemoveAccountPopup } from './popups/RemoveAccountPopup';
 
@@ -97,19 +104,20 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
 };
 
 export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
-  const { editAccountName } = useTempleClient();
   const setAccountPkh = useSetAccountPkh();
-  const { removeContact, editContact } = useContactsActions();
+  const { removeContact } = useContactsActions();
   const account = useAccount();
-  const customAlert = useAlert();
-  const formAnalytics = useFormAnalytics('ChangeAccountName');
   const confirm = useConfirm();
   const { popup } = useAppEnv();
+  const { explorer } = useBlockExplorer();
+  const { account: explorerBaseUrl } = useExplorerBaseUrls();
 
   const { accToChange, isOwn } = useAccountOwnership(accHash);
+  const { loading: userHistoryLoading, list: userHistory } = useHistory(3);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
 
-  const editAccNameFieldRef = useRef<HTMLInputElement>(null);
-  const accNamePrevRef = useRef<string>();
+  const editNamePopup = usePopupState(false);
 
   const accountHash = useMemo(
     () => (accToChange ? accToChange.address : account.publicKeyHash),
@@ -117,11 +125,6 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   );
 
   const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
-
-  const { value, handleChange, handleClean } = useAccountNameInputHandlers(accountName, editAccNameFieldRef);
-  useEffect(() => {
-    accNamePrevRef.current = accountName;
-  }, [accountName]);
 
   const autoCancelTimeoutRef = useRef<number>();
 
@@ -132,43 +135,11 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
     []
   );
 
-  const handleEditSubmit = useCallback<FormEventHandler>(
-    evt => {
-      evt.preventDefault();
+  // handlers --------------------------------------------
 
-      (async () => {
-        formAnalytics.trackSubmit();
-        try {
-          const newName = editAccNameFieldRef.current?.value;
-
-          if (!newName || newName === accountName) {
-            goBack();
-            return;
-          }
-
-          if (isOwn) {
-            // update "own" account name
-            await editAccountName(accountHash, newName);
-          } else {
-            // update contact from address book
-            await editContact(accountHash, { name: newName });
-          }
-
-          formAnalytics.trackSubmitSuccess();
-          goBack();
-        } catch (err: any) {
-          formAnalytics.trackSubmitFail();
-          console.error(err);
-
-          await customAlert({
-            title: t('errorChangingAccountName'),
-            children: err.message
-          });
-        }
-      })();
-    },
-    [formAnalytics, accountName, isOwn, editAccountName, accountHash, editContact, customAlert]
-  );
+  const handleRequestClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   const handleRemoveContactClick = useCallback(async () => {
     if (isOwn) {
@@ -183,7 +154,8 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
         title: t('deleteContact'),
         children: t('deleteContactConfirm'),
         comfirmButtonText: t('delete'),
-        confirmButtonType: BTN_ERROR
+        confirmButtonType: BTN_ERROR,
+        cancelButtonType: BTN_ERROR
       }))
     ) {
       return;
@@ -193,56 +165,96 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
     goBack();
   }, [accountHash, confirm, isOwn, removeContact, setAccountPkh]);
 
-  const handleEditFieldFocus = useCallback(() => {
-    clearTimeout(autoCancelTimeoutRef.current);
-  }, []);
+  const handleItemClick = useCallback(
+    (hash: string) => {
+      setIsOpen(true);
+      setActiveHistoryItem(userHistory.find(item => item.hash === hash) ?? null);
+    },
+    [userHistory]
+  );
 
   return (
-    <PageLayout
-      pageTitle={<span>{isOwn ? t('editAccount') : t('editContact')}</span>}
-      isTopbarVisible={false}
-      RightSidedComponent={
-        <button className="flex-none text-white" onClick={handleRemoveContactClick}>
-          <TrashIcon className="w-5 h-5" title={t('remove')} />
-        </button>
-      }
-    >
+    <PageLayout pageTitle={<span>{t('contactInfo')}</span>} isTopbarVisible={false}>
       <div
         className={clsx(
-          'w-full mx-auto h-full flex flex-col justify-start pb-8',
+          'w-full mx-auto h-full flex flex-col flex-1 justify-between',
           popup ? 'max-w-sm' : 'max-w-screen-xxs'
         )}
       >
-        <div className="flex flex-col gap-1 mb-4">
-          <div className="text-primary-white text-base-plus">
-            <T id="publicAddress" />:
+        <section className="flex flex-col">
+          <div className="p-4 rounded-2xl overflow-hidden bg-gray-900 flex flex-col items-center relative mb-4">
+            {/* Positioned Content */}
+            <div className="flex items-center absolute top-4 right-4 text-white text-xs">
+              <p className="underline">
+                {' '}
+                <T id="viewOnBlockExplorerName" substitutions={[explorer.name]} />
+              </p>
+              <ExternalLinkChip
+                href={`${explorerBaseUrl}${accountHash}`}
+                tooltip="Explore Contact"
+                iconColor="text-white"
+              />
+            </div>
+            <EllipsePurple className="absolute left-0 top-0 z-0" />
+            {/* ------------------- */}
+            <div className="z-10 flex flex-col items-center">
+              <Identicon type="bottts" hash={accountHash} size={64} className="shadow-xs rounded-full flex-shrink-0" />
+              <div className="text-white flex items-center gap-1 mb-2 mt-3">
+                <Name className="text-primary-white text-xl">{accountName}</Name>
+
+                <button onClick={editNamePopup.open} className="outline-none focus:outline-none">
+                  <EditIcon className="min-w-6 w-6 h-6 fill-current" />
+                </button>
+              </div>
+              <HashChip hash={accountHash} trim={false} />
+            </div>
           </div>
-          <HashChip hash={accountHash} small trim={false} />
-        </div>
 
-        <form className="flex flex-col items-center flex-1 justify-start gap-3" onSubmit={handleEditSubmit}>
-          <FormField
-            ref={editAccNameFieldRef}
-            name="name"
-            value={value}
-            onChange={handleChange}
-            maxLength={16}
-            label={isOwn ? t('editAccountName') : t('editContactName')}
-            placeholder={t('enterAccountName')}
-            pattern={ACCOUNT_NAME_PATTERN_STR}
-            title={t('accountNameInputTitle')}
-            spellCheck={false}
-            onFocus={handleEditFieldFocus}
-            cleanBtnBottomOffset="27%"
-            onClean={handleClean}
-            cleanable={Boolean(value)}
-          />
+          <p className="mb-2 text-white text-base-plus font-bold">
+            <T id="recentTransfers" />
+          </p>
 
-          <ButtonRounded size="big" className="w-full capitalize" testID={EditableTitleSelectors.saveButton}>
-            <T id="save" />
+          <section>
+            {userHistoryLoading ? (
+              <>
+                <SyncSpinner className="mt-4" />
+              </>
+            ) : (
+              userHistory.map((historyItem, idx) => (
+                <Fragment key={historyItem.hash + idx}>
+                  <HistoryItem
+                    address={accountHash}
+                    historyItem={historyItem}
+                    handleItemClick={handleItemClick}
+                    last={false}
+                  />
+                </Fragment>
+              ))
+            )}
+          </section>
+        </section>
+        <div className="flex-1 min-h-8"></div>
+        <div>
+          <ButtonRounded
+            btnType={BTN_ERROR}
+            size="big"
+            fill={false}
+            className="w-full"
+            onClick={handleRemoveContactClick}
+          >
+            <T id="deleteContact" />
           </ButtonRounded>
-        </form>
+        </div>
       </div>
+      <EditAccountNamePopup
+        opened={editNamePopup.opened}
+        close={editNamePopup.close}
+        name={accountName}
+        accountHash={accountHash}
+        isOwn={isOwn}
+        accToChange={accToChange}
+      />
+      <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} historyItem={activeHistoryItem} />
     </PageLayout>
   );
 };

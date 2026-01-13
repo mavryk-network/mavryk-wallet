@@ -6,18 +6,9 @@ import { Button, Identicon, Name } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowDownicon } from 'app/icons/chevron-down.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { t } from 'lib/i18n';
 import { TempleAccount } from 'lib/temple/types';
-import { useTippyById } from 'lib/ui/useTippy';
 
 import AccountPopup from '.';
-
-const tippyProps = {
-  trigger: 'mouseenter',
-  hideOnClick: true,
-  content: t('manageAddresses'),
-  animation: 'shift-away-subtle'
-};
 
 export type AccountButtonProps = {
   child?: JSX.Element;
@@ -48,8 +39,6 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
     },
     [restrictAccountSelect]
   );
-
-  const handleMouseEnter = useTippyById('#manageAddressesBtn', tippyProps);
 
   return (
     <div className="flex gap-2">

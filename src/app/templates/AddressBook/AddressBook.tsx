@@ -4,6 +4,8 @@ import classNames from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
+import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
@@ -49,7 +51,16 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   }, []);
 
   const AddComponent = useMemo(
-    () => <TopbarRightText onClick={handleAddContactClick} label={t('add')} />,
+    () => (
+      <TopbarRightText
+        onClick={handleAddContactClick}
+        label={
+          <div className="rounded-lg bg-gray-910 h-7 w-7 flex items-center justify-center">
+            <PlusIcon className="w-6 h-6 stroke-2" />
+          </div>
+        }
+      />
+    ),
     [handleAddContactClick]
   );
 
@@ -110,28 +121,27 @@ const ContactContent: React.FC<
   OptionRenderProps<TempleContact, string, ContactActions> & { account: TempleAccount }
 > = ({ item, account }) => {
   return (
-    <div
-      className="flex flex-1 w-full py-3"
-      {...setTestID(AddressBookSelectors.contactItem)}
-      {...setAnotherSelector('hash', item.address)}
-    >
-      <div className="flex flex-col justify-between flex-1">
-        <div className="flex items-center">
-          <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
-          <AddressBookBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
-        </div>
+    <Link to={`/edit-account/${item.address}`} className="flex flex-1 w-full py-3">
+      <div
+        className="flex flex-1 w-full"
+        {...setTestID(AddressBookSelectors.contactItem)}
+        {...setAnotherSelector('hash', item.address)}
+      >
+        <div className="flex flex-col justify-between flex-1">
+          <div className="flex items-center">
+            <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
+            <AddressBookBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
+          </div>
 
-        <div className="text-sm mt-1">
-          <HashChip hash={item.address} small />
+          <div className="text-sm mt-1 relative z-10">
+            <HashChip hash={item.address} small showIcon={false} />
+          </div>
         </div>
       </div>
-
-      <Link to={`/edit-account/${item.address}`} className="flex items-center">
-        <ButtonRounded size="xs" fill={false}>
-          <T id="edit" />
-        </ButtonRounded>
-      </Link>
-    </div>
+      <div className="ml-auto self-center">
+        <ChevronRightIcon className="w-4 h-4 fill-white" />
+      </div>
+    </Link>
   );
 };
 

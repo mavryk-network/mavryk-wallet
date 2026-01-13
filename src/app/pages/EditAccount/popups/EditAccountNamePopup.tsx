@@ -95,12 +95,14 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
     clearTimeout(autoCancelTimeoutRef.current);
   }, []);
 
+  const label = isOwn ? t('enterAccountName') : t('newContactPlaceholder');
+
   return (
     <PopupModalWithTitle
       isOpen={opened}
       contentPosition={popup ? 'bottom' : 'center'}
       onRequestClose={close}
-      title={'Edit Account Name'}
+      title={isOwn ? t('editAccountName') : t('editContactName')}
       portalClassName="edit-account-name-popup-portal"
     >
       <div className={clsx('flex flex-col', popup ? 'px-4' : 'px-12')}>
@@ -112,12 +114,12 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
             onChange={handleChange}
             maxLength={16}
             label={
-              <div className="flex flex-col gap-1">
-                {isOwn ? t('editAccountName') : t('editContactName')}
+              <div className="flex flex-col gap-1 capitalize">
+                {label}
                 <span className="text-sm text-secondary-white">1-16 characters, no special</span>
               </div>
             }
-            placeholder={t('enterAccountName')}
+            placeholder={label}
             pattern={ACCOUNT_NAME_PATTERN_STR}
             title={t('accountNameInputTitle')}
             spellCheck

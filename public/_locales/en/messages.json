@@ -2283,6 +2283,14 @@
     "message": "Blockchain Explorer"
   },
   "viewOnBlockExplorer": { "message": "View On Block Explorer" },
+  "viewOnBlockExplorerName": {
+    "message": "View On $name$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
   "specifyTokenId": {
     "message": "Specify token ID"
   },
@@ -2550,6 +2558,9 @@
   "recentDestinations": {
     "message": "Recent destinations"
   },
+  "recentTransfers": {
+    "message": "Recent Transfers"
+  },
   "unknownAccount": {
     "message": "Unknown account"
   },
@@ -2572,6 +2583,9 @@
   },
   "contacts": {
     "message": "Contacts"
+  },
+  "contactInfo": {
+    "message": "Contact Info"
   },
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."

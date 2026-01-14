@@ -7,10 +7,10 @@ import * as Bip39 from 'bip39';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
 import { getKYCStatus } from 'lib/apis/tzkt/api';
-import { formatOpParamsBeforeSend, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
+import { formatOpParamsBeforeSend, isNameCollision, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
-import { TempleAccount, TempleAccountType, TempleSettings } from 'lib/temple/types';
+import { TempleAccount, TempleAccountType, TempleSettings, WalletSpecs } from 'lib/temple/types';
 
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
@@ -27,7 +27,9 @@ import {
   createMemorySigner,
   getMainDerivationPath,
   getPublicKeyAndHash,
-  withError
+  withError,
+  mnemonicToTezosAccountCreds,
+  buildEncryptAndSaveManyForAccount
 } from './misc';
 import {
   encryptAndSaveMany,
@@ -49,8 +51,16 @@ import {
   accPubKeyStrgKey,
   accountsStrgKey,
   settingsStrgKey,
-  legacyMigrationLevelStrgKey
+  legacyMigrationLevelStrgKey,
+  walletMnemonicStrgKey
 } from './storage-keys';
+import { nanoid } from 'nanoid';
+import {
+  ACCOUNT_ALREADY_EXISTS_ERR_MSG,
+  ACCOUNT_NAME_COLLISION_ERR_MSG,
+  WALLETS_SPECS_STORAGE_KEY
+} from 'lib/constants';
+import { getAccountAddressForTezos } from 'mavryk/accounts';
 
 const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
@@ -296,6 +306,10 @@ export class Vault {
     return fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, this.passKey);
   }
 
+  async fetchWalletsSpecs() {
+    return (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+  }
+
   async fetchSettings() {
     let saved;
     try {
@@ -304,47 +318,99 @@ export class Vault {
     return saved ? { ...DEFAULT_SETTINGS, ...saved } : DEFAULT_SETTINGS;
   }
 
-  async createHDAccount(name?: string, hdAccIndex?: number): Promise<TempleAccount[]> {
-    return withError('Failed to create account', async () => {
-      const [mnemonic, allAccounts] = await Promise.all([
-        fetchAndDecryptOne<string>(mnemonicStrgKey, this.passKey),
-        this.fetchAccounts()
+  async findFreeHDAccountIndex(walletId: string) {
+    return withError('Failed to find free HD account index', async doThrow => {
+      const [mnemonic, allAccounts, walletsSpecs] = await Promise.all([
+        fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), this.passKey),
+        this.fetchAccounts(),
+        this.fetchWalletsSpecs()
       ]);
 
-      const seed = Bip39.mnemonicToSeedSync(mnemonic);
-
-      if (!hdAccIndex) {
-        const allHDAccounts = allAccounts.filter(a => a.type === TempleAccountType.HD);
-        hdAccIndex = allHDAccounts.length;
+      if (!(walletId in walletsSpecs)) {
+        throw doThrow();
       }
 
-      const accPrivateKey = seedToHDPrivateKey(seed, hdAccIndex);
-      const [accPublicKey, accPublicKeyHash] = await getPublicKeyAndHash(accPrivateKey);
-      const accName = name || (await fetchNewAccountName(allAccounts));
+      const sameGroupHDAccounts = getSameGroupAccounts(allAccounts, TempleAccountType.HD, walletId);
+      const startHdIndex = Math.max(-1, ...sameGroupHDAccounts.map(a => a.hdIndex)) + 1;
+      let firstSkippedAccount: StoredAccount | undefined;
+      for (let skipsCount = 0; ; skipsCount++) {
+        const hdIndex = startHdIndex + skipsCount;
+        const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdIndex);
+        const evmAcc = mnemonicToEvmAccountCreds(mnemonic, hdIndex);
+        const sameAddressAccount = allAccounts.find(acc => {
+          if (acc.type === TempleAccountType.HD) {
+            return false;
+          }
 
-      if (allAccounts.some(a => a.publicKeyHash === accPublicKeyHash)) {
-        return this.createHDAccount(accName, hdAccIndex + 1);
+          const chain = 'chain' in acc ? acc.chain : TempleChainKind.Tezos;
+
+          return chain === TempleChainKind.Tezos
+            ? getAccountAddressForTezos(acc) === tezosAcc.address
+            : getAccountAddressForEvm(acc) === evmAcc.address;
+        });
+
+        if (sameAddressAccount && !firstSkippedAccount) {
+          firstSkippedAccount = sameAddressAccount;
+        } else if (!sameAddressAccount) {
+          return { hdIndex, firstSkippedAccount };
+        }
+      }
+    });
+  }
+
+  async createHDAccount(walletId: string, name?: string, hdAccIndex?: number): Promise<TempleAccount[]> {
+    return withError('Failed to create account', async doThrow => {
+      const [mnemonic, allAccounts, walletsSpecs] = await Promise.all([
+        fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), this.passKey),
+        this.fetchAccounts(),
+        this.fetchWalletsSpecs()
+      ]);
+
+      if (!(walletId in walletsSpecs)) {
+        throw doThrow();
+      }
+
+      if (!hdAccIndex) {
+        hdAccIndex = (await this.findFreeHDAccountIndex(walletId)).hdIndex;
+      }
+
+      const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdAccIndex);
+      const sameAddressAccount = allAccounts.find(acc => {
+        if (acc.type === TempleAccountType.HD) {
+          return false;
+        }
+
+        return getAccountAddressForTezos(acc);
+      });
+
+      if (sameAddressAccount) {
+        throw new PublicError(ACCOUNT_ALREADY_EXISTS_ERR_MSG);
+      }
+
+      const accName = name ?? (await fetchNewAccountName(allAccounts, TempleAccountType.HD, walletId));
+
+      if (isNameCollision(allAccounts, TempleAccountType.HD, accName, walletId)) {
+        throw new PublicError(ACCOUNT_NAME_COLLISION_ERR_MSG);
       }
 
       const newAccount: TempleAccount = {
+        id: nanoid(),
         type: TempleAccountType.HD,
         name: accName,
-        publicKeyHash: accPublicKeyHash,
         hdIndex: hdAccIndex,
-        isKYC: undefined
+        publicKeyHash: tezosAcc.address,
+        isKYC: undefined,
+        walletId
       };
-      const newAllAcounts = concatAccount(allAccounts, newAccount);
+
+      const newAllAccounts = concatAccount(allAccounts, newAccount);
 
       await encryptAndSaveMany(
-        [
-          [accPrivKeyStrgKey(accPublicKeyHash), accPrivateKey],
-          [accPubKeyStrgKey(accPublicKeyHash), accPublicKey],
-          [accountsStrgKey, newAllAcounts]
-        ],
+        [...buildEncryptAndSaveManyForAccount(tezosAcc), [accountsStrgKey, newAllAccounts]],
         this.passKey
       );
 
-      return newAllAcounts;
+      return newAllAccounts;
     });
   }
 

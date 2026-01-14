@@ -11,9 +11,18 @@ import type {
   TempleSendTrackEventResponse
 } from './analytics-types';
 
+export enum TempleChainKind {
+  Tezos = 'tezos'
+}
+
 type NonEmptyArray<T> = [T, ...T[]];
 
 export { DerivationType };
+
+export interface WalletSpecs {
+  name: string;
+  createdAt: number;
+}
 
 export interface ReadyTempleState extends TempleState {
   status: TempleStatus.Ready;
@@ -64,16 +73,19 @@ export type TempleAccount =
 
 interface TempleLedgerAccount extends TempleAccountBase {
   type: TempleAccountType.Ledger;
+  chain: TempleChainKind;
   derivationPath: string;
 }
 
 interface TempleImportedAccount extends TempleAccountBase {
   type: TempleAccountType.Imported;
+  chain: TempleChainKind;
 }
 
 interface TempleHDAccount extends TempleAccountBase {
   type: TempleAccountType.HD;
   hdIndex: number;
+  walletId: string;
 }
 
 interface TempleManagedKTAccount extends TempleAccountBase {
@@ -84,16 +96,20 @@ interface TempleManagedKTAccount extends TempleAccountBase {
 
 interface TempleWatchOnlyAccount extends TempleAccountBase {
   type: TempleAccountType.WatchOnly;
+  chain: TempleChainKind;
+  /** For contract addresses */
   chainId?: string;
 }
 
-interface TempleAccountBase {
+export interface TempleAccountBase {
+  id: string;
   type: TempleAccountType;
   name: string;
   publicKeyHash: string;
   hdIndex?: number;
   derivationPath?: string;
   derivationType?: DerivationType;
+  hidden?: boolean;
 }
 
 export enum TempleAccountType {

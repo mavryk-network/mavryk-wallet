@@ -4012,5 +4012,13 @@
   },
   "pleaseNote": {
     "message": "Please Note"
+  },
+  "hdWalletDefaultName": {
+    "message": "Wallet $groupLetter$",
+    "placeholders": {
+      "groupLetter": {
+        "content": "$1"
+      }
+    }
   }
 }

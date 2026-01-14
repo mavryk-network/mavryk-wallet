@@ -15,7 +15,7 @@ import { TempleAccount, TempleAccountType, TempleSettings, WalletSpecs } from 'l
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
 
-import { transformHttpResponseError } from './helpers';
+import { fetchMessage, fetchNewGroupName, toExcelColumnName, transformHttpResponseError } from './helpers';
 import { MIGRATIONS } from './migrations';
 import {
   seedToHDPrivateKey,
@@ -411,6 +411,69 @@ export class Vault {
       );
 
       return newAllAccounts;
+    });
+  }
+
+  async createOrImportWallet(mnemonic?: string) {
+    return withError('Failed to create wallet', async () => {
+      if (!mnemonic) {
+        mnemonic = Bip39.generateMnemonic(128);
+      }
+
+      const hdAccIndex = 0;
+
+      const walletsSpecs = await this.fetchWalletsSpecs();
+      const groupsMnemonics = await Promise.all(
+        Object.keys(walletsSpecs).map(walletId =>
+          fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), this.passKey)
+        )
+      );
+
+      if (groupsMnemonics.some(m => m === mnemonic)) {
+        throw new PublicError('This wallet is already imported');
+      }
+
+      const allAccounts = await this.fetchAccounts();
+      const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdAccIndex);
+
+      const walletId = nanoid();
+      const walletName = await fetchNewGroupName(walletsSpecs, i =>
+        fetchMessage('hdWalletDefaultName', toExcelColumnName(i))
+      );
+      const accountToReplace = allAccounts.find(acc => {
+        if (acc.type === TempleAccountType.HD) {
+          return false;
+        }
+
+        return getAccountAddressForTezos(acc) === tezosAcc.address;
+      });
+      const newAccount: TempleAccount = {
+        id: nanoid(),
+        type: TempleAccountType.HD,
+        name: accountToReplace?.name ?? (await fetchMessage('defaultAccountName', '1')),
+        hdIndex: hdAccIndex,
+        publicKeyHash: tezosAcc.address,
+        walletId,
+        isKYC: undefined
+      };
+
+      const newAccounts = concatAccount(allAccounts, newAccount);
+      const newWalletsSpecs: StringRecord<WalletSpecs> = {
+        ...walletsSpecs,
+        [walletId]: { name: walletName, createdAt: Date.now() }
+      };
+
+      await encryptAndSaveMany(
+        [
+          [walletMnemonicStrgKey(walletId), mnemonic],
+          ...buildEncryptAndSaveManyForAccount(tezosAcc),
+          [accountsStrgKey, newAccounts]
+        ],
+        this.passKey
+      );
+      await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
+
+      return { newAccounts, newWalletsSpecs };
     });
   }
 

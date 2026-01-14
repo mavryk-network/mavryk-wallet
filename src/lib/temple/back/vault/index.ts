@@ -478,7 +478,7 @@ export class Vault {
     });
   }
 
-  async importAccount(chain: TempleChainKind, accPrivateKey: string, chainId: string, encPassword?: string) {
+  async importAccount(chain: TempleChainKind, chainId: string, accPrivateKey: string, encPassword?: string) {
     const errMessage = 'Failed to import account.\nThis may happen because provided Key is invalid';
 
     return withError(errMessage, async () => {
@@ -520,8 +520,10 @@ export class Vault {
         seed = deriveSeed(seed, derivationPath);
       }
 
+      const chain = TempleChainKind.Tezos;
+
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey, chainId);
+      return this.importAccount(chain, chainId, privateKey);
     });
   }
 

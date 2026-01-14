@@ -531,7 +531,7 @@ export class Vault {
     return withError('Failed to import fundraiser account', async () => {
       const seed = Bip39.mnemonicToSeedSync(mnemonic, `${email}${password}`);
       const privateKey = seedToPrivateKey(seed);
-      return this.importAccount(privateKey, chainId);
+      return this.importAccount(TempleChainKind.Tezos, chainId, privateKey);
     });
   }
 
@@ -541,9 +541,11 @@ export class Vault {
 
       const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
       const newAccount: TempleAccount = {
+        id: nanoid(),
         type: TempleAccountType.ManagedKT,
         name: await fetchNewAccountName(
           allAccounts.filter(({ type }) => type === TempleAccountType.ManagedKT),
+          TempleAccountType.ManagedKT,
           'defaultManagedKTAccountName'
         ),
         publicKeyHash: accPublicKeyHash,
@@ -559,26 +561,28 @@ export class Vault {
     });
   }
 
-  async importWatchOnlyAccount(accPublicKeyHash: string, chainId?: string, accName?: string) {
+  async importWatchOnlyAccount(chain: TempleChainKind, address: string, chainId?: string) {
     return withError('Failed to import Watch Only account', async () => {
       const allAccounts = await this.fetchAccounts();
       const newAccount: TempleAccount = {
+        id: nanoid(),
         type: TempleAccountType.WatchOnly,
-        name: accName
-          ? accName
-          : await fetchNewAccountName(
-              allAccounts.filter(({ type }) => type === TempleAccountType.WatchOnly),
-              'defaultWatchOnlyAccountName'
-            ),
-        publicKeyHash: accPublicKeyHash,
+        name: await fetchNewAccountName(
+          allAccounts,
+          TempleAccountType.WatchOnly,
+          undefined,
+          'defaultWatchOnlyAccountName'
+        ),
+        publicKeyHash: address,
+        chain,
         chainId,
         isKYC: false
       };
-      const newAllAcounts = concatAccount(allAccounts, newAccount);
+      const newAllAccounts = concatAccount(allAccounts, newAccount);
 
-      await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], this.passKey);
+      await encryptAndSaveMany([[accountsStrgKey, newAllAccounts]], this.passKey);
 
-      return newAllAcounts;
+      return newAllAccounts;
     });
   }
 

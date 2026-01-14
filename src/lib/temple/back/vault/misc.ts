@@ -102,6 +102,13 @@ export async function privateKeyToTezosAccountCreds(
   return { address, publicKey, privateKey: realAccPrivateKey };
 }
 
+export function canRemoveAccounts(allAccounts: TempleAccount[], accountsToRemove: TempleAccount[]) {
+  const allHdAccounts = allAccounts.filter(acc => acc.type === TempleAccountType.HD);
+  const hdAccountsToRemove = accountsToRemove.filter(acc => acc.type === TempleAccountType.HD);
+
+  return allHdAccounts.length - hdAccountsToRemove.length >= 1;
+}
+
 export async function withError<T>(errMessage: string, factory: (doThrow: () => void) => Promise<T>) {
   try {
     return await factory(() => {

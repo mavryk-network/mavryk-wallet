@@ -10,6 +10,7 @@ import { getKYCStatus } from 'lib/apis/tzkt/api';
 import {
   ACCOUNT_ALREADY_EXISTS_ERR_MSG,
   ACCOUNT_NAME_COLLISION_ERR_MSG,
+  AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG,
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
 import {
@@ -29,7 +30,8 @@ import {
   TempleSettings,
   WalletSpecs
 } from 'lib/temple/types';
-import { getAccountAddressForTezos } from 'mavryk/accounts';
+import { isTruthy } from 'lib/utils';
+import { getAccountAddressForChain, getAccountAddressForTezos } from 'mavryk/accounts';
 
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
@@ -48,7 +50,8 @@ import {
   withError,
   mnemonicToTezosAccountCreds,
   buildEncryptAndSaveManyForAccount,
-  privateKeyToTezosAccountCreds
+  privateKeyToTezosAccountCreds,
+  canRemoveAccounts
 } from './misc';
 import {
   encryptAndSaveMany,
@@ -78,7 +81,12 @@ const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
 const libthemisWasmSrc = '/wasm/libthemis.wasm';
 
+interface RemoveAccountEventPayload {
+  publicKeyhash?: string;
+}
+
 export class Vault {
+  static removeAccountsListeners: SyncFn<RemoveAccountEventPayload[]>[] = [];
   static async isExist() {
     const stored = await isStored(checkStrgKey);
     if (stored) return stored;
@@ -120,17 +128,20 @@ export class Vault {
       if (!mnemonic) {
         mnemonic = Bip39.generateMnemonic(128);
       }
-      const seed = Bip39.mnemonicToSeedSync(mnemonic);
 
       const hdAccIndex = 0;
-      const accPrivateKey = seedToHDPrivateKey(seed, hdAccIndex);
-      const [accPublicKey, accPublicKeyHash] = await getPublicKeyAndHash(accPrivateKey);
 
+      const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdAccIndex);
+
+      const walletId = nanoid();
+      const walletName = await fetchMessage('hdWalletDefaultName', 'A');
       const initialAccount: TempleAccount = {
+        id: nanoid(),
         type: TempleAccountType.HD,
-        name: 'Account 1',
-        publicKeyHash: accPublicKeyHash,
+        name: await fetchMessage('defaultAccountName', '1'),
         hdIndex: hdAccIndex,
+        publicKeyHash: tezosAcc.address,
+        walletId,
         isKYC: undefined
       };
       const newAccounts = [initialAccount];
@@ -144,16 +155,18 @@ export class Vault {
       await encryptAndSaveMany(
         [
           [checkStrgKey, generateCheck()],
-          [mnemonicStrgKey, mnemonic],
-          [accPrivKeyStrgKey(accPublicKeyHash), accPrivateKey],
-          [accPubKeyStrgKey(accPublicKeyHash), accPublicKey],
+          [walletMnemonicStrgKey(walletId), mnemonic],
+          ...buildEncryptAndSaveManyForAccount(tezosAcc),
           [accountsStrgKey, newAccounts]
         ],
         passKey
       );
+      await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, {
+        [walletId]: { name: walletName, createdAt: Date.now() }
+      });
       await savePlain(migrationLevelStrgKey, MIGRATIONS.length);
 
-      return accPublicKeyHash;
+      return tezosAcc.address;
     });
   }
 
@@ -261,21 +274,91 @@ export class Vault {
     });
   }
 
-  static async removeAccount(accPublicKeyHash: string, password: string) {
+  private static async removeAccountsKeys(accounts: TempleAccount[]) {
+    const accAddresses = Object.values(TempleChainKind)
+      .map(chain => accounts.map(acc => getAccountAddressForChain(acc, chain)))
+      .flat()
+      .filter(isTruthy);
+
+    await removeMany(accAddresses.map(address => [accPrivKeyStrgKey(address), accPubKeyStrgKey(address)]).flat());
+    Vault.removeAccountsListeners.forEach(fn =>
+      fn(
+        accounts.map(account => ({
+          publicKeyhash: getAccountAddressForTezos(account)
+        }))
+      )
+    );
+  }
+
+  static async removeAccount(id: string, password: string) {
     const { passKey } = await Vault.toValidPassKey(password);
     return withError('Failed to remove account', async doThrow => {
       const allAccounts = await fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey);
-      const acc = allAccounts.find(a => a.publicKeyHash === accPublicKeyHash);
-      if (!acc || acc.type === TempleAccountType.HD) {
-        doThrow();
+      const acc = allAccounts.find(a => a.id === id);
+
+      if (!acc) {
+        throw doThrow();
       }
 
-      const newAllAcounts = allAccounts.filter(currentAccount => currentAccount.publicKeyHash !== accPublicKeyHash);
-      await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], passKey);
+      if (!canRemoveAccounts(allAccounts, [acc])) {
+        throw new PublicError(AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG);
+      }
 
-      await removeMany([accPrivKeyStrgKey(accPublicKeyHash), accPubKeyStrgKey(accPublicKeyHash)]);
+      const newAccounts = allAccounts.filter(currentAccount => currentAccount.id !== id);
+      const allHdWalletsEntries = Object.entries(
+        (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {}
+      );
+      const newWalletsSpecs = Object.fromEntries(
+        allHdWalletsEntries.filter(([walletId]) =>
+          newAccounts.some(acc => acc.type === TempleAccountType.HD && acc.walletId === walletId)
+        )
+      );
+      await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
+      await savePlain(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
+      await Vault.removeAccountsKeys([acc]);
 
-      return newAllAcounts;
+      return { newAccounts, newWalletsSpecs };
+    });
+  }
+
+  static async removeHdWallet(id: string, password: string) {
+    const { passKey } = await Vault.toValidPassKey(password);
+
+    return withError('Failed to remove HD group', async doThrow => {
+      const walletsSpecs = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+
+      if (!(id in walletsSpecs)) {
+        throw doThrow();
+      }
+
+      const allAccounts = await fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey);
+      const accountsToRemove: TempleAccount[] = getSameGroupAccounts(allAccounts, TempleAccountType.HD, id);
+
+      if (!canRemoveAccounts(allAccounts, accountsToRemove)) {
+        throw new PublicError(AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG);
+      }
+
+      const newAccounts = allAccounts.filter(acc => !accountsToRemove.includes(acc));
+      const { [id]: oldGroupName, ...newWalletsSpecs } = walletsSpecs;
+      await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
+      await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
+      await Vault.removeAccountsKeys(accountsToRemove);
+
+      return { newAccounts, newWalletsSpecs };
+    });
+  }
+
+  static async removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
+    const { passKey } = await Vault.toValidPassKey(password);
+
+    return withError('Failed to remove accounts', async () => {
+      const allAccounts = await fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey);
+      const accountsToRemove = allAccounts.filter(acc => acc.type === type);
+      const newAccounts = allAccounts.filter(acc => acc.type !== type);
+      await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
+      await Vault.removeAccountsKeys(accountsToRemove);
+
+      return newAccounts;
     });
   }
 

@@ -1,5 +1,6 @@
 import { InMemorySigner } from '@mavrykdynamics/webmavryk-signer';
 import * as TaquitoUtils from '@mavrykdynamics/webmavryk-utils';
+import { isDefined } from '@rnw-community/shared';
 import * as Bip39 from 'bip39';
 import * as Ed25519 from 'ed25519-hd-key';
 
@@ -84,6 +85,21 @@ export async function mnemonicToTezosAccountCreds(mnemonic: string, hdIndex: num
   const [publicKey, address] = await Promise.all([signer.publicKey(), signer.publicKeyHash()]);
 
   return { address, publicKey, privateKey };
+}
+
+export async function privateKeyToTezosAccountCreds(
+  accPrivateKey: string,
+  encPassword?: string
+): Promise<AccountCreds> {
+  const signer = await createMemorySigner(accPrivateKey, encPassword);
+
+  const [realAccPrivateKey, publicKey, address] = await Promise.all([
+    isDefined(encPassword) ? signer.secretKey() : Promise.resolve(accPrivateKey),
+    signer.publicKey(),
+    signer.publicKeyHash()
+  ]);
+
+  return { address, publicKey, privateKey: realAccPrivateKey };
 }
 
 export async function withError<T>(errMessage: string, factory: (doThrow: () => void) => Promise<T>) {

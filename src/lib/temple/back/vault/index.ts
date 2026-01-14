@@ -10,7 +10,7 @@ import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { formatOpParamsBeforeSend, isNameCollision, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
-import { TempleAccount, TempleAccountType, TempleSettings, WalletSpecs } from 'lib/temple/types';
+import { TempleAccount, TempleAccountType, TempleChainKind, TempleSettings, WalletSpecs } from 'lib/temple/types';
 
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
@@ -29,7 +29,8 @@ import {
   getPublicKeyAndHash,
   withError,
   mnemonicToTezosAccountCreds,
-  buildEncryptAndSaveManyForAccount
+  buildEncryptAndSaveManyForAccount,
+  privateKeyToTezosAccountCreds
 } from './misc';
 import {
   encryptAndSaveMany,
@@ -477,38 +478,32 @@ export class Vault {
     });
   }
 
-  async importAccount(accPrivateKey: string, chainId: string, encPassword?: string) {
+  async importAccount(chain: TempleChainKind, accPrivateKey: string, chainId: string, encPassword?: string) {
     const errMessage = 'Failed to import account.\nThis may happen because provided Key is invalid';
 
     return withError(errMessage, async () => {
-      const allAccounts = await this.fetchAccounts();
       const signer = await createMemorySigner(accPrivateKey, encPassword);
-      const [realAccPrivateKey, accPublicKey, accPublicKeyHash] = await Promise.all([
-        signer.secretKey(),
-        signer.publicKey(),
-        signer.publicKeyHash()
-      ]);
-
+      const [accPublicKeyHash] = await Promise.all([signer.publicKeyHash()]);
+      const allAccounts = await this.fetchAccounts();
       const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
 
+      const accCreds = await privateKeyToTezosAccountCreds(accPrivateKey, encPassword);
       const newAccount: TempleAccount = {
+        id: nanoid(),
         type: TempleAccountType.Imported,
-        name: await fetchNewAccountName(allAccounts),
-        publicKeyHash: accPublicKeyHash,
+        chain,
+        name: await fetchNewAccountName(allAccounts, TempleAccountType.Imported),
+        publicKeyHash: accCreds.address,
         isKYC
       };
-      const newAllAcounts = concatAccount(allAccounts, newAccount);
+      const newAllAccounts = concatAccount(allAccounts, newAccount);
 
       await encryptAndSaveMany(
-        [
-          [accPrivKeyStrgKey(accPublicKeyHash), realAccPrivateKey],
-          [accPubKeyStrgKey(accPublicKeyHash), accPublicKey],
-          [accountsStrgKey, newAllAcounts]
-        ],
+        [...buildEncryptAndSaveManyForAccount(accCreds), [accountsStrgKey, newAllAccounts]],
         this.passKey
       );
 
-      return newAllAcounts;
+      return newAllAccounts;
     });
   }
 

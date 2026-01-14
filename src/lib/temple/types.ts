@@ -112,6 +112,8 @@ export interface TempleAccountBase {
   hidden?: boolean;
 }
 
+export type SaveLedgerAccountInput = Omit<TempleLedgerAccount, 'id' | 'type'> & { publicKey: string };
+
 export enum TempleAccountType {
   HD,
   Imported,

@@ -10,7 +10,14 @@ import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { formatOpParamsBeforeSend, isNameCollision, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
-import { TempleAccount, TempleAccountType, TempleChainKind, TempleSettings, WalletSpecs } from 'lib/temple/types';
+import {
+  SaveLedgerAccountInput,
+  TempleAccount,
+  TempleAccountType,
+  TempleChainKind,
+  TempleSettings,
+  WalletSpecs
+} from 'lib/temple/types';
 
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
@@ -586,40 +593,35 @@ export class Vault {
     });
   }
 
-  async createLedgerAccount(name: string, chainId: string, derivationPath?: string, derivationType?: DerivationType) {
-    return withError('Failed to connect Ledger account', async () => {
-      if (!derivationPath) derivationPath = getMainDerivationPath(0);
-
-      const { signer, cleanup } = await createLedgerSigner(derivationPath, derivationType);
-
+  async createLedgerAccount(input: SaveLedgerAccountInput) {
+    return withError('Failed to create Ledger account', async () => {
       try {
-        const accPublicKey = await signer.publicKey();
-        const accPublicKeyHash = await signer.publicKeyHash();
-
-        const isKYC = await getKYCStatus(accPublicKeyHash, chainId);
-
-        const newAccount: TempleAccount = {
-          type: TempleAccountType.Ledger,
-          name,
-          publicKeyHash: accPublicKeyHash,
-          derivationPath,
-          derivationType,
-          isKYC
-        };
         const allAccounts = await this.fetchAccounts();
-        const newAllAcounts = concatAccount(allAccounts, newAccount);
+
+        if (isNameCollision(allAccounts, TempleAccountType.Ledger, input.name)) {
+          throw new PublicError(ACCOUNT_NAME_COLLISION_ERR_MSG);
+        }
+
+        const { publicKey, ...storedAccountProps } = input;
+        const newAccount: TempleAccount = {
+          id: nanoid(),
+          type: TempleAccountType.Ledger,
+          isKYC: false,
+          ...storedAccountProps
+        };
+        const newAllAccounts = concatAccount(allAccounts, newAccount);
 
         await encryptAndSaveMany(
           [
-            [accPubKeyStrgKey(accPublicKeyHash), accPublicKey],
-            [accountsStrgKey, newAllAcounts]
+            [accPubKeyStrgKey(input.publicKeyHash), publicKey],
+            [accountsStrgKey, newAllAccounts]
           ],
           this.passKey
         );
 
-        return newAllAcounts;
-      } finally {
-        cleanup();
+        return newAllAccounts;
+      } catch (e: any) {
+        throw new PublicError(e.message);
       }
     });
   }

@@ -1,13 +1,24 @@
 import { CompositeForger, RpcForger, Signer, MavrykOperationError, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
-import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
 import * as TaquitoUtils from '@mavrykdynamics/webmavryk-utils';
 import * as Bip39 from 'bip39';
+import { nanoid } from 'nanoid';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
 import { getKYCStatus } from 'lib/apis/tzkt/api';
-import { formatOpParamsBeforeSend, isNameCollision, loadFastRpcClient, michelEncoder } from 'lib/temple/helpers';
+import {
+  ACCOUNT_ALREADY_EXISTS_ERR_MSG,
+  ACCOUNT_NAME_COLLISION_ERR_MSG,
+  WALLETS_SPECS_STORAGE_KEY
+} from 'lib/constants';
+import {
+  formatOpParamsBeforeSend,
+  getSameGroupAccounts,
+  isNameCollision,
+  loadFastRpcClient,
+  michelEncoder
+} from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
 import {
@@ -18,6 +29,7 @@ import {
   TempleSettings,
   WalletSpecs
 } from 'lib/temple/types';
+import { getAccountAddressForTezos } from 'mavryk/accounts';
 
 import { createLedgerSigner } from '../ledger';
 import { PublicError } from '../PublicError';
@@ -32,7 +44,6 @@ import {
   fetchNewAccountName,
   concatAccount,
   createMemorySigner,
-  getMainDerivationPath,
   getPublicKeyAndHash,
   withError,
   mnemonicToTezosAccountCreds,
@@ -62,13 +73,6 @@ import {
   legacyMigrationLevelStrgKey,
   walletMnemonicStrgKey
 } from './storage-keys';
-import { nanoid } from 'nanoid';
-import {
-  ACCOUNT_ALREADY_EXISTS_ERR_MSG,
-  ACCOUNT_NAME_COLLISION_ERR_MSG,
-  WALLETS_SPECS_STORAGE_KEY
-} from 'lib/constants';
-import { getAccountAddressForTezos } from 'mavryk/accounts';
 
 const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
@@ -339,22 +343,17 @@ export class Vault {
       }
 
       const sameGroupHDAccounts = getSameGroupAccounts(allAccounts, TempleAccountType.HD, walletId);
-      const startHdIndex = Math.max(-1, ...sameGroupHDAccounts.map(a => a.hdIndex)) + 1;
-      let firstSkippedAccount: StoredAccount | undefined;
+      const startHdIndex = Math.max(-1, ...sameGroupHDAccounts.map(a => a.hdIndex ?? -1)) + 1;
+      let firstSkippedAccount: TempleAccount | undefined;
       for (let skipsCount = 0; ; skipsCount++) {
         const hdIndex = startHdIndex + skipsCount;
         const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdIndex);
-        const evmAcc = mnemonicToEvmAccountCreds(mnemonic, hdIndex);
         const sameAddressAccount = allAccounts.find(acc => {
           if (acc.type === TempleAccountType.HD) {
             return false;
           }
 
-          const chain = 'chain' in acc ? acc.chain : TempleChainKind.Tezos;
-
-          return chain === TempleChainKind.Tezos
-            ? getAccountAddressForTezos(acc) === tezosAcc.address
-            : getAccountAddressForEvm(acc) === evmAcc.address;
+          return getAccountAddressForTezos(acc) === tezosAcc.address;
         });
 
         if (sameAddressAccount && !firstSkippedAccount) {
@@ -641,6 +640,32 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAllAcounts]], this.passKey);
 
       return newAllAcounts;
+    });
+  }
+
+  async editGroupName(id: string, name: string) {
+    return withError('Failed to edit group name', async () => {
+      const walletsSpecs = await this.fetchWalletsSpecs();
+
+      if (!(id in walletsSpecs)) {
+        throw new PublicError('Group not found');
+      }
+
+      if (
+        Object.entries(walletsSpecs).some(
+          ([walletId, { name: currentName }]) => walletId !== id && currentName === name
+        )
+      ) {
+        throw new PublicError('Group with this name already exists');
+      }
+
+      const newWalletsSpecs: StringRecord<WalletSpecs> = {
+        ...walletsSpecs,
+        [id]: { name, createdAt: walletsSpecs[id].createdAt }
+      };
+      await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
+
+      return newWalletsSpecs;
     });
   }
 

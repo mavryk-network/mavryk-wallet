@@ -58,11 +58,13 @@ import {
   fetchAndDecryptOne,
   fetchAndDecryptOneLegacy,
   getPlain,
+  getPlainLegacy,
   isStored,
   isStoredLegacy,
   removeMany,
   removeManyLegacy,
-  savePlain
+  savePlain,
+  savePlainLegacy
 } from './safe-storage';
 import * as SessionStore from './session-store';
 import {
@@ -183,7 +185,7 @@ export class Vault {
         return fetchAndDecryptOneLegacy<number>(legacyMigrationLevelStrgKey, legacyPassKey);
       });
     } else {
-      const saved = await getPlain<number>(migrationLevelStrgKey);
+      const saved = await getPlainLegacy<number>(migrationLevelStrgKey);
 
       migrationLevel = saved ?? 0;
 
@@ -228,7 +230,7 @@ export class Vault {
         await removeManyLegacy([legacyMigrationLevelStrgKey]);
       }
 
-      await savePlain(migrationLevelStrgKey, MIGRATIONS.length);
+      await savePlainLegacy(migrationLevelStrgKey, MIGRATIONS.length);
     }
   }
 
@@ -387,6 +389,20 @@ export class Vault {
         await fetchAndDecryptOne<any>(checkStrgKey, passKey);
       }
     });
+  }
+
+  static async reset(password: string) {
+    await Vault.assertValidPassword(password);
+    await Vault.forgetSession();
+    await clearAsyncStorages();
+  }
+
+  static subscribeToRemoveAccounts(fn: SyncFn<RemoveAccountEventPayload[]>) {
+    Vault.removeAccountsListeners.push(fn);
+  }
+
+  static unsubscribeFromRemoveAccounts(fn: SyncFn<RemoveAccountEventPayload[]>) {
+    Vault.removeAccountsListeners = Vault.removeAccountsListeners.filter(f => f !== fn);
   }
 
   constructor(private passKey: CryptoKey) {}

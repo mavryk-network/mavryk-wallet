@@ -435,6 +435,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     defaultNetworks,
     customNetworks,
     networks,
+    walletsSpecs,
     accounts,
     settings,
     idle,

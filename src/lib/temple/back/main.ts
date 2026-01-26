@@ -65,7 +65,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       return { type: TempleMessageType.LockResponse };
 
     case TempleMessageType.CreateAccountRequest:
-      await Actions.createHDAccount(req.name);
+      await Actions.createHDAccount(req.walletId, req.name, req.hdIndex);
       return { type: TempleMessageType.CreateAccountResponse };
 
     case TempleMessageType.RevealPublicKeyRequest:
@@ -115,7 +115,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.ImportAccountRequest:
-      await Actions.importAccount(req.privateKey, req.chainId, req.encPassword);
+      await Actions.importAccount(req.chainId, req.chain, req.privateKey, req.encPassword);
       return {
         type: TempleMessageType.ImportAccountResponse
       };
@@ -139,13 +139,13 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.ImportWatchOnlyAccountRequest:
-      await Actions.importWatchOnlyAccount(req.address, req.chainId, req.accName);
+      await Actions.importWatchOnlyAccount(req.address, req.chain, req.chainId);
       return {
         type: TempleMessageType.ImportWatchOnlyAccountResponse
       };
 
     case TempleMessageType.CreateLedgerAccountRequest:
-      await Actions.createLedgerAccount(req.name, req.chainId, req.derivationPath, req.derivationType);
+      await Actions.createLedgerAccount(req.input);
       return {
         type: TempleMessageType.CreateLedgerAccountResponse
       };
@@ -154,6 +154,24 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       await Actions.updateSettings(req.settings);
       return {
         type: TempleMessageType.UpdateSettingsResponse
+      };
+
+    case TempleMessageType.RemoveHdWalletRequest:
+      await Actions.removeHdWallet(req.id, req.password);
+      return {
+        type: TempleMessageType.RemoveHdWalletResponse
+      };
+
+    case TempleMessageType.RemoveAccountsByTypeRequest:
+      await Actions.removeAccountsByType(req.accountsType, req.password);
+      return {
+        type: TempleMessageType.RemoveAccountsByTypeResponse
+      };
+
+    case TempleMessageType.CreateOrImportWalletRequest:
+      await Actions.createOrImportWallet(req.mnemonic);
+      return {
+        type: TempleMessageType.CreateOrImportWalletResponse
       };
 
     case TempleMessageType.OperationsRequest:

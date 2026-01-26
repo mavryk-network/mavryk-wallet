@@ -283,6 +283,12 @@ export enum TempleMessageType {
   CreateLedgerAccountResponse = 'TEMPLE_CREATE_LEDGER_ACCOUNT_RESPONSE',
   UpdateSettingsRequest = 'TEMPLE_UPDATE_SETTINGS_REQUEST',
   UpdateSettingsResponse = 'TEMPLE_UPDATE_SETTINGS_RESPONSE',
+  RemoveHdWalletRequest = 'TEMPLE_REMOVE_HD_WALLET_REQUEST',
+  RemoveHdWalletResponse = 'TEMPLE_REMOVE_HD_WALLET_RESPONSE',
+  RemoveAccountsByTypeRequest = 'TEMPLE_REMOVE_ACCOUNTS_BY_TYPE_REQUEST',
+  RemoveAccountsByTypeResponse = 'TEMPLE_REMOVE_ACCOUNTS_BY_TYPE_RESPONSE',
+  CreateOrImportWalletRequest = 'TEMPLE_CREATE_OR_IMPORT_WALLET_REQUEST',
+  CreateOrImportWalletResponse = 'TEMPLE_CREATE_OR_IMPORT_WALLET_RESPONSE',
   OperationsRequest = 'TEMPLE_OPERATIONS_REQUEST',
   OperationsResponse = 'TEMPLE_OPERATIONS_RESPONSE',
   SignRequest = 'TEMPLE_SIGN_REQUEST',
@@ -324,6 +330,9 @@ export type TempleRequest =
   | TempleUnlockRequest
   | TempleLockRequest
   | TempleCreateAccountRequest
+  | TempleCreateOrImportWalletRequest
+  | TempleRemoveHdWalletRequest
+  | TempleRemoveAccountsByTypeRequest
   | TempleRevealPublicKeyRequest
   | TempleRevealPrivateKeyRequest
   | TempleRevealMnemonicRequest
@@ -359,6 +368,9 @@ export type TempleResponse =
   | TempleUnlockResponse
   | TempleLockResponse
   | TempleCreateAccountResponse
+  | TempleCreateOrImportWalletResponse
+  | TempleRemoveHdWalletResponse
+  | TempleRemoveAccountsByTypeResponse
   | TempleRevealPublicKeyResponse
   | TempleRevealPrivateKeyResponse
   | TempleRevealMnemonicResponse
@@ -457,11 +469,22 @@ interface TempleLockResponse extends TempleMessageBase {
 
 interface TempleCreateAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateAccountRequest;
+  walletId: string;
   name?: string;
+  hdIndex?: number;
 }
 
 interface TempleCreateAccountResponse extends TempleMessageBase {
   type: TempleMessageType.CreateAccountResponse;
+}
+
+interface TempleCreateOrImportWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletRequest;
+  mnemonic?: string;
+}
+
+interface TempleCreateOrImportWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletResponse;
 }
 
 interface TempleRevealPublicKeyRequest extends TempleMessageBase {
@@ -536,6 +559,7 @@ interface TempleUpdateKYCAccountResponse extends TempleMessageBase {
 interface TempleImportAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportAccountRequest;
   chainId: string;
+  chain: TempleChainKind;
   privateKey: string;
   encPassword?: string;
 }
@@ -582,8 +606,8 @@ interface TempleImportManagedKTAccountResponse extends TempleMessageBase {
 interface TempleImportWatchOnlyAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportWatchOnlyAccountRequest;
   address: string;
+  chain: TempleChainKind;
   chainId?: string;
-  accName?: string;
 }
 
 interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
@@ -592,10 +616,7 @@ interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
 
 interface TempleCreateLedgerAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateLedgerAccountRequest;
-  name: string;
-  chainId: string;
-  derivationPath?: string;
-  derivationType?: DerivationType;
+  input: SaveLedgerAccountInput;
 }
 
 interface TempleCreateLedgerAccountResponse extends TempleMessageBase {
@@ -609,6 +630,35 @@ interface TempleUpdateSettingsRequest extends TempleMessageBase {
 
 interface TempleUpdateSettingsResponse extends TempleMessageBase {
   type: TempleMessageType.UpdateSettingsResponse;
+}
+
+interface TempleRemoveHdWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.RemoveHdWalletRequest;
+  id: string;
+  password: string;
+}
+
+interface TempleRemoveHdWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.RemoveHdWalletResponse;
+}
+
+interface TempleRemoveAccountsByTypeRequest extends TempleMessageBase {
+  type: TempleMessageType.RemoveAccountsByTypeRequest;
+  accountsType: Exclude<TempleAccountType, TempleAccountType.HD>;
+  password: string;
+}
+
+interface TempleRemoveAccountsByTypeResponse extends TempleMessageBase {
+  type: TempleMessageType.RemoveAccountsByTypeResponse;
+}
+
+interface TempleCreateOrImportWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletRequest;
+  mnemonic?: string;
+}
+
+interface TempleCreateOrImportWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletResponse;
 }
 
 interface TempleOperationsRequest extends TempleMessageBase {

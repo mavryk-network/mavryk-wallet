@@ -2114,6 +2114,9 @@
   "errorChangingAccountName": {
     "message": "An error occurred while changing account name"
   },
+  "errorChangingWalletName": {
+    "message": "An error occurred while changing wallet name"
+  },
   "ok": {
     "message": "OK"
   },
@@ -4026,5 +4029,8 @@
   },
   "ledgerGroupLabel": {
     "message": "Hardware"
+  },
+  "renameWallet": {
+    "message": "Rename Wallet"
   }
 }

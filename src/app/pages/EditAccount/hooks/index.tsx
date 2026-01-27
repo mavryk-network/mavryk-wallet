@@ -27,10 +27,3 @@ export const useAccountOwnership = (accHash?: string | null) => {
 
   return { accToChange, isOwn };
 };
-
-export const usePopupState = (initial = false) => {
-  const [opened, setOpened] = useState(initial);
-  const open = useCallback(() => setOpened(true), []);
-  const close = useCallback(() => setOpened(false), []);
-  return { opened, open, close };
-};

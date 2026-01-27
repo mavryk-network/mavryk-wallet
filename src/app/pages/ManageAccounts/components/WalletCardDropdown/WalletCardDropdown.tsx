@@ -8,17 +8,21 @@ import { ReactComponent as EyeIcon } from 'app/icons/eye-open-secondary.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
+import { usePopupState } from 'app/templates/PopupModalWithTitle/hooks/usePopupState';
 import { t } from 'lib/i18n';
 import { useAllAccounts, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { translateYModifiersNegative } from 'lib/ui/general-modifiers';
 import { navigate } from 'lib/woozie';
 
+import { EditWalletGroupNamePopup } from '../../popups/EditWalletGroupNamePopup';
+
 type WalletCardDropdownProps = {
   walletId: string;
+  walletName: string;
 };
 
-export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) => {
+export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId, walletName }) => {
   const { createAccount } = useTempleClient();
   const allAccounts = useAllAccounts();
 
@@ -31,6 +35,8 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) =>
     () => t('defaultAccountName', String(allHDOrImported.length + 1)),
     [allHDOrImported.length]
   );
+
+  const editWalletnameState = usePopupState(false);
 
   const addAccount = useCallback(async () => {
     try {
@@ -63,7 +69,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) =>
         id: nanoid(),
         label: 'Rename Wallet',
         Icon: PenIcon,
-        disabled: true
+        onClick: editWalletnameState.open
       },
       {
         id: nanoid(),
@@ -72,7 +78,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) =>
         onClick: revesalSeedPhrase
       }
     ],
-    [addAccount, revesalSeedPhrase]
+    [addAccount, editWalletnameState.open, revesalSeedPhrase]
   );
 
   return (
@@ -93,6 +99,12 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) =>
           renderOptionContent: option => renderOptionContent(option),
           onOptionChange: option => option.onClick?.()
         }}
+      />
+      <EditWalletGroupNamePopup
+        walletName={walletName}
+        walletId={walletId}
+        opened={editWalletnameState.opened}
+        close={editWalletnameState.close}
       />
     </>
   );

@@ -13,6 +13,7 @@ import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/L
 import AccountBanner from 'app/templates/AccountBanner';
 import { HistoryDetailsPopup } from 'app/templates/History/HistoryDetailsPopup';
 import { HistoryItem } from 'app/templates/History/HistoryItem';
+import { usePopupState } from 'app/templates/PopupModalWithTitle/hooks/usePopupState';
 import { T, t } from 'lib/i18n';
 import {
   useAccount,
@@ -28,7 +29,7 @@ import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
-import { useAccountOwnership, usePopupState } from './hooks';
+import { useAccountOwnership } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
 import { RemoveAccountPopup } from './popups/RemoveAccountPopup';
 

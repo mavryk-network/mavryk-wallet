@@ -12,6 +12,7 @@ import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 import { Link } from 'lib/woozie';
 
 import { WalletCard } from './components/WalletCard';
+import { useAccountsGroups } from 'mavryk/front/groups';
 
 type AccountPopupProps = {
   opened: boolean;
@@ -59,6 +60,8 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
       return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
     }
   }, [searchValue, allAccounts]);
+
+  const groups = useAccountsGroups(filteredAccounts);
 
   const handleAccountClick = useCallback(
     (publicKeyHash: string) => {
@@ -144,7 +147,9 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
               <T id="noResults" />
             </p>
           ) : (
-            <WalletCard name="Wallet A" accounts={filteredAccounts} handleAccountClick={handleAccountClick} />
+            groups.map(({ name, accounts }) => (
+              <WalletCard name={name} accounts={accounts} handleAccountClick={handleAccountClick} />
+            ))
           )}
         </div>
       </div>

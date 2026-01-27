@@ -13,6 +13,7 @@ export const getAllGroups = (hdGroups: Pick<DisplayedGroup, 'id' | 'name'>[], ac
     .map(({ id, name }) => ({
       type: TempleAccountType.HD,
       id,
+      color: colorFromId(id),
       name,
       accounts: accounts.filter(
         (acc): acc is TempleHDAccount => acc.type === TempleAccountType.HD && acc.walletId === id
@@ -42,3 +43,14 @@ export const getAllGroups = (hdGroups: Pick<DisplayedGroup, 'id' | 'name'>[], ac
 
   return displayedHdGroups;
 };
+
+function colorFromId(id: string) {
+  let hash = 0;
+
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const color = `#${((hash >>> 0) & 0xffffff).toString(16).padStart(6, '0')}`;
+  return color;
+}

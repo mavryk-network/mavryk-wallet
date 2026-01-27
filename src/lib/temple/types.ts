@@ -130,6 +130,7 @@ export interface DisplayedGroup {
   name: string;
   accounts: TempleAccount[];
   type: TempleAccountType;
+  color?: string;
 }
 
 interface TempleNetworkBase {

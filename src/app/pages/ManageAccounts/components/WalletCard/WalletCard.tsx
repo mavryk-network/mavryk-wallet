@@ -1,22 +1,19 @@
 import React from 'react';
 
 import { useGasToken } from 'lib/assets/hooks';
-import { useAllAccounts } from 'lib/temple/front';
-import { TempleAccount } from 'lib/temple/types';
+import { DisplayedGroup } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { AccountItem } from '../AccountItem';
 import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
 
 type WalletCardProps = {
-  name: string;
-  accounts: TempleAccount[];
-  walletId: string;
+  group: DisplayedGroup;
 };
 
-export const WalletCard = ({ name, accounts, walletId }: WalletCardProps) => {
+export const WalletCard = ({ group }: WalletCardProps) => {
+  const { name, accounts, id: walletId, color } = group;
   const { assetName: gasTokenName } = useGasToken();
-  const allAccounts = useAllAccounts();
 
   const handleAccountClick = (publicKeyHash: string) => {
     navigate(`edit-account/${publicKeyHash}`);
@@ -32,14 +29,14 @@ export const WalletCard = ({ name, accounts, walletId }: WalletCardProps) => {
         </p>
       </div>
       <div className="flex flex-col">
-        {accounts.map(account => (
+        {accounts.map((account, idx) => (
           <AccountItem
             key={account.publicKeyHash}
             account={account}
             gasTokenName={gasTokenName}
             attractSelf={true}
             onClick={() => handleAccountClick(account.publicKeyHash)}
-            isMainAcc={account.publicKeyHash === allAccounts[0]?.publicKeyHash}
+            keyColor={idx === 0 ? color : undefined}
           />
         ))}
       </div>

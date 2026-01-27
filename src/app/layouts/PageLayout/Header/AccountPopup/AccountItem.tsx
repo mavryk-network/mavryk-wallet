@@ -19,10 +19,10 @@ interface AccountItemProps {
   gasTokenName: string;
   attractSelf: boolean;
   onClick: () => void;
-  isMainAcc?: boolean;
+  keyColor?: string;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick, isMainAcc }) => {
+export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick, keyColor }) => {
   const { name, publicKeyHash, type } = account;
   const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash, true);
 
@@ -63,7 +63,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
           <AccountTypeBadge account={account} />
-          {isMainAcc && <KeyIcon />}
+          {keyColor && <KeyIcon style={{ fill: keyColor }} />}
         </div>
 
         <div

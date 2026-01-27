@@ -10,9 +10,9 @@ import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
 import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 import { Link } from 'lib/woozie';
+import { useAccountsGroups } from 'mavryk/front/groups';
 
 import { WalletCard } from './components/WalletCard';
-import { useAccountsGroups } from 'mavryk/front/groups';
 
 type AccountPopupProps = {
   opened: boolean;
@@ -147,9 +147,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
               <T id="noResults" />
             </p>
           ) : (
-            groups.map(({ name, accounts }) => (
-              <WalletCard name={name} accounts={accounts} handleAccountClick={handleAccountClick} />
-            ))
+            groups.map(group => <WalletCard group={group} handleAccountClick={handleAccountClick} />)
           )}
         </div>
       </div>

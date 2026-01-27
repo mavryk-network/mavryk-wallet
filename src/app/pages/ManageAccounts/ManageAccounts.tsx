@@ -16,9 +16,20 @@ import { WalletCard } from './components/WalletCard/WalletCard';
 export const ManageAccounts: FC = () => {
   const { popup } = useAppEnv();
   const allAccounts = useRelevantAccounts();
-  const groups = useAccountsGroups(allAccounts);
 
   const [searchValue, setSearchValue] = useState('');
+
+  const filteredAccounts = useMemo(() => {
+    if (searchValue.length === 0) {
+      return allAccounts;
+    } else {
+      const lowerCaseSearchValue = searchValue.toLowerCase();
+
+      return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
+    }
+  }, [searchValue, allAccounts]);
+
+  const groups = useAccountsGroups(filteredAccounts);
 
   const memoizedContentContainerStyle = useMemo(() => (popup ? { padding: 0 } : {}), [popup]);
 

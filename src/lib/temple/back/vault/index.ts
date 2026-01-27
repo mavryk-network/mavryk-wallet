@@ -39,14 +39,12 @@ import { PublicError } from '../PublicError';
 import { fetchMessage, fetchNewGroupName, toExcelColumnName, transformHttpResponseError } from './helpers';
 import { MIGRATIONS } from './migrations';
 import {
-  seedToHDPrivateKey,
   seedToPrivateKey,
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
   concatAccount,
   createMemorySigner,
-  getPublicKeyAndHash,
   withError,
   mnemonicToTezosAccountCreds,
   buildEncryptAndSaveManyForAccount,

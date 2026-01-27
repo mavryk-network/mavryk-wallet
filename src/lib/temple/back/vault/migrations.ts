@@ -1,4 +1,3 @@
-import * as Bip39 from 'bip39';
 import { nanoid } from 'nanoid';
 
 import {
@@ -9,7 +8,6 @@ import {
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
 import { moveValueInStorage, putToStorage, removeFromStorage } from 'lib/storage';
-import { StoredTezosNetwork } from 'lib/temple/networks';
 import * as Passworder from 'lib/temple/passworder';
 import {
   TempleAccount,

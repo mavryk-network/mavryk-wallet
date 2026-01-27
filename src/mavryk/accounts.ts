@@ -26,7 +26,7 @@ function getAccountForChain<C extends TempleChainKind>(account: TempleAccount, c
 
   switch (account.type) {
     case TempleAccountType.HD:
-      publicKeyHash = account[`${chain}Address`];
+      publicKeyHash = account[`publicKeyHash`];
       break;
     case TempleAccountType.Imported:
     case TempleAccountType.WatchOnly:
@@ -47,10 +47,11 @@ function getAccountForChain<C extends TempleChainKind>(account: TempleAccount, c
 export const getAccountAddressForTezos = (account: TempleAccount) =>
   getAccountAddressForChain(account, TempleChainKind.Tezos);
 
+// TODO in future for different chains replace `publicKeyHash` with `chain`
 export const getAccountAddressForChain = (account: TempleAccount, chain: TempleChainKind): string | undefined => {
   switch (account.type) {
     case TempleAccountType.HD:
-      return account[`${chain}Address`];
+      return account[`publicKeyHash`];
     case TempleAccountType.Imported:
     case TempleAccountType.WatchOnly:
     case TempleAccountType.Ledger:

@@ -63,42 +63,45 @@ export enum TempleStatus {
 }
 
 export type TempleAccount =
-  | { isKYC: boolean | undefined } & (
-      | TempleHDAccount
-      | TempleImportedAccount
-      | TempleLedgerAccount
-      | TempleManagedKTAccount
-      | TempleWatchOnlyAccount
-    );
+  | TempleHDAccount
+  | TempleImportedAccount
+  | TempleLedgerAccount
+  | TempleManagedKTAccount
+  | TempleWatchOnlyAccount;
 
-interface TempleLedgerAccount extends TempleAccountBase {
+export interface TempleLedgerAccount extends TempleAccountBase {
   type: TempleAccountType.Ledger;
   chain: TempleChainKind;
   derivationPath: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleImportedAccount extends TempleAccountBase {
+export interface TempleImportedAccount extends TempleAccountBase {
   type: TempleAccountType.Imported;
   chain: TempleChainKind;
+  isKYC: boolean | undefined;
 }
 
-interface TempleHDAccount extends TempleAccountBase {
+export interface TempleHDAccount extends TempleAccountBase {
   type: TempleAccountType.HD;
   hdIndex: number;
   walletId: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleManagedKTAccount extends TempleAccountBase {
+export interface TempleManagedKTAccount extends TempleAccountBase {
   type: TempleAccountType.ManagedKT;
   chainId: string;
   owner: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleWatchOnlyAccount extends TempleAccountBase {
+export interface TempleWatchOnlyAccount extends TempleAccountBase {
   type: TempleAccountType.WatchOnly;
   chain: TempleChainKind;
   /** For contract addresses */
   chainId?: string;
+  isKYC: boolean | undefined;
 }
 
 export interface TempleAccountBase {
@@ -120,6 +123,13 @@ export enum TempleAccountType {
   Ledger,
   ManagedKT,
   WatchOnly
+}
+
+export interface DisplayedGroup {
+  id: string;
+  name: string;
+  accounts: TempleAccount[];
+  type: TempleAccountType;
 }
 
 interface TempleNetworkBase {

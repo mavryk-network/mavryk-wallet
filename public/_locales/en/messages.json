@@ -4020,5 +4020,11 @@
         "content": "$1"
       }
     }
+  },
+  "importedGroupLabel": {
+    "message": "Integrated"
+  },
+  "ledgerGroupLabel": {
+    "message": "Hardware"
   }
 }

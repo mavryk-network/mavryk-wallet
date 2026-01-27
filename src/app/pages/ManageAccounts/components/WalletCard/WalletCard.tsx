@@ -11,9 +11,10 @@ import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
 type WalletCardProps = {
   name: string;
   accounts: TempleAccount[];
+  walletId: string;
 };
 
-export const WalletCard = ({ name, accounts }: WalletCardProps) => {
+export const WalletCard = ({ name, accounts, walletId }: WalletCardProps) => {
   const { assetName: gasTokenName } = useGasToken();
   const allAccounts = useAllAccounts();
 
@@ -27,7 +28,7 @@ export const WalletCard = ({ name, accounts }: WalletCardProps) => {
         <p className="text-base-plus text-white font-bold">{name}</p>
         <p className="text-sm text-secondary-white">{accounts?.length ?? 0} Accounts</p>
         <p className="ml-auto text-white flex items-center gap-0.5">
-          <WalletCardDropdown />
+          <WalletCardDropdown walletId={walletId} />
         </p>
       </div>
       <div className="flex flex-col">

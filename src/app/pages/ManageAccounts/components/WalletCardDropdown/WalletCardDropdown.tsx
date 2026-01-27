@@ -14,7 +14,11 @@ import { TempleAccountType } from 'lib/temple/types';
 import { translateYModifiersNegative } from 'lib/ui/general-modifiers';
 import { navigate } from 'lib/woozie';
 
-export const WalletCardDropdown: FC = () => {
+type WalletCardDropdownProps = {
+  walletId: string;
+};
+
+export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId }) => {
   const { createAccount } = useTempleClient();
   const allAccounts = useAllAccounts();
 
@@ -30,11 +34,11 @@ export const WalletCardDropdown: FC = () => {
 
   const addAccount = useCallback(async () => {
     try {
-      await createAccount(defaultName);
+      await createAccount(walletId, defaultName);
     } catch (err: any) {
       console.error(err);
     }
-  }, [createAccount, defaultName]);
+  }, [createAccount, defaultName, walletId]);
 
   const revesalSeedPhrase = useCallback(() => {
     navigate<SuccessStateType>('/success', undefined, {

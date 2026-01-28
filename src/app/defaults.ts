@@ -12,6 +12,8 @@ export class ZeroTEZBalanceError extends NotEnoughFundsError {}
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 
+export const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
+
 export const PASSWORD_PATTERN = new RegExp(
   [
     '^',

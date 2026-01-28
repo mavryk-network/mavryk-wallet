@@ -13,10 +13,10 @@ interface AccountItemProps {
   gasTokenName: string;
   attractSelf: boolean;
   onClick: () => void;
-  isMainAcc?: boolean;
+  keyColor?: string;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, isMainAcc }) => {
+export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, keyColor }) => {
   const { name, publicKeyHash } = account;
 
   const classNameMemo = useMemo(
@@ -43,7 +43,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, isMa
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
           <AccountTypeBadge account={account} />
-          {isMainAcc && <KeyIcon />}
+          {keyColor && <KeyIcon style={{ fill: keyColor }} />}
         </div>
 
         <div className="text-xs text-blue-200 mt-1">

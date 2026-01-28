@@ -8,6 +8,8 @@ import PageLayout from 'app/layouts/PageLayout';
 import SearchField from 'app/templates/SearchField';
 import { t, T } from 'lib/i18n';
 import { useRelevantAccounts } from 'lib/temple/front';
+import { Link } from 'lib/woozie';
+import { useAccountsGroups } from 'mavryk/front/groups';
 
 import { WalletCard } from './components/WalletCard/WalletCard';
 
@@ -26,6 +28,8 @@ export const ManageAccounts: FC = () => {
       return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
     }
   }, [searchValue, allAccounts]);
+
+  const groups = useAccountsGroups(filteredAccounts);
 
   const memoizedContentContainerStyle = useMemo(() => (popup ? { padding: 0 } : {}), [popup]);
 
@@ -57,17 +61,17 @@ export const ManageAccounts: FC = () => {
             cleanButtonStyle={{ backgroundColor: 'transparent' }}
             onValueChange={setSearchValue}
           />
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
+          <Link to="import-account" className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
             <PlusIcon className="w-6 h-6 stroke-2" />
-          </div>
+          </Link>
         </div>
         <div className="flex flex-col gap-4">
-          {filteredAccounts.length === 0 ? (
+          {groups.length === 0 ? (
             <p className="text-center text-white text-base">
               <T id="noResults" />
             </p>
           ) : (
-            <WalletCard name="Wallet A" accounts={filteredAccounts} />
+            groups.map(group => <WalletCard group={group} />)
           )}
         </div>
       </div>

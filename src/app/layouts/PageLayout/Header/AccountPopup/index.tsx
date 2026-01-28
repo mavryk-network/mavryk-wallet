@@ -10,6 +10,7 @@ import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useSetAccountPkh } from 'lib/temple/front';
 import useTippy, { UseTippyOptions } from 'lib/ui/useTippy';
 import { Link } from 'lib/woozie';
+import { useAccountsGroups } from 'mavryk/front/groups';
 
 import { WalletCard } from './components/WalletCard';
 
@@ -59,6 +60,8 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
       return allAccounts.filter(currentAccount => currentAccount.name.toLowerCase().includes(lowerCaseSearchValue));
     }
   }, [searchValue, allAccounts]);
+
+  const groups = useAccountsGroups(filteredAccounts);
 
   const handleAccountClick = useCallback(
     (publicKeyHash: string) => {
@@ -144,7 +147,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
               <T id="noResults" />
             </p>
           ) : (
-            <WalletCard name="Wallet A" accounts={filteredAccounts} handleAccountClick={handleAccountClick} />
+            groups.map(group => <WalletCard group={group} handleAccountClick={handleAccountClick} />)
           )}
         </div>
       </div>

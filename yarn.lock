@@ -2972,13 +2972,6 @@
   resolved "https://registry.yarnpkg.com/@temple-wallet/jest-webextension-mock/-/jest-webextension-mock-4.1.0.tgz#6834acd98297eb1c76b85a2585a0584ff5578e8f"
   integrity sha512-1D/3WpaJS9rk5SENnFB1RZ3oeYkrfDvCV4qyIYjAD6uWe6RHVzcGxQ8UPtSQ/MRrcqjT95q2VwDNxek+9z6+yw==
 
-"@temple-wallet/save-remote-file-webpack-plugin@^1.1.2":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@temple-wallet/save-remote-file-webpack-plugin/-/save-remote-file-webpack-plugin-1.1.4.tgz#7a9e2966b30c51a3483c4b4d0fb497753cf38165"
-  integrity sha512-uYfYlUm/mH+fKzB3/Ee8z75qjrUkLmQ8Jwq+DWhEVmGkkHKqVgwIpL/CEde7xufgj8ykW9Iq19JrfWNSKqR3YQ==
-  dependencies:
-    axios "^1.8.4"
-
 "@temple-wallet/wallet-address-validator@^0.4.3":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@temple-wallet/wallet-address-validator/-/wallet-address-validator-0.4.4.tgz#9cdc162b34140c0991916911e1afdabb5306e467"

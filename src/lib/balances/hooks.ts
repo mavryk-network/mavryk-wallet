@@ -4,6 +4,7 @@ import { emptyFn } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
+import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
 import { useAllAccountBalancesSelector, useAllBalancesSelector } from 'app/store/balances/selectors';
 import { getKeyForBalancesRecord } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
@@ -54,6 +55,8 @@ export const useGetOtherAccountTokenOrGasBalanceWithDecimals = (accountPkh: stri
   const rawBalances = useOtherAccountBalances(accountPkh);
   const getMetadata = useGetTokenOrGasMetadata();
 
+  useBalancesLoadingOnce(accountPkh);
+
   return useCallback(
     (slug: string) => {
       const rawBalance = rawBalances[slug] as string | undefined;
@@ -85,6 +88,7 @@ export function useRawBalance(
   const chainId = chainIdSwrRes.data;
 
   const allBalances = useAllBalancesSelector();
+
   const balances = useMemo(() => {
     if (!chainId) return null;
 
@@ -105,12 +109,11 @@ export function useRawBalance(
   const onChainBalanceSwrRes = useTypedSWR(
     getBalanceSWRKey(tezos, assetSlug, address),
     () => {
-      if (!chainId || usingStore) return;
-
+      // if (!chainId || usingStore) return;
       return fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString());
     },
     {
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
       dedupingInterval: 20_000
     }
   );

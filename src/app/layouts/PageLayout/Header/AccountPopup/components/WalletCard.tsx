@@ -2,17 +2,17 @@ import React from 'react';
 
 import { useGasToken } from 'lib/assets/hooks';
 import { useAccount } from 'lib/temple/front';
-import { TempleAccount } from 'lib/temple/types';
+import { DisplayedGroup } from 'lib/temple/types';
 
 import { AccountItem } from '../AccountItem';
 
 type WalletCardProps = {
-  name: string;
-  accounts: TempleAccount[];
+  group: DisplayedGroup;
   handleAccountClick: (publicKeyHash: string) => void;
 };
 
-export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardProps) => {
+export const WalletCard = ({ group, handleAccountClick }: WalletCardProps) => {
+  const { name, accounts, color } = group;
   const { assetName: gasTokenName } = useGasToken();
   const { publicKeyHash } = useAccount();
 
@@ -23,7 +23,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
         <p className="text-sm text-secondary-white">{accounts?.length ?? 0} Accounts</p>
       </div>
       <div className="flex flex-col">
-        {accounts.map(account => (
+        {accounts.map((account, idx) => (
           <AccountItem
             key={account.publicKeyHash}
             account={account}
@@ -31,7 +31,7 @@ export const WalletCard = ({ name, accounts, handleAccountClick }: WalletCardPro
             attractSelf={true}
             selected={account.publicKeyHash === publicKeyHash}
             onClick={() => handleAccountClick(account.publicKeyHash)}
-            isMainAcc={account.publicKeyHash === accounts[0]?.publicKeyHash}
+            keyColor={idx === 0 ? color : undefined}
           />
         ))}
       </div>

@@ -61,10 +61,7 @@ export const ManageAccounts: FC = () => {
             cleanButtonStyle={{ backgroundColor: 'transparent' }}
             onValueChange={setSearchValue}
           />
-          <Link
-            to="import-account/mnemonic"
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card"
-          >
+          <Link to="import-account" className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary-card">
             <PlusIcon className="w-6 h-6 stroke-2" />
           </Link>
         </div>

@@ -5,17 +5,16 @@ import { DisplayedGroup } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { AccountItem } from '../AccountItem';
-import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
+
+import { Accountsmanagement } from '.';
 
 type WalletCardProps = {
   group: DisplayedGroup;
 };
 
 export const WalletCard = ({ group }: WalletCardProps) => {
-  const { name, accounts, id: walletId, color, type } = group;
+  const { name, accounts, color, type } = group;
   const { assetName: gasTokenName } = useGasToken();
-
-  console.log(group, 'group');
 
   const handleAccountClick = (publicKeyHash: string) => {
     navigate(`edit-account/${publicKeyHash}`);
@@ -30,7 +29,7 @@ export const WalletCard = ({ group }: WalletCardProps) => {
           <>
             <p className="text-sm text-secondary-white">{accounts?.length ?? 0} Accounts</p>
             <p className="ml-auto text-white flex items-center gap-0.5">
-              <WalletCardDropdown walletId={walletId} walletName={name} />
+              <Accountsmanagement group={group} />
             </p>
           </>
         )}

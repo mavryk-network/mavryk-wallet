@@ -10,21 +10,17 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
+import { DisplayedGroup } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 
 type EditWalletGroupNamePopupProps = {
   opened: boolean;
   close: () => void;
-  walletId: string;
-  walletName: string;
+  group: DisplayedGroup;
 };
 
-export const EditWalletGroupNamePopup: FC<EditWalletGroupNamePopupProps> = ({
-  opened,
-  close,
-  walletId,
-  walletName
-}) => {
+export const EditWalletGroupNamePopup: FC<EditWalletGroupNamePopupProps> = ({ opened, close, group }) => {
+  const { name: walletName, id: walletId } = group;
   const { popup } = useAppEnv();
   const { editHdGroupName } = useTempleClient();
   const customAlert = useAlert();

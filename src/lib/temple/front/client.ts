@@ -22,6 +22,7 @@ import {
 } from '@mavrykdynamics/webmavryk/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/webmavryk-utils';
 import constate from 'constate';
+import { omit } from 'lodash';
 import { nanoid } from 'nanoid';
 import toBuffer from 'typedarray-to-buffer';
 
@@ -144,6 +145,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
       type: TempleMessageType.LockRequest
     });
     assertResponse(res.type === TempleMessageType.LockResponse);
+  }, []);
+
+  const findFreeHdIndex = useCallback(async (walletId: string) => {
+    const res = await request({
+      type: TempleMessageType.FindFreeHDAccountIndexRequest,
+      walletId
+    });
+    assertResponse(res.type === TempleMessageType.FindFreeHDAccountIndexResponse);
+    return omit(res, 'type');
   }, []);
 
   const createAccount = useCallback(async (walletId: string, name?: string) => {
@@ -456,6 +466,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     generateSyncPayload,
     removeAccount,
     editAccountName,
+    findFreeHdIndex,
     updateAccountKYCStatus,
     importAccount,
     importMnemonicAccount,

@@ -8,43 +8,67 @@ import { ReactComponent as EyeIcon } from 'app/icons/eye-open-secondary.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
-import { usePopupState } from 'app/templates/PopupModalWithTitle/hooks/usePopupState';
-import { t } from 'lib/i18n';
-import { useAllAccounts, useTempleClient } from 'lib/temple/front';
-import { TempleAccountType } from 'lib/temple/types';
+import { ACCOUNT_EXISTS_SHOWN_WARNINGS_STORAGE_KEY } from 'lib/constants';
+import { useStorage, useTempleClient } from 'lib/temple/front';
+import { useHDGroups } from 'lib/temple/front/ready';
+import { DisplayedGroup, TempleAccount } from 'lib/temple/types';
+import { useAlert } from 'lib/ui';
 import { translateYModifiersNegative } from 'lib/ui/general-modifiers';
 import { navigate } from 'lib/woozie';
 
-import { EditWalletGroupNamePopup } from '../../popups/EditWalletGroupNamePopup';
-
 type WalletCardDropdownProps = {
-  walletId: string;
-  walletName: string;
+  group: DisplayedGroup;
+  handleRenameClick: (group: DisplayedGroup) => void;
+  showAccountAlreadyExistsWarning: (group: DisplayedGroup, oldAccount: TempleAccount) => void;
 };
 
-export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId, walletName }) => {
-  const { createAccount } = useTempleClient();
-  const allAccounts = useAllAccounts();
+export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({
+  group,
+  showAccountAlreadyExistsWarning,
+  handleRenameClick
+}) => {
+  const { id: walletId } = group;
+  const { createAccount, findFreeHdIndex } = useTempleClient();
+  const hdGroups = useHDGroups();
+  const customAlert = useAlert();
 
-  const allHDOrImported = useMemo(
-    () => allAccounts.filter(acc => [TempleAccountType.HD, TempleAccountType.Imported].includes(acc.type)),
-    [allAccounts]
+  const [accountExistsShownWarnings, setAccountExistsShownWarnings] = useStorage<Record<string, boolean>>(
+    ACCOUNT_EXISTS_SHOWN_WARNINGS_STORAGE_KEY,
+    {}
   );
-
-  const defaultName = useMemo(
-    () => t('defaultAccountName', String(allHDOrImported.length + 1)),
-    [allHDOrImported.length]
-  );
-
-  const editWalletnameState = usePopupState(false);
 
   const addAccount = useCallback(async () => {
     try {
-      await createAccount(walletId, defaultName);
-    } catch (err: any) {
-      console.error(err);
+      const { firstSkippedAccount } = await findFreeHdIndex(walletId);
+      if (firstSkippedAccount && !accountExistsShownWarnings[walletId]) {
+        showAccountAlreadyExistsWarning(group, firstSkippedAccount);
+        setAccountExistsShownWarnings(prevState => ({
+          ...Object.fromEntries(
+            Object.entries(prevState).filter(([groupId]) => !hdGroups.some(({ id }) => id === groupId))
+          ),
+          [walletId]: true
+        }));
+      } else {
+        await createAccount(walletId);
+      }
+    } catch (e: any) {
+      console.error(e);
+      customAlert({
+        title: 'Failed to create an account',
+        description: e.message
+      });
     }
-  }, [createAccount, defaultName, walletId]);
+  }, [
+    accountExistsShownWarnings,
+    createAccount,
+    customAlert,
+    findFreeHdIndex,
+    group,
+    hdGroups,
+    setAccountExistsShownWarnings,
+    showAccountAlreadyExistsWarning,
+    walletId
+  ]);
 
   const revesalSeedPhrase = useCallback(() => {
     navigate<SuccessStateType>('/success', undefined, {
@@ -69,7 +93,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId, wall
         id: nanoid(),
         label: 'Rename Wallet',
         Icon: PenIcon,
-        onClick: editWalletnameState.open
+        onClick: () => handleRenameClick(group)
       },
       {
         id: nanoid(),
@@ -78,7 +102,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId, wall
         onClick: revesalSeedPhrase
       }
     ],
-    [addAccount, editWalletnameState.open, revesalSeedPhrase]
+    [addAccount, group, handleRenameClick, revesalSeedPhrase]
   );
 
   return (
@@ -99,12 +123,6 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({ walletId, wall
           renderOptionContent: option => renderOptionContent(option),
           onOptionChange: option => option.onClick?.()
         }}
-      />
-      <EditWalletGroupNamePopup
-        walletName={walletName}
-        walletId={walletId}
-        opened={editWalletnameState.opened}
-        close={editWalletnameState.close}
       />
     </>
   );

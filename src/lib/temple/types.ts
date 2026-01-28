@@ -266,6 +266,8 @@ export enum TempleMessageType {
   LockResponse = 'TEMPLE_LOCK_RESPONSE',
   CreateAccountRequest = 'TEMPLE_CREATE_ACCOUNT_REQUEST',
   CreateAccountResponse = 'TEMPLE_CREATE_ACCOUNT_RESPONSE',
+  FindFreeHDAccountIndexRequest = 'TEMPLE_FIND_FREE_HD_ACCOUNT_INDEX_REQUEST',
+  FindFreeHDAccountIndexResponse = 'TEMPLE_FIND_FREE_HD_ACCOUNT_INDEX_RESPONSE',
   RevealPublicKeyRequest = 'TEMPLE_REVEAL_PUBLIC_KEY_REQUEST',
   RevealPublicKeyResponse = 'TEMPLE_REVEAL_PUBLIC_KEY_RESPONSE',
   RevealPrivateKeyRequest = 'TEMPLE_REVEAL_PRIVATE_KEY_REQUEST',
@@ -340,6 +342,7 @@ export type TempleRequest =
   | TempleNewWalletRequest
   | TempleUnlockRequest
   | TempleLockRequest
+  | TempleFreeHDAccountIndexRequest
   | TempleCreateAccountRequest
   | TempleCreateOrImportWalletRequest
   | TempleRemoveHdWalletRequest
@@ -379,6 +382,7 @@ export type TempleResponse =
   | TempleUnlockResponse
   | TempleLockResponse
   | TempleCreateAccountResponse
+  | TempleFreeHDAccountIndexResponse
   | TempleCreateOrImportWalletResponse
   | TempleRemoveHdWalletResponse
   | TempleRemoveAccountsByTypeResponse
@@ -476,6 +480,17 @@ interface TempleLockRequest extends TempleMessageBase {
 
 interface TempleLockResponse extends TempleMessageBase {
   type: TempleMessageType.LockResponse;
+}
+
+interface TempleFreeHDAccountIndexRequest extends TempleMessageBase {
+  type: TempleMessageType.FindFreeHDAccountIndexRequest;
+  walletId: string;
+}
+
+interface TempleFreeHDAccountIndexResponse extends TempleMessageBase {
+  type: TempleMessageType.FindFreeHDAccountIndexResponse;
+  hdIndex: number;
+  firstSkippedAccount: TempleAccount | undefined;
 }
 
 interface TempleCreateAccountRequest extends TempleMessageBase {

@@ -4,9 +4,8 @@ import { useGasToken } from 'lib/assets/hooks';
 import { DisplayedGroup } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
-import { AccountItem } from '../AccountItem';
-
 import { Accountsmanagement } from '..';
+import { AccountItem } from '../AccountItem';
 
 type WalletCardProps = {
   group: DisplayedGroup;

@@ -148,3 +148,40 @@ export const useBalancesLoading = () => {
   useEffect(dispatchLoadAssetsBalancesActions, [dispatchLoadAssetsBalancesActions]);
   useOnBlock(dispatchLoadAssetsBalancesActions, undefined, tokensSubscriptionConfirmed && isStoredError === false);
 };
+
+export const useBalancesLoadingOnce = (publicKeyHash: string) => {
+  const chainId = useChainId(true)!;
+
+  const isLoading = useBalancesLoadingSelector(publicKeyHash, chainId);
+  const isLoadingRef = useRef(false);
+
+  // keep latest loading flag (same idea as your hook)
+  useDidUpdate(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
+
+  const storedError = useBalancesErrorSelector(publicKeyHash, chainId);
+  const isStoredError = isDefined(storedError);
+
+  const dispatch = useDispatch();
+
+  // run only once per mount (and only for that PKH+chainId)
+  const didRunRef = useRef(false);
+
+  useEffect(() => {
+    if (didRunRef.current) return;
+    didRunRef.current = true;
+
+    if (!publicKeyHash || !isKnownChainId(chainId)) return;
+
+    // initial load (no subscriptions, no polling)
+    if (isLoadingRef.current === false && isStoredError === false) {
+      dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
+      dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally empty: once
+
+  // optional: expose info if you want
+  return { isLoading, isStoredError };
+};

@@ -134,21 +134,27 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
 
       <div
         className={classNames(
-          'overflow-y-auto shadow-inner no-scrollbar',
+          'flex flex-col',
           popup && 'max-h-80',
           isShowSearch && 'border-t-0 rounded-t-none',
           !popup && filteredAccounts.length > 5 && 'pr-4'
         )}
         style={isShowSearch ? { height: LIST_HEIGHT } : undefined}
       >
-        <div className="flex flex-col gap-4">
-          {filteredAccounts.length === 0 ? (
-            <p className="text-center text-white text-base">
-              <T id="noResults" />
-            </p>
-          ) : (
-            groups.map(group => <WalletCard group={group} handleAccountClick={handleAccountClick} />)
-          )}
+        {/* CLIP WRAPPER (doesn't scroll) */}
+        <div className="flex-1 overflow-hidden rounded-xl bg-transparent">
+          {/* SCROLLER */}
+          <div className="h-full overflow-y-auto no-scrollbarD shadow-inner">
+            <div className="flex flex-col gap-4 py-1">
+              {filteredAccounts.length === 0 ? (
+                <p className="text-center text-white text-base">
+                  <T id="noResults" />
+                </p>
+              ) : (
+                groups.map(group => <WalletCard key={group.id} group={group} handleAccountClick={handleAccountClick} />)
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

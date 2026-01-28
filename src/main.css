@@ -252,6 +252,15 @@ button,
 
 /* hide scrollbar */
 
+.no-scrollbarD {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbarD::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 @media (max-width: 500px) {
   .no-scrollbar {
     -ms-overflow-style: none;

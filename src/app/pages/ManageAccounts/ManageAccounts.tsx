@@ -71,7 +71,7 @@ export const ManageAccounts: FC = () => {
               <T id="noResults" />
             </p>
           ) : (
-            groups.map(group => <WalletCard group={group} />)
+            groups.map(group => <WalletCard key={group.id} group={group} />)
           )}
         </div>
       </div>

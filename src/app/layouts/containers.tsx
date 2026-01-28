@@ -2,7 +2,6 @@ import React, { forwardRef, useRef } from 'react';
 
 import clsx from 'clsx';
 
-import { useStickyObservation } from 'app/hooks/use-sticky-observation';
 import { combineRefs } from 'lib/ui/utils';
 
 export const SCROLL_DOCUMENT = process.env.SCROLL_DOCUMENT === 'true';
@@ -46,13 +45,8 @@ interface StickyBarProps extends PropsWithChildren {
 export const StickyBar = React.forwardRef<HTMLDivElement, StickyBarProps>(({ className, children }, forwardedRef) => {
   const spareRef = useRef<HTMLDivElement>(null);
 
-  const sticked = useStickyObservation(spareRef);
-
   return (
-    <div
-      ref={combineRefs(forwardedRef, spareRef)}
-      className={clsx('sticky z-sticky', '-top-px', sticked && 'bg-white shadow-bottom', className)}
-    >
+    <div ref={combineRefs(forwardedRef, spareRef)} className={clsx('sticky z-sticky', '-top-px', className)}>
       {children}
     </div>
   );

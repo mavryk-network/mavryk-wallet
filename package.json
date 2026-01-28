@@ -69,7 +69,6 @@
     "@rnw-community/shared": "^0.48.0",
     "@svgr/webpack": "6.4.0",
     "@temple-wallet/jest-webextension-mock": "^4.1.0",
-    "@temple-wallet/save-remote-file-webpack-plugin": "^1.1.2",
     "@temple-wallet/wallet-address-validator": "^0.4.3",
     "@temple-wallet/youves-sdk": "^0.0.9",
     "@types/async-retry": "1.4.8",

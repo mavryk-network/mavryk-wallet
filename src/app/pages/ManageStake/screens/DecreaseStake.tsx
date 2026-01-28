@@ -245,7 +245,7 @@ export const DecreaseStake: FC = () => {
               !canUnlock
           )}
         >
-          <T id="unlock" />
+          <T id="decrease" />
         </FormSubmitButton>
       </div>
     </form>

@@ -2628,7 +2628,7 @@
     "message": "To update an existing contact, just remove it\nand add a new one."
   },
   "deleteContactConfirm": {
-    "message": "Are you sure you want to delete this contact?"
+    "message": "Are you sure you want to delete this contact? This will remove them from your contact list."
   },
   "closePartnersPromoConfirm": {
     "message": "Pay attention: you can receive cashback in USDt tokens for enabling advertisement in our wallet. If you turned off ADS, you can always activate it in the settings."

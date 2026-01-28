@@ -2,9 +2,10 @@ import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState 
 
 import clsx from 'clsx';
 
-import { ExternalLinkChip, HashChip, Identicon, Name, SyncSpinner } from 'app/atoms';
+import { Anchor, HashChip, Identicon, Name, SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
+import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ReactComponent as EllipsePurple } from 'app/misc/Ellipse-purple.svg';
@@ -27,7 +28,7 @@ import { UserHistoryItem } from 'lib/temple/history';
 import useHistory from 'lib/temple/history/hook';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-import { goBack, navigate } from 'lib/woozie';
+import { goBack, Link, navigate } from 'lib/woozie';
 
 import { useAccountOwnership } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
@@ -191,17 +192,16 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
         <section className="flex flex-col">
           <div className="p-4 rounded-2xl overflow-hidden bg-gray-900 flex flex-col items-center relative mb-4">
             {/* Positioned Content */}
-            <div className="flex items-center absolute top-4 right-4 text-white text-xs">
+            <Anchor
+              href={`${explorerBaseUrl}${accountHash}`}
+              className="flex items-center absolute top-4 right-4 text-white text-xs z-20"
+            >
               <p className="underline">
-                {' '}
                 <T id="viewOnBlockExplorerName" substitutions={[explorer.name]} />
               </p>
-              <ExternalLinkChip
-                href={`${explorerBaseUrl}${accountHash}`}
-                tooltip="Explore Contact"
-                iconColor="text-white"
-              />
-            </div>
+              <LinkSvgIcon className="fill-current w-4 h-4" />
+            </Anchor>
+
             <EllipsePurple className="absolute left-0 top-0 z-0" />
             {/* ------------------- */}
             <div className="z-10 flex flex-col items-center">

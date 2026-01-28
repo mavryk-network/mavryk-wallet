@@ -1,4 +1,5 @@
-import { TempleChainId, TempleNetwork } from 'lib/temple/types';
+import { TID } from 'lib/i18n';
+import { TempleChainId, TempleChainKind, TempleNetwork } from 'lib/temple/types';
 
 // const formatDateToRPCFormat = (date: Date) => date.toLocaleDateString('en-GB').split('/').reverse().join('-');
 
@@ -239,3 +240,25 @@ export const NETWORKS: TempleNetwork[] = [
   //   hidden: true
   // }
 ];
+
+export interface NetworkBase {
+  chain: TempleChainKind;
+  id: string;
+  rpcBaseURL: string;
+  chainId: string | number;
+  name: string;
+  nameI18nKey?: TID;
+  description?: string;
+  /** TODO: Remove, when(if) deprecated */
+  color: string;
+  /** Means: hardcoded, never stored */
+  default?: boolean;
+  // Deprecated params:
+  /** @deprecated */
+  type?: 'main' | 'test' | 'dcp';
+}
+
+export interface StoredTezosNetwork extends NetworkBase {
+  chain: TempleChainKind.Tezos;
+  chainId: string;
+}

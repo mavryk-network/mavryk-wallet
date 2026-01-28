@@ -78,9 +78,9 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
         disabled={disabled || isLoading}
         className={classNames(
           styles.btn,
-          size === 'small' && 'rounded-2xl-plus',
-          size === 'big' && 'rounded-full',
-          size === 'xs' && 'rounded-2xl-plus',
+          size === 'small' && 'rounded-md',
+          size === 'big' && 'rounded-xl',
+          size === 'xs' && 'rounded-md',
           'transition ease-in-out duration-200',
           disabled ? 'border-transparent' : `border-${borderColor}`, // border color
           !disabled &&

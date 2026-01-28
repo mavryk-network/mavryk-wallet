@@ -13,7 +13,6 @@ import { ReactComponent as RoundedMinusIcon } from 'app/icons/rounded-minus.svg'
 import { ReactComponent as RoundedPlusIcon } from 'app/icons/rounded-plus.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { ReactComponent as StickerIcon } from 'app/icons/sticker.svg';
-import { ReactComponent as SyncIcon } from 'app/icons/sync.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
@@ -25,7 +24,6 @@ import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
 import RevealSecret from 'app/templates/RevealSecrets/RevealSecret';
 import GeneralSettings from 'app/templates/SettingsGeneral';
-import SyncSettings from 'app/templates/Synchronization/SyncSettings';
 import { T } from 'lib/i18n';
 
 import ConnectLedger from '../ConnectLedger/ConnectLedger';
@@ -61,8 +59,8 @@ const TABS: Tab[] = [
     fillIcon: false
   },
   {
-    linkTo: 'address-book',
-    i18nKey: 'addressBook',
+    linkTo: 'contacts',
+    i18nKey: 'contacts',
     Icon: AddressBookIcon,
     Component: AddressBook,
     testID: SettingsSelectors.addressBookButton,

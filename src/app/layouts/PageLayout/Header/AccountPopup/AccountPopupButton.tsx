@@ -4,28 +4,16 @@ import classNames from 'clsx';
 
 import { Button, Identicon, Name } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as AddressIcon } from 'app/icons/adress-with-setting.svg';
 import { ReactComponent as ArrowDownicon } from 'app/icons/chevron-down.svg';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { T, t } from 'lib/i18n';
 import { TempleAccount } from 'lib/temple/types';
-import { useTippyById } from 'lib/ui/useTippy';
-import { Link } from 'lib/woozie';
 
 import AccountPopup from '.';
-
-const tippyProps = {
-  trigger: 'mouseenter',
-  hideOnClick: true,
-  content: t('manageAddresses'),
-  animation: 'shift-away-subtle'
-};
 
 export type AccountButtonProps = {
   child?: JSX.Element;
   iconSize?: number;
   account: TempleAccount;
-  onlyAccSelect?: boolean;
   restrictAccountSelect?: boolean;
 };
 
@@ -38,7 +26,6 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
   account,
   child,
   iconSize = 24,
-  onlyAccSelect = false,
   restrictAccountSelect = false
 }) => {
   const { popup } = useAppEnv();
@@ -52,8 +39,6 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
     },
     [restrictAccountSelect]
   );
-
-  const handleMouseEnter = useTippyById('#manageAddressesBtn', tippyProps);
 
   return (
     <div className="flex gap-2">
@@ -85,22 +70,11 @@ export const AccountPopupButton: FC<AccountButtonProps> = ({
       <PopupModalWithTitle
         isOpen={showAccountsPopup}
         onRequestClose={handlePopupToggle.bind(null, setShowAccountsPopup, false)}
-        title={<T id="selectAccount" />}
+        title={<>My Accounts</>}
         portalClassName="accounts-popup"
         contentPosition={popup ? 'bottom' : 'center'}
-        leftSidedComponent={
-          <button
-            id="manageAddressesBtn"
-            onMouseEnter={handleMouseEnter}
-            className={classNames(popup ? 'w-6' : 'w-8 flex justify-start')}
-          >
-            <Link to="/settings/address-book" className="w-6">
-              <AddressIcon className="w-6 h-6" />
-            </Link>
-          </button>
-        }
       >
-        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} onlyAccSelect={onlyAccSelect} />
+        <AccountPopup opened={showAccountsPopup} setOpened={setShowAccountsPopup} />
       </PopupModalWithTitle>
     </div>
   );

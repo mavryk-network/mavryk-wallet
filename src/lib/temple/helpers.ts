@@ -6,6 +6,8 @@ import memoizee from 'memoizee';
 
 import { FastRpcClient } from 'lib/taquito-fast-rpc';
 
+import { TempleAccount, TempleAccountType } from './types';
+
 export const loadFastRpcClient = memoizee((rpc: string) => new FastRpcClient(rpc), { max: 5 });
 
 export const michelEncoder = new MichelCodecPacker();
@@ -74,4 +76,46 @@ export function formatOpParamsBeforeSend(params: any) {
     return newParams;
   }
   return params;
+}
+
+export function getSameGroupAccounts(allAccounts: TempleAccount[], accountType: TempleAccountType, groupId?: string) {
+  return allAccounts.filter(
+    acc => acc.type === accountType && (acc.type !== TempleAccountType.HD || acc.walletId === groupId)
+  );
+}
+async function pickUniqueName(
+  startIndex: number,
+  getNameCandidate: (i: number) => string | Promise<string>,
+  isUnique: (name: string) => boolean
+) {
+  for (let i = startIndex; ; i++) {
+    const nameCandidate = await getNameCandidate(i);
+    if (isUnique(nameCandidate)) {
+      return nameCandidate;
+    }
+  }
+}
+
+export function isNameCollision(
+  allAccounts: TempleAccount[],
+  accountType: TempleAccountType,
+  name: string,
+  walletId?: string
+) {
+  return getSameGroupAccounts(allAccounts, accountType, walletId).some(acc => acc.name === name);
+}
+
+export async function fetchNewAccountName(
+  allAccounts: TempleAccount[],
+  newAccountType: TempleAccountType,
+  getNameCandidate: (i: number) => string | Promise<string>,
+  newAccountWalletId?: string
+) {
+  const sameGroupAccounts = getSameGroupAccounts(allAccounts, newAccountType, newAccountWalletId);
+
+  return await pickUniqueName(
+    sameGroupAccounts.length + 1,
+    getNameCandidate,
+    name => !isNameCollision(allAccounts, newAccountType, name, newAccountWalletId)
+  );
 }

@@ -10,7 +10,7 @@ export const fetchRawBalance = async (tezos: MavrykToolkit, assetSlug: string, a
   const asset = await fromAssetSlugWithStandardDetect(tezos, assetSlug);
 
   if (asset === MAV_TOKEN_SLUG)
-    return await tezos.tz.getBalance(account).then(toSafeBignum, error => {
+    return await tezos.mv.getBalance(account).then(toSafeBignum, error => {
       console.error(error);
 
       return ZERO;

@@ -5,7 +5,6 @@ import {
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
-import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
@@ -18,7 +17,10 @@ import {
   TempleMessageType,
   TempleRequest,
   TempleSettings,
-  TempleSharedStorageKey
+  TempleSharedStorageKey,
+  TempleChainKind,
+  SaveLedgerAccountInput,
+  TempleAccountType
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
 
@@ -48,7 +50,10 @@ import {
 } from './store';
 import { Vault } from './vault';
 
-const ACCOUNT_NAME_PATTERN = /^.{0,16}$/;
+export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
+export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
+const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
+
 const AUTODECLINE_AFTER = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;
@@ -129,22 +134,25 @@ export async function unlockFromSession() {
   });
 }
 
-export function createHDAccount(name?: string) {
+export function findFreeHDAccountIndex(walletId: string) {
+  return withUnlocked(({ vault }) => vault.findFreeHDAccountIndex(walletId));
+}
+
+export function createHDAccount(walletId: string, name?: string, hdIndex?: number) {
   return withUnlocked(async ({ vault }) => {
     if (name) {
       name = name.trim();
-      if (!ACCOUNT_NAME_PATTERN.test(name)) {
-        throw new Error('Invalid name. It should be: 1-16 characters, without special');
+      if (!ACCOUNT_OR_GROUP_NAME_PATTERN.test(name)) {
+        throw new Error('Invalid name. It should be 1-16 characters');
       }
     }
 
-    const updatedAccounts = await vault.createHDAccount(name);
+    const updatedAccounts = await vault.createHDAccount(walletId, name, hdIndex);
     accountsUpdated(updatedAccounts);
   });
 }
-
-export function revealMnemonic(password: string) {
-  return withUnlocked(() => Vault.revealMnemonic(password));
+export function revealMnemonic(walletId: string, password: string) {
+  return withUnlocked(() => Vault.revealMnemonic(walletId, password));
 }
 
 export function generateSyncPayload(password: string) {
@@ -159,10 +167,10 @@ export function revealPublicKey(accPublicKeyHash: string) {
   return withUnlocked(({ vault }) => vault.revealPublicKey(accPublicKeyHash));
 }
 
-export function removeAccount(accPublicKeyHash: string, password: string) {
+export function removeAccount(id: string, password: string) {
   return withUnlocked(async () => {
-    const updatedAccounts = await Vault.removeAccount(accPublicKeyHash, password);
-    accountsUpdated(updatedAccounts);
+    const { newAccounts } = await Vault.removeAccount(id, password);
+    accountsUpdated(newAccounts);
   });
 }
 
@@ -185,9 +193,9 @@ export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
   });
 }
 
-export function importAccount(privateKey: string, chainId: string, encPassword?: string) {
+export function importAccount(chainId: string, chain: TempleChainKind, privateKey: string, encPassword?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importAccount(privateKey, chainId, encPassword);
+    const updatedAccounts = await vault.importAccount(chain, chainId, privateKey, encPassword);
     accountsUpdated(updatedAccounts);
   });
 }
@@ -213,21 +221,16 @@ export function importManagedKTAccount(address: string, chainId: string, owner: 
   });
 }
 
-export function importWatchOnlyAccount(address: string, chainId?: string, accName?: string) {
+export function importWatchOnlyAccount(address: string, chain: TempleChainKind, chainId?: string) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.importWatchOnlyAccount(address, chainId, accName);
+    const updatedAccounts = await vault.importWatchOnlyAccount(chain, address, chainId);
     accountsUpdated(updatedAccounts);
   });
 }
 
-export function createLedgerAccount(
-  name: string,
-  chainId: string,
-  derivationPath?: string,
-  derivationType?: DerivationType
-) {
+export function createLedgerAccount(input: SaveLedgerAccountInput) {
   return withUnlocked(async ({ vault }) => {
-    const updatedAccounts = await vault.createLedgerAccount(name, chainId, derivationPath, derivationType);
+    const updatedAccounts = await vault.createLedgerAccount(input);
     accountsUpdated(updatedAccounts);
   });
 }
@@ -237,6 +240,27 @@ export function updateSettings(settings: Partial<TempleSettings>) {
     const updatedSettings = await vault.updateSettings(settings);
     createCustomNetworksSnapshot(updatedSettings);
     settingsUpdated(updatedSettings);
+  });
+}
+
+export function removeHdWallet(id: string, password: string) {
+  return withUnlocked(async () => {
+    const { newAccounts } = await Vault.removeHdWallet(id, password);
+    accountsUpdated(newAccounts);
+  });
+}
+
+export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
+  return withUnlocked(async () => {
+    const newAccounts = await Vault.removeAccountsByType(type, password);
+    accountsUpdated(newAccounts);
+  });
+}
+
+export function createOrImportWallet(mnemonic?: string) {
+  return withUnlocked(async ({ vault }) => {
+    const { newAccounts } = await vault.createOrImportWallet(mnemonic);
+    accountsUpdated(newAccounts);
   });
 }
 

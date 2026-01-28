@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
-import usePrevious from 'lib/ui/hooks/usePrevious';
+
+import { TempleAccount } from '../types';
 
 import fetchUserHistory from './fetch';
 import { UserHistoryItem } from './types';
@@ -27,11 +28,14 @@ type TLoading = 'init' | 'more' | false;
 export default function useHistory(
   initialPseudoLimit: number,
   assetSlug?: string,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: GetOperationsTransactionsParams,
+  differentAccount?: TempleAccount
 ) {
   const tezos = useTezos();
   const chainId = useChainId(true);
-  const account = useAccount();
+  const originalAccount = useAccount();
+
+  const account = differentAccount ? differentAccount : originalAccount;
 
   const accountAddress = account.publicKeyHash;
 
@@ -41,12 +45,20 @@ export default function useHistory(
 
   const { stop: stopLoading, stopAndBuildChecker } = useStopper();
 
-  const hasParameters = useMemo(
-    () => Boolean(operationParams) && typeof operationParams === 'object' && Object.keys(operationParams).length !== 0,
-    [operationParams]
-  );
+  // stable boolean, not the params object itself
+  const hasParameters = useMemo(() => {
+    return Boolean(operationParams) && typeof operationParams === 'object' && Object.keys(operationParams).length !== 0;
+  }, [operationParams]);
 
-  const originalHistory = usePrevious<UserHistoryItem[]>(userHistory, hasParameters);
+  const paramsKey = useMemo(() => {
+    // if params order can vary, stringify is fine but this is safer-ish for small objects
+    if (!hasParameters) return '';
+    try {
+      return JSON.stringify(operationParams);
+    } catch {
+      return 'unstringifiable';
+    }
+  }, [hasParameters, operationParams]);
 
   async function loadUserHistory(pseudoLimit: number, historyItems: UserHistoryItem[], shouldStop: () => boolean) {
     if (!isKnownChainId(chainId)) {
@@ -70,67 +82,58 @@ export default function useHistory(
         lastHistoryItem,
         operationParams
       );
-      // console.log('Logging user history in the History Hook:', newHistoryItems);
       if (shouldStop()) return;
     } catch (error) {
       if (shouldStop()) return;
       setLoading(false);
-      console.error('Logging error in History Hook after fetching history items:', error);
+      console.error('History hook fetch error:', error);
       return;
     }
 
     setUserHistory(prev => {
-      // Filter out items that already exist in prev
       const newUniqueItems = newHistoryItems.filter(item => !prev.some(prevItem => prevItem.hash === item.hash));
 
-      // If nothing new to add, we've reached the end
       if (newUniqueItems.length === 0) {
         setReachedTheEnd(true);
         return prev;
       }
 
-      // Merge and deduplicate just in case
+      // merge + dedupe
       const merged = [...prev, ...newUniqueItems];
-      const unique = Array.from(new Map(merged.map(item => [item.hash, item])).values());
-
-      return unique;
+      return Array.from(new Map(merged.map(item => [item.hash, item])).values());
     });
+
     setLoading(false);
     if (newHistoryItems.length === 0) setReachedTheEnd(true);
   }
 
-  /** Loads more of older items */
   function loadMore(pseudoLimit: number) {
     if (loading || reachedTheEnd) return;
     loadUserHistory(pseudoLimit, userHistory, stopAndBuildChecker());
   }
 
-  useDidMount(() => {
-    loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-
-    return stopLoading;
-  });
-
   useDidUpdate(() => {
+    // cancel any in-flight requests from previous key
+    const shouldStop = stopAndBuildChecker();
+
+    // reset state immediately so UI doesn't show old account history
     setUserHistory([]);
-    setLoading('init');
+    setLoading(isKnownChainId(chainId) ? 'init' : false);
     setReachedTheEnd(false);
 
-    loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-  }, [chainId, accountAddress, assetSlug, operationParams]);
+    // fetch fresh
+    loadUserHistory(initialPseudoLimit, [], shouldStop);
 
-  useDidUpdate(() => {
-    if (hasParameters) {
-      setUserHistory([]);
-      setLoading('init');
-      setReachedTheEnd(false);
+    // cleanup cancels in-flight if key changes/unmounts
+    return stopLoading;
+  }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit]);
 
-      loadUserHistory(initialPseudoLimit, [], stopAndBuildChecker());
-    } else {
-      setUserHistory(originalHistory ?? []);
-      setReachedTheEnd(false);
-    }
-  }, [hasParameters, assetSlug, accountAddress, chainId]);
+  // If you want initial mount to also fetch, keep this:
+  useDidMount(() => {
+    const shouldStop = stopAndBuildChecker();
+    loadUserHistory(initialPseudoLimit, [], shouldStop);
+    return stopLoading;
+  });
 
   return {
     loading,

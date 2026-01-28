@@ -33,6 +33,7 @@ import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
 import { AddOrImportAccount } from './pages/AddOrImportAccount';
 import { CoStake } from './pages/CoStake/CoStake';
 import { EditAccount } from './pages/EditAccount';
+import { ManageAccounts } from './pages/ManageAccounts/ManageAccounts';
 import { ManageStake } from './pages/ManageStake/ManageStake';
 import Onboarding from './pages/Onboarding/Onboarding';
 import { ProVersion } from './pages/ProVersion/ProVersion';
@@ -104,6 +105,7 @@ const ROUTE_MAP = Woozie.createMap<RouteContext>([
   ['/add-asset', onlyReady(() => <AddAsset />)],
   ['/settings/:tabSlug?', onlyReady(({ tabSlug }) => <Settings tabSlug={tabSlug} />)],
   ['/add-network', onlyReady(() => <AddNetworkScreen />)],
+  ['/manage-accounts', onlyReady(() => <ManageAccounts />)],
   // ['/buy', onlyReady(onlyInFullPage(() => <Buy />))],
   // ['/buy/crypto/exolix', onlyReady(onlyInFullPage(() => <Exolix />))],
   // ['/buy/debit', onlyReady(onlyInFullPage(() => <BuyWithCreditCard />))],

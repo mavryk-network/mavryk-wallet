@@ -36,7 +36,7 @@ interface ByMnemonicFormData {
 
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { importMnemonicAccount } = useTempleClient();
+  const { createOrImportWallet } = useTempleClient();
   const chainId = useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
@@ -64,12 +64,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
         setError(null);
 
         try {
-          await importMnemonicAccount(
-            formatMnemonic(seedPhrase),
-            chainId!,
-            password || undefined,
-            derivationPath === 'custom' ? customDerivationPath || undefined : DEFAULT_DERIVATION_PATH
-          );
+          await createOrImportWallet(formatMnemonic(seedPhrase));
 
           formAnalytics.trackSubmitSuccess();
         } catch (err: any) {
@@ -85,17 +80,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
         setSeedError(t('mnemonicWordsAmountConstraint', [numberOfWords]) as string);
       }
     },
-    [
-      seedPhrase,
-      seedError,
-      formState.isSubmitting,
-      setError,
-      importMnemonicAccount,
-      derivationPath,
-      formAnalytics,
-      numberOfWords,
-      chainId
-    ]
+    [seedPhrase, seedError, formState.isSubmitting, setError, createOrImportWallet, formAnalytics, numberOfWords]
   );
 
   return (

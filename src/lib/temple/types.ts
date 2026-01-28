@@ -634,6 +634,7 @@ interface TempleImportWatchOnlyAccountRequest extends TempleMessageBase {
   address: string;
   chain: TempleChainKind;
   chainId?: string;
+  name?: string;
 }
 
 interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {

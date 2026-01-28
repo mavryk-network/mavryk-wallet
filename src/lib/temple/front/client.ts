@@ -270,11 +270,12 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
   }, []);
 
-  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string) => {
+  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, name?: string) => {
     const res = await request({
       type: TempleMessageType.ImportWatchOnlyAccountRequest,
       address,
       chainId,
+      name,
       chain: TempleChainKind.Tezos
     });
     assertResponse(res.type === TempleMessageType.ImportWatchOnlyAccountResponse);

@@ -484,7 +484,7 @@ export class Vault {
           return false;
         }
 
-        return getAccountAddressForTezos(acc);
+        return getAccountAddressForTezos(acc) === tezosAcc.address;
       });
 
       if (sameAddressAccount) {

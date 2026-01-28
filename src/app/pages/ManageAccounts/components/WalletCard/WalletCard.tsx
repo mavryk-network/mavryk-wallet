@@ -6,7 +6,7 @@ import { navigate } from 'lib/woozie';
 
 import { AccountItem } from '../AccountItem';
 
-import { Accountsmanagement } from '.';
+import { Accountsmanagement } from '..';
 
 type WalletCardProps = {
   group: DisplayedGroup;

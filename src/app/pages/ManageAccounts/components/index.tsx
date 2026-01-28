@@ -4,9 +4,10 @@ import { useTempleClient } from 'lib/temple/front';
 import { DisplayedGroup, TempleAccount } from 'lib/temple/types';
 import { useAlert } from 'lib/ui/dialog';
 
-import { AccountAlreadyExistsWarning } from '../../popups/AccountAlreadyExistsWarning';
-import { EditWalletGroupNamePopup } from '../../popups/EditWalletGroupNamePopup';
-import { WalletCardDropdown } from '../WalletCardDropdown/WalletCardDropdown';
+import { AccountAlreadyExistsWarning } from '../popups/AccountAlreadyExistsWarning';
+import { EditWalletGroupNamePopup } from '../popups/EditWalletGroupNamePopup';
+
+import { WalletCardDropdown } from './WalletCardDropdown/WalletCardDropdown';
 
 type AccountsmanagementProps = {
   group: DisplayedGroup;

@@ -703,7 +703,6 @@ export class Vault {
         const newAccount: TempleAccount = {
           id: nanoid(),
           type: TempleAccountType.Ledger,
-          isKYC: false,
           ...storedAccountProps
         };
         const newAllAccounts = concatAccount(allAccounts, newAccount);

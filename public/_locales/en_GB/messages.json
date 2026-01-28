@@ -2114,6 +2114,9 @@
   "errorChangingAccountName": {
     "message": "An error occurred while changing account name"
   },
+  "errorChangingWalletName": {
+    "message": "An error occurred while changing wallet name"
+  },
   "ok": {
     "message": "OK"
   },
@@ -2625,7 +2628,7 @@
     "message": "To update an existing contact, just remove it\nand add a new one."
   },
   "deleteContactConfirm": {
-    "message": "Are you sure you want to delete this contact?"
+    "message": "Are you sure you want to delete this contact? This will remove them from your contact list."
   },
   "closePartnersPromoConfirm": {
     "message": "Pay attention: you can receive cashback in USDt tokens for enabling advertisement in our wallet. If you turned off ADS, you can always activate it in the settings."
@@ -4018,6 +4021,29 @@
     "placeholders": {
       "groupLetter": {
         "content": "$1"
+      }
+    }
+  },
+  "importedGroupLabel": {
+    "message": "Integrated"
+  },
+  "ledgerGroupLabel": {
+    "message": "Hardware"
+  },
+  "renameWallet": {
+    "message": "Rename Wallet"
+  },
+  "addAccount": {
+    "message": "Add account"
+  },
+  "accountAlreadyExistsWarning": {
+    "message": "Please note that some accounts from $walletName$ already exist as $oldAccountGroupName$. The next accounts in this group will be added while considering the existing ones.",
+    "placeholders": {
+      "walletName": {
+        "content": "$1"
+      },
+      "oldAccountGroupName": {
+        "content": "$2"
       }
     }
   }

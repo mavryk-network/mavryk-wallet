@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Identicon } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { ReactComponent as KeyIcon } from 'app/icons/acc-key.svg';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { TempleAccount } from 'lib/temple/types';
@@ -42,7 +41,6 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, keyC
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
-          <AccountTypeBadge account={account} />
           {keyColor && <KeyIcon style={{ fill: keyColor }} />}
         </div>
 

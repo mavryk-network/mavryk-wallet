@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Identicon, Money } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { RadioButton } from 'app/atoms/RadioButton';
 import { ReactComponent as KeyIcon } from 'app/icons/acc-key.svg';
 import { useOtherAccountTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
@@ -20,6 +19,7 @@ interface AccountItemProps {
   attractSelf: boolean;
   onClick: () => void;
   keyColor?: string;
+  showBadge?: boolean;
 }
 
 export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick, keyColor }) => {
@@ -62,7 +62,6 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
-          <AccountTypeBadge account={account} />
           {keyColor && <KeyIcon style={{ fill: keyColor }} />}
         </div>
 

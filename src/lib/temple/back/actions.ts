@@ -151,8 +151,8 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
     accountsUpdated(updatedAccounts);
   });
 }
-export function revealMnemonic(password: string) {
-  return withUnlocked(() => Vault.revealMnemonic(password));
+export function revealMnemonic(walletId: string, password: string) {
+  return withUnlocked(() => Vault.revealMnemonic(walletId, password));
 }
 
 export function generateSyncPayload(password: string) {

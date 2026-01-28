@@ -232,11 +232,12 @@ export class Vault {
     }
   }
 
-  static async revealMnemonic(password: string) {
+  static async revealMnemonic(walletId: string, password: string) {
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to reveal seed phrase', () => fetchAndDecryptOne<string>(mnemonicStrgKey, passKey));
+    return withError('Failed to reveal seed phrase', () =>
+      fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey)
+    );
   }
-
   static async generateSyncPayload(password: string) {
     let WasmThemis: typeof WasmThemisPackageInterface;
     try {

@@ -90,12 +90,11 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.RevealMnemonicRequest:
-      const mnemonic = await Actions.revealMnemonic(req.password);
+      const mnemonic = await Actions.revealMnemonic(req.walletId, req.password);
       return {
         type: TempleMessageType.RevealMnemonicResponse,
         mnemonic
       };
-
     case TempleMessageType.GenerateSyncPayloadRequest:
       const payload = await Actions.generateSyncPayload(req.password);
       return {

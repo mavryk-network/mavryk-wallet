@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { DelegateResponse } from '@mavrykdynamics/taquito-rpc';
+import { DelegateResponse } from '@mavrykdynamics/webmavryk-rpc';
 import classNames from 'clsx';
 
 import { HashChip, Identicon } from 'app/atoms';
@@ -10,7 +10,6 @@ import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useAccount, useDelegate, useKnownBaker } from 'lib/temple/front';
-import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
 import { AssetsSelectors } from '../../../Assets.selectors';
@@ -72,24 +71,19 @@ export const StakeTezosTag: FC = () => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
-
-      if (acc.type !== TempleAccountType.WatchOnly) {
-        navigate('/stake');
-      }
+      navigate('/stake');
     },
-    [acc.type, trackEvent]
+    [trackEvent]
   );
-
-  const isBtnDisabled = acc.type === TempleAccountType.WatchOnly;
 
   const NotStakedButton = useMemo(
     () => (
-      <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick} disabled={isBtnDisabled}>
+      <AlertWithAction btnLabel={t('stake')} onClick={handleTagClick}>
         <T id="stakeToEarn" />
         <span>&#x1F525;</span>
       </AlertWithAction>
     ),
-    [handleTagClick, isBtnDisabled]
+    [handleTagClick]
   );
 
   const StakedButton = useMemo(
@@ -115,17 +109,27 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
           <T id="delegatedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
-              {/* <img
-                src={baker?.logo}
-                alt={baker?.name}
-                className={classNames('flex-shrink-0', 'bg-white rounded-full')}
-                style={{
-                  minHeight: '1rem',
-                  width: 24,
-                  height: 24
-                }}
-              /> */}
-              <Identicon hash={myBakerPkh} size={24} className="rounded-full" />
+              {baker.logo ? (
+                <>
+                  {typeof baker.logo === 'string' ? (
+                    <img
+                      src={baker.logo}
+                      alt={baker.address}
+                      className="flex-shrink-0 bg-white rounded-full"
+                      style={{ width: 24, height: 24 }}
+                    />
+                  ) : (
+                    // @ts-expect-error // hardcoded svg logos for the time being
+                    <baker.logo
+                      className="flex-shrink-0 bg-transparent rounded-full"
+                      style={{ width: 24, height: 24 }}
+                    />
+                  )}
+                </>
+              ) : (
+                <Identicon type="bottts" hash={myBakerPkh} size={24} className="rounded-full" />
+              )}
+
               <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>
             </div>
           ) : (

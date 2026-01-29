@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 
 import { MAV_TOKEN_SLUG, isMavSlug, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
-import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import {
   HistoryItemOpTypeEnum,
@@ -142,7 +142,7 @@ export function getStakingMessage(
   bakerAddress?: string
 ): StakingMessage {
   const sender = senderAddress ?? 'unknown';
-  const baker = getPredefinedBakerName(bakerAddress) ?? 'unknown';
+  const baker = getPredefinedBakerProperty(bakerAddress) ?? 'unknown';
 
   switch (updateType) {
     case StakingActions.stake:

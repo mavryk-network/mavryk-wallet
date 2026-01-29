@@ -39,5 +39,5 @@ export function useFilteredContacts() {
     if (contacts && contacts.length !== filteredContacts.length) updateSettings({ contacts: filteredContacts });
   }, [contacts, filteredContacts, updateSettings]);
 
-  return { contacts: filteredContacts, allContacts };
+  return { contacts: filteredContacts, allContacts, outsideWalletContacts: filteredContacts };
 }

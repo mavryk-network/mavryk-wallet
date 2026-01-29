@@ -17,9 +17,10 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -40,7 +41,10 @@ export const IncreaseStake = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
-  const { myBakerPkh, canCostake, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const chainId = useChainId();
+  const {
+    data: { myBakerPkh, canCostake, stakedBalance }
+  } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
@@ -49,12 +53,6 @@ export const IncreaseStake = () => {
   const tezos = useTezos();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
-
-  useEffect(() => {
-    if (!canCostake) {
-      navigate('stake');
-    }
-  });
 
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
@@ -70,18 +68,28 @@ export const IncreaseStake = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
+  const amountValue = watch('amount');
+
+  console.log(amountValue, 'amountValue');
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+      const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'coStake',
-        description: 'coStakeDesriptionSuccessMsg',
-        btnText: 'goToMain',
-        subHeader: 'coStakeSubHeaderSuccessMsg'
+        btnText: 'viewHistoryTab',
+        btnLink: '?tab=history',
+        contentId: 'DelegationOperation',
+        contentIdFnProps: {
+          hash,
+          assetSlug: MAV_TOKEN_SLUG,
+          amount: amountValue,
+          validatorAddress: myBakerPkh,
+          type: 'stake'
+        }
       });
     }
-  }, [operation]);
+  }, [amountValue, myBakerPkh, operation]);
 
-  const amountValue = watch('amount');
   const baseFee = useMemo(() => new BigNumber(RECOMMENDED_ADD_FEE), []);
 
   const maxAmount = useMemo(
@@ -119,16 +127,29 @@ export const IncreaseStake = () => {
 
   const onSubmit = useCallback(
     async ({ amount }: FormData) => {
-      if (formState.isSubmitting || !myBakerPkh) return;
+      if (formState.isSubmitting || !myBakerPkh || !canCostake) return;
       formAnalytics.trackSubmit({ amount });
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
+        const estmtn = await tezos.estimate.stake({ amount: Number(amount) });
 
         const op = await tezos.wallet
           .stake({
             amount: Number(amount)
           })
           .send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          amount: tokensToAtoms(amount, assetMetadata?.decimals ?? MAVEN_METADATA.decimals).toString(),
+          estimation: estmtn,
+          baker: myBakerPkh,
+          kind: 'stake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({
@@ -144,7 +165,19 @@ export const IncreaseStake = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
+    [
+      formState.isSubmitting,
+      myBakerPkh,
+      canCostake,
+      formAnalytics,
+      assetMetadata,
+      tezos.estimate,
+      tezos.wallet,
+      account.publicKeyHash,
+      chainId,
+      setOperation,
+      setSubmitError
+    ]
   );
 
   const balancesData: ManagStakeBalancetype[] = useMemo(() => {
@@ -215,7 +248,12 @@ export const IncreaseStake = () => {
         <FormSubmitButton
           loading={formState.isSubmitting}
           disabled={Boolean(
-            formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
+            formState.isSubmitting ||
+              errors.amount ||
+              !formState.isValid ||
+              !amountValue ||
+              amountValue === '0' ||
+              !canCostake
           )}
         >
           <T id="increase" />

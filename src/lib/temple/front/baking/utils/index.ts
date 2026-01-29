@@ -1,14 +1,24 @@
-import { PREDEFINED_BAKERS_NAMES_MAINNET } from 'lib/temple/front/baking/const';
+import { PREDEFINED_BAKERS_NAMES_MAINNET, PredefinedBakerData } from 'lib/temple/front/baking/const';
 
 export * from './capacities';
 export * from './delegateTime';
 export * from './label';
 
-export const getPredefinedBakerName = (address?: string | null) => {
-  if (!address) return address;
-  // @ts-expect-error // random address as key
-  const predefineedBakerData = PREDEFINED_BAKERS_NAMES_MAINNET[address];
-  if (predefineedBakerData) return predefineedBakerData.name;
+type BakerProperty = keyof PredefinedBakerData;
 
+export function getPredefinedBakerProperty<K extends BakerProperty = 'name'>(
+  address?: string | null,
+  key: K = 'name' as K
+): PredefinedBakerData[K] | string | null {
+  if (!address) return null;
+
+  const predefinedBakerData = PREDEFINED_BAKERS_NAMES_MAINNET[address];
+  if (predefinedBakerData) return predefinedBakerData[key];
+
+  // If address not predefined, return it (string)
   return address;
+}
+
+export const getPredefinedBaker = (address: string) => {
+  return PREDEFINED_BAKERS_NAMES_MAINNET[address] || null;
 };

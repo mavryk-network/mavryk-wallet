@@ -3,7 +3,7 @@
  * Explore: https://public-api-v3-20221206.objkt.com/explore
  */
 
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { chunk } from 'lodash';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 

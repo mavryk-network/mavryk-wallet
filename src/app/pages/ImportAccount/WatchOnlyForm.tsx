@@ -93,10 +93,10 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
     formState.isSubmitting,
     formAnalytics,
     finalAddress,
-    finalAccName,
     importWatchOnlyAccount,
     tezos.rpc,
-    tezos.contract
+    tezos.contract,
+    finalAccName
   ]);
 
   return (

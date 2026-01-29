@@ -1,14 +1,31 @@
-import * as Bip39 from 'bip39';
+import { nanoid } from 'nanoid';
 
+import {
+  ACCOUNT_PKH_STORAGE_KEY,
+  ADS_VIEWER_ADDRESS_STORAGE_KEY,
+  CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY,
+  SHOULD_DISABLE_NOT_ACTIVE_NETWORKS_STORAGE_KEY,
+  WALLETS_SPECS_STORAGE_KEY
+} from 'lib/constants';
+import { moveValueInStorage, putToStorage, removeFromStorage } from 'lib/storage';
 import * as Passworder from 'lib/temple/passworder';
-import { TempleAccount, TempleAccountType, TempleContact, TempleSettings } from 'lib/temple/types';
+import {
+  TempleAccount,
+  TempleAccountType,
+  TempleChainKind,
+  TempleContact,
+  TempleSettings,
+  WalletSpecs
+} from 'lib/temple/types';
 
-import { seedToHDPrivateKey, generateCheck, fetchNewAccountName, getPublicKeyAndHash } from './misc';
+import { fetchMessage } from './helpers';
+import { generateCheck, fetchNewAccountName, mnemonicToTezosAccountCreds } from './misc';
 import {
   encryptAndSaveMany,
   encryptAndSaveManyLegacy,
+  fetchAndDecryptOne,
   fetchAndDecryptOneLegacy,
-  getPlain,
+  getPlainLegacy,
   removeManyLegacy
 } from './safe-storage';
 import {
@@ -17,7 +34,8 @@ import {
   accPrivKeyStrgKey,
   accPubKeyStrgKey,
   accountsStrgKey,
-  settingsStrgKey
+  settingsStrgKey,
+  walletMnemonicStrgKey
 } from './storage-keys';
 
 export const MIGRATIONS = [
@@ -38,24 +56,21 @@ export const MIGRATIONS = [
         : acc
     );
 
-    const seed = Bip39.mnemonicToSeedSync(mnemonic);
     const hdAccIndex = 0;
-    const accPrivateKey = seedToHDPrivateKey(seed, hdAccIndex);
-    const [accPublicKey, accPublicKeyHash] = await getPublicKeyAndHash(accPrivateKey);
+    const tezosAcc = await mnemonicToTezosAccountCreds(mnemonic, hdAccIndex);
 
-    const newInitialAccount: TempleAccount = {
+    const newInitialAccount: LegacyTypes.TempleAccount = {
       type: TempleAccountType.HD,
-      name: await fetchNewAccountName(accounts),
-      publicKeyHash: accPublicKeyHash,
-      hdIndex: hdAccIndex,
-      isKYC: undefined
+      name: await fetchNewAccountName(accounts, TempleAccountType.HD),
+      publicKeyHash: tezosAcc.publicKey,
+      hdIndex: hdAccIndex
     };
     const newAccounts = [newInitialAccount, ...migratedAccounts];
 
     await encryptAndSaveManyLegacy(
       [
-        [accPrivKeyStrgKey(accPublicKeyHash), accPrivateKey],
-        [accPubKeyStrgKey(accPublicKeyHash), accPublicKey],
+        [accPrivKeyStrgKey(tezosAcc.address), tezosAcc.privateKey],
+        [accPubKeyStrgKey(tezosAcc.address), tezosAcc.publicKey],
         [accountsStrgKey, newAccounts]
       ],
       passKey
@@ -104,12 +119,12 @@ export const MIGRATIONS = [
 
     const [mnemonic, accounts, settings] = await Promise.all([
       fetchLegacySafe<string>(mnemonicStrgKey),
-      fetchLegacySafe<TempleAccount[]>(accountsStrgKey),
+      fetchLegacySafe<LegacyTypes.TempleAccount[]>(accountsStrgKey),
       fetchLegacySafe<TempleSettings>(settingsStrgKey)
     ]);
 
     // Address book contacts migration
-    const contacts = await getPlain<TempleContact[]>('contacts');
+    const contacts = await getPlainLegacy<TempleContact[]>('contacts');
 
     const accountsStrgKeys = accounts!
       .map(acc => [accPrivKeyStrgKey(acc.publicKeyHash), accPubKeyStrgKey(acc.publicKeyHash)])
@@ -131,5 +146,102 @@ export const MIGRATIONS = [
 
     // Remove old
     await removeManyLegacy([...toSave.map(([key]) => key), 'contacts']);
+  },
+
+  // [5] Extend data formats for EVM support
+  async (password: string) => {
+    console.log('VAULT.MIGRATIONS: migration started');
+    const passKey = await Passworder.generateKey(password);
+
+    /* ACCOUNTS */
+    const accounts = await fetchAndDecryptOne<LegacyTypes.TempleAccount[]>(accountsStrgKey, passKey);
+    const mnemonic = await fetchAndDecryptOne<string>(mnemonicStrgKey, passKey);
+
+    const toEncryptAndSave: [string, any][] = [];
+    const walletId = nanoid();
+    const hdWalletName = await fetchMessage('hdWalletDefaultName', 'A');
+
+    const newAccounts = accounts.map<TempleAccount>(account => {
+      const id = nanoid();
+
+      switch (account.type) {
+        case TempleAccountType.HD:
+          return { ...account, id, walletId, isKYC: undefined };
+        case TempleAccountType.Imported:
+          return { ...account, id, chain: TempleChainKind.Tezos, isKYC: undefined };
+        case TempleAccountType.WatchOnly:
+          return { ...account, id, chain: TempleChainKind.Tezos, isKYC: false };
+        case TempleAccountType.Ledger:
+          return { ...account, id, chain: TempleChainKind.Tezos, isKYC: undefined };
+        case TempleAccountType.ManagedKT:
+          return { ...account, id, isKYC: undefined };
+      }
+
+      return account;
+    });
+
+    toEncryptAndSave.push([accountsStrgKey, newAccounts], [walletMnemonicStrgKey(walletId), mnemonic]);
+    await putToStorage<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, {
+      [walletId]: { name: hdWalletName, createdAt: Date.now() }
+    });
+
+    moveValueInStorage(ACCOUNT_PKH_STORAGE_KEY, ADS_VIEWER_ADDRESS_STORAGE_KEY);
+
+    await encryptAndSaveMany(toEncryptAndSave, passKey);
+    await putToStorage(SHOULD_DISABLE_NOT_ACTIVE_NETWORKS_STORAGE_KEY, true);
+
+    /* CLEAN-UP */
+
+    removeFromStorage(['network_id', 'tokens_base_metadata', 'block_explorer', CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY]);
+
+    console.log('VAULT.MIGRATIONS: EVM migration finished');
+  },
+
+  // [6] Prepare to extend public accounts data
+  async () => {
+    await removeFromStorage(ADS_VIEWER_ADDRESS_STORAGE_KEY);
   }
 ];
+
+namespace LegacyTypes {
+  export type TempleAccount =
+    | TempleHDAccount
+    | TempleImportedAccount
+    | TempleLedgerAccount
+    | TempleManagedKTAccount
+    | TempleWatchOnlyAccount;
+
+  interface TempleLedgerAccount extends TempleAccountBase {
+    type: TempleAccountType.Ledger;
+    derivationPath: string;
+  }
+
+  interface TempleImportedAccount extends TempleAccountBase {
+    type: TempleAccountType.Imported;
+  }
+
+  interface TempleHDAccount extends TempleAccountBase {
+    type: TempleAccountType.HD;
+    hdIndex: number;
+  }
+
+  interface TempleManagedKTAccount extends TempleAccountBase {
+    type: TempleAccountType.ManagedKT;
+    chainId: string;
+    owner: string;
+  }
+
+  interface TempleWatchOnlyAccount extends TempleAccountBase {
+    type: TempleAccountType.WatchOnly;
+    chainId?: string;
+  }
+
+  interface TempleAccountBase {
+    type: TempleAccountType;
+    name: string;
+    publicKeyHash: string;
+    hdIndex?: number;
+    derivationPath?: string;
+    derivationType?: 0 | 1 | 2 | 3;
+  }
+}

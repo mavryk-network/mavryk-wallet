@@ -914,6 +914,12 @@
   "revealSeedPhrase": {
     "message": "Reveal Seed Phrase"
   },
+  "proceedToReveal": {
+    "message": "Proceed To Reveal"
+  },
+  "proceedToRevealMsg": {
+    "message": "You can view the seed phrase only for wallets created in the app. For security reasons, seed phrases for imported wallets aren’t available."
+  },
   "revealSeedPhraseDescription": {
     "message": "Also known as \"Export Wallet\", you may need this seed phrase to access your wallet and accounts on other devices."
   },
@@ -2108,6 +2114,9 @@
   "errorChangingAccountName": {
     "message": "An error occurred while changing account name"
   },
+  "errorChangingWalletName": {
+    "message": "An error occurred while changing wallet name"
+  },
   "ok": {
     "message": "OK"
   },
@@ -2277,6 +2286,14 @@
     "message": "Blockchain Explorer"
   },
   "viewOnBlockExplorer": { "message": "View On Block Explorer" },
+  "viewOnBlockExplorerName": {
+    "message": "View On $name$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
   "specifyTokenId": {
     "message": "Specify token ID"
   },
@@ -2544,6 +2561,9 @@
   "recentDestinations": {
     "message": "Recent destinations"
   },
+  "recentTransfers": {
+    "message": "Recent Transfers"
+  },
   "unknownAccount": {
     "message": "Unknown account"
   },
@@ -2563,6 +2583,12 @@
   },
   "addressBook": {
     "message": "Address Book"
+  },
+  "contacts": {
+    "message": "Contacts"
+  },
+  "contactInfo": {
+    "message": "Contact Info"
   },
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."
@@ -2602,7 +2628,7 @@
     "message": "To update an existing contact, just remove it\nand add a new one."
   },
   "deleteContactConfirm": {
-    "message": "Are you sure you want to delete this contact?"
+    "message": "Are you sure you want to delete this contact? This will remove them from your contact list."
   },
   "closePartnersPromoConfirm": {
     "message": "Pay attention: you can receive cashback in USDt tokens for enabling advertisement in our wallet. If you turned off ADS, you can always activate it in the settings."
@@ -3589,7 +3615,7 @@
     "message": "Your asset was successfully added"
   },
   "editAccount": {
-    "message": "Edit Your Account"
+    "message": "Edit Account"
   },
   "editContact": {
     "message": "Edit Contact"
@@ -3900,6 +3926,9 @@
       }
     }
   },
+  "unlocking": {
+    "message": "Unlocking"
+  },
   "unlocked": {
     "message": "unlocked"
   },
@@ -3964,6 +3993,58 @@
     "message": "Decrease Co-Stake"
   },
   "decreaseCostakeDesc": {
-    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 4 cycles (~12 days) for your funds to fully unlock, after which they will become liquid for use."
+    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 3 cycles (~9 days) for your funds to fully unlock, after which they will become liquid for use."
+  },
+  "default": {
+    "message": "Default"
+  },
+  "viewHistoryTab": {
+    "message": "View History Tab"
+  },
+  "manageAccounts": {
+    "message": "Manage Accounts"
+  },
+  "finalizeUnlock": {
+    "message": "Finalize Unlock"
+  },
+  "editName": {
+    "message": "Edit Name"
+  },
+  "deleteAccount": {
+    "message": "Delete Account"
+  },
+  "pleaseNote": {
+    "message": "Please Note"
+  },
+  "hdWalletDefaultName": {
+    "message": "Wallet $groupLetter$",
+    "placeholders": {
+      "groupLetter": {
+        "content": "$1"
+      }
+    }
+  },
+  "importedGroupLabel": {
+    "message": "Imported"
+  },
+  "ledgerGroupLabel": {
+    "message": "Hardware"
+  },
+  "renameWallet": {
+    "message": "Rename Wallet"
+  },
+  "addAccount": {
+    "message": "Add account"
+  },
+  "accountAlreadyExistsWarning": {
+    "message": "Please note that some accounts from $walletName$ already exist as $oldAccountGroupName$. The next accounts in this group will be added while considering the existing ones.",
+    "placeholders": {
+      "walletName": {
+        "content": "$1"
+      },
+      "oldAccountGroupName": {
+        "content": "$2"
+      }
+    }
   }
 }

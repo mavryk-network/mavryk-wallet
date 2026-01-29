@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import type { WalletOperation } from '@mavrykdynamics/taquito';
-import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
+import type { WalletOperation } from '@mavrykdynamics/webmavryk';
+import { BatchWalletOperation } from '@mavrykdynamics/webmavryk/dist/types/wallet/batch-operation';
 
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { navigate } from 'lib/woozie';

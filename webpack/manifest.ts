@@ -167,7 +167,10 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
     ...withVendors('firefox')({
       browser_specific_settings: {
         gecko: {
-          id: '{4b36f54a-8223-478e-9e31-d87000b4745c}'
+          id: '{c0abd1ce-af67-42b6-a5a9-a4dfb36d46f8}',
+          data_collection_permissions: {
+            required: ['none']
+          }
         }
       }
     }),

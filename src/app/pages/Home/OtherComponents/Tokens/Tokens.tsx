@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ChainIds } from '@mavrykdynamics/taquito';
+import { ChainIds } from '@mavrykdynamics/webmavryk';
 import clsx from 'clsx';
 
 import { SyncSpinner } from 'app/atoms';

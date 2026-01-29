@@ -14,13 +14,19 @@ import {
   WalletStakeParams,
   WalletUnstakeParams,
   WalletFinalizeUnstakeParams
-} from '@mavrykdynamics/taquito';
-import { FinalizeUnstakeParams, StakeParams, UnstakeParams } from '@mavrykdynamics/taquito/dist/types/operations/types';
-import { buf2hex } from '@mavrykdynamics/taquito-utils';
+} from '@mavrykdynamics/webmavryk';
+import {
+  FinalizeUnstakeParams,
+  StakeParams,
+  UnstakeParams
+} from '@mavrykdynamics/webmavryk/dist/types/operations/types';
+import { buf2hex } from '@mavrykdynamics/webmavryk-utils';
 import constate from 'constate';
+import { omit } from 'lodash';
 import { nanoid } from 'nanoid';
 import toBuffer from 'typedarray-to-buffer';
 
+import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
 import { useRetryableSWR } from 'lib/swr';
 import { clearLocalStorage } from 'lib/temple/reset';
@@ -32,8 +38,13 @@ import {
   TempleResponse,
   TempleNotification,
   TempleSettings,
-  DerivationType
+  TempleChainKind,
+  WalletSpecs,
+  SaveLedgerAccountInput,
+  TempleAccountType
 } from 'lib/temple/types';
+
+import { useStorage } from './storage';
 
 type Confirmation = {
   id: string;
@@ -100,6 +111,8 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   const locked = status === TempleStatus.Locked;
   const ready = status === TempleStatus.Ready;
 
+  const [walletsSpecs, setWalletsSpecs] = useStorage<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, {});
+
   const customNetworks = useMemo(() => settings?.customNetworks ?? [], [settings]);
   const networks = useMemo(() => [...defaultNetworks, ...customNetworks], [defaultNetworks, customNetworks]);
 
@@ -134,10 +147,20 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.LockResponse);
   }, []);
 
-  const createAccount = useCallback(async (name?: string) => {
+  const findFreeHdIndex = useCallback(async (walletId: string) => {
+    const res = await request({
+      type: TempleMessageType.FindFreeHDAccountIndexRequest,
+      walletId
+    });
+    assertResponse(res.type === TempleMessageType.FindFreeHDAccountIndexResponse);
+    return omit(res, 'type');
+  }, []);
+
+  const createAccount = useCallback(async (walletId: string, name?: string) => {
     const res = await request({
       type: TempleMessageType.CreateAccountRequest,
-      name
+      name,
+      walletId
     });
     assertResponse(res.type === TempleMessageType.CreateAccountResponse);
   }, []);
@@ -152,9 +175,10 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     return res.privateKey;
   }, []);
 
-  const revealMnemonic = useCallback(async (password: string) => {
+  const revealMnemonic = useCallback(async (walletId: string, password: string) => {
     const res = await request({
       type: TempleMessageType.RevealMnemonicRequest,
+      walletId,
       password
     });
     assertResponse(res.type === TempleMessageType.RevealMnemonicResponse);
@@ -202,7 +226,8 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
       type: TempleMessageType.ImportAccountRequest,
       privateKey,
       chainId,
-      encPassword
+      encPassword,
+      chain: TempleChainKind.Tezos
     });
     assertResponse(res.type === TempleMessageType.ImportAccountResponse);
   }, []);
@@ -245,29 +270,24 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.ImportManagedKTAccountResponse);
   }, []);
 
-  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, accName?: string) => {
+  const importWatchOnlyAccount = useCallback(async (address: string, chainId?: string, name?: string) => {
     const res = await request({
       type: TempleMessageType.ImportWatchOnlyAccountRequest,
       address,
       chainId,
-      accName
+      name,
+      chain: TempleChainKind.Tezos
     });
     assertResponse(res.type === TempleMessageType.ImportWatchOnlyAccountResponse);
   }, []);
 
-  const createLedgerAccount = useCallback(
-    async (name: string, chainId: string, derivationType?: DerivationType, derivationPath?: string) => {
-      const res = await request({
-        type: TempleMessageType.CreateLedgerAccountRequest,
-        name,
-        chainId,
-        derivationPath,
-        derivationType
-      });
-      assertResponse(res.type === TempleMessageType.CreateLedgerAccountResponse);
-    },
-    []
-  );
+  const createLedgerAccount = useCallback(async (input: SaveLedgerAccountInput) => {
+    const res = await request({
+      type: TempleMessageType.CreateLedgerAccountRequest,
+      input
+    });
+    assertResponse(res.type === TempleMessageType.CreateLedgerAccountResponse);
+  }, []);
 
   const updateSettings = useCallback(async (newSettings: Partial<TempleSettings>) => {
     const res = await request({
@@ -276,6 +296,47 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     });
     assertResponse(res.type === TempleMessageType.UpdateSettingsResponse);
   }, []);
+
+  const removeHdGroup = useCallback(async (id: string, password: string) => {
+    const res = await request({
+      type: TempleMessageType.RemoveHdWalletRequest,
+      id,
+      password
+    });
+    assertResponse(res.type === TempleMessageType.RemoveHdWalletResponse);
+  }, []);
+
+  const removeAccountsByType = useCallback(
+    async (type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) => {
+      const res = await request({
+        type: TempleMessageType.RemoveAccountsByTypeRequest,
+        accountsType: type,
+        password
+      });
+      assertResponse(res.type === TempleMessageType.RemoveAccountsByTypeResponse);
+    },
+    []
+  );
+
+  const createOrImportWallet = useCallback(async (mnemonic?: string) => {
+    const res = await request({
+      type: TempleMessageType.CreateOrImportWalletRequest,
+      mnemonic
+    });
+    assertResponse(res.type === TempleMessageType.CreateOrImportWalletResponse);
+  }, []);
+
+  const editHdGroupName = useCallback(
+    (id: string, name: string) =>
+      setWalletsSpecs(prevSpecs => ({
+        ...prevSpecs,
+        [id]: {
+          ...prevSpecs[id],
+          name: name.trim()
+        }
+      })),
+    [setWalletsSpecs]
+  );
 
   const confirmInternal = useCallback(
     async (id: string, confirmed: boolean, modifiedTotalFee?: number, modifiedStorageLimit?: number) => {
@@ -386,6 +447,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     defaultNetworks,
     customNetworks,
     networks,
+    walletsSpecs,
     accounts,
     settings,
     idle,
@@ -406,6 +468,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     generateSyncPayload,
     removeAccount,
     editAccountName,
+    findFreeHdIndex,
     updateAccountKYCStatus,
     importAccount,
     importMnemonicAccount,
@@ -414,6 +477,10 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     importWatchOnlyAccount,
     createLedgerAccount,
     updateSettings,
+    removeHdGroup,
+    removeAccountsByType,
+    createOrImportWallet,
+    editHdGroupName,
     confirmInternal,
     getDAppPayload,
     confirmDAppPermission,

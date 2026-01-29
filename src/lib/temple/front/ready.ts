@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
-import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
-import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
+import { Tzip16Module } from '@mavrykdynamics/webmavryk-tzip16';
 import constate from 'constate';
 
 import { getKYCStatus } from 'lib/apis/tzkt/api';
@@ -32,6 +32,7 @@ export const [
   useAccount,
   useAccountPkh,
   useSettings,
+  useHDGroups,
   useTezos
 ] = constate(
   useReadyTemple,
@@ -43,6 +44,7 @@ export const [
   v => v.account,
   v => v.accountPkh,
   v => v.settings,
+  v => v.hdGroups,
   v => v.tezos
 );
 
@@ -54,9 +56,18 @@ function useReadyTemple() {
     networks: allNetworks,
     accounts: allAccounts,
     settings,
+    walletsSpecs,
     createTaquitoSigner,
     createTaquitoWallet
   } = templeFront;
+
+  const hdGroups = useMemo(
+    () =>
+      Object.entries(walletsSpecs)
+        .sort(([, { createdAt: aCreatedAt }], [, { createdAt: bCreatedAt }]) => aCreatedAt - bCreatedAt)
+        .map(([id, { name }]) => ({ id, name })),
+    [walletsSpecs]
+  );
 
   /**
    * Networks
@@ -161,6 +172,7 @@ function useReadyTemple() {
     setAccountPkh,
 
     settings,
+    hdGroups,
     tezos
   };
 }

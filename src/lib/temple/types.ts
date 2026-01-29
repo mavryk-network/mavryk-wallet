@@ -1,6 +1,6 @@
 import type { MavrykWalletDAppMetadata, MavrykWalletDAppNetwork } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import type { Estimate } from '@mavrykdynamics/taquito';
-import type { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import type { Estimate } from '@mavrykdynamics/webmavryk';
+import type { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 
 import type { TID } from 'lib/i18n/types';
 
@@ -11,9 +11,18 @@ import type {
   TempleSendTrackEventResponse
 } from './analytics-types';
 
+export enum TempleChainKind {
+  Tezos = 'tezos'
+}
+
 type NonEmptyArray<T> = [T, ...T[]];
 
 export { DerivationType };
+
+export interface WalletSpecs {
+  name: string;
+  createdAt: number;
+}
 
 export interface ReadyTempleState extends TempleState {
   status: TempleStatus.Ready;
@@ -54,47 +63,59 @@ export enum TempleStatus {
 }
 
 export type TempleAccount =
-  | { isKYC: boolean | undefined } & (
-      | TempleHDAccount
-      | TempleImportedAccount
-      | TempleLedgerAccount
-      | TempleManagedKTAccount
-      | TempleWatchOnlyAccount
-    );
+  | TempleHDAccount
+  | TempleImportedAccount
+  | TempleLedgerAccount
+  | TempleManagedKTAccount
+  | TempleWatchOnlyAccount;
 
-interface TempleLedgerAccount extends TempleAccountBase {
+export interface TempleLedgerAccount extends TempleAccountBase {
   type: TempleAccountType.Ledger;
+  chain: TempleChainKind;
   derivationPath: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleImportedAccount extends TempleAccountBase {
+export interface TempleImportedAccount extends TempleAccountBase {
   type: TempleAccountType.Imported;
+  chain: TempleChainKind;
+  isKYC: boolean | undefined;
 }
 
-interface TempleHDAccount extends TempleAccountBase {
+export interface TempleHDAccount extends TempleAccountBase {
   type: TempleAccountType.HD;
   hdIndex: number;
+  walletId: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleManagedKTAccount extends TempleAccountBase {
+export interface TempleManagedKTAccount extends TempleAccountBase {
   type: TempleAccountType.ManagedKT;
   chainId: string;
   owner: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleWatchOnlyAccount extends TempleAccountBase {
+export interface TempleWatchOnlyAccount extends TempleAccountBase {
   type: TempleAccountType.WatchOnly;
+  chain: TempleChainKind;
+  /** For contract addresses */
   chainId?: string;
+  isKYC: boolean | undefined;
 }
 
-interface TempleAccountBase {
+export interface TempleAccountBase {
+  id: string;
   type: TempleAccountType;
   name: string;
   publicKeyHash: string;
   hdIndex?: number;
   derivationPath?: string;
   derivationType?: DerivationType;
+  hidden?: boolean;
 }
+
+export type SaveLedgerAccountInput = Omit<TempleLedgerAccount, 'id' | 'type'> & { publicKey: string };
 
 export enum TempleAccountType {
   HD,
@@ -102,6 +123,14 @@ export enum TempleAccountType {
   Ledger,
   ManagedKT,
   WatchOnly
+}
+
+export interface DisplayedGroup {
+  id: string;
+  name: string;
+  accounts: TempleAccount[];
+  type: TempleAccountType;
+  color?: string;
 }
 
 interface TempleNetworkBase {
@@ -237,6 +266,8 @@ export enum TempleMessageType {
   LockResponse = 'TEMPLE_LOCK_RESPONSE',
   CreateAccountRequest = 'TEMPLE_CREATE_ACCOUNT_REQUEST',
   CreateAccountResponse = 'TEMPLE_CREATE_ACCOUNT_RESPONSE',
+  FindFreeHDAccountIndexRequest = 'TEMPLE_FIND_FREE_HD_ACCOUNT_INDEX_REQUEST',
+  FindFreeHDAccountIndexResponse = 'TEMPLE_FIND_FREE_HD_ACCOUNT_INDEX_RESPONSE',
   RevealPublicKeyRequest = 'TEMPLE_REVEAL_PUBLIC_KEY_REQUEST',
   RevealPublicKeyResponse = 'TEMPLE_REVEAL_PUBLIC_KEY_RESPONSE',
   RevealPrivateKeyRequest = 'TEMPLE_REVEAL_PRIVATE_KEY_REQUEST',
@@ -265,6 +296,12 @@ export enum TempleMessageType {
   CreateLedgerAccountResponse = 'TEMPLE_CREATE_LEDGER_ACCOUNT_RESPONSE',
   UpdateSettingsRequest = 'TEMPLE_UPDATE_SETTINGS_REQUEST',
   UpdateSettingsResponse = 'TEMPLE_UPDATE_SETTINGS_RESPONSE',
+  RemoveHdWalletRequest = 'TEMPLE_REMOVE_HD_WALLET_REQUEST',
+  RemoveHdWalletResponse = 'TEMPLE_REMOVE_HD_WALLET_RESPONSE',
+  RemoveAccountsByTypeRequest = 'TEMPLE_REMOVE_ACCOUNTS_BY_TYPE_REQUEST',
+  RemoveAccountsByTypeResponse = 'TEMPLE_REMOVE_ACCOUNTS_BY_TYPE_RESPONSE',
+  CreateOrImportWalletRequest = 'TEMPLE_CREATE_OR_IMPORT_WALLET_REQUEST',
+  CreateOrImportWalletResponse = 'TEMPLE_CREATE_OR_IMPORT_WALLET_RESPONSE',
   OperationsRequest = 'TEMPLE_OPERATIONS_REQUEST',
   OperationsResponse = 'TEMPLE_OPERATIONS_RESPONSE',
   SignRequest = 'TEMPLE_SIGN_REQUEST',
@@ -305,7 +342,11 @@ export type TempleRequest =
   | TempleNewWalletRequest
   | TempleUnlockRequest
   | TempleLockRequest
+  | TempleFreeHDAccountIndexRequest
   | TempleCreateAccountRequest
+  | TempleCreateOrImportWalletRequest
+  | TempleRemoveHdWalletRequest
+  | TempleRemoveAccountsByTypeRequest
   | TempleRevealPublicKeyRequest
   | TempleRevealPrivateKeyRequest
   | TempleRevealMnemonicRequest
@@ -341,6 +382,10 @@ export type TempleResponse =
   | TempleUnlockResponse
   | TempleLockResponse
   | TempleCreateAccountResponse
+  | TempleFreeHDAccountIndexResponse
+  | TempleCreateOrImportWalletResponse
+  | TempleRemoveHdWalletResponse
+  | TempleRemoveAccountsByTypeResponse
   | TempleRevealPublicKeyResponse
   | TempleRevealPrivateKeyResponse
   | TempleRevealMnemonicResponse
@@ -437,13 +482,35 @@ interface TempleLockResponse extends TempleMessageBase {
   type: TempleMessageType.LockResponse;
 }
 
+interface TempleFreeHDAccountIndexRequest extends TempleMessageBase {
+  type: TempleMessageType.FindFreeHDAccountIndexRequest;
+  walletId: string;
+}
+
+interface TempleFreeHDAccountIndexResponse extends TempleMessageBase {
+  type: TempleMessageType.FindFreeHDAccountIndexResponse;
+  hdIndex: number;
+  firstSkippedAccount: TempleAccount | undefined;
+}
+
 interface TempleCreateAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateAccountRequest;
+  walletId: string;
   name?: string;
+  hdIndex?: number;
 }
 
 interface TempleCreateAccountResponse extends TempleMessageBase {
   type: TempleMessageType.CreateAccountResponse;
+}
+
+interface TempleCreateOrImportWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletRequest;
+  mnemonic?: string;
+}
+
+interface TempleCreateOrImportWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletResponse;
 }
 
 interface TempleRevealPublicKeyRequest extends TempleMessageBase {
@@ -518,6 +585,7 @@ interface TempleUpdateKYCAccountResponse extends TempleMessageBase {
 interface TempleImportAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportAccountRequest;
   chainId: string;
+  chain: TempleChainKind;
   privateKey: string;
   encPassword?: string;
 }
@@ -564,8 +632,9 @@ interface TempleImportManagedKTAccountResponse extends TempleMessageBase {
 interface TempleImportWatchOnlyAccountRequest extends TempleMessageBase {
   type: TempleMessageType.ImportWatchOnlyAccountRequest;
   address: string;
+  chain: TempleChainKind;
   chainId?: string;
-  accName?: string;
+  name?: string;
 }
 
 interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
@@ -574,10 +643,7 @@ interface TempleImportWatchOnlyAccountResponse extends TempleMessageBase {
 
 interface TempleCreateLedgerAccountRequest extends TempleMessageBase {
   type: TempleMessageType.CreateLedgerAccountRequest;
-  name: string;
-  chainId: string;
-  derivationPath?: string;
-  derivationType?: DerivationType;
+  input: SaveLedgerAccountInput;
 }
 
 interface TempleCreateLedgerAccountResponse extends TempleMessageBase {
@@ -591,6 +657,35 @@ interface TempleUpdateSettingsRequest extends TempleMessageBase {
 
 interface TempleUpdateSettingsResponse extends TempleMessageBase {
   type: TempleMessageType.UpdateSettingsResponse;
+}
+
+interface TempleRemoveHdWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.RemoveHdWalletRequest;
+  id: string;
+  password: string;
+}
+
+interface TempleRemoveHdWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.RemoveHdWalletResponse;
+}
+
+interface TempleRemoveAccountsByTypeRequest extends TempleMessageBase {
+  type: TempleMessageType.RemoveAccountsByTypeRequest;
+  accountsType: Exclude<TempleAccountType, TempleAccountType.HD>;
+  password: string;
+}
+
+interface TempleRemoveAccountsByTypeResponse extends TempleMessageBase {
+  type: TempleMessageType.RemoveAccountsByTypeResponse;
+}
+
+interface TempleCreateOrImportWalletRequest extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletRequest;
+  mnemonic?: string;
+}
+
+interface TempleCreateOrImportWalletResponse extends TempleMessageBase {
+  type: TempleMessageType.CreateOrImportWalletResponse;
 }
 
 interface TempleOperationsRequest extends TempleMessageBase {

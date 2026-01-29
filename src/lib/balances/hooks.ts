@@ -4,6 +4,7 @@ import { emptyFn } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
+import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
 import { useAllAccountBalancesSelector, useAllBalancesSelector } from 'app/store/balances/selectors';
 import { getKeyForBalancesRecord } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
@@ -15,8 +16,7 @@ import {
   useChainId,
   ReactiveTezosToolkit,
   useChainIdLoading,
-  useOnBlock,
-  useDelegate
+  useOnBlock
 } from 'lib/temple/front';
 import { michelEncoder, loadFastRpcClient, atomsToTokens } from 'lib/temple/helpers';
 
@@ -55,6 +55,8 @@ export const useGetOtherAccountTokenOrGasBalanceWithDecimals = (accountPkh: stri
   const rawBalances = useOtherAccountBalances(accountPkh);
   const getMetadata = useGetTokenOrGasMetadata();
 
+  useBalancesLoadingOnce(accountPkh);
+
   return useCallback(
     (slug: string) => {
       const rawBalance = rawBalances[slug] as string | undefined;
@@ -86,6 +88,7 @@ export function useRawBalance(
   const chainId = chainIdSwrRes.data;
 
   const allBalances = useAllBalancesSelector();
+
   const balances = useMemo(() => {
     if (!chainId) return null;
 
@@ -106,12 +109,11 @@ export function useRawBalance(
   const onChainBalanceSwrRes = useTypedSWR(
     getBalanceSWRKey(tezos, assetSlug, address),
     () => {
-      if (!chainId || usingStore) return;
-
+      // if (!chainId || usingStore) return;
       return fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString());
     },
     {
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
       dedupingInterval: 20_000
     }
   );
@@ -151,27 +153,21 @@ export function useRawBalance(
 
 export function useBalance(assetSlug: string, address: string, networkRpc?: string) {
   const { value: rawValue, isSyncing, error, refresh } = useRawBalance(assetSlug, address, networkRpc);
-  const { data: accStats } = useDelegate(address);
   const assetMetadata = useAssetMetadata(assetSlug);
 
-  // Include staking balance to the final value
-  const rawsValuePlusStakingBalance = useMemo(() => {
-    if (accStats) {
-      const { stakedBalance = 0, unstakedBalance = 0 } = accStats;
-      return new BigNumber(rawValue ?? 0).plus(stakedBalance).plus(unstakedBalance).toString();
-    }
-    return rawValue;
-  }, [accStats, rawValue]);
-
   const value = useMemo(
-    () =>
-      rawsValuePlusStakingBalance && assetMetadata
-        ? atomsToTokens(new BigNumber(rawsValuePlusStakingBalance), assetMetadata.decimals)
-        : undefined,
-    [rawsValuePlusStakingBalance, assetMetadata]
+    () => (rawValue && assetMetadata ? atomsToTokens(new BigNumber(rawValue), assetMetadata.decimals) : undefined),
+    [rawValue, assetMetadata]
   );
 
-  return { rawValue: rawsValuePlusStakingBalance, value, isSyncing, error, refresh, assetMetadata };
+  return {
+    rawValue,
+    value,
+    isSyncing,
+    error,
+    refresh,
+    assetMetadata
+  };
 }
 
 const buildTezosToolkit = memoizee(

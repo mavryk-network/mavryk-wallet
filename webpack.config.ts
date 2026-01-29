@@ -3,7 +3,6 @@
   https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/config/webpack.config.js
 */
 
-import SaveRemoteFilePlugin from '@temple-wallet/save-remote-file-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import CreateFileWebpack from 'create-file-webpack';
@@ -55,6 +54,18 @@ if (BACKGROUND_IS_WORKER) CONTENT_SCRIPTS.push('keepBackgroundWorkerAlive');
 
 const mainConfig = (() => {
   const config = buildBaseConfig();
+
+  config.resolve = {
+    ...(config.resolve || {}),
+    alias: {
+      ...(config.resolve?.alias || {}),
+      '@mavrykdynamics/taquito': '@taquito/taquito',
+      '@mavrykdynamics/taquito-michelson-encoder': '@taquito/michelson-encoder',
+      '@mavrykdynamics/taquito-michel-codec': '@taquito/michel-codec',
+      '@mavrykdynamics/taquito-rpc': '@taquito/rpc',
+      '@mavrykdynamics/taquito-tzip16': '@taquito/tzip16'
+    }
+  };
 
   /* Page reloading in development mode */
   const liveReload = DEVELOPMENT_ENV && usePagesLiveReload(RELOADER_PORTS.PAGES);
@@ -137,10 +148,6 @@ const mainConfig = (() => {
           { from: PATHS.LIBTHEMIS_WASM_FILE, to: PATHS.OUTPUT_WASM }
         ]
       }),
-
-      new SaveRemoteFilePlugin([
-        { url: 'https://api.hypelab.com/v1/scripts/hp-sdk.js?v=0', filepath: 'scripts/hypelab.embed.js', hash: false }
-      ]),
 
       new CreateFileWebpack({
         path: PATHS.OUTPUT,

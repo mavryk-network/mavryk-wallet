@@ -20,6 +20,7 @@ export type ListItemWithNavigateprops = {
   showDivider?: boolean;
   fullWidthDivider?: boolean;
   disabled?: boolean;
+  paddingClassName?: string;
 };
 
 export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
@@ -28,6 +29,7 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
   onClick,
   linkTo,
   className,
+  paddingClassName = 'p-4',
   hasExternalLink = false,
   fillIcon = true,
   showDivider = true,
@@ -36,12 +38,13 @@ export const ListItemWithNavigate: FC<ListItemWithNavigateprops> = ({
 }) => {
   const baseProps = {
     className: classNames(
-      'p-4 flex items-center justify-between cursor-pointer hover:bg-primary-card-hover relative ',
+      'flex items-center justify-between cursor-pointer hover:bg-primary-card-hover relative ',
       showDivider && 'hover:outline hover:outline-2 hover:outline-offset-2',
       !fullWidthDivider && (showDivider ? styles.listItemBorder : styles.listItemWithoutDivider),
       showDivider && fullWidthDivider && 'border-b border-divider',
       disabled && 'opacity-50 pointer-events-none',
-      className
+      className,
+      paddingClassName
     ),
     onClick,
     children: (

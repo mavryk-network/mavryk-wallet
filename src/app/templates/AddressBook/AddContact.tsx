@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
+import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
@@ -94,7 +95,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addContact',
           btnText: 'goToAddressBook',
-          btnLink: '/settings/address-book',
+          btnLink: '/settings/contacts',
           description: 'addContactSuccessDesc',
           subHeader: 'success'
         });
@@ -140,6 +141,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
           label={t('contactName')}
           id="name"
           name="name"
+          pattern={ACCOUNT_NAME_PATTERN_STR}
           placeholder={t('newContactPlaceholder')}
           errorCaption={errors.name?.message}
           containerClassName="mb-2"

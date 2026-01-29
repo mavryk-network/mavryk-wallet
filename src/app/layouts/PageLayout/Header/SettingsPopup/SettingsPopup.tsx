@@ -5,12 +5,14 @@ import clsx from 'clsx';
 import { Anchor } from 'app/atoms';
 import { ListItemDivider } from 'app/atoms/Divider';
 import { openInFullPage, useAppEnv } from 'app/env';
+import { ReactComponent as ContactsIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as BlocksSvgIcon } from 'app/icons/blocks.svg';
 import { ReactComponent as ExitSvgIcon } from 'app/icons/exit.svg';
 import { ReactComponent as ExtendSvgIcon } from 'app/icons/extend.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
+import { ReactComponent as UserGearIcon } from 'app/icons/user-gear.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { T } from 'lib/i18n';
@@ -65,6 +67,20 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer',
+        onClick: closePopup
+      },
+      {
+        key: 'manageAccounts',
+        linkTo: `/manage-accounts`,
+        Icon: UserGearIcon,
+        i18nKey: 'manageAccounts',
+        onClick: closePopup
+      },
+      {
+        key: 'contacts',
+        linkTo: `/settings/contacts`,
+        Icon: ContactsIcon,
+        i18nKey: 'contacts',
         onClick: closePopup
       },
       {
@@ -153,6 +169,18 @@ export const SettingsDropdown: FC = () => {
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer'
         // onClick: closePopup
+      },
+      {
+        key: 'manageAccounts',
+        linkTo: `/manage-accounts`,
+        Icon: UserGearIcon,
+        i18nKey: 'manageAccounts'
+      },
+      {
+        key: 'contacts',
+        linkTo: `/settings/contacts`,
+        Icon: ContactsIcon,
+        i18nKey: 'contacts'
       },
       {
         key: 'expandView',

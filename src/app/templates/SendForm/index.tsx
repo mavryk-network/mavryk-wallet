@@ -1,8 +1,7 @@
 import React, { FC, Suspense, useCallback, useMemo, useState } from 'react';
 
-import type { WalletOperation } from '@mavrykdynamics/taquito';
+import type { WalletOperation } from '@mavrykdynamics/webmavryk';
 
-import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
@@ -56,22 +55,6 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
     setAddContactModalAddress(null);
   }, [setAddContactModalAddress]);
 
-  const navigateProps = useMemo(
-    () => ({
-      pageTitle: 'send',
-      btnText: 'goToMain',
-      contentId: 'hash',
-      // @ts-expect-error
-      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'send' },
-      subHeader: 'success'
-    }),
-    // @ts-expect-error
-    [operation?.hash, operation?.opHash]
-  );
-
-  // @ts-expect-error
-  useOperationStatus(operation, navigateProps);
-
   return (
     <>
       {/* {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />} */}
@@ -79,7 +62,12 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
       <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-4 no-scrollbar" />
 
       <Suspense fallback={<SpinnerSection />}>
-        <Form assetSlug={selectedAsset} setOperation={setOperation} onAddContactRequested={handleAddContactRequested} />
+        <Form
+          assetSlug={selectedAsset}
+          operation={operation}
+          setOperation={setOperation}
+          onAddContactRequested={handleAddContactRequested}
+        />
       </Suspense>
 
       <AddContactModal address={addContactModalAddress} onClose={closeContactModal} />

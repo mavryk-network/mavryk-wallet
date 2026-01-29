@@ -4,7 +4,7 @@ import classNames from 'clsx';
 
 import { setAnotherSelector } from 'lib/analytics';
 
-import { ButtonRounded } from '../molecules/ButtonRounded';
+import { ButtonRounded, ButtonRoundedType } from '../molecules/ButtonRounded';
 
 import { ButtonProps } from './Button';
 
@@ -13,6 +13,7 @@ interface FormSubmitButtonProps extends ButtonProps {
   loading?: boolean;
   small?: boolean;
   textClassNames?: string;
+  btnType?: ButtonRoundedType;
 }
 
 export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
@@ -27,7 +28,7 @@ export const FormSubmitButton: FC<FormSubmitButtonProps> = ({
 }) => {
   const classNameMemo = classNames(
     'relative flex items-center justify-center h-12 gap-x-2',
-    'text-primary-white font-normal rounded-full',
+    'text-primary-white font-normal',
     'transition duration-200 ease-in-out w-max',
     small ? 'px-6 py-2 text-sm' : 'px-8 py-2.5 text-base',
     loading || disabled

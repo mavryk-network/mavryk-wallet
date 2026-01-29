@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -19,6 +19,7 @@ import {
   useTempleClient,
   validateDerivationPath
 } from 'lib/temple/front';
+import { fetchNewAccountName } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -66,7 +67,7 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { createLedgerAccount } = useTempleClient();
+  const { accounts, createLedgerAccount } = useTempleClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
@@ -136,12 +137,16 @@ const ConnectLedger: FC = () => {
       }
 
       try {
-        await createLedgerAccount(
-          name,
-          chainId!,
-          derivationType,
-          customDerivationPath ?? (accountNumber && `m/44'/1729'/${accountNumber - 1}'/0'`)
-        );
+        const account = knownLedgerAccounts[activeAccountIndex];
+        const { chain, derivationPath, address, publicKey } = account;
+        // await createLedgerAccount({
+        //   chain,
+        //   derivationPath,
+        //   address,
+        //   publicKey,
+        //   derivationType: 'derivationType' in account ? account.derivationType : undefined,
+        //   name: await fetchNewAccountName(accounts, TempleAccountType.Ledger, i => t('defaultLedgerName', String(i)))
+        // });
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {

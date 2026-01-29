@@ -1,6 +1,6 @@
 import React, { FC, memo, useMemo } from 'react';
 
-import { Estimate } from '@mavrykdynamics/taquito';
+import { Estimate } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
@@ -10,7 +10,7 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses, useAllAccounts } from 'lib/temple/front';
-import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
@@ -60,6 +60,7 @@ const ExpensesView: FC<ExpensesViewProps> = ({ expenses, mainnet, gasFeeError })
               last={index === arr.length - 1}
               mainnet={mainnet}
               accounts={accounts}
+              length={arr.length}
             />
           ))}
         </div>
@@ -80,9 +81,15 @@ type ExpenseViewItemProps = {
   last: boolean;
   mainnet?: boolean;
   accounts: TempleAccount[];
+  length: number;
 };
 
-const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accounts }) => {
+const STAKING_TYPES = ['staking', 'stake', 'finalize_unstake', 'unstake'] as const;
+type StakingType = (typeof STAKING_TYPES)[number];
+
+const isStakingType = (t: string): t is StakingType => (STAKING_TYPES as readonly string[]).includes(t);
+
+const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accounts, length }) => {
   const savedAccountsRecord = useMemo(() => {
     return accounts.reduce<StringRecord<TempleAccount>>((accumulator, account) => {
       accumulator[account.publicKeyHash] = account;
@@ -90,9 +97,11 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
     }, {});
   }, [accounts]);
 
+  const skipStakingCases = length > 1 && isStakingType(item.type);
+  const effectiveType = skipStakingCases ? '__omit__' : item.type;
+
   const operationTypeLabel = useMemo(() => {
-    switch (item.type) {
-      // TODO: add translations for other operations types
+    switch (effectiveType) {
       case 'transaction':
       case 'transfer':
         return `${t('transfer')}`;
@@ -111,11 +120,9 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
       default:
         return item.isEntrypointInteraction ? <T id="interaction" /> : t('transactionOfSomeType', item.type);
     }
-  }, [item]);
+  }, [effectiveType, item.isEntrypointInteraction, item.type]);
 
-  const { argumentDisplayProps } = useMemo<{
-    argumentDisplayProps?: OperationArgumentDisplayProps;
-  }>(() => {
+  const { argumentDisplayProps } = useMemo<{ argumentDisplayProps?: OperationArgumentDisplayProps }>(() => {
     const receivers = [
       ...new Set(
         item.expenses
@@ -129,69 +136,48 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
       return receiver;
     });
 
-    switch (item.type) {
+    switch (effectiveType) {
       case 'transaction':
       case 'transfer':
-        return {
-          argumentDisplayProps: {
-            i18nKey: 'transferToSmb',
-            arg: alteredReceivers
-          }
-        };
+        return { argumentDisplayProps: { i18nKey: 'transferToSmb', arg: alteredReceivers } };
 
       case 'approve':
-        return {
-          argumentDisplayProps: {
-            i18nKey: 'approveForSmb',
-            arg: alteredReceivers
-          }
-        };
+        return { argumentDisplayProps: { i18nKey: 'approveForSmb', arg: alteredReceivers } };
 
       case 'delegation':
         if (item.delegate) {
           return {
-            argumentDisplayProps: {
-              i18nKey: 'delegationToSmb',
-              arg: [getPredefinedBakerName(item.delegate)]
-            }
+            argumentDisplayProps: { i18nKey: 'delegationToSmb', arg: [getPredefinedBakerProperty(item.delegate)] }
           };
         }
-
         return {};
+
       case 'finalize_unstake':
       case 'staking':
       case 'stake':
         return {
-          argumentDisplayProps: {
-            i18nKey: 'doSthToSmb',
-            arg: [getPredefinedBakerName(item.contractAddress!)]
-          }
+          argumentDisplayProps: { i18nKey: 'doSthToSmb', arg: [getPredefinedBakerProperty(item.contractAddress!)] }
         };
 
       case 'unstake':
         return {
           argumentDisplayProps: {
             i18nKey: item.delegate ? 'doSthFromSmb' : 'doSthToSmb',
-            arg: [getPredefinedBakerName(item.delegate || item.contractAddress!)]
+            arg: [getPredefinedBakerProperty(item.delegate || item.contractAddress!)]
           }
         };
 
       default:
         return item.isEntrypointInteraction
-          ? {
-              argumentDisplayProps: {
-                i18nKey: 'interactionWithContract',
-                arg: [item.contractAddress!]
-              }
-            }
+          ? { argumentDisplayProps: { i18nKey: 'interactionWithContract', arg: [item.contractAddress!] } }
           : {};
     }
   }, [
+    effectiveType,
     item.contractAddress,
     item.delegate,
     item.expenses,
     item.isEntrypointInteraction,
-    item.type,
     savedAccountsRecord
   ]);
 

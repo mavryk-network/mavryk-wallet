@@ -1,4 +1,4 @@
-import { HttpResponseError } from '@mavrykdynamics/taquito-http-utils';
+import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import browser from 'webextension-polyfill';
 
 // (!) Only importing from `lib/i18n/${'helpers' | 'types'}` directly here
@@ -12,6 +12,7 @@ import {
 } from 'lib/i18n/helpers';
 import type { TID, Substitutions } from 'lib/i18n/types';
 import { IntercomError } from 'lib/intercom/helpers';
+import { WalletSpecs } from 'lib/temple/types';
 
 export async function fetchMessage(msgId: TID, substitutions?: Substitutions) {
   const savedLocale = await asyncGetSavedLocale();
@@ -41,6 +42,33 @@ export async function fetchMessage(msgId: TID, substitutions?: Substitutions) {
   result = await fetchAllGetOneLocaleMessageStr(defltLocale, msgId, substitutions);
 
   return result || '';
+}
+
+async function pickUniqueName(
+  startIndex: number,
+  getNameCandidate: (i: number) => string | Promise<string>,
+  isUnique: (name: string) => boolean
+) {
+  for (let i = startIndex; ; i++) {
+    const nameCandidate = await getNameCandidate(i);
+    if (isUnique(nameCandidate)) {
+      return nameCandidate;
+    }
+  }
+}
+
+export function toExcelColumnName(n: number) {
+  let dividend = n + 1;
+  let columnName = '';
+  let modulo;
+
+  while (dividend > 0) {
+    modulo = (dividend - 1) % 26;
+    columnName = String.fromCharCode(65 + modulo) + columnName;
+    dividend = Math.floor((dividend - modulo) / 26);
+  }
+
+  return columnName;
 }
 
 async function fetchAllGetOneLocaleMessageStr(locale: string, msgId: string, substitutions?: Substitutions) {
@@ -85,4 +113,13 @@ function getTezErrLocaleMsgId(tezErrId?: string) {
   const idPostfixes = Object.keys(KNOWN_TEZ_ERRORS) as (keyof typeof KNOWN_TEZ_ERRORS)[];
   const matchingPostfix = tezErrId && idPostfixes.find(idPostfix => tezErrId.endsWith(idPostfix));
   return (matchingPostfix && KNOWN_TEZ_ERRORS[matchingPostfix]) || null;
+}
+
+export async function fetchNewGroupName(
+  walletsSpecs: StringRecord<WalletSpecs>,
+  getNameCandidate: (i: number) => Promise<string>
+) {
+  const groupsNames = Object.values(walletsSpecs).map(spec => spec.name);
+
+  return await pickUniqueName(groupsNames.length, getNameCandidate, name => !groupsNames.includes(name));
 }

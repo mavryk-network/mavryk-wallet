@@ -7,6 +7,8 @@ import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 // import { sendPageEvent, sendTrackEvent } from './send-events.utils';
 // import { useAnalyticsNetwork } from './use-analytics-network.hook';
 
+// This hook is just  mockup for future data callection.
+// it DOES NOT collect and send any type of data
 export const useAnalytics = () => {
   const analyticsEnabled = useAnalyticsEnabledSelector();
   // const userId = useUserIdSelector();

@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/taquito';
+import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AdditionalFeeInput } from 'app/templates/AdditionalFeeInput/AdditionalFeeInput';
 import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
+import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
 import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
@@ -32,6 +33,7 @@ import {
   Baker,
   isDomainNameValid,
   useAccount,
+  useChainId,
   useDelegate,
   useKnownBaker,
   useKnownBakers,
@@ -48,9 +50,11 @@ import {
   UNLOCK_STAKE,
   UNLOCKING
 } from 'lib/temple/front/baking/const';
+import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { atomsToTokens, hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay, fifoResolve } from 'lib/utils';
@@ -109,6 +113,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const balanceNum = balance.toNumber();
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
+  const chainId = useChainId();
 
   /**
    * Form
@@ -224,11 +229,11 @@ const DelegateForm: FC<DelegateFormProps> = ({
       console.error(err);
 
       switch (true) {
-        // case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
-        //   return new UnchangedError(err.message);
+        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
+          return new UnchangedError(err.message);
 
-        // case err?.id.includes('unregistered_delegate'):
-        //   return new UnregisteredDelegateError(err.message);
+        case err?.id.includes('unregistered_delegate'):
+          return new UnregisteredDelegateError(err.message);
 
         default:
           throw err;
@@ -280,31 +285,38 @@ const DelegateForm: FC<DelegateFormProps> = ({
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
+      const delegationBaseStateProps = {
+        hash,
+        assetSlug: MAV_TOKEN_SLUG,
+        amount: atomsToTokens(balanceNum ?? 0, MAVEN_METADATA.decimals).toNumber(),
+        validatorAddress: myBakerPkh
+      };
+
       if (unfamiliarWithDelegation) {
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'delegate',
-          description: 'delegateSuccessDescMsg',
-          subHeader: 'delegateSuccessMsg',
-          btnText: 'goToMain'
-        });
-      } else if (isReDelegationActive) {
-        navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'reDelegate',
-          description: 'reDelegateSuccessDescMsg',
-          subHeader: 'reDelegateSuccessMsg',
-          btnText: 'goToMain'
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
+          contentIdFnProps: {
+            ...delegationBaseStateProps,
+            type: 'delegate'
+          }
         });
       } else {
         navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'stake',
-          btnText: 'goToMain',
-          contentId: 'hash',
-          contentIdFnProps: { hash, i18nKey: 'staking' },
-          subHeader: 'success'
+          pageTitle: 'reDelegate',
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
+          contentIdFnProps: {
+            ...delegationBaseStateProps,
+            type: 'reDelegate'
+          }
         });
       }
     }
-  }, [isReDelegationActive, operation, unfamiliarWithDelegation]);
+  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -337,6 +349,18 @@ const DelegateForm: FC<DelegateFormProps> = ({
           opHash = op.opHash;
         }
 
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'delegation',
+          sender: accountPkh,
+          to,
+          newDelegate: to,
+          prevDelegate: myBakerPkh,
+          estimation: estmtn
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
+
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
@@ -368,9 +392,11 @@ const DelegateForm: FC<DelegateFormProps> = ({
       getEstimation,
       acc.type,
       acc.publicKeyHash,
+      accountPkh,
+      myBakerPkh,
+      chainId,
       reset,
-      tezos,
-      accountPkh
+      tezos
     ]
   );
 
@@ -467,7 +493,7 @@ interface BakerFormProps {
 export enum SortOptions {
   AVAILABLE_SPACE = 'availableSpace',
   FEE = 'fee',
-  UP_TIME = 'upTime'
+  DEFAULT = 'default'
 }
 
 const BakerForm: React.FC<BakerFormProps> = ({
@@ -492,6 +518,20 @@ const BakerForm: React.FC<BakerFormProps> = ({
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
   const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 
+  const acc = useAccount();
+  const accountPkh = acc.publicKeyHash;
+
+  const { rawValue } = useBalance(MAV_TOKEN_SLUG, accountPkh);
+
+  const { delegatedFreeSpace } = useMemo(() => {
+    const { stakedBalance, delegatedBalance, externalStakedBalance } = baker ?? {
+      stakedBalance: 0,
+      delegatedBalance: 0,
+      externalStakedBalance: 0
+    };
+    return calculateCapacities({ stakedBalance, delegatedBalance, externalStakedBalance });
+  }, [baker]);
+
   const bakerTestMessage = useMemo(() => {
     if (baker?.address !== RECOMMENDED_BAKER_ADDRESS) {
       return 'Unknown Delegate Button';
@@ -512,6 +552,9 @@ const BakerForm: React.FC<BakerFormProps> = ({
     );
   }
   const tzError = submitError || estimationError;
+  const hasLowBalance = new BigNumber(rawValue ?? 0).isLessThan(baker?.minDelegation ?? 0);
+  const isBakerOverDelegated = delegatedFreeSpace < 0;
+  const isDelegateBtnDisabled = Boolean(estimationError) || hasLowBalance || isBakerOverDelegated;
 
   return restFormDisplayed ? (
     <div className="flex-grow flex flex-col mt-2">
@@ -541,7 +584,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
 
         <FormSubmitButton
           loading={formState.isSubmitting}
-          disabled={Boolean(estimationError)}
+          disabled={isDelegateBtnDisabled}
           className="mt-6"
           testID={DelegateFormSelectors.bakerDelegateButton}
           testIDProperties={{
@@ -565,12 +608,11 @@ interface BakerBannerComponentProps {
 }
 
 export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzError, baker, style }) => {
+  const { popup } = useAppEnv();
   const acc = useAccount();
 
   const accountPkh = acc.publicKeyHash;
-  const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
-  const balance = balanceData!;
-  const balanceNum = balance.toNumber();
+  const { rawValue } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const { metadata } = useGasToken();
 
   return baker ? (
@@ -578,24 +620,25 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
       <div className="flex flex-col items-center">
         <BakerBanner bakerPkh={baker.address} style={{ width: undefined, ...style }} />
       </div>
-
-      {!tzError && (baker.minDelegation ?? 0) > balanceNum && (
-        <Alert
-          type="warning"
-          title={t('minDelegationAmountTitle')}
-          description={
-            <T
-              id="minDelegationAmountDescription"
-              substitutions={[
-                <span className="font-normal" key="minDelegationsAmount">
-                  <Money>{atomsToTokens(baker.minDelegation || ZERO, metadata.decimals)}</Money>{' '}
-                  <span>{metadata.symbol}</span>
-                </span>
-              ]}
-            />
-          }
-          className="mb-6"
-        />
+      {!tzError && new BigNumber(rawValue ?? 0).isLessThan(baker.minDelegation ?? 0) && (
+        <div className={classNames('pb-6', popup && 'px-4')}>
+          <Alert
+            type="info"
+            title={t('minDelegationAmountTitle')}
+            description={
+              <T
+                id="minDelegationAmountDescription"
+                substitutions={[
+                  <span className="font-normal" key="minDelegationsAmount">
+                    <Money>{atomsToTokens(baker.minDelegation || ZERO, metadata.decimals)}</Money>{' '}
+                    <span>{metadata.symbol}</span>
+                  </span>
+                ]}
+              />
+            }
+            className={classNames('mt-6')}
+          />
+        </div>
       )}
     </>
   ) : null;
@@ -608,9 +651,10 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     firstUnlock: false
   });
   const account = useAccount();
+  const chainId = useChainId();
   const tezos = useTezos();
-  const data = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance } = data;
+  const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance, myBakerPkh } = data;
   const delegateLabel = getDelegateLabel(data);
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
@@ -642,14 +686,32 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
 
     if (delegateLabel === FINALIZE_UNLOCK) {
       try {
-        await tezos.wallet.finalizeUnstake({}).send();
+        const estmtn = await tezos.estimate.finalizeUnstake({});
+        const op = await tezos.wallet.finalizeUnstake({}).send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          estimation: estmtn,
+          baker: myBakerPkh,
+          kind: 'finalize_unstake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         return navigate<SuccessStateType>('/success', undefined, {
-          pageTitle: 'unlock',
-          subHeader: 'success',
-          description: 'finalizeUnlockSuccessMsg',
-          btnText: 'backToValidator',
-          btnLink: '/stake'
+          pageTitle: 'finalizeUnlock',
+          btnText: 'viewHistoryTab',
+          btnLink: '?tab=history',
+          contentId: 'DelegationOperation',
+          contentIdFnProps: {
+            hash: pendingOpObject?.hash,
+            assetSlug: MAV_TOKEN_SLUG,
+            amount: atomsToTokens(unstakedBalance ?? 0, MAVEN_METADATA.decimals).toNumber(),
+            validatorAddress: myBakerPkh,
+            type: 'finalize'
+          }
         });
       } catch (error) {
         console.log(error);
@@ -659,7 +721,16 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
     if (delegateLabel === UNLOCKING) {
       return;
     }
-  }, [delegateLabel, hasZeroStakingBalance, tezos.wallet]);
+  }, [
+    account.publicKeyHash,
+    chainId,
+    delegateLabel,
+    hasZeroStakingBalance,
+    myBakerPkh,
+    tezos.estimate,
+    tezos.wallet,
+    unstakedBalance
+  ]);
 
   const isStakeButtonDisabled = useMemo(() => {
     switch (delegateLabel) {
@@ -690,6 +761,8 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
       ? MANAGE_STAKE
       : delegateLabel;
   }, [delegateLabel, hasZeroStakingBalance]);
+
+  if (isWatchOnlyAccount) return null;
 
   return (
     <div className="grid gap-3 grid-cols-2">
@@ -758,84 +831,72 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
   const myBakerPkh = accStats?.delegate?.address ?? '';
 
   const testGroupName = useUserTestingGroupNameSelector();
-  // const { popup } = useAppEnv();
+  const { popup } = useAppEnv();
 
-  // const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.AVAILABLE_SPACE);
+  const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.DEFAULT);
 
-  // const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-  //   () => [
-  //     {
-  //       id: SortOptions.AVAILABLE_SPACE,
-  //       selected: sortOption === SortOptions.AVAILABLE_SPACE,
-  //       onClick: () => {
-  //         setSortOption(SortOptions.AVAILABLE_SPACE);
-  //       },
-  //       nameI18nKey: 'availableSpace'
-  //     },
-  //     {
-  //       id: SortOptions.FEE,
-  //       selected: sortOption === SortOptions.FEE,
-  //       onClick: () => setSortOption(SortOptions.FEE),
-  //       nameI18nKey: 'fee'
-  //     },
-  //     {
-  //       id: SortOptions.UP_TIME,
-  //       selected: sortOption === SortOptions.UP_TIME,
-  //       onClick: () => setSortOption(SortOptions.UP_TIME),
-  //       nameI18nKey: 'upTime'
-  //     }
-  //   ],
-  //   [sortOption]
-  // );
-
-  // const baseSortedKnownBakers = useMemo(() => {
-  //   if (!knownBakers) return null;
-
-  //   const toSort = Array.from(knownBakers);
-  //   // SORTED_PREDEFINED_SPONSORED_BAKERS
-  //   return toSort.sort((a, b) => {
-  //     return (
-  //       SORTED_PREDEFINED_SPONSORED_BAKERS.includes(a.address) || SORTED_PREDEFINED_SPONSORED_BAKERS.includes(b.address)
-  //     );
-  //   });
-  // switch (sortOption) {
-  //   case SortOptions.AVAILABLE_SPACE:
-  //     return toSort.sort((a, b) => b.freeSpace ?? 0 - (a.freeSpace ?? 0));
-
-  //   case SortOptions.FEE:
-  //     return toSort.sort((a, b) => a.fee ?? 0 - (b.fee ?? 0));
-
-  //   case SortOptions.UP_TIME:
-  //     return toSort.sort((a, b) => b.estimatedRoi ?? 0 - (a.estimatedRoi ?? 0));
-
-  //   default:
-  //     return toSort;
-  // }
-  // }, [knownBakers]);
+  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
+    () => [
+      {
+        id: SortOptions.DEFAULT,
+        selected: sortOption === SortOptions.DEFAULT,
+        onClick: () => setSortOption(SortOptions.DEFAULT),
+        nameI18nKey: 'default'
+      },
+      {
+        id: SortOptions.AVAILABLE_SPACE,
+        selected: sortOption === SortOptions.AVAILABLE_SPACE,
+        onClick: () => {
+          setSortOption(SortOptions.AVAILABLE_SPACE);
+        },
+        nameI18nKey: 'availableSpace'
+      },
+      {
+        id: SortOptions.FEE,
+        selected: sortOption === SortOptions.FEE,
+        onClick: () => setSortOption(SortOptions.FEE),
+        nameI18nKey: 'fee'
+      }
+    ],
+    [sortOption]
+  );
 
   const baseSortedKnownBakers = useMemo(() => {
     if (!knownBakers) return null;
 
     const toSort = Array.from(knownBakers);
 
-    return toSort.sort((a, b) => {
-      const idxA = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(a.address);
-      const idxB = SORTED_PREDEFINED_SPONSORED_BAKERS.indexOf(b.address);
+    switch (sortOption) {
+      case SortOptions.AVAILABLE_SPACE:
+        return toSort.sort((a, b) => (b.freeSpace ?? 0) - (a.freeSpace ?? 0));
 
-      const aIsKnown = idxA !== -1;
-      const bIsKnown = idxB !== -1;
+      case SortOptions.FEE:
+        return toSort.sort((a, b) => (b.fee ?? 0) - (a.fee ?? 0));
 
-      // unknowns first
-      if (!aIsKnown && bIsKnown) return -1;
-      if (aIsKnown && !bIsKnown) return 1;
+      case SortOptions.DEFAULT:
+      default:
+        // SORTED_PREDEFINED_SPONSORED_BAKERS
+        return toSort.sort((a, b) => {
+          const { totalFreSpace: aTotalFreeSpace, totalCapacity: aTotalCapacity } = calculateCapacities({
+            stakedBalance: a.stakedBalance,
+            delegatedBalance: a.delegatedBalance,
+            externalStakedBalance: a.externalStakedBalance
+          });
 
-      // both unknown
-      if (!aIsKnown && !bIsKnown) return 0;
+          const { totalFreSpace: bTotalFreeSpace, totalCapacity: bTotalCapacity } = calculateCapacities({
+            stakedBalance: b.stakedBalance,
+            delegatedBalance: b.delegatedBalance,
+            externalStakedBalance: b.externalStakedBalance
+          });
 
-      // both known follow predefined order from SORTED_PREDEFINED_SPONSORED_BAKERS
-      return idxA - idxB;
-    });
-  }, [knownBakers]);
+          const aTotalFreeSpacePercent = aTotalCapacity > 0 ? (aTotalFreeSpace / aTotalCapacity) * 100 : 0;
+
+          const bTotalFreeSpacePercent = bTotalCapacity > 0 ? (bTotalFreeSpace / bTotalCapacity) * 100 : 0;
+
+          return bTotalFreeSpacePercent - aTotalFreeSpacePercent;
+        });
+    }
+  }, [knownBakers, sortOption]);
 
   if (!baseSortedKnownBakers) return null;
 
@@ -860,10 +921,10 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
           <T id="delegateToPromotedValidators" />
         </span>
 
-        {/* <SortPopup>
+        <SortPopup>
           <SortButton className="-mr-1" />
           <SortPopupContent items={memoizedSortAssetsOptions} alternativeLogic={!popup} />
-        </SortPopup> */}
+        </SortPopup>
       </h2>
 
       {/* <div>

@@ -1,4 +1,4 @@
-// import { MavrykToolkit } from '@mavrykdynamics/taquito';
+// import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 // import {
 //   contracts,
 //   AssetDefinition,

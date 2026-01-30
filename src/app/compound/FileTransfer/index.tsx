@@ -12,6 +12,7 @@ export type ImportProgress = {
   /** 0..100 */
   percent: number;
   fileName?: string;
+  fileSize: number;
   error?: string;
 };
 
@@ -228,7 +229,8 @@ export function FileTransferProvider<T extends object>({ children }: { children:
 
   const [importProgress, setImportProgress] = useState<ImportProgress>({
     status: 'idle',
-    percent: 0
+    percent: 0,
+    fileSize: 0
   });
 
   // hidden input for picking files (reuse it)
@@ -284,12 +286,13 @@ export function FileTransferProvider<T extends object>({ children }: { children:
         status: 'error',
         percent: 0,
         fileName: file.name,
+        fileSize: file.size,
         error: 'Unsupported file type'
       });
       return null;
     }
 
-    setImportProgress({ status: 'reading', percent: 0, fileName: file.name });
+    setImportProgress({ status: 'reading', percent: 0, fileName: file.name, fileSize: file.size });
 
     let rawText = '';
     try {
@@ -305,12 +308,13 @@ export function FileTransferProvider<T extends object>({ children }: { children:
         status: 'error',
         percent: 0,
         fileName: file.name,
+        fileSize: file.size,
         error: e?.message ?? 'Failed to read file'
       });
       return null;
     }
 
-    setImportProgress({ status: 'parsing', percent: 99, fileName: file.name });
+    setImportProgress({ status: 'parsing', percent: 99, fileName: file.name, fileSize: file.size });
 
     try {
       let data: any[] = [];
@@ -324,13 +328,14 @@ export function FileTransferProvider<T extends object>({ children }: { children:
 
       const result = { format, fileName: file.name, rawText, data } as ImportResult<T>;
       setLastImportResult(result);
-      setImportProgress({ status: 'done', percent: 100, fileName: file.name });
+      setImportProgress({ status: 'done', percent: 100, fileName: file.name, fileSize: file.size });
       return result;
     } catch (e: any) {
       setImportProgress({
         status: 'error',
         percent: 0,
         fileName: file.name,
+        fileSize: file.size,
         error: e?.message ?? 'Failed to parse file'
       });
       return null;
@@ -341,7 +346,7 @@ export function FileTransferProvider<T extends object>({ children }: { children:
     async (opts?: { accept?: ImportFormat[] }): Promise<ImportPickResult<T>> => {
       const accept = opts?.accept?.length ? opts.accept : (['json', 'csv'] as ImportFormat[]);
 
-      setImportProgress({ status: 'picking', percent: 0 });
+      setImportProgress({ status: 'picking', percent: 0, fileSize: 0 });
 
       const input = ensureInput();
       input.accept = accept.map(f => `.${f}`).join(',');
@@ -357,7 +362,7 @@ export function FileTransferProvider<T extends object>({ children }: { children:
       });
 
       if (!file) {
-        setImportProgress({ status: 'idle', percent: 0 });
+        setImportProgress({ status: 'idle', percent: 0, fileSize: 0 });
         return { file: null, result: null };
       }
 

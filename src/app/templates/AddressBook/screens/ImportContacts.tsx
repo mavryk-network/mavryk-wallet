@@ -3,7 +3,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { useTabSlug } from 'app/atoms/useTabSlug';
-import { FileImportWrapper } from 'app/compound/FileTransfer';
+import { FileImportWrapper, useFileImportState } from 'app/compound/FileTransfer';
+import { formatFileSize } from 'app/compound/FileTransfer/utils';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseSvg } from 'app/icons/close.svg';
 import { ReactComponent as UploadCloudSvg } from 'app/icons/feather-upload-cloud.svg';
@@ -158,9 +159,13 @@ const CSVImportInfo = () => {
 type ImportFileInProgressProps = ImportFileViewProps;
 
 const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveView }) => {
+  const { importProgress } = useFileImportState();
+
   const onClosehandler = useCallback(() => {
     changeActiveView(SELECT_FILE_VIEW);
   }, [changeActiveView]);
+
+  const size = useMemo(() => formatFileSize(importProgress.fileSize), [importProgress.fileSize]);
 
   return (
     <>
@@ -173,8 +178,8 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
           <FileSvg className="text-white w-6 h-6 stroke-current" />
           <div className="flex flex-col gap-1 w-full">
             <div className="flex text-sm text-primary-white justify-between gap-4">
-              <p className="flex-1">File Name</p>
-              <p className="text-secondary-white">5.7MB</p>
+              <p className="flex-1 truncate">{importProgress.fileName}</p>
+              <p className="text-secondary-white">{size}</p>
             </div>
             <FileProgressBar />
           </div>

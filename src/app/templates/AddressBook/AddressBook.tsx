@@ -3,6 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import clsx from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
+import { FileExportWrapper, FileTransferProvider } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
@@ -16,9 +17,12 @@ import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
+import { PopupModalWithTitle } from '../PopupModalWithTitle';
+import { usePopupState } from '../PopupModalWithTitle/hooks/usePopupState';
 
 import styles from './addressBook.module.css';
 import { AddressBookSelectors } from './AddressBook.selectors';
+import { ContactExportPopup } from './popups/ContactExportPopup';
 
 type ContactActions = {
   remove: (address: string) => void;
@@ -28,6 +32,8 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
   const { outsideWalletContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
   const { popup } = useAppEnv();
+
+  const { open, opened, close } = usePopupState();
 
   const allContacts = useMemo(
     () =>
@@ -85,20 +91,23 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
         style={{ maxHeight: !popup ? '70vh' : 'auto' }}
         className="flex flex-col flex-1 overflow-y-auto no-scrollbarD"
       >
-        <div className={clsx('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
-          <CustomSelect
-            className={clsx('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
-            getItemId={getContactKey}
-            items={contacts}
-            // items={allContacts}
-            OptionIcon={ContactIcon}
-            OptionContent={item => <ContactContent {...item} account={account} />}
-            light
-            hoverable={false}
-            padding={0}
-            itemWithBorder
-          />
-        </div>
+        {!isContactsEmpty && (
+          <div className={clsx('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+            <CustomSelect
+              className={clsx('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
+              getItemId={getContactKey}
+              items={contacts}
+              // items={allContacts}
+              OptionIcon={ContactIcon}
+              OptionContent={item => <ContactContent {...item} account={account} />}
+              light
+              hoverable={false}
+              padding={0}
+              itemWithBorder
+            />
+          </div>
+        )}
+
         {isContactsEmpty && (
           <section className="w-full flex-grow flex justify-center items-center">
             <div className="flex flex-col items-center text-center">
@@ -120,16 +129,30 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
           </section>
         )}
       </div>
-      <div
-        className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
-      >
-        <ButtonRounded size="big" btnType="primary" fill={false}>
-          <T id="export" />
-        </ButtonRounded>
-        <ButtonRounded size="big" btnType="primary" fill>
-          <T id="import" />
-        </ButtonRounded>
-      </div>
+      <FileTransferProvider>
+        <div
+          className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
+        >
+          <FileExportWrapper data={contacts} suggestedFileName={'contacts'} onClick={open}>
+            <ButtonRounded size="big" btnType="primary" fill={false} disabled={isContactsEmpty}>
+              <T id="export" />
+            </ButtonRounded>
+          </FileExportWrapper>
+          <ButtonRounded size="big" btnType="primary" fill>
+            <T id="import" />
+          </ButtonRounded>
+        </div>
+
+        <PopupModalWithTitle
+          isOpen={opened}
+          onRequestClose={close}
+          title={<T id="chooseFileType" />}
+          portalClassName="contacts-export-popup"
+          contentPosition={popup ? 'bottom' : 'center'}
+        >
+          <ContactExportPopup close={close} />
+        </PopupModalWithTitle>
+      </FileTransferProvider>
     </section>
   );
 };

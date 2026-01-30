@@ -4049,5 +4049,8 @@
         "content": "$2"
       }
     }
+  },
+  "chooseFileType": {
+    "message": "Choose File Type"
   }
 }

@@ -2,6 +2,7 @@ import React, { FC, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { FileTransferProvider } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
@@ -177,18 +178,20 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
     >
       <div className="h-full flex-1 flex flex-col">
         <div className="h-full flex-1 flex flex-col">
-          {activeTab ? (
-            <activeTab.Component
-              setToolbarRightSidedComponent={setToolbarRightSidedComponent}
-              toolbarRightSidedComponent={toolbarRightSidedComponent}
-            />
-          ) : (
-            <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
-              {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
-              ))}
-            </ul>
-          )}
+          <FileTransferProvider>
+            {activeTab ? (
+              <activeTab.Component
+                setToolbarRightSidedComponent={setToolbarRightSidedComponent}
+                toolbarRightSidedComponent={toolbarRightSidedComponent}
+              />
+            ) : (
+              <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
+                {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
+                  <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
+                ))}
+              </ul>
+            )}
+          </FileTransferProvider>
         </div>
       </div>
     </PageLayout>

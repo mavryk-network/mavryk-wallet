@@ -4073,5 +4073,11 @@
   },
   "importFileSubmitSuccess": {
     "message": "Import File submitted"
+  },
+  "json": {
+    "message": "JSON"
+  },
+  "csv": {
+    "message": ".csv"
   }
 }

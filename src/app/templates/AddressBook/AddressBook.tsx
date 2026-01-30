@@ -3,7 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import clsx from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
-import { FileExportWrapper, FileTransferProvider } from 'app/compound/FileTransfer';
+import { FileExportWrapper } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
@@ -133,30 +133,29 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
           </section>
         )}
       </div>
-      <FileTransferProvider>
-        <div
-          className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
-        >
-          <FileExportWrapper data={contacts} suggestedFileName={'contacts'} onClick={open}>
-            <ButtonRounded size="big" btnType="primary" fill={false} disabled={isContactsEmpty}>
-              <T id="export" />
-            </ButtonRounded>
-          </FileExportWrapper>
-          <ButtonRounded size="big" btnType="primary" fill onClick={handleImportContactClick}>
-            <T id="import" />
-          </ButtonRounded>
-        </div>
 
-        <PopupModalWithTitle
-          isOpen={opened}
-          onRequestClose={close}
-          title={<T id="chooseFileType" />}
-          portalClassName="contacts-export-popup"
-          contentPosition={popup ? 'bottom' : 'center'}
-        >
-          <ContactExportPopup close={close} />
-        </PopupModalWithTitle>
-      </FileTransferProvider>
+      <div
+        className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
+      >
+        <FileExportWrapper data={contacts} suggestedFileName={'contacts'} onClick={open}>
+          <ButtonRounded size="big" btnType="primary" fill={false} disabled={isContactsEmpty}>
+            <T id="export" />
+          </ButtonRounded>
+        </FileExportWrapper>
+        <ButtonRounded size="big" btnType="primary" fill onClick={handleImportContactClick}>
+          <T id="import" />
+        </ButtonRounded>
+      </div>
+
+      <PopupModalWithTitle
+        isOpen={opened}
+        onRequestClose={close}
+        title={<T id="chooseFileType" />}
+        portalClassName="contacts-export-popup"
+        contentPosition={popup ? 'bottom' : 'center'}
+      >
+        <ContactExportPopup close={close} />
+      </PopupModalWithTitle>
     </section>
   );
 };

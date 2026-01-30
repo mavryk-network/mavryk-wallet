@@ -1,11 +1,13 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
 import { useTabSlug } from 'app/atoms/useTabSlug';
 import { FileImportWrapper } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as CloseSvg } from 'app/icons/close.svg';
 import { ReactComponent as UploadCloudSvg } from 'app/icons/feather-upload-cloud.svg';
+import { ReactComponent as FileSvg } from 'app/icons/file-v2.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TabsBar } from 'app/templates/TabBar';
 import { T, TID } from 'lib/i18n';
@@ -23,9 +25,37 @@ interface TabData {
   disabled?: boolean;
 }
 
-// bg-gray-900
+const SELECT_FILE_VIEW = 'SELECT_FILE_VIEW';
+const TRACK_PROGRESS_VIEW = 'TRACK_PROGRESS_VIEW';
+
+type ActiveViewType = typeof SELECT_FILE_VIEW | typeof TRACK_PROGRESS_VIEW;
+
+const importViewsData: ActiveViewType[] = [SELECT_FILE_VIEW, TRACK_PROGRESS_VIEW];
+
 export const ImportContacts: React.FC = () => {
   const { popup } = useAppEnv();
+
+  // views state
+  const [activeView, setActiveView] = useState<ActiveViewType>(importViewsData[0]);
+
+  const changeActiveView = useCallback((view: ActiveViewType) => {
+    setActiveView(view);
+  }, []);
+
+  return (
+    <div className={clsx('w-full h-full mx-auto flex-1 flex flex-col text-primary-white', popup && 'pb-8 max-w-sm')}>
+      {activeView === SELECT_FILE_VIEW && <ImportFileView changeActiveView={changeActiveView} />}
+      {activeView === TRACK_PROGRESS_VIEW && <ImportFileInProgressView changeActiveView={changeActiveView} />}
+    </div>
+  );
+};
+
+// File import view -------------------------------------
+
+type ImportFileViewProps = {
+  changeActiveView: (view: ActiveViewType) => void;
+};
+const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView }) => {
   const tabSlug = useTabSlug();
 
   const tabs = useMemo<TabData[]>(() => {
@@ -54,8 +84,12 @@ export const ImportContacts: React.FC = () => {
     console.log(data);
   }, []);
 
+  const onImportStart = useCallback(() => {
+    changeActiveView(TRACK_PROGRESS_VIEW);
+  }, [changeActiveView]);
+
   return (
-    <div className={clsx('w-full h-full mx-auto flex-1 flex flex-col text-primary-white', popup && 'pb-8 max-w-sm')}>
+    <>
       <p className="text-base-plus text-center mb-4">
         <T id="fileImportDescr" />
       </p>
@@ -66,7 +100,7 @@ export const ImportContacts: React.FC = () => {
 
       <div className="px-4 py-3 bg-gray-900 rounded-2xl overflow-hidden mb-3">{Component && <Component />}</div>
 
-      <FileImportWrapper<TempleContact> onImported={onContactsImported}>
+      <FileImportWrapper<TempleContact> onImported={onContactsImported} onImportStart={onImportStart}>
         <section className="px-4 py-6 flex items justify-center border border-dashed border-blue-200 rounded-lg">
           <div className="flex flex-col gap-4 items-center">
             <UploadCloudSvg className="text-white w-9 h-9 stroke-current" />
@@ -85,7 +119,7 @@ export const ImportContacts: React.FC = () => {
           </div>
         </section>
       </FileImportWrapper>
-    </div>
+    </>
   );
 };
 
@@ -117,4 +151,50 @@ const CSVImportInfo = () => {
       <T id="csvFileImportDescr" />
     </div>
   );
+};
+
+// File import in progress view -------------------------------------
+
+type ImportFileInProgressProps = ImportFileViewProps;
+
+const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveView }) => {
+  const onClosehandler = useCallback(() => {
+    changeActiveView(SELECT_FILE_VIEW);
+  }, [changeActiveView]);
+
+  return (
+    <>
+      <p className="text-base-plus text-center mb-4">
+        <T id="submitFileTitle" />
+      </p>
+
+      <div className="flex items-center gap-2">
+        <div className="px-3 py-4 bg-gray-900 rounded-2xl overflow-hidden flex items-center gap-3 flex-1">
+          <FileSvg className="text-white w-6 h-6 stroke-current" />
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex text-sm text-primary-white justify-between gap-4">
+              <p className="flex-1">File Name</p>
+              <p className="text-secondary-white">5.7MB</p>
+            </div>
+            <FileProgressBar />
+          </div>
+        </div>
+        <div aria-label="Close" className="p-1 rounded-full bg-gray-900 cursor-pointer" onClick={onClosehandler}>
+          <CloseSvg className="text-white w-6 h-6 stroke-current stroke-2" />
+        </div>
+      </div>
+
+      <div className="flex-1" />
+
+      <div className="w-full">
+        <ButtonRounded size="big" className="w-full" fill>
+          <T id="import" />
+        </ButtonRounded>
+      </div>
+    </>
+  );
+};
+
+const FileProgressBar = () => {
+  return <div></div>;
 };

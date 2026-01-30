@@ -27,18 +27,22 @@ export type ImportResult<T extends object = object> = {
   data: T[];
 };
 
+export type ImportPickResult<T extends object = object> = {
+  file: File | null;
+  result: ImportResult<T> | null;
+};
+
 export type FileTransferContextType<T extends object = object> = {
-  /** set when you click an ExportWrapper */
   pendingExport?: ExportRequest<T> | null;
 
   exportAs: (format: ExportFormat, opts?: { fileName?: string }) => void;
 
-  /** wrapper calls it to stage export data */
   requestExport: (req: ExportRequest<T>) => void;
 
   /** open file picker and parse file */
-  importFile: (opts?: { accept?: ImportFormat[] }) => Promise<ImportResult<T> | null>;
-  /**  for drag and srop */
+  importFile: (opts?: { accept?: ImportFormat[] }) => Promise<ImportPickResult<T>>;
+
+  /** for drag and drop */
   importFromFile: (
     file: File,
     opts?: {
@@ -46,13 +50,10 @@ export type FileTransferContextType<T extends object = object> = {
     }
   ) => Promise<ImportResult<T> | null>;
 
-  /** import progress for UI */
   importProgress: ImportProgress;
 
-  /** last successful or failed result (failed: data empty + error in progress) */
   lastImportResult?: ImportResult<T> | null;
 
-  /** clear staged stuff */
   clearPendingExport: () => void;
   clearLastImport: () => void;
 };
@@ -274,101 +275,8 @@ export function FileTransferProvider<T extends object>({ children }: { children:
     return input;
   }, []);
 
-  const importFile = useCallback(
-    async (opts?: { accept?: ImportFormat[] }) => {
-      const accept = opts?.accept?.length ? opts.accept : ['json', 'csv'];
-
-      setImportProgress({ status: 'picking', percent: 0 });
-      const input = ensureInput();
-      input.accept = accept.map(f => `.${f}`).join(',');
-      input.value = ''; // allow re-picking same file
-
-      const file = await new Promise<File | null>(resolve => {
-        const handler = () => {
-          input.removeEventListener('change', handler);
-          resolve(input.files?.[0] ?? null);
-        };
-        input.addEventListener('change', handler);
-        input.click();
-      });
-
-      if (!file) {
-        setImportProgress({ status: 'idle', percent: 0 });
-        return null;
-      }
-
-      const format = detectFormat(file.name);
-      if (!format || !accept.includes(format)) {
-        setImportProgress({
-          status: 'error',
-          percent: 0,
-          fileName: file.name,
-          error: 'Unsupported file type'
-        });
-        return null;
-      }
-
-      setImportProgress({ status: 'reading', percent: 0, fileName: file.name });
-
-      let rawText = '';
-      try {
-        rawText = await readFileAsTextWithProgress(file, p => {
-          setImportProgress(prev => ({
-            ...prev,
-            status: 'reading',
-            percent: Math.min(99, Math.max(prev.percent, p)) // keep < 100 until parsed
-          }));
-        });
-      } catch (e: any) {
-        setImportProgress({
-          status: 'error',
-          percent: 0,
-          fileName: file.name,
-          error: e?.message ?? 'Failed to read file'
-        });
-        return null;
-      }
-
-      setImportProgress({ status: 'parsing', percent: 99, fileName: file.name });
-
-      try {
-        let data: any[] = [];
-
-        if (format === 'json') {
-          const parsed = JSON.parse(rawText);
-          if (!Array.isArray(parsed)) {
-            throw new Error('JSON must be an array of objects');
-          }
-          data = parsed;
-        } else {
-          data = csvToObjects(rawText);
-        }
-
-        const result: ImportResult<T> = {
-          format,
-          fileName: file.name,
-          rawText,
-          data
-        };
-
-        setLastImportResult(result);
-        setImportProgress({ status: 'done', percent: 100, fileName: file.name });
-        return result;
-      } catch (e: any) {
-        setImportProgress({
-          status: 'error',
-          percent: 0,
-          fileName: file.name,
-          error: e?.message ?? 'Failed to parse file'
-        });
-        return null;
-      }
-    },
-    [ensureInput]
-  );
-
   const importFromFile = useCallback(async (file: File, opts?: { accept?: ImportFormat[] }) => {
-    const accept = opts?.accept?.length ? opts.accept : ['json', 'csv'];
+    const accept: ImportFormat[] = opts?.accept?.length ? opts.accept : ['json', 'csv'];
 
     const format = detectFormat(file.name);
     if (!format || !accept.includes(format)) {
@@ -428,6 +336,38 @@ export function FileTransferProvider<T extends object>({ children }: { children:
       return null;
     }
   }, []);
+
+  const importFile = useCallback(
+    async (opts?: { accept?: ImportFormat[] }): Promise<ImportPickResult<T>> => {
+      const accept = opts?.accept?.length ? opts.accept : (['json', 'csv'] as ImportFormat[]);
+
+      setImportProgress({ status: 'picking', percent: 0 });
+
+      const input = ensureInput();
+      input.accept = accept.map(f => `.${f}`).join(',');
+      input.value = '';
+
+      const file = await new Promise<File | null>(resolve => {
+        const handler = () => {
+          input.removeEventListener('change', handler);
+          resolve(input.files?.[0] ?? null);
+        };
+        input.addEventListener('change', handler);
+        input.click();
+      });
+
+      if (!file) {
+        setImportProgress({ status: 'idle', percent: 0 });
+        return { file: null, result: null };
+      }
+
+      // reuse the same parsing logic
+      const result = await importFromFile(file, { accept });
+
+      return { file, result };
+    },
+    [ensureInput, importFromFile]
+  );
 
   const value = useMemo<FileTransferContextType<T>>(
     () => ({
@@ -506,20 +446,25 @@ export function FileImportWrapper<T extends object>({
   children,
   accept = ['json', 'csv'],
   onImported,
+  onImportStart,
   onClick
 }: {
   children: WrapperChild;
   accept?: ImportFormat[];
   onImported?: (result: ImportResult<T>) => void;
+  onImportStart?: (file: File) => void;
   onClick?: () => void;
 }) {
   const { importFile, importFromFile } = useFileTransfer<T>();
 
-  // if you didn’t add importFromFile yet, see snippet below
   const handlePick = async () => {
     onClick?.();
-    const res = await importFile({ accept });
-    if (res) onImported?.(res);
+
+    const { file, result } = await importFile({ accept });
+    if (!file) return;
+
+    onImportStart?.(file);
+    if (result) onImported?.(result);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -528,6 +473,8 @@ export function FileImportWrapper<T extends object>({
 
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
+
+    onImportStart?.(file);
 
     const res = await importFromFile(file, { accept });
     if (res) onImported?.(res);
@@ -541,7 +488,6 @@ export function FileImportWrapper<T extends object>({
     onClick: mergeHandlers(children.props.onClick, handlePick),
     onDrop: mergeHandlers(children.props.onDrop, handleDrop),
     onDragOver: mergeHandlers(children.props.onDragOver, handleDragOver),
-    // optional: makes it clearer it's droppable
     role: children.props.role ?? 'button',
     tabIndex: children.props.tabIndex ?? 0
   });

@@ -31,7 +31,6 @@ export type FileTransferContextType<T extends object = object> = {
   /** set when you click an ExportWrapper */
   pendingExport?: ExportRequest<T> | null;
 
-  /** call this from your popup once user picks json/csv */
   exportAs: (format: ExportFormat, opts?: { fileName?: string }) => void;
 
   /** wrapper calls it to stage export data */
@@ -39,8 +38,15 @@ export type FileTransferContextType<T extends object = object> = {
 
   /** open file picker and parse file */
   importFile: (opts?: { accept?: ImportFormat[] }) => Promise<ImportResult<T> | null>;
+  /**  for drag and srop */
+  importFromFile: (
+    file: File,
+    opts?: {
+      accept?: ImportFormat[];
+    }
+  ) => Promise<ImportResult<T> | null>;
 
-  /** import progress for your UI */
+  /** import progress for UI */
   importProgress: ImportProgress;
 
   /** last successful or failed result (failed: data empty + error in progress) */
@@ -361,12 +367,75 @@ export function FileTransferProvider<T extends object>({ children }: { children:
     [ensureInput]
   );
 
+  const importFromFile = useCallback(async (file: File, opts?: { accept?: ImportFormat[] }) => {
+    const accept = opts?.accept?.length ? opts.accept : ['json', 'csv'];
+
+    const format = detectFormat(file.name);
+    if (!format || !accept.includes(format)) {
+      setImportProgress({
+        status: 'error',
+        percent: 0,
+        fileName: file.name,
+        error: 'Unsupported file type'
+      });
+      return null;
+    }
+
+    setImportProgress({ status: 'reading', percent: 0, fileName: file.name });
+
+    let rawText = '';
+    try {
+      rawText = await readFileAsTextWithProgress(file, p => {
+        setImportProgress(prev => ({
+          ...prev,
+          status: 'reading',
+          percent: Math.min(99, Math.max(prev.percent, p))
+        }));
+      });
+    } catch (e: any) {
+      setImportProgress({
+        status: 'error',
+        percent: 0,
+        fileName: file.name,
+        error: e?.message ?? 'Failed to read file'
+      });
+      return null;
+    }
+
+    setImportProgress({ status: 'parsing', percent: 99, fileName: file.name });
+
+    try {
+      let data: any[] = [];
+      if (format === 'json') {
+        const parsed = JSON.parse(rawText);
+        if (!Array.isArray(parsed)) throw new Error('JSON must be an array of objects');
+        data = parsed;
+      } else {
+        data = csvToObjects(rawText);
+      }
+
+      const result = { format, fileName: file.name, rawText, data } as ImportResult<T>;
+      setLastImportResult(result);
+      setImportProgress({ status: 'done', percent: 100, fileName: file.name });
+      return result;
+    } catch (e: any) {
+      setImportProgress({
+        status: 'error',
+        percent: 0,
+        fileName: file.name,
+        error: e?.message ?? 'Failed to parse file'
+      });
+      return null;
+    }
+  }, []);
+
   const value = useMemo<FileTransferContextType<T>>(
     () => ({
       pendingExport,
       requestExport,
       exportAs,
       importFile,
+      importFromFile,
       importProgress,
       lastImportResult,
       clearPendingExport,
@@ -377,6 +446,7 @@ export function FileTransferProvider<T extends object>({ children }: { children:
       requestExport,
       exportAs,
       importFile,
+      importFromFile,
       importProgress,
       lastImportResult,
       clearPendingExport,
@@ -423,6 +493,15 @@ export function FileExportWrapper<T extends object>({
   });
 }
 
+function mergeHandlers<T extends (...args: any[]) => any>(a?: T, b?: T): T | undefined {
+  if (!a) return b;
+  if (!b) return a;
+  return ((...args: any[]) => {
+    a(...args);
+    b(...args);
+  }) as unknown as T;
+}
+
 export function FileImportWrapper<T extends object>({
   children,
   accept = ['json', 'csv'],
@@ -432,15 +511,39 @@ export function FileImportWrapper<T extends object>({
   children: WrapperChild;
   accept?: ImportFormat[];
   onImported?: (result: ImportResult<T>) => void;
-  /** if you want extra UI action before opening picker */
   onClick?: () => void;
 }) {
-  const { importFile } = useFileTransfer<T>();
+  const { importFile, importFromFile } = useFileTransfer<T>();
 
-  return cloneWithOnClick(children, async () => {
+  // if you didn’t add importFromFile yet, see snippet below
+  const handlePick = async () => {
     onClick?.();
-    const result = await importFile({ accept });
-    if (result) onImported?.(result);
+    const res = await importFile({ accept });
+    if (res) onImported?.(res);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const res = await importFromFile(file, { accept });
+    if (res) onImported?.(res);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  return React.cloneElement(children, {
+    onClick: mergeHandlers(children.props.onClick, handlePick),
+    onDrop: mergeHandlers(children.props.onDrop, handleDrop),
+    onDragOver: mergeHandlers(children.props.onDragOver, handleDragOver),
+    // optional: makes it clearer it's droppable
+    role: children.props.role ?? 'button',
+    tabIndex: children.props.tabIndex ?? 0
   });
 }
 

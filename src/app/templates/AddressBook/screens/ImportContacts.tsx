@@ -1,11 +1,15 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import clsx from 'clsx';
 
 import { useTabSlug } from 'app/atoms/useTabSlug';
+import { FileImportWrapper } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
+import { ReactComponent as UploadCloudSvg } from 'app/icons/feather-upload-cloud.svg';
+import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TabsBar } from 'app/templates/TabBar';
 import { T, TID } from 'lib/i18n';
+import { TempleContact } from 'lib/temple/types';
 
 import { AddressBookSelectors } from '../AddressBook.selectors';
 
@@ -46,17 +50,41 @@ export const ImportContacts: React.FC = () => {
     return tab ?? tabs[0];
   }, [tabSlug, tabs]);
 
+  const onContactsImported = useCallback((data: any) => {
+    console.log(data);
+  }, []);
+
   return (
     <div className={clsx('w-full h-full mx-auto flex-1 flex flex-col text-primary-white', popup && 'pb-8 max-w-sm')}>
       <p className="text-base-plus text-center mb-4">
         <T id="fileImportDescr" />
       </p>
 
-      <div className="flex items-center relative">
+      <div className="flex items-center relative mx-auto mb-2">
         <TabsBar tabs={tabs} activeTabName={name} />
       </div>
 
-      <div className="px-4 py-3 bg-gray-900 rounded-2xl overflow-hidden">{Component && <Component />}</div>
+      <div className="px-4 py-3 bg-gray-900 rounded-2xl overflow-hidden mb-3">{Component && <Component />}</div>
+
+      <FileImportWrapper<TempleContact> onImported={onContactsImported}>
+        <section className="px-4 py-6 flex items justify-center border border-dashed border-blue-200 rounded-lg">
+          <div className="flex flex-col gap-4 items-center">
+            <UploadCloudSvg className="text-white w-9 h-9 stroke-current" />
+            <div className="text-center">
+              <p className="mb-1 text-sm">
+                <T id="selectFIleOrDrag" />
+              </p>
+              <p className="text-xs text-secondary-white">
+                <T id="fileImportLimitationDescr" />
+              </p>
+            </div>
+
+            <ButtonRounded size="small" fill={false}>
+              <T id="selectFile" />
+            </ButtonRounded>
+          </div>
+        </section>
+      </FileImportWrapper>
     </div>
   );
 };

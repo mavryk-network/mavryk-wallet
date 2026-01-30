@@ -59,6 +59,8 @@ export type FileTransferContextType<T extends object = object> = {
   clearLastImport: () => void;
 };
 
+const MAX_IMPORT_SIZE = 1 * 1024 * 1024;
+
 /** ---------- Context ---------- */
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -208,7 +210,7 @@ function readFileAsTextWithProgress(file: File, onProgress: (percent: number) =>
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onprogress = evt => {
+    reader.onprogress = async evt => {
       if (evt.lengthComputable) {
         const percent = Math.round((evt.loaded / evt.total) * 100);
         onProgress(percent);
@@ -292,6 +294,18 @@ export function FileTransferProvider<T extends object>({ children }: { children:
       return null;
     }
 
+    if (file.size > MAX_IMPORT_SIZE) {
+      setImportProgress({
+        status: 'error',
+        percent: 0,
+        fileName: file.name,
+        fileSize: file.size,
+        error: 'File is too large (max 1MB)'
+      });
+
+      return null;
+    }
+
     setImportProgress({ status: 'reading', percent: 0, fileName: file.name, fileSize: file.size });
 
     let rawText = '';
@@ -350,6 +364,7 @@ export function FileTransferProvider<T extends object>({ children }: { children:
 
       const input = ensureInput();
       input.accept = accept.map(f => `.${f}`).join(',');
+      input.multiple = false;
       input.value = '';
 
       const file = await new Promise<File | null>(resolve => {
@@ -363,6 +378,18 @@ export function FileTransferProvider<T extends object>({ children }: { children:
 
       if (!file) {
         setImportProgress({ status: 'idle', percent: 0, fileSize: 0 });
+        return { file: null, result: null };
+      }
+
+      if (file.size > MAX_IMPORT_SIZE) {
+        setImportProgress({
+          status: 'error',
+          percent: 0,
+          fileName: file.name,
+          fileSize: file.size,
+          error: 'File is too large (max 1MB)'
+        });
+
         return { file: null, result: null };
       }
 
@@ -508,4 +535,7 @@ export function useFileExportActions<T extends object = object>() {
 export function useFileImportState<T extends object = object>() {
   const { importProgress, lastImportResult, clearLastImport } = useFileTransfer<T>();
   return { importProgress, lastImportResult, clearLastImport };
+}
+function sleep(arg0: number) {
+  throw new Error('Function not implemented.');
 }

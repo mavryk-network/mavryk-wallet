@@ -14,7 +14,9 @@ import { TabsBar } from 'app/templates/TabBar';
 import { T, TID } from 'lib/i18n';
 import { TempleContact } from 'lib/temple/types';
 
-import { AddressBookSelectors } from '../AddressBook.selectors';
+import { AddressBookSelectors } from '../../AddressBook.selectors';
+
+import styles from './importContacts.module.css';
 
 type TabName = 'JSON' | '.csv';
 
@@ -181,7 +183,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
               <p className="flex-1 truncate">{importProgress.fileName}</p>
               <p className="text-secondary-white">{size}</p>
             </div>
-            <FileProgressBar />
+            <FileProgressBar percent={importProgress.percent} />
           </div>
         </div>
         <div aria-label="Close" className="p-1 rounded-full bg-gray-900 cursor-pointer" onClick={onClosehandler}>
@@ -192,7 +194,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
       <div className="flex-1" />
 
       <div className="w-full">
-        <ButtonRounded size="big" className="w-full" fill>
+        <ButtonRounded size="big" className="w-full" fill disabled={importProgress.percent !== 100}>
           <T id="import" />
         </ButtonRounded>
       </div>
@@ -200,6 +202,15 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
   );
 };
 
-const FileProgressBar = () => {
-  return <div></div>;
+type FileProgressBarProps = {
+  percent: number;
+};
+
+const FileProgressBar: FC<FileProgressBarProps> = ({ percent }) => {
+  return (
+    <div style={{ '--file-percentage': `${percent}%` } as React.CSSProperties} className="flex items-center gap-2">
+      <div className={clsx(styles.progressBar, 'flex-1')} />
+      <p className="text-base-plus text-white">{percent}%</p>
+    </div>
+  );
 };

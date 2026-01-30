@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
-import classNames from 'clsx';
+import clsx from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -74,42 +74,63 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     };
   }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
 
+  const contacts = Array.from({ length: 20 }, (_, i) => ({
+    ...allContacts[0],
+    name: `${allContacts[0].name}_${i + 1}`
+  }));
+
   return (
-    <div className="flex flex-col h-full flex-1">
-      <div className={classNames('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
-        <CustomSelect
-          className={classNames('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
-          getItemId={getContactKey}
-          items={allContacts}
-          OptionIcon={ContactIcon}
-          OptionContent={item => <ContactContent {...item} account={account} />}
-          light
-          hoverable={false}
-          padding={0}
-          itemWithBorder
-        />
+    <section className="flex flex-col h-full flex-1 relative">
+      <div
+        style={{ maxHeight: !popup ? '70vh' : 'auto' }}
+        className="flex flex-col flex-1 overflow-y-auto no-scrollbarD"
+      >
+        <div className={clsx('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+          <CustomSelect
+            className={clsx('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
+            getItemId={getContactKey}
+            items={contacts}
+            // items={allContacts}
+            OptionIcon={ContactIcon}
+            OptionContent={item => <ContactContent {...item} account={account} />}
+            light
+            hoverable={false}
+            padding={0}
+            itemWithBorder
+          />
+        </div>
+        {isContactsEmpty && (
+          <section className="w-full flex-grow flex justify-center items-center">
+            <div className="flex flex-col items-center text-center">
+              <div className="text-base-plus text-white mb-2">
+                <T id="noContacts" />
+              </div>
+              <div className="text-sm text-secondary-white mb-4 text-center">
+                <T id="addAddresesDesc" />
+              </div>
+              <ButtonRounded
+                size="small"
+                className={clsx('self-center rounded-2xl-plus', styles.contactButton)}
+                onClick={handleAddContactClick}
+                fill
+              >
+                <T id="addContact" />
+              </ButtonRounded>
+            </div>
+          </section>
+        )}
       </div>
-      {isContactsEmpty && (
-        <section className="w-full flex-grow flex justify-center items-center">
-          <div className="flex flex-col items-center text-center">
-            <div className="text-base-plus text-white mb-2">
-              <T id="noContacts" />
-            </div>
-            <div className="text-sm text-secondary-white mb-4 text-center">
-              <T id="addAddresesDesc" />
-            </div>
-            <ButtonRounded
-              size="small"
-              className={classNames('self-center rounded-2xl-plus', styles.contactButton)}
-              onClick={handleAddContactClick}
-              fill
-            >
-              <T id="addContact" />
-            </ButtonRounded>
-          </div>
-        </section>
-      )}
-    </div>
+      <div
+        className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
+      >
+        <ButtonRounded size="big" btnType="primary" fill={false}>
+          <T id="export" />
+        </ButtonRounded>
+        <ButtonRounded size="big" btnType="primary" fill>
+          <T id="import" />
+        </ButtonRounded>
+      </div>
+    </section>
   );
 };
 
@@ -157,7 +178,7 @@ const AddressBookBadge: FC<AddressBookBadgeProps> = ({ own, isCurrent }) => {
     <div className="flex items-center">
       <span
         style={{ padding: '2px 4px' }}
-        className={classNames('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
+        className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
         {...setTestID(AddressBookSelectors.contactOwnLabelText)}
       >
         {isCurrent ? <T id="current" /> : <T id="ownAccount" />}

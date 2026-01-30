@@ -1411,6 +1411,9 @@
   "import": {
     "message": "Import"
   },
+  "export": {
+    "message": "Export"
+  },
   "revealNewSeedPhrase": {
     "message": "<b>Click on</b> area below to reveal your new Seed Phrase. Then, write down this phrase and store in a secure location."
   },

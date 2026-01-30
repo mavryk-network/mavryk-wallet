@@ -1411,6 +1411,9 @@
   "import": {
     "message": "Import"
   },
+  "export": {
+    "message": "Export"
+  },
   "revealNewSeedPhrase": {
     "message": "<b>Click on</b> area below to reveal your new Seed Phrase. Then, write down this phrase and store in a secure location."
   },
@@ -4046,5 +4049,29 @@
         "content": "$2"
       }
     }
+  },
+  "chooseFileType": {
+    "message": "Choose File Type"
+  },
+  "importContacts": {
+    "message": "Import Contacts"
+  },
+  "fileImportDescr": {
+    "message": "Please submit a JSON or .csv  file with the following format:"
+  },
+  "submitFileTitle": {
+    "message": "Please submit a JSON or .csv file"
+  },
+  "fileImportLimitationDescr": {
+    "message": "JSON or .csv file format,  size no more than 1MB"
+  },
+  "selectFIleOrDrag": {
+    "message": "Select a file or drag and drop here"
+  },
+  "csvFileImportDescr": {
+    "message": "When importing a .csv file, please ensure that there are 2 columns, address and name. All other info on the .csv will be ignored. You will be able to download a .csv with that info and the others available on our bookmark page."
+  },
+  "importFileSubmitSuccess": {
+    "message": "Import File submitted"
   }
 }

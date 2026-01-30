@@ -56,6 +56,10 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     navigate('/settings/add-contact');
   }, []);
 
+  const handleImportContactClick = useCallback(() => {
+    navigate('/settings/import-contacts');
+  }, []);
+
   const AddComponent = useMemo(
     () => (
       <TopbarRightText
@@ -138,7 +142,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
               <T id="export" />
             </ButtonRounded>
           </FileExportWrapper>
-          <ButtonRounded size="big" btnType="primary" fill>
+          <ButtonRounded size="big" btnType="primary" fill onClick={handleImportContactClick}>
             <T id="import" />
           </ButtonRounded>
         </div>

@@ -10,11 +10,14 @@ import { ReactComponent as CloseSvg } from 'app/icons/close.svg';
 import { ReactComponent as UploadCloudSvg } from 'app/icons/feather-upload-cloud.svg';
 import { ReactComponent as FileSvg } from 'app/icons/file-v2.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { TabsBar } from 'app/templates/TabBar';
 import { t, T, TID } from 'lib/i18n';
 import { useContactsActions } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
+import { useLoading } from 'lib/ui/hooks/useLoading';
+import { navigate } from 'lib/woozie';
 
 import { AddressBookSelectors } from '../../AddressBook.selectors';
 
@@ -176,21 +179,33 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
   const { importProgress } = useFileImportState();
   const { addMultipleContacts } = useContactsActions();
   const customAlert = useAlert();
+  const loader = useLoading();
 
   const handleImportContacts = useCallback(async () => {
     try {
       if (fileContacts !== null) {
+        loader.start();
         await addMultipleContacts(fileContacts.data);
+        loader.stop();
+
+        navigate<SuccessStateType>('/success', undefined, {
+          pageTitle: 'importContacts',
+          subHeader: 'importFileSubmitted',
+          btnText: 'openContacts',
+          btnLink: '/settings/contacts',
+          description: 'contactsImportSuccessMsg'
+        });
       }
     } catch (e: any) {
       console.error(e);
+      loader.stop();
 
       await customAlert({
         title: t('errorChangingAccountName'),
         children: e.message
       });
     }
-  }, [addMultipleContacts, customAlert, fileContacts]);
+  }, [addMultipleContacts, customAlert, fileContacts, loader]);
 
   const onClosehandler = useCallback(() => {
     changeActiveView(SELECT_FILE_VIEW);
@@ -228,6 +243,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
           size="big"
           className="w-full"
           fill
+          isLoading={loader.status === 'loading'}
           disabled={importProgress.percent !== 100 || !fileContacts}
         >
           <T id="import" />

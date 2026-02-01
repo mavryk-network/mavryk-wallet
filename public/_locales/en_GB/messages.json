@@ -4085,5 +4085,14 @@
   },
   "noNewContactsToAdd": {
     "message": "Not new Contacts to add"
+  },
+  "importFileSubmitted": {
+    "message": "Import file Submitted"
+  },
+  "contactsImportSuccessMsg": {
+    "message": "Contacts successfully imported"
+  },
+  "openContacts": {
+    "message": "Open Contacts"
   }
 }

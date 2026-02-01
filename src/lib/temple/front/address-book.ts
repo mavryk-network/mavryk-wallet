@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 
+import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import { getMessage } from 'lib/i18n';
 import { TempleContact } from 'lib/temple/types';
+
+import { isAddressValid } from '../helpers';
 
 import { useTempleClient } from './client';
 import { useFilteredContacts } from './use-filtered-contacts.hook';
@@ -18,6 +21,54 @@ export function useContactsActions() {
 
       await updateSettings({
         contacts: [cToAdd, ...contacts]
+      });
+    },
+    [contacts, allContacts, updateSettings]
+  );
+
+  const addMultipleContacts = useCallback(
+    async (rawContacts: Partial<TempleContact>[]) => {
+      const existing = new Set(allContacts.map(c => c.address));
+
+      const normalized: TempleContact[] = rawContacts.map((c, i) => {
+        const name = c.name?.trim();
+        const address = c.address?.trim();
+
+        // Required fields
+        if (!name || !address) {
+          throw new Error(`Contact #${i + 1}: name or address is missing`);
+        }
+
+        // Validate name
+        if (!ACCOUNT_NAME_PATTERN.test(name)) {
+          throw new Error(`Contact "${name}": invalid name format`);
+        }
+
+        // Validate address
+        if (!isAddressValid(address)) {
+          throw new Error(`Contact "${name}": invalid address`);
+        }
+
+        return {
+          name,
+          address,
+          addedAt: Date.now()
+        };
+      });
+
+      // Remove duplicates (existing + batch)
+      const unique = normalized.filter(c => {
+        if (existing.has(c.address)) return false;
+        existing.add(c.address);
+        return true;
+      });
+
+      if (!unique.length) {
+        throw new Error(getMessage('noNewContactsToAdd'));
+      }
+
+      await updateSettings({
+        contacts: [...unique, ...contacts]
       });
     },
     [contacts, allContacts, updateSettings]
@@ -55,6 +106,7 @@ export function useContactsActions() {
 
   return {
     addContact,
+    addMultipleContacts,
     removeContact,
     getContact,
     editContact

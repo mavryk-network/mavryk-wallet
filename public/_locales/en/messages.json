@@ -2117,6 +2117,9 @@
   "errorChangingAccountName": {
     "message": "An error occurred while changing account name"
   },
+  "errorAddingContacts": {
+    "message": "An error occurred while importing contacts from file"
+  },
   "errorChangingWalletName": {
     "message": "An error occurred while changing wallet name"
   },
@@ -4079,5 +4082,8 @@
   },
   "csv": {
     "message": ".csv"
+  },
+  "noNewContactsToAdd": {
+    "message": "Not new Contacts to add"
   }
 }

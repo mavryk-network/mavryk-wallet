@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { useTabSlug } from 'app/atoms/useTabSlug';
-import { FileImportWrapper, useFileImportState } from 'app/compound/FileTransfer';
+import { FileImportWrapper, ImportResult, useFileImportState } from 'app/compound/FileTransfer';
 import { formatFileSize } from 'app/compound/FileTransfer/utils';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseSvg } from 'app/icons/close.svg';
@@ -11,8 +11,10 @@ import { ReactComponent as UploadCloudSvg } from 'app/icons/feather-upload-cloud
 import { ReactComponent as FileSvg } from 'app/icons/file-v2.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TabsBar } from 'app/templates/TabBar';
-import { T, TID } from 'lib/i18n';
+import { t, T, TID } from 'lib/i18n';
+import { useContactsActions } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
+import { useAlert } from 'lib/ui';
 
 import { AddressBookSelectors } from '../../AddressBook.selectors';
 
@@ -40,6 +42,8 @@ export const ImportContacts: React.FC = () => {
 
   // views state
   const [activeView, setActiveView] = useState<ActiveViewType>(importViewsData[0]);
+  // we dont know what is inside file - therefore any type
+  const [fileContacts, setFilesContacts] = useState<ImportResult<any> | null>(null);
 
   const changeActiveView = useCallback((view: ActiveViewType) => {
     setActiveView(view);
@@ -47,8 +51,12 @@ export const ImportContacts: React.FC = () => {
 
   return (
     <div className={clsx('w-full h-full mx-auto flex-1 flex flex-col text-primary-white', popup && 'pb-8 max-w-sm')}>
-      {activeView === SELECT_FILE_VIEW && <ImportFileView changeActiveView={changeActiveView} />}
-      {activeView === TRACK_PROGRESS_VIEW && <ImportFileInProgressView changeActiveView={changeActiveView} />}
+      {activeView === SELECT_FILE_VIEW && (
+        <ImportFileView changeActiveView={changeActiveView} setFilesContacts={setFilesContacts} />
+      )}
+      {activeView === TRACK_PROGRESS_VIEW && (
+        <ImportFileInProgressView changeActiveView={changeActiveView} fileContacts={fileContacts} />
+      )}
     </div>
   );
 };
@@ -57,8 +65,9 @@ export const ImportContacts: React.FC = () => {
 
 type ImportFileViewProps = {
   changeActiveView: (view: ActiveViewType) => void;
+  setFilesContacts: React.Dispatch<React.SetStateAction<ImportResult<any> | null>>;
 };
-const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView }) => {
+const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView, setFilesContacts }) => {
   const tabSlug = useTabSlug();
 
   const tabs = useMemo<TabData[]>(() => {
@@ -84,7 +93,7 @@ const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView }) => {
   }, [tabSlug, tabs]);
 
   const onContactsImported = useCallback((data: any) => {
-    console.log(data);
+    setFilesContacts(data);
   }, []);
 
   const onImportStart = useCallback(() => {
@@ -158,10 +167,30 @@ const CSVImportInfo = () => {
 
 // File import in progress view -------------------------------------
 
-type ImportFileInProgressProps = ImportFileViewProps;
+type ImportFileInProgressProps = {
+  changeActiveView: (view: ActiveViewType) => void;
+  fileContacts: ImportResult<any> | null;
+};
 
-const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveView }) => {
+const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveView, fileContacts }) => {
   const { importProgress } = useFileImportState();
+  const { addMultipleContacts } = useContactsActions();
+  const customAlert = useAlert();
+
+  const handleImportContacts = useCallback(async () => {
+    try {
+      if (fileContacts !== null) {
+        await addMultipleContacts(fileContacts.data);
+      }
+    } catch (e: any) {
+      console.error(e);
+
+      await customAlert({
+        title: t('errorChangingAccountName'),
+        children: e.message
+      });
+    }
+  }, [addMultipleContacts, customAlert, fileContacts]);
 
   const onClosehandler = useCallback(() => {
     changeActiveView(SELECT_FILE_VIEW);
@@ -194,7 +223,13 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
       <div className="flex-1" />
 
       <div className="w-full">
-        <ButtonRounded size="big" className="w-full" fill disabled={importProgress.percent !== 100}>
+        <ButtonRounded
+          onClick={handleImportContacts}
+          size="big"
+          className="w-full"
+          fill
+          disabled={importProgress.percent !== 100 || !fileContacts}
+        >
           <T id="import" />
         </ButtonRounded>
       </div>

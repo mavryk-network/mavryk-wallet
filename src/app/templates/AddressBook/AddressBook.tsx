@@ -11,7 +11,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
-import { t, T } from 'lib/i18n';
+import { T } from 'lib/i18n';
 import { useAccount, useFilteredContacts } from 'lib/temple/front';
 import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
@@ -84,11 +84,6 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     };
   }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
 
-  const contacts = Array.from({ length: 20 }, (_, i) => ({
-    ...allContacts[0],
-    name: `${allContacts[0].name}_${i + 1}`
-  }));
-
   return (
     <section className="flex flex-col h-full flex-1 relative">
       <div
@@ -100,8 +95,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
             <CustomSelect
               className={clsx('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
               getItemId={getContactKey}
-              items={contacts}
-              // items={allContacts}
+              items={allContacts}
               OptionIcon={ContactIcon}
               OptionContent={item => <ContactContent {...item} account={account} />}
               light
@@ -137,7 +131,7 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
       <div
         className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
       >
-        <FileExportWrapper data={contacts} suggestedFileName={'contacts'} onClick={open}>
+        <FileExportWrapper data={allContacts} suggestedFileName={'contacts'} onClick={open}>
           <ButtonRounded size="big" btnType="primary" fill={false} disabled={isContactsEmpty}>
             <T id="export" />
           </ButtonRounded>

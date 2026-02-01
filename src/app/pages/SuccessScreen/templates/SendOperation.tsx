@@ -36,7 +36,7 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
         &nbsp;{assetMetadata?.symbol}
       </div>
       {/* <T id="requestSent" substitutions={t(i18nKey)} /> */}
-      <div className="bg-primary-card rounded-lg p-3 w-full mt-4">
+      <div className="bg-primary-card rounded-2xl-plus p-3 w-full mt-4">
         <div className="flex items-center justify-between">
           <span className="text-secondary-white">
             <T id="address" />:

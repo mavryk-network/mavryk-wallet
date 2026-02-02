@@ -4095,41 +4095,6 @@
   "openContacts": {
     "message": "Open Contacts"
   },
-  "days_one": {
-    "message": "$amount$ day",
-    "description": "For plural forms",
-    "placeholders": {
-      "amount": { "content": "$1" }
-    }
-  },
-  "days_zero": {
-    "message": "$amount$ days",
-    "description": "For plural forms",
-    "placeholders": {
-      "amount": { "content": "$1" }
-    }
-  },
-  "days_two": {
-    "message": "$amount$ days",
-    "description": "For plural forms",
-    "placeholders": {
-      "amount": { "content": "$1" }
-    }
-  },
-  "days_few": {
-    "message": "$amount$ days",
-    "description": "For plural forms",
-    "placeholders": {
-      "amount": { "content": "$1" }
-    }
-  },
-  "days_many": {
-    "message": "$amount$ days",
-    "description": "For plural forms",
-    "placeholders": {
-      "amount": { "content": "$1" }
-    }
-  },
   "active_in_days": {
     "message": "Activates in $1",
     "placeholders": {

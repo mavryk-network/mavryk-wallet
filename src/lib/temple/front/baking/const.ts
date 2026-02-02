@@ -3,7 +3,6 @@ import BigNumber from 'bignumber.js';
 
 import { ReactComponent as MavrykDynamicsLogo } from 'app/icons/mavrykDynamicsLogo.svg';
 import { ReactComponent as NodeLogo } from 'app/icons/nodeLogo.svg';
-import { ReactComponent as PopsLogo } from 'app/icons/p-ops.svg';
 // import { ReactComponent as RepublicCryptoLogo } from 'app/icons/republicCrypto.svg';
 import { ReactComponent as SimplyStakingLogo } from 'app/icons/simplyStaking.svg';
 import { ReactComponent as ValidatorsLogo } from 'app/icons/validatorsLogo.svg';

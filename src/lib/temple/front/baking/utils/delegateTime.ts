@@ -46,6 +46,17 @@ export function getDelegationWaitTime(cycleDurationMs: number, delegationTime?: 
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
 }
 
+export function getDelegationWaitTimeFromNow(
+  cycleDurationMs: number,
+  cyclesToActivate = 7,
+  startedAt: string | Date = new Date()
+): string {
+  const start = dayjs(startedAt);
+  const end = start.add(cycleDurationMs * cyclesToActivate, 'millisecond');
+  const diff = end.diff(dayjs());
+  return formatTimeLeft(diff);
+}
+
 // 2) Unlock stake ~ (9 days)
 export function getUnlockWaitTime(
   cycleDurationMs: number,

@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useMemo } from 'react';
+import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -10,7 +10,9 @@ import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, TID } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { Baker, useKnownBaker } from 'lib/temple/front';
+import { Baker, useKnownBaker, useTezos } from 'lib/temple/front';
+import { DEFAULT_CYCLE_DURATION_MS } from 'lib/temple/front/baking/const';
+import { getDelegationWaitTimeFromNow, getOneCycleinMs } from 'lib/temple/front/baking/utils';
 
 import styles from '../successScreen.module.css';
 
@@ -20,7 +22,7 @@ const ACTIVE_FOR = 'ACTIVE_FOR';
 type ActivationLabelType = typeof ACTIVE_IN | typeof ACTIVE_FOR;
 
 type ActivationlabelProps = {
-  days: number;
+  days: string;
   type: ActivationLabelType;
 };
 
@@ -165,18 +167,38 @@ const DefaultDelagtionTemplate: FC<DefaultDelagtionTemplateProps> = ({ baker, va
 
 type RetDelagtionTemplateProps = DefaultDelagtionTemplateProps & {
   oldBaker: Baker | null | undefined;
-  activeForXDays?: number;
-  activeInYDays?: number;
 };
 
-const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({
-  baker,
-  oldBaker,
-  validatorAddress,
-  popup,
-  activeForXDays,
-  activeInYDays
-}) => {
+const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, validatorAddress, popup }) => {
+  const tezos = useTezos();
+
+  const [daysData, setDaysData] = useState<{ activeForXDays: string | null; activeInYDays: string | null }>(() => ({
+    activeForXDays: null,
+    activeInYDays: null
+  }));
+
+  const { activeForXDays, activeInYDays } = daysData;
+
+  useEffect(() => {
+    (async function () {
+      try {
+        let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
+
+        try {
+          const constants = await tezos.rpc.getConstants();
+          cycleDurationMs = getOneCycleinMs(constants);
+          const days = getDelegationWaitTimeFromNow(cycleDurationMs);
+
+          setDaysData(prev => ({ ...prev, activeInYDays: days }));
+        } catch {
+          console.log('Error getting RPC default constants');
+        }
+      } catch (err) {
+        console.error('Error getting delegation time');
+      }
+    })();
+  }, [tezos.rpc]);
+
   return (
     <section className="bg-primary-card rounded-2xl-plus p-3 w-full mt-3">
       <section className="flex items-start flex-col justify-between">
@@ -259,18 +281,7 @@ const labelColors = {
   ACTIVE_FOR: '#AAAAAA80'
 };
 
-function getPluralForm(value: number, key: string) {
-  if (value === 1) return `${key}_one`;
-  if (value === 0) return `${key}_zero`;
-  if (value >= 2 && value <= 4) return `${key}_few`;
-
-  return `${key}_many`;
-}
 const Activationlabel: FC<ActivationlabelProps> = ({ type, days }) => {
-  const daysKey = useMemo(() => {
-    return getPluralForm(days, 'days');
-  }, [days]) as TID;
-
   const labelKey: TID | null = useMemo(() => {
     switch (type) {
       case ACTIVE_IN:
@@ -289,7 +300,7 @@ const Activationlabel: FC<ActivationlabelProps> = ({ type, days }) => {
       style={{ backgroundColor: labelColors[type] }}
       className="px-2 pb-1 text-white text-sm leading-normal rounded"
     >
-      <T id={labelKey} substitutions={[<T key="days" id={daysKey} substitutions={[days]} />]} />
+      <T id={labelKey} substitutions={[days]} />
     </span>
   );
 };

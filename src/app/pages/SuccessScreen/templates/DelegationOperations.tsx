@@ -189,7 +189,7 @@ const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, 
           cycleDurationMs = getOneCycleinMs(constants);
           const days = getDelegationWaitTimeFromNow(cycleDurationMs);
 
-          setDaysData(prev => ({ ...prev, activeInYDays: days }));
+          setDaysData(prev => ({ ...prev, activeInYDays: days, activeForXDays: days }));
         } catch {
           console.log('Error getting RPC default constants');
         }

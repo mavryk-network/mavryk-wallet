@@ -1,12 +1,10 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import clsx from 'clsx';
 
 import { Name, Identicon, HashChip } from 'app/atoms';
-import { FileExportWrapper } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
-import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
@@ -17,23 +15,19 @@ import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
 
 import CustomSelect, { OptionRenderProps } from '../CustomSelect';
-import { PopupModalWithTitle } from '../PopupModalWithTitle';
-import { usePopupState } from '../PopupModalWithTitle/hooks/usePopupState';
 
-import styles from './addressBook.module.css';
-import { AddressBookSelectors } from './AddressBook.selectors';
-import { ContactExportPopup } from './popups/ContactExportPopup';
+import { ContactsBadge } from './components/ContactsBadge';
+import { ContactsDropdown } from './components/ContactsDropdown';
+import { AddressBookSelectors } from './Contacts.selectors';
 
 type ContactActions = {
   remove: (address: string) => void;
 };
 
-export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
+export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
   const { outsideWalletContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
   const { popup } = useAppEnv();
-
-  const { open, opened, close } = usePopupState();
 
   const allContacts = useMemo(
     () =>
@@ -56,33 +50,18 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
     navigate('/settings/add-contact');
   }, []);
 
-  const handleImportContactClick = useCallback(() => {
-    navigate('/settings/import-contacts');
-  }, []);
-
-  const AddComponent = useMemo(
-    () => (
-      <TopbarRightText
-        onClick={handleAddContactClick}
-        label={
-          <div className="rounded-lg bg-gray-910 h-7 w-7 flex items-center justify-center">
-            <PlusIcon className="w-6 h-6 stroke-2" />
-          </div>
-        }
-      />
-    ),
-    [handleAddContactClick]
+  const ContactsSettingsComponent = useMemo(
+    () => <TopbarRightText label={<ContactsDropdown allContacts={allContacts} />} />,
+    [allContacts]
   );
 
   useEffect(() => {
-    if (!isContactsEmpty) {
-      setToolbarRightSidedComponent(AddComponent);
-    }
+    setToolbarRightSidedComponent(ContactsSettingsComponent);
 
     return () => {
       setToolbarRightSidedComponent(null);
     };
-  }, [AddComponent, isContactsEmpty, setToolbarRightSidedComponent]);
+  }, [ContactsSettingsComponent, isContactsEmpty, setToolbarRightSidedComponent]);
 
   return (
     <section className="flex flex-col h-full flex-1 relative">
@@ -115,41 +94,18 @@ export const AddressBook: React.FC<TabComponentProps> = ({ setToolbarRightSidedC
               <div className="text-sm text-secondary-white mb-4 text-center">
                 <T id="addAddresesDesc" />
               </div>
-              <ButtonRounded
-                size="small"
-                className={clsx('self-center rounded-2xl-plus', styles.contactButton)}
-                onClick={handleAddContactClick}
-                fill
-              >
-                <T id="addContact" />
-              </ButtonRounded>
             </div>
           </section>
         )}
       </div>
 
       <div
-        className={clsx('absolute bottom-0 w-full grid grid-cols-2 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
+        className={clsx('absolute bottom-0 w-full grid grid-cols-1 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
       >
-        <FileExportWrapper data={allContacts} suggestedFileName={'contacts'} onClick={open}>
-          <ButtonRounded size="big" btnType="primary" fill={false} disabled={isContactsEmpty}>
-            <T id="export" />
-          </ButtonRounded>
-        </FileExportWrapper>
-        <ButtonRounded size="big" btnType="primary" fill onClick={handleImportContactClick}>
-          <T id="import" />
+        <ButtonRounded onClick={handleAddContactClick} size="big" btnType="primary" fill>
+          <T id="addContact" />
         </ButtonRounded>
       </div>
-
-      <PopupModalWithTitle
-        isOpen={opened}
-        onRequestClose={close}
-        title={<T id="chooseFileType" />}
-        portalClassName="contacts-export-popup"
-        contentPosition={popup ? 'bottom' : 'center'}
-      >
-        <ContactExportPopup close={close} />
-      </PopupModalWithTitle>
     </section>
   );
 };
@@ -171,7 +127,7 @@ const ContactContent: React.FC<
         <div className="flex flex-col justify-between flex-1">
           <div className="flex items-center">
             <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
-            <AddressBookBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
+            <ContactsBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
           </div>
 
           <div className="text-sm mt-1 relative z-10">
@@ -183,27 +139,6 @@ const ContactContent: React.FC<
         <ChevronRightIcon className="w-4 h-4 fill-white" />
       </div>
     </Link>
-  );
-};
-
-type AddressBookBadgeProps = {
-  own: boolean | undefined;
-  isCurrent: boolean;
-};
-
-const AddressBookBadge: FC<AddressBookBadgeProps> = ({ own, isCurrent }) => {
-  if (!own) return null;
-
-  return (
-    <div className="flex items-center">
-      <span
-        style={{ padding: '2px 4px' }}
-        className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
-        {...setTestID(AddressBookSelectors.contactOwnLabelText)}
-      >
-        {isCurrent ? <T id="current" /> : <T id="ownAccount" />}
-      </span>
-    </div>
   );
 };
 

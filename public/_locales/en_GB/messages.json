@@ -3415,13 +3415,13 @@
     "message": "Connect your ledger device to access your funds from this wallet application."
   },
   "noContacts": {
-    "message": "No Contacts"
+    "message": "No Contacts yet"
   },
   "addAddress": {
     "message": "Add Address"
   },
   "addAddresesDesc": {
-    "message": "Contacts & accounts you’ve added will appear here."
+    "message": "Add your first one to get started!"
   },
   "goToAddressBook": {
     "message": "Go to Address Book"
@@ -4058,6 +4058,9 @@
   },
   "importContacts": {
     "message": "Import Contacts"
+  },
+  "exportContacts": {
+    "message": "Export Contacts"
   },
   "fileImportDescr": {
     "message": "Please submit a JSON or .csv  file with the following format:"

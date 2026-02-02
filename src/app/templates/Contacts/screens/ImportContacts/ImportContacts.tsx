@@ -20,7 +20,7 @@ import { useAlert } from 'lib/ui';
 import { useLoading } from 'lib/ui/hooks/useLoading';
 import { navigate } from 'lib/woozie';
 
-import { AddressBookSelectors } from '../../AddressBook.selectors';
+import { AddressBookSelectors } from '../../Contacts.selectors';
 
 import styles from './importContacts.module.css';
 

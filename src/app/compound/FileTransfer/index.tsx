@@ -536,6 +536,3 @@ export function useFileImportState<T extends object = object>() {
   const { importProgress, lastImportResult, clearLastImport } = useFileTransfer<T>();
   return { importProgress, lastImportResult, clearLastImport };
 }
-function sleep(arg0: number) {
-  throw new Error('Function not implemented.');
-}

@@ -18,9 +18,9 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
-import { AddressBook } from 'app/templates/AddressBook/AddressBook';
-import { AddContact } from 'app/templates/AddressBook/screens/AddContact';
-import { ImportContacts } from 'app/templates/AddressBook/screens/ImportContacts/ImportContacts';
+import { Contacts } from 'app/templates/Contacts/Contacts';
+import { AddContact } from 'app/templates/Contacts/screens/AddContact';
+import { ImportContacts } from 'app/templates/Contacts/screens/ImportContacts/ImportContacts';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 // import HelpAndCommunity from 'app/templates/HelpAndCommunity';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
@@ -64,7 +64,7 @@ const TABS: Tab[] = [
     linkTo: 'contacts',
     i18nKey: 'contacts',
     Icon: AddressBookIcon,
-    Component: AddressBook,
+    Component: Contacts,
     testID: SettingsSelectors.addressBookButton,
     fillIcon: false
   },

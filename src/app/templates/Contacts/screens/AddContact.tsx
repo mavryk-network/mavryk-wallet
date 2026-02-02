@@ -14,7 +14,7 @@ import { isAddressValid } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
 import { HistoryAction, goBack, navigate, useLocation } from 'lib/woozie';
 
-import { AddressBookSelectors } from '../AddressBook.selectors';
+import { AddressBookSelectors } from '../Contacts.selectors';
 
 export const AddContact: React.FC = () => {
   const { popup } = useAppEnv();

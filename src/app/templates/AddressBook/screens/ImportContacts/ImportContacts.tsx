@@ -201,7 +201,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
       loader.stop();
 
       await customAlert({
-        title: t('errorChangingAccountName'),
+        title: t('errorAddingContacts'),
         children: e.message
       });
     }

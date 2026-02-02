@@ -2,6 +2,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { Alert } from 'app/atoms';
 import { useTabSlug } from 'app/atoms/useTabSlug';
 import { FileImportWrapper, ImportResult, useFileImportState } from 'app/compound/FileTransfer';
 import { formatFileSize } from 'app/compound/FileTransfer/utils';
@@ -95,9 +96,12 @@ const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView, setFilesCon
     return tab ?? tabs[0];
   }, [tabSlug, tabs]);
 
-  const onContactsImported = useCallback((data: any) => {
-    setFilesContacts(data);
-  }, []);
+  const onContactsImported = useCallback(
+    (data: any) => {
+      setFilesContacts(data);
+    },
+    [setFilesContacts]
+  );
 
   const onImportStart = useCallback(() => {
     changeActiveView(TRACK_PROGRESS_VIEW);
@@ -234,6 +238,16 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
           <CloseSvg className="text-white w-6 h-6 stroke-current stroke-2" />
         </div>
       </div>
+
+      {importProgress.error && (
+        <Alert
+          type="error"
+          title="Error"
+          description={importProgress.error ?? t('smthWentWrong')}
+          className="my-4"
+          closable={false}
+        />
+      )}
 
       <div className="flex-1" />
 

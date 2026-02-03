@@ -147,7 +147,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
   mv1MtuibrK2PZpbJLhe1zkxfLq9HXwRsFWuZ: {
     logo: 'https://pops.one/img/pops-logo.png',
     name: 'P-OPS Team',
-    fee: 0,
+    fee: 0.1,
     links: [{ link: 'https://pops.one/', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
@@ -176,6 +176,24 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     name: 'RHINO 🦏',
     fee: 0.1,
     links: [{ link: 'https://rhinostake.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1X5RFsjS2WjEAf2UZHzAwFM9gSeotUN4uK: {
+    logo: 'https://www.ankr.com/_next/static/images/ankr-blue-symbol-20f8a9b70392a88ef8e14f930b3bf115.png',
+    name: 'Ankr',
+    fee: 0.1,
+    links: [{ link: 'https://www.ankr.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv18PQKEU8uQJLwzbJKBaiTfzhh1YL16dH6P: {
+    logo: 'https://cdn.jsdelivr.net/gh/stakingcabin/stakingcabin@main/assets/logo512.png',
+    name: 'StakingCabin',
+    fee: 0.1,
+    links: [{ link: 'https://stakingcabin.com', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

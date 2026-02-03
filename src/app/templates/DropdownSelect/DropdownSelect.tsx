@@ -151,7 +151,7 @@ const SelectOptions = <Type extends unknown>({
       style={{
         // maxHeight: '15.125rem',
         backgroundColor: '#010101',
-        borderColor: '#44494A'
+        borderColor: '#333'
       }}
     >
       {(options.length === 0 || isLoading) && (

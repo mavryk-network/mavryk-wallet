@@ -66,7 +66,7 @@ export const IncreaseStake = () => {
     () => ({ balance, acc: account, tezos, mode: STAKE_MODE, amount: amountValue ? new BigNumber(amountValue) : ZERO }),
     [account, amountValue, balance, tezos]
   );
-  const { feeToUse, estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);
+  const { estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);
 
   useEffect(() => {
     if (account.type === TempleAccountType.WatchOnly) {

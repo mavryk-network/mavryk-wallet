@@ -143,8 +143,22 @@ export function unlock(password: string) {
       unlocked({ vault, accounts, settings });
       try {
         await refreshAuthTokens();
-      } catch (err) {
-        console.error(err);
+      } catch (refreshError) {
+        const authAccount = accounts.find(
+          acc => acc.type !== TempleAccountType.WatchOnly && acc.type !== TempleAccountType.ManagedKT
+        );
+
+        if (!authAccount) {
+          console.error(refreshError);
+          return;
+        }
+
+        try {
+          await performAuthForAccount(vault, authAccount.publicKeyHash);
+        } catch (authError) {
+          console.error(refreshError);
+          console.error(authError);
+        }
       }
     })
   );

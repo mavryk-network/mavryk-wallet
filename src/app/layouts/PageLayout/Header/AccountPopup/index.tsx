@@ -19,7 +19,7 @@ type AccountPopupProps = {
   setOpened: (v: boolean) => void;
 };
 
-const LIST_HEIGHT = 320;
+const LIST_HEIGHT = 350;
 const isShowSearch = true;
 
 const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
@@ -135,7 +135,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
       <div
         className={classNames(
           'flex flex-col',
-          popup && 'max-h-80',
+          // popup && 'h-96',
           isShowSearch && 'border-t-0 rounded-t-none',
           !popup && filteredAccounts.length > 5 && 'pr-4'
         )}

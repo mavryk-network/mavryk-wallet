@@ -142,10 +142,10 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         style={isShowSearch ? { height: LIST_HEIGHT } : undefined}
       >
         {/* CLIP WRAPPER (doesn't scroll) */}
-        <div className="flex-1 overflow-hidden rounded-xl bg-transparent">
+        <div className="flex-1 overflow-hidden bg-transparent">
           {/* SCROLLER */}
-          <div className="h-full overflow-y-auto shadow-inner">
-            <div className="flex flex-col gap-4 py-1">
+          <div className="h-full overflow-y-auto shadow-inner rounded-xl">
+            <div className="flex flex-col gap-4">
               {filteredAccounts.length === 0 ? (
                 <p className="text-center text-white text-base">
                   <T id="noResults" />

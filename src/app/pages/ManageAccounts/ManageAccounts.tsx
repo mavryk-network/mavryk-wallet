@@ -43,8 +43,8 @@ export const ManageAccounts: FC = () => {
       isTopbarVisible={false}
       contentContainerStyle={memoizedContentContainerStyle}
     >
-      <div className={clsx(popup && 'px-4 my-4')}>
-        <div className={clsx('flex items-center justify-end mb-3 gap-3')}>
+      <div className={clsx(popup && 'px-4', 'flex h-full min-h-0 flex-col overflow-hidden')}>
+        <div className={clsx('sticky top-0 z-10 mb-3 flex shrink-0 items-center justify-end gap-3 bg-inherit pt-4')}>
           <SearchField
             value={searchValue}
             className={clsx(
@@ -65,14 +65,17 @@ export const ManageAccounts: FC = () => {
             <PlusIcon className="w-6 h-6 stroke-2" />
           </Link>
         </div>
-        <div className="flex flex-col gap-4">
-          {groups.length === 0 ? (
-            <p className="text-center text-white text-base">
-              <T id="noResults" />
-            </p>
-          ) : (
-            groups.map(group => <WalletCard key={group.id} group={group} />)
-          )}
+
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl shadow-inner stable-scrollbar visible-scrollbar pb-4">
+          <div className="flex flex-col gap-4 py-2">
+            {groups.length === 0 ? (
+              <p className="text-center text-white text-base">
+                <T id="noResults" />
+              </p>
+            ) : (
+              groups.map(group => <WalletCard key={group.id} group={group} />)
+            )}
+          </div>
         </div>
       </div>
     </PageLayout>

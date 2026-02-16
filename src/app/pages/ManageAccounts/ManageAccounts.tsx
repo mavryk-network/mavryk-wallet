@@ -66,7 +66,7 @@ export const ManageAccounts: FC = () => {
           </Link>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl shadow-inner stable-scrollbar visible-scrollbar pb-4">
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl shadow-inner stable-scrollbar visible-scrollbar mb-6">
           <div className="flex flex-col gap-4 py-2">
             {groups.length === 0 ? (
               <p className="text-center text-white text-base">

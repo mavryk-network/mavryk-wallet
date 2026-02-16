@@ -144,7 +144,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
         {/* CLIP WRAPPER (doesn't scroll) */}
         <div className="flex-1 overflow-hidden rounded-xl bg-transparent">
           {/* SCROLLER */}
-          <div className="h-full overflow-y-auto no-scrollbarD shadow-inner">
+          <div className="h-full overflow-y-auto shadow-inner">
             <div className="flex flex-col gap-4 py-1">
               {filteredAccounts.length === 0 ? (
                 <p className="text-center text-white text-base">

@@ -65,6 +65,8 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   const additionalDelegateBlock = useMemo(() => {
     const rows: { Column1: React.ReactNode; Column2: React.ReactNode }[] = [];
 
+    if (!isMavToken) return [];
+
     if (isDelegated && !delegatedBalance.isZero()) {
       rows.push({
         Column1: (
@@ -90,7 +92,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
     }
 
     return rows.length > 0 ? rows : null;
-  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals]);
+  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken]);
 
   const balanceToDisplay = useMemo(() => {
     return isMavToken ? upgradeBalanceWithStakingBalance(balance, accStats) : balance;

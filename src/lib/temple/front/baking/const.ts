@@ -1,6 +1,7 @@
 // import { ReactComponent as kryptstarLogo } from 'app/icons/kryptstar.svg';
 import BigNumber from 'bignumber.js';
 
+import { ReactComponent as KingNodesLogo } from 'app/icons/kingnodes.svg';
 import { ReactComponent as MavrykDynamicsLogo } from 'app/icons/mavrykDynamicsLogo.svg';
 import { ReactComponent as NodeLogo } from 'app/icons/nodeLogo.svg';
 // import { ReactComponent as RepublicCryptoLogo } from 'app/icons/republicCrypto.svg';
@@ -163,6 +164,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
   },
 
   mv1CxRfFHnGoq497Y1MAfiMHZk6zGS9wftyF: {
+    // kept  old working raw URL (new JSON had a github "blob" link which is busted as an image)
     logo: 'https://raw.githubusercontent.com/nansen-ai/nansen-staking-public/refs/heads/main/logo/Nansen.png',
     name: 'Nansen',
     fee: 0.15,
@@ -194,6 +196,15 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     name: 'StakingCabin',
     fee: 0.1,
     links: [{ link: 'https://stakingcabin.com', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1JrpWXsWW5mngE8Hv1Xvy7tdBsdjUbaFTF: {
+    logo: KingNodesLogo,
+    name: 'Kingnodes',
+    fee: 0.1,
+    links: [{ link: 'https://kingnodes.com', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

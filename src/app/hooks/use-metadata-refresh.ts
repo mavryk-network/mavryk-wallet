@@ -4,12 +4,11 @@ import { useDispatch } from 'react-redux';
 
 import { refreshTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
-import { fetchTokensMetadata } from 'lib/apis/temple';
 import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
-import { reduceToMetadataRecord } from 'lib/metadata/fetch';
 import { useChainId } from 'lib/temple/front';
 import { TempleChainId } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
+import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
 
 const STORAGE_KEY = 'METADATA_REFRESH';
 
@@ -43,9 +42,9 @@ export const useMetadataRefresh = () => {
 
     if (!needToSetVersion || chainId !== TempleChainId.Mainnet) return;
 
-    fetchTokensMetadata(chainId, slugsOnAppLoad).then(
-      data => {
-        const record = reduceToMetadataRecord(slugsOnAppLoad, data);
+    fetchWalletTokens().then(
+      tokens => {
+        const record = mapWalletTokensToFetchedMetadataRecord(slugsOnAppLoad, tokens);
         dispatch(refreshTokensMetadataAction(record));
         setLastVersion();
       },

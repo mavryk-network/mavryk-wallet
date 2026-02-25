@@ -3,6 +3,7 @@ export enum SettingsSelectors {
   synchronizationButton = 'Settings/Synchronization Button',
   addressBookButton = 'Settings/Address Book Button',
   addContactButton = 'Settings/Add Contact Button',
+  importContactsButton = 'Settings/Import Contacts Button',
   revealPrivateKeyButton = 'Settings/Reveal Private Key Button',
   revealSeedPhraseButton = 'Settings/Reveal Seed Phrase Button',
   dAppsButton = 'Settings/DApps Button',

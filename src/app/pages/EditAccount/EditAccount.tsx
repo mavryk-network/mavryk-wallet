@@ -28,7 +28,7 @@ import { UserHistoryItem } from 'lib/temple/history';
 import useHistory from 'lib/temple/history/hook';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
-import { goBack, Link, navigate } from 'lib/woozie';
+import { goBack, navigate } from 'lib/woozie';
 
 import { useAccountOwnership } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
@@ -61,35 +61,40 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
   const accountOptions: ListItemWithNavigateprops[] = useMemo(
     () => [
       { i18nKey: 'editName', Icon: EditIcon, onClick: editNamePopup.open, fillIcon: true },
-      { linkTo: '/settings/reveal-private-key', i18nKey: 'revealPrivateKey', Icon: KeyIcon, fillIcon: false }
+      ...(account.type !== TempleAccountType.WatchOnly
+        ? [{ linkTo: '/settings/reveal-private-key', i18nKey: 'revealPrivateKey', Icon: KeyIcon, fillIcon: false }]
+        : [])
     ],
-    [editNamePopup.open]
+    [account.type, editNamePopup.open]
   );
 
   return (
     <PageLayout pageTitle={<span>{isOwn ? t('editAccount') : t('editContact')}</span>} isTopbarVisible={false}>
-      <div
-        className={clsx(
-          'w-full mx-auto h-full flex flex-col justify-start flex-1',
-          popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs'
-        )}
-      >
-        <div className="flex flex-col gap-1">
-          <AccountBanner account={account} restrictAccountSelect />
+      <div className={clsx('w-full mx-auto h-full flex flex-col flex-1', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs')}>
+        <div className="flex flex-col gap-1 flex-1">
+          <div className="flex flex-col gap-1">
+            <AccountBanner account={account} restrictAccountSelect />
+          </div>
+
+          <ul className={clsx('flex flex-col pb-4')}>
+            {accountOptions.map(option => (
+              <ListItemWithNavigate key={option.i18nKey} {...option} paddingClassName="py-4" fullWidthDivider />
+            ))}
+          </ul>
         </div>
 
-        <ul className={clsx('flex flex-col pb-4')}>
-          {accountOptions.map(option => (
-            <ListItemWithNavigate key={option.i18nKey} {...option} paddingClassName="py-4" fullWidthDivider />
-          ))}
-        </ul>
+        {account.type !== TempleAccountType.HD && (
+          <ButtonRounded
+            btnType={BTN_ERROR}
+            size="big"
+            fill={false}
+            className="w-full mt-auto"
+            onClick={removeAccountPopup.open}
+          >
+            <T id="deleteAccount" />
+          </ButtonRounded>
+        )}
       </div>
-
-      {account.type !== TempleAccountType.HD && (
-        <ButtonRounded btnType={BTN_ERROR} size="big" fill={false} className="w-full" onClick={removeAccountPopup.open}>
-          <T id="deleteAccount" />
-        </ButtonRounded>
-      )}
 
       <EditAccountNamePopup
         opened={editNamePopup.opened}
@@ -100,7 +105,12 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
         accToChange={accToChange}
       />
 
-      <RemoveAccountPopup opened={removeAccountPopup.opened} close={removeAccountPopup.close} />
+      <RemoveAccountPopup
+        opened={removeAccountPopup.opened}
+        close={removeAccountPopup.close}
+        accountId={account.id}
+        onRemoved={goBack}
+      />
     </PageLayout>
   );
 };

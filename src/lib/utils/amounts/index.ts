@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js';
 
 import { PENNY } from 'lib/constants';
+import { MAVEN_METADATA } from 'lib/metadata';
+import { tokensToAtoms, atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 
 export const formatAmountToTargetSize = (value: string | number, targetSize = 6) => {
@@ -32,3 +34,8 @@ export const getMaxAmountToken = (acc: TempleAccount, balance: BigNumber, baseFe
           .minus(PENNY),
     0
   );
+
+export const getMaxStakeAmount = (balance: BigNumber, totalFee: BigNumber, decimals = 6) => {
+  const max = balance.minus(totalFee).minus(PENNY);
+  return max.isGreaterThan(0) ? max.decimalPlaces(decimals, BigNumber.ROUND_FLOOR) : new BigNumber(0);
+};

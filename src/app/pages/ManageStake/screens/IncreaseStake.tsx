@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { FormSubmitButton } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
+import { FeeValueParams, STAKE_MODE, useMavStakeFeeValue } from 'app/hooks/useFeeValue/use-fee-value';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
@@ -14,7 +15,6 @@ import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
-import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
@@ -24,7 +24,7 @@ import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { getMaxAmountToken } from 'lib/utils/amounts';
+import { getMaxStakeAmount } from 'lib/utils/amounts';
 import { ZERO } from 'lib/utils/numbers';
 import { goBack, navigate, useLocation } from 'lib/woozie';
 
@@ -60,6 +60,14 @@ export const IncreaseStake = () => {
   const [submitError, setSubmitError] = useSafeState<any>(null);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
+  const amountValue = watch('amount');
+
+  const mavFeeProps: FeeValueParams = useMemo(
+    () => ({ balance, acc: account, tezos, mode: STAKE_MODE, amount: amountValue ? new BigNumber(amountValue) : ZERO }),
+    [account, amountValue, balance, tezos]
+  );
+  const { estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);
+
   useEffect(() => {
     if (account.type === TempleAccountType.WatchOnly) {
       navigate('/');
@@ -68,9 +76,6 @@ export const IncreaseStake = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
-  const amountValue = watch('amount');
-
-  console.log(amountValue, 'amountValue');
   useEffect(() => {
     if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
       const hash = operation.hash || operation.opHash;
@@ -90,12 +95,23 @@ export const IncreaseStake = () => {
     }
   }, [amountValue, myBakerPkh, operation]);
 
-  const baseFee = useMemo(() => new BigNumber(RECOMMENDED_ADD_FEE), []);
+  useEffect(() => {
+    const error = feeError ?? estimationError;
+    if (error) {
+      setSubmitError(error);
+    }
+  }, [estimationError, feeError, setSubmitError]);
 
-  const maxAmount = useMemo(
-    () => getMaxAmountToken(account, balance, baseFee, RECOMMENDED_ADD_FEE),
-    [account, balance, baseFee]
+  const safeFeeBN = useMemo(() => new BigNumber(safeFeeValue), [safeFeeValue]);
+  const totalFeeBN = useMemo(
+    () => (baseFee instanceof BigNumber ? baseFee.plus(safeFeeBN) : undefined),
+    [baseFee, safeFeeBN]
   );
+
+  const maxAmount = useMemo(() => {
+    if (!totalFeeBN) return undefined;
+    return getMaxStakeAmount(balance, totalFeeBN, assetMetadata?.decimals ?? 6);
+  }, [balance, totalFeeBN, assetMetadata?.decimals]);
 
   const stakedAmount = useMemo(
     () => atomsToTokens(stakedBalance, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),
@@ -106,11 +122,12 @@ export const IncreaseStake = () => {
     (v?: number) => {
       if (v === undefined) return t('required');
 
-      if (!maxAmount) return true;
+      if (!balance) return true;
       const vBN = new BigNumber(v);
-      return vBN.isLessThanOrEqualTo(maxAmount) || t('maximalAmount', toLocalFixed(maxAmount));
+
+      return vBN.isLessThanOrEqualTo(balance) || t('maximalAmount', toLocalFixed(balance));
     },
-    [maxAmount]
+    [balance]
   );
 
   const handleSetMaxAmount = useCallback(() => {
@@ -129,14 +146,22 @@ export const IncreaseStake = () => {
     async ({ amount }: FormData) => {
       if (formState.isSubmitting || !myBakerPkh || !canCostake) return;
       formAnalytics.trackSubmit({ amount });
+      const amtBN = new BigNumber(amount).decimalPlaces(6, BigNumber.ROUND_FLOOR);
+
+      console.log({
+        amountStr: amount,
+        amtFixed: amtBN.toFixed(6),
+        amtNumber: amtBN.toNumber()
+      });
+
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
-        const estmtn = await tezos.estimate.stake({ amount: Number(amount) });
 
         const op = await tezos.wallet
+          // eslint-disable-next-line no-type-assertion/no-type-assertion
           .stake({
-            amount: Number(amount)
-          })
+            amount: new BigNumber(amount).toNumber()
+          } as any)
           .send();
 
         // create pending delegate operation
@@ -145,7 +170,7 @@ export const IncreaseStake = () => {
           type: 'staking',
           sender: account.publicKeyHash,
           amount: tokensToAtoms(amount, assetMetadata?.decimals ?? MAVEN_METADATA.decimals).toString(),
-          estimation: estmtn,
+          estimation: estimation,
           baker: myBakerPkh,
           kind: 'stake'
         });
@@ -171,12 +196,12 @@ export const IncreaseStake = () => {
       canCostake,
       formAnalytics,
       assetMetadata,
-      tezos.estimate,
       tezos.wallet,
       account.publicKeyHash,
       chainId,
       setOperation,
-      setSubmitError
+      setSubmitError,
+      estimation
     ]
   );
 

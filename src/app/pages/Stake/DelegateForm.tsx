@@ -110,7 +110,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
   const balance = balanceData!;
-  const balanceNum = balance.toNumber();
+  const balanceNum = balance?.toNumber() ?? ZERO;
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
   const chainId = useChainId();
@@ -289,7 +289,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
         hash,
         assetSlug: MAV_TOKEN_SLUG,
         amount: atomsToTokens(balanceNum ?? 0, MAVEN_METADATA.decimals).toNumber(),
-        validatorAddress: myBakerPkh
+        oldValidatorAddress: myBakerPkh,
+        validatorAddress: operation.to
       };
 
       if (unfamiliarWithDelegation) {
@@ -316,7 +317,25 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
       }
     }
-  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation]);
+  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation, toResolved]);
+
+  // useEffect(() => {
+  //   navigate<SuccessStateType>('/success', undefined, {
+  //     pageTitle: 'reDelegate',
+  //     btnText: 'viewHistoryTab',
+  //     btnLink: '?tab=history',
+  //     contentId: 'DelegationOperation',
+  //     contentIdFnProps: {
+  //       ...{
+  //         hash: 'ndsoiJDODSADASDQEfka9UEDWOADHSakndska',
+  //         assetSlug: MAV_TOKEN_SLUG,
+  //         amount: ZERO.toNumber(),
+  //         validatorAddress: myBakerPkh
+  //       },
+  //       type: 'reDelegate'
+  //     }
+  //   });
+  // }, [myBakerPkh]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -361,7 +380,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
         if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
 
-        setOperation(op);
+        setOperation({ ...op, to });
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
         if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {

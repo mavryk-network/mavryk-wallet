@@ -19,7 +19,7 @@ type AccountPopupProps = {
   setOpened: (v: boolean) => void;
 };
 
-const LIST_HEIGHT = 320;
+const LIST_HEIGHT = 350;
 const isShowSearch = true;
 
 const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
@@ -135,17 +135,17 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
       <div
         className={classNames(
           'flex flex-col',
-          popup && 'max-h-80',
+          // popup && 'h-96',
           isShowSearch && 'border-t-0 rounded-t-none',
           !popup && filteredAccounts.length > 5 && 'pr-4'
         )}
         style={isShowSearch ? { height: LIST_HEIGHT } : undefined}
       >
         {/* CLIP WRAPPER (doesn't scroll) */}
-        <div className="flex-1 overflow-hidden rounded-xl bg-transparent">
+        <div className="flex-1 overflow-hidden bg-transparent">
           {/* SCROLLER */}
-          <div className="h-full overflow-y-auto no-scrollbarD shadow-inner">
-            <div className="flex flex-col gap-4 py-1">
+          <div className="h-full overflow-y-auto shadow-inner rounded-xl">
+            <div className="flex flex-col gap-4">
               {filteredAccounts.length === 0 ? (
                 <p className="text-center text-white text-base">
                   <T id="noResults" />

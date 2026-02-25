@@ -23,19 +23,24 @@ type FormData = {
 type RemoveAccountPopupProps = {
   opened: boolean;
   close: () => void;
+  accountId: string;
+  onRemoved?: () => void;
 };
 
-export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close }) => {
+export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close, accountId, onRemoved }) => {
   const { removeAccount } = useTempleClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const { popup } = useAppEnv();
+  const removedWithCustomNavRef = useRef(false);
 
   const prevAccLengthRef = useRef(allAccounts.length);
   useEffect(() => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current > accLength) {
-      navigate('/');
+      if (!removedWithCustomNavRef.current) {
+        navigate('/');
+      }
     }
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
@@ -50,7 +55,11 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close 
 
       clearError('password');
       try {
-        await removeAccount(account.publicKeyHash, password);
+        await removeAccount(accountId, password);
+        if (onRemoved) {
+          removedWithCustomNavRef.current = true;
+          onRemoved();
+        }
       } catch (err: any) {
         console.error(err);
 
@@ -59,7 +68,7 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close 
         setError('password', SUBMIT_ERROR_TYPE, err.message);
       }
     },
-    [submitting, clearError, setError, removeAccount, account.publicKeyHash]
+    [submitting, clearError, setError, removeAccount, accountId, onRemoved]
   );
 
   return (

@@ -1,25 +1,26 @@
 import React, { FC } from 'react';
 
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import ModalWithTitle, { ModalWithTitleProps } from 'app/templates/ModalWithTitle';
 import { t } from 'lib/i18n';
 
-export type AlertModalProps = ModalWithTitleProps;
+import { PopupModalWithTitle, PopupModalWithTitlePropsProps } from './PopupModalWithTitle';
+
+export type AlertModalProps = PopupModalWithTitlePropsProps;
 
 const AlertModal: FC<AlertModalProps> = props => {
   const { onRequestClose, children, ...restProps } = props;
 
   return (
-    <ModalWithTitle {...restProps} onRequestClose={onRequestClose}>
-      <div className="flex flex-col">
-        <div className="mb-8">{children}</div>
+    <PopupModalWithTitle {...restProps} contentPosition="center" onRequestClose={onRequestClose}>
+      <div className="flex flex-col px-4">
+        <div className="mb-8 text-base-plus text-white">{children}</div>
         <div className="flex justify-end">
           <ButtonRounded size="big" fill type="button" onClick={onRequestClose}>
             {t('ok')}
           </ButtonRounded>
         </div>
       </div>
-    </ModalWithTitle>
+    </PopupModalWithTitle>
   );
 };
 

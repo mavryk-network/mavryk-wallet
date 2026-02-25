@@ -97,6 +97,16 @@
   font-display: swap;
 }
 
+/**
+ * inconsolata UI font
+ */
+@font-face {
+  font-family: 'Inconsolata';
+  src: url('/public/fonts/inconsolata/Inconsolata-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 * {
   font-variant-ligatures: none;
 }
@@ -310,4 +320,8 @@ span:has(> span.array-key) {
 
 .fullPageBg {
   background: linear-gradient(180deg, rgba(95, 88, 255, 0.25) 0%, rgba(0, 0, 0, 0) 263.1%), #010101;
+}
+
+.codeFont {
+  font-family: 'Inconsolata', monospace;
 }

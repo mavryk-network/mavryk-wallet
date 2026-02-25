@@ -1,9 +1,9 @@
 // import { ReactComponent as kryptstarLogo } from 'app/icons/kryptstar.svg';
 import BigNumber from 'bignumber.js';
 
+import { ReactComponent as KingNodesLogo } from 'app/icons/kingnodes.svg';
 import { ReactComponent as MavrykDynamicsLogo } from 'app/icons/mavrykDynamicsLogo.svg';
 import { ReactComponent as NodeLogo } from 'app/icons/nodeLogo.svg';
-import { ReactComponent as PopsLogo } from 'app/icons/p-ops.svg';
 // import { ReactComponent as RepublicCryptoLogo } from 'app/icons/republicCrypto.svg';
 import { ReactComponent as SimplyStakingLogo } from 'app/icons/simplyStaking.svg';
 import { ReactComponent as ValidatorsLogo } from 'app/icons/validatorsLogo.svg';
@@ -148,7 +148,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
   mv1MtuibrK2PZpbJLhe1zkxfLq9HXwRsFWuZ: {
     logo: 'https://pops.one/img/pops-logo.png',
     name: 'P-OPS Team',
-    fee: 0,
+    fee: 0.1,
     links: [{ link: 'https://pops.one/', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
@@ -164,6 +164,7 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
   },
 
   mv1CxRfFHnGoq497Y1MAfiMHZk6zGS9wftyF: {
+    // kept  old working raw URL (new JSON had a github "blob" link which is busted as an image)
     logo: 'https://raw.githubusercontent.com/nansen-ai/nansen-staking-public/refs/heads/main/logo/Nansen.png',
     name: 'Nansen',
     fee: 0.15,
@@ -177,6 +178,33 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     name: 'RHINO 🦏',
     fee: 0.1,
     links: [{ link: 'https://rhinostake.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1X5RFsjS2WjEAf2UZHzAwFM9gSeotUN4uK: {
+    logo: 'https://www.ankr.com/_next/static/images/ankr-blue-symbol-20f8a9b70392a88ef8e14f930b3bf115.png',
+    name: 'Ankr',
+    fee: 0.1,
+    links: [{ link: 'https://www.ankr.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv18PQKEU8uQJLwzbJKBaiTfzhh1YL16dH6P: {
+    logo: 'https://cdn.jsdelivr.net/gh/stakingcabin/stakingcabin@main/assets/logo512.png',
+    name: 'StakingCabin',
+    fee: 0.1,
+    links: [{ link: 'https://stakingcabin.com', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1JrpWXsWW5mngE8Hv1Xvy7tdBsdjUbaFTF: {
+    logo: KingNodesLogo,
+    name: 'Kingnodes',
+    fee: 0.1,
+    links: [{ link: 'https://kingnodes.com', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

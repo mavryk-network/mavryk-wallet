@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 export enum ContentScriptType {
   ExternalLinksActivity = 'ExternalLinksActivity',
   ExternalPageLocation = 'ExternalPageLocation',

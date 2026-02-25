@@ -2,6 +2,7 @@ import React, { FC, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { FileTransferProvider } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
@@ -17,8 +18,9 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
-import { AddContact } from 'app/templates/AddressBook/AddContact';
-import { AddressBook } from 'app/templates/AddressBook/AddressBook';
+import { Contacts } from 'app/templates/Contacts/Contacts';
+import { AddContact } from 'app/templates/Contacts/screens/AddContact';
+import { ImportContacts } from 'app/templates/Contacts/screens/ImportContacts/ImportContacts';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 // import HelpAndCommunity from 'app/templates/HelpAndCommunity';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
@@ -62,7 +64,7 @@ const TABS: Tab[] = [
     linkTo: 'contacts',
     i18nKey: 'contacts',
     Icon: AddressBookIcon,
-    Component: AddressBook,
+    Component: Contacts,
     testID: SettingsSelectors.addressBookButton,
     fillIcon: false
   },
@@ -73,6 +75,14 @@ const TABS: Tab[] = [
     Component: AddContact,
     hidden: true,
     testID: SettingsSelectors.addContactButton
+  },
+  {
+    linkTo: 'import-contacts',
+    i18nKey: 'importContacts',
+    Icon: null,
+    Component: ImportContacts,
+    hidden: true,
+    testID: SettingsSelectors.importContactsButton
   },
   {
     linkTo: 'dapps',
@@ -168,18 +178,20 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
     >
       <div className="h-full flex-1 flex flex-col">
         <div className="h-full flex-1 flex flex-col">
-          {activeTab ? (
-            <activeTab.Component
-              setToolbarRightSidedComponent={setToolbarRightSidedComponent}
-              toolbarRightSidedComponent={toolbarRightSidedComponent}
-            />
-          ) : (
-            <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
-              {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
-              ))}
-            </ul>
-          )}
+          <FileTransferProvider>
+            {activeTab ? (
+              <activeTab.Component
+                setToolbarRightSidedComponent={setToolbarRightSidedComponent}
+                toolbarRightSidedComponent={toolbarRightSidedComponent}
+              />
+            ) : (
+              <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
+                {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
+                  <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
+                ))}
+              </ul>
+            )}
+          </FileTransferProvider>
         </div>
       </div>
     </PageLayout>

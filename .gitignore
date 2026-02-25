@@ -45,3 +45,7 @@ DerivedData
 
 #e2e
 video-rep
+/.claude/
+/.agent/
+/.agents/
+/CLAUDE.md

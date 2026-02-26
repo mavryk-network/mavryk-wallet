@@ -63,7 +63,7 @@ const ExchangeStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, step,
     } else if (exchangeData.status === ExchangeDataStatusEnum.OVERDUE) {
       setIsError(true);
     }
-  }, [exchangeData, setExchangeData, setStep, step, setIsError]);
+  }, [exchangeData, setStep, setIsError]);
 
   if (!exchangeData) {
     return (

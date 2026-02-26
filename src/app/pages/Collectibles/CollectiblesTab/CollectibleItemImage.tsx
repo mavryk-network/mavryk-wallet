@@ -33,7 +33,7 @@ export const CollectibleItemImage = memo<Props>(
     const isAudioCollectible = useMemo(() => Boolean(mime && mime.startsWith('audio')), [mime]);
 
     const [isInViewport, setIsInViewport] = useState(false);
-    const handleIntersection = useMemo(() => debounce(setIsInViewport, 500), []);
+    const handleIntersection = useMemo(() => debounce(setIsInViewport, 500), [setIsInViewport]);
 
     useIntersectionByOffsetObserver(containerElemRef, handleIntersection, true, 800);
 

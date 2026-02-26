@@ -31,7 +31,7 @@ export const RwaItemImage = memo<Props>(({ assetSlug, metadata, adultBlur, areDe
   const sources = useMemo(() => (metadata ? buildCollectibleImagesStack(metadata) : []), [metadata]);
 
   const [isInViewport, setIsInViewport] = useState(false);
-  const handleIntersection = useMemo(() => debounce(setIsInViewport, 500), []);
+  const handleIntersection = useMemo(() => debounce(setIsInViewport, 500), [setIsInViewport]);
 
   useIntersectionByOffsetObserver(containerElemRef, handleIntersection, true, 800);
 

@@ -8,7 +8,9 @@ import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
-import { CardWithLabel } from './CardWithLabel';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
+
+import { renderFiatBalance } from '../components/FiatBalanceDisplay';
 
 import { RwaDetailsDisplay } from '.';
 
@@ -51,12 +53,7 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
         <CardWithLabel label={<T id={'totalValue'} />}>
           <span className={itemValueClassName}>
             <InFiat assetSlug={assetSlug} volume={details?.tokens ?? 0} smallFractionFont={false}>
-              {({ balance, symbol }) => (
-                <div className="ml-1 font-normal text-white flex items-center truncate text-right">
-                  <span>{symbol}</span>
-                  {balance}
-                </div>
-              )}
+              {renderFiatBalance}
             </InFiat>
           </span>
         </CardWithLabel>

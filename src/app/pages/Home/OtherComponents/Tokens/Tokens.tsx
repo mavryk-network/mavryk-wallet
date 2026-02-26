@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
+import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
@@ -17,7 +18,7 @@ import {
   SearchExplorerFinder,
   SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
-import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
+import { SortButton, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
@@ -82,31 +83,7 @@ export const TokensTab: FC = () => {
 
   const sortedSlugs = useSortededAssetsSlugs(sortOption, filteredAssets, balances);
 
-  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-    () => [
-      {
-        id: SortOptions.HIGH_TO_LOW,
-        selected: sortOption === SortOptions.HIGH_TO_LOW,
-        onClick: () => {
-          setSortOption(SortOptions.HIGH_TO_LOW);
-        },
-        nameI18nKey: 'highToLow'
-      },
-      {
-        id: SortOptions.LOW_TO_HIGH,
-        selected: sortOption === SortOptions.LOW_TO_HIGH,
-        onClick: () => setSortOption(SortOptions.LOW_TO_HIGH),
-        nameI18nKey: 'lowToHigh'
-      },
-      {
-        id: SortOptions.BY_NAME,
-        selected: sortOption === SortOptions.BY_NAME,
-        onClick: () => setSortOption(SortOptions.BY_NAME),
-        nameI18nKey: 'byName'
-      }
-    ],
-    [sortOption]
-  );
+  const memoizedSortAssetsOptions = useSortAssetsOptions(sortOption, setSortOption);
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);

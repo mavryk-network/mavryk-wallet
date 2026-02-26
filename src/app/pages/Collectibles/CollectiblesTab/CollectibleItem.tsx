@@ -11,14 +11,14 @@ import {
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { Link } from 'lib/woozie';
 
+import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
 import { getDetailsListing } from '../utils';
-
-import { CollectibleItemImage } from './CollectibleItemImage';
 
 interface Props {
   assetSlug: string;
@@ -47,6 +47,8 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
 
   const assetName = getAssetName(metadata);
 
+  const isAudioCollectible = useMemo(() => Boolean(details?.mime && details.mime.startsWith('audio')), [details?.mime]);
+
   return (
     <Link to={`/nft/${assetSlug}`} className="flex flex-col rounded-2xl">
       <div
@@ -57,14 +59,14 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
         )}
         title={assetName}
       >
-        <CollectibleItemImage
+        <AssetItemImage
           assetSlug={assetSlug}
           metadata={metadata}
           areDetailsLoading={areDetailsLoading && details === undefined}
-          mime={details?.mime}
           // TODO add adult blur logic
           adultBlur={false}
           containerElemRef={toDisplayRef}
+          fallback={<CollectibleImageFallback isAudioCollectible={isAudioCollectible} />}
         />
 
         {areDetailsShown && balance ? (

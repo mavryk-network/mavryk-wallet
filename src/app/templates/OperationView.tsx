@@ -12,7 +12,7 @@ import { tryParseExpenses } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
 
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
-import TabsSwitcher from './TabsSwicther/TabsSwitcher';
+import TabsSwitcher from './TabsSwitcher/TabsSwitcher';
 
 const MIN_GAS_FEE = 0;
 const bytesStyle = { height: 112, background: '#171717', border: 'none' };

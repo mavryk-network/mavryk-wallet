@@ -34,7 +34,7 @@ import { isTruthy } from 'lib/utils';
 
 import { InternalConfirmationSelectors } from './InternalConfirmation.selectors';
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
-import TabsSwitcher from './TabsSwicther/TabsSwitcher';
+import TabsSwitcher from './TabsSwitcher/TabsSwitcher';
 
 type InternalConfiramtionProps = {
   payload: TempleConfirmationPayload;

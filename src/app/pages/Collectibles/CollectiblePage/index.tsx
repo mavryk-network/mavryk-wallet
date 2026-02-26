@@ -15,6 +15,8 @@ import {
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
+import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
@@ -28,12 +30,12 @@ import { TempleAccountType } from 'lib/temple/types';
 import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
+import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
+import { LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY } from '../constants';
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { CollectibleSelectors } from '../selectors';
 import { getDetailsListing } from '../utils';
 
-import { CardWithLabel } from './CardWithLabel';
-import { CollectiblePageImage } from './CollectiblePageImage';
 import { PropertiesItems } from './PropertiesItems';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
@@ -165,13 +167,16 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
         <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
           <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
-            <CollectiblePageImage
+            <AssetPageImage
               metadata={metadata}
               areDetailsLoading={areDetailsLoading}
               objktArtifactUri={details?.objktArtifactUri}
               isAdultContent={details?.isAdultContent}
               mime={details?.mime}
               className="h-full w-full"
+              fallback={<CollectibleImageFallback large />}
+              audioFallback={<CollectibleImageFallback large isAudioCollectible />}
+              adultBlurToggleKey={LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY}
             />
           </div>
           {fullPage && <CollectibleTextSection />}

@@ -7,9 +7,12 @@ import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
 import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
 import { useAppEnv } from 'app/env';
 import { useCollectiblesListingLogic } from 'app/hooks/use-collectibles-listing-logic';
-import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
+import { useSortedAssetSlugs } from 'app/hooks/use-sorted-asset-slugs';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
+import { useAllCollectibleDetailsSelector } from 'app/store/collectibles/selectors';
+import { AssetListEmptySection } from 'app/templates/AssetListEmptySection';
 import {
   SearchExplorer,
   SearchExplorerClosed,
@@ -18,14 +21,11 @@ import {
   SearchExplorerOpened,
   SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
-import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
+import { SortButton, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { SortOptions } from 'lib/assets/use-sorted';
-import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
-
-import { useSortededCollectiblesSlugs } from '../hooks/use-collectible-sorted.hook';
 
 import styles from './Collectible.module.css';
 import { CollectibleItem } from './CollectibleItem';
@@ -42,36 +42,13 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
   const allSlugs = useEnabledAccountCollectiblesSlugs();
+  const assetsDetails = useAllCollectibleDetailsSelector();
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 
-  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-    () => [
-      {
-        id: SortOptions.HIGH_TO_LOW,
-        selected: sortOption === SortOptions.HIGH_TO_LOW,
-        onClick: () => {
-          setSortOption(SortOptions.HIGH_TO_LOW);
-        },
-        nameI18nKey: 'highToLow'
-      },
-      {
-        id: SortOptions.LOW_TO_HIGH,
-        selected: sortOption === SortOptions.LOW_TO_HIGH,
-        onClick: () => setSortOption(SortOptions.LOW_TO_HIGH),
-        nameI18nKey: 'lowToHigh'
-      },
-      {
-        id: SortOptions.BY_NAME,
-        selected: sortOption === SortOptions.BY_NAME,
-        onClick: () => setSortOption(SortOptions.BY_NAME),
-        nameI18nKey: 'byName'
-      }
-    ],
-    [sortOption]
-  );
+  const memoizedSortAssetsOptions = useSortAssetsOptions(sortOption, setSortOption);
 
-  const sortedAssets = useSortededCollectiblesSlugs(sortOption, allSlugs);
+  const sortedAssets = useSortedAssetSlugs(sortOption, allSlugs, assetsDetails);
 
   const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
     useCollectiblesListingLogic(sortedAssets);
@@ -142,7 +119,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
         </SearchExplorer>
 
         {displayedSlugs.length === 0 ? (
-          buildEmptySection(isSyncing)
+          <AssetListEmptySection isSyncing={isSyncing} messageI18nKey="zeroNFTText" buttonI18nKey="getNFTs" />
         ) : (
           <>
             {isInSearchMode ? (
@@ -160,19 +137,3 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
     </div>
   );
 });
-
-const buttonStyle = { maxHeight: 27, display: 'flex', alignItems: 'center' };
-
-const buildEmptySection = (isSyncing: boolean) =>
-  isSyncing ? (
-    <SyncSpinner className="pt-4" />
-  ) : (
-    <div className="w-full py-23 flex flex-col items-center gap-y-4">
-      <p className={'text-white text-base-plus text-center'}>
-        <T id="zeroNFTText" />
-      </p>
-      <ButtonRounded type="button" size="small" fill style={buttonStyle} disabled>
-        <T id="getNFTs" />
-      </ButtonRounded>
-    </div>
-  );

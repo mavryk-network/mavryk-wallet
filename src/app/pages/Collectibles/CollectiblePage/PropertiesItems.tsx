@@ -9,7 +9,7 @@ import { useBalance } from 'lib/balances';
 import { formatDate } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
-import { CardWithLabel } from './CardWithLabel';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
 
 interface PropertiesItemsProps {
   assetSlug: string;

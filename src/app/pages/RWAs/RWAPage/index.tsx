@@ -15,6 +15,8 @@ import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
 import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { ActionsBlock } from 'app/templates/Actions';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
+import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
@@ -24,9 +26,10 @@ import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
 
-import { CardWithLabel } from './CardWithLabel';
+import { RwaImageFallback } from '../components/CollectibleImageFallback';
+import { LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY } from '../constants';
+
 import { PropertiesItems } from './PropertiesItems';
-import { RwaPageImage } from './RwaPageImage';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
@@ -91,13 +94,16 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
             className={clsx('relative rounded-2xl mb-6 bg-primary-card overflow-hidden')}
             style={{ aspectRatio: '1/1' }}
           >
-            <RwaPageImage
+            <AssetPageImage
               metadata={metadata}
               areDetailsLoading={false}
               objktArtifactUri={'ipfs://QmZxcWgVM7Kn4ohZ5Tw45GdS2wc1zih4EPKQr6iPZrLgS8'}
               isAdultContent={false}
               mime={null}
               className="h-full w-full"
+              fallback={<RwaImageFallback symbol={metadata?.symbol} large />}
+              audioFallback={<RwaImageFallback large isAudioCollectible symbol={metadata?.symbol} />}
+              adultBlurToggleKey={LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY}
             />
           </div>
           {fullPage && <CollectibleTextSection />}

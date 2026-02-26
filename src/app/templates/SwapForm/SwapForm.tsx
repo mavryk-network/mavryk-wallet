@@ -84,17 +84,16 @@ export const SwapForm: FC = () => {
   const defaultValues = useSwapFormDefaultValue();
   const {
     handleSubmit,
-    errors,
+    formState: { errors, dirtyFields },
     watch,
     setValue,
     control,
     register,
-    triggerValidation,
-    formState: { dirtyFields }
+    trigger
   } = useForm<SwapFormValue>({
     defaultValues,
     mode: 'onChange',
-    validateCriteriaMode: 'firstError'
+    criteriaMode: 'firstError'
   });
 
   const inputValue = watch('input') ?? { assetSlug: undefined, amount: 0 };
@@ -192,21 +191,21 @@ export const SwapForm: FC = () => {
 
   useEffect(() => {
     if (isSubmitButtonPressedRef.current) {
-      triggerValidation(['input', 'output'], true);
+      trigger(['input', 'output']);
     }
-  }, [triggerValidation, inputValue.amount, swapParams.data.output, outputValue.assetSlug]);
+  }, [trigger, inputValue.amount, swapParams.data.output, outputValue.assetSlug]);
 
   useEffect(() => {
     setValue('output', {
       assetSlug: outputValue.assetSlug,
       amount: isDefined(swapParams.data.output) ? new BigNumber(swapParams.data.output) : undefined
     });
-  }, [swapParams.data.output, setValue, triggerValidation, outputValue.assetSlug]);
+  }, [swapParams.data.output, setValue, trigger, outputValue.assetSlug]);
 
   useEffect(() => {
     register('input', {
       validate: ({ amount }: SwapInputValue) => {
-        if (!dirtyFields.has('input')) return true;
+        if (!dirtyFields.input) return true;
 
         if (!amount || amount.isLessThan(0)) {
           return t('amountMustBePositive');
@@ -218,7 +217,7 @@ export const SwapForm: FC = () => {
 
     register('output', {
       validate: ({ amount }: SwapInputValue) => {
-        if (!dirtyFields.has('output')) return true;
+        if (!dirtyFields.output) return true;
 
         // Do NOT show err msg if no amount
         if (!amount) return true;
@@ -438,7 +437,8 @@ export const SwapForm: FC = () => {
   const handleOperationClose = () => setOperation(undefined);
 
   const handleToggleIconClick = () => {
-    setValue([{ input: { assetSlug: outputValue.assetSlug } }, { output: { assetSlug: inputValue.assetSlug } }]);
+    setValue('input', { assetSlug: outputValue.assetSlug } as SwapInputValue);
+    setValue('output', { assetSlug: inputValue.assetSlug } as SwapInputValue);
     dispatch(resetSwapParamsAction());
   };
 
@@ -495,7 +495,6 @@ export const SwapForm: FC = () => {
       <SwapFormInput
         name="input"
         value={inputValue}
-        // @ts-expect-error
         error={errors.input?.message}
         label={<T id="from" />}
         onChange={handleInputChange}
@@ -518,7 +517,6 @@ export const SwapForm: FC = () => {
         className="mb-6"
         name="output"
         value={outputValue}
-        // @ts-expect-error
         error={errors.output?.message}
         label={<T id="toAsset" />}
         amountInputDisabled={true}
@@ -573,10 +571,14 @@ export const SwapForm: FC = () => {
             <div className="justify-end text-white flex">
               <Controller
                 control={control}
-                as={SlippageToleranceInput}
-                error={!!errors.slippageTolerance}
                 name="slippageTolerance"
                 rules={{ validate: slippageToleranceInputValidationFn }}
+                render={({ field }) => (
+                  <SlippageToleranceInput
+                    {...field}
+                    error={!!errors.slippageTolerance}
+                  />
+                )}
               />
             </div>
           </div>

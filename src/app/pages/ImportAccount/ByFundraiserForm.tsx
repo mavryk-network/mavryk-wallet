@@ -24,7 +24,8 @@ interface ByFundraiserFormData {
 
 export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useTempleClient();
-  const { register, errors, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
+  const { register, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Fundraiser);
   const { popup } = useAppEnv();
@@ -77,8 +78,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
 
       <FormField
-        ref={register({ required: t('required') })}
-        name="email"
+        {...register('email', { required: t('required') })}
         id="importfundacc-email"
         label={t('email')}
         placeholder={t('enterEmailPlaceholder')}
@@ -88,8 +88,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       />
 
       <FormField
-        ref={register({ required: t('required') })}
-        name="password"
+        {...register('password', { required: t('required') })}
         type="password"
         id="importfundacc-password"
         label={t('password')}

@@ -25,7 +25,8 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
   const chainId = useChainId();
 
-  const { register, handleSubmit, errors, formState, watch } = useForm<ByPrivateKeyFormData>();
+  const { register, handleSubmit, formState, watch } = useForm<ByPrivateKeyFormData>();
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
@@ -63,10 +64,9 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
         {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-4" />}
 
         <FormField
-          ref={register({ required: t('required') })}
+          {...register('privateKey', { required: t('required') })}
           type="password"
           revealForbidden
-          name="privateKey"
           id="importacc-privatekey"
           label={t('privateKey')}
           labelDescription={t('privateKeyInputDescription')}
@@ -82,8 +82,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
 
         {encrypted && (
           <FormField
-            ref={register}
-            name="encPassword"
+            {...register('encPassword')}
             type="password"
             id="importacc-password"
             label={

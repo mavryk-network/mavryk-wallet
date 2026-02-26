@@ -51,7 +51,7 @@ export const DecreaseStake: FC = () => {
 
   const formAnalytics = useFormAnalytics('UnlockCoStakeForm');
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
+  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger } = useForm<FormData>({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
@@ -91,8 +91,8 @@ export const DecreaseStake: FC = () => {
   );
 
   const validateAmount = useCallback(
-    (v?: number) => {
-      if (v === undefined) return t('required');
+    (v?: string) => {
+      if (v === undefined || v === '') return t('required');
 
       if (!maxAmount) return true;
       const vBN = new BigNumber(v);
@@ -104,9 +104,9 @@ export const DecreaseStake: FC = () => {
   const handleSetMaxAmount = useCallback(() => {
     if (maxAmount) {
       setValue('amount', maxAmount.toString());
-      triggerValidation('amount');
+      trigger('amount');
     }
-  }, [setValue, maxAmount, triggerValidation]);
+  }, [setValue, maxAmount, trigger]);
 
   const handleAmountFieldFocus = useCallback<FocusEventHandler>(evt => {
     evt.preventDefault();
@@ -198,31 +198,36 @@ export const DecreaseStake: FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
       <Controller
         name="amount"
-        as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
         control={control}
         rules={{
           validate: validateAmount
         }}
-        onChange={([v]) => v}
-        onFocus={() => amountFieldRef.current?.focus()}
-        id="co-stake-amount"
-        assetDecimals={assetMetadata?.decimals ?? 0}
-        label={
-          <div className="flex items-center gap-1">
-            <T id="decreaseCostake" />
-            <InfoTooltip content={<T id="decreaseCostakeDesc" />} />
-          </div>
-        }
-        placeholder={'Enter amount'}
-        errorCaption={errors.amount?.message || submitError?.message}
-        containerClassName="mb-1"
-        autoFocus={Boolean(maxAmount)}
-        extraInnerWrapper="unset"
-        extraInner={
-          <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
-            <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
-          </div>
-        }
+        render={({ field: { ref: _ref, ...field } }) => (
+          <AssetField
+            ref={amountFieldRef}
+            {...field}
+            onChange={(v: any) => field.onChange(v)}
+            onFocus={handleAmountFieldFocus}
+            id="co-stake-amount"
+            assetDecimals={assetMetadata?.decimals ?? 0}
+            label={
+              <div className="flex items-center gap-1">
+                <T id="decreaseCostake" />
+                <InfoTooltip content={<T id="decreaseCostakeDesc" />} />
+              </div>
+            }
+            placeholder={'Enter amount'}
+            errorCaption={errors.amount?.message || submitError?.message}
+            containerClassName="mb-1"
+            autoFocus={Boolean(maxAmount)}
+            extraInnerWrapper="unset"
+            extraInner={
+              <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+                <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+              </div>
+            }
+          />
+        )}
       />
       <div className="flex flex-col gap-1 flex-1">
         {balancesData.map(({ id, ...rest }) => (

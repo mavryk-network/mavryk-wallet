@@ -18,10 +18,14 @@ interface NewSeedBackupProps {
 }
 
 export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComplete }) => {
-  const { register, handleSubmit, errors, formState, watch } = useForm<BackupFormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<BackupFormData>();
+  const submitting = isSubmitting;
 
   const backuped = watch('backuped') ?? false;
+
+  const { ref: backupedRef, ...backupedRest } = register('backuped', {
+    validate: val => val || t('unableToContinueWithoutConfirming')
+  });
 
   return (
     <div className="w-full mt-6">
@@ -51,11 +55,9 @@ export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComp
 
       <form className="w-full mt-4" onSubmit={handleSubmit(onBackupComplete)}>
         <FormCheckbox
-          ref={register({
-            validate: val => val || t('unableToContinueWithoutConfirming')
-          })}
+          ref={backupedRef}
+          name={backupedRest.name}
           errorCaption={errors.backuped?.message}
-          name="backuped"
           label={t('backupedInputLabel')}
           testID={NewSeedBackupSelectors.iMadeSeedPhraseBackupCheckBox}
           labelClassName="py-0"

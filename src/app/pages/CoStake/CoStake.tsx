@@ -57,7 +57,7 @@ export const CoStake: FC = () => {
     }
   });
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
+  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger } = useForm<FormData>({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
@@ -101,8 +101,8 @@ export const CoStake: FC = () => {
   );
 
   const validateAmount = useCallback(
-    (v?: number) => {
-      if (v === undefined) return t('required');
+    (v?: string) => {
+      if (v === undefined || v === '') return t('required');
 
       if (!maxAmount) return true;
       const vBN = new BigNumber(v);
@@ -114,9 +114,9 @@ export const CoStake: FC = () => {
   const handleSetMaxAmount = useCallback(() => {
     if (maxAmount) {
       setValue('amount', maxAmount.toString());
-      triggerValidation('amount');
+      trigger('amount');
     }
-  }, [setValue, maxAmount, triggerValidation]);
+  }, [setValue, maxAmount, trigger]);
 
   const handleAmountFieldFocus = useCallback<FocusEventHandler>(evt => {
     evt.preventDefault();
@@ -164,26 +164,31 @@ export const CoStake: FC = () => {
           <div className="flex-1">
             <Controller
               name="amount"
-              as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
               control={control}
               rules={{
                 validate: validateAmount
               }}
-              onChange={([v]) => v}
-              onFocus={() => amountFieldRef.current?.focus()}
-              id="co-stake-amount"
-              assetDecimals={assetMetadata?.decimals ?? 0}
-              label={'Co-stake Amount'}
-              placeholder={'Enter amount'}
-              errorCaption={errors.amount?.message || submitError?.message}
-              containerClassName="mb-1"
-              autoFocus={Boolean(maxAmount)}
-              extraInnerWrapper="unset"
-              extraInner={
-                <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
-                  <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
-                </div>
-              }
+              render={({ field: { ref: _ref, ...field } }) => (
+                <AssetField
+                  ref={amountFieldRef}
+                  {...field}
+                  onChange={(v: any) => field.onChange(v)}
+                  onFocus={handleAmountFieldFocus}
+                  id="co-stake-amount"
+                  assetDecimals={assetMetadata?.decimals ?? 0}
+                  label={'Co-stake Amount'}
+                  placeholder={'Enter amount'}
+                  errorCaption={errors.amount?.message || submitError?.message}
+                  containerClassName="mb-1"
+                  autoFocus={Boolean(maxAmount)}
+                  extraInnerWrapper="unset"
+                  extraInner={
+                    <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+                      <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+                    </div>
+                  }
+                />
+              )}
             />
             <div className="flex text-sm gap-1 items-center">
               <p className="text-secondary-white">

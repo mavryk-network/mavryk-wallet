@@ -29,9 +29,10 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const formAnalytics = useFormAnalytics(ImportAccountFormType.WatchOnly);
   const { popup } = useAppEnv();
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<WatchOnlyFormData>({
+  const { watch, handleSubmit, control, formState, setValue, trigger } = useForm<WatchOnlyFormData>({
     mode: 'onChange'
   });
+  const { errors } = formState;
 
   const [error, setError] = useState<ReactNode>(null);
 
@@ -51,8 +52,8 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
   const cleanAddressField = useCallback(() => {
     setValue('address', '');
-    triggerValidation('address');
-  }, [setValue, triggerValidation]);
+    trigger('address');
+  }, [setValue, trigger]);
 
   const onSubmit = useCallback(async () => {
     if (formState.isSubmitting) return;
@@ -109,44 +110,55 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       <Controller
         name="address"
         defaultValue={''}
-        as={<NoSpaceField ref={addressFieldRef} />}
         control={control}
         rules={{
           required: true,
           validate: (value: any) => validateDelegate(value, domainsClient)
         }}
-        onChange={([v]) => v}
-        onFocus={() => addressFieldRef.current?.focus()}
-        textarea
-        rows={popup ? 2 : 1}
-        cleanable={Boolean(addressValue)}
-        onClean={cleanAddressField}
-        id="watch-address"
-        label={t('address')}
-        testID={ImportAccountSelectors.watchOnlyInput}
-        labelDescription={
-          <T id={canUseDomainNames ? 'addressInputDescriptionWithDomain' : 'addressInputDescription'} />
-        }
-        placeholder={t('enterAddress')}
-        errorCaption={errors.address?.message}
-        style={{
-          resize: 'none'
-        }}
-        containerClassName="mb-2"
+        render={({ field }) => (
+          <NoSpaceField
+            {...field}
+            ref={(el: HTMLTextAreaElement | null) => {
+              field.ref(el);
+              (addressFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+            }}
+            onFocus={() => addressFieldRef.current?.focus()}
+            textarea
+            rows={popup ? 2 : 1}
+            cleanable={Boolean(addressValue)}
+            onClean={cleanAddressField}
+            id="watch-address"
+            label={t('address')}
+            testID={ImportAccountSelectors.watchOnlyInput}
+            labelDescription={
+              <T id={canUseDomainNames ? 'addressInputDescriptionWithDomain' : 'addressInputDescription'} />
+            }
+            placeholder={t('enterAddress')}
+            errorCaption={errors.address?.message}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName="mb-2"
+          />
+        )}
       />
 
       <Controller
         name="accName"
-        as={<FormField />}
         control={control}
-        onPaste={clearClipboard}
         defaultValue={''}
-        id="acc-name"
-        label={`${t('accountName')} ${t('optionalComment')}`}
-        labelDescription={<T id="accountNameAlternativeInputDescription" />}
-        placeholder={t('enterAccountName')}
-        errorCaption={errors.accName?.message}
-        containerClassName="mb-4 flex-grow"
+        render={({ field }) => (
+          <FormField
+            {...field}
+            onPaste={clearClipboard}
+            id="acc-name"
+            label={`${t('accountName')} ${t('optionalComment')}`}
+            labelDescription={<T id="accountNameAlternativeInputDescription" />}
+            placeholder={t('enterAccountName')}
+            errorCaption={errors.accName?.message}
+            containerClassName="mb-4 flex-grow"
+          />
+        )}
       />
 
       <div>

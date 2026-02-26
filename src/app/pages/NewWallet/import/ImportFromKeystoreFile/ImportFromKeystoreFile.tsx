@@ -1,7 +1,7 @@
 import React, { FC, useCallback } from 'react';
 
 import classNames from 'clsx';
-import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
 import { ToggleButton, Toggle, ToggleOn, useToggle, ToggleContext } from 'app/compound/Toggle';
@@ -58,16 +58,24 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
   const { fullPage } = useAppEnv();
 
   const customAlert = useAlert();
-  const { setValue, control, register, watch, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
+  const {
+    setValue,
+    control,
+    register,
+    watch,
+    handleSubmit,
+    trigger,
+    formState: { errors, isSubmitting, isSubmitted }
+  } = useForm<FormData>({
     mode: 'onChange'
   });
-  const submitting = formState.isSubmitting || secondarySubmitting;
-  const isKeystoreFileSubmitted = formState.isSubmitted;
+  const submitting = isSubmitting || secondarySubmitting;
+  const isKeystoreFileSubmitted = isSubmitted;
 
   const clearKeystoreFileInput = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     event.stopPropagation();
     setValue('keystoreFile', undefined);
-    triggerValidation('keystoreFile');
+    trigger('keystoreFile');
   };
 
   const watchedKeystoreFile = watch('keystoreFile');
@@ -123,25 +131,28 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
             <Controller
               control={control}
               name="keystoreFile"
-              as={KeystoreFileInput}
               rules={{
                 required: t('required'),
                 validate: validateKeystoreFile
               }}
-              clearKeystoreFileInput={clearKeystoreFileInput}
+              render={({ field }) => (
+                <KeystoreFileInput
+                  {...field}
+                  clearKeystoreFileInput={clearKeystoreFileInput}
+                />
+              )}
             />
             <ErrorKeystoreComponent errors={errors} />
           </div>
 
           <FormField
-            ref={register({
+            {...register('keystorePassword', {
               required: t('required')
             })}
             label={t('filePassword')}
             placeholder={t('filePasswordInputPlaceholder')}
             id="keystore-password"
             type="password"
-            name="keystorePassword"
             fieldWrapperBottomMargin={false}
             errorCaption={errors.keystorePassword?.message}
             testID={ImportFromKeystoreFileSelectors.filePasswordInput}
@@ -265,7 +276,7 @@ const handleKukaiWalletError = (err: any, customAlert: AlertFn) => {
 };
 
 interface ErrorKeystoreComponentProps {
-  errors: NestDataObject<FormData, FieldError>;
+  errors: FieldErrors<FormData>;
 }
 
 const ErrorKeystoreComponent: React.FC<ErrorKeystoreComponentProps> = ({ errors }) =>

@@ -24,19 +24,17 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
     register,
     reset: resetForm,
     handleSubmit,
-    formState,
-    clearError,
-    setError,
-    errors
+    formState: { errors, isSubmitting: submitting },
+    clearErrors,
+    setError
   } = useForm<{ name: string }>();
-  const submitting = formState.isSubmitting;
 
   const onAddContactSubmit = useCallback(
     async ({ name }: { name: string }) => {
       if (submitting) return;
 
       try {
-        clearError();
+        clearErrors();
 
         await addContact({
           address: address!,
@@ -50,10 +48,10 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
 
         await delay();
 
-        setError('address', 'submit-error', err.message);
+        setError('name', { type: 'submit-error', message: err.message });
       }
     },
-    [submitting, clearError, addContact, address, resetForm, onClose, setError]
+    [submitting, clearErrors, addContact, address, resetForm, onClose, setError]
   );
 
   return (
@@ -87,13 +85,12 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
           </div>
 
           <FormField
-            ref={register({
+            {...register('name', {
               required: t('required'),
               maxLength: { value: 50, message: t('maximalAmount', '50') }
             })}
             label={t('name')}
             id="name"
-            name="name"
             placeholder={t('newContactPlaceholder')}
             errorCaption={errors.name?.message}
             containerClassName="mb-6"

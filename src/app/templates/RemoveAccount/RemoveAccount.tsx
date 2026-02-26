@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -35,15 +35,14 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors, watch } = useForm<FormData>();
   const password = watch('password') ?? '';
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
       if (submitting) return;
 
-      clearError('password');
+      clearErrors('password');
       try {
         await removeAccount(account.id, password);
       } catch (err: any) {
@@ -51,10 +50,10 @@ const RemoveAccount: FC = () => {
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
       }
     },
-    [submitting, clearError, setError, removeAccount, account.id]
+    [submitting, clearErrors, setError, removeAccount, account.id]
   );
 
   return (
@@ -89,11 +88,10 @@ const RemoveAccount: FC = () => {
           <Alert title={t('attention')} description={t('removeAccountMessage')} className="mb-4" />
           <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
             <FormField
-              ref={register({ required: t('required') })}
+              {...register('password', { required: t('required') })}
               label={t('password')}
               id="removeacc-secret-password"
               type="password"
-              name="password"
               placeholder={t('enterWalletPassword')}
               errorCaption={errors.password?.message}
               containerClassName="flex-grow"

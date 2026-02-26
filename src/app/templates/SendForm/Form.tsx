@@ -74,7 +74,7 @@ interface FormData {
   fee: number;
 }
 
-const amountStyle = {
+const amountStyle: React.CSSProperties = {
   resize: 'none',
   height: 66,
   position: 'relative'
@@ -123,7 +123,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation, reset } = useForm<FormData>({
+  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger, reset } = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
       fee: RECOMMENDED_ADD_FEE
@@ -157,7 +157,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   useEffect(() => {
     if (!canToggleFiat && prevCanToggleFiat.current && shoudUseFiat) {
       setShouldUseFiat(false);
-      setValue('amount', undefined);
+      setValue('amount', '');
     }
     prevCanToggleFiat.current = canToggleFiat;
   }, [setShouldUseFiat, canToggleFiat, shoudUseFiat, setValue]);
@@ -196,8 +196,8 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const cleanToField = useCallback(() => {
     setValue('to', '');
-    triggerValidation('to');
-  }, [setValue, triggerValidation]);
+    trigger('to');
+  }, [setValue, trigger]);
 
   const toFieldRef = useScrollIntoView<HTMLTextAreaElement>(Boolean(toFilled), { block: 'center' });
 
@@ -322,9 +322,9 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   }, [acc, assetSlug, balance, baseFee, safeFeeValue, shoudUseFiat, assetPrice]);
 
   const validateAmount = useCallback(
-    (v?: number) => {
-      if (v === undefined) return t('required');
-      if (!isKTAddress(toValue) && v === 0) {
+    (v?: string) => {
+      if (v === undefined || v === '') return t('required');
+      if (!isKTAddress(toValue) && Number(v) === 0) {
         return t('amountMustBePositive');
       }
       if (!maxAmount) return true;
@@ -341,17 +341,17 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const maxAmountStr = maxAmount?.toString();
   useEffect(() => {
-    if (formState.dirtyFields.has('amount')) {
-      triggerValidation('amount');
+    if (formState.dirtyFields.amount) {
+      trigger('amount');
     }
-  }, [formState.dirtyFields, triggerValidation, maxAmountStr]);
+  }, [formState.dirtyFields, trigger, maxAmountStr]);
 
   const handleSetMaxAmount = useCallback(() => {
     if (maxAmount) {
       setValue('amount', maxAmount.toString());
-      triggerValidation('amount');
+      trigger('amount');
     }
-  }, [setValue, maxAmount, triggerValidation]);
+  }, [setValue, maxAmount, trigger]);
 
   const handleAmountFieldFocus = useCallback<FocusEventHandler>(evt => {
     evt.preventDefault();
@@ -456,10 +456,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const handleAccountSelect = useCallback(
     (account: string) => {
       setValue('to', account);
-      triggerValidation('to');
+      trigger('to');
       setPickedFromDropdown(true);
     },
-    [setValue, triggerValidation]
+    [setValue, trigger]
   );
 
   const restFormDisplayed = getRestFormDisplayed(toFilled, baseFee, estimationError);
@@ -497,7 +497,11 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
     <form className={clsx('min-h-96 flex flex-col flex-grow', popup && 'pb-8')} onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="to"
-        as={
+        control={control}
+        rules={{
+          validate: (value: any) => validateRecipient(value, domainsClient)
+        }}
+        render={({ field: { ref: _ref, ...field } }) =>
           pickedFromDropdown && filledContact ? (
             <div>
               <div className="text-base font-normal text-primary-white mb-3">
@@ -514,7 +518,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
           ) : (
             <NoSpaceField
               ref={toFieldRef}
+              {...field}
+              onChange={(v: any) => field.onChange(v)}
               onFocus={handleToFieldFocus}
+              onBlur={handleToFieldBlur}
               extraInner={
                 <InnerDropDownComponentGuard
                   contacts={allContactsWithoutCurrent}
@@ -524,28 +531,22 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
                 />
               }
               extraInnerWrapper="unset"
+              textarea
+              rows={2}
+              cleanable={Boolean(toValue)}
+              onClean={cleanToField}
+              id="send-to"
+              label={t('sendTo')}
+              placeholder={t('enterAddress')}
+              errorCaption={!toFieldFocused ? errors.to?.message : null}
+              style={{
+                resize: 'none'
+              }}
+              containerClassName="mb-2"
+              testID={SendFormSelectors.recipientInput}
             />
           )
         }
-        control={control}
-        rules={{
-          validate: (value: any) => validateRecipient(value, domainsClient)
-        }}
-        onChange={([v]) => v}
-        onBlur={handleToFieldBlur}
-        textarea
-        rows={2}
-        cleanable={Boolean(toValue)}
-        onClean={cleanToField}
-        id="send-to"
-        label={t('sendTo')}
-        placeholder={t('enterAddress')}
-        errorCaption={!toFieldFocused ? errors.to?.message : null}
-        style={{
-          resize: 'none'
-        }}
-        containerClassName="mb-2"
-        testID={SendFormSelectors.recipientInput}
       />
 
       {resolvedAddress && (
@@ -570,55 +571,60 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       <div className="relative">
         <Controller
           name="amount"
-          as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
           control={control}
           rules={{
             validate: validateAmount
           }}
-          onChange={([v]) => v}
-          onFocus={() => amountFieldRef.current?.focus()}
-          id="send-amount"
-          assetSymbol={assetSymbol}
-          assetDecimals={shoudUseFiat ? 2 : assetMetadata?.decimals ?? 0}
-          label={t('amount')}
-          labelDescription={
-            restFormDisplayed &&
-            maxAmount && (
-              <div className="flex items-center w-full">
-                <T id="availableToSend" />
-                <div className="flex items-center">
-                  &nbsp;
-                  {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
-                  <div className={clsx('truncate text-sm text-secondary-white text-right flex justify-end')}>
-                    <Money smallFractionFont={false} cryptoDecimals={assetMetadata?.decimals}>
-                      {maxAmount}
-                    </Money>
+          render={({ field: { ref: _ref, ...field } }) => (
+            <AssetField
+              ref={amountFieldRef}
+              {...field}
+              onChange={(v: any) => field.onChange(v)}
+              onFocus={handleAmountFieldFocus}
+              id="send-amount"
+              assetSymbol={assetSymbol}
+              assetDecimals={shoudUseFiat ? 2 : assetMetadata?.decimals ?? 0}
+              label={t('amount')}
+              labelDescription={
+                restFormDisplayed &&
+                maxAmount && (
+                  <div className="flex items-center w-full">
+                    <T id="availableToSend" />
+                    <div className="flex items-center">
+                      &nbsp;
+                      {shoudUseFiat ? <span className="pr-px">{selectedFiatCurrency.symbol}</span> : null}
+                      <div className={clsx('truncate text-sm text-secondary-white text-right flex justify-end')}>
+                        <Money smallFractionFont={false} cryptoDecimals={assetMetadata?.decimals}>
+                          {maxAmount}
+                        </Money>
+                      </div>
+                    </div>
+                    <span onClick={handleSetMaxAmount} className="text-accent-blue cursor-pointer ml-auto">
+                      &nbsp;
+                      <T id="useMax" />
+                    </span>
                   </div>
-                </div>
-                <span onClick={handleSetMaxAmount} className="text-accent-blue cursor-pointer ml-auto">
-                  &nbsp;
-                  <T id="useMax" />
-                </span>
-              </div>
-            )
-          }
-          textarea
-          rows={2}
-          placeholder={0}
-          errorCaption={restFormDisplayed && errors.amount?.message}
-          containerClassName="mb-2"
-          autoFocus={Boolean(maxAmount)}
-          testID={SendFormSelectors.amountInput}
-          style={amountStyle}
-          childForInputWrapper={
-            <TokenToFiat
-              amountValue={amountValue}
-              assetMetadata={assetMetadata}
-              shoudUseFiat={shoudUseFiat}
-              assetSlug={assetSlug}
-              toAssetAmount={toAssetAmount}
+                )
+              }
+              textarea
+              rows={2}
+              placeholder="0"
+              errorCaption={restFormDisplayed && errors.amount?.message}
+              containerClassName="mb-2"
+              autoFocus={Boolean(maxAmount)}
+              testID={SendFormSelectors.amountInput}
+              style={amountStyle}
+              childForInputWrapper={
+                <TokenToFiat
+                  amountValue={amountValue}
+                  assetMetadata={assetMetadata}
+                  shoudUseFiat={shoudUseFiat}
+                  assetSlug={assetSlug}
+                  toAssetAmount={toAssetAmount}
+                />
+              }
             />
-          }
+          )}
         />
       </div>
 

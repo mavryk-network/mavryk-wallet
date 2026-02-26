@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { getAccountBadgeTitle } from 'app/defaults';
@@ -32,8 +32,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const { popup } = useAppEnv();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];
 
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors, watch } = useForm<FormData>();
 
   const walletPasswordValue = watch('password') ?? '';
 
@@ -56,11 +55,11 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     focusPasswordField();
   }, [focusPasswordField]);
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
       if (submitting) return;
 
-      clearError('password');
+      clearErrors('password');
       try {
         let scrt: string;
 
@@ -80,7 +79,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
         focusPasswordField();
       }
     },
@@ -88,7 +87,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
       walletId,
       reveal,
       submitting,
-      clearError,
+      clearErrors,
       setError,
       revealPrivateKey,
       revealMnemonic,
@@ -194,15 +193,13 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
         className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
       >
         <FormField
-          ref={register({ required: t('required') })}
+          {...register('password', { required: t('required'), onChange: () => clearErrors() })}
           label={t('password')}
           id="reveal-secret-password"
           type="password"
-          name="password"
           placeholder={t('enterWalletPassword')}
           errorCaption={errors.password?.message}
           containerClassName="mb-4"
-          onChange={() => clearError()}
           testID={RevealSecretsSelectors.RevealPasswordInput}
         />
 
@@ -226,7 +223,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     walletPasswordValue.length,
     submitting,
     account,
-    clearError
+    clearErrors
   ]);
 
   return (

@@ -38,7 +38,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const chainId = useChainId() ?? '';
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
 
-  const { control, handleSubmit: handleTextFormSubmit, watch, errors, setValue } = useForm<FaucetTextInputFormData>();
+  const { control, handleSubmit: handleTextFormSubmit, watch, formState: { errors }, setValue } = useForm<FaucetTextInputFormData>();
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [processing, setProcessing] = useSafeState(false);
@@ -205,27 +205,34 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
       >
         <Controller
           name="text"
-          as={<FormField className="font-mono" ref={textFieldRef} />}
           control={control}
           rules={{
             validate: validateFaucetTextInput
           }}
-          onChange={([v]) => v}
-          onFocus={handleTextFieldFocus}
-          textarea
-          rows={5}
-          cleanable={Boolean(textFieldValue)}
-          onClean={cleanTextField}
-          id="faucet-text-input"
-          label={t('faucetJson')}
-          labelDescription={t('faucetJsonDescription')}
-          placeholder={'{ ... }'}
-          errorCaption={errors.text?.message && t(errors.text.message.toString() as TID)}
-          className="text-xs"
-          style={{
-            resize: 'none'
-          }}
-          containerClassName="mb-4"
+          render={({ field }) => (
+            <FormField
+              {...field}
+              ref={(el: HTMLTextAreaElement | null) => {
+                field.ref(el);
+                (textFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+              }}
+              onFocus={handleTextFieldFocus}
+              textarea
+              rows={5}
+              cleanable={Boolean(textFieldValue)}
+              onClean={cleanTextField}
+              id="faucet-text-input"
+              label={t('faucetJson')}
+              labelDescription={t('faucetJsonDescription')}
+              placeholder={'{ ... }'}
+              errorCaption={errors.text?.message && t(errors.text.message.toString() as TID)}
+              className="font-mono text-xs"
+              style={{
+                resize: 'none'
+              }}
+              containerClassName="mb-4"
+            />
+          )}
         />
         <div className="w-full flex flex-col">
           <FormSubmitButton loading={processing}>

@@ -64,25 +64,23 @@ export const useBuyWithCreditCardForm = () => {
   const [purchaseLinkLoading, setPurchaseLinkLoading] = useState(false);
   const [purchaseLinkError, setPurchaseLinkError] = useState<Error>();
 
-  const { errors, watch, register, setValue, getValues, ...rest } = useForm<BuyWithCreditCardFormValues>({
+  const { formState, watch, register, setValue, getValues, trigger, ...rest } = useForm<BuyWithCreditCardFormValues>({
     defaultValues,
-    validationResolver
+    resolver: validationResolver
   });
+  const { errors } = formState;
 
-  const formValues = watch({ nest: true });
+  const formValues = watch();
 
   const lazySetValue = useCallback(
     (newValues: Partial<BuyWithCreditCardFormValues>, shouldValidate?: boolean) => {
       const currentValues = getValues();
-      const changes: Array<Partial<BuyWithCreditCardFormValues>> = [];
       for (const fieldName in newValues) {
-        const value = newValues[fieldName as keyof BuyWithCreditCardFormValues];
-        if (value !== currentValues[fieldName as keyof BuyWithCreditCardFormValues]) {
-          changes.push({ [fieldName]: value });
+        const key = fieldName as keyof BuyWithCreditCardFormValues;
+        const value = newValues[key];
+        if (value !== currentValues[key]) {
+          setValue(key, value as any, { shouldValidate });
         }
-      }
-      if (changes.length > 0) {
-        setValue(changes, shouldValidate);
       }
     },
     [setValue, getValues]
@@ -168,6 +166,8 @@ export const useBuyWithCreditCardForm = () => {
     lazySetValue,
     setValue,
     getValues,
+    triggerValidation: trigger,
+    formState,
     onSubmit,
     purchaseLinkError,
     purchaseLinkLoading,

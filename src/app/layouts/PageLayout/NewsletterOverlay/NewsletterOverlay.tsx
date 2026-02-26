@@ -44,9 +44,9 @@ export const NewsletterOverlay: FC = () => {
 
   const validationResolver = useYupValidationResolver<FormValues>(validationSchema);
 
-  const { errors, handleSubmit, watch, register } = useForm<FormValues>({
+  const { formState: { errors }, handleSubmit, watch, register } = useForm<FormValues>({
     defaultValues: { email: '' },
-    validationResolver
+    resolver: validationResolver
   });
   const email = watch('email');
   const isValid = Object.keys(errors).length === 0;
@@ -132,8 +132,7 @@ export const NewsletterOverlay: FC = () => {
               <span className="mb-1 text-xs text-left text-gray-600">{t('keepLatestNews')}</span>
               <div className="w-full mb-4">
                 <input
-                  ref={register()}
-                  name="email"
+                  {...register('email')}
                   className="w-full max-h-13 p-4 rounded-md border text-sm text-gray-910"
                   placeholder="example@mail.com"
                   {...setTestID(NewsletterOverlaySelectors.emailInput)}

@@ -3,7 +3,7 @@ import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo,
 import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
-import { Control, Controller, FieldError, FormStateProxy, NestDataObject, useForm } from 'react-hook-form';
+import { Control, Controller, FieldErrors, UseFormTrigger, useForm } from 'react-hook-form';
 
 import { Alert, Anchor, Button, Divider, FormSubmitButton, HashChip, NoSpaceField } from 'app/atoms';
 import Money from 'app/atoms/Money';
@@ -118,7 +118,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation, reset } = useForm<FormData>({
+  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger, reset } = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
       fee: RECOMMENDED_ADD_FEE
@@ -159,8 +159,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const cleanToField = useCallback(() => {
     setValue('to', '');
-    triggerValidation('to');
-  }, [setValue, triggerValidation]);
+    trigger('to');
+  }, [setValue, trigger]);
 
   useLayoutEffect(() => {
     if (pathname === '/stake') {
@@ -438,24 +438,29 @@ const DelegateForm: FC<DelegateFormProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col flex-1">
           <Controller
             name="to"
-            as={<NoSpaceField ref={toFieldRef} />}
             control={control}
             rules={{ validate: fifoValidateDelegate }}
-            onChange={([v]) => v}
-            onFocus={() => toFieldRef.current?.focus()}
-            textarea
-            rows={2}
-            cleanable={Boolean(toValue)}
-            onClean={cleanToField}
-            id="delegate-to"
-            label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
-            placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
-            errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
-            style={{
-              resize: 'none'
-            }}
-            containerClassName={classNames('mb-4', toFilled && 'hidden')}
-            testID={DelegateFormSelectors.bakerInput}
+            render={({ field: { ref: _ref, ...field } }) => (
+              <NoSpaceField
+                ref={toFieldRef}
+                {...field}
+                onChange={(v: any) => field.onChange(v)}
+                onFocus={() => toFieldRef.current?.focus()}
+                textarea
+                rows={2}
+                cleanable={Boolean(toValue)}
+                onClean={cleanToField}
+                id="delegate-to"
+                label={isDcpNetwork ? t('producer') : t('delegateToValidator')}
+                placeholder={canUseDomainNames ? t('enterPublicAddressPlaceholder') : t('bakerInputPlaceholder')}
+                errorCaption={errors.to?.message && t(errors.to.message.toString() as TID)}
+                style={{
+                  resize: 'none'
+                }}
+                containerClassName={classNames('mb-4', toFilled && 'hidden')}
+                testID={DelegateFormSelectors.bakerInput}
+              />
+            )}
           />
 
           {resolvedAddress && (
@@ -477,7 +482,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
             errors={errors}
             handleFeeFieldChange={handleFeeFieldChange}
             setValue={setValue}
-            triggerValidation={triggerValidation}
+            trigger={trigger}
             formState={formState}
             restFormDisplayed={restFormDisplayed}
             toValue={toValue}
@@ -502,10 +507,10 @@ interface BakerFormProps {
   baseFee?: BigNumber | ArtificialError | UnchangedError | UnregisteredDelegateError;
   control: Control<FormData>;
   handleFeeFieldChange: ([v]: any) => any;
-  errors: NestDataObject<FormData, FieldError>;
+  errors: FieldErrors<FormData>;
   setValue: any;
-  triggerValidation: (payload?: string | string[] | undefined, shouldRender?: boolean | undefined) => Promise<boolean>;
-  formState: FormStateProxy<FormData>;
+  trigger: UseFormTrigger<FormData>;
+  formState: { isSubmitting: boolean };
 }
 
 export enum SortOptions {
@@ -526,7 +531,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
   errors,
   handleFeeFieldChange,
   setValue,
-  triggerValidation,
+  trigger,
   formState,
   restFormDisplayed,
   toValue
@@ -614,7 +619,7 @@ const BakerForm: React.FC<BakerFormProps> = ({
       </div>
     </div>
   ) : (
-    <KnownDelegatorsList setValue={setValue} triggerValidation={triggerValidation} />
+    <KnownDelegatorsList setValue={setValue} trigger={trigger} />
   );
 };
 
@@ -836,10 +841,10 @@ export const AdvancedBakerBannerComponent: React.FC<{
 // LIST --------------------------------
 type KnownDelegatorsListProps = {
   setValue: any;
-  triggerValidation: (payload?: string | string[] | undefined, shouldRender?: boolean | undefined) => Promise<boolean>;
+  trigger: UseFormTrigger<FormData>;
 };
 
-const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, triggerValidation }) => {
+const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, trigger }) => {
   const knownBakers = useKnownBakers();
   const acc = useAccount();
 
@@ -956,7 +961,7 @@ const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setValue, tri
           const last = i === arr.length - 1;
           const handleBakerClick = () => {
             setValue('to', baker.address);
-            triggerValidation('to');
+            trigger('to');
             window.scrollTo(0, 0);
             navigate(`/stake/${baker.address}`);
           };

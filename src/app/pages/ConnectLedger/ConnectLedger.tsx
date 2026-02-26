@@ -87,7 +87,7 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
+  const { control, register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
@@ -96,7 +96,7 @@ const ConnectLedger: FC = () => {
       derivationPath: DERIVATION_PATHS[0].type
     }
   });
-  const submitting = formState.isSubmitting;
+  const submitting = isSubmitting;
   const derivationPathType = watch('derivationPath');
 
   const [error, setError] = useState<ReactNode>(null);
@@ -174,7 +174,7 @@ const ConnectLedger: FC = () => {
               <T id="connectLedgerDesc" />
             </div>
             <FormField
-              ref={register({
+              {...register('name', {
                 pattern: {
                   value: /^.{0,16}$/,
                   message: t('ledgerNameConstraint')
@@ -184,7 +184,6 @@ const ConnectLedger: FC = () => {
               // labelDescription={t('ledgerNameInputDescription')}
               id="create-ledger-name"
               type="text"
-              name="name"
               placeholder={defaultName}
               errorCaption={errors.name?.message}
               containerClassName="mb-2"
@@ -193,33 +192,42 @@ const ConnectLedger: FC = () => {
 
             <div className="flex flex-col">
               <Controller
-                as={DerivationTypeFieldSelect}
                 control={control}
                 name="derivationType"
-                options={DERIVATION_TYPES}
-                i18nKey={t('derivationType')}
+                render={({ field }) => (
+                  <DerivationTypeFieldSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={DERIVATION_TYPES}
+                    i18nKey={t('derivationType')}
+                  />
+                )}
               />
             </div>
 
             <div className="flex flex-col">
               <Controller
-                as={DerivationTypeFieldSelect}
                 control={control}
                 name="derivationPath"
-                options={DERIVATION_PATHS}
-                i18nKey={t('derivationPath')}
+                render={({ field }) => (
+                  <DerivationTypeFieldSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={DERIVATION_PATHS}
+                    i18nKey={t('derivationPath')}
+                  />
+                )}
               />
             </div>
 
             {derivationPathType === 'another' && (
               <FormField
-                ref={register({
+                {...register('accountNumber', {
                   min: { value: 1, message: t('positiveIntMessage') },
                   required: t('required')
                 })}
                 min={0}
                 type="number"
-                name="accountNumber"
                 id="importacc-acc-number"
                 label={t('accountNumber')}
                 placeholder="1"
@@ -229,11 +237,10 @@ const ConnectLedger: FC = () => {
 
             {derivationPathType === 'custom' && (
               <FormField
-                ref={register({
+                {...register('customDerivationPath', {
                   required: t('required'),
                   validate: validateDerivationPath
                 })}
-                name="customDerivationPath"
                 id="importacc-cdp"
                 label={t('customDerivationPath')}
                 placeholder={t('derivationPathExample2')}

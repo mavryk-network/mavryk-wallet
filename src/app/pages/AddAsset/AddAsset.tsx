@@ -2,7 +2,7 @@ import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } f
 
 import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/webmavryk';
 import classNames from 'clsx';
-import { FormContextValues, useForm } from 'react-hook-form';
+import { UseFormReturn, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useSWRConfig, unstable_serialize } from 'swr';
 import { useDebouncedCallback } from 'use-debounce';
@@ -89,10 +89,11 @@ const Form = memo(() => {
   const formAnalytics = useFormAnalytics('AddAsset');
   const dispatch = useDispatch();
 
-  const { register, handleSubmit, errors, formState, watch, setValue, triggerValidation, clearError } =
+  const { register, handleSubmit, formState, watch, setValue, trigger, clearErrors } =
     useForm<FormData>({
       mode: 'onChange'
     });
+  const { errors } = formState;
 
   const contractAddress = watch('address');
   const tokenId = watch('id') || 0;
@@ -141,12 +142,10 @@ const Form = memo(() => {
       if (metadata) {
         metadataRef.current = metadata;
 
-        setValue([
-          { symbol: metadata.symbol },
-          { name: metadata.name },
-          { decimals: metadata.decimals },
-          { thumbnailUri: metadata.thumbnailUri }
-        ]);
+        setValue('symbol', metadata.symbol ?? '');
+        setValue('name', metadata.name ?? '');
+        setValue('decimals', metadata.decimals ?? 0);
+        setValue('thumbnailUri', metadata.thumbnailUri ?? '');
       }
 
       stateToSet = {
@@ -178,7 +177,7 @@ const Form = memo(() => {
 
   useEffect(() => {
     if (formValid) {
-      clearError();
+      clearErrors();
       loadMetadataRef.current();
     } else {
       setState(INITIAL_STATE);
@@ -188,8 +187,8 @@ const Form = memo(() => {
 
   const cleanContractAddress = useCallback(() => {
     setValue('address', '');
-    triggerValidation('address');
-  }, [setValue, triggerValidation]);
+    trigger('address');
+  }, [setValue, trigger]);
 
   const onSubmit = useCallback(
     async ({ address, symbol, name, decimals, thumbnailUri, id }: FormData) => {
@@ -278,10 +277,10 @@ const Form = memo(() => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <NoSpaceField
-        ref={register({
+        ref={register('address', {
           required: t('required'),
           validate: validateContractAddress
-        })}
+        }).ref as unknown as React.Ref<HTMLTextAreaElement>}
         name="address"
         id="addtoken-address"
         textarea
@@ -304,12 +303,11 @@ const Form = memo(() => {
       />
 
       <FormField
-        ref={register({
+        {...register('id', {
           min: { value: 0, message: t('nonNegativeIntMessage') }
         })}
         min={0}
         type="number"
-        name="id"
         id="token-id"
         label={`${t('assetId')} ${t('optionalComment')}`}
         labelDescription={t('tokenIdInputDescription')}
@@ -361,7 +359,8 @@ const Form = memo(() => {
   );
 });
 
-type BottomSectionProps = Pick<FormContextValues, 'register' | 'errors' | 'formState'> & {
+type BottomSectionProps = Pick<UseFormReturn<FormData>, 'register' | 'formState'> & {
+  errors: UseFormReturn<FormData>['formState']['errors'];
   submitError?: ReactNode;
 };
 
@@ -371,14 +370,13 @@ const BottomSection: FC<BottomSectionProps> = props => {
   return (
     <>
       <FormField
-        ref={register({
+        {...register('symbol', {
           required: t('required'),
           pattern: {
             value: /^[a-zA-Z0-9]{2,10}$/,
             message: t('tokenSymbolPatternDescription')
           }
         })}
-        name="symbol"
         id="addtoken-symbol"
         label={t('symbol')}
         labelDescription={t('tokenSymbolInputDescription')}
@@ -392,14 +390,13 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('name', {
           required: t('required'),
           pattern: {
             value: /^.{3,25}$/,
             message: t('tokenNamePatternDescription')
           }
         })}
-        name="name"
         id="addtoken-name"
         label={t('name')}
         labelDescription={t('tokenNameInputDescription')}
@@ -413,11 +410,10 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('decimals', {
           min: { value: 0, message: t('nonNegativeIntMessage') }
         })}
         type="number"
-        name="decimals"
         id="addtoken-decimals"
         label={t('decimals')}
         labelDescription={t('decimalsInputDescription')}
@@ -431,32 +427,16 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('thumbnailUri', {
           validate: (val: string) => {
             if (!val) return true;
             if (val.match(/(https:\/\/.*)/i) || val.match(/(ipfs:\/\/.*)/i) || val.match(/(data:image\/.*)/i)) {
               return true;
             }
 
-            return (
-              <ul className="list-disc list-inside">
-                <li>
-                  <T id="validImageURL" />
-                </li>
-                <li>
-                  <T id="onlyHTTPS" />
-                </li>
-                <li>
-                  <T id="formatsAllowed" />
-                </li>
-                <li>
-                  <T id="orIPFSImageURL" />
-                </li>
-              </ul>
-            );
+            return 'invalidThumbnailUri';
           }
         })}
-        name="thumbnailUri"
         id="addtoken-thumbnailUri"
         label={
           <>
@@ -468,7 +448,26 @@ const BottomSection: FC<BottomSectionProps> = props => {
         }
         labelDescription={t('iconURLInputDescription')}
         placeholder="e.g. https://cdn.com/mytoken.png"
-        errorCaption={errors.thumbnailUri?.message}
+        errorCaption={
+          errors.thumbnailUri?.message === 'invalidThumbnailUri' ? (
+            <ul className="list-disc list-inside">
+              <li>
+                <T id="validImageURL" />
+              </li>
+              <li>
+                <T id="onlyHTTPS" />
+              </li>
+              <li>
+                <T id="formatsAllowed" />
+              </li>
+              <li>
+                <T id="orIPFSImageURL" />
+              </li>
+            </ul>
+          ) : (
+            errors.thumbnailUri?.message
+          )
+        }
         containerClassName="mb-4"
         testIDs={{
           inputSection: AddAssetSelectors.iconURLInputSection,
@@ -497,7 +496,9 @@ const errorHandler = (err: any, contractAddress: string, setValue: any) => {
   const errorMessage = t(
     err instanceof TokenMetadataNotFoundError ? 'failedToParseMetadata' : 'unknownParseErrorOccurred'
   );
-  setValue([{ symbol: '' }, { name: '' }, { decimals: 0 }]);
+  setValue('symbol', '');
+  setValue('name', '');
+  setValue('decimals', 0);
 
   return {
     bottomSectionVisible: true,

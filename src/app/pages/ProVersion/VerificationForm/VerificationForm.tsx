@@ -38,7 +38,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, reset } = useForm<FormData>({
+  const { watch, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<FormData>({
     mode: 'onChange'
   });
 
@@ -60,7 +60,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
   const onSubmit = useCallback(
     async (_: FormData) => {
       const to = toResolved;
-      if (formState.isSubmitting) return;
+      if (isSubmitting) return;
       setSubmitError(null);
 
       const analyticsProperties = { enteredAddress: to };
@@ -102,7 +102,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
         setSubmitError(err);
       }
     },
-    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, rpcUrl, reset, chainId]
+    [toResolved, isSubmitting, setSubmitError, formAnalytics, rpcUrl, chainId, reset]
   );
 
   return (
@@ -113,28 +113,33 @@ const VerificationForm: FC<DelegateFormProps> = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col justify-between flex-1">
         <Controller
           name="to"
-          as={<NoSpaceField ref={toFieldRef} />}
           control={control}
           // will no allow form submitting is address is invalid
           // rules={{ validate: memoizedValidateAddress }}
-          onChange={([v]) => v}
-          onFocus={() => toFieldRef.current?.focus()}
-          textarea
-          rows={2}
-          id="validate-to"
-          label={t('contractAddress')}
-          placeholder={t('enterContractAddressPlaceholder')}
-          errorCaption={(errors.to?.message && t(errors.to.message.toString() as TID)) || submitError?.message}
-          style={{
-            resize: 'none'
-          }}
-          containerClassName={clsx('mb-4', popup && 'px-4')}
-          testID={VerificationFormSelectors.addressInput}
+          render={({ field }) => (
+            <NoSpaceField
+              ref={toFieldRef}
+              value={field.value}
+              onChange={((v: string) => field.onChange(v)) as any}
+              onFocus={() => toFieldRef.current?.focus()}
+              textarea
+              rows={2}
+              id="validate-to"
+              label={t('contractAddress')}
+              placeholder={t('enterContractAddressPlaceholder')}
+              errorCaption={(errors.to?.message && t(errors.to.message.toString() as TID)) || submitError?.message}
+              style={{
+                resize: 'none'
+              }}
+              containerClassName={clsx('mb-4', popup && 'px-4')}
+              testID={VerificationFormSelectors.addressInput}
+            />
+          )}
         />
         <div className={clsx(popup && 'px-4')}>
           <ButtonRounded
-            isLoading={formState.isSubmitting}
-            disabled={!toResolved || formState.isSubmitting || Boolean(submitError?.message)}
+            isLoading={isSubmitting}
+            disabled={!toResolved || isSubmitting || Boolean(submitError?.message)}
             size="big"
             type="submit"
             className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}

@@ -36,6 +36,7 @@ export interface FormData extends TestIDProps {
   analytics?: boolean;
   viewAds: boolean;
   skipOnboarding?: boolean;
+  shouldUseKeystorePassword?: boolean;
   testID?: string;
 }
 
@@ -74,7 +75,15 @@ export const useCreareOrRestorePassword = (
 
   const isKeystorePasswordWeak = isImportFromKeystoreFile && !PASSWORD_PATTERN.test(keystorePassword!);
 
-  const { control, watch, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
+  const {
+    control,
+    watch,
+    register,
+    handleSubmit,
+    trigger,
+    getValues,
+    formState: { errors, isSubmitting, dirtyFields }
+  } = useForm<FormData>({
     defaultValues: {
       analytics: true,
       viewAds: false,
@@ -83,14 +92,14 @@ export const useCreareOrRestorePassword = (
     mode: 'onChange'
   });
 
-  const submitting = formState.isSubmitting;
+  const submitting = isSubmitting;
 
   const shouldUseKeystorePassword = watch('shouldUseKeystorePassword');
 
   const passwordValue = watch('password');
 
-  const isTermsAccepted: boolean = control.getValues()?.termsAccepted;
-  const isBetaAccepted: boolean = control.getValues()?.betaAgreement;
+  const isTermsAccepted: boolean = getValues()?.termsAccepted;
+  const isBetaAccepted: boolean = getValues()?.betaAgreement;
 
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
@@ -102,10 +111,10 @@ export const useCreareOrRestorePassword = (
   });
 
   useLayoutEffect(() => {
-    if (formState.dirtyFields.has('repeatPassword')) {
-      triggerValidation('repeatPassword');
+    if (dirtyFields.repeatPassword) {
+      trigger('repeatPassword');
     }
-  }, [triggerValidation, formState.dirtyFields, passwordValue]);
+  }, [trigger, dirtyFields, passwordValue]);
 
   const handlePasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import classNames from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
@@ -70,14 +70,13 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
     formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus();
   }, []);
 
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors } = useForm<FormData>();
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
       if (submitting) return;
 
-      clearError('password');
+      clearErrors('password');
       formAnalytics.trackSubmit();
       try {
         if (attempt > LAST_ATTEMPT) await delay(Math.random() * 2000 + 1000);
@@ -95,11 +94,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
         focusPasswordField();
       }
     },
-    [submitting, clearError, setError, unlock, focusPasswordField, formAnalytics, attempt, setAttempt, setTimeLock]
+    [submitting, clearErrors, setError, unlock, focusPasswordField, formAnalytics, attempt, setAttempt, setTimeLock]
   );
 
   const isDisabled = useMemo(() => Date.now() - timelock <= lockLevel, [timelock, lockLevel]);
@@ -133,12 +132,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormField
-          ref={register({ required: t('required') })}
+          {...register('password', { required: t('required') })}
           label={''}
           labelDescription={t('unlockPasswordInputDescription')}
           id="unlock-password"
           type="password"
-          name="password"
           placeholder="Password"
           errorCaption={errors.password && errors.password.message}
           containerClassName="mb-4"

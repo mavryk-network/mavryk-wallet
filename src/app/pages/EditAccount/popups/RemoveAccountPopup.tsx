@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -45,15 +45,14 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors, watch } = useForm<FormData>();
   const password = watch('password') ?? '';
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
       if (submitting) return;
 
-      clearError('password');
+      clearErrors('password');
       try {
         await removeAccount(accountId, password);
         if (onRemoved) {
@@ -65,10 +64,10 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
       }
     },
-    [submitting, clearError, setError, removeAccount, accountId, onRemoved]
+    [submitting, clearErrors, setError, removeAccount, accountId, onRemoved]
   );
 
   return (
@@ -82,11 +81,10 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
       <div className={clsx('flex flex-col', popup ? 'px-4' : 'px-12')}>
         <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
           <FormField
-            ref={register({ required: t('required') })}
+            {...register('password', { required: t('required') })}
             label={t('password')}
             id="removeacc-secret-password"
             type="password"
-            name="password"
             placeholder={t('enterWalletPassword')}
             errorCaption={errors.password?.message}
             containerClassName="flex-grow"

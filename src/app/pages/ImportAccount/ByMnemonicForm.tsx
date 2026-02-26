@@ -45,12 +45,13 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
 
   const [numberOfWords, setNumberOfWords] = useState(defaultNumberOfWords);
 
-  const { register, handleSubmit, errors, formState, reset, control, watch } = useForm<ByMnemonicFormData>({
+  const { register, handleSubmit, formState, reset, control, watch } = useForm<ByMnemonicFormData>({
     defaultValues: {
       customDerivationPath: DEFAULT_DERIVATION_PATH,
       accountNumber: 1
     }
   });
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
 
   const derivationPath = watch('customDerivationPath');
@@ -109,22 +110,25 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       <div className="flex flex-col">
         <div>
           <Controller
-            as={DerivationTypeFieldSelect}
             control={control}
             name="customDerivationPath"
-            options={DERIVATION_PATHS}
-            i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
-            descriptionI18nKey="addDerivationPathPrompt"
+            render={({ field }) => (
+              <DerivationTypeFieldSelect
+                {...field}
+                options={DERIVATION_PATHS}
+                i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
+                descriptionI18nKey="addDerivationPathPrompt"
+              />
+            )}
           />
         </div>
       </div>
 
       {derivationPath === 'custom' && (
         <FormField
-          ref={register({
+          {...register('customDerivationPath', {
             validate: validateDerivationPath
           })}
-          name="customDerivationPath"
           id="importacc-cdp"
           label={t('customDerivationPath')}
           placeholder={t('derivationPathExample2')}
@@ -135,8 +139,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       )}
 
       <FormField
-        ref={register}
-        name="password"
+        {...register('password')}
         type="password"
         id="importfundacc-password"
         label={

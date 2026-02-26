@@ -26,15 +26,14 @@ const ActivateAccount = memo(() => {
 
   const [success, setSuccess] = useSafeState<ReactNode>(null);
 
-  const { register, handleSubmit, formState, clearError, setError, errors, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, clearErrors, setError, watch } = useForm<FormData>();
   const secret = watch('secret') ?? '';
 
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (submitting) return;
 
-      clearError('secret');
+      clearErrors('secret');
       setSuccess(null);
 
       try {
@@ -55,10 +54,10 @@ const ActivateAccount = memo(() => {
         console.error(err);
 
         const mes = t('failureSecretMayBeInvalid');
-        setError('secret', SUBMIT_ERROR_TYPE, mes);
+        setError('secret', { type: SUBMIT_ERROR_TYPE, message: mes });
       }
     },
-    [clearError, submitting, setError, setSuccess, account.publicKeyHash, tezos]
+    [clearErrors, submitting, setError, setSuccess, account.publicKeyHash, tezos]
   );
 
   const submit = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -95,8 +94,7 @@ const ActivateAccount = memo(() => {
       <FormField
         textarea
         rows={1}
-        ref={register({ required: t('required') })}
-        name="secret"
+        {...register('secret', { required: t('required') })}
         id="activateaccount-secret"
         label={t('activateAccountSecret')}
         labelDescription={t('activateAccountSecretDescription')}

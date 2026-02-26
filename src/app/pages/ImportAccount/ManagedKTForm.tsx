@@ -53,11 +53,12 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
     return usersContracts.filter(({ address }) => !accounts.some(({ publicKeyHash }) => publicKeyHash === address));
   }, [accounts, usersContracts]);
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } =
+  const { watch, handleSubmit, control, formState, setValue, trigger } =
     useForm<ImportKTAccountFormData>({
       mode: 'onChange',
       defaultValues: {}
     });
+  const { errors } = formState;
 
   const contractAddressFieldRef = useRef<HTMLTextAreaElement>(null);
   const handleContactAddressFocus = useCallback(() => contractAddressFieldRef?.current?.focus(), []);
@@ -87,8 +88,8 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const contractAddress = watch('contractAddress') ?? '';
   const cleanContractAddressField = useCallback(() => {
     setValue('contractAddress', '');
-    triggerValidation('contractAddress');
-  }, [setValue, triggerValidation]);
+    trigger('contractAddress');
+  }, [setValue, trigger]);
 
   const contractAddressFilled = useMemo(
     () => Boolean(contractAddress && isAddressValid(contractAddress)),
@@ -139,9 +140,9 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const handleKnownContractSelect = useCallback(
     (address: string) => {
       setValue('contractAddress', address);
-      triggerValidation('contractAddress');
+      trigger('contractAddress');
     },
-    [setValue, triggerValidation]
+    [setValue, trigger]
   );
 
   return (
@@ -153,51 +154,58 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
 
       <Controller
         name="contractAddress"
-        as={<NoSpaceField ref={contractAddressFieldRef} />}
         control={control}
         rules={{
           required: true,
           validate: validateContractAddress
         }}
-        onChange={([v]) => v}
-        onFocus={handleContactAddressFocus}
-        textarea
-        rows={2}
-        cleanable={Boolean(contractAddress)}
-        onClean={cleanContractAddressField}
-        id="contract-address"
-        label={t('managedContract')}
-        labelDescription={
-          filledAccount ? (
-            <div className="flex flex-wrap items-center">
-              <Identicon
-                type="bottts"
-                hash={filledAccount.address}
-                size={14}
-                className="flex-shrink-0 shadow-xs opacity-75"
-              />
-              <div className="ml-1 mr-px font-normal">
-                <T id="contract" />
-              </div>{' '}
-              <Balance assetSlug="mav" address={filledAccount.address}>
-                {bal => (
-                  <span className="text-xs leading-none">
-                    <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
-                  </span>
-                )}
-              </Balance>
-            </div>
-          ) : (
-            t('contractAddressInputDescription')
-          )
-        }
-        placeholder={t('addressContractPlaceholder')}
-        errorCaption={errors.contractAddress?.message}
-        style={{
-          resize: 'none'
-        }}
-        containerClassName="mb-4"
-        testID={ImportAccountSelectors.managedContractInput}
+        render={({ field }) => (
+          <NoSpaceField
+            {...field}
+            ref={(el: HTMLTextAreaElement | null) => {
+              field.ref(el);
+              (contractAddressFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+            }}
+            onFocus={handleContactAddressFocus}
+            textarea
+            rows={2}
+            cleanable={Boolean(contractAddress)}
+            onClean={cleanContractAddressField}
+            id="contract-address"
+            label={t('managedContract')}
+            labelDescription={
+              filledAccount ? (
+                <div className="flex flex-wrap items-center">
+                  <Identicon
+                    type="bottts"
+                    hash={filledAccount.address}
+                    size={14}
+                    className="flex-shrink-0 shadow-xs opacity-75"
+                  />
+                  <div className="ml-1 mr-px font-normal">
+                    <T id="contract" />
+                  </div>{' '}
+                  <Balance assetSlug="mav" address={filledAccount.address}>
+                    {bal => (
+                      <span className="text-xs leading-none">
+                        <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
+                      </span>
+                    )}
+                  </Balance>
+                </div>
+              ) : (
+                t('contractAddressInputDescription')
+              )
+            }
+            placeholder={t('addressContractPlaceholder')}
+            errorCaption={errors.contractAddress?.message}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName="mb-4"
+            testID={ImportAccountSelectors.managedContractInput}
+          />
+        )}
       />
 
       <div>

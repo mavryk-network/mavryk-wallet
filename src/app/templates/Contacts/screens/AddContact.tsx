@@ -41,14 +41,11 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     register,
     reset: resetForm,
     handleSubmit,
-    formState,
-    clearError,
+    formState: { errors, isSubmitting: submitting },
+    clearErrors,
     setError,
-    errors,
     watch
   } = useForm<ContactFormData>();
-
-  const submitting = formState.isSubmitting;
   const name = watch('name') ?? '';
   const address = watch('address') ?? '';
 
@@ -59,7 +56,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const onCancelSubmit = useCallback(() => {
     if (submitting) return;
 
-    clearError();
+    clearErrors();
     resetForm();
 
     if (properHistoryPosition) {
@@ -67,14 +64,14 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     }
 
     navigate('/', HistoryAction.Replace);
-  }, [clearError, properHistoryPosition, resetForm, submitting]);
+  }, [clearErrors, properHistoryPosition, resetForm, submitting]);
 
   const onAddContactSubmit = useCallback(
     async ({ address, name }: ContactFormData) => {
       if (submitting) return;
 
       try {
-        clearError();
+        clearErrors();
 
         if (isDomainNameValid(address, domainsClient)) {
           const resolved = await domainsClient.resolver.resolveNameToAddress(address);
@@ -104,10 +101,10 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
 
         await delay();
 
-        setError('address', SUBMIT_ERROR_TYPE, err.message);
+        setError('address', { type: SUBMIT_ERROR_TYPE, message: err.message });
       }
     },
-    [submitting, clearError, addContact, resetForm, setError, domainsClient]
+    [submitting, clearErrors, addContact, resetForm, setError, domainsClient]
   );
 
   const validateAddressField = useCallback(
@@ -134,13 +131,12 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     <form className={className} onSubmit={handleSubmit(onAddContactSubmit)}>
       <div>
         <FormField
-          ref={register({
+          {...register('name', {
             required: t('required'),
             maxLength: { value: 50, message: t('maximalAmount', '50') }
           })}
           label={t('contactName')}
           id="name"
-          name="name"
           pattern={ACCOUNT_NAME_PATTERN_STR}
           placeholder={t('newContactPlaceholder')}
           errorCaption={errors.name?.message}
@@ -153,10 +149,9 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
         />
 
         <FormField
-          ref={register({ validate: validateAddressField })}
+          {...register('address', { validate: validateAddressField })}
           label={t('publicAddress')}
           id="address"
-          name="address"
           placeholder={t('enterPublicAddressPlaceholder')}
           errorCaption={errors.address?.message}
           containerClassName="mb-2"

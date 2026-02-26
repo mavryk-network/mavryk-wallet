@@ -10,6 +10,7 @@ const config = {
     '^lib/(.*)$': '<rootDir>/src/lib/$1'
   },
   testEnvironment: 'jsdom',
+  testPathIgnorePatterns: ['/node_modules/', '\\.claude/'],
   transform: {
     '.+\\.ts$': 'ts-jest',
     '.+\\.tsx$': 'ts-jest'

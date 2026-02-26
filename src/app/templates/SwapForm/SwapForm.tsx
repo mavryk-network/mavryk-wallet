@@ -16,7 +16,6 @@ import { useSwap } from 'app/hooks/use-swap';
 import { ReactComponent as InfoIcon } from 'app/icons/info.svg';
 import { ReactComponent as ToggleIcon } from 'app/icons/toggle.svg';
 import { buildSwapPageUrlQuery } from 'app/pages/Swap/utils/build-url-query';
-import { useSelector } from 'app/store';
 import { loadSwapParamsAction, resetSwapParamsAction } from 'app/store/swap/actions';
 import { useSwapParamsSelector, useSwapTokenSelector, useSwapTokensSelector } from 'app/store/swap/selectors';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -25,6 +24,7 @@ import { fetchRoute3SwapParams } from 'lib/apis/route3/fetch-route3-swap-params'
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { KNOWN_TOKENS_SLUGS } from 'lib/assets/known-tokens';
 import { useBalance } from 'lib/balances/hooks';
+import { useUsdToTokenRates } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, useGetTokenMetadata } from 'lib/metadata';
 import {
@@ -72,7 +72,7 @@ export const SwapForm: FC = () => {
   const getSwapParams = useSwap();
   const { data: route3Tokens } = useSwapTokensSelector();
   const swapParams = useSwapParamsSelector();
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useUsdToTokenRates();
   const getTokenMetadata = useGetTokenMetadata();
   const account = useAccount();
   const { popup } = useAppEnv();

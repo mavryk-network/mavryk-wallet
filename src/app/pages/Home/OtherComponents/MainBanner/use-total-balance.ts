@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 
-import { useSelector } from 'app/store/root-state.selector';
 import { TzktUserAccount } from 'lib/apis/tzkt/types';
 import { isMavSlug, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
@@ -12,6 +11,7 @@ import {
   useGetCurrentAccountTokenOrGasBalanceWithDecimals,
   useGetOtherAccountTokenOrGasBalanceWithDecimals
 } from 'lib/balances/hooks';
+import { useUsdToTokenRates } from 'lib/fiat-currency';
 import { useGasTokenMetadata } from 'lib/metadata';
 import { useAccount, useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -26,7 +26,7 @@ export const useTotalBalance = (isStakingBalanceIncluded = false) => {
   const metadata = useGasTokenMetadata();
 
   const getBalance = useGetCurrentAccountTokenOrGasBalanceWithDecimals();
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useUsdToTokenRates();
 
   const slugs = useMemo(() => [MAV_TOKEN_SLUG, ...tokensSlugs], [tokensSlugs]);
 
@@ -55,7 +55,7 @@ export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalance
   const tokensSlugs = useEnabledOtherAccountTokensSlugs(accountPkh);
 
   const getBalance = useGetOtherAccountTokenOrGasBalanceWithDecimals(accountPkh);
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useUsdToTokenRates();
 
   const slugs = useMemo(() => [MAV_TOKEN_SLUG, ...tokensSlugs], [tokensSlugs]);
 

@@ -4,7 +4,7 @@ import { isDefined } from '@rnw-community/shared';
 import axios from 'axios';
 import { BigNumber } from 'bignumber.js';
 
-import { useSelector } from 'app/store/root-state.selector';
+import { useUsdToTokenRatesData, useFiatToTezosRatesData } from 'app/hooks/use-exchange-rates.query';
 import { useStorage } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
@@ -13,7 +13,7 @@ import type { FiatCurrencyOption, CoingeckoFiatInterface } from './types';
 
 const FIAT_CURRENCY_STORAGE_KEY = 'fiat_currency';
 
-export const useUsdToTokenRates = () => useSelector(state => state.currency.usdToTokenRates.data);
+export const useUsdToTokenRates = () => useUsdToTokenRatesData();
 
 function useAssetUSDPrice(slug: string) {
   const usdToTokenRates = useUsdToTokenRates();
@@ -52,7 +52,7 @@ export function useAssetFiatCurrencyPrice(slug: string): BigNumber {
 }
 
 export const useFiatCurrency = () => {
-  const { data } = useSelector(state => state.currency.fiatToTezosRates);
+  const fiatToTezosRates = useFiatToTezosRatesData();
 
   const [selectedFiatCurrency, setSelectedFiatCurrency] = useStorage<FiatCurrencyOption>(
     FIAT_CURRENCY_STORAGE_KEY,
@@ -62,7 +62,7 @@ export const useFiatCurrency = () => {
   return {
     selectedFiatCurrency,
     setSelectedFiatCurrency,
-    fiatRates: data
+    fiatRates: fiatToTezosRates
   };
 };
 

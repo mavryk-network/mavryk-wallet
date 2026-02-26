@@ -1,7 +1,6 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 
 import { PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import {
@@ -14,7 +13,6 @@ import {
 import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { uiStore } from 'lib/store/zustand/ui.store';
-import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
@@ -48,8 +46,6 @@ export const useCreareOrRestorePassword = (
   const { popup } = useAppEnv();
   const { trackEvent } = useAnalytics();
 
-  const dispatch = useDispatch();
-
   const setAnalyticsEnabled = useCallback(
     (analyticsEnabled: boolean) => uiStore.getState().setAnalyticsEnabled(analyticsEnabled),
     []
@@ -57,15 +53,9 @@ export const useCreareOrRestorePassword = (
 
   const setAdsViewEnabled = useCallback(
     (adsViewEnabled: boolean) => {
-      if (adsViewEnabled) {
-        // dispatch(setAdsBannerVisibilityAction(false));
-        dispatch(togglePartnersPromotionAction(true));
-      } else {
-        // dispatch(setAdsBannerVisibilityAction(true));
-        dispatch(togglePartnersPromotionAction(false));
-      }
+      uiStore.getState().togglePartnersPromotion(adsViewEnabled);
     },
-    [dispatch]
+    []
   );
 
   const { setOnboardingCompleted } = useOnboardingProgress();

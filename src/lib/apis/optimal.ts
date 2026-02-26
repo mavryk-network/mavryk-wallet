@@ -56,6 +56,23 @@ export const getOptimalPromotionImage$ = (variant: OptimalPromoVariantEnum, acco
       })
   );
 
+export const fetchOptimalPromotion = async (
+  variant: OptimalPromoVariantEnum,
+  accountAddress: string
+): Promise<OptimalPromotionType> => {
+  const response = await optimalApi.get<OptimalPromotionType>('api/v1/decision', {
+    params: {
+      publisher: 'templewallet',
+      ad_types: variant,
+      div_ids: 'ad',
+      wallets: `1729:${accountAddress}`
+    }
+  });
+  const { data } = response;
+  assertIsObject(data);
+  return data;
+};
+
 function assertIsObject(likelyAnObject: unknown): void {
   const isObject = typeof likelyAnObject === 'object' && likelyAnObject !== null && !Array.isArray(likelyAnObject);
 

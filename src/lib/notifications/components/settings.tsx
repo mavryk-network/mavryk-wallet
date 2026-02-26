@@ -1,18 +1,13 @@
 import React, { FC } from 'react';
 
-import { useDispatch } from 'react-redux';
-
 import { EnablingSetting } from 'app/templates/SettingsGeneral/Components/EnablingSetting';
 import { SettingsGeneralSelectors } from 'app/templates/SettingsGeneral/selectors';
-
-import { setIsNewsEnabledAction } from '../store/actions';
-import { useIsNewsEnabledSelector } from '../store/selectors';
+import { uiStore, useIsNewsEnabled } from 'lib/store/zustand/ui.store';
 
 export const NotificationsSettings: FC = () => {
-  const dispatch = useDispatch();
-  const isNewsEnabled = useIsNewsEnabledSelector();
+  const isNewsEnabled = useIsNewsEnabled();
 
-  const handleNewsNotificationsChange = (checked: boolean) => dispatch(setIsNewsEnabledAction(checked));
+  const handleNewsNotificationsChange = (checked: boolean) => uiStore.getState().setIsNewsEnabled(checked);
 
   return (
     <EnablingSetting

@@ -3,6 +3,7 @@ import { createStore, useStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { ABTestGroup } from 'lib/apis/temple';
+import { AD_HIDING_TIMEOUT } from 'lib/constants';
 
 import { browserStorage } from './persist-storage';
 
@@ -13,6 +14,8 @@ import { browserStorage } from './persist-storage';
  * - newsletter (shouldShowNewsletterModal)
  * - settings (userId, isAnalyticsEnabled, balanceMode, isOnRampPossibility)
  * - abTesting (abTestGroupName)
+ * - partnersPromotion (shouldShowPromotion, promotionHidingTimestamps)
+ * - notifications (isNewsEnabled)
  *
  * Persisted to browser.storage.local via Zustand persist middleware.
  */
@@ -37,6 +40,13 @@ export interface UIState {
 
   // Advertising
   lastSeenPromotionName?: string;
+
+  // Partners Promotion
+  shouldShowPromotion: boolean;
+  promotionHidingTimestamps: Record<string, number>;
+
+  // Notifications
+  isNewsEnabled: boolean;
 }
 
 interface UIActions {
@@ -47,6 +57,9 @@ interface UIActions {
   setOnRampPossibility: (possible: boolean) => void;
   setAbTestGroupName: (group: ABTestGroup) => void;
   setLastSeenPromotionName: (name: string | undefined) => void;
+  togglePartnersPromotion: (show: boolean) => void;
+  hidePromotion: (id: string, timestamp: number) => void;
+  setIsNewsEnabled: (enabled: boolean) => void;
 }
 
 export type UIStore = UIState & UIActions;
@@ -69,6 +82,13 @@ export const uiStore = createStore<UIStore>()(
       // Advertising
       lastSeenPromotionName: undefined,
 
+      // Partners Promotion
+      shouldShowPromotion: false,
+      promotionHidingTimestamps: {},
+
+      // Notifications
+      isNewsEnabled: true,
+
       // Actions
       setShouldShowNewsletterModal: (show) => set({ shouldShowNewsletterModal: show }),
       setUserId: (id) => set({ userId: id }),
@@ -76,7 +96,19 @@ export const uiStore = createStore<UIStore>()(
       setBalanceMode: (mode) => set({ balanceMode: mode }),
       setOnRampPossibility: (possible) => set({ isOnRampPossibility: possible }),
       setAbTestGroupName: (group) => set({ abTestGroupName: group }),
-      setLastSeenPromotionName: (name) => set({ lastSeenPromotionName: name })
+      setLastSeenPromotionName: (name) => set({ lastSeenPromotionName: name }),
+      togglePartnersPromotion: (show) => set({ shouldShowPromotion: show, promotionHidingTimestamps: {} }),
+      hidePromotion: (id, timestamp) => set((state) => {
+        const cleaned: Record<string, number> = {};
+        for (const key in state.promotionHidingTimestamps) {
+          if (state.promotionHidingTimestamps[key] >= timestamp - AD_HIDING_TIMEOUT * 2) {
+            cleaned[key] = state.promotionHidingTimestamps[key];
+          }
+        }
+        cleaned[id] = timestamp;
+        return { promotionHidingTimestamps: cleaned };
+      }),
+      setIsNewsEnabled: (enabled) => set({ isNewsEnabled: enabled })
     }),
     {
       name: 'zustand-ui',
@@ -100,7 +132,10 @@ export const uiStore = createStore<UIStore>()(
         balanceMode: state.balanceMode,
         isOnRampPossibility: state.isOnRampPossibility,
         abTestGroupName: state.abTestGroupName,
-        lastSeenPromotionName: state.lastSeenPromotionName
+        lastSeenPromotionName: state.lastSeenPromotionName,
+        shouldShowPromotion: state.shouldShowPromotion,
+        promotionHidingTimestamps: state.promotionHidingTimestamps,
+        isNewsEnabled: state.isNewsEnabled
       }) as unknown as UIStore
     }
   )
@@ -118,3 +153,6 @@ export const useBalanceMode = () => useUIStore(s => s.balanceMode);
 export const useIsOnRampPossibility = () => useUIStore(s => s.isOnRampPossibility);
 export const useAbTestGroupName = () => useUIStore(s => s.abTestGroupName);
 export const useLastSeenPromotionName = () => useUIStore(s => s.lastSeenPromotionName);
+export const useShouldShowPromotion = () => useUIStore(s => s.shouldShowPromotion);
+export const usePromotionHidingTimestamp = (id: string) => useUIStore(s => s.promotionHidingTimestamps[id] ?? 0);
+export const useIsNewsEnabled = () => useUIStore(s => s.isNewsEnabled);

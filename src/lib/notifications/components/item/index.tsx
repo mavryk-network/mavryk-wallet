@@ -2,7 +2,6 @@ import React, { FC, useEffect } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Button } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -11,8 +10,7 @@ import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
 import { goBack, navigate } from 'lib/woozie';
 
-import { readNotificationsItemAction } from '../../store/actions';
-import { useNotificationsItemSelector } from '../../store/selectors';
+import { useNotificationItem, useReadNotificationItem } from '../../hooks/use-notifications.query';
 import { formatDateOutput } from '../../utils/date.utils';
 
 import { NotificationsItemContent } from './content';
@@ -23,9 +21,10 @@ interface Props {
 
 export const NotificationsItem: FC<Props> = ({ id }) => {
   const { popup } = useAppEnv();
-  const dispatch = useDispatch();
-  const notification = useNotificationsItemSelector(id);
-  useEffect(() => void dispatch(readNotificationsItemAction(notification?.id ?? 0)), [notification?.id]);
+  const notification = useNotificationItem(id);
+  const readItem = useReadNotificationItem();
+
+  useEffect(() => void readItem(notification?.id ?? 0), [notification?.id, readItem]);
 
   useEffect(() => {
     navigate('/');

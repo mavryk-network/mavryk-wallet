@@ -1,7 +1,6 @@
 import React, { FC, FunctionComponent, SVGProps, useEffect, useLayoutEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 import { Props as TippyProps } from 'tippy.js';
 
 import { Anchor, Divider } from 'app/atoms';
@@ -10,7 +9,6 @@ import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
@@ -22,7 +20,8 @@ import * as Woozie from 'lib/woozie';
 import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/woozie';
 import { createLocationState } from 'lib/woozie/location';
 
-import { togglePartnersPromotionAction } from '../../store/partners-promotion/actions';
+import { uiStore, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
+
 import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress.hook';
 
 import { ContentSection } from './ContentSection';
@@ -50,9 +49,8 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const account = useAccount();
   const { search } = useLocation();
   useNetwork();
-  const dispatch = useDispatch();
 
-  const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
+  const shouldShowPartnersPromo = useShouldShowPromotion();
 
   const assetMetadata = useAssetMetadata(assetSlug || MAV_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
@@ -69,9 +67,9 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
 
   useEffect(() => {
     if (shouldShowPartnersPromo) {
-      dispatch(togglePartnersPromotionAction(false));
+      uiStore.getState().togglePartnersPromotion(false);
     }
-  }, [shouldShowPartnersPromo, dispatch]);
+  }, [shouldShowPartnersPromo]);
 
   const accountPkh = account.publicKeyHash;
   const canSend = account.type !== TempleAccountType.WatchOnly;

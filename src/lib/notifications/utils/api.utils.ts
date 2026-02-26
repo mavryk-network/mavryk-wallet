@@ -16,3 +16,13 @@ export const loadNotifications$ = (startFromTime: number) =>
       }
     })
   ).pipe(map(response => response.data.map(notification => ({ ...notification, status: NotificationStatus.New }))));
+
+export const fetchNotifications = async (startFromTime: number): Promise<NotificationInterface[]> => {
+  const response = await templeWalletApi.get<NotificationInterface[]>('/notifications', {
+    params: {
+      platform: NotificationPlatformType.Extension,
+      startFromTime
+    }
+  });
+  return response.data.map(notification => ({ ...notification, status: NotificationStatus.New }));
+};

@@ -1,14 +1,6 @@
 module.exports = {
-  purge: {
-    content: ['./public/**/*.{html,js,mjs}', './src/**/*.{js,jsx,ts,tsx}'],
-    options: {
-      whitelistPatterns: [/popper/, /tippy/, /BrainhubCarousel/],
-      whitelistPatternsChildren: [/popper/, /tippy/, /BrainhubCarousel/]
-    }
-  },
-  prefix: '',
-  important: false,
-  separator: ':',
+  // v4 auto-detects content — purge/content config is no longer needed.
+  // This config is loaded via @config in src/main.css for theme customization.
   theme: {
     screens: {
       xxs: '440px',
@@ -124,7 +116,6 @@ module.exports = {
           300: '#90cdf4',
           400: '#63b3ed',
           500: '#4299e1',
-          510: '#1B96CD',
           600: '#3182ce',
           650: '#007AFF',
           700: '#2b6cb0',
@@ -176,12 +167,8 @@ module.exports = {
         'secondary-white': baseColors.gray[30],
         'accent-blue': baseColors.indigo[700],
         'accent-blue-hover': 'rgba(95, 88, 255, 0.25)',
-        'indigo-add': '#5F58FF80',
-        'green-add': '#00B71D80',
-        'orange-add': '#F8641280',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
-        'tertiary-card': '#282828',
         'primary-card-hover': baseColors.gray[890],
         'secondary-card': baseColors.gray[910],
         'primary-bg': baseColors.gray[920],
@@ -190,7 +177,6 @@ module.exports = {
         'primary-error': '#FF3E3E',
         'primary-warning': '#E68226',
         'primary-info': '#B9EEFE',
-        'primary-info-hover': '#B9EEFE40',
         'accent-orange': baseColors.orange[600],
 
         'list-item-selected': baseColors.gray[710],
@@ -198,7 +184,6 @@ module.exports = {
         'primary-card-op': 'rgba(0, 0, 0, 0.50)',
         'primary-border': 'rgba(255, 255, 255, 0.25)',
         'primary-alert-bg': 'rgba(230, 130, 38, 0.25)',
-        'primary-alert-error': 'rgba(219, 5, 5, 0.25)',
         'primary-success-bg': 'rgba(47, 143, 62, 0.25)',
         // --
         'primary-orange': baseColors.orange[500],
@@ -213,8 +198,11 @@ module.exports = {
         ...brandColors
       };
     })(),
-    backgroundColor: theme => theme('colors'),
-    backgroundOpacity: theme => theme('opacity'),
+    // v4: backgroundColor, textColor, borderColor, placeholderColor automatically
+    // inherit from colors. Opacity utilities use modifier syntax (e.g. bg-red-500/50).
+    // Removed: backgroundColor, backgroundOpacity, textColor, textOpacity,
+    //   borderColor, borderOpacity, placeholderColor, placeholderOpacity,
+    //   divideColor, divideOpacity, divideWidth callback references.
     backgroundPosition: {
       bottom: 'bottom',
       center: 'center',
@@ -231,11 +219,6 @@ module.exports = {
       cover: 'cover',
       contain: 'contain'
     },
-    borderColor: theme => ({
-      ...theme('colors'),
-      DEFAULT: theme('colors["primary-border"]', 'currentColor')
-    }),
-    borderOpacity: theme => theme('opacity'),
     borderRadius: {
       none: '0',
       sm: '0.125rem',
@@ -271,7 +254,6 @@ module.exports = {
       outline: '0 0 0 3px rgba(237, 137, 54, 0.5)',
       none: 'none'
     },
-    container: {},
     cursor: {
       auto: 'auto',
       default: 'default',
@@ -281,9 +263,6 @@ module.exports = {
       move: 'move',
       'not-allowed': 'not-allowed'
     },
-    divideColor: theme => theme('borderColor'),
-    divideOpacity: theme => theme('borderOpacity'),
-    divideWidth: theme => theme('borderWidth'),
     fill: {
       current: 'currentColor',
       'accent-blue': '#5F58FF',
@@ -381,8 +360,6 @@ module.exports = {
       11: '11',
       12: '12'
     },
-    placeholderColor: theme => theme('colors'),
-    placeholderOpacity: theme => theme('opacity'),
     stroke: {
       current: 'currentColor',
       'accent-orange': '#FF5B00',
@@ -397,8 +374,6 @@ module.exports = {
       1: '1',
       2: '2'
     },
-    textColor: theme => theme('colors'),
-    textOpacity: theme => theme('opacity'),
     zIndex: {
       auto: 'auto',
       0: '0',
@@ -540,14 +515,6 @@ module.exports = {
       90: '90deg',
       180: '180deg'
     },
-    translate: (theme, { negative }) => ({
-      ...theme('spacing'),
-      ...negative(theme('spacing')),
-      '-full': '-100%',
-      '-1/2': '-50%',
-      '1/2': '50%',
-      full: '100%'
-    }),
     skew: {
       '-12': '-12deg',
       '-6': '-6deg',
@@ -681,15 +648,12 @@ module.exports = {
         '2px': '2px',
         10: '0.625rem',
         '12px': '12px',
-        '14px': '14px',
-        4.5: '18px',
-        '40px': '2.5rem',
         '14px': '0.875rem',
+        4.5: '18px',
         '10px': '0.6rem',
         '40px': '40px',
         13: '3.25rem',
         15: '3.75rem',
-        17: '4.26rem',
         18: '4.5rem',
         21: '5.25rem',
         23: '5.75rem',
@@ -708,15 +672,11 @@ module.exports = {
         '400px': '400px',
         max: '100%'
       },
-      height: theme => theme('spacing'),
-      minHeight: theme => theme('height'),
-      maxHeight: theme => theme('height'),
-      width: theme => theme('spacing'),
-      minWidth: theme => theme('width'),
-      maxWidth: (theme, { breakpoints }) => ({
-        ...theme('width'),
+      // v4: height/width/margin/padding/etc. automatically include spacing values.
+      // Only need to add truly extra values that are not in spacing.
+      maxWidth: {
         xs: '20rem',
-        sm: '23.4375rem',
+        sm: '24rem',
         md: '28rem',
         lg: '32rem',
         xl: '36rem',
@@ -725,15 +685,9 @@ module.exports = {
         '4xl': '56rem',
         '5xl': '64rem',
         '6xl': '72rem',
-        '9/10': '90%',
-        ...breakpoints(theme('screens'))
-      }),
-      margin: (theme, { negative }) => ({
-        ...theme('spacing'),
-        ...negative(theme('spacing'))
-      }),
-      padding: theme => ({
-        ...theme('spacing'),
+        '9/10': '90%'
+      },
+      padding: {
         '1/2': '50%',
         '1/3': '33.333333%',
         '2/3': '66.666667%',
@@ -761,122 +715,23 @@ module.exports = {
         '10/12': '83.333333%',
         '11/12': '91.666667%',
         full: '100%'
-      }),
+      },
       inset: {
         '2px': '2px',
         '1/2': '50%',
         18: '4.5rem'
       },
-      space: (theme, { negative }) => ({
-        ...theme('spacing'),
-        ...negative(theme('spacing'))
-      }),
-      gap: theme => theme('spacing')
+      translate: {
+        '-full': '-100%',
+        '-1/2': '-50%',
+        '1/2': '50%',
+        full: '100%'
+      },
+      borderColor: {
+        DEFAULT: 'rgba(255, 255, 255, 0.25)'
+      }
     }
-  },
-  variants: {
-    accessibility: ['responsive', 'focus'],
-    alignContent: ['responsive'],
-    alignItems: ['responsive'],
-    alignSelf: ['responsive'],
-    appearance: ['responsive'],
-    backgroundAttachment: ['responsive'],
-    backgroundColor: ['responsive', 'hover', 'focus'],
-    backgroundOpacity: ['responsive', 'hover', 'focus'],
-    backgroundPosition: ['responsive'],
-    backgroundRepeat: ['responsive'],
-    backgroundSize: ['responsive'],
-    borderCollapse: ['responsive'],
-    borderColor: ['responsive', 'hover', 'focus'],
-    borderOpacity: ['responsive', 'hover', 'focus'],
-    borderRadius: ['responsive'],
-    borderStyle: ['responsive'],
-    borderWidth: ['responsive'],
-    boxShadow: ['responsive', 'hover', 'focus'],
-    boxSizing: ['responsive'],
-    container: ['responsive'],
-    cursor: ['responsive'],
-    display: ['responsive'],
-    divideColor: ['responsive'],
-    divideOpacity: ['responsive'],
-    divideWidth: ['responsive'],
-    fill: ['responsive'],
-    flex: ['responsive'],
-    flexDirection: ['responsive'],
-    flexGrow: ['responsive'],
-    flexShrink: ['responsive'],
-    flexWrap: ['responsive'],
-    float: ['responsive'],
-    clear: ['responsive'],
-    fontFamily: ['responsive'],
-    fontSize: ['responsive'],
-    fontSmoothing: ['responsive'],
-    fontStyle: ['responsive'],
-    fontWeight: ['responsive', 'hover', 'focus'],
-    height: ['responsive'],
-    inset: ['responsive'],
-    justifyContent: ['responsive'],
-    letterSpacing: ['responsive'],
-    lineHeight: ['responsive'],
-    listStylePosition: ['responsive'],
-    listStyleType: ['responsive'],
-    margin: ['responsive'],
-    maxHeight: ['responsive'],
-    maxWidth: ['responsive'],
-    minHeight: ['responsive'],
-    minWidth: ['responsive'],
-    objectFit: ['responsive'],
-    objectPosition: ['responsive'],
-    opacity: ['responsive', 'hover', 'focus'],
-    order: ['responsive'],
-    outline: ['responsive', 'focus'],
-    overflow: ['responsive'],
-    overscrollBehavior: ['responsive'],
-    padding: ['responsive'],
-    placeholderColor: ['responsive', 'focus'],
-    placeholderOpacity: ['responsive', 'focus'],
-    pointerEvents: ['responsive'],
-    position: ['responsive'],
-    resize: ['responsive'],
-    space: ['responsive'],
-    stroke: ['responsive'],
-    strokeWidth: ['responsive'],
-    tableLayout: ['responsive'],
-    textAlign: ['responsive'],
-    textColor: ['responsive', 'hover', 'focus'],
-    textOpacity: ['responsive', 'hover', 'focus'],
-    textDecoration: ['responsive', 'hover', 'focus'],
-    textTransform: ['responsive'],
-    userSelect: ['responsive'],
-    verticalAlign: ['responsive'],
-    visibility: ['responsive'],
-    whitespace: ['responsive'],
-    width: ['responsive'],
-    wordBreak: ['responsive'],
-    zIndex: ['responsive'],
-    gap: ['responsive'],
-    gridAutoFlow: ['responsive'],
-    gridTemplateColumns: ['responsive'],
-    gridColumn: ['responsive'],
-    gridColumnStart: ['responsive'],
-    gridColumnEnd: ['responsive'],
-    gridTemplateRows: ['responsive'],
-    gridRow: ['responsive'],
-    gridRowStart: ['responsive'],
-    gridRowEnd: ['responsive'],
-    transform: ['responsive'],
-    transformOrigin: ['responsive'],
-    scale: ['responsive', 'hover', 'focus'],
-    rotate: ['responsive', 'hover', 'focus'],
-    translate: ['responsive', 'hover', 'focus'],
-    skew: ['responsive', 'hover', 'focus'],
-    transitionProperty: ['responsive'],
-    transitionTimingFunction: ['responsive'],
-    transitionDuration: ['responsive'],
-    transitionDelay: ['responsive'],
-    animation: ['responsive'],
-    textOverflow: ['responsive', 'group-hover']
-  },
-  corePlugins: {},
-  plugins: []
+  }
+  // v4: variants are no longer configured — all variants are enabled by default.
+  // v4: corePlugins and plugins arrays are handled differently (via CSS @plugin).
 };

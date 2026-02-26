@@ -7,9 +7,9 @@ import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import { useBalanceSelector } from 'app/store/balances/selectors';
 import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
+  useCollectiblesDetailsLoading,
+  useCollectibleDetails
+} from 'lib/collectibles/use-collectibles-details.query';
 import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import { T } from 'lib/i18n';
@@ -40,8 +40,8 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
     [balanceAtomic, decimals]
   );
 
-  const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-  const details = useCollectibleDetailsSelector(assetSlug);
+  const areDetailsLoading = useCollectiblesDetailsLoading();
+  const details = useCollectibleDetails(assetSlug);
 
   const listing = useMemo(() => getDetailsListing(details), [details]);
 

@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 
-import { useSwapTokensSelector } from 'app/store/swap/selectors';
 import { toTokenSlug } from 'lib/assets';
+import { useSwapTokensData } from 'lib/swap/use-swap.query';
 
 import { isRoute3GasToken } from './utils/assets.utils';
 
 export const useAvailableRoute3TokensSlugs = () => {
-  const { data: route3tokens, isLoading } = useSwapTokensSelector();
+  const { data: route3tokens, isLoading } = useSwapTokensData();
 
   const route3tokensSlugs = useMemo(
     () =>

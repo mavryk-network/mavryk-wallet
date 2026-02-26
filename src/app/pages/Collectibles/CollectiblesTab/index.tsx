@@ -11,7 +11,7 @@ import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useSortedAssetSlugs } from 'app/hooks/use-sorted-asset-slugs';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAllCollectibleDetailsSelector } from 'app/store/collectibles/selectors';
+import { useAllCollectiblesDetails } from 'lib/collectibles/use-collectibles-details.query';
 import { AssetListEmptySection } from 'app/templates/AssetListEmptySection';
 import {
   SearchExplorer,
@@ -42,7 +42,7 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
   const allSlugs = useEnabledAccountCollectiblesSlugs();
-  const assetsDetails = useAllCollectibleDetailsSelector();
+  const assetsDetails = useAllCollectiblesDetails();
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 

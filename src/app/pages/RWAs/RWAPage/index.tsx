@@ -1,37 +1,29 @@
 import React, { memo, useMemo } from 'react';
 
-// import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Spinner, Divider, Identicon, Anchor } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
 import PageLayout from 'app/layouts/PageLayout';
-// import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
+import { useRwaDetails, useRwasDetailsQuery } from 'lib/rwas/use-rwas-details.query';
 import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { ActionsBlock } from 'app/templates/Actions';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
-import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T } from 'lib/i18n';
 import { TokenMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
-import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
 
 import { RwaImageFallback } from '../components/CollectibleImageFallback';
 import { LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY } from '../constants';
 
 import { PropertiesItems } from './PropertiesItems';
-
-const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 
 interface Props {
   assetSlug: string;
@@ -50,7 +42,7 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
 
   const { publicKeyHash } = useAccount();
   const metadata = useRwaMetadataSelector(assetSlug);
-  const rwaDetails = useRwaDetailsSelector(assetSlug);
+  const rwaDetails = useRwaDetails(assetSlug);
   const { value: balance = ZERO } = useBalance(assetSlug, publicKeyHash);
   const [address] = fromAssetSlug(assetSlug);
 
@@ -58,11 +50,8 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
 
   const areDetailsLoading = false;
 
-  const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
-    dispatch,
-    assetSlug
-  ]);
+  // TanStack Query handles fetching + refetch interval automatically
+  useRwasDetailsQuery([assetSlug]);
 
   const details: RwaDetailsDisplay = useMemo(
     () => ({

@@ -11,7 +11,7 @@ import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useSortedAssetSlugs } from 'app/hooks/use-sorted-asset-slugs';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAllRwaDetailsSelector } from 'app/store/rwas/selectors';
+import { useAllRwasDetails } from 'lib/rwas/use-rwas-details.query';
 import { AssetListEmptySection } from 'app/templates/AssetListEmptySection';
 import {
   SearchExplorer,
@@ -42,7 +42,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
   const allSlugs = useEnabledAccountRwaSlugs();
-  const assetsDetails = useAllRwaDetailsSelector();
+  const assetsDetails = useAllRwasDetails();
 
   const [sortOption, setSortOption] = useState<null | SortOptions>(SortOptions.HIGH_TO_LOW);
 

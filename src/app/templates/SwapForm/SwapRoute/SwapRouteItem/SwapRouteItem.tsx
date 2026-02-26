@@ -3,8 +3,8 @@ import React, { FC } from 'react';
 import { BigNumber } from 'bignumber.js';
 
 import { ReactComponent as Separator } from 'app/icons/separator.svg';
-import { useSwapDexesSelector } from 'app/store/swap/selectors';
 import { Route3Chain } from 'lib/route3/interfaces';
+import { useSwapDexesData } from 'lib/swap/use-swap.query';
 
 import { HopItem } from './hop-item';
 
@@ -32,7 +32,7 @@ const calculatePercentage = (base: string | undefined, part: string) => {
   return amountToFormat.toFixed(PERCENTAGE_DECIMALS);
 };
 export const SwapRouteItem: FC<Props> = ({ chain, baseInput, baseOutput }) => {
-  const { data: route3Dexes } = useSwapDexesSelector();
+  const { data: route3Dexes } = useSwapDexesData();
 
   return (
     <div className="flex justify-between relative">

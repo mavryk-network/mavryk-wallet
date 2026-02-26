@@ -1,6 +1,6 @@
 import { isDefined } from '@rnw-community/shared';
 
-import { CollectibleDetails } from 'app/store/collectibles/state';
+import type { CollectibleDetails } from 'lib/collectibles/types';
 import { objktCurrencies } from 'lib/apis/objkt';
 
 export function getDetailsListing(details: CollectibleDetails | nullish) {

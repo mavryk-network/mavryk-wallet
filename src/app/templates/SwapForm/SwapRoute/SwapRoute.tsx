@@ -5,11 +5,10 @@ import BigNumber from 'bignumber.js';
 
 import { ReactComponent as ChevronDown } from 'app/icons/chevron-down.svg';
 import { ReactComponent as ChevronUp } from 'app/icons/chevron-up.svg';
-import { useSwapParamsSelector } from 'app/store/swap/selectors';
 import { T } from 'lib/i18n';
 import { AssetMetadataBase } from 'lib/metadata';
 import { ROUTING_FEE_RATIO } from 'lib/route3/constants';
-import { isSwapChains, Route3Chain } from 'lib/route3/interfaces';
+import { isSwapChains, Route3Chain, Route3SwapParamsResponse } from 'lib/route3/interfaces';
 
 import { LbPoolPart } from './lb-pool-part';
 import { SwapRouteItem } from './SwapRouteItem/SwapRouteItem';
@@ -19,6 +18,7 @@ interface Props {
   isLbInput: boolean;
   outputToken: AssetMetadataBase;
   routingFeeIsTakenFromOutput: boolean;
+  swapParamsData: Route3SwapParamsResponse;
   className?: string;
 }
 
@@ -27,13 +27,12 @@ export const SwapRoute: FC<Props> = ({
   isLbOutput,
   routingFeeIsTakenFromOutput,
   outputToken,
+  swapParamsData,
   className
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const {
-    data: { input, output, ...chains }
-  } = useSwapParamsSelector();
+  const { input, output, ...chains } = swapParamsData;
 
   const chainsHeap = useMemo(() => {
     let chainsHeapBeforeOutputFee: Route3Chain[] = [];

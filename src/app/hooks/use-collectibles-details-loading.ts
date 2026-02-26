@@ -1,11 +1,9 @@
 import { isEqual } from 'lodash';
 
-import { dispatch } from 'app/store';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
+import { useCollectiblesDetailsQuery } from 'lib/collectibles/use-collectibles-details.query';
 import { useAccountCollectibles } from 'lib/assets/hooks';
-import { COLLECTIBLES_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
 import { useAccount, useChainId } from 'lib/temple/front';
-import { useInterval, useMemoWithCompare } from 'lib/ui/hooks';
+import { useMemoWithCompare } from 'lib/ui/hooks';
 
 export const useCollectiblesDetailsLoading = () => {
   const chainId = useChainId()!;
@@ -14,12 +12,6 @@ export const useCollectiblesDetailsLoading = () => {
 
   const slugs = useMemoWithCompare(() => collectibles.map(({ slug }) => slug).sort(), [collectibles], isEqual);
 
-  useInterval(
-    () => {
-      // Is it necessary for collectibles on non-Mainnet networks too?
-      if (slugs.length) dispatch(loadCollectiblesDetailsActions.submit(slugs));
-    },
-    COLLECTIBLES_DETAILS_SYNC_INTERVAL,
-    [slugs]
-  );
+  // TanStack Query handles fetching + refetch interval automatically
+  useCollectiblesDetailsQuery(slugs);
 };

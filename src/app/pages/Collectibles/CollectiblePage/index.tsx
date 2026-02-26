@@ -2,18 +2,17 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
 import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
+  useCollectiblesDetailsLoading,
+  useCollectibleDetails,
+  useCollectiblesDetailsQuery
+} from 'lib/collectibles/use-collectibles-details.query';
 import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';
@@ -27,7 +26,6 @@ import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
 import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
@@ -46,8 +44,8 @@ interface Props {
 
 const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const metadata = useCollectibleMetadataSelector(assetSlug);
-  const details = useCollectibleDetailsSelector(assetSlug);
-  const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const details = useCollectibleDetails(assetSlug);
+  const areAnyNFTsDetailsLoading = useCollectiblesDetailsLoading();
   const { fullPage } = useAppEnv();
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
@@ -87,11 +85,8 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
-  const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
-    dispatch,
-    assetSlug
-  ]);
+  // TanStack Query handles fetching + refetch interval automatically
+  useCollectiblesDetailsQuery([assetSlug]);
 
   const displayedOffer = useMemo(() => {
     const highestOffer = offers?.[0];

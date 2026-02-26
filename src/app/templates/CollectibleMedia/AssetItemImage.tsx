@@ -3,7 +3,7 @@ import React, { memo, useMemo, useState } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import { debounce } from 'lodash';
 
-import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors';
+import { useCollectibleIsAdult } from 'lib/collectibles/use-collectibles-details.query';
 import { buildCollectibleImagesStack } from 'lib/images-uri';
 import type { TokenMetadata } from 'lib/metadata';
 import { ImageStacked } from 'lib/ui/ImageStacked';
@@ -23,7 +23,7 @@ interface Props {
 
 export const AssetItemImage = memo<Props>(
   ({ assetSlug, metadata, adultBlur, areDetailsLoading, containerElemRef, fallback }) => {
-    const isAdultContent = useCollectibleIsAdultSelector(assetSlug);
+    const isAdultContent = useCollectibleIsAdult(assetSlug);
     const isAdultFlagLoading = areDetailsLoading && !isDefined(isAdultContent);
     const shouldShowBlur = isAdultContent && adultBlur;
 

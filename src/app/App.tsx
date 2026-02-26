@@ -15,6 +15,7 @@ import { AppEnvProvider } from 'app/env';
 import ErrorBoundary from 'app/ErrorBoundary';
 import Dialogs from 'app/layouts/Dialogs';
 import { PageRouter } from 'app/PageRouter';
+import { QueryProvider } from 'lib/store/zustand/QueryProvider';
 import { TempleProvider } from 'lib/temple/front';
 import { TzktConnectionProvider } from 'lib/temple/front/tzkt-connection';
 import { DialogsProvider } from 'lib/ui/dialog';
@@ -49,12 +50,14 @@ export const App: FC<Props> = ({ env }) => (
 
 const AppProvider: FC<Props> = ({ children, env }) => (
   <AppEnvProvider {...env}>
-    <StoreProvider>
-      <Woozie.Provider>
-        <TempleProvider>
-          <TzktConnectionProvider>{children}</TzktConnectionProvider>
-        </TempleProvider>
-      </Woozie.Provider>
-    </StoreProvider>
+    <QueryProvider>
+      <StoreProvider>
+        <Woozie.Provider>
+          <TempleProvider>
+            <TzktConnectionProvider>{children}</TzktConnectionProvider>
+          </TempleProvider>
+        </Woozie.Provider>
+      </StoreProvider>
+    </QueryProvider>
   </AppEnvProvider>
 );

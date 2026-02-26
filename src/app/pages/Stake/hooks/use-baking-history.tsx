@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
 import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
@@ -28,7 +28,7 @@ export const useBakingHistory = () => {
   const myBakerPkh = accStats?.delegate?.address || null;
   const canDelegate = acc.type !== TempleAccountType.WatchOnly;
   const chainId = useChainId(true);
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
 
   const getBakingHistory = useCallback(
     async ([, accountPkh, , chainId]: [string, string, string | nullish, string | nullish]) => {

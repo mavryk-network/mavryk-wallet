@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import {
   WalletProvider,
@@ -28,15 +28,16 @@ import toBuffer from 'typedarray-to-buffer';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
-import { useRetryableSWR } from 'lib/swr';
+import {
+  useWalletStore,
+  useWalletSuspense,
+  walletStore
+} from 'lib/store/zustand/wallet.store';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
-  TempleConfirmationPayload,
   TempleMessageType,
-  TempleStatus,
   TempleRequest,
   TempleResponse,
-  TempleNotification,
   TempleSettings,
   TempleChainKind,
   WalletSpecs,
@@ -46,70 +47,35 @@ import {
 
 import { useStorage } from './storage';
 
-type Confirmation = {
-  id: string;
-  payload: TempleConfirmationPayload;
-  error?: any;
-};
-
 export const intercom = new IntercomClient();
 
 export const [TempleClientProvider, useTempleClient] = constate(() => {
   /**
-   * State
+   * State — now reads from Zustand walletStore (synced via intercom-sync.ts).
+   * The Suspense hook throws a promise until the initial state fetch completes.
    */
+  useWalletSuspense();
 
-  const fetchState = useCallback(async () => {
-    const res = await request({ type: TempleMessageType.GetStateRequest });
-    assertResponse(res.type === TempleMessageType.GetStateResponse);
-    return res.state;
-  }, []);
+  const status = useWalletStore(s => s.status);
+  const accounts = useWalletStore(s => s.accounts);
+  const defaultNetworks = useWalletStore(s => s.networks);
+  const settings = useWalletStore(s => s.settings);
+  const confirmation = useWalletStore(s => s.confirmation);
 
-  const { data, mutate } = useRetryableSWR('state', fetchState, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
-  const state = data!;
+  const idle = useWalletStore(s => s.idle);
+  const locked = useWalletStore(s => s.locked);
+  const ready = useWalletStore(s => s.ready);
 
-  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const state = useMemo(
+    () => ({ status, accounts, networks: defaultNetworks, settings }),
+    [status, accounts, defaultNetworks, settings]
+  );
+
   const confirmationIdRef = useRef<string | null>(null);
   const resetConfirmation = useCallback(() => {
     confirmationIdRef.current = null;
-    setConfirmation(null);
-  }, [setConfirmation]);
-
-  useEffect(() => {
-    return intercom.subscribe((msg: TempleNotification) => {
-      switch (msg?.type) {
-        case TempleMessageType.StateUpdated:
-          mutate();
-          break;
-
-        case TempleMessageType.ConfirmationRequested:
-          if (msg.id === confirmationIdRef.current) {
-            setConfirmation({ id: msg.id, payload: msg.payload, error: msg.error });
-          }
-          break;
-
-        case TempleMessageType.ConfirmationExpired:
-          if (msg.id === confirmationIdRef.current) {
-            resetConfirmation();
-          }
-          break;
-      }
-    });
-  }, [mutate, setConfirmation, resetConfirmation]);
-
-  /**
-   * Aliases
-   */
-
-  const { status, networks: defaultNetworks, accounts, settings } = state;
-  const idle = status === TempleStatus.Idle;
-  const locked = status === TempleStatus.Locked;
-  const ready = status === TempleStatus.Ready;
+    walletStore.getState().resetConfirmation();
+  }, []);
 
   const [walletsSpecs, setWalletsSpecs] = useStorage<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, {});
 
@@ -400,6 +366,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
       new TaquitoWallet(sourcePkh, networkRpc, {
         onBeforeSend: id => {
           confirmationIdRef.current = id;
+          walletStore.getState().setConfirmationId(id);
         }
       }),
     []
@@ -409,6 +376,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     (sourcePkh: string) =>
       new TempleSigner(sourcePkh, id => {
         confirmationIdRef.current = id;
+        walletStore.getState().setConfirmationId(id);
       }),
     []
   );

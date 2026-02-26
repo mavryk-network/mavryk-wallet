@@ -118,7 +118,7 @@ export function useRawBalance(
     }
   );
 
-  const refreshChainId = useCallback(() => chainIdSwrRes.mutate(), [chainIdSwrRes.mutate]);
+  const refreshChainId = useCallback(() => void chainIdSwrRes.refetch(), [chainIdSwrRes.refetch]);
   const refreshBalanceOnChain = useCallback(() => void onChainBalanceSwrRes.mutate(), [onChainBalanceSwrRes.mutate]);
 
   useOnBlock(refreshBalanceOnChain, tezos, !chainId || usingStore);
@@ -126,7 +126,7 @@ export function useRawBalance(
   if (!chainId)
     return {
       value: undefined,
-      isSyncing: chainIdSwrRes.isValidating,
+      isSyncing: chainIdSwrRes.isFetching,
       error: chainIdSwrRes.error,
       refresh: refreshChainId
     };

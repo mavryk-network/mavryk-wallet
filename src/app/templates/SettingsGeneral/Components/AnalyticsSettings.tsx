@@ -1,19 +1,15 @@
 import React from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { setIsAnalyticsEnabledAction } from 'app/store/settings/actions';
-import { useAnalyticsEnabledSelector } from 'app/store/settings/selectors';
+import { useIsAnalyticsEnabled, uiStore } from 'lib/store/zustand/ui.store';
 
 import { SettingsGeneralSelectors } from '../selectors';
 
 import { EnablingSetting } from './EnablingSetting';
 
 const AnalyticsSettings: React.FC = () => {
-  const dispatch = useDispatch();
-  const analyticsEnabled = useAnalyticsEnabledSelector();
+  const analyticsEnabled = useIsAnalyticsEnabled();
 
-  const setAnalyticsEnabled = () => dispatch(setIsAnalyticsEnabledAction(!analyticsEnabled));
+  const setAnalyticsEnabled = () => uiStore.getState().setAnalyticsEnabled(!analyticsEnabled);
 
   return (
     <EnablingSetting

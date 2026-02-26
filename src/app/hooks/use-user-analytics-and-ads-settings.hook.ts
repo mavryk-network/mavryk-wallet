@@ -7,11 +7,11 @@ import { useAccountPkh } from 'lib/temple/front';
 import { usePassiveStorage } from 'lib/temple/front/storage';
 
 import { useShouldShowPartnersPromoSelector } from '../store/partners-promotion/selectors';
-import { useAnalyticsEnabledSelector } from '../store/settings/selectors';
+import { useIsAnalyticsEnabled } from 'lib/store/zustand/ui.store';
 
 export const useUserAnalyticsAndAdsSettings = () => {
   const { trackEvent } = useAnalytics();
-  const isAnalyticsEnabled = useAnalyticsEnabledSelector();
+  const isAnalyticsEnabled = useIsAnalyticsEnabled();
   const isAdsEnabled = useShouldShowPartnersPromoSelector();
 
   const [, setIsWebsitesAnalyticsEnabled] = usePassiveStorage(WEBSITES_ANALYTICS_ENABLED);

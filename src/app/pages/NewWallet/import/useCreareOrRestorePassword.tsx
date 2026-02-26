@@ -13,9 +13,8 @@ import {
 } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
-import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
+import { uiStore } from 'lib/store/zustand/ui.store';
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
-import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
@@ -52,8 +51,8 @@ export const useCreareOrRestorePassword = (
   const dispatch = useDispatch();
 
   const setAnalyticsEnabled = useCallback(
-    (analyticsEnabled: boolean) => dispatch(setIsAnalyticsEnabledAction(analyticsEnabled)),
-    [dispatch]
+    (analyticsEnabled: boolean) => uiStore.getState().setAnalyticsEnabled(analyticsEnabled),
+    []
   );
 
   const setAdsViewEnabled = useCallback(
@@ -166,8 +165,8 @@ export const useCreareOrRestorePassword = (
         } else {
           navigate('/loading');
         }
-        !ownMnemonic && dispatch(setOnRampPossibilityAction(true));
-        dispatch(shouldShowNewsletterModalAction(true));
+        !ownMnemonic && uiStore.getState().setOnRampPossibility(true);
+        uiStore.getState().setShouldShowNewsletterModal(true);
       } catch (err: any) {
         console.error(err);
       }
@@ -185,8 +184,7 @@ export const useCreareOrRestorePassword = (
       registerWallet,
       seedPhrase,
       trackEvent,
-      popup,
-      dispatch
+      popup
     ]
   );
 

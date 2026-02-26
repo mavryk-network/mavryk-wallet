@@ -1,7 +1,6 @@
 import React, { FC, useMemo } from 'react';
 
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Anchor, Button } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -12,9 +11,8 @@ import { ReactComponent as SmileWithGlassesIcon } from 'app/icons/smile-with-gla
 import { ReactComponent as SmileIcon } from 'app/icons/smile.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { useOnboardingProgress } from 'app/pages/Onboarding/hooks/useOnboardingProgress.hook';
-import { setOnRampPossibilityAction } from 'app/store/settings/actions';
-import { useOnRampPossibilitySelector } from 'app/store/settings/selectors';
 import { T } from 'lib/i18n/react';
+import { useIsOnRampPossibility, uiStore } from 'lib/store/zustand/ui.store';
 import { useAccount } from 'lib/temple/front';
 
 import OnRampOverlayBgPopupImg from './assets/on-ramp-overlay-bg-popup.png';
@@ -24,17 +22,16 @@ import { OnRampSmileButton } from './OnRampSmileButton/OnRampSmileButton';
 import { getWertLink } from './utils/getWertLink.util';
 
 export const OnRampOverlay: FC = () => {
-  const dispatch = useDispatch();
   const { publicKeyHash } = useAccount();
   const { popup } = useAppEnv();
-  const isOnRampPossibility = useOnRampPossibilitySelector();
+  const isOnRampPossibility = useIsOnRampPossibility();
   const { onboardingCompleted } = useOnboardingProgress();
 
   const popupClassName = useMemo(
     () => (popup ? 'inset-0 p-4' : 'top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2'),
     [popup]
   );
-  const close = () => void dispatch(setOnRampPossibilityAction(false));
+  const close = () => uiStore.getState().setOnRampPossibility(false);
 
   if (!isOnRampPossibility || !onboardingCompleted) return null;
 

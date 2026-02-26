@@ -14,7 +14,7 @@ import { useOutputEstimation } from 'app/hooks/AliceBob/use-output-estimation';
 import { ReactComponent as AlertIcon } from 'app/icons/alert.svg';
 import styles from 'app/pages/Buy/Crypto/Exolix/Exolix.module.css';
 import { WithdrawSelectors } from 'app/pages/Withdraw/Withdraw.selectors';
-import { useUserIdSelector } from 'app/store/settings/selectors';
+import { useUserId } from 'lib/store/zustand/ui.store';
 import { TopUpInput } from 'app/templates/TopUpInput';
 import { createAliceBobOrder } from 'lib/apis/temple';
 import { t, T } from 'lib/i18n/react';
@@ -27,7 +27,7 @@ import { StepProps } from './step.props';
 const NOT_UKRAINIAN_CARD_ERROR_MESSAGE = 'Ukrainian bank card is required.';
 
 export const InitialStep: FC<Omit<StepProps, 'orderInfo'>> = ({ isApiError, setOrderInfo, setStep, setIsApiError }) => {
-  const userId = useUserIdSelector();
+  const userId = useUserId();
 
   const [orderIsProcessing, setOrderIsProcessing] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);

@@ -1,16 +1,23 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 
 import { ShortcutAccountSelectStateProvider } from 'app/hooks/use-account-select-shortcut';
 import { usePushNotifications } from 'app/hooks/use-push-notifications';
 import { CustomRpcContext } from 'lib/analytics';
+import { startIntercomSync } from 'lib/store/zustand/intercom-sync';
 
 import { NewBlockTriggersProvider } from './chain';
-import { TempleClientProvider, useTempleClient } from './client';
+import { TempleClientProvider, intercom, useTempleClient } from './client';
 import { ReadyTempleProvider, useNetwork } from './ready';
 
 export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
   // Not in use
   usePushNotifications();
+
+  // Start Zustand ↔ Intercom sync (runs in parallel with SWR-based sync)
+  useEffect(() => {
+    const unsubscribe = startIntercomSync(intercom);
+    return unsubscribe;
+  }, []);
 
   return (
     <CustomRpcContext.Provider value={undefined}>

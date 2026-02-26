@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 // import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
-import { useAnalyticsEnabledSelector } from 'app/store/settings/selectors';
+import { useIsAnalyticsEnabled } from 'lib/store/zustand/ui.store';
 import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 
 // import { sendPageEvent, sendTrackEvent } from './send-events.utils';
@@ -10,7 +10,7 @@ import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 // This hook is just  mockup for future data callection.
 // it DOES NOT collect and send any type of data
 export const useAnalytics = () => {
-  const analyticsEnabled = useAnalyticsEnabledSelector();
+  const analyticsEnabled = useIsAnalyticsEnabled();
   // const userId = useUserIdSelector();
   // const rpc = useAnalyticsNetwork();
   // const testGroupName = useUserTestingGroupNameSelector();

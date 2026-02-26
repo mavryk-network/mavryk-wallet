@@ -14,7 +14,7 @@ import { useAccount, useDelegate, useKnownBakers } from 'lib/temple/front';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { navigate } from 'lib/woozie';
 
-import { useUserTestingGroupNameSelector } from '../../../store/ab-testing/selectors';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { DelegateFormSelectors } from '../delegateForm.selectors';
 
 export enum SortOptions {
@@ -42,7 +42,7 @@ export const KnownDelegatorsList: React.FC<KnownDelegatorsListProps> = ({ setVal
   const { data: accStats } = useDelegate(accountPkh);
   const myBakerPkh = accStats?.delegate?.address ?? '';
 
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
   const { popup } = useAppEnv();
 
   const [sortOption, setSortOption] = useState<SortOptions>(SortOptions.DEFAULT);

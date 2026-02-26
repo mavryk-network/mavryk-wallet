@@ -18,7 +18,7 @@ import { MAVEN_METADATA } from 'lib/metadata';
 import { Baker, useAccount } from 'lib/temple/front';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 
-import { useUserTestingGroupNameSelector } from '../../../store/ab-testing/selectors';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { DelegateFormSelectors } from '../delegateForm.selectors';
 
 import { BakerBannerComponent } from './BakerBannerComponent';
@@ -67,7 +67,7 @@ export const BakerForm: React.FC<BakerFormProps> = ({
   toValue
 }) => {
   const { popup } = useAppEnv();
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
   const estimateFallbackDisplayed = toFilled && !baseFee && (estimating || bakerValidating);
   const memoizedBakerStyles = useMemo(() => ({ ...(!popup ? { paddingInline: 0, paddingTop: 0 } : {}) }), [popup]);
 

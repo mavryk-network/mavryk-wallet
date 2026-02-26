@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
 
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
 import { Tzip16Module } from '@mavrykdynamics/webmavryk-tzip16';
+import { useQuery } from '@tanstack/react-query';
 import constate from 'constate';
 
 import { getKYCStatus } from 'lib/apis/tzkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
-import { useRetryableSWR } from 'lib/swr';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import {
   ReadyTempleState,
@@ -192,9 +192,20 @@ export function useChainIdValue(rpcUrl: string, suspense?: boolean) {
 }
 
 export function useChainIdLoading(rpcUrl: string, suspense?: boolean) {
-  const fetchChainId = useCallback(() => loadChainId(rpcUrl).catch(() => null), [rpcUrl]);
+  const result = useQuery({
+    queryKey: ['chain-id', rpcUrl],
+    queryFn: () => loadChainId(rpcUrl).catch(() => null),
+    enabled: !!rpcUrl,
+    refetchOnWindowFocus: false,
+    retry: 2
+  });
 
-  return useRetryableSWR(['chain-id', rpcUrl], fetchChainId, { suspense, revalidateOnFocus: false });
+  // Suspense support: throw promise while loading (matches previous SWR behavior)
+  if (suspense && result.isLoading && result.fetchStatus !== 'idle') {
+    throw result.refetch();
+  }
+
+  return result;
 }
 
 export function useRelevantAccounts(withExtraTypes = true) {

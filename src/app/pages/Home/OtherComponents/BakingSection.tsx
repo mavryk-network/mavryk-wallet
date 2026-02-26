@@ -19,7 +19,7 @@ import { ReactComponent as ClockIcon } from 'app/icons/time.svg';
 import { ReactComponent as UnlockIcon } from 'app/icons/unlock.svg';
 //
 import BakingHistoryItem from 'app/pages/Home/OtherComponents/BakingHistoryItem';
-import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import BakerBanner from 'app/templates/BakerBanner';
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
 import { useGasToken } from 'lib/assets/hooks';
@@ -76,7 +76,7 @@ const BakingSection = memo(() => {
   const canDelegate = acc.type !== TempleAccountType.WatchOnly;
   const chainId = useChainId(true);
   const { isDcpNetwork } = useGasToken();
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
 
   const { popup } = useAppEnv();
 

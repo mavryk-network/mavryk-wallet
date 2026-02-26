@@ -2,7 +2,6 @@ import React, { FC, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { object, string } from 'yup';
 
 import { Button } from 'app/atoms';
@@ -11,13 +10,11 @@ import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { useOnboardingProgress } from 'app/pages/Onboarding/hooks/useOnboardingProgress.hook';
-import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
-import { useShouldShowNewsletterModalSelector } from 'app/store/newsletter/newsletter-selectors';
-import { useOnRampPossibilitySelector } from 'app/store/settings/selectors';
 import { setTestID } from 'lib/analytics';
 import { newsletterApi } from 'lib/apis/newsletter';
 import { useYupValidationResolver } from 'lib/form/use-yup-validation-resolver';
 import { T, t } from 'lib/i18n/react';
+import { useShouldShowNewsletterModal, useIsOnRampPossibility, uiStore } from 'lib/store/zustand/ui.store';
 import { useLocation } from 'lib/woozie';
 
 import NewsletterImage from './NewsletterImage.png';
@@ -34,13 +31,12 @@ const validationSchema = object().shape({
 const HOME_PAGE_PATH = '/';
 
 export const NewsletterOverlay: FC = () => {
-  const dispatch = useDispatch();
   const { popup } = useAppEnv();
   const { pathname } = useLocation();
 
   const { onboardingCompleted } = useOnboardingProgress();
-  const shouldShowNewsletterModal = useShouldShowNewsletterModalSelector();
-  const isOnRampPossibility = useOnRampPossibilitySelector();
+  const shouldShowNewsletterModal = useShouldShowNewsletterModal();
+  const isOnRampPossibility = useIsOnRampPossibility();
 
   const validationResolver = useYupValidationResolver<FormValues>(validationSchema);
 
@@ -59,7 +55,7 @@ export const NewsletterOverlay: FC = () => {
     [popup]
   );
   const closeButtonClassName = useMemo(() => (popup ? 'top-8 right-8' : 'top-4 right-4'), [popup]);
-  const close = () => void dispatch(shouldShowNewsletterModalAction(false));
+  const close = () => uiStore.getState().setShouldShowNewsletterModal(false);
 
   const onSubmit = () => {
     setIsLoading(true);
@@ -70,7 +66,7 @@ export const NewsletterOverlay: FC = () => {
       })
       .then(() => {
         setSuccessSubscribing(true);
-        dispatch(shouldShowNewsletterModalAction(false));
+        uiStore.getState().setShouldShowNewsletterModal(false);
       })
       .finally(() => setIsLoading(false));
   };

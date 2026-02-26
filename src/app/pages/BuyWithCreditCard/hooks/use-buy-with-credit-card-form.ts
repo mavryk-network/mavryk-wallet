@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import browser from 'webextension-polyfill';
 import { object as objectSchema, number as numberSchema, mixed as mixedSchema } from 'yup';
 
-import { useUserIdSelector } from 'app/store/settings/selectors';
+import { useUserId } from 'lib/store/zustand/ui.store';
 import { AnalyticsEventCategory, useAnalytics, useFormAnalytics } from 'lib/analytics';
 import { MOONPAY_ASSETS_BASE_URL } from 'lib/apis/moonpay';
 import { createAliceBobOrder, getMoonpaySign } from 'lib/apis/temple';
@@ -59,7 +59,7 @@ export const useBuyWithCreditCardForm = () => {
 
   const formAnalytics = useFormAnalytics('BuyWithCreditCardForm');
   const { publicKeyHash } = useAccount();
-  const userId = useUserIdSelector();
+  const userId = useUserId();
 
   const [purchaseLinkLoading, setPurchaseLinkLoading] = useState(false);
   const [purchaseLinkError, setPurchaseLinkError] = useState<Error>();

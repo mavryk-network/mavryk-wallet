@@ -1,4 +1,4 @@
-import { useCollectiblesMetadataLoadingSelector } from 'app/store/collectibles-metadata/selectors';
+import { useCollectiblesMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { useCollectiblesMetadataPresenceCheck, useGetCollectibleMetadata } from 'lib/metadata';
 
 import { useAssetListingLogic, useInitialPageAmount, useMetaSlugsToCheck } from './use-asset-listing-logic';

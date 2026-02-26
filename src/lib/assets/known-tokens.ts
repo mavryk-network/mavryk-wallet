@@ -1,4 +1,4 @@
-import type { MetadataRecords } from 'app/store/tokens-metadata/state';
+import type { MetadataRecords } from 'lib/store/zustand/metadata.store';
 import { TokenMetadata, TokenStandardsEnum } from 'lib/metadata/types';
 import { TempleChainId } from 'lib/temple/types';
 

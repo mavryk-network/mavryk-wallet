@@ -15,7 +15,7 @@ import { dispatch } from 'app/store';
 import { setCollectibleStatusAction, setTokenStatusAction, setRwaStatusAction } from 'app/store/assets/actions';
 import { useAreAssetsLoading } from 'app/store/assets/selectors';
 import { StoredAssetStatus } from 'app/store/assets/state';
-import { useTokensMetadataLoadingSelector } from 'app/store/tokens-metadata/selectors';
+import { useTokensMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSelect';
 import SearchAssetField from 'app/templates/SearchAssetField';

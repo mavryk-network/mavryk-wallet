@@ -12,8 +12,7 @@ import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
-import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
-import { putTokensMetadataAction } from 'app/store/tokens-metadata/actions';
+import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { useFormAnalytics } from 'lib/analytics';
 import { TokenMetadataResponse } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';
@@ -215,9 +214,9 @@ const Form = memo(() => {
 
         const assetIsCollectible = isCollectible(tokenMetadata);
 
-        const actionPayload = { records: { [tokenSlug]: tokenMetadata } };
-        if (assetIsCollectible) dispatch(putCollectiblesMetadataAction(actionPayload));
-        else dispatch(putTokensMetadataAction(actionPayload));
+        const store = metadataStore.getState();
+        if (assetIsCollectible) store.putCollectibleMetadataDirectly(tokenSlug, tokenMetadata);
+        else store.putTokenMetadataDirectly(tokenSlug, tokenMetadata);
 
         const asset = {
           chainId,

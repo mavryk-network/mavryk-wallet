@@ -1,32 +1,24 @@
 import { combineEpics, Epic } from 'redux-observable';
-import { from, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { ignoreElements, tap } from 'rxjs/operators';
 import { ofType, toPayload } from 'ts-action-operators';
 
-import { loadTokensMetadata } from 'lib/metadata/fetch';
+import { metadataStore } from 'lib/store/zustand/metadata.store';
 
 import { loadTokensWhitelistActions } from '../assets/actions';
 
-import {
-  putTokensMetadataAction,
-  loadTokensMetadataAction,
-  addWhitelistTokensMetadataAction,
-  resetTokensMetadataLoadingAction
-} from './actions';
-
-const addWhitelistMetadataEpic: Epic = action$ =>
-  action$.pipe(ofType(loadTokensWhitelistActions.success), toPayload(), map(addWhitelistTokensMetadataAction));
-
-const loadTokensMetadataEpic: Epic = action$ =>
+/**
+ * Bridge epic: forwards whitelist data from the assets Redux slice
+ * to the Zustand metadata store. Will be removed when the assets
+ * slice is migrated.
+ */
+const addWhitelistMetadataBridgeEpic: Epic = action$ =>
   action$.pipe(
-    ofType(loadTokensMetadataAction),
+    ofType(loadTokensWhitelistActions.success),
     toPayload(),
-    switchMap(({ rpcUrl, slugs }) =>
-      from(loadTokensMetadata(rpcUrl, slugs)).pipe(
-        map(records => putTokensMetadataAction({ records, resetLoading: true })),
-        catchError(() => of(resetTokensMetadataLoadingAction()))
-      )
-    )
+    tap(payload => {
+      metadataStore.getState().addWhitelistTokensMetadata(payload);
+    }),
+    ignoreElements()
   );
 
-export const tokensMetadataEpics = combineEpics(addWhitelistMetadataEpic, loadTokensMetadataEpic);
+export const tokensMetadataEpics = combineEpics(addWhitelistMetadataBridgeEpic);

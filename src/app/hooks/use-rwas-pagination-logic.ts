@@ -1,10 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { putRwasMetadataAction } from 'app/store/rwas-metadata/actions';
-import { useAllRwasMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import { loadTokensMetadata } from 'lib/metadata/fetch';
+import { metadataStore, useAllRwasMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useNetwork } from 'lib/temple/front';
 import { useDidMount, useDidUpdate } from 'lib/ui/hooks';
 import { setNavigateSearchParams } from 'lib/woozie';
@@ -15,7 +12,6 @@ export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: nu
   const allMeta = useAllRwasMetadataSelector();
 
   const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
 
   const [slugs, setSlugs] = useState<string[]>(() => allSlugsSorted.slice(0, initialSize));
 
@@ -31,13 +27,13 @@ export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: nu
       const slugsWithoutMeta = nextSlugs
         // Not checking metadata of loaded items
         .slice(slugs.length)
-        .filter(slug => !allMeta.get(slug));
+        .filter(slug => !allMeta[slug]);
 
       if (slugsWithoutMeta.length)
         await loadTokensMetadata(rpcUrl, slugsWithoutMeta)
           .then(
             records => {
-              dispatch(putRwasMetadataAction({ records }));
+              metadataStore.getState().putRwasMetadata(records);
               setSlugs(nextSlugs);
             },
             error => {
@@ -52,7 +48,7 @@ export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: nu
 
       setNavigateSearchParams({ amount: String(size) });
     },
-    [allSlugsSorted, slugs.length, allMeta, rpcUrl, dispatch]
+    [allSlugsSorted, slugs.length, allMeta, rpcUrl]
   );
 
   useDidMount(() => {

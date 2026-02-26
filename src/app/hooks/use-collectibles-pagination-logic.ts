@@ -1,10 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
-import { useAllCollectiblesMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 import { loadTokensMetadata } from 'lib/metadata/fetch';
+import { metadataStore, useAllCollectiblesMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useNetwork } from 'lib/temple/front';
 import { useDidMount, useDidUpdate } from 'lib/ui/hooks';
 import { setNavigateSearchParams } from 'lib/woozie';
@@ -15,7 +12,6 @@ export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initial
   const allMeta = useAllCollectiblesMetadataSelector();
 
   const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
 
   const [slugs, setSlugs] = useState<string[]>(() => allSlugsSorted.slice(0, initialSize));
 
@@ -31,13 +27,13 @@ export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initial
       const slugsWithoutMeta = nextSlugs
         // Not checking metadata of loaded items
         .slice(slugs.length)
-        .filter(slug => !allMeta.get(slug));
+        .filter(slug => !allMeta[slug]);
 
       if (slugsWithoutMeta.length)
         await loadTokensMetadata(rpcUrl, slugsWithoutMeta)
           .then(
             records => {
-              dispatch(putCollectiblesMetadataAction({ records }));
+              metadataStore.getState().putCollectiblesMetadata(records);
               setSlugs(nextSlugs);
             },
             error => {
@@ -52,7 +48,7 @@ export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initial
 
       setNavigateSearchParams({ amount: String(size) });
     },
-    [allSlugsSorted, slugs.length, allMeta, rpcUrl, dispatch]
+    [allSlugsSorted, slugs.length, allMeta, rpcUrl]
   );
 
   useDidMount(() => {

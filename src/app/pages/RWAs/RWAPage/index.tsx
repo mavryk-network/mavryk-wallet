@@ -13,7 +13,7 @@ import PageLayout from 'app/layouts/PageLayout';
 // import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
 import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
 import { useRwaDetailsSelector } from 'app/store/rwas/selectors';
-import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { ActionsBlock } from 'app/templates/Actions';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';

@@ -10,7 +10,7 @@ import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';

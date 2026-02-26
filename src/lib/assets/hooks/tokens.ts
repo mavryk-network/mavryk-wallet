@@ -10,7 +10,7 @@ import {
 } from 'app/store/assets/selectors';
 import { isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount } from 'app/store/assets/utils';
 import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
-import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 

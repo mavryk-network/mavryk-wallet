@@ -14,7 +14,7 @@ import {
   useAllCollectiblesDetailsLoadingSelector,
   useCollectibleDetailsSelector
 } from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import OperationStatus from 'app/templates/OperationStatus';

@@ -1,4 +1,4 @@
-import { useRwasMetadataLoadingSelector } from 'app/store/rwas-metadata/selectors';
+import { useRwasMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { useRwasMetadataPresenceCheck, useGetRwaMetadata } from 'lib/metadata';
 
 import { useAssetListingLogic, useInitialPageAmount, useMetaSlugsToCheck } from './use-asset-listing-logic';

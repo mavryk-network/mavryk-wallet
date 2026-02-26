@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
-import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';

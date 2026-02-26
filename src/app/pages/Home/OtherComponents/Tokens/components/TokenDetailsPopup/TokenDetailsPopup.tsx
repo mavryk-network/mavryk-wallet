@@ -17,7 +17,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useTokenMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
 import { HistoryComponent } from 'app/templates/History/History';

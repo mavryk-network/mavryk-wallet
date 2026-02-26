@@ -91,7 +91,9 @@ export function importKey(keyData: ArrayBuffer) {
  * @deprecated
  */
 export function generateKeyLegacy(password: string) {
-  return importKey(Buffer.alloc(32, password));
+  const buf = Buffer.alloc(32, password);
+  const ab = new Uint8Array(buf).buffer;
+  return importKey(ab as ArrayBuffer);
 }
 
 /**

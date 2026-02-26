@@ -4,7 +4,6 @@ import { isDefined } from '@rnw-community/shared';
 import { debounce } from 'lodash';
 
 import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors';
-import { RwaDetails } from 'app/store/rwas/state';
 import { buildCollectibleImagesStack } from 'lib/images-uri';
 import type { TokenMetadata } from 'lib/metadata';
 import { ImageStacked } from 'lib/ui/ImageStacked';

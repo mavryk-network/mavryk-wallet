@@ -52,7 +52,7 @@ const api = axios.create();
 api.interceptors.response.use(
   res => res,
   err => {
-    const message = (err as AxiosError).response?.data?.message;
+    const message = (err as AxiosError<{ message?: string }>).response?.data?.message;
     console.error(`Failed when querying Tzkt API: ${message}`, err);
     throw err;
   }
@@ -86,7 +86,7 @@ type GetOperationsBaseParams = {
 
 export const fetchGetAccountOperationByHash = async (
   chainId: TzktApiChainId,
-  accountAddress: string,
+  _accountAddress: string,
   hash: string | undefined
 ) => {
   try {

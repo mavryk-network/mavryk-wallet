@@ -34,8 +34,8 @@ export function useSortededRwasSlugs(sortOption: SortOptions | null, assetsSlugs
     case SortOptions.HIGH_TO_LOW:
     case SortOptions.LOW_TO_HIGH:
       sortedAssetSlugs = sortedAssetSlugs.sort((a, b) => {
-        const nftA = assetsDetails[a]?.listing;
-        const nftB = assetsDetails[b]?.listing;
+        const nftA = (assetsDetails[a] as any)?.listing;
+        const nftB = (assetsDetails[b] as any)?.listing;
 
         const floorA = nftA
           ? atomsToTokens(nftA.floorPrice, objktCurrencies[nftA?.currencyId].decimals)

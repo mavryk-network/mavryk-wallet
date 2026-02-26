@@ -67,7 +67,7 @@ export const Accountsmanagement: FC<AccountsmanagementProps> = ({ group }) => {
       console.error(e);
       customAlert({
         title: 'Failed to create an account',
-        description: e.message
+        children: e.message
       });
     }
   }, [createAccount, customAlert, handleModalClose, selectedGroup]);

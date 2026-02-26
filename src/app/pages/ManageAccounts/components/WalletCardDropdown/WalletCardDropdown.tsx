@@ -55,7 +55,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({
       console.error(e);
       customAlert({
         title: 'Failed to create an account',
-        description: e.message
+        children: e.message
       });
     }
   }, [

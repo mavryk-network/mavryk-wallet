@@ -19,7 +19,6 @@ import {
   useTempleClient,
   validateDerivationPath
 } from 'lib/temple/front';
-import { fetchNewAccountName } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -67,7 +66,7 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { accounts, createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount } = useTempleClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
@@ -103,7 +102,7 @@ const ConnectLedger: FC = () => {
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
-    async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
+    async (_formData: FormData) => {
       if (submitting) return;
 
       setError(null);
@@ -137,8 +136,8 @@ const ConnectLedger: FC = () => {
       }
 
       try {
-        const account = knownLedgerAccounts[activeAccountIndex];
-        const { chain, derivationPath, address, publicKey } = account;
+        // const account = knownLedgerAccounts[activeAccountIndex];
+        // const { chain, derivationPath, address, publicKey } = account;
         // await createLedgerAccount({
         //   chain,
         //   derivationPath,

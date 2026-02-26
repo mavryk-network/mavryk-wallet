@@ -130,7 +130,7 @@ export const SeedPhraseInput: FC<SeedPhraseInputProps> = ({
     event => {
       const newSeed = event.clipboardData.getData('text');
 
-      if (newSeed.trim().match(/\s/u)) {
+      if (newSeed.trim().match(/\s/)) {
         event.preventDefault();
         onSeedPaste(newSeed);
       }

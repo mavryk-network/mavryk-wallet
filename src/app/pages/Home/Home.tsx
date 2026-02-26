@@ -6,11 +6,9 @@ import { Props as TippyProps } from 'tippy.js';
 
 import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
-import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
@@ -51,7 +49,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();
-  const network = useNetwork();
+  useNetwork();
   const dispatch = useDispatch();
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();

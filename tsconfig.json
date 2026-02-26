@@ -21,6 +21,7 @@
     "downlevelIteration": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "types": ["jest", "chrome", "w3c-web-hid"]
   }
 }

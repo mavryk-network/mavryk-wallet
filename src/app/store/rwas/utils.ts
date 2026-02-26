@@ -46,7 +46,7 @@ export const convertRwaObjktInfoToStateDetailsType = (
 
         return { ...attribute, rarity };
       })
-  };
+  } as unknown as RwaDetails;
 };
 
 const parseRoyalties = (royalties: { amount: number; decimals: number }[]) => {

@@ -67,19 +67,22 @@ export const mergeOpParams = (
   keys.delete('type');
 
   keys.forEach(key => {
-    const prevValue = prevParams[key];
-    const newValue = params[key];
+    const prev = prevParams as Record<string, unknown>;
+    const next = params as Record<string, unknown>;
+    const merged = mergedParams as Record<string, unknown>;
+    const prevValue = prev[key];
+    const newValue = next[key];
 
     if (prevValue === undefined) {
-      mergedParams[key] = newValue;
+      merged[key] = newValue;
     } else if (newValue === undefined) {
-      mergedParams[key] = prevValue;
+      merged[key] = prevValue;
     } else if (prevValue === newValue) {
-      mergedParams[key] = prevValue;
+      merged[key] = prevValue;
     } else if (key === 'entrypoint.null') {
       // Apply the specific rules for entrypoint.null
       if ((prevValue === true && newValue === false) || (prevValue === false && newValue === true)) {
-        delete mergedParams['entrypoint.null']; // Remove if both true and false exist
+        delete merged['entrypoint.null']; // Remove if both true and false exist
       }
     }
   });
@@ -101,7 +104,7 @@ export const buildTEZOpParams = (
     return defaultTEZpParams;
   }
 
-  const internalOperationParams = { ...operationParams };
+  const internalOperationParams = { ...operationParams } as ExtendedGetOperationsTransactionsParams;
 
   const hasBothTargetAndSender = Boolean(internalOperationParams.target) && Boolean(internalOperationParams.sender);
 
@@ -164,14 +167,9 @@ const getReturnedTransactionParams = (
     return defaultFa_1_2OpParams;
   }
 
-  // target (receiver from )
-  // sender (sent to)
-  // interaction ...
-
-  let internalOperationParams = { ...operationParams };
+  let internalOperationParams = { ...operationParams } as ExtendedGetOperationsTransactionsParams;
   const hasTarget = Boolean(internalOperationParams.target);
   const hasSender = Boolean(internalOperationParams.sender);
-  console.log(internalOperationParams, 'internalOperationParams');
 
   // params for received transactions
   if (internalOperationParams['target'] === accountAddress) {

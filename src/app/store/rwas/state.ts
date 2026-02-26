@@ -4,6 +4,7 @@ import { createEntity, LoadableEntityState } from 'lib/store';
 // TODO check UserObjktCollectible
 export type RwaDetails = TzktRWAAssetMetadata & {
   isAdultContent?: boolean;
+  metadataHash?: string | null;
 };
 
 /** `null` for no available asset details */

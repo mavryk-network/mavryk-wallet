@@ -104,7 +104,9 @@ describe('Beacon', () => {
   describe('getOrCreateKeyPair', () => {
     it('called with correct arguments', async () => {
       await getOrCreateKeyPair();
-      expect(mockSodiumUtil.crypto_sign_seed_keypair).toBeCalledWith('mock string');
+      expect(mockSodiumUtil.crypto_sign_seed_keypair).toBeCalledWith(
+        new Uint8Array([109, 111, 99, 107, 32, 115, 116, 114, 105, 110, 103])
+      );
       expect(mockSodiumUtil.crypto_generichash).toBeCalledWith(32, new Uint8Array(new Array(64).fill(48)));
     });
     it('Generates new valid seed', async () => {
@@ -129,8 +131,12 @@ describe('Beacon', () => {
       const selfKeyPair = await getOrCreateKeyPair();
       const buffers = await createCryptoBox(MOCK_PUBLIC_KEY, selfKeyPair);
       expect(buffers.length).toEqual(3);
-      expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519).toBeCalledWith(Buffer.from(selfKeyPair.privateKey));
-      expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519).toBeCalledWith(Buffer.from(selfKeyPair.publicKey));
+      expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519).toBeCalledWith(
+        new Uint8Array(selfKeyPair.privateKey)
+      );
+      expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519).toBeCalledWith(
+        new Uint8Array(selfKeyPair.publicKey)
+      );
       expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519.mock.calls.length).toBe(1);
       expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519.mock.calls.length).toBe(2);
     });
@@ -142,9 +148,9 @@ describe('Beacon', () => {
       expect(cryptoClient).toHaveProperty('sharedRx');
       expect(cryptoClient).toHaveProperty('sharedTx');
       expect(mockSodiumUtil.crypto_kx_client_session_keys).toBeCalledWith(
-        Buffer.from(MOCK_PK_KEY),
-        Buffer.from(MOCK_SK_KEY),
-        Buffer.from(MOCK_PK_KEY)
+        new Uint8Array(MOCK_PK_KEY),
+        new Uint8Array(MOCK_SK_KEY),
+        new Uint8Array(MOCK_PK_KEY)
       );
     });
   });
@@ -155,9 +161,9 @@ describe('Beacon', () => {
       expect(cryptoClient).toHaveProperty('sharedRx');
       expect(cryptoClient).toHaveProperty('sharedTx');
       expect(mockSodiumUtil.crypto_kx_server_session_keys).toBeCalledWith(
-        Buffer.from(MOCK_PK_KEY),
-        Buffer.from(MOCK_SK_KEY),
-        Buffer.from(MOCK_PK_KEY)
+        new Uint8Array(MOCK_PK_KEY),
+        new Uint8Array(MOCK_SK_KEY),
+        new Uint8Array(MOCK_PK_KEY)
       );
     });
   });
@@ -166,17 +172,17 @@ describe('Beacon', () => {
       const keyPair = await getOrCreateKeyPair();
       const { sharedRx } = await createCryptoBoxServer(MOCK_PUBLIC_KEY, keyPair);
       const payload = 'mock payload';
-      const hexPayload = Buffer.from(payload, 'hex');
+      const hexPayload = new Uint8Array(Buffer.from(payload, 'hex'));
       const decryptedMessage = await decryptCryptoboxPayload(hexPayload, sharedRx);
       expect(decryptedMessage).toStrictEqual('mock secretbox');
       expect(mockSodiumUtil.crypto_kx_server_session_keys).toBeCalledWith(
-        Buffer.from(MOCK_PK_KEY),
-        Buffer.from(MOCK_SK_KEY),
-        Buffer.from(MOCK_PK_KEY)
+        new Uint8Array(MOCK_PK_KEY),
+        new Uint8Array(MOCK_SK_KEY),
+        new Uint8Array(MOCK_PK_KEY)
       );
       expect(mockSodiumUtil.crypto_secretbox_open_easy).toBeCalledWith(
-        Buffer.from([]),
-        Buffer.from([]),
+        new Uint8Array([]),
+        new Uint8Array([]),
         new Uint8Array([])
       );
     });
@@ -190,8 +196,8 @@ describe('Beacon', () => {
       expect(payload).toBe('6d6f636b2072616e646f6d62797465736d6f636b20736563726574626f782065617379');
       expect(mockSodiumUtil.randombytes_buf).toBeCalled();
       expect(mockSodiumUtil.crypto_secretbox_easy).toBeCalledWith(
-        Buffer.from(message, 'utf8'),
-        Buffer.from('mock randombytes'),
+        new Uint8Array(Buffer.from(message, 'utf8')),
+        new Uint8Array(Buffer.from('mock randombytes')),
         sharedTx
       );
     });
@@ -213,7 +219,7 @@ describe('Beacon', () => {
           ...PAIRING_RESPONSE_BASE,
           publicKey: toHex(keyPair.publicKey)
         }),
-        fromHex(req.publicKey)
+        new Uint8Array(fromHex(req.publicKey))
       );
       expect(result).toBe('6d6f636b2063727970746f626f78207365616c');
       expect(mockSodiumUtil.crypto_box_seal).toBeCalled();

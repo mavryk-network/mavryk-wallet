@@ -144,7 +144,7 @@ type UnfamiliarWithDelegationScreenProps = {
 
 const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({
   setShowStakeScreen,
-  setIsFromCoStakeNavigation
+  setIsFromCoStakeNavigation: _setIsFromCoStakeNavigation
 }) => {
   const { popup } = useAppEnv();
   const handleBtnClick = useCallback(() => {

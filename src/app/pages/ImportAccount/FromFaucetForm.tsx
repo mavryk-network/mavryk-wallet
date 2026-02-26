@@ -7,7 +7,7 @@ import { Alert, FileInputProps, FileInput, FormField, FormSubmitButton } from 'a
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useTempleClient, useSetAccountPkh, useTezos, activateAccount } from 'lib/temple/front';
+import { useTempleClient, useSetAccountPkh, useTezos, useChainId, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -35,6 +35,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
   const setAccountPkh = useSetAccountPkh();
   const tezos = useTezos();
+  const chainId = useChainId() ?? '';
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
 
   const { control, handleSubmit: handleTextFormSubmit, watch, errors, setValue } = useForm<FaucetTextInputFormData>();
@@ -61,7 +62,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
       }
 
       try {
-        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '));
+        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '), chainId);
       } catch (err: any) {
         if (/Account already exists/.test(err?.message)) {
           setAccountPkh(data.pkh);

@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 
-import { TempleAccountType, TempleStatus } from '../types';
+import { TempleAccountType, TempleChainKind, TempleStatus } from '../types';
 
 import { accountsUpdated, inited as initEvent, locked, settingsUpdated, store, unlocked } from './store';
 import { Vault } from './vault';
@@ -45,10 +45,12 @@ describe('Store tests', () => {
   it('Accounts updated event', () => {
     accountsUpdated([
       {
+        id: 'testId',
         name: 'testName',
         type: TempleAccountType.Imported,
         publicKeyHash: 'testHashKey',
-        isKYC: false
+        chain: TempleChainKind.Tezos,
+        isKYC: undefined
       }
     ]);
     const { accounts } = store.getState();

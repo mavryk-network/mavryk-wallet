@@ -299,7 +299,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
                 assetSlug={slug}
                 last={last}
                 checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
-                hidden={tokensRecord[slug]?.status === 'disabled' ?? false}
+                hidden={tokensRecord[slug]?.status === 'disabled'}
                 assetType={assetType}
                 balance={new BigNumber(balances[assetType] ?? 0)}
                 address={address}

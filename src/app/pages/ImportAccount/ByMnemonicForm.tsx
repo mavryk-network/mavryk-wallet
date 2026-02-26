@@ -37,7 +37,7 @@ interface ByMnemonicFormData {
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
   const { createOrImportWallet } = useTempleClient();
-  const chainId = useChainId();
+  useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -56,7 +56,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const derivationPath = watch('customDerivationPath');
 
   const onSubmit = useCallback(
-    async ({ password, customDerivationPath }: ByMnemonicFormData) => {
+    async (_formData: ByMnemonicFormData) => {
       if (formState.isSubmitting) return;
 
       if (!seedError && isSeedPhraseFilled(seedPhrase)) {

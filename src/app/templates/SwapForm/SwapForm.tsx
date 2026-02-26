@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { TransferParams } from '@mavrykdynamics/webmavryk';
-import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
+import { BatchWalletOperation } from '@mavrykdynamics/webmavryk/dist/types/wallet/batch-operation';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -237,12 +237,10 @@ export const SwapForm: FC = () => {
       pageTitle: 'swap',
       btnText: 'goToMain',
       contentId: 'hash',
-      // @ts-expect-error
-      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'swap' },
+      contentIdFnProps: { hash: operation?.opHash ?? (operation as any)?.hash, i18nKey: 'swap' },
       subHeader: 'success'
     }),
-    // @ts-expect-error
-    [operation?.hash, operation?.opHash]
+    [(operation as any)?.hash, operation?.opHash]
   );
 
   // @ts-expect-error

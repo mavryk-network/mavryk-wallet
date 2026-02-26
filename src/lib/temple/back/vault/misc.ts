@@ -65,7 +65,7 @@ export function getMainDerivationPath(accIndex: number) {
 }
 
 export function seedToPrivateKey(seed: Buffer) {
-  return TaquitoUtils.b58cencode(seed.slice(0, 32), TaquitoUtils.prefix.edsk2);
+  return TaquitoUtils.b58cencode(new Uint8Array(seed.slice(0, 32)), TaquitoUtils.prefix.edsk2);
 }
 
 export function deriveSeed(seed: Buffer, derivationPath: string) {

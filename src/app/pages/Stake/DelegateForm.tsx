@@ -46,7 +46,6 @@ import {
   CO_STAKE,
   FINALIZE_UNLOCK,
   MANAGE_STAKE,
-  SORTED_PREDEFINED_SPONSORED_BAKERS,
   UNLOCK_STAKE,
   UNLOCKING
 } from 'lib/temple/front/baking/const';

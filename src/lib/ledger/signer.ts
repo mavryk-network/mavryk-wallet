@@ -54,7 +54,7 @@ export class TempleLedgerSigner extends LedgerSigner {
     if (typeof watermark !== 'undefined') {
       bb = mergebuf(watermark, bb);
     }
-    const watermarkedBytes = buf2hex(toBuffer(bb));
+    const watermarkedBytes = buf2hex(new Uint8Array(toBuffer(bb)));
     const signatureVerified = await this.verify(watermarkedBytes, result.prefixSig);
 
     if (!signatureVerified) {
@@ -162,7 +162,7 @@ export const safeSignEdData = (sig: Uint8Array, bytesHash: Uint8Array, _publicKe
 
 export const safeSignSpData = (sig: Uint8Array, bytesHash: Uint8Array, _publicKey: any) => {
   const key = new elliptic.ec('secp256k1').keyFromPublic(_publicKey);
-  const hexSig = buf2hex(toBuffer(sig));
+  const hexSig = buf2hex(new Uint8Array(toBuffer(sig)));
   const match = hexSig.match(/([a-f\d]{64})/gi);
   if (match) {
     try {
@@ -177,7 +177,7 @@ export const safeSignSpData = (sig: Uint8Array, bytesHash: Uint8Array, _publicKe
 
 export const safeSignP2Data = (sig: Uint8Array, bytesHash: Uint8Array, _publicKey: any) => {
   const key = new elliptic.ec('p256').keyFromPublic(_publicKey);
-  const hexSig = buf2hex(toBuffer(sig));
+  const hexSig = buf2hex(new Uint8Array(toBuffer(sig)));
   const match = hexSig.match(/([a-f\d]{64})/gi);
   if (match) {
     try {

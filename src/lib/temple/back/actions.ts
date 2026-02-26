@@ -540,7 +540,7 @@ export async function processBeacon(
           ...Beacon.PAIRING_RESPONSE_BASE,
           publicKey: Beacon.toHex(keyPair.publicKey)
         }),
-        Beacon.fromHex(req.publicKey)
+        new Uint8Array(Beacon.fromHex(req.publicKey))
       )
     };
   }

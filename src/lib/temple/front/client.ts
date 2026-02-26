@@ -623,7 +623,7 @@ class TempleSigner implements Signer {
       sourcePkh: this.pkh,
       id,
       bytes,
-      watermark: watermark ? buf2hex(toBuffer(watermark)) : undefined
+      watermark: watermark ? buf2hex(new Uint8Array(toBuffer(watermark))) : undefined
     });
     assertResponse(res.type === TempleMessageType.SignResponse);
     return res.result;

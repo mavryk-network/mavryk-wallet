@@ -10,7 +10,7 @@ import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ReactComponent as EllipsePurple } from 'app/misc/Ellipse-purple.svg';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
-import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
+import { ListItemWithNavigate } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
 import { HistoryDetailsPopup } from 'app/templates/History/HistoryDetailsPopup';
 import { HistoryItem } from 'app/templates/History/HistoryItem';
@@ -58,7 +58,7 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
   const editNamePopup = usePopupState(false);
   const removeAccountPopup = usePopupState(false);
 
-  const accountOptions: ListItemWithNavigateprops[] = useMemo(
+  const accountOptions = useMemo(
     () => [
       { i18nKey: 'editName', Icon: EditIcon, onClick: editNamePopup.open, fillIcon: true },
       ...(account.type !== TempleAccountType.WatchOnly
@@ -78,7 +78,7 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
 
           <ul className={clsx('flex flex-col pb-4')}>
             {accountOptions.map(option => (
-              <ListItemWithNavigate key={option.i18nKey} {...option} paddingClassName="py-4" fullWidthDivider />
+              <ListItemWithNavigate key={option.i18nKey} {...(option as any)} paddingClassName="py-4" fullWidthDivider />
             ))}
           </ul>
         </div>
@@ -134,7 +134,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
 
   const accountObj: TempleAccount = useMemo(
-    () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly }),
+    () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly } as any as TempleAccount),
     [accountHash, accountName]
   );
 

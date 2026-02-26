@@ -11,7 +11,7 @@ import { useTezos, useChainId } from './ready';
 
 function getClient(networkId: 'mainnet' | 'custom', tezos: MavrykToolkit) {
   return isMavrykDomainsSupportedNetwork(networkId)
-    ? new TaquitoMavrykDomainsClient({ network: networkId, tezos })
+    ? new TaquitoMavrykDomainsClient({ network: networkId, tezos: tezos as any })
     : TaquitoMavrykDomainsClient.Unsupported;
 }
 

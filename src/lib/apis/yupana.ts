@@ -48,6 +48,20 @@ export const fetchApyFromYupana$ = (symbol: keyof typeof TOKENS_IDS) => {
   );
 };
 
+export const fetchApyFromYupana = async (symbol: keyof typeof TOKENS_IDS): Promise<number> => {
+  try {
+    const request = buildGetApyFromYupanaGqlQuery(TOKENS_IDS[symbol]);
+    const data = await apolloYupanaClient.fetch<GetApyFromYupanaResponse>(request);
+    if (!data) return 0;
+    const { rates } = data.asset[0];
+    const { supply_apy } = rates[0];
+    const apy = Number(supply_apy) / 10000000000000000;
+    return Number(apy.toFixed(2));
+  } catch {
+    return 0;
+  }
+};
+
 const buildGetApyFromYupanaGqlQuery = (yId: number) => gql`
 query GetTokenApy {
   asset(where: { ytoken: { _eq: ${yId} } }) {

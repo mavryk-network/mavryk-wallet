@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import { useTokensApyRatesSelector } from 'app/store/d-apps';
+import { useTokensApyRates } from 'app/hooks/use-tokens-apy.query';
 import { KNOWN_TOKENS_SLUGS } from 'lib/assets/known-tokens';
 
 const YUPANA_LEND_LINK = 'https://app.yupana.finance/lending';
@@ -24,7 +24,7 @@ export interface TokenApyInfo {
 }
 
 export const useTokenApyInfo = (slug: string): TokenApyInfo | undefined => {
-  const apyRates = useTokensApyRatesSelector();
+  const apyRates = useTokensApyRates();
 
   const rate = apyRates[slug] || 0;
 

@@ -34,6 +34,9 @@ export interface UIState {
 
   // AB Testing
   abTestGroupName: ABTestGroup;
+
+  // Advertising
+  lastSeenPromotionName?: string;
 }
 
 interface UIActions {
@@ -43,6 +46,7 @@ interface UIActions {
   setBalanceMode: (mode: BalanceMode) => void;
   setOnRampPossibility: (possible: boolean) => void;
   setAbTestGroupName: (group: ABTestGroup) => void;
+  setLastSeenPromotionName: (name: string | undefined) => void;
 }
 
 export type UIStore = UIState & UIActions;
@@ -62,13 +66,17 @@ export const uiStore = createStore<UIStore>()(
       // AB Testing
       abTestGroupName: ABTestGroup.Unknown,
 
+      // Advertising
+      lastSeenPromotionName: undefined,
+
       // Actions
       setShouldShowNewsletterModal: (show) => set({ shouldShowNewsletterModal: show }),
       setUserId: (id) => set({ userId: id }),
       setAnalyticsEnabled: (enabled) => set({ isAnalyticsEnabled: enabled }),
       setBalanceMode: (mode) => set({ balanceMode: mode }),
       setOnRampPossibility: (possible) => set({ isOnRampPossibility: possible }),
-      setAbTestGroupName: (group) => set({ abTestGroupName: group })
+      setAbTestGroupName: (group) => set({ abTestGroupName: group }),
+      setLastSeenPromotionName: (name) => set({ lastSeenPromotionName: name })
     }),
     {
       name: 'zustand-ui',
@@ -91,7 +99,8 @@ export const uiStore = createStore<UIStore>()(
         isAnalyticsEnabled: state.isAnalyticsEnabled,
         balanceMode: state.balanceMode,
         isOnRampPossibility: state.isOnRampPossibility,
-        abTestGroupName: state.abTestGroupName
+        abTestGroupName: state.abTestGroupName,
+        lastSeenPromotionName: state.lastSeenPromotionName
       }) as unknown as UIStore
     }
   )
@@ -108,3 +117,4 @@ export const useIsAnalyticsEnabled = () => useUIStore(s => s.isAnalyticsEnabled)
 export const useBalanceMode = () => useUIStore(s => s.balanceMode);
 export const useIsOnRampPossibility = () => useUIStore(s => s.isOnRampPossibility);
 export const useAbTestGroupName = () => useUIStore(s => s.abTestGroupName);
+export const useLastSeenPromotionName = () => useUIStore(s => s.lastSeenPromotionName);

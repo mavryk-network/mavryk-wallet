@@ -161,8 +161,6 @@ export const useCreareOrRestorePassword = (
         dispatch(shouldShowNewsletterModalAction(true));
       } catch (err: any) {
         console.error(err);
-
-        alert(err.message);
       }
     },
     [

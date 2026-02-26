@@ -23,7 +23,7 @@ export function useSortededAssetsSlugs(
   const assetsSlugNames = useMemo(
     () =>
       assetsSlugs.map(slug => ({
-        name: tokensMetadata[slug]?.name ?? 'Unknwon token',
+        name: tokensMetadata[slug]?.name ?? 'Unknown token',
         slug
       })),
     [assetsSlugs, tokensMetadata]

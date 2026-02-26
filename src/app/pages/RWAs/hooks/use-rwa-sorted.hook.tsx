@@ -16,7 +16,7 @@ export function useSortededRwasSlugs(sortOption: SortOptions | null, assetsSlugs
   const assetsSlugNames = useMemo(
     () =>
       assetsSlugs.map(slug => ({
-        name: assetsMetadatas[slug]?.name ?? 'Unknwon token',
+        name: assetsMetadatas[slug]?.name ?? 'Unknown token',
         slug
       })),
     [assetsSlugs, assetsMetadatas]

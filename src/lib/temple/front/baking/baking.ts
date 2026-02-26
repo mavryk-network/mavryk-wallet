@@ -148,7 +148,7 @@ export function useAccountDelegatePeriodStats(
                 const constants = await tezos.rpc.getConstants();
                 cycleDurationMs = getOneCycleinMs(constants);
               } catch {
-                console.log('Error getting RPC default constants');
+                console.error('Error getting RPC default constants');
               }
               // -----------------------------------
 
@@ -195,7 +195,7 @@ export function useAccountDelegatePeriodStats(
               };
             }
           } catch (e) {
-            console.log(e);
+            console.error(e);
           }
 
           return emptydelegateStatsResponse;

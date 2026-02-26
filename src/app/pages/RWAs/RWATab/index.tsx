@@ -28,7 +28,6 @@ import { useAccount, useChainId } from 'lib/temple/front';
 
 import { useSortededRwasSlugs } from '../hooks/use-rwa-sorted.hook';
 
-import { mockedRWASlug } from './rwa.mock';
 import styles from './rwa.module.css';
 import { RwaItem } from './RwaItem';
 
@@ -74,7 +73,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
     [sortOption]
   );
 
-  const sortedAssets = useSortededRwasSlugs(sortOption, allSlugs) ?? [mockedRWASlug];
+  const sortedAssets = useSortededRwasSlugs(sortOption, allSlugs) ?? [];
 
   const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
     useRWAListingLogic(sortedAssets);

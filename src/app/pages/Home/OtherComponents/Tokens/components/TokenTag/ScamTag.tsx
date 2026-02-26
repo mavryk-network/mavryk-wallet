@@ -42,7 +42,6 @@ export const ScamTag = memo<Props>(({ assetSlug }) => {
           );
       } catch (err: any) {
         console.error(err);
-        alert(err.message);
       }
     },
     [chainId, publicKeyHash, confirm]

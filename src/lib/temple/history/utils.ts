@@ -379,7 +379,7 @@ function reduceParameterFa2Values(values: ParameterFa2['value'], relAddress: str
       }
     }
   } catch (e) {
-    console.log(values);
+    console.error('Failed to build token transfer items:', e);
   }
 
   return result;
@@ -635,6 +635,6 @@ export const putOperationIntoStorage = async (
       await putToStorage(storageKey, [...operations, pendingOpObject]);
     }
   } catch (e) {
-    console.log('Error putting pending operation into browser storage');
+    console.error('Error putting pending operation into browser storage');
   }
 };

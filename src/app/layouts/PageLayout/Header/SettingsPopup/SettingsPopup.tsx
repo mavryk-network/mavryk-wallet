@@ -222,7 +222,7 @@ export const SettingsDropdown: FC = () => {
         optionsListClassName="bg-primary-card w-auto py-2"
         dropdownButtonClassName="bg-transparent gap-0 w-auto"
         fontContentWrapperClassname="border-none bg-transparent"
-        DropdownFaceContent={<SettingButton onClick={() => console.log('clicked')} />}
+        DropdownFaceContent={<SettingButton onClick={() => void 0} />}
         showIcon={false}
         poperModifiers={translateYModifiers}
         poperPlacement="bottom-end"

@@ -136,7 +136,6 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         );
       } catch (err: any) {
         console.error(err);
-        alert(err.message);
       }
     },
     [assetType, account.publicKeyHash, chainId]

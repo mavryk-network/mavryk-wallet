@@ -10,12 +10,12 @@ import { useExplorerBaseUrls } from 'lib/temple/front';
 
 import { CardWithLabel } from './CardWithLabel';
 
-import { TemporaryRwaType } from '.';
+import { RwaDetailsDisplay } from '.';
 
 interface PropertiesItemsProps {
   assetSlug: string;
   accountPkh: string;
-  details?: TemporaryRwaType | null;
+  details?: RwaDetailsDisplay | null;
 }
 
 export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details }) => {

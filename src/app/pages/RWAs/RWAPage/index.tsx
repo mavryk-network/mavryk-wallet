@@ -24,8 +24,6 @@ import { useAccount } from 'lib/temple/front';
 import { useInterval } from 'lib/ui/hooks';
 import { ZERO } from 'lib/utils/numbers';
 
-import { addRandomDecimals } from '../utils';
-
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
 import { RwaPageImage } from './RwaPageImage';
@@ -36,7 +34,7 @@ interface Props {
   assetSlug: string;
 }
 
-export type TemporaryRwaType = {
+export type RwaDetailsDisplay = {
   tokens: BigNumber;
   totalValue: string;
   estMarketPrice: string;
@@ -63,12 +61,12 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
     assetSlug
   ]);
 
-  const details: TemporaryRwaType = useMemo(
+  const details: RwaDetailsDisplay = useMemo(
     () => ({
       tokens: balance,
-      totalValue: '5.000.00',
-      estMarketPrice: '50.00',
-      lastSale: `${addRandomDecimals()}`,
+      totalValue: '--',
+      estMarketPrice: '--',
+      lastSale: '--',
       metadata
     }),
     [balance, metadata]

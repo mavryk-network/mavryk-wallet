@@ -39,7 +39,7 @@ export async function fetchRwaAssetsContracts() {
       return acc;
     }, []);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return [];
   }
 }

@@ -22,7 +22,7 @@ export const useAnalytics = () => {
       properties?: object,
       isAnalyticsEnabled = analyticsEnabled
     ) => {
-      console.log(event, category, properties, isAnalyticsEnabled);
+      void [event, category, properties, isAnalyticsEnabled];
       return;
       // return (
       //   isAnalyticsEnabled &&
@@ -33,7 +33,7 @@ export const useAnalytics = () => {
   );
 
   const pageEvent = useCallback((path: string, search: string, additionalProperties = {}) => {
-    console.log(path, search, additionalProperties);
+    void [path, search, additionalProperties];
     return;
     // return (
     //   analyticsEnabled &&

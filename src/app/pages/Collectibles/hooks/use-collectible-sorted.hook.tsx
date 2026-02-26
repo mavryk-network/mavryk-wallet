@@ -16,7 +16,7 @@ export function useSortededCollectiblesSlugs(sortOption: SortOptions | null, ass
   const assetsSlugNames = useMemo(
     () =>
       assetsSlugs.map(slug => ({
-        name: assetsMetadatas[slug]?.name ?? 'Unknwon token',
+        name: assetsMetadatas[slug]?.name ?? 'Unknown token',
         slug
       })),
     [assetsSlugs, assetsMetadatas]

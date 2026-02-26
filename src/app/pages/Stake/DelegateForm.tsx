@@ -732,7 +732,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           }
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
 

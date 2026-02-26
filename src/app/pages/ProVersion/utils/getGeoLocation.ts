@@ -8,7 +8,7 @@ export async function getGeoLocation() {
       regionName
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return {
       country: 'NIL',
       regionName: 'NIL'

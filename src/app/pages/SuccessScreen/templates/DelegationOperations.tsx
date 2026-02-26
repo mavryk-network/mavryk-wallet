@@ -191,7 +191,7 @@ const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, 
 
           setDaysData(prev => ({ ...prev, activeInYDays: days, activeForXDays: days }));
         } catch {
-          console.log('Error getting RPC default constants');
+          console.error('Error getting RPC default constants');
         }
       } catch (err) {
         console.error('Error getting delegation time');

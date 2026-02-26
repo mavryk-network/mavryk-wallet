@@ -356,7 +356,7 @@ export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string
 
     return false;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return false;
   }
 };

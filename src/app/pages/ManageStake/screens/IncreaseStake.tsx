@@ -146,13 +146,6 @@ export const IncreaseStake = () => {
     async ({ amount }: FormData) => {
       if (formState.isSubmitting || !myBakerPkh || !canCostake) return;
       formAnalytics.trackSubmit({ amount });
-      const amtBN = new BigNumber(amount).decimalPlaces(6, BigNumber.ROUND_FLOOR);
-
-      console.log({
-        amountStr: amount,
-        amtFixed: amtBN.toFixed(6),
-        amtNumber: amtBN.toNumber()
-      });
 
       try {
         if (!assetMetadata) throw new Error('Metadata not found');

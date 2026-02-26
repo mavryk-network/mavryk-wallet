@@ -219,7 +219,7 @@ export const HistoryComponent: React.FC<Props> = memo(
 
             setFilteredHistory(arr);
           } catch (e) {
-            console.log(e);
+            console.error(e);
             setFilteredHistory([]);
             setIsSearchingByHash(false);
           }

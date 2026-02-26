@@ -1,6 +1,5 @@
 import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import { BigNumber } from 'bignumber.js';
-import dayjs from 'dayjs';
 
 import { isKnownChainId, TzktAlias, TzktApiChainId, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
 import {
@@ -561,7 +560,7 @@ export async function buildPendingOperationObject({
 }: BuildPendingOperationObjecttype) {
   if (!operation) return null;
 
-  const now = dayjs().toISOString();
+  const now = new Date().toISOString();
 
   const baseOperationFoelds = {
     type,

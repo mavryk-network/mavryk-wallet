@@ -71,7 +71,11 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
       assert: require.resolve('assert/'),
       vm: require.resolve('vm-browserify'),
       /* Current package version has a bug with false import path */
-      '@ledgerhq/devices/hid-framing': require.resolve('@ledgerhq/devices/lib-es/hid-framing')
+      '@ledgerhq/devices/hid-framing': require.resolve('@ledgerhq/devices/lib-es/hid-framing'),
+      /* Deprecated webauthn transport uses @ledgerhq/devices v5 scrambling module removed in v8 */
+      '@ledgerhq/devices/lib/scrambling': require.resolve(
+        '@ledgerhq/hw-transport-webauthn/node_modules/@ledgerhq/devices/lib/scrambling'
+      )
     },
 
     alias: {

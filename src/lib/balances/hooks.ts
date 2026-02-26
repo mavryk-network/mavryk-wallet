@@ -5,9 +5,12 @@ import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
-import { useAllAccountBalancesSelector, useAllBalancesSelector } from 'app/store/balances/selectors';
-import { getKeyForBalancesRecord } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
+import {
+  useAllAccountBalancesSelector,
+  useAllBalancesSelector,
+  getKeyForBalancesRecord
+} from 'lib/store/zustand/balances.store';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
 import { useTypedSWR } from 'lib/swr';
 import {

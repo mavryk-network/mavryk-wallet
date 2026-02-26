@@ -3,7 +3,6 @@ import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } f
 import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/webmavryk';
 import classNames from 'clsx';
 import { UseFormReturn, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { useSWRConfig, unstable_serialize } from 'swr';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -11,7 +10,7 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
-import { putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
+import { assetsStore } from 'lib/store/zustand/assets.store';
 import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { useFormAnalytics } from 'lib/analytics';
 import { TokenMetadataResponse } from 'lib/apis/temple';
@@ -86,7 +85,6 @@ const Form = memo(() => {
   const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('AddAsset');
-  const dispatch = useDispatch();
 
   const { register, handleSubmit, formState, watch, setValue, trigger, clearErrors } =
     useForm<FormData>({
@@ -225,7 +223,9 @@ const Form = memo(() => {
           status: 'enabled' as const
         };
 
-        dispatch(assetIsCollectible ? putCollectiblesAsIsAction([asset]) : putTokensAsIsAction([asset]));
+        const assets = assetsStore.getState();
+        if (assetIsCollectible) assets.putCollectiblesAsIs([asset]);
+        else assets.putTokensAsIs([asset]);
 
         swrCache.delete(unstable_serialize(getBalanceSWRKey(tezos, tokenSlug, accountPkh)));
 
@@ -260,7 +260,6 @@ const Form = memo(() => {
       accountPkh,
       setSubmitError,
       formAnalytics,
-      dispatch,
       contractAddress,
       tokenId
     ]

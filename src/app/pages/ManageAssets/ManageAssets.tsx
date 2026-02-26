@@ -11,10 +11,7 @@ import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
-import { dispatch } from 'app/store';
-import { setCollectibleStatusAction, setTokenStatusAction, setRwaStatusAction } from 'app/store/assets/actions';
-import { useAreAssetsLoading } from 'app/store/assets/selectors';
-import { StoredAssetStatus } from 'app/store/assets/state';
+import { assetsStore, useAreAssetsLoading, StoredAssetStatus } from 'lib/store/zustand/assets.store';
 import { useTokensMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSelect';
@@ -122,18 +119,17 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const handleAssetUpdate = useCallback(
     async (assetSlug: string, status: StoredAssetStatus) => {
       try {
-        dispatch(
-          (assetType === AssetTypesEnum.Collectibles
-            ? setCollectibleStatusAction
-            : assetType === AssetTypesEnum.Rwas
-            ? setRwaStatusAction
-            : setTokenStatusAction)({
-            account: account.publicKeyHash,
-            chainId,
-            slug: assetSlug,
-            status
-          })
-        );
+        const store = assetsStore.getState();
+        const payload = {
+          account: account.publicKeyHash,
+          chainId,
+          slug: assetSlug,
+          status
+        };
+
+        if (assetType === AssetTypesEnum.Collectibles) store.setCollectibleStatus(payload);
+        else if (assetType === AssetTypesEnum.Rwas) store.setRwaStatus(payload);
+        else store.setTokenStatus(payload);
       } catch (err: any) {
         console.error(err);
       }

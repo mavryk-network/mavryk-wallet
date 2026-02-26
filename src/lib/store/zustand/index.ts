@@ -22,3 +22,31 @@ export { startIntercomSync } from './intercom-sync';
 
 // Persist storage adapter
 export { browserStorage } from './persist-storage';
+
+// Assets store
+export { assetsStore } from './assets.store';
+export type { AssetsState, AssetsStore, StoredAssetStatus, AssetsType, AccountAssetForStore, AssetToPut } from './assets.store';
+export {
+  useAssetsStore,
+  useAllTokensSelector,
+  useAccountTokensSelector,
+  useAccountCollectiblesSelector,
+  useAccountRwasSelector,
+  useAreAssetsLoading,
+  useMainnetTokensWhitelistSelector,
+  useMainnetTokensScamlistSelector,
+  getAccountAssetsStoreKey,
+  isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount
+} from './assets.store';
+
+// Balances store
+export { balancesStore } from './balances.store';
+export type { BalancesState, BalancesStore } from './balances.store';
+export {
+  useAllBalancesSelector,
+  useAllAccountBalancesSelector,
+  useBalanceSelector,
+  useBalancesLoadingSelector,
+  useBalancesErrorSelector,
+  getKeyForBalancesRecord
+} from './balances.store';

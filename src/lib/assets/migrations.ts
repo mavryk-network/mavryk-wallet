@@ -1,10 +1,4 @@
-import { dispatch } from 'app/store';
-import {
-  AssetToPut,
-  putTokensAsIsAction,
-  putCollectiblesAsIsAction,
-  putRwasAsIsAction
-} from 'app/store/assets/actions';
+import { assetsStore, AssetToPut } from 'lib/store/zustand/assets.store';
 import { isCollectible, isRwa, TokenMetadata } from 'lib/metadata';
 import * as Repo from 'lib/temple/repo';
 
@@ -43,9 +37,10 @@ export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetada
     });
   }
 
-  if (tokens.length) dispatch(putTokensAsIsAction(tokens));
-  if (collectibles.length) dispatch(putCollectiblesAsIsAction(collectibles));
-  if (rwas.length) dispatch(putRwasAsIsAction(rwas));
+  const store = assetsStore.getState();
+  if (tokens.length) store.putTokensAsIs(tokens);
+  if (collectibles.length) store.putCollectiblesAsIs(collectibles);
+  if (rwas.length) store.putRwasAsIs(rwas);
 
   await Repo.accountTokens.clear();
 };

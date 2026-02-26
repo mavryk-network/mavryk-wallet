@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { BigNumber } from 'bignumber.js';
 
-import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
+import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useGetCurrentAccountTokenOrGasBalanceWithDecimals } from 'lib/balances/hooks';
 import { useUsdToTokenRates } from 'lib/fiat-currency/core';
 import { useAccount, useChainId } from 'lib/temple/front';

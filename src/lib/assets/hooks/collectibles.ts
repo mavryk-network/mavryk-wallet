@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { useAccountCollectiblesSelector } from 'app/store/assets/selectors';
-import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
+import { useAccountCollectiblesSelector } from 'lib/store/zustand/assets.store';
+import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 

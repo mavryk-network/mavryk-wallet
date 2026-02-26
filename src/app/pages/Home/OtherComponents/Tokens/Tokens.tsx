@@ -9,7 +9,7 @@ import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
+import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'lib/store/zustand/assets.store';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,

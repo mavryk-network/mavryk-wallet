@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 
-import { useAccountTokensSelector } from 'app/store/assets/selectors';
+import { useAccountTokensSelector } from 'lib/store/zustand/assets.store';
 import { useTokensMetadataPresenceCheck } from 'lib/metadata';
 import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { useAccount, useChainId } from 'lib/temple/front';

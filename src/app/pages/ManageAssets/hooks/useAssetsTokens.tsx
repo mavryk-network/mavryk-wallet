@@ -1,4 +1,4 @@
-import { AssetsType } from 'app/store/assets/selectors';
+import { AssetsType } from 'lib/store/zustand/assets.store';
 import { useAccountCollectibles } from 'lib/assets/hooks';
 import { useAccountRwas } from 'lib/assets/hooks/rwas';
 import { useAccountTokens } from 'lib/assets/hooks/tokens';

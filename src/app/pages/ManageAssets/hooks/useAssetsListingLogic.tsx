@@ -1,7 +1,7 @@
 import { useCollectiblesListingLogic } from 'app/hooks/use-collectibles-listing-logic';
 import { useRWAListingLogic } from 'app/hooks/use-rwa-listing-logic';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
-import { AssetsType } from 'app/store/assets/selectors';
+import { AssetsType } from 'lib/store/zustand/assets.store';
 
 export const useAssetsListingLogic = (type: AssetsType, managebleSlugs: string[]) => {
   const tokensData = useTokensListingLogic(managebleSlugs, false);

@@ -1,24 +1,13 @@
 import { combineEpics, Epic } from 'redux-observable';
-import { ignoreElements, tap } from 'rxjs/operators';
-import { ofType, toPayload } from 'ts-action-operators';
-
-import { metadataStore } from 'lib/store/zustand/metadata.store';
-
-import { loadTokensWhitelistActions } from '../assets/actions';
+import { EMPTY } from 'rxjs';
 
 /**
- * Bridge epic: forwards whitelist data from the assets Redux slice
- * to the Zustand metadata store. Will be removed when the assets
- * slice is migrated.
+ * The whitelist-to-metadata bridge epic has been removed.
+ * Whitelist data is now fed directly to the Zustand metadata store
+ * from the TanStack Query hook in `lib/assets/use-assets-query.ts`.
+ *
+ * This file is kept as a no-op epic to avoid breaking the root epic combiner.
  */
-const addWhitelistMetadataBridgeEpic: Epic = action$ =>
-  action$.pipe(
-    ofType(loadTokensWhitelistActions.success),
-    toPayload(),
-    tap(payload => {
-      metadataStore.getState().addWhitelistTokensMetadata(payload);
-    }),
-    ignoreElements()
-  );
+const noopEpic: Epic = () => EMPTY;
 
-export const tokensMetadataEpics = combineEpics(addWhitelistMetadataBridgeEpic);
+export const tokensMetadataEpics = combineEpics(noopEpic);

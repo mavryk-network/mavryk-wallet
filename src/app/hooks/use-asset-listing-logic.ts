@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { useDebounce } from 'use-debounce';
 
-import { AssetsType, useAreAssetsLoading } from 'app/store/assets/selectors';
+import { AssetsType, useAreAssetsLoading } from 'lib/store/zustand/assets.store';
 import { searchAssetsWithNoMeta } from 'lib/assets/search.utils';
 import { TokenMetadataGetter } from 'lib/metadata';
 import { isSearchStringApplicable } from 'lib/utils/search-items';

@@ -2,11 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import { noop } from 'lodash';
-import { useDispatch } from 'react-redux';
 
-import { loadGasBalanceActions, loadAssetsBalancesActions, putTokensBalancesAction } from 'app/store/balances/actions';
-import { useBalancesErrorSelector, useBalancesLoadingSelector } from 'app/store/balances/selectors';
-import { fixBalances } from 'app/store/balances/utils';
 import {
   TzktSubscriptionChannel,
   TzktSubscriptionMethod,
@@ -15,11 +11,44 @@ import {
   TzktTokenBalancesSubscriptionMessage,
   TzktAccountType,
   isKnownChainId,
-  calcTzktAccountSpendableTezBalance
+  calcTzktAccountSpendableTezBalance,
+  fetchTezosBalanceFromTzkt,
+  fetchAllAssetsBalancesFromTzkt
 } from 'lib/apis/tzkt';
+import type { TzktApiChainId } from 'lib/apis/tzkt';
 import { toTokenSlug } from 'lib/assets';
+import {
+  balancesStore,
+  useBalancesLoadingSelector,
+  useBalancesErrorSelector
+} from 'lib/store/zustand/balances.store';
+import { fixBalances } from 'app/store/balances/utils';
 import { useAccount, useChainId, useOnBlock, useTzktConnection } from 'lib/temple/front';
 import { useDidUpdate } from 'lib/ui/hooks';
+
+const { getState } = balancesStore;
+
+/** Fetch gas balance from TzKT and write to Zustand store */
+const fetchAndSetGasBalance = async (publicKeyHash: string, chainId: TzktApiChainId) => {
+  try {
+    const balance = await fetchTezosBalanceFromTzkt(publicKeyHash, chainId);
+    getState().setGasBalance(publicKeyHash, chainId, balance);
+  } catch (err: any) {
+    getState().setGasBalanceError(publicKeyHash, chainId, err?.message ?? String(err));
+  }
+};
+
+/** Fetch all asset balances from TzKT and write to Zustand store */
+const fetchAndSetAssetsBalances = async (publicKeyHash: string, chainId: TzktApiChainId) => {
+  getState().setAssetsBalancesLoading(publicKeyHash, chainId);
+  try {
+    const balances = await fetchAllAssetsBalancesFromTzkt(publicKeyHash, chainId);
+    fixBalances(balances);
+    getState().setAssetsBalancesSuccess(publicKeyHash, chainId, balances);
+  } catch (err: any) {
+    getState().setAssetsBalancesError(publicKeyHash, chainId, err?.message ?? String(err));
+  }
+};
 
 export const useBalancesLoading = () => {
   const chainId = useChainId(true)!;
@@ -41,19 +70,17 @@ export const useBalancesLoading = () => {
   const [tokensSubscriptionConfirmed, setTokensSubscriptionConfirmed] = useState(false);
   const [accountsSubscriptionConfirmed, setAccountsSubscriptionConfirmed] = useState(false);
 
-  const dispatch = useDispatch();
-
   const tokenBalancesListener = useCallback(
     (msg: TzktTokenBalancesSubscriptionMessage) => {
-      const skipDispatch = isLoadingRef.current || !isKnownChainId(chainId);
+      const skip = isLoadingRef.current || !isKnownChainId(chainId);
 
       switch (msg.type) {
         case TzktSubscriptionStateMessageType.Reorg:
-          if (skipDispatch) return;
-          dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
+          if (skip) return;
+          fetchAndSetAssetsBalances(publicKeyHash, chainId);
           break;
         case TzktSubscriptionStateMessageType.Data:
-          if (skipDispatch) return;
+          if (skip) return;
           const balances: StringRecord = {};
           msg.data.forEach(({ account, token, balance }) => {
             if (account.address !== publicKeyHash) return;
@@ -62,27 +89,27 @@ export const useBalancesLoading = () => {
           });
           fixBalances(balances);
           if (Object.keys(balances).length > 0) {
-            dispatch(putTokensBalancesAction({ publicKeyHash, chainId, balances }));
+            getState().putTokensBalances(publicKeyHash, chainId, balances);
           }
           break;
         default:
           setTokensSubscriptionConfirmed(true);
       }
     },
-    [publicKeyHash, chainId, isLoadingRef, dispatch]
+    [publicKeyHash, chainId, isLoadingRef]
   );
 
   const accountsListener = useCallback(
     (msg: TzktAccountsSubscriptionMessage) => {
-      const skipDispatch = isLoadingRef.current || !isKnownChainId(chainId);
+      const skip = isLoadingRef.current || !isKnownChainId(chainId);
 
       switch (msg.type) {
         case TzktSubscriptionStateMessageType.Reorg:
-          if (skipDispatch) return;
-          dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
+          if (skip) return;
+          fetchAndSetGasBalance(publicKeyHash, chainId);
           break;
         case TzktSubscriptionStateMessageType.Data:
-          if (skipDispatch) return;
+          if (skip) return;
           const matchingAccount = msg.data.find(acc => acc.address === publicKeyHash);
           if (
             matchingAccount?.type === TzktAccountType.Contract ||
@@ -90,23 +117,16 @@ export const useBalancesLoading = () => {
             matchingAccount?.type === TzktAccountType.User
           ) {
             const balance = calcTzktAccountSpendableTezBalance(matchingAccount);
-
-            dispatch(
-              loadGasBalanceActions.success({
-                publicKeyHash,
-                chainId,
-                balance
-              })
-            );
+            getState().setGasBalance(publicKeyHash, chainId, balance);
           } else if (matchingAccount) {
-            dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
+            fetchAndSetGasBalance(publicKeyHash, chainId);
           }
           break;
         default:
           setAccountsSubscriptionConfirmed(true);
       }
     },
-    [publicKeyHash, chainId, isLoadingRef, dispatch]
+    [publicKeyHash, chainId, isLoadingRef]
   );
 
   useEffect(() => {
@@ -130,23 +150,23 @@ export const useBalancesLoading = () => {
     return noop;
   }, [accountsListener, tokenBalancesListener, connection, connectionReady, publicKeyHash]);
 
-  const dispatchLoadGasBalanceAction = useCallback(() => {
+  const loadGasBalance = useCallback(() => {
     if (isLoadingRef.current === false && isKnownChainId(chainId)) {
-      dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
+      fetchAndSetGasBalance(publicKeyHash, chainId);
     }
-  }, [publicKeyHash, chainId, isLoadingRef, dispatch]);
+  }, [publicKeyHash, chainId, isLoadingRef]);
 
-  useEffect(dispatchLoadGasBalanceAction, [dispatchLoadGasBalanceAction]);
-  useOnBlock(dispatchLoadGasBalanceAction, undefined, accountsSubscriptionConfirmed && isStoredError === false);
+  useEffect(loadGasBalance, [loadGasBalance]);
+  useOnBlock(loadGasBalance, undefined, accountsSubscriptionConfirmed && isStoredError === false);
 
-  const dispatchLoadAssetsBalancesActions = useCallback(() => {
+  const loadAssetsBalances = useCallback(() => {
     if (isLoadingRef.current === false && isKnownChainId(chainId)) {
-      dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
+      fetchAndSetAssetsBalances(publicKeyHash, chainId);
     }
-  }, [publicKeyHash, chainId, isLoadingRef, dispatch]);
+  }, [publicKeyHash, chainId, isLoadingRef]);
 
-  useEffect(dispatchLoadAssetsBalancesActions, [dispatchLoadAssetsBalancesActions]);
-  useOnBlock(dispatchLoadAssetsBalancesActions, undefined, tokensSubscriptionConfirmed && isStoredError === false);
+  useEffect(loadAssetsBalances, [loadAssetsBalances]);
+  useOnBlock(loadAssetsBalances, undefined, tokensSubscriptionConfirmed && isStoredError === false);
 };
 
 export const useBalancesLoadingOnce = (publicKeyHash: string) => {
@@ -163,8 +183,6 @@ export const useBalancesLoadingOnce = (publicKeyHash: string) => {
   const storedError = useBalancesErrorSelector(publicKeyHash, chainId);
   const isStoredError = isDefined(storedError);
 
-  const dispatch = useDispatch();
-
   // run only once per mount (and only for that PKH+chainId)
   const didRunRef = useRef(false);
 
@@ -176,8 +194,8 @@ export const useBalancesLoadingOnce = (publicKeyHash: string) => {
 
     // initial load (no subscriptions, no polling)
     if (isLoadingRef.current === false && isStoredError === false) {
-      dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
-      dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
+      fetchAndSetGasBalance(publicKeyHash, chainId as TzktApiChainId);
+      fetchAndSetAssetsBalances(publicKeyHash, chainId as TzktApiChainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally empty: once

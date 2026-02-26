@@ -6,10 +6,10 @@ import { isEqual, sortBy, uniqBy } from 'lodash';
 import {
   useAllTokensSelector,
   useAccountTokensSelector,
-  useMainnetTokensWhitelistSelector
-} from 'app/store/assets/selectors';
-import { isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount } from 'app/store/assets/utils';
-import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
+  useMainnetTokensWhitelistSelector,
+  isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount
+} from 'lib/store/zustand/assets.store';
+import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';

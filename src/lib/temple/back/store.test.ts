@@ -2,10 +2,25 @@ import browser from 'webextension-polyfill';
 
 import { TempleAccountType, TempleChainKind, TempleStatus } from '../types';
 
-import { accountsUpdated, inited as initEvent, locked, settingsUpdated, store, unlocked } from './store';
+import { accountsUpdated, inited, locked, settingsUpdated, store, unlocked } from './store';
 import { Vault } from './vault';
 
 describe('Store tests', () => {
+  beforeEach(() => {
+    // Reset store to initial state before each test
+    store.setState(
+      {
+        inited: false,
+        vault: null,
+        status: TempleStatus.Idle,
+        accounts: [],
+        networks: [],
+        settings: null
+      },
+      true
+    );
+  });
+
   it('Browser storage works well', async () => {
     await browser.storage.local.set({ kek: 'KEK' });
     const items = await browser.storage.local.get('kek');
@@ -13,8 +28,8 @@ describe('Store tests', () => {
   });
 
   it('Initial store values', () => {
-    const { inited, vault, status, accounts, networks, settings } = store.getState();
-    expect(inited).toBeFalsy();
+    const { inited: isInited, vault, status, accounts, networks, settings } = store.getState();
+    expect(isInited).toBeFalsy();
     expect(vault).toBeNull();
     expect(status).toBe(TempleStatus.Idle);
     expect(accounts).toEqual([]);
@@ -22,13 +37,13 @@ describe('Store tests', () => {
     expect(settings).toBeNull();
   });
   it('Inited event', () => {
-    initEvent(false);
-    const { inited, status } = store.getState();
-    expect(inited).toBeTruthy();
+    inited(false);
+    const { inited: isInited, status } = store.getState();
+    expect(isInited).toBeTruthy();
     expect(status).toBe(TempleStatus.Idle);
   });
   it('Inited event with Vault', () => {
-    initEvent(true);
+    inited(true);
     const { status } = store.getState();
     expect(status).toBe(TempleStatus.Locked);
   });

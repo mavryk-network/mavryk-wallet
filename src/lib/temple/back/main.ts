@@ -14,9 +14,7 @@ import { AnalyticsEventCategory } from '../analytics-types';
 import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
-import { store, toFront } from './store';
-
-const frontStore = store.map(toFront);
+import { store } from './store';
 
 export const start = async () => {
   intercom.onRequest(processRequestWithErrorsLogged);
@@ -24,7 +22,7 @@ export const start = async () => {
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
 
-  frontStore.watch(() => {
+  store.subscribe(() => {
     intercom.broadcast({ type: TempleMessageType.StateUpdated });
   });
 };

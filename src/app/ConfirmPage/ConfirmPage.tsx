@@ -1,5 +1,6 @@
 import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
@@ -17,7 +18,6 @@ import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
 import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -125,11 +125,12 @@ const ConfirmDAppForm: FC = () => {
     return pageId;
   }, [loc.search]);
 
-  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  const { data } = useSuspenseQuery<TempleDAppPayload>({
+    queryKey: ['getDAppPayload', id],
+    queryFn: () => getDAppPayload(id),
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
 
   const payload = data!;

@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -12,9 +13,8 @@ import { useAppEnv } from 'app/env';
 import Balance from 'app/templates/Balance';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { useFormAnalytics } from 'lib/analytics';
-import { getOneUserContracts, TzktRelatedContract, isKnownChainId } from 'lib/apis/tzkt';
+import { getOneUserContracts, MvktRelatedContract, isKnownChainId } from 'lib/apis/mvkt';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { useRelevantAccounts, useTezos, useTempleClient, useChainId } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
@@ -27,7 +27,7 @@ type ImportKTAccountFormData = {
   contractAddress: string;
 };
 
-const getContractAddress = (contract: TzktRelatedContract) => contract.address;
+const getContractAddress = (contract: MvktRelatedContract) => contract.address;
 
 export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const accounts = useRelevantAccounts();
@@ -47,7 +47,11 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
     ],
     [accounts, chainId]
   );
-  const { data: usersContracts = [] } = useRetryableSWR(queryKey, getUsersContracts, {});
+  const { data: usersContracts = [] } = useQuery({
+    queryKey,
+    queryFn: () => getUsersContracts(queryKey),
+    retry: 2
+  });
 
   const remainingUsersContracts = useMemo(() => {
     return usersContracts.filter(({ address }) => !accounts.some(({ publicKeyHash }) => publicKeyHash === address));
@@ -251,7 +255,7 @@ const getUsersContracts = async ([, chainId, ...accounts]: string[]) => {
   }
 
   const contractsChunks = await Promise.all(
-    accounts.map<Promise<TzktRelatedContract[]>>(account => getOneUserContracts(chainId, account).catch(() => []))
+    accounts.map<Promise<MvktRelatedContract[]>>(account => getOneUserContracts(chainId, account).catch(() => []))
   );
   return contractsChunks.reduce(
     (contracts, chunk) => [...contracts, ...chunk.filter(({ kind }) => kind === 'delegator_contract')],
@@ -259,7 +263,7 @@ const getUsersContracts = async ([, chainId, ...accounts]: string[]) => {
   );
 };
 
-type ContractOptionRenderProps = OptionRenderProps<TzktRelatedContract, string>;
+type ContractOptionRenderProps = OptionRenderProps<MvktRelatedContract, string>;
 
 const ContractIcon: FC<ContractOptionRenderProps> = props => {
   return <Identicon type="bottts" hash={props.item.address} size={32} className="flex-shrink-0 shadow-xs" />;

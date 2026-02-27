@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 
-import { TzktUserAccount } from 'lib/apis/tzkt/types';
+import { MvktUserAccount } from 'lib/apis/mvkt/types';
 import { isMavSlug, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useEnabledOtherAccountTokensSlugs } from 'lib/assets/hooks/tokens';
@@ -50,7 +50,7 @@ export const useTotalBalance = (isStakingBalanceIncluded = false) => {
 };
 
 export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalanceIncluded = false) => {
-  const { data: accStats } = useDelegate(accountPkh, false);
+  const { data: accStats } = useDelegate(accountPkh);
   const metadata = useGasTokenMetadata();
   const tokensSlugs = useEnabledOtherAccountTokensSlugs(accountPkh);
 
@@ -77,7 +77,7 @@ export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalance
   }, [slugs, getBalance, isStakingBalanceIncluded, allUsdToTokenRates, accStats, metadata.decimals]);
 };
 
-export const upgradeBalanceWithStakingBalance = (balance?: BigNumber, acc?: TzktUserAccount, decimals = 6) => {
+export const upgradeBalanceWithStakingBalance = (balance?: BigNumber, acc?: MvktUserAccount, decimals = 6) => {
   const stakedBalance = atomsToTokens(acc?.stakedBalance ?? ZERO, decimals);
   const unstakedBalance = atomsToTokens(acc?.unstakedBalance ?? ZERO, decimals);
 

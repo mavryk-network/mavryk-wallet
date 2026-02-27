@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { isKnownChainId } from 'lib/apis/mvkt';
 import { fetchWhitelistTokens } from 'lib/apis/temple';
 import { fetchScamlistTokens } from 'lib/apis/temple/scamlist-tokens';
-import { isKnownChainId } from 'lib/apis/tzkt';
 import { ASSETS_SYNC_INTERVAL } from 'lib/fixed-times';
 import { assetsStore, useAreAssetsLoading } from 'lib/store/zustand/assets.store';
 import { metadataStore } from 'lib/store/zustand/metadata.store';

@@ -18,3 +18,9 @@ export interface TokenMetadata extends AssetMetadataBase {
   displayUri?: string;
   artifactUri?: string;
 }
+
+/**
+ * Maps are up to 2000 times faster to read from than arrays.
+ * Be sure to convert to a serializible value before persisting.
+ */
+export type MetadataMap = Map<string, TokenMetadata>;

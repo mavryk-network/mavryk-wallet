@@ -7,11 +7,11 @@ import {
   mapAliceBobProviderCurrencies,
   mapMoonPayProviderCurrencies,
   mapUtorgProviderCurrencies
-} from 'app/store/buy-with-credit-card/utils';
+} from './utils';
 import { getMoonPayCurrencies } from 'lib/apis/moonpay';
 import { getAliceBobPairsInfo } from 'lib/apis/temple';
 import { getCurrenciesInfo as getUtorgCurrenciesInfo } from 'lib/apis/utorg';
-import { LoadableEntityState } from 'lib/store';
+import { LoadableEntityState } from './loadable-entity';
 import { getAxiosQueryErrorMessage } from 'lib/utils/get-axios-query-error-message';
 
 import { PAIR_NOT_FOUND_MESSAGE } from './constants';

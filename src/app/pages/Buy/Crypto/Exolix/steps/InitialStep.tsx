@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
+import { useQuery } from '@tanstack/react-query';
 import classNames from 'clsx';
 import { useDebounce } from 'use-debounce';
 
@@ -11,7 +12,6 @@ import ErrorComponent from 'app/pages/Buy/Crypto/Exolix/steps/ErrorComponent';
 import WarningComponent from 'app/pages/Buy/Crypto/Exolix/steps/WarningComponent';
 import { TopUpInput } from 'app/templates/TopUpInput';
 import { T, t } from 'lib/i18n';
-import { useTypedSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 
 import { EXOLIX_PRIVICY_LINK, EXOLIX_TERMS_LINK, outputTokensList } from '../config';
@@ -43,10 +43,10 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
 
   const [debouncedAmount] = useDebounce(amount, 500);
 
-  const { data: allCurrencies, isValidating: isCurrenciesLoading } = useTypedSWR(
-    ['exolix/api/currencies'],
-    getCurrencies
-  );
+  const { data: allCurrencies, isFetching: isCurrenciesLoading } = useQuery({
+    queryKey: ['exolix/api/currencies'],
+    queryFn: getCurrencies
+  });
 
   const { inputCurrencies, outputCurrencies } = useMemo(() => {
     const inputCurrencies: OutputCurrencyInterface[] = [];
@@ -89,15 +89,17 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
     }
   };
 
-  const { data: ratesData } = useTypedSWR(['exolix/api/rate', coinFrom, coinTo, amount], () =>
-    queryExchange({
-      coinFrom: coinFrom.code,
-      coinFromNetwork: coinFrom.network.code,
-      amount: amount ?? 0,
-      coinTo: coinTo.code,
-      coinToNetwork: coinTo.network.code
-    })
-  );
+  const { data: ratesData } = useQuery({
+    queryKey: ['exolix/api/rate', coinFrom, coinTo, amount],
+    queryFn: () =>
+      queryExchange({
+        coinFrom: coinFrom.code,
+        coinFromNetwork: coinFrom.network.code,
+        amount: amount ?? 0,
+        coinTo: coinTo.code,
+        coinToNetwork: coinTo.network.code
+      })
+  });
 
   const { rate, toAmount } = ratesData || { rate: null, toAmount: 0 };
 

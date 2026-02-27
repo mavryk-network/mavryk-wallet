@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from 'lib/apis/tzkt/utils';
+import { fetchWithTimeout } from 'lib/apis/mvkt/utils';
 import { MVRK_PRICE, RWA_ASSET_PRICES } from 'lib/constants';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 

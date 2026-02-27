@@ -1,18 +1,18 @@
 import { useCallback, useMemo } from 'react';
 
 import { emptyFn } from '@rnw-community/shared';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
-import { isKnownChainId } from 'lib/apis/tzkt';
+import { isKnownChainId } from 'lib/apis/mvkt';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
 import {
   useAllAccountBalancesSelector,
   useAllBalancesSelector,
   getKeyForBalancesRecord
 } from 'lib/store/zustand/balances.store';
-import { useTypedSWR } from 'lib/swr';
 import {
   useTezos,
   useAccount,
@@ -24,7 +24,6 @@ import {
 import { michelEncoder, loadFastRpcClient, atomsToTokens } from 'lib/temple/helpers';
 
 import { fetchRawBalance as fetchRawBalanceFromBlockchain } from './fetch';
-import { getBalanceSWRKey } from './utils';
 
 export const useCurrentAccountBalances = () => {
   const { publicKeyHash } = useAccount();
@@ -108,21 +107,25 @@ export function useRawBalance(
   const usingStore = address === currentAccountAddress && isKnownChainId(chainId);
 
   const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeTezos), [networkRpc, nativeTezos]);
+  const queryClient = useQueryClient();
 
-  const onChainBalanceSwrRes = useTypedSWR(
-    getBalanceSWRKey(tezos, assetSlug, address),
-    () => {
-      // if (!chainId || usingStore) return;
-      return fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString());
-    },
-    {
-      revalidateOnFocus: true,
-      dedupingInterval: 20_000
-    }
+  const balanceQueryKey = useMemo(
+    () => ['balance', tezos.checksum, assetSlug, address],
+    [tezos.checksum, assetSlug, address]
   );
 
+  const onChainBalanceRes = useQuery({
+    queryKey: balanceQueryKey,
+    queryFn: () => fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString()),
+    refetchOnWindowFocus: true,
+    staleTime: 20_000
+  });
+
   const refreshChainId = useCallback(() => void chainIdSwrRes.refetch(), [chainIdSwrRes.refetch]);
-  const refreshBalanceOnChain = useCallback(() => void onChainBalanceSwrRes.mutate(), [onChainBalanceSwrRes.mutate]);
+  const refreshBalanceOnChain = useCallback(
+    () => void queryClient.invalidateQueries({ queryKey: balanceQueryKey }),
+    [queryClient, balanceQueryKey]
+  );
 
   useOnBlock(refreshBalanceOnChain, tezos, !chainId || usingStore);
 
@@ -147,9 +150,9 @@ export function useRawBalance(
     };
 
   return {
-    value: onChainBalanceSwrRes.data,
-    isSyncing: onChainBalanceSwrRes.isValidating,
-    error: onChainBalanceSwrRes.error,
+    value: onChainBalanceRes.data,
+    isSyncing: onChainBalanceRes.isFetching,
+    error: onChainBalanceRes.error,
     refresh: refreshBalanceOnChain
   };
 }

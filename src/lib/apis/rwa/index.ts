@@ -3,8 +3,8 @@ import { forkJoin, map } from 'rxjs';
 
 import { fromAssetSlug } from 'lib/assets/utils';
 
-import { TzktRWAAssetMetadata } from '../tzkt/types';
-import { fetchWithTimeout } from '../tzkt/utils';
+import { MvktRWAAssetMetadata } from '../mvkt/types';
+import { fetchWithTimeout } from '../mvkt/utils';
 
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
 import { MOCK_RWA_CONFIG, MOCKED_RWA_ASSETS } from './mock';
@@ -99,7 +99,7 @@ export const fetchRWADetails$ = (slugs: string[]) =>
             name,
             symbol,
             shouldPreferSymbol
-          } as TzktRWAAssetMetadata;
+          } as MvktRWAAssetMetadata;
         });
       })
     )

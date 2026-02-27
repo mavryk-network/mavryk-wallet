@@ -28,6 +28,7 @@ import toBuffer from 'typedarray-to-buffer';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
+import { startIntercomSync } from 'lib/store/zustand/intercom-sync';
 import { useWalletStore, useWalletSuspense, walletStore } from 'lib/store/zustand/wallet.store';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
@@ -44,6 +45,11 @@ import {
 import { useStorage } from './storage';
 
 export const intercom = new IntercomClient();
+
+// Start intercom sync at module level so it runs before any React Suspense boundary.
+// This avoids a deadlock where useWalletSuspense() suspends rendering, preventing the
+// useEffect that would trigger the initial state fetch from ever firing.
+startIntercomSync(intercom);
 
 export const [TempleClientProvider, useTempleClient] = constate(() => {
   /**

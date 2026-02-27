@@ -1,9 +1,9 @@
 import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } from 'react';
 
 import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/webmavryk';
+import { useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
 import { UseFormReturn, useForm } from 'react-hook-form';
-import { useSWRConfig, unstable_serialize } from 'swr';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
@@ -19,7 +19,6 @@ import {
   detectTokenStandard,
   IncorrectTokenIdError
 } from 'lib/assets/standards';
-import { getBalanceSWRKey } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
 import { fetchOneTokenMetadata } from 'lib/metadata/fetch';
@@ -81,7 +80,7 @@ const Form = memo(() => {
   const { id: networkId } = useNetwork();
   const chainId = useChainId(true)!;
   const { publicKeyHash: accountPkh } = useAccount();
-  const { cache: swrCache } = useSWRConfig();
+  const queryClient = useQueryClient();
   const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('AddAsset');
@@ -226,7 +225,7 @@ const Form = memo(() => {
         if (assetIsCollectible) assets.putCollectiblesAsIs([asset]);
         else assets.putTokensAsIs([asset]);
 
-        swrCache.delete(unstable_serialize(getBalanceSWRKey(tezos, tokenSlug, accountPkh)));
+        queryClient.removeQueries({ queryKey: ['balance', tezos.checksum, tokenSlug, accountPkh] });
 
         formAnalytics.trackSubmitSuccess();
 
@@ -253,7 +252,7 @@ const Form = memo(() => {
     },
     [
       tezos,
-      swrCache,
+      queryClient,
       formState.isSubmitting,
       chainId,
       accountPkh,

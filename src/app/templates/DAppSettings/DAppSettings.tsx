@@ -1,5 +1,6 @@
 import React, { ComponentProps, FC, useCallback, useMemo, useRef, useState } from 'react';
 
+import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { Name, Divider } from 'app/atoms';
@@ -10,7 +11,6 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
@@ -27,13 +27,14 @@ const DAppSettings: FC = () => {
   const confirm = useConfirm();
   const { popup } = useAppEnv();
 
-  const { data, mutate } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  const queryClient = useQueryClient();
+  const { data: dAppSessions } = useSuspenseQuery<TempleDAppSessions>({
+    queryKey: ['getAllDAppSessions'],
+    queryFn: getAllDAppSessions,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
-  const dAppSessions = data!;
 
   const [dAppEnabled, setDAppEnabled] = useStorage(TempleSharedStorageKey.DAppEnabled, true);
 
@@ -65,10 +66,10 @@ const DAppSettings: FC = () => {
         })
       ) {
         await removeDAppSession(origin);
-        mutate();
+        queryClient.invalidateQueries({ queryKey: ['getAllDAppSessions'] });
       }
     },
-    [removeDAppSession, mutate, confirm]
+    [removeDAppSession, queryClient, confirm]
   );
 
   const handleRemoveAllClick = useCallback(async () => {
@@ -80,11 +81,9 @@ const DAppSettings: FC = () => {
     ) {
       const origins = dAppEntries.map(([origin]) => origin);
       await removeAllDAppSessions(origins);
-      mutate();
+      queryClient.invalidateQueries({ queryKey: ['getAllDAppSessions'] });
     }
-
-    // mutate();
-  }, [confirm, dAppEntries, mutate, removeAllDAppSessions]);
+  }, [confirm, dAppEntries, queryClient, removeAllDAppSessions]);
 
   return (
     <div className={clsx('w-full h-full', popup && 'pb-8 max-w-sm mx-auto')}>

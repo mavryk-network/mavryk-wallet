@@ -1,6 +1,6 @@
-import { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
+import { MvktRWAAssetMetadata } from 'lib/apis/mvkt/types';
 
-export type RwaDetails = TzktRWAAssetMetadata & {
+export type RwaDetails = MvktRWAAssetMetadata & {
   isAdultContent?: boolean;
   metadataHash?: string | null;
 };

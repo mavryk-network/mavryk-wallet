@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { getCurrencyNameByCode, knownAliceBobFiatCurrencies } from 'app/store/buy-with-credit-card/utils';
+import { getCurrencyNameByCode, knownAliceBobFiatCurrencies } from 'lib/buy-with-credit-card/utils';
 import { getAliceBobPairsInfo } from 'lib/apis/temple';
 import { FIAT_ICONS_SRC } from 'lib/icons';
 

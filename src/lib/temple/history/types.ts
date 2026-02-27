@@ -1,13 +1,13 @@
-import { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
+import { MvktAlias, MvktOperation, MvktTokenTransfer } from 'lib/apis/mvkt';
 
 import { AssetMetadataBase } from '../../metadata';
 
-export type HistoryItemStatus = TzktOperation['status'] | 'pending';
-export type HistoryMember = TzktAlias;
+export type HistoryItemStatus = MvktOperation['status'] | 'pending';
+export type HistoryMember = MvktAlias;
 
 export interface OperationsGroup {
   hash: string;
-  operations: TzktOperation[];
+  operations: MvktOperation[];
 }
 
 export interface UserHistoryItem {
@@ -22,7 +22,7 @@ export interface UserHistoryItem {
   oldestOperation?: IndividualHistoryItem;
 }
 
-type PickedPropsFromTzktOperation = Pick<TzktOperation, 'id' | 'level' | 'hash' | 'block'>;
+type PickedPropsFromMvktOperation = Pick<MvktOperation, 'id' | 'level' | 'hash' | 'block'>;
 
 export enum HistoryItemOpTypeEnum {
   TransferTo,
@@ -46,7 +46,7 @@ export enum StakingActions {
   slash_unstaked = 'slash_unstaked'
 }
 
-export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
+export interface HistoryItemOperationBase extends PickedPropsFromMvktOperation {
   contractAddress?: string;
   source: HistoryMember;
   status: HistoryItemStatus;
@@ -124,11 +124,11 @@ export interface UserHistory {
   items: UserHistoryItem[];
 }
 
-type PickedPropsFromTzktTokenTransfer = Pick<TzktTokenTransfer, 'id' | 'level'>;
+type PickedPropsFromMvktTokenTransfer = Pick<MvktTokenTransfer, 'id' | 'level'>;
 
 export type TokenType = 'mav' | 'fa12' | 'fa2';
 
-export interface HistoryItemTokenTransfer extends PickedPropsFromTzktTokenTransfer {
+export interface HistoryItemTokenTransfer extends PickedPropsFromMvktTokenTransfer {
   sender: HistoryMember;
   recipients?: RecipientInfo[];
   totalAmount: string;

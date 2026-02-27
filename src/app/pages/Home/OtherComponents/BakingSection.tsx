@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -21,10 +21,11 @@ import { ReactComponent as UnlockIcon } from 'app/icons/unlock.svg';
 import BakingHistoryItem from 'app/pages/Home/OtherComponents/BakingHistoryItem';
 import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import BakerBanner from 'app/templates/BakerBanner';
-import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
@@ -87,25 +88,16 @@ const BakingSection = memo(() => {
     animation: 'shift-away-subtle'
   };
 
-  const getBakingHistory = useCallback(
-    async ([, accountPkh, , chainId]: [string, string, string | nullish, string | nullish]) => {
-      if (!isKnownChainId(chainId!)) {
-        return [];
-      }
-      return (
-        (await getDelegatorRewards(chainId, {
-          address: accountPkh,
-          limit: 30
-        })) || []
-      );
+  const { data: bakingHistory, isFetching: loadingBakingHistory } = useSuspenseQuery({
+    queryKey: ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
+    queryFn: () => {
+      if (!isKnownChainId(chainId!)) return [];
+      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []);
     },
-    []
-  );
-  const { data: bakingHistory, isValidating: loadingBakingHistory } = useRetryableSWR(
-    ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
-    getBakingHistory,
-    { suspense: true, revalidateOnFocus: false, revalidateOnReconnect: false }
-  );
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 2
+  });
 
   const delegateButtonRef = useTippy<HTMLButtonElement>(tippyProps);
   const commonDelegateButtonProps = useMemo(

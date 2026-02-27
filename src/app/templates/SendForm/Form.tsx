@@ -19,6 +19,7 @@ import {
   WalletOperation
 } from '@mavrykdynamics/webmavryk';
 import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
+import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
@@ -39,7 +40,6 @@ import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
 import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { transferImplicit, transferToContract } from 'lib/michelson';
-import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
 import {
   ReactiveTezosToolkit,
@@ -298,16 +298,15 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const {
     data: baseFee,
     error: estimateBaseFeeError,
-    isValidating: estimating
-  } = useTypedSWR(
-    () => (toFilled ? ['transfer-base-fee', tezos.checksum, assetSlug, accountPkh, toResolved] : null),
-    estimateBaseFee,
-    {
-      shouldRetryOnError: false,
-      focusThrottleInterval: 10_000,
-      dedupingInterval: BLOCK_DURATION
-    }
-  );
+    isFetching: estimating
+  } = useQuery({
+    queryKey: ['transfer-base-fee', tezos.checksum, assetSlug, accountPkh, toResolved],
+    queryFn: estimateBaseFee,
+    enabled: Boolean(toFilled),
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: BLOCK_DURATION
+  });
   const feeError = getBaseFeeError(baseFee, estimateBaseFeeError);
   const estimationError = getFeeError(estimating, feeError);
 

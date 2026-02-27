@@ -69,8 +69,8 @@ const PageLayout: FC<PageLayoutProps> = ({
       )}
 
       <div className={classNames(fullPage && 'pb-16', 'relative')}>
-        {isTopbarVisible && <Header />}
         <ContentPaper style={contentPaperStyle} customContainerMinHeight={customContainerMinHeight}>
+          {isTopbarVisible && <Header />}
           <Toolbar {...toolbarProps} />
 
           <div
@@ -120,7 +120,7 @@ export const ContentPaper: FC<ContentPaparProps> = ({
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-primary-bg rounded-md shadow-lg h-full flex flex-col', className)}
+        className={classNames('bg-primary-bg rounded-2xl shadow-lg h-full flex flex-col overflow-hidden', className)}
         style={{
           minHeight: isMainPage
             ? fullPageMinHeightScreenWithHeader

@@ -12,6 +12,8 @@ export interface CheckboxProps
   overrideClassNames?: string;
   errored?: boolean;
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Native onChange handler for react-hook-form v7 register() compatibility */
+  onNativeChange?: React.ChangeEventHandler<HTMLInputElement>;
   IconFromProps?: ImportedSVGComponent;
   iconClassName?: string;
   shouldFocus?: boolean;
@@ -25,6 +27,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       className,
       checked,
       onChange,
+      onNativeChange,
       onFocus,
       onBlur,
       testID,
@@ -49,9 +52,12 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         const { checked: toChecked } = event.target;
         checkedHandler(event, onChange && (() => onChange(toChecked, event)), setLocalChecked);
 
+        // Forward the native event to react-hook-form's register() onChange
+        onNativeChange?.(event);
+
         testID && trackEvent(testID, AnalyticsEventCategory.CheckboxChange, { toChecked, ...testIDProperties });
       },
-      [onChange, setLocalChecked, trackEvent, testID, testIDProperties]
+      [onChange, onNativeChange, setLocalChecked, trackEvent, testID, testIDProperties]
     );
 
     /**

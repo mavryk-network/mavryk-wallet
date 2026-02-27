@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
@@ -24,7 +25,6 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { uiStore } from 'lib/store/zustand/ui.store';
-import { useRetryableSWR } from 'lib/swr';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
 import { MAV_RPC_NETWORK } from 'lib/temple/networks';
 import { TempleAccountType, TempleChainId, TempleConfirmationPayload } from 'lib/temple/types';
@@ -73,7 +73,13 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         return [];
     }
   }, [payload]);
-  const { data: contentToParse } = useRetryableSWR(['content-to-parse'], getContentToParse, { suspense: true });
+  const { data: contentToParse } = useSuspenseQuery({
+    queryKey: ['content-to-parse', payload.type, payload.type === 'sign' ? payload.bytes : null],
+    queryFn: getContentToParse,
+    retry: 2,
+    staleTime: 0,
+    gcTime: 0
+  });
 
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 

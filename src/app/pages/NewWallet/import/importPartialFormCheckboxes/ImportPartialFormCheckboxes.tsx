@@ -82,6 +82,8 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
       <FormCheckbox
         ref={betaRef}
         name={betaRest.name}
+        onNativeChange={betaRest.onChange}
+        onBlur={betaRest.onBlur}
         errorCaption={errors.betaAgreement?.message}
         testID={setWalletPasswordSelectors.betaAgreementCheckbox}
         label={<T id="betaAgreementMsg" />}
@@ -90,6 +92,8 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
       <FormCheckbox
         ref={termsRef}
         name={termsRest.name}
+        onNativeChange={termsRest.onChange}
+        onBlur={termsRest.onBlur}
         errorCaption={errors.termsAccepted?.message}
         testID={setWalletPasswordSelectors.acceptTermsCheckbox}
         labelClassName={clsx(popup && styles['max-w-295'])}

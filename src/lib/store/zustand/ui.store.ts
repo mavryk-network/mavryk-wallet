@@ -1,4 +1,4 @@
-import { nanoid } from '@reduxjs/toolkit';
+import { nanoid } from 'nanoid';
 import { createStore, useStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 

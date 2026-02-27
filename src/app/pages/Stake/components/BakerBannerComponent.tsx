@@ -64,7 +64,7 @@ export const AdvancedBakerBannerComponent: React.FC<{
   bakerAddress: string;
   avtivateReDelegation: () => void;
 }> = ({ bakerAddress, avtivateReDelegation }) => {
-  const { data: baker } = useKnownBaker(bakerAddress || null, false);
+  const { data: baker } = useKnownBaker(bakerAddress || null);
 
   return baker ? (
     <div>

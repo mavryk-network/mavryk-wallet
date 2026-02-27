@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { Subscription, MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
-import { useSWRConfig } from 'swr';
 
-import { getBalanceSWRKey } from 'lib/balances/utils';
 import { confirmOperation } from 'lib/temple/operation';
 import { useUpdatableRef } from 'lib/ui/hooks';
 
@@ -13,16 +12,16 @@ import { useTezos, useRelevantAccounts } from './ready';
 export const [NewBlockTriggersProvider, useBlockTriggers] = constate(useNewBlockTriggers);
 
 function useNewBlockTriggers() {
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
   const tezos = useTezos();
   const allAccounts = useRelevantAccounts();
 
   const triggerNewBlock = useCallback(() => {
     for (const acc of allAccounts) {
-      mutate(getBalanceSWRKey(tezos, 'mav', acc.publicKeyHash));
-      mutate(['delegate', tezos.checksum, acc.publicKeyHash]);
+      queryClient.invalidateQueries({ queryKey: ['balance', tezos.checksum, 'mav', acc.publicKeyHash] });
+      queryClient.invalidateQueries({ queryKey: ['delegate', tezos.checksum, acc.publicKeyHash] });
     }
-  }, [allAccounts, mutate, tezos]);
+  }, [allAccounts, queryClient, tezos]);
 
   useOnBlock(triggerNewBlock);
 

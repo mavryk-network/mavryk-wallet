@@ -1,15 +1,17 @@
 import { FC } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
+
 import { onInited } from 'lib/i18n';
-import { useTypedSWR } from 'lib/swr';
 import { delay } from 'lib/utils';
 
 const AwaitI18N: FC = () => {
-  useTypedSWR('i18n', awaitI18n, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  useSuspenseQuery({
+    queryKey: ['i18n'],
+    queryFn: awaitI18n,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
 
   return null;

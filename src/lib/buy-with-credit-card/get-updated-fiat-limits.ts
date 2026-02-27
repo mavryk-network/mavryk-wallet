@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { getMoonPayBuyQuote } from 'lib/apis/moonpay';
 import { convertFiatAmountToCrypto as utorgConvertFiatAmountToCrypto } from 'lib/apis/utorg';
-import { createEntity, LoadableEntityState } from 'lib/store';
+import { createEntity, LoadableEntityState } from './loadable-entity';
 import { getAxiosQueryErrorMessage } from 'lib/utils/get-axios-query-error-message';
 
 import { TopUpProviderId } from './top-up-provider-id.enum';

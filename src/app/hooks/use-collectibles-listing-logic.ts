@@ -16,7 +16,7 @@ export const useCollectiblesListingLogic = (allSlugsSorted: string[]) => {
   } = useCollectiblesPaginationLogic(allSlugsSorted, initialAmount);
 
   const metadatasLoading = useCollectiblesMetadataLoadingSelector();
-  const getCollectibleMeta = useGetCollectibleMetadata();
+  const getMetadata = useGetCollectibleMetadata();
 
   const result = useAssetListingLogic(allSlugsSorted, {
     assetsLoadingType: 'collectibles',
@@ -24,7 +24,7 @@ export const useCollectiblesListingLogic = (allSlugsSorted: string[]) => {
     paginatedSlugs,
     pageIsLoading,
     loadNext,
-    getMetadata: getCollectibleMeta
+    getMetadata
   });
 
   const metaToCheckAndLoad = useMetaSlugsToCheck(

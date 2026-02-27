@@ -6,7 +6,7 @@ import * as Bip39 from 'bip39';
 import { nanoid } from 'nanoid';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
-import { getKYCStatus } from 'lib/apis/tzkt/api';
+import { getKYCStatus } from 'lib/apis/mvkt/api';
 import {
   ACCOUNT_ALREADY_EXISTS_ERR_MSG,
   ACCOUNT_NAME_COLLISION_ERR_MSG,

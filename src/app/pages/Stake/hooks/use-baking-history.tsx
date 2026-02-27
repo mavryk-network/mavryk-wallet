@@ -1,10 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 
-import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
+import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
 import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
-import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 
@@ -30,25 +30,16 @@ export const useBakingHistory = () => {
   const chainId = useChainId(true);
   const testGroupName = useAbTestGroupName();
 
-  const getBakingHistory = useCallback(
-    async ([, accountPkh, , chainId]: [string, string, string | nullish, string | nullish]) => {
-      if (!isKnownChainId(chainId!)) {
-        return [];
-      }
-      return (
-        (await getDelegatorRewards(chainId, {
-          address: accountPkh,
-          limit: 30
-        })) || []
-      );
+  const { data: bakingHistory, isFetching: loadingBakingHistory } = useSuspenseQuery({
+    queryKey: ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
+    queryFn: () => {
+      if (!isKnownChainId(chainId!)) return [];
+      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []);
     },
-    []
-  );
-  const { data: bakingHistory, isValidating: loadingBakingHistory } = useRetryableSWR(
-    ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
-    getBakingHistory,
-    { suspense: true, revalidateOnFocus: false, revalidateOnReconnect: false }
-  );
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 2
+  });
 
   const rewardsPerEventHistory = useMemo(() => {
     if (!bakingHistory) {

@@ -48,4 +48,4 @@ export { useFilteredContacts } from './use-filtered-contacts.hook';
 
 export { decryptKukaiSeedPhrase } from './kukai';
 
-export { TzktConnectionProvider, useTzktConnection } from './tzkt-connection';
+export { MvktConnectionProvider, useMvktConnection } from './mvkt-connection';

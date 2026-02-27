@@ -8,16 +8,17 @@
  *   3. Updates the Zustand assets store with the returned slugs
  *   4. Updates the Zustand metadata store with any newly-fetched metadata
  */
+import { fixBalances } from 'lib/balances/utils';
+import type { MetadataMap } from 'lib/metadata/types';
+import { assetsStore } from 'lib/store/zustand/assets.store';
+import { balancesStore } from 'lib/store/zustand/balances.store';
+import { metadataStore } from 'lib/store/zustand/metadata.store';
+
 import {
   loadAccountTokens as loadAccountTokensRaw,
   loadAccountCollectibles as loadAccountCollectiblesRaw,
   loadAccountRwas as loadAccountRwasRaw
-} from 'app/store/assets/utils';
-import { fixBalances } from 'app/store/balances/utils';
-import type { MetadataMap } from 'app/store/collectibles-metadata/state';
-import { assetsStore } from 'lib/store/zustand/assets.store';
-import { balancesStore } from 'lib/store/zustand/balances.store';
-import { metadataStore } from 'lib/store/zustand/metadata.store';
+} from './asset-loaders';
 
 // ---- Helpers ---------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
+import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
@@ -19,7 +20,6 @@ import { TID, T, t } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { setDelegate } from 'lib/michelson';
-import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
 import {
   isDomainNameValid,
@@ -230,21 +230,19 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const {
     data: baseFee,
     error: estimateBaseFeeError,
-    isValidating: estimating
-  } = useTypedSWR(
-    () => (toFilled ? ['delegate-base-fee', tezos.checksum, accountPkh, toResolved] : null),
-    estimateBaseFee,
-    {
-      shouldRetryOnError: false,
-      focusThrottleInterval: 10_000,
-      dedupingInterval: BLOCK_DURATION
-    }
-  );
+    isFetching: estimating
+  } = useQuery({
+    queryKey: ['delegate-base-fee', tezos.checksum, accountPkh, toResolved],
+    queryFn: estimateBaseFee,
+    enabled: Boolean(toFilled),
+    retry: false,
+    staleTime: BLOCK_DURATION
+  });
   const baseFeeError = baseFee instanceof Error ? baseFee : estimateBaseFeeError;
 
   const estimationError = !estimating ? baseFeeError : null;
 
-  const { data: baker, isValidating: bakerValidating } = useKnownBaker(toResolved || null, false);
+  const { data: baker, isFetching: bakerValidating } = useKnownBaker(toResolved || null);
 
   const maxAddFee = useMemo(() => {
     if (baseFee instanceof BigNumber) {

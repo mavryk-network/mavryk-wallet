@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
+import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/mvkt/api';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 

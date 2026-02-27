@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
@@ -22,7 +23,6 @@ import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
-import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
@@ -50,13 +50,12 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
-  const { data: extraDetails } = useRetryableSWR(
-    ['fetchCollectibleExtraDetails', contractAddress, tokenId],
-    () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
-    {
-      refreshInterval: DETAILS_SYNC_INTERVAL
-    }
-  );
+  const { data: extraDetails } = useQuery({
+    queryKey: ['fetchCollectibleExtraDetails', contractAddress, tokenId],
+    queryFn: () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
+    refetchInterval: DETAILS_SYNC_INTERVAL,
+    retry: 2
+  });
 
   const account = useAccount();
 

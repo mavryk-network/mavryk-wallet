@@ -1,74 +1,18 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
-import { loadTokensMetadata } from 'lib/metadata/fetch';
+import { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import { metadataStore, useAllCollectiblesMetadataSelector } from 'lib/store/zustand/metadata.store';
-import { useNetwork } from 'lib/temple/front';
-import { useDidMount, useDidUpdate } from 'lib/ui/hooks';
-import { setNavigateSearchParams } from 'lib/woozie';
 
-export const ITEMS_PER_PAGE = 30;
+import { useAssetPaginationLogic } from './use-asset-pagination-logic';
+
+export { ITEMS_PER_PAGE } from './use-asset-pagination-logic';
 
 export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initialSize: number) => {
   const allMeta = useAllCollectiblesMetadataSelector();
-
-  const { rpcBaseURL: rpcUrl } = useNetwork();
-
-  const [slugs, setSlugs] = useState<string[]>(() => allSlugsSorted.slice(0, initialSize));
-
-  const initialIsLoading = initialSize ? false : Boolean(allSlugsSorted.length);
-  const [isLoading, setIsLoading] = useState(initialIsLoading);
-
-  const _load = useCallback(
-    async (size: number) => {
-      setIsLoading(true);
-
-      const nextSlugs = allSlugsSorted.slice(0, size);
-
-      const slugsWithoutMeta = nextSlugs
-        // Not checking metadata of loaded items
-        .slice(slugs.length)
-        .filter(slug => !allMeta[slug]);
-
-      if (slugsWithoutMeta.length)
-        await loadTokensMetadata(rpcUrl, slugsWithoutMeta)
-          .then(
-            records => {
-              metadataStore.getState().putCollectiblesMetadata(records);
-              setSlugs(nextSlugs);
-            },
-            error => {
-              console.error(error);
-            }
-          )
-          .finally(() => setIsLoading(false));
-      else {
-        setSlugs(nextSlugs);
-        setIsLoading(false);
-      }
-
-      setNavigateSearchParams({ amount: String(size) });
-    },
-    [allSlugsSorted, slugs.length, allMeta, rpcUrl]
+  const putMetadata = useCallback(
+    (records: FetchedMetadataRecord) => metadataStore.getState().putCollectiblesMetadata(records),
+    []
   );
 
-  useDidMount(() => {
-    if (initialIsLoading) _load(ITEMS_PER_PAGE);
-  });
-
-  useDidUpdate(() => {
-    if (isLoading) return;
-
-    if (slugs.length) _load(slugs.length);
-    else if (allSlugsSorted.length) _load(ITEMS_PER_PAGE);
-  }, [allSlugsSorted]);
-
-  const loadNext = useCallback(() => {
-    if (isLoading || slugs.length === allSlugsSorted.length) return;
-
-    const size = (Math.floor(slugs.length / ITEMS_PER_PAGE) + 1) * ITEMS_PER_PAGE;
-
-    _load(size);
-  }, [_load, isLoading, slugs.length, allSlugsSorted.length]);
-
-  return { slugs, isLoading, loadNext };
+  return useAssetPaginationLogic(allSlugsSorted, initialSize, allMeta, putMetadata);
 };

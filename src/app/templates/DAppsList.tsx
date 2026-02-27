@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
 import classNames from 'clsx';
 
 import { Anchor } from 'app/atoms/Anchor';
@@ -9,7 +10,6 @@ import DAppItem from 'app/templates/DAppsList/DAppItem';
 import SearchField from 'app/templates/SearchField/SearchField';
 import { DappEnum, getDApps } from 'lib/apis/temple';
 import { TID, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 
 import { DAppStoreSelectors } from './DAppsList.selectors';
 
@@ -18,7 +18,11 @@ const TOP_DAPPS_SLUGS = ['quipuswap', 'objkt.com', 'youves'];
 
 const DAppsList = () => {
   const { popup } = useAppEnv();
-  const { data } = useRetryableSWR('dapps-list', getDApps, { suspense: true });
+  const { data } = useSuspenseQuery({
+    queryKey: ['dapps-list'],
+    queryFn: getDApps,
+    retry: 2
+  });
 
   const dApps = useMemo(() => {
     return data!.dApps.map(({ categories: rawCategories, ...restProps }) => {

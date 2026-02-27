@@ -3,31 +3,31 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import { noop } from 'lodash';
 
-import { fixBalances } from 'app/store/balances/utils';
 import {
-  TzktSubscriptionChannel,
-  TzktSubscriptionMethod,
-  TzktSubscriptionStateMessageType,
-  TzktAccountsSubscriptionMessage,
-  TzktTokenBalancesSubscriptionMessage,
-  TzktAccountType,
+  MvktSubscriptionChannel,
+  MvktSubscriptionMethod,
+  MvktSubscriptionStateMessageType,
+  MvktAccountsSubscriptionMessage,
+  MvktTokenBalancesSubscriptionMessage,
+  MvktAccountType,
   isKnownChainId,
-  calcTzktAccountSpendableTezBalance,
-  fetchTezosBalanceFromTzkt,
-  fetchAllAssetsBalancesFromTzkt
-} from 'lib/apis/tzkt';
-import type { TzktApiChainId } from 'lib/apis/tzkt';
+  calcMvktAccountSpendableTezBalance,
+  fetchTezosBalanceFromMvkt,
+  fetchAllAssetsBalancesFromMvkt
+} from 'lib/apis/mvkt';
+import type { MvktApiChainId } from 'lib/apis/mvkt';
 import { toTokenSlug } from 'lib/assets';
+import { fixBalances } from 'lib/balances/utils';
 import { balancesStore, useBalancesLoadingSelector, useBalancesErrorSelector } from 'lib/store/zustand/balances.store';
-import { useAccount, useChainId, useOnBlock, useTzktConnection } from 'lib/temple/front';
+import { useAccount, useChainId, useOnBlock, useMvktConnection } from 'lib/temple/front';
 import { useDidUpdate } from 'lib/ui/hooks';
 
 const { getState } = balancesStore;
 
 /** Fetch gas balance from TzKT and write to Zustand store */
-const fetchAndSetGasBalance = async (publicKeyHash: string, chainId: TzktApiChainId) => {
+const fetchAndSetGasBalance = async (publicKeyHash: string, chainId: MvktApiChainId) => {
   try {
-    const balance = await fetchTezosBalanceFromTzkt(publicKeyHash, chainId);
+    const balance = await fetchTezosBalanceFromMvkt(publicKeyHash, chainId);
     getState().setGasBalance(publicKeyHash, chainId, balance);
   } catch (err: any) {
     getState().setGasBalanceError(publicKeyHash, chainId, err?.message ?? String(err));
@@ -35,10 +35,10 @@ const fetchAndSetGasBalance = async (publicKeyHash: string, chainId: TzktApiChai
 };
 
 /** Fetch all asset balances from TzKT and write to Zustand store */
-const fetchAndSetAssetsBalances = async (publicKeyHash: string, chainId: TzktApiChainId) => {
+const fetchAndSetAssetsBalances = async (publicKeyHash: string, chainId: MvktApiChainId) => {
   getState().setAssetsBalancesLoading(publicKeyHash, chainId);
   try {
-    const balances = await fetchAllAssetsBalancesFromTzkt(publicKeyHash, chainId);
+    const balances = await fetchAllAssetsBalancesFromMvkt(publicKeyHash, chainId);
     fixBalances(balances);
     getState().setAssetsBalancesSuccess(publicKeyHash, chainId, balances);
   } catch (err: any) {
@@ -62,20 +62,20 @@ export const useBalancesLoading = () => {
   const storedError = useBalancesErrorSelector(publicKeyHash, chainId);
   const isStoredError = isDefined(storedError);
 
-  const { connection, connectionReady } = useTzktConnection();
+  const { connection, connectionReady } = useMvktConnection();
   const [tokensSubscriptionConfirmed, setTokensSubscriptionConfirmed] = useState(false);
   const [accountsSubscriptionConfirmed, setAccountsSubscriptionConfirmed] = useState(false);
 
   const tokenBalancesListener = useCallback(
-    (msg: TzktTokenBalancesSubscriptionMessage) => {
+    (msg: MvktTokenBalancesSubscriptionMessage) => {
       const skip = isLoadingRef.current || !isKnownChainId(chainId);
 
       switch (msg.type) {
-        case TzktSubscriptionStateMessageType.Reorg:
+        case MvktSubscriptionStateMessageType.Reorg:
           if (skip) return;
           fetchAndSetAssetsBalances(publicKeyHash, chainId);
           break;
-        case TzktSubscriptionStateMessageType.Data:
+        case MvktSubscriptionStateMessageType.Data:
           if (skip) return;
           const balances: StringRecord = {};
           msg.data.forEach(({ account, token, balance }) => {
@@ -96,23 +96,23 @@ export const useBalancesLoading = () => {
   );
 
   const accountsListener = useCallback(
-    (msg: TzktAccountsSubscriptionMessage) => {
+    (msg: MvktAccountsSubscriptionMessage) => {
       const skip = isLoadingRef.current || !isKnownChainId(chainId);
 
       switch (msg.type) {
-        case TzktSubscriptionStateMessageType.Reorg:
+        case MvktSubscriptionStateMessageType.Reorg:
           if (skip) return;
           fetchAndSetGasBalance(publicKeyHash, chainId);
           break;
-        case TzktSubscriptionStateMessageType.Data:
+        case MvktSubscriptionStateMessageType.Data:
           if (skip) return;
           const matchingAccount = msg.data.find(acc => acc.address === publicKeyHash);
           if (
-            matchingAccount?.type === TzktAccountType.Contract ||
-            matchingAccount?.type === TzktAccountType.Delegate ||
-            matchingAccount?.type === TzktAccountType.User
+            matchingAccount?.type === MvktAccountType.Contract ||
+            matchingAccount?.type === MvktAccountType.Delegate ||
+            matchingAccount?.type === MvktAccountType.User
           ) {
-            const balance = calcTzktAccountSpendableTezBalance(matchingAccount);
+            const balance = calcMvktAccountSpendableTezBalance(matchingAccount);
             getState().setGasBalance(publicKeyHash, chainId, balance);
           } else if (matchingAccount) {
             fetchAndSetGasBalance(publicKeyHash, chainId);
@@ -127,19 +127,19 @@ export const useBalancesLoading = () => {
 
   useEffect(() => {
     if (connection && connectionReady) {
-      connection.on(TzktSubscriptionChannel.TokenBalances, tokenBalancesListener);
-      connection.on(TzktSubscriptionChannel.Accounts, accountsListener);
+      connection.on(MvktSubscriptionChannel.TokenBalances, tokenBalancesListener);
+      connection.on(MvktSubscriptionChannel.Accounts, accountsListener);
 
       Promise.all([
-        connection.invoke(TzktSubscriptionMethod.SubscribeToAccounts, { addresses: [publicKeyHash] }),
-        connection.invoke(TzktSubscriptionMethod.SubscribeToTokenBalances, { account: publicKeyHash })
+        connection.invoke(MvktSubscriptionMethod.SubscribeToAccounts, { addresses: [publicKeyHash] }),
+        connection.invoke(MvktSubscriptionMethod.SubscribeToTokenBalances, { account: publicKeyHash })
       ]).catch(e => console.error(e));
 
       return () => {
         setAccountsSubscriptionConfirmed(false);
         setTokensSubscriptionConfirmed(false);
-        connection.off(TzktSubscriptionChannel.TokenBalances, tokenBalancesListener);
-        connection.off(TzktSubscriptionChannel.Accounts, accountsListener);
+        connection.off(MvktSubscriptionChannel.TokenBalances, tokenBalancesListener);
+        connection.off(MvktSubscriptionChannel.Accounts, accountsListener);
       };
     }
 
@@ -190,8 +190,8 @@ export const useBalancesLoadingOnce = (publicKeyHash: string) => {
 
     // initial load (no subscriptions, no polling)
     if (isLoadingRef.current === false && isStoredError === false) {
-      fetchAndSetGasBalance(publicKeyHash, chainId as TzktApiChainId);
-      fetchAndSetAssetsBalances(publicKeyHash, chainId as TzktApiChainId);
+      fetchAndSetGasBalance(publicKeyHash, chainId as MvktApiChainId);
+      fetchAndSetAssetsBalances(publicKeyHash, chainId as MvktApiChainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally empty: once

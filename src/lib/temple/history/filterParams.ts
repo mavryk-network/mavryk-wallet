@@ -1,4 +1,4 @@
-import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/mvkt/api';
 
 import { HistoryItemOpTypeEnum } from './types';
 

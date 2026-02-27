@@ -62,6 +62,8 @@ export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComp
         <FormCheckbox
           ref={backupedRef}
           name={backupedRest.name}
+          onNativeChange={backupedRest.onChange}
+          onBlur={backupedRest.onBlur}
           errorCaption={errors.backuped?.message}
           label={t('backupedInputLabel')}
           testID={NewSeedBackupSelectors.iMadeSeedPhraseBackupCheckBox}

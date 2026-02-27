@@ -16,7 +16,7 @@ export const useRWAListingLogic = (allSlugsSorted: string[]) => {
   } = useRwasPaginationLogic(allSlugsSorted, initialAmount);
 
   const metadatasLoading = useRwasMetadataLoadingSelector();
-  const getRwaMeta = useGetRwaMetadata();
+  const getMetadata = useGetRwaMetadata();
 
   const result = useAssetListingLogic(allSlugsSorted, {
     assetsLoadingType: 'rwas',
@@ -24,7 +24,7 @@ export const useRWAListingLogic = (allSlugsSorted: string[]) => {
     paginatedSlugs,
     pageIsLoading,
     loadNext,
-    getMetadata: getRwaMeta
+    getMetadata
   });
 
   const metaToCheckAndLoad = useMetaSlugsToCheck(

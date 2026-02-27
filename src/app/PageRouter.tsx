@@ -2,45 +2,48 @@ import React, { FC, useLayoutEffect, useMemo } from 'react';
 
 import RootSuspenseFallback from 'app/a11y/RootSuspenseFallback';
 import { OpenInFullPage, useAppEnv } from 'app/env';
-import AddAsset from 'app/pages/AddAsset/AddAsset';
-// import { Buy } from 'app/pages/Buy/Buy';
-// import Exolix from 'app/pages/Buy/Crypto/Exolix/Exolix';
-// import { BuyWithCreditCard } from 'app/pages/BuyWithCreditCard/BuyWithCreditCard';
-import NFTsPage from 'app/pages/Collectibles/CollectiblePage';
-import ConnectLedger from 'app/pages/ConnectLedger/ConnectLedger';
-import CreateAccount from 'app/pages/CreateAccount/CreateAccount';
-import DApps from 'app/pages/DApps';
 import Home from 'app/pages/Home/Home';
-import ImportAccount from 'app/pages/ImportAccount';
-import ManageAssets from 'app/pages/ManageAssets/ManageAssets';
 import { CreateWallet } from 'app/pages/NewWallet/CreateWallet';
 import { ImportWallet } from 'app/pages/NewWallet/ImportWallet';
-// import AttentionPage from 'app/pages/Onboarding/pages/AttentionPage';
-import Receive from 'app/pages/Receive/Receive';
-import Send from 'app/pages/Send';
-import Settings from 'app/pages/Settings/Settings';
-// import { Swap } from 'app/pages/Swap/Swap';
 import Unlock from 'app/pages/Unlock/Unlock';
 import Welcome from 'app/pages/Welcome/Welcome';
-// import { AliceBobWithdraw } from 'app/pages/Withdraw/Debit/AliceBob/AliceBobWithdraw';
-// import { Withdraw } from 'app/pages/Withdraw/Withdraw';
 import { usePageRouterAnalytics } from 'lib/analytics';
-// import { Notifications, NotificationsItem } from 'lib/notifications/components';
 import { useTempleClient } from 'lib/temple/front';
 import * as Woozie from 'lib/woozie';
 
-import { AddNetworkScreen } from './pages/AddNetwork/AddNetwork';
-import { AddOrImportAccount } from './pages/AddOrImportAccount';
-import { CoStake } from './pages/CoStake/CoStake';
-import { EditAccount } from './pages/EditAccount';
-import { ManageAccounts } from './pages/ManageAccounts/ManageAccounts';
-import { ManageStake } from './pages/ManageStake/ManageStake';
-import Onboarding from './pages/Onboarding/Onboarding';
-import { ProVersion } from './pages/ProVersion/ProVersion';
-import RWAPage from './pages/RWAs/RWAPage';
-import { Stake } from './pages/Stake/Stake';
-import { SuccessScreen } from './pages/SuccessScreen/SuccessScreen';
 import { WithDataLoading } from './WithDataLoading';
+
+// Lazy-loaded pages — split into separate chunks, loaded on demand.
+// Existing <Suspense> boundaries in PageLayout handle the loading fallback.
+const AddAsset = React.lazy(() => import('app/pages/AddAsset/AddAsset'));
+const NFTsPage = React.lazy(() => import('app/pages/Collectibles/CollectiblePage'));
+const ConnectLedger = React.lazy(() => import('app/pages/ConnectLedger/ConnectLedger'));
+const CreateAccount = React.lazy(() => import('app/pages/CreateAccount/CreateAccount'));
+const DApps = React.lazy(() => import('app/pages/DApps'));
+const ImportAccount = React.lazy(() => import('app/pages/ImportAccount'));
+const ManageAssets = React.lazy(() => import('app/pages/ManageAssets/ManageAssets'));
+const Receive = React.lazy(() => import('app/pages/Receive/Receive'));
+const Send = React.lazy(() => import('app/pages/Send'));
+const Settings = React.lazy(() => import('app/pages/Settings/Settings'));
+const AddNetworkScreen = React.lazy(() =>
+  import('./pages/AddNetwork/AddNetwork').then(m => ({ default: m.AddNetworkScreen }))
+);
+const AddOrImportAccount = React.lazy(() =>
+  import('./pages/AddOrImportAccount').then(m => ({ default: m.AddOrImportAccount }))
+);
+const CoStake = React.lazy(() => import('./pages/CoStake/CoStake').then(m => ({ default: m.CoStake })));
+const EditAccount = React.lazy(() => import('./pages/EditAccount').then(m => ({ default: m.EditAccount })));
+const ManageAccounts = React.lazy(() =>
+  import('./pages/ManageAccounts/ManageAccounts').then(m => ({ default: m.ManageAccounts }))
+);
+const ManageStake = React.lazy(() => import('./pages/ManageStake/ManageStake').then(m => ({ default: m.ManageStake })));
+const Onboarding = React.lazy(() => import('./pages/Onboarding/Onboarding'));
+const ProVersion = React.lazy(() => import('./pages/ProVersion/ProVersion').then(m => ({ default: m.ProVersion })));
+const RWAPage = React.lazy(() => import('./pages/RWAs/RWAPage'));
+const Stake = React.lazy(() => import('./pages/Stake/Stake').then(m => ({ default: m.Stake })));
+const SuccessScreen = React.lazy(() =>
+  import('./pages/SuccessScreen/SuccessScreen').then(m => ({ default: m.SuccessScreen }))
+);
 
 interface RouteContext {
   popup: boolean;

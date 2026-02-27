@@ -1,7 +1,7 @@
 import { OperationContentsAndResult } from '@mavrykdynamics/webmavryk-rpc';
 import Dexie from 'dexie';
 
-import { TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
+import { MvktOperation, MvktTokenTransfer } from 'lib/apis/mvkt';
 
 enum Table {
   AccountTokens = 'accountTokens',
@@ -53,8 +53,8 @@ interface IOperation {
 
 type IOperationData = AtLeastOne<{
   localGroup: Array<OperationContentsAndResult>;
-  tzktGroup: Array<TzktOperation>;
-  tzktTokenTransfers: Array<TzktTokenTransfer>;
+  mvktGroup: Array<MvktOperation>;
+  mvktTokenTransfers: Array<MvktTokenTransfer>;
 }>;
 
 function indexes(...items: string[]) {

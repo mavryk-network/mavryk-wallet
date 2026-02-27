@@ -8,20 +8,20 @@ import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import {
-  useCollectiblesDetailsLoading,
-  useCollectibleDetails,
-  useCollectiblesDetailsQuery
-} from 'lib/collectibles/use-collectibles-details.query';
-import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
+import {
+  useCollectiblesDetailsLoading,
+  useCollectibleDetails,
+  useCollectiblesDetailsQuery
+} from 'lib/collectibles/use-collectibles-details.query';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
+import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';

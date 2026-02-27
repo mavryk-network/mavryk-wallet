@@ -5,15 +5,12 @@ import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
-import { useBalanceSelector } from 'lib/store/zustand/balances.store';
-import {
-  useCollectiblesDetailsLoading,
-  useCollectibleDetails
-} from 'lib/collectibles/use-collectibles-details.query';
-import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetItemImage } from 'app/templates/CollectibleMedia';
+import { useCollectiblesDetailsLoading, useCollectibleDetails } from 'lib/collectibles/use-collectibles-details.query';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
+import { useBalanceSelector } from 'lib/store/zustand/balances.store';
+import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { Link } from 'lib/woozie';
 

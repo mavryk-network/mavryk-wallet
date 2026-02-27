@@ -25,7 +25,14 @@ export { browserStorage } from './persist-storage';
 
 // Assets store
 export { assetsStore } from './assets.store';
-export type { AssetsState, AssetsStore, StoredAssetStatus, AssetsType, AccountAssetForStore, AssetToPut } from './assets.store';
+export type {
+  AssetsState,
+  AssetsStore,
+  StoredAssetStatus,
+  AssetsType,
+  AccountAssetForStore,
+  AssetToPut
+} from './assets.store';
 export {
   useAssetsStore,
   useAllTokensSelector,

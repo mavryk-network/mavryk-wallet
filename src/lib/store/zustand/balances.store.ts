@@ -57,7 +57,7 @@ const ensureRecord = (state: BalancesState, key: string): BalanceRecord => {
 
 export const balancesStore = createStore<BalancesStore>()(
   persist(
-    (set) => ({
+    set => ({
       // --- State ---
       balancesAtomic: {},
 
@@ -139,14 +139,14 @@ export const balancesStore = createStore<BalancesStore>()(
     {
       name: 'balances',
       storage: {
-        getItem: async (name) => {
+        getItem: async name => {
           const raw = await browserStorage.getItem(name);
           return raw ? JSON.parse(raw) : null;
         },
         setItem: async (name, value) => {
           await browserStorage.setItem(name, JSON.stringify(value));
         },
-        removeItem: async (name) => {
+        removeItem: async name => {
           await browserStorage.removeItem(name);
         }
       }

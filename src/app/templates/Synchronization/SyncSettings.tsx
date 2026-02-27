@@ -24,7 +24,14 @@ const SyncSettings: FC = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
   const [payload, setPayload] = useVanishingState();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, clearErrors, watch } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors,
+    watch
+  } = useForm<FormData>();
 
   const focusPasswordField = useCallback(
     () => formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus(),

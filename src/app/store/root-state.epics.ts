@@ -8,7 +8,7 @@ import { abTestingEpics } from './ab-testing/epics';
 // import { advertisingEpics } from './advertising/epics';
 import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
-import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
+// import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
 import { collectiblesEpics } from './collectibles/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 import { currencyEpics } from './currency/epics';
@@ -32,7 +32,7 @@ const allEpics = combineEpics(
   rwasMetadataEpics,
   collectiblesMetadataEpics,
   abTestingEpics,
-  buyWithCreditCardEpics,
+  // buyWithCreditCardEpics,
   collectiblesEpics
 );
 

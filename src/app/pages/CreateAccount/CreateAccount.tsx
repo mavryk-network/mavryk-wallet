@@ -65,7 +65,13 @@ const CreateAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting }
+  } = useForm<FormData>({
     defaultValues: { name: defaultName }
   });
   const submitting = isSubmitting;

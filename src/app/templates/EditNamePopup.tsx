@@ -7,11 +7,9 @@ import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
-import { useFormAnalytics } from 'lib/analytics';
+import { useFormAnalytics, TestIDProperty } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useAlert } from 'lib/ui';
-
-import { TestIDProperty } from '../../lib/analytics';
 
 interface EditNamePopupProps extends TestIDProperty {
   opened: boolean;

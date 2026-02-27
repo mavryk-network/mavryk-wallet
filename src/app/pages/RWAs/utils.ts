@@ -14,4 +14,3 @@ export function getDetailsListing(details: CollectibleDetails | nullish) {
 
   return { floorPrice, decimals: currency.decimals, symbol: currency.symbol };
 }
-

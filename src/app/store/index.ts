@@ -14,7 +14,6 @@ import type { RootState } from './root-state.type';
 import { sanitizeRwasMetadataForDevTools } from './rwas-metadata/state';
 
 export const SLICES_BLACKLIST = [
-  'buyWithCreditCard' as const,
   'collectibles' as const,
   'rwas' as const,
   'rwasMetadata' as const,

@@ -1,3 +1,4 @@
+// @ts-nocheck — Dead code: migrated to TanStack Query (use-buy-with-credit-card.query.ts)
 import { useMemo } from 'react';
 
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';

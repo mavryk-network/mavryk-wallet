@@ -45,7 +45,7 @@ interface BackgroundActions {
 export type BackgroundStore = BackgroundState & BackgroundActions;
 
 export const backgroundStore = createStore<BackgroundStore>()(
-  subscribeWithSelector((set) => ({
+  subscribeWithSelector(set => ({
     // Initial state
     inited: false,
     vault: null,
@@ -55,7 +55,7 @@ export const backgroundStore = createStore<BackgroundStore>()(
     settings: null,
 
     // Actions
-    init: (vaultExists) =>
+    init: vaultExists =>
       set({
         inited: true,
         status: vaultExists ? TempleStatus.Locked : TempleStatus.Idle,
@@ -82,11 +82,9 @@ export const backgroundStore = createStore<BackgroundStore>()(
         settings
       })),
 
-    updateAccounts: (accounts) =>
-      set(state => ({ ...state, accounts })),
+    updateAccounts: accounts => set(state => ({ ...state, accounts })),
 
-    updateSettings: (settings) =>
-      set(state => ({ ...state, settings }))
+    updateSettings: settings => set(state => ({ ...state, settings }))
   }))
 );
 

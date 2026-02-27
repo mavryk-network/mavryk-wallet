@@ -1,7 +1,7 @@
-import { AssetsType } from 'lib/store/zustand/assets.store';
 import { useAccountCollectibles } from 'lib/assets/hooks';
 import { useAccountRwas } from 'lib/assets/hooks/rwas';
 import { useAccountTokens } from 'lib/assets/hooks/tokens';
+import { AssetsType } from 'lib/store/zustand/assets.store';
 
 export const useAssetsTokens = (type: AssetsType, address: string, chainId: string, returnRemovedTokes = false) => {
   const tokens = useAccountTokens(address, chainId, returnRemovedTokes);

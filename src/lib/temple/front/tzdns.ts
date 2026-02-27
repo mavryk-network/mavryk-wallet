@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { DomainNameValidationResult, isMavrykDomainsSupportedNetwork } from '@mavrykdynamics/mavryk-domains-core';
-import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
+import { WebmavrykMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-webmavryk-client';
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 
 import { useTypedSWR } from 'lib/swr';
@@ -11,11 +11,11 @@ import { useTezos, useChainId } from './ready';
 
 function getClient(networkId: 'mainnet' | 'custom', tezos: MavrykToolkit) {
   return isMavrykDomainsSupportedNetwork(networkId)
-    ? new TaquitoMavrykDomainsClient({ network: networkId, tezos: tezos as any })
-    : TaquitoMavrykDomainsClient.Unsupported;
+    ? new WebmavrykMavrykDomainsClient({ network: networkId, mavryk: tezos })
+    : WebmavrykMavrykDomainsClient.Unsupported;
 }
 
-export function isDomainNameValid(name: string, client: TaquitoMavrykDomainsClient) {
+export function isDomainNameValid(name: string, client: WebmavrykMavrykDomainsClient) {
   return client.validator.validateDomainName(name, { minLevel: 2 }) === DomainNameValidationResult.VALID;
 }
 

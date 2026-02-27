@@ -28,11 +28,7 @@ import toBuffer from 'typedarray-to-buffer';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
-import {
-  useWalletStore,
-  useWalletSuspense,
-  walletStore
-} from 'lib/store/zustand/wallet.store';
+import { useWalletStore, useWalletSuspense, walletStore } from 'lib/store/zustand/wallet.store';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
   TempleMessageType,
@@ -361,9 +357,9 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.DAppSignConfirmationResponse);
   }, []);
 
-  const createTaquitoWallet = useCallback(
+  const createWebMavrykWallet = useCallback(
     (sourcePkh: string, networkRpc: string) =>
-      new TaquitoWallet(sourcePkh, networkRpc, {
+      new WebMavrykWallet(sourcePkh, networkRpc, {
         onBeforeSend: id => {
           confirmationIdRef.current = id;
           walletStore.getState().setConfirmationId(id);
@@ -372,7 +368,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     []
   );
 
-  const createTaquitoSigner = useCallback(
+  const createWebMavrykSigner = useCallback(
     (sourcePkh: string) =>
       new TempleSigner(sourcePkh, id => {
         confirmationIdRef.current = id;
@@ -454,15 +450,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     confirmDAppPermission,
     confirmDAppOperation,
     confirmDAppSign,
-    createTaquitoWallet,
-    createTaquitoSigner,
+    createWebMavrykWallet,
+    createWebMavrykSigner,
     getAllDAppSessions,
     removeAllDAppSessions,
     removeDAppSession
   };
 });
 
-type TaquitoWalletOps = {
+type WebMavrykWalletOps = {
   onBeforeSend?: (id: string) => void;
 };
 
@@ -498,8 +494,8 @@ export const createFinalizeUnstakeOperation = ({ source, fee, gasLimit, storageL
   });
 };
 
-class TaquitoWallet implements WalletProvider {
-  constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
+class WebMavrykWallet implements WalletProvider {
+  constructor(private pkh: string, private rpc: string, private opts: WebMavrykWalletOps = {}) {}
 
   async getPKH() {
     return this.pkh;

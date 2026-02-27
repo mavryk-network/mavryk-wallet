@@ -67,7 +67,13 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
     formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus();
   }, []);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    setError,
+    clearErrors
+  } = useForm<FormData>();
 
   const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {

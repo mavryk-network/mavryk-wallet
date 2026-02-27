@@ -1,22 +1,24 @@
 import React, { FC, Suspense, useEffect, useMemo, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { useDispatch } from 'react-redux';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
 import ErrorBoundary from 'app/ErrorBoundary';
 import { ReactComponent as ArrowDownIcon } from 'app/icons/arrow-down.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { loadAllCurrenciesActions, updatePairLimitsActions } from 'app/store/buy-with-credit-card/actions';
-import { useCurrenciesLoadingSelector } from 'app/store/buy-with-credit-card/selectors';
 import { PaymentProviderInput } from 'app/templates/PaymentProviderInput';
 import { SpinnerSection } from 'app/templates/SendForm/SpinnerSection';
 import { TopUpInput } from 'app/templates/TopUpInput';
 import { MOONPAY_ASSETS_BASE_URL } from 'lib/apis/moonpay';
 import { getAssetSymbolToDisplay } from 'lib/buy-with-credit-card/get-asset-symbol-to-display';
 import { TopUpInputInterface } from 'lib/buy-with-credit-card/topup.interface';
+import {
+  buyWithCreditCardKeys,
+  useCurrenciesLoading
+} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { shouldShowFieldError } from 'lib/form/should-show-field-error';
 import { t, T, toLocalFormat } from 'lib/i18n';
 import { FIAT_ICONS_SRC } from 'lib/icons';
@@ -39,7 +41,7 @@ const fitFiatIconFn = (currency: TopUpInputInterface) =>
   !currency.icon.startsWith(MOONPAY_ASSETS_BASE_URL) && currency.icon !== FIAT_ICONS_SRC.UAH;
 
 export const BuyWithCreditCard: FC = () => {
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const [formIsLoading, setFormIsLoading] = useState(false);
   const form = useBuyWithCreditCardForm();
   const {
@@ -82,7 +84,7 @@ export const BuyWithCreditCard: FC = () => {
     outputToken.code
   );
   const allCryptoCurrencies = useAllCryptoCurrencies();
-  const currenciesLoading = useCurrenciesLoadingSelector();
+  const currenciesLoading = useCurrenciesLoading();
   const pairLimitsLoading = usePairLimitsAreLoading(inputCurrency.code, outputToken.code);
 
   const inputAmountErrorMessage = errors.inputAmount?.message;
@@ -95,11 +97,14 @@ export const BuyWithCreditCard: FC = () => {
     shouldShowFieldError('topUpProvider', formState) &&
     paymentProvidersToDisplay.length > 0;
 
-  useEffect(() => void dispatch(loadAllCurrenciesActions.submit()), []);
-
+  // Re-fetch pair limits when currencies counts change (currencies query auto-fetches on mount)
   useEffect(() => {
-    dispatch(updatePairLimitsActions.submit({ fiatSymbol: inputCurrency.code, cryptoSymbol: outputToken.code }));
-  }, [dispatch, inputCurrency.code, outputToken.code, allFiatCurrencies.length, allCryptoCurrencies.length]);
+    if (allFiatCurrencies.length > 0 || allCryptoCurrencies.length > 0) {
+      queryClient.invalidateQueries({
+        queryKey: buyWithCreditCardKeys.pairLimits(inputCurrency.code, outputToken.code)
+      });
+    }
+  }, [queryClient, inputCurrency.code, outputToken.code, allFiatCurrencies.length, allCryptoCurrencies.length]);
 
   useEffect(() => {
     const newInputAsset = allFiatCurrencies.find(({ code }) => code === inputCurrency.code);

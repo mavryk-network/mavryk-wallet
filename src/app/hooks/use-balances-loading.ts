@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import { noop } from 'lodash';
 
+import { fixBalances } from 'app/store/balances/utils';
 import {
   TzktSubscriptionChannel,
   TzktSubscriptionMethod,
@@ -17,12 +18,7 @@ import {
 } from 'lib/apis/tzkt';
 import type { TzktApiChainId } from 'lib/apis/tzkt';
 import { toTokenSlug } from 'lib/assets';
-import {
-  balancesStore,
-  useBalancesLoadingSelector,
-  useBalancesErrorSelector
-} from 'lib/store/zustand/balances.store';
-import { fixBalances } from 'app/store/balances/utils';
+import { balancesStore, useBalancesLoadingSelector, useBalancesErrorSelector } from 'lib/store/zustand/balances.store';
 import { useAccount, useChainId, useOnBlock, useTzktConnection } from 'lib/temple/front';
 import { useDidUpdate } from 'lib/ui/hooks';
 

@@ -4,12 +4,12 @@ import clsx from 'clsx';
 
 import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { useRwasDetailsLoading, useRwaDetails } from 'lib/rwas/use-rwas-details.query';
-import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { useBalance } from 'lib/balances';
+import { useRwasDetailsLoading, useRwaDetails } from 'lib/rwas/use-rwas-details.query';
+import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
 

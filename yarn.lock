@@ -1825,52 +1825,52 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.0.0"
 
-"@mavrykdynamics/mavryk-domains-core@1.26.1", "@mavrykdynamics/mavryk-domains-core@^1.26.1":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-core/-/mavryk-domains-core-1.26.1.tgz#97bccf1fe1d547e574616383fde1e9830f8fa0c4"
-  integrity sha512-DhQVmuw04AfPe5g5SFXFVJpSNkKIljzdSbbeKqwS5I7VNNivGkq8imxrB4v4EYrm7krOxMQjgHMki2D2UXrcMw==
+"@mavrykdynamics/mavryk-domains-core@^1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-core/-/mavryk-domains-core-1.30.2.tgz#3ad15ef317c3352b45b8dcc0b63b4ae124c73739"
+  integrity sha512-0FwLFGXGsFzhChoqk0S3tS5RyGXUdpa4O9VEIhYxOPAX5mFI24CBWkqRBj7sQb/Wgz3V4Ta/9THQmcViGQHHOA==
   dependencies:
     idna-uts46-hx "^3.3.0"
     lodash.isplainobject "4.0.6"
 
-"@mavrykdynamics/mavryk-domains-manager@^1.26.1":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-manager/-/mavryk-domains-manager-1.26.1.tgz#104ec9eed2a6e2f35b1624c72b0be860ba4bef3f"
-  integrity sha512-CkOqU61md4uzB7h6K0nbvwWa5x+VhMjx8p8MWgdQ+PmbVBrahYKqrpmV35BPU6sAZvZoOvAHesKLU7YewSw94A==
+"@mavrykdynamics/mavryk-domains-manager@^1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-manager/-/mavryk-domains-manager-1.30.2.tgz#10c6659d54a6d5d46fbf52821d1ee79929eb4042"
+  integrity sha512-6qfMxJiuoVyYqVWOfhZI1Z8pzJYb4n4PW9x7802cGF+aunnZbV6cY7nUJ2/7eeV+/CIg/ReZ2lz7KQ9X/kHRuQ==
   dependencies:
-    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
-    "@mavrykdynamics/mavryk-domains-taquito" "^1.26.1"
+    "@mavrykdynamics/mavryk-domains-core" "^1.30.2"
+    "@mavrykdynamics/mavryk-domains-webmavryk" "^1.30.2"
     "@types/sha.js" "^2.4.0"
-    bignumber.js "^9.1.0"
+    bignumber.js "^9.1.2"
     sha.js "^2.4.11"
 
-"@mavrykdynamics/mavryk-domains-resolver@^1.26.1":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-resolver/-/mavryk-domains-resolver-1.26.1.tgz#a7f2ab18dff8d6c73da8b93c051577b8ec922a4a"
-  integrity sha512-jfHgQiN/bFtKKq9pphjakxFc3NtQ6BxozlUN7h9ba3p3dkxI+o/zvsxVLZfDlzmbNokWpJn+5C6+YuAQ5aVB5w==
+"@mavrykdynamics/mavryk-domains-resolver@^1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-resolver/-/mavryk-domains-resolver-1.30.2.tgz#9178d3f096d4c3e02b4d2a6b055507e259ea0ad3"
+  integrity sha512-EasqX473g9hib+BxTO4ENw0eAd7yVibJdj/YNgpD/DlrJ0cPz8Q1G9vJgnaRonY80jwp0SifsgNDwI7+E3UnHQ==
   dependencies:
-    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
+    "@mavrykdynamics/mavryk-domains-core" "^1.30.2"
     node-cache "^5.1.2"
 
-"@mavrykdynamics/mavryk-domains-taquito-client@1.26.1":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-taquito-client/-/mavryk-domains-taquito-client-1.26.1.tgz#c930274e12f7561a64dc2d30f7199a1f356c20b0"
-  integrity sha512-ddhx7PG9EFpklLzsEb0xg68ZZN78foo2rrYcyRvdlD0WIwhSZ7MBu6VTZdbQ1gISopakdU8WdNgVKKvgdklI/w==
+"@mavrykdynamics/mavryk-domains-webmavryk-client@^1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-webmavryk-client/-/mavryk-domains-webmavryk-client-1.30.2.tgz#baa3a1f7c4b2f23fd7a95892ff89610380b075e6"
+  integrity sha512-zInurs2gnNAHjZDPfiYQaygCNemqWy8b0f6BVi1ZbPj5vlZcEnSOrkl+1tmqFTJXWjJsaQ7qgOc3prIOCjPW0Q==
   dependencies:
-    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
-    "@mavrykdynamics/mavryk-domains-manager" "^1.26.1"
-    "@mavrykdynamics/mavryk-domains-resolver" "^1.26.1"
-    "@mavrykdynamics/mavryk-domains-taquito" "^1.26.1"
-    bignumber.js "^9.1.0"
+    "@mavrykdynamics/mavryk-domains-core" "^1.30.2"
+    "@mavrykdynamics/mavryk-domains-manager" "^1.30.2"
+    "@mavrykdynamics/mavryk-domains-resolver" "^1.30.2"
+    "@mavrykdynamics/mavryk-domains-webmavryk" "^1.30.2"
+    bignumber.js "^9.1.2"
     node-cache "^5.1.2"
 
-"@mavrykdynamics/mavryk-domains-taquito@^1.26.1":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-taquito/-/mavryk-domains-taquito-1.26.1.tgz#2380c12ec6f3c365d2fb432daa18129164c59b93"
-  integrity sha512-If1qcjXe8m/4GX0Y98XcscCWhD31gcgAfrUZjDTxLMnJKkX/+l6Qx6MslW1HFL4Fc3uAvX4Phd7ZNAjrl7svIg==
+"@mavrykdynamics/mavryk-domains-webmavryk@^1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/mavryk-domains-webmavryk/-/mavryk-domains-webmavryk-1.30.2.tgz#933bfd8771c8220d359e3267b74106ef5892c27e"
+  integrity sha512-c0Pa9zgOy7a1BLWx+JiOjcECGHzOQ/yNA3Q3INqDH+/wG60cKuRSQxKI7MqUucaFFU4u+PwXkxF0E8cCP7epqA==
   dependencies:
-    "@mavrykdynamics/mavryk-domains-core" "^1.26.1"
-    bignumber.js "^9.1.0"
+    "@mavrykdynamics/mavryk-domains-core" "^1.30.2"
+    bignumber.js "^9.1.2"
     node-cache "^5.1.2"
 
 "@mavrykdynamics/mavryk-wallet-dapp@^8.0.1":
@@ -1879,103 +1879,6 @@
   integrity sha512-YzMzM++33pvGwYDk1ugwRGhBVW5V376nY7rsfnqPNdEw+MPeNu8wKtF5A4/gUIB316DXl0tQqVCAw0oSjF8pVg==
   dependencies:
     nanoid "^3.1.30"
-
-"@mavrykdynamics/taquito-core@19.2.3", "@mavrykdynamics/taquito-core@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-core/-/taquito-core-19.2.3.tgz#544da2cb88a26ec1902bf4cb39281ab45f619739"
-  integrity sha512-mwHOJCJoBsb/S5BiUe7hDuvn9imzMvkJn6KGF5/Xk/VZ8b43y37FjfV6lw7haGEnOzrkE1lWG/q1/fKIka5qkw==
-  dependencies:
-    json-stringify-safe "^5.0.1"
-
-"@mavrykdynamics/taquito-http-utils@19.2.3", "@mavrykdynamics/taquito-http-utils@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-http-utils/-/taquito-http-utils-19.2.3.tgz#a4d211a37fa2e123845953f0b0c4abd46a27bc1e"
-  integrity sha512-GhAkzIJOWFyKIriXPFJ2Nbh29DAgPFgo27Fzy09ILdp5x+ERh+1nUjj3F3UeCqhQT0W3MofGdoXK2k2ueRDGWg==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    node-fetch "^2.7.0"
-
-"@mavrykdynamics/taquito-local-forging@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-local-forging/-/taquito-local-forging-19.2.3.tgz#2e4a26e46f779017240debc4fe77c30156d8aa04"
-  integrity sha512-VzM2NRCvcNe/IcBjMrn9h9MwmLN6O0TPNsZmldOCnjUZjruGSmG8EzWGf6nFgZPPpwT34uuU5SNyEyRjh+Fn/g==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@mavrykdynamics/taquito-utils" "^19.2.3"
-    bignumber.js "^9.1.2"
-
-"@mavrykdynamics/taquito-michel-codec@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-michel-codec/-/taquito-michel-codec-19.2.3.tgz#7b96bf8a480f89b74e685504e3d7865585b39d45"
-  integrity sha512-EayMuyFl10DJTm6E/57ZsVOl6zFObOX7F/6N9WZ1JZsQ0HDafXf3YWt7JCX3/UpYcBzyMvQhsMdwUAKrOfassA==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-
-"@mavrykdynamics/taquito-michelson-encoder@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-michelson-encoder/-/taquito-michelson-encoder-19.2.3.tgz#5c1a71c9d09ef8f7ddbe436057d8fbe1ddee7b03"
-  integrity sha512-pJnW1DTXAKJzwZ7gSoXOilUMKKRAmy+x6y74z/04Q/Pae2sqxoeTCP3LDyaW53QCjvb7xMS1JQ97AyFL6EgAjw==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@mavrykdynamics/taquito-rpc" "^19.2.3"
-    "@mavrykdynamics/taquito-utils" "^19.2.3"
-    bignumber.js "^9.1.2"
-    fast-json-stable-stringify "^2.1.0"
-
-"@mavrykdynamics/taquito-rpc@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-rpc/-/taquito-rpc-19.2.3.tgz#1cfd4d30129c326e361bb130cbc86c282a60de22"
-  integrity sha512-dRB4XcO/0nq7IBHRrjhMBbQLsxebvXxr0q8DH/fRKvsudtg8mLX+HNWzcsHIzpTQCF54THcyrcw69DqG42Kodw==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@mavrykdynamics/taquito-http-utils" "^19.2.3"
-    "@mavrykdynamics/taquito-utils" "^19.2.3"
-    bignumber.js "^9.1.2"
-
-"@mavrykdynamics/taquito-tzip16@19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-tzip16/-/taquito-tzip16-19.2.3.tgz#bb274b1bae07509c6f5f23bc9757ccd777a29449"
-  integrity sha512-k4WJWh5iFhHISmWLx1M7jXOAKlsqpIeyQXN8eTdA1+rWpDXD6xtf1VpcTMcNm5YGX+5YKlDB1jbAYEtqH6325g==
-  dependencies:
-    "@mavrykdynamics/taquito" "^19.2.3"
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@mavrykdynamics/taquito-http-utils" "^19.2.3"
-    "@mavrykdynamics/taquito-michelson-encoder" "^19.2.3"
-    "@mavrykdynamics/taquito-rpc" "^19.2.3"
-    "@mavrykdynamics/taquito-utils" "^19.2.3"
-    bignumber.js "^9.1.2"
-    crypto-js "^4.2.0"
-
-"@mavrykdynamics/taquito-utils@19.2.3", "@mavrykdynamics/taquito-utils@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito-utils/-/taquito-utils-19.2.3.tgz#e604c8523b6381233cce41342eb42eb7d14a86fd"
-  integrity sha512-5FEK29k1Oh/RPCayuBTH+ZkXz0WNrQBUbZaKJjTsJeYzWTzgWnmI3IV2gxiR7ZYyy7DJ8eWfUap+pPszMx5e2g==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@stablelib/blake2b" "^1.0.1"
-    "@stablelib/ed25519" "^1.0.3"
-    "@types/bs58check" "^2.1.0"
-    bignumber.js "^9.1.2"
-    blakejs "^1.2.1"
-    bs58check "^3.0.1"
-    buffer "^6.0.3"
-    elliptic "^6.5.4"
-    typedarray-to-buffer "^4.0.0"
-
-"@mavrykdynamics/taquito@19.2.3", "@mavrykdynamics/taquito@^19.2.3":
-  version "19.2.3"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/taquito/-/taquito-19.2.3.tgz#6a5ed17012041bdd6a7268285304552590fc5f29"
-  integrity sha512-LMtnaF9SwM11Bwtcy3lciEbXWAMrHQcgiX9zsUghHHgHfqmyDvCFkodWTStqZ8UB9S0JuHyvefGe4o9Vwv4YEw==
-  dependencies:
-    "@mavrykdynamics/taquito-core" "^19.2.3"
-    "@mavrykdynamics/taquito-http-utils" "^19.2.3"
-    "@mavrykdynamics/taquito-local-forging" "^19.2.3"
-    "@mavrykdynamics/taquito-michel-codec" "^19.2.3"
-    "@mavrykdynamics/taquito-michelson-encoder" "^19.2.3"
-    "@mavrykdynamics/taquito-rpc" "^19.2.3"
-    "@mavrykdynamics/taquito-utils" "^19.2.3"
-    bignumber.js "^9.1.2"
-    rxjs "^7.8.1"
 
 "@mavrykdynamics/webmavryk-core@^2.0.0":
   version "2.0.0"
@@ -4513,7 +4416,7 @@ big.js@^5.2.2:
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-5.2.2.tgz#65f0af382f578bcdc742bd9c281e9cb2d7768328"
   integrity sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
 
-bignumber.js@9.1.0, bignumber.js@^9.1.0, bignumber.js@^9.1.2:
+bignumber.js@9.1.0, bignumber.js@^9.1.2:
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.0.tgz#8d340146107fe3a6cb8d40699643c302e8773b62"
   integrity sha512-4LwHK4nfDOraBCtst+wOWIHbu1vhvAPJK8g8nROd4iuc3PSEjWif/qwbkh8jwCJz6yDBvtU4KPynETgrfh7y3A==

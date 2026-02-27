@@ -31,6 +31,7 @@ import {
   useTezosDomainsClient,
   validateDelegate
 } from 'lib/temple/front';
+import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { atomsToTokens, hasManager, isAddressValid, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
@@ -40,10 +41,9 @@ import { ZERO } from 'lib/utils/numbers';
 import { navigate, useLocation } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 
-import { BakerForm, BakerFormProps } from './components/BakerForm';
 import { AdvancedBakerBannerComponent } from './components/BakerBannerComponent';
+import { BakerForm, BakerFormProps } from './components/BakerForm';
 import { UnchangedError, UnregisteredDelegateError, validateAddress } from './components/delegate-errors';
 import { DelegateFormSelectors } from './delegateForm.selectors';
 

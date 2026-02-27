@@ -84,7 +84,9 @@ export const useSwapParamsQuery = (params: Route3SwapParamsRequestRaw | null) =>
   });
 };
 
-export const useSwapParamsData = (params: Route3SwapParamsRequestRaw | null): {
+export const useSwapParamsData = (
+  params: Route3SwapParamsRequestRaw | null
+): {
   data: Route3SwapParamsResponse;
   isLoading: boolean;
   error: string | undefined;

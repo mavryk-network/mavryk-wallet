@@ -18,18 +18,17 @@ interface AssetListEmptySectionProps {
  * Shared empty-state section for asset listing tabs (Collectibles, RWAs).
  * Shows a spinner while syncing, or an empty-state message with a disabled button.
  */
-export const AssetListEmptySection = memo<AssetListEmptySectionProps>(
-  ({ isSyncing, messageI18nKey, buttonI18nKey }) =>
-    isSyncing ? (
-      <SyncSpinner className="pt-4" />
-    ) : (
-      <div className="w-full py-23 flex flex-col items-center gap-y-4">
-        <p className={'text-white text-base-plus text-center'}>
-          <T id={messageI18nKey} />
-        </p>
-        <ButtonRounded type="button" size="small" fill style={buttonStyle} disabled>
-          <T id={buttonI18nKey} />
-        </ButtonRounded>
-      </div>
-    )
+export const AssetListEmptySection = memo<AssetListEmptySectionProps>(({ isSyncing, messageI18nKey, buttonI18nKey }) =>
+  isSyncing ? (
+    <SyncSpinner className="pt-4" />
+  ) : (
+    <div className="w-full py-23 flex flex-col items-center gap-y-4">
+      <p className={'text-white text-base-plus text-center'}>
+        <T id={messageI18nKey} />
+      </p>
+      <ButtonRounded type="button" size="small" fill style={buttonStyle} disabled>
+        <T id={buttonI18nKey} />
+      </ButtonRounded>
+    </div>
+  )
 );

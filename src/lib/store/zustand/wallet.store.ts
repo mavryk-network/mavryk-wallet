@@ -42,7 +42,12 @@ export interface WalletState {
 
 interface WalletActions {
   /** Sync full state from background (called on StateUpdated notification) */
-  syncState: (state: { status: TempleStatus; accounts: TempleAccount[]; networks: TempleNetwork[]; settings: TempleSettings | null }) => void;
+  syncState: (state: {
+    status: TempleStatus;
+    accounts: TempleAccount[];
+    networks: TempleNetwork[];
+    settings: TempleSettings | null;
+  }) => void;
 
   /** Set pending confirmation */
   setConfirmation: (confirmation: Confirmation) => void;
@@ -57,7 +62,7 @@ interface WalletActions {
 export type WalletStore = WalletState & WalletActions;
 
 export const walletStore = createStore<WalletStore>()(
-  subscribeWithSelector((set) => ({
+  subscribeWithSelector(set => ({
     // Initial state
     hydrated: false,
     status: TempleStatus.Idle,
@@ -83,20 +88,16 @@ export const walletStore = createStore<WalletStore>()(
         ready: status === TempleStatus.Ready
       }),
 
-    setConfirmation: (confirmation) =>
-      set({ confirmation }),
+    setConfirmation: confirmation => set({ confirmation }),
 
-    resetConfirmation: () =>
-      set({ confirmation: null, confirmationId: null }),
+    resetConfirmation: () => set({ confirmation: null, confirmationId: null }),
 
-    setConfirmationId: (id) =>
-      set({ confirmationId: id })
+    setConfirmationId: id => set({ confirmationId: id })
   }))
 );
 
 // Typed selector hooks for React components (Phase 5b will use these)
-export const useWalletStore = <T>(selector: (state: WalletStore) => T): T =>
-  useStore(walletStore, selector);
+export const useWalletStore = <T>(selector: (state: WalletStore) => T): T => useStore(walletStore, selector);
 
 // Convenience selectors
 export const useWalletStatus = () => useWalletStore(s => s.status);
@@ -123,7 +124,7 @@ export function useWalletSuspense(): void {
       hydrationPromise = new Promise<void>(resolve => {
         const unsub = walletStore.subscribe(
           s => s.hydrated,
-          (isHydrated) => {
+          isHydrated => {
             if (isHydrated) {
               unsub();
               hydrationPromise = null;

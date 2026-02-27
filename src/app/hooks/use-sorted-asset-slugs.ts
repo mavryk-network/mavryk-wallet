@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { objktCurrencies } from 'lib/apis/objkt';
 import { SortOptions } from 'lib/assets/use-sorted';
+import { useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { atomsToTokens } from 'lib/temple/helpers';
 
 interface AssetListing {

@@ -3,7 +3,7 @@ import React, { FC, useMemo, CSSProperties } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
 
-import { useCryptoCurrenciesSelector } from 'app/store/buy-with-credit-card/selectors';
+import { useCryptoCurrencies } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { TopUpProviderIcon } from 'app/templates/TopUpProviderIcon';
 import { PaymentProviderInterface } from 'lib/buy-with-credit-card/topup.interface';
 import { t, toLocalFixed } from 'lib/i18n';
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export const PaymentProviderOption: FC<Props> = ({ value, isSelected, shouldShowSeparator, style }) => {
-  const cryptoCurrencies = useCryptoCurrenciesSelector(value.id);
+  const cryptoCurrencies = useCryptoCurrencies(value.id);
 
   const tagsProps = useMemo(() => {
     const result: PaymentProviderTagProps[] = [];

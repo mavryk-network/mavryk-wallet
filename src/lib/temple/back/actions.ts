@@ -711,7 +711,7 @@ function getErrorData(err: any) {
 
 function generateRawPayloadBytes(payload: string) {
   const bytes = char2Bytes(Buffer.from(payload, 'utf8').toString('hex'));
-  // https://tezostaquito.io/docs/signing/
+  // https://webmavryk.mavryk.org/docs/signing/
   return `0501${char2Bytes(String(bytes.length))}${bytes}`;
 }
 

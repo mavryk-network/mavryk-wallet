@@ -57,7 +57,14 @@ export const CoStake: FC = () => {
     }
   });
 
-  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger } = useForm<FormData>({
+  const {
+    watch,
+    handleSubmit,
+    formState: { errors, ...formState },
+    control,
+    setValue,
+    trigger
+  } = useForm<FormData>({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);

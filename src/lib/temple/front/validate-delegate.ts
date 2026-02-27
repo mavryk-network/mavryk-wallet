@@ -1,4 +1,4 @@
-import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
+import { WebmavrykMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-webmavryk-client';
 
 import { t } from 'lib/i18n';
 import { isAddressValid } from 'lib/temple/helpers';
@@ -20,7 +20,7 @@ export function validateAnyAddress(value: string) {
 
 export const validateDelegate = async (
   value: string | null | undefined,
-  domainsClient: TaquitoMavrykDomainsClient,
+  domainsClient: WebmavrykMavrykDomainsClient,
   validateAddress: (value: string) => boolean | string = validateAnyAddress
 ) => {
   if (!value) return false;

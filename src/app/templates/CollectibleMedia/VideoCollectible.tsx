@@ -2,8 +2,9 @@ import React, { memo, useCallback, useState } from 'react';
 
 import { emptyFn } from '@rnw-community/shared';
 
-import { CollectibleImageLoader } from './CollectibleImageLoader';
 import { Player } from 'app/templates/VideoPlayer/Player';
+
+import { CollectibleImageLoader } from './CollectibleImageLoader';
 
 interface Props {
   uri: string;

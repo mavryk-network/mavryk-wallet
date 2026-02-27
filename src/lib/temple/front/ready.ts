@@ -57,8 +57,8 @@ function useReadyTemple() {
     accounts: allAccounts,
     settings,
     walletsSpecs,
-    createTaquitoSigner,
-    createTaquitoWallet
+    createWebMavrykSigner,
+    createWebMavrykWallet
   } = templeFront;
 
   const hdGroups = useMemo(
@@ -135,12 +135,12 @@ function useReadyTemple() {
     const pkh = account.type === TempleAccountType.ManagedKT ? account.owner : account.publicKeyHash;
 
     const t = new ReactiveTezosToolkit(loadFastRpcClient(rpc), checksum);
-    t.setSignerProvider(createTaquitoSigner(pkh));
-    t.setWalletProvider(createTaquitoWallet(pkh, rpc));
+    t.setSignerProvider(createWebMavrykSigner(pkh));
+    t.setWalletProvider(createWebMavrykWallet(pkh, rpc));
     t.setPackerProvider(michelEncoder);
 
     return t;
-  }, [createTaquitoSigner, createTaquitoWallet, network, account]);
+  }, [createWebMavrykSigner, createWebMavrykWallet, network, account]);
 
   // Get user KYC status ---------------
   useEffect(() => {

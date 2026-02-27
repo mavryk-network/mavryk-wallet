@@ -26,10 +26,7 @@ import { delay } from 'lib/utils';
 import { ZERO } from 'lib/utils/numbers';
 import { goBack, navigate, useLocation } from 'lib/woozie';
 
-import {
-  ManageStakeUnderTextFieldBalance,
-  ManagStakeBalancetype
-} from './ManageStakeUnderTextFieldBalance';
+import { ManageStakeUnderTextFieldBalance, ManagStakeBalancetype } from './ManageStakeUnderTextFieldBalance';
 
 export type StakeMode = 'increase' | 'decrease';
 
@@ -95,9 +92,9 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
   const chainId = useChainId();
-  const {
-    data: { myBakerPkh, canUnlock, canCostake, stakedBalance } = {}
-  } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { data: { myBakerPkh, canUnlock, canCostake, stakedBalance } = {} } = useAccountDelegatePeriodStats(
+    account.publicKeyHash
+  );
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
 

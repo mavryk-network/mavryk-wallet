@@ -11,7 +11,6 @@ import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useSortedAssetSlugs } from 'app/hooks/use-sorted-asset-slugs';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAllCollectiblesDetails } from 'lib/collectibles/use-collectibles-details.query';
 import { AssetListEmptySection } from 'app/templates/AssetListEmptySection';
 import {
   SearchExplorer,
@@ -25,6 +24,7 @@ import { SortButton, SortPopup, SortPopupContent } from 'app/templates/SortPopup
 import { useEnabledAccountCollectiblesSlugs } from 'lib/assets/hooks';
 import { AssetTypesEnum } from 'lib/assets/types';
 import { SortOptions } from 'lib/assets/use-sorted';
+import { useAllCollectiblesDetails } from 'lib/collectibles/use-collectibles-details.query';
 import { useAccount, useChainId } from 'lib/temple/front';
 
 import styles from './Collectible.module.css';

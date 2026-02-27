@@ -17,12 +17,10 @@ import { loadAccountTokens, loadAccountCollectibles, loadAccountRwas } from './l
 const assetsKeys = {
   whitelist: ['assets', 'whitelist'] as const,
   scamlist: ['assets', 'scamlist'] as const,
-  accountTokens: (account: string, chainId: string) =>
-    ['assets', 'accountTokens', account, chainId] as const,
+  accountTokens: (account: string, chainId: string) => ['assets', 'accountTokens', account, chainId] as const,
   accountCollectibles: (account: string, chainId: string) =>
     ['assets', 'accountCollectibles', account, chainId] as const,
-  accountRwas: (account: string, chainId: string) =>
-    ['assets', 'accountRwas', account, chainId] as const
+  accountRwas: (account: string, chainId: string) => ['assets', 'accountRwas', account, chainId] as const
 };
 
 // ---- Whitelist Query ------------------------------------------------------

@@ -1,14 +1,13 @@
 import React, { memo, useMemo } from 'react';
 
 import { HashChip, ExternalLinkChip, Money } from 'app/atoms';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
-
-import { CardWithLabel } from 'app/templates/CardWithLabel';
 
 import { renderFiatBalance } from '../components/FiatBalanceDisplay';
 

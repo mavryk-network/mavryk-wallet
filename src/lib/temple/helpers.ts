@@ -4,7 +4,7 @@ import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-uti
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
-import { FastRpcClient } from 'lib/taquito-fast-rpc';
+import { FastRpcClient } from 'lib/webmavryk-fast-rpc';
 
 import { TempleAccount, TempleAccountType } from './types';
 

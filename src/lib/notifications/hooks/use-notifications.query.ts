@@ -71,9 +71,7 @@ export const useViewAllNotifications = () => {
   return useCallback(() => {
     queryClient.setQueryData<NotificationInterface[]>(NOTIFICATIONS_QUERY_KEY, prev => {
       if (!prev) return prev;
-      return prev.map(n =>
-        n.status === NotificationStatus.New ? { ...n, status: NotificationStatus.Viewed } : n
-      );
+      return prev.map(n => (n.status === NotificationStatus.New ? { ...n, status: NotificationStatus.Viewed } : n));
     });
   }, [queryClient]);
 };

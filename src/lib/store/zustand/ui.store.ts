@@ -66,7 +66,7 @@ export type UIStore = UIState & UIActions;
 
 export const uiStore = createStore<UIStore>()(
   persist(
-    (set) => ({
+    set => ({
       // Newsletter
       shouldShowNewsletterModal: true,
 
@@ -90,60 +90,61 @@ export const uiStore = createStore<UIStore>()(
       isNewsEnabled: true,
 
       // Actions
-      setShouldShowNewsletterModal: (show) => set({ shouldShowNewsletterModal: show }),
-      setUserId: (id) => set({ userId: id }),
-      setAnalyticsEnabled: (enabled) => set({ isAnalyticsEnabled: enabled }),
-      setBalanceMode: (mode) => set({ balanceMode: mode }),
-      setOnRampPossibility: (possible) => set({ isOnRampPossibility: possible }),
-      setAbTestGroupName: (group) => set({ abTestGroupName: group }),
-      setLastSeenPromotionName: (name) => set({ lastSeenPromotionName: name }),
-      togglePartnersPromotion: (show) => set({ shouldShowPromotion: show, promotionHidingTimestamps: {} }),
-      hidePromotion: (id, timestamp) => set((state) => {
-        const cleaned: Record<string, number> = {};
-        for (const key in state.promotionHidingTimestamps) {
-          if (state.promotionHidingTimestamps[key] >= timestamp - AD_HIDING_TIMEOUT * 2) {
-            cleaned[key] = state.promotionHidingTimestamps[key];
+      setShouldShowNewsletterModal: show => set({ shouldShowNewsletterModal: show }),
+      setUserId: id => set({ userId: id }),
+      setAnalyticsEnabled: enabled => set({ isAnalyticsEnabled: enabled }),
+      setBalanceMode: mode => set({ balanceMode: mode }),
+      setOnRampPossibility: possible => set({ isOnRampPossibility: possible }),
+      setAbTestGroupName: group => set({ abTestGroupName: group }),
+      setLastSeenPromotionName: name => set({ lastSeenPromotionName: name }),
+      togglePartnersPromotion: show => set({ shouldShowPromotion: show, promotionHidingTimestamps: {} }),
+      hidePromotion: (id, timestamp) =>
+        set(state => {
+          const cleaned: Record<string, number> = {};
+          for (const key in state.promotionHidingTimestamps) {
+            if (state.promotionHidingTimestamps[key] >= timestamp - AD_HIDING_TIMEOUT * 2) {
+              cleaned[key] = state.promotionHidingTimestamps[key];
+            }
           }
-        }
-        cleaned[id] = timestamp;
-        return { promotionHidingTimestamps: cleaned };
-      }),
-      setIsNewsEnabled: (enabled) => set({ isNewsEnabled: enabled })
+          cleaned[id] = timestamp;
+          return { promotionHidingTimestamps: cleaned };
+        }),
+      setIsNewsEnabled: enabled => set({ isNewsEnabled: enabled })
     }),
     {
       name: 'zustand-ui',
       storage: {
-        getItem: async (name) => {
+        getItem: async name => {
           const value = await browserStorage.getItem(name);
           return value ? JSON.parse(value) : null;
         },
         setItem: async (name, value) => {
           await browserStorage.setItem(name, JSON.stringify(value));
         },
-        removeItem: async (name) => {
+        removeItem: async name => {
           await browserStorage.removeItem(name);
         }
       },
       // Only persist state, not actions
-      partialize: (state) => ({
-        shouldShowNewsletterModal: state.shouldShowNewsletterModal,
-        userId: state.userId,
-        isAnalyticsEnabled: state.isAnalyticsEnabled,
-        balanceMode: state.balanceMode,
-        isOnRampPossibility: state.isOnRampPossibility,
-        abTestGroupName: state.abTestGroupName,
-        lastSeenPromotionName: state.lastSeenPromotionName,
-        shouldShowPromotion: state.shouldShowPromotion,
-        promotionHidingTimestamps: state.promotionHidingTimestamps,
-        isNewsEnabled: state.isNewsEnabled
-      }) as unknown as UIStore
+      partialize: state =>
+        ({
+          shouldShowNewsletterModal: state.shouldShowNewsletterModal,
+          userId: state.userId,
+          isAnalyticsEnabled: state.isAnalyticsEnabled,
+          balanceMode: state.balanceMode,
+          isOnRampPossibility: state.isOnRampPossibility,
+          abTestGroupName: state.abTestGroupName,
+          lastSeenPromotionName: state.lastSeenPromotionName,
+          shouldShowPromotion: state.shouldShowPromotion,
+          promotionHidingTimestamps: state.promotionHidingTimestamps,
+          isNewsEnabled: state.isNewsEnabled
+        } as unknown as UIStore)
     }
   )
 );
 
 // Typed selector hook
-export const useUIStore = <T>(selector: (state: UIStore) => T): T =>
-  useStore(uiStore, selector);
+export const useUIStore = <T>(selector: (state: UIStore) => T): T => useStore(uiStore, selector);
 
 // Convenience selectors
 export const useShouldShowNewsletterModal = () => useUIStore(s => s.shouldShowNewsletterModal);

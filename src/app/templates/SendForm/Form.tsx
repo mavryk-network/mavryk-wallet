@@ -123,7 +123,15 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
    * Form
    */
 
-  const { watch, handleSubmit, formState: { errors, ...formState }, control, setValue, trigger, reset } = useForm<FormData>({
+  const {
+    watch,
+    handleSubmit,
+    formState: { errors, ...formState },
+    control,
+    setValue,
+    trigger,
+    reset
+  } = useForm<FormData>({
     mode: 'onChange',
     defaultValues: {
       fee: RECOMMENDED_ADD_FEE

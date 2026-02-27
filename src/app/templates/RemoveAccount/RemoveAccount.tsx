@@ -35,7 +35,14 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors, watch } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    setError,
+    clearErrors,
+    watch
+  } = useForm<FormData>();
   const password = watch('password') ?? '';
 
   const onSubmit = useCallback<SubmitHandler<FormData>>(

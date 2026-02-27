@@ -2,9 +2,9 @@ import { useCallback } from 'react';
 
 import { BigNumber } from 'bignumber.js';
 
-import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useGetCurrentAccountTokenOrGasBalanceWithDecimals } from 'lib/balances/hooks';
 import { useUsdToTokenRates } from 'lib/fiat-currency/core';
+import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { ZERO } from 'lib/utils/numbers';
 

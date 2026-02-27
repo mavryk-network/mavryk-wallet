@@ -53,11 +53,10 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
     return usersContracts.filter(({ address }) => !accounts.some(({ publicKeyHash }) => publicKeyHash === address));
   }, [accounts, usersContracts]);
 
-  const { watch, handleSubmit, control, formState, setValue, trigger } =
-    useForm<ImportKTAccountFormData>({
-      mode: 'onChange',
-      defaultValues: {}
-    });
+  const { watch, handleSubmit, control, formState, setValue, trigger } = useForm<ImportKTAccountFormData>({
+    mode: 'onChange',
+    defaultValues: {}
+  });
   const { errors } = formState;
 
   const contractAddressFieldRef = useRef<HTMLTextAreaElement>(null);

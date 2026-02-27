@@ -6,7 +6,7 @@ import { abTestingReducer } from './ab-testing/reducers';
 import { advertisingReducer } from './advertising/reducers';
 import { assetsPersistedReducer } from './assets/reducer';
 import { balancesReducer } from './balances/reducers';
-import { buyWithCreditCardReducer } from './buy-with-credit-card/reducers';
+// import { buyWithCreditCardReducer } from './buy-with-credit-card/reducers';
 import { collectiblesPersistedReducer } from './collectibles/reducer';
 import { collectiblesMetadataPersistedReducer } from './collectibles-metadata/reducer';
 import { currencyReducer } from './currency/reducers';
@@ -33,7 +33,7 @@ const rootStateReducersMap = {
   collectiblesMetadata: collectiblesMetadataPersistedReducer,
   rwasMetadata: rwasMetadataPersistedReducer,
   abTesting: abTestingReducer,
-  buyWithCreditCard: buyWithCreditCardReducer,
+  // buyWithCreditCard: buyWithCreditCardReducer,
   collectibles: collectiblesPersistedReducer,
   rwas: rwasPersistedReducer,
   newsletter: newsletterReducers

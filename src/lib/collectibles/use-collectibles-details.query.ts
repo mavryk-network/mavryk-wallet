@@ -103,10 +103,10 @@ export const useLoadCollectiblesDetails = () => {
       if (!slugs.length) return;
       const data = await fetchCollectiblesDetails(slugs);
       // Merge into existing cache
-      queryClient.setQueryData<CollectibleDetailsRecord>(
-        collectiblesKeys.details(slugs),
-        prev => ({ ...prev, ...data })
-      );
+      queryClient.setQueryData<CollectibleDetailsRecord>(collectiblesKeys.details(slugs), prev => ({
+        ...prev,
+        ...data
+      }));
     },
     [queryClient]
   );

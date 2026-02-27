@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useRef } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import debounce from 'debounce-promise';
-import { useDispatch } from 'react-redux';
 
-import { loadAllCurrenciesActions, updatePairLimitsActions } from 'app/store/buy-with-credit-card/actions';
-import { useAllPairsLimitsSelector } from 'app/store/buy-with-credit-card/selectors';
+import {
+  buyWithCreditCardKeys,
+  usePairLimitsFromCache
+} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { mergeProvidersLimits } from 'lib/buy-with-credit-card/merge-limits';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
 import {
@@ -28,8 +30,8 @@ export const useFormInputsCallbacks = (
   const { inputAmount, inputCurrency, outputToken, topUpProvider } = formValues;
   const outputCalculationDataRef = useRef({ inputAmount, inputCurrency, outputToken });
   const manuallySelectedProviderIdRef = useRef<TopUpProviderId>();
-  const dispatch = useDispatch();
-  const allPairsLimits = useAllPairsLimitsSelector();
+  const queryClient = useQueryClient();
+  const getPairLimitsFromCache = usePairLimitsFromCache();
 
   const setPaymentProvider = useCallback(
     (newProvider?: PaymentProviderInterface) => {
@@ -91,7 +93,7 @@ export const useFormInputsCallbacks = (
 
   const handleOutputTokenChange = useCallback(
     (newValue: TopUpOutputInterface) => {
-      const pairLimits = allPairsLimits[inputCurrency.code]?.[newValue.code];
+      const pairLimits = getPairLimitsFromCache(inputCurrency.code, newValue.code);
       const { min: minInputAmount, max: maxInputAmount } = mergeProvidersLimits(pairLimits);
 
       const patchedInputCurrency = {
@@ -104,7 +106,7 @@ export const useFormInputsCallbacks = (
       setFormIsLoading(true);
       updateOutput(inputAmount, patchedInputCurrency, newValue);
     },
-    [inputAmount, inputCurrency, updateOutput, allPairsLimits]
+    [inputAmount, inputCurrency, updateOutput, getPairLimitsFromCache]
   );
 
   const handlePaymentProviderChange = useCallback(
@@ -116,14 +118,16 @@ export const useFormInputsCallbacks = (
   );
 
   const refreshForm = useCallback(() => {
-    dispatch(loadAllCurrenciesActions.submit());
-    dispatch(updatePairLimitsActions.submit({ fiatSymbol: inputCurrency.code, cryptoSymbol: outputToken.code }));
+    queryClient.invalidateQueries({ queryKey: buyWithCreditCardKeys.currencies });
+    queryClient.invalidateQueries({
+      queryKey: buyWithCreditCardKeys.pairLimits(inputCurrency.code, outputToken.code)
+    });
     if (!formIsLoading) {
       outputCalculationDataRef.current = { inputAmount, inputCurrency, outputToken };
       setFormIsLoading(true);
       updateOutput(inputAmount, inputCurrency, outputToken);
     }
-  }, [dispatch, inputCurrency, outputToken, updateOutput, formIsLoading, inputAmount]);
+  }, [queryClient, inputCurrency, outputToken, updateOutput, formIsLoading, inputAmount]);
 
   return {
     handleInputAssetChange,

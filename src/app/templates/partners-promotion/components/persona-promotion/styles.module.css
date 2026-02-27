@@ -9,6 +9,6 @@
   height: 100% !important;
 }
 
-.container > div > a[data-test=persona-watermark] {
+.container > div > a[data-test='persona-watermark'] {
   display: none;
 }

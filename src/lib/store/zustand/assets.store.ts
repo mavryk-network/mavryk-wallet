@@ -1,8 +1,8 @@
 import { createStore, useStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import type { WhitelistResponseToken } from 'lib/apis/temple';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 
 import { browserStorage } from './persist-storage';
 
@@ -34,8 +34,7 @@ type StoredAssetsRecords = StringRecord<AccountAssetsRecord>;
 
 // ---- Helpers --------------------------------------------------------------
 
-export const getAccountAssetsStoreKey = (account: string, chainId: string) =>
-  `${account}@${chainId}`;
+export const getAccountAssetsStoreKey = (account: string, chainId: string) => `${account}@${chainId}`;
 
 export const isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount = (
   key: string,
@@ -96,7 +95,7 @@ export type AssetsStore = AssetsState & AssetsActions;
 
 export const assetsStore = createStore<AssetsStore>()(
   persist(
-    (set) => ({
+    set => ({
       // --- Initial state ---
       tokens: {},
       tokensLoading: false,
@@ -114,10 +113,10 @@ export const assetsStore = createStore<AssetsStore>()(
       mainnetScamlistLoading: false,
 
       // --- Tokens actions ---
-      setTokensLoading: (loading) => set({ tokensLoading: loading }),
+      setTokensLoading: loading => set({ tokensLoading: loading }),
 
       loadAccountTokensSuccess: (account, chainId, slugs) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const existing = state.tokens[key] ?? {};
           const updated = { ...existing };
@@ -135,7 +134,7 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       setTokenStatus: ({ account, chainId, slug, status }) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const accountTokens = state.tokens[key];
           if (!accountTokens?.[slug]) return state;
@@ -151,8 +150,8 @@ export const assetsStore = createStore<AssetsStore>()(
           };
         }),
 
-      putTokensAsIs: (assets) =>
-        set((state) => {
+      putTokensAsIs: assets =>
+        set(state => {
           const updated = { ...state.tokens };
 
           for (const { slug, account, chainId, status, manual } of assets) {
@@ -166,10 +165,10 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       // --- Collectibles actions ---
-      setCollectiblesLoading: (loading) => set({ collectiblesLoading: loading }),
+      setCollectiblesLoading: loading => set({ collectiblesLoading: loading }),
 
       loadAccountCollectiblesSuccess: (account, chainId, slugs) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const existing = state.collectibles[key] ?? {};
           const updated = { ...existing };
@@ -197,7 +196,7 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       setCollectibleStatus: ({ account, chainId, slug, status }) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const accountCollectibles = state.collectibles[key];
           if (!accountCollectibles?.[slug]) return state;
@@ -213,8 +212,8 @@ export const assetsStore = createStore<AssetsStore>()(
           };
         }),
 
-      putCollectiblesAsIs: (assets) =>
-        set((state) => {
+      putCollectiblesAsIs: assets =>
+        set(state => {
           const updated = { ...state.collectibles };
 
           for (const { slug, account, chainId, status, manual } of assets) {
@@ -228,10 +227,10 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       // --- RWAs actions ---
-      setRwasLoading: (loading) => set({ rwasLoading: loading }),
+      setRwasLoading: loading => set({ rwasLoading: loading }),
 
       loadAccountRwasSuccess: (account, chainId, slugs) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const existing = state.rwas[key] ?? {};
           const updated = { ...existing };
@@ -257,7 +256,7 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       setRwaStatus: ({ account, chainId, slug, status }) =>
-        set((state) => {
+        set(state => {
           const key = getAccountAssetsStoreKey(account, chainId);
           const accountRwas = state.rwas[key];
           if (!accountRwas?.[slug]) return state;
@@ -273,8 +272,8 @@ export const assetsStore = createStore<AssetsStore>()(
           };
         }),
 
-      putRwasAsIs: (assets) =>
-        set((state) => {
+      putRwasAsIs: assets =>
+        set(state => {
           const updated = { ...state.rwas };
 
           for (const { slug, account, chainId, status, manual } of assets) {
@@ -288,10 +287,10 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       // --- Whitelist ---
-      setWhitelistLoading: (loading) => set({ mainnetWhitelistLoading: loading }),
+      setWhitelistLoading: loading => set({ mainnetWhitelistLoading: loading }),
 
-      loadWhitelistSuccess: (tokens) =>
-        set((state) => {
+      loadWhitelistSuccess: tokens =>
+        set(state => {
           const updatedWhitelist = [...state.mainnetWhitelist];
 
           for (const token of tokens) {
@@ -307,9 +306,9 @@ export const assetsStore = createStore<AssetsStore>()(
         }),
 
       // --- Scamlist ---
-      setScamlistLoading: (loading) => set({ mainnetScamlistLoading: loading }),
+      setScamlistLoading: loading => set({ mainnetScamlistLoading: loading }),
 
-      loadScamlistSuccess: (slugs) =>
+      loadScamlistSuccess: slugs =>
         set({
           mainnetScamlist: slugs,
           mainnetScamlistLoading: false
@@ -318,54 +317,52 @@ export const assetsStore = createStore<AssetsStore>()(
     {
       name: 'zustand-assets',
       storage: {
-        getItem: async (name) => {
+        getItem: async name => {
           const value = await browserStorage.getItem(name);
           return value ? JSON.parse(value) : null;
         },
         setItem: async (name, value) => {
           await browserStorage.setItem(name, JSON.stringify(value));
         },
-        removeItem: async (name) => {
+        removeItem: async name => {
           await browserStorage.removeItem(name);
         }
       },
-      partialize: (state) =>
+      partialize: state =>
         ({
           tokens: state.tokens,
           collectibles: state.collectibles,
           rwas: state.rwas,
           mainnetWhitelist: state.mainnetWhitelist,
           mainnetScamlist: state.mainnetScamlist
-        }) as unknown as AssetsStore
+        } as unknown as AssetsStore)
     }
   )
 );
 
 // ---- Selector hooks -------------------------------------------------------
 
-export const useAssetsStore = <T>(selector: (state: AssetsStore) => T): T =>
-  useStore(assetsStore, selector);
+export const useAssetsStore = <T>(selector: (state: AssetsStore) => T): T => useStore(assetsStore, selector);
 
 const ACCOUNT_ASSETS_EMPTY: AccountAssetsRecord = {};
 
 // Tokens
-export const useAllTokensSelector = () =>
-  useAssetsStore((s) => s.tokens);
+export const useAllTokensSelector = () => useAssetsStore(s => s.tokens);
 
 export const useAccountTokensSelector = (account: string, chainId: string) =>
-  useAssetsStore((s) => s.tokens[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
+  useAssetsStore(s => s.tokens[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
 
 // Collectibles
 export const useAccountCollectiblesSelector = (account: string, chainId: string) =>
-  useAssetsStore((s) => s.collectibles[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
+  useAssetsStore(s => s.collectibles[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
 
 // RWAs
 export const useAccountRwasSelector = (account: string, chainId: string) =>
-  useAssetsStore((s) => s.rwas[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
+  useAssetsStore(s => s.rwas[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
 
 // Loading
 export const useAreAssetsLoading = (type: AssetsType) =>
-  useAssetsStore((s) => {
+  useAssetsStore(s => {
     switch (type) {
       case 'tokens':
         return s.tokensLoading;
@@ -377,8 +374,6 @@ export const useAreAssetsLoading = (type: AssetsType) =>
   });
 
 // Whitelist & Scamlist
-export const useMainnetTokensWhitelistSelector = () =>
-  useAssetsStore((s) => s.mainnetWhitelist);
+export const useMainnetTokensWhitelistSelector = () => useAssetsStore(s => s.mainnetWhitelist);
 
-export const useMainnetTokensScamlistSelector = () =>
-  useAssetsStore((s) => s.mainnetScamlist);
+export const useMainnetTokensScamlistSelector = () => useAssetsStore(s => s.mainnetScamlist);

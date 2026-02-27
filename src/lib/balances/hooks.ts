@@ -6,12 +6,12 @@ import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
 import { isKnownChainId } from 'lib/apis/tzkt';
+import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
 import {
   useAllAccountBalancesSelector,
   useAllBalancesSelector,
   getKeyForBalancesRecord
 } from 'lib/store/zustand/balances.store';
-import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
 import { useTypedSWR } from 'lib/swr';
 import {
   useTezos,

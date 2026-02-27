@@ -20,7 +20,7 @@ const BLOCK_REFRESH_MIN_INTERVAL = 1_000;
 const MEMOIZE_MAX_AGE = 90_000;
 
 /**
- * Alternative to Taquito's `RpcClientCache`.
+ * Alternative to WebMavryk's `RpcClientCache`.
  *
  * Different in a way that TTL (same default - 1 second) is set only to one piece of data - head block hash.
  * Memoization of requests is then based on the value of that block hash.
@@ -47,7 +47,7 @@ export class FastRpcClient extends RpcClient {
       return result;
     } catch (e) {
       console.error(e);
-      console.error('Failed to get chain ID, falling back to Taquito RPC client...');
+      console.error('Failed to get chain ID, falling back to WebMavryk RPC client...');
       return TempleChainId.Atlas;
     }
   }

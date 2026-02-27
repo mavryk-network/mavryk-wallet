@@ -87,7 +87,13 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<FormData>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch
+  } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,

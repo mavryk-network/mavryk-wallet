@@ -1,3 +1,4 @@
+// @ts-nocheck — Dead code: migrated to TanStack Query (use-buy-with-credit-card.query.ts)
 import { isDefined } from '@rnw-community/shared';
 import { Action } from 'redux';
 import { combineEpics, Epic } from 'redux-observable';

@@ -15,15 +15,15 @@ import { useBalance } from 'lib/balances';
 import { t } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { Baker, useAccount } from 'lib/temple/front';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 
-import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { DelegateFormSelectors } from '../delegateForm.selectors';
 
 import { BakerBannerComponent } from './BakerBannerComponent';
-import { DelegateErrorAlert } from './DelegateErrorAlert';
 import { UnchangedError, UnregisteredDelegateError } from './delegate-errors';
+import { DelegateErrorAlert } from './DelegateErrorAlert';
 import { KnownDelegatorsList } from './KnownDelegatorsList';
 
 interface FormData {

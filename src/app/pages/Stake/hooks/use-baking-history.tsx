@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';

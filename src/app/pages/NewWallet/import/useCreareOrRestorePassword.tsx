@@ -12,10 +12,10 @@ import {
 } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
-import { uiStore } from 'lib/store/zustand/ui.store';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
+import { uiStore } from 'lib/store/zustand/ui.store';
 import { useTempleClient } from 'lib/temple/front';
 import { PasswordValidation } from 'lib/ui/PasswordStrengthIndicator';
 import { delay } from 'lib/utils';
@@ -51,12 +51,9 @@ export const useCreareOrRestorePassword = (
     []
   );
 
-  const setAdsViewEnabled = useCallback(
-    (adsViewEnabled: boolean) => {
-      uiStore.getState().togglePartnersPromotion(adsViewEnabled);
-    },
-    []
-  );
+  const setAdsViewEnabled = useCallback((adsViewEnabled: boolean) => {
+    uiStore.getState().togglePartnersPromotion(adsViewEnabled);
+  }, []);
 
   const { setOnboardingCompleted } = useOnboardingProgress();
 

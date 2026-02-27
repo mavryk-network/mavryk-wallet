@@ -1,5 +1,5 @@
-import type { StateStorage } from 'zustand/middleware';
 import browser from 'webextension-polyfill';
+import type { StateStorage } from 'zustand/middleware';
 
 /**
  * Zustand persist storage adapter for browser.storage.local.

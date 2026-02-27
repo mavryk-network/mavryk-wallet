@@ -32,7 +32,14 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const { popup } = useAppEnv();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];
 
-  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, setError, clearErrors, watch } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    setError,
+    clearErrors,
+    watch
+  } = useForm<FormData>();
 
   const walletPasswordValue = watch('password') ?? '';
 

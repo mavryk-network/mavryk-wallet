@@ -23,8 +23,8 @@ import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitche
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { uiStore } from 'lib/store/zustand/ui.store';
+import { useRetryableSWR } from 'lib/swr';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
 import { MAV_RPC_NETWORK } from 'lib/temple/networks';
 import { TempleAccountType, TempleChainId, TempleConfirmationPayload } from 'lib/temple/types';

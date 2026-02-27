@@ -4,11 +4,11 @@ import { isDefined } from '@rnw-community/shared';
 import { BigNumber } from 'bignumber.js';
 
 import {
-  useFiatCurrenciesSelector,
-  useCryptoCurrenciesSelector,
-  useProviderCurrenciesErrorSelector,
-  usePairLimitsErrorsSelector
-} from 'app/store/buy-with-credit-card/selectors';
+  useFiatCurrencies,
+  useCryptoCurrencies,
+  useProviderCurrenciesError,
+  usePairLimitsErrors
+} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { getMoonPayBuyQuote } from 'lib/apis/moonpay';
 import { estimateAliceBobOutput } from 'lib/apis/temple/endpoints/alice-bob';
 import { convertFiatAmountToCrypto } from 'lib/apis/utorg';
@@ -93,10 +93,10 @@ export const usePaymentProvider = (
   const [outputAmount, setOutputAmount] = useState<number>();
   const [outputError, setOutputError] = useState<Error>();
   const [outputAmountLoading, setOutputAmountLoading] = useState<boolean>(false);
-  const fiatCurrencies = useFiatCurrenciesSelector(providerId);
-  const cryptoCurrencies = useCryptoCurrenciesSelector(providerId);
-  const currenciesError = useProviderCurrenciesErrorSelector(providerId);
-  const limitsErrors = usePairLimitsErrorsSelector(inputAsset.code, outputAsset.code);
+  const fiatCurrencies = useFiatCurrencies(providerId);
+  const cryptoCurrencies = useCryptoCurrencies(providerId);
+  const currenciesError = useProviderCurrenciesError(providerId);
+  const limitsErrors = usePairLimitsErrors(inputAsset.code, outputAsset.code);
   const { min: minInputAmount, max: maxInputAmount } = useInputLimits(providerId, inputAsset.code, outputAsset.code);
   const initialData = initialPaymentProvidersData[providerId];
   const getOutputAmount = getOutputAmountFunctions[providerId];

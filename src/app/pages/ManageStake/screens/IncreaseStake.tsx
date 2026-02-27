@@ -16,7 +16,9 @@ import { StakeAmountForm } from '../components/StakeAmountForm';
 
 export const IncreaseStake = () => {
   const account = useAccount();
-  const { data: { stakedBalance } } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const {
+    data: { stakedBalance }
+  } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);

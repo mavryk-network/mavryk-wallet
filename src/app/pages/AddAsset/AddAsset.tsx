@@ -10,8 +10,6 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
-import { assetsStore } from 'lib/store/zustand/assets.store';
-import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { useFormAnalytics } from 'lib/analytics';
 import { TokenMetadataResponse } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';
@@ -26,6 +24,8 @@ import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
 import { fetchOneTokenMetadata } from 'lib/metadata/fetch';
 import { TokenMetadataNotFoundError } from 'lib/metadata/on-chain';
+import { assetsStore } from 'lib/store/zustand/assets.store';
+import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { loadContract } from 'lib/temple/contract';
 import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
@@ -86,10 +86,9 @@ const Form = memo(() => {
 
   const formAnalytics = useFormAnalytics('AddAsset');
 
-  const { register, handleSubmit, formState, watch, setValue, trigger, clearErrors } =
-    useForm<FormData>({
-      mode: 'onChange'
-    });
+  const { register, handleSubmit, formState, watch, setValue, trigger, clearErrors } = useForm<FormData>({
+    mode: 'onChange'
+  });
   const { errors } = formState;
 
   const contractAddress = watch('address');
@@ -275,10 +274,12 @@ const Form = memo(() => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <NoSpaceField
-        ref={register('address', {
-          required: t('required'),
-          validate: validateContractAddress
-        }).ref as unknown as React.Ref<HTMLTextAreaElement>}
+        ref={
+          register('address', {
+            required: t('required'),
+            validate: validateContractAddress
+          }).ref as unknown as React.Ref<HTMLTextAreaElement>
+        }
         name="address"
         id="addtoken-address"
         textarea

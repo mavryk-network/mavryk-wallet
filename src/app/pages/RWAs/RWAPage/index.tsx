@@ -8,8 +8,6 @@ import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ExternalLinkIcon } from 'app/icons/external-link.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { useRwaDetails, useRwasDetailsQuery } from 'lib/rwas/use-rwas-details.query';
-import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { ActionsBlock } from 'app/templates/Actions';
 import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { AssetPageImage } from 'app/templates/CollectibleMedia';
@@ -17,6 +15,8 @@ import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { TokenMetadata } from 'lib/metadata';
+import { useRwaDetails, useRwasDetailsQuery } from 'lib/rwas/use-rwas-details.query';
+import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount } from 'lib/temple/front';
 import { ZERO } from 'lib/utils/numbers';
 

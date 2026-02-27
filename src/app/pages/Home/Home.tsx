@@ -13,14 +13,13 @@ import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { uiStore, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 import { useAccount, useNetwork } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
 import * as Woozie from 'lib/woozie';
 import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/woozie';
 import { createLocationState } from 'lib/woozie/location';
-
-import { uiStore, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 
 import { useOnboardingProgress } from '../Onboarding/hooks/useOnboardingProgress.hook';
 

@@ -1,5 +1,5 @@
-import { assetsStore, AssetToPut } from 'lib/store/zustand/assets.store';
 import { isCollectible, isRwa, TokenMetadata } from 'lib/metadata';
+import { assetsStore, AssetToPut } from 'lib/store/zustand/assets.store';
 import * as Repo from 'lib/temple/repo';
 
 export const migrateFromIndexedDB = async (metadatas: Record<string, TokenMetadata>) => {

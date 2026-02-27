@@ -534,12 +534,7 @@ export const SwapForm: FC = () => {
                 control={control}
                 name="slippageTolerance"
                 rules={{ validate: slippageToleranceInputValidationFn }}
-                render={({ field }) => (
-                  <SlippageToleranceInput
-                    {...field}
-                    error={!!errors.slippageTolerance}
-                  />
-                )}
+                render={({ field }) => <SlippageToleranceInput {...field} error={!!errors.slippageTolerance} />}
               />
             </div>
           </div>

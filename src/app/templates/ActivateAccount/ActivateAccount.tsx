@@ -26,7 +26,14 @@ const ActivateAccount = memo(() => {
 
   const [success, setSuccess] = useSafeState<ReactNode>(null);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting: submitting }, clearErrors, setError, watch } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    clearErrors,
+    setError,
+    watch
+  } = useForm<FormData>();
   const secret = watch('secret') ?? '';
 
   const onSubmit = useCallback(

@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 
-import { useCollectiblesDetailsQuery } from 'lib/collectibles/use-collectibles-details.query';
 import { useAccountCollectibles } from 'lib/assets/hooks';
+import { useCollectiblesDetailsQuery } from 'lib/collectibles/use-collectibles-details.query';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 

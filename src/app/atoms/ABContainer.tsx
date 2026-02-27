@@ -1,7 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 
 import { ABTestGroup } from 'lib/apis/temple';
-
 import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 
 interface ABContainerProps {

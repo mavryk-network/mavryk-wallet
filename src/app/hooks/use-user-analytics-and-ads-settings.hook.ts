@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react';
 
 import { useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
+import { useIsAnalyticsEnabled, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 import { useAccountPkh } from 'lib/temple/front';
 import { usePassiveStorage } from 'lib/temple/front/storage';
-
-import { useIsAnalyticsEnabled, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 
 export const useUserAnalyticsAndAdsSettings = () => {
   const { trackEvent } = useAnalytics();

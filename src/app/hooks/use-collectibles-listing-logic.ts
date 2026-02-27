@@ -1,5 +1,5 @@
-import { useCollectiblesMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { useCollectiblesMetadataPresenceCheck, useGetCollectibleMetadata } from 'lib/metadata';
+import { useCollectiblesMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 
 import { useAssetListingLogic, useInitialPageAmount, useMetaSlugsToCheck } from './use-asset-listing-logic';
 import { useCollectiblesPaginationLogic } from './use-collectibles-pagination-logic';

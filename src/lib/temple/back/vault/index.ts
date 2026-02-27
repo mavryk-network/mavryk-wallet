@@ -1,7 +1,7 @@
 import { CompositeForger, RpcForger, Signer, MavrykOperationError, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
-import * as TaquitoUtils from '@mavrykdynamics/webmavryk-utils';
+import * as WebMavrykUtils from '@mavrykdynamics/webmavryk-utils';
 import * as Bip39 from 'bip39';
 import { nanoid } from 'nanoid';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
@@ -794,7 +794,7 @@ export class Vault {
   async sign(accPublicKeyHash: string, bytes: string, watermark?: string) {
     return withError('Failed to sign', () =>
       this.withSigner(accPublicKeyHash, async signer => {
-        const watermarkBuf = watermark ? TaquitoUtils.hex2buf(watermark) : undefined;
+        const watermarkBuf = watermark ? WebMavrykUtils.hex2buf(watermark) : undefined;
         return signer.sign(bytes, watermarkBuf);
       })
     );

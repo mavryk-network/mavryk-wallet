@@ -18,7 +18,12 @@ interface NewSeedBackupProps {
 }
 
 export const NewSeedBackup: FC<NewSeedBackupProps> = ({ seedPhrase, onBackupComplete }) => {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<BackupFormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch
+  } = useForm<BackupFormData>();
   const submitting = isSubmitting;
 
   const backuped = watch('backuped') ?? false;

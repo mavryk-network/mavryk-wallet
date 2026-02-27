@@ -40,7 +40,12 @@ export const NewsletterOverlay: FC = () => {
 
   const validationResolver = useYupValidationResolver<FormValues>(validationSchema);
 
-  const { formState: { errors }, handleSubmit, watch, register } = useForm<FormValues>({
+  const {
+    formState: { errors },
+    handleSubmit,
+    watch,
+    register
+  } = useForm<FormValues>({
     defaultValues: { email: '' },
     resolver: validationResolver
   });

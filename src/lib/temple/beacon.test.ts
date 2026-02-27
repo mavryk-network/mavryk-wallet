@@ -134,9 +134,7 @@ describe('Beacon', () => {
       expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519).toBeCalledWith(
         new Uint8Array(selfKeyPair.privateKey)
       );
-      expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519).toBeCalledWith(
-        new Uint8Array(selfKeyPair.publicKey)
-      );
+      expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519).toBeCalledWith(new Uint8Array(selfKeyPair.publicKey));
       expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519.mock.calls.length).toBe(1);
       expect(mockSodiumUtil.crypto_sign_ed25519_pk_to_curve25519.mock.calls.length).toBe(2);
     });

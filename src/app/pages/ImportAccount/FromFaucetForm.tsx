@@ -38,7 +38,13 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const chainId = useChainId() ?? '';
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
 
-  const { control, handleSubmit: handleTextFormSubmit, watch, formState: { errors }, setValue } = useForm<FaucetTextInputFormData>();
+  const {
+    control,
+    handleSubmit: handleTextFormSubmit,
+    watch,
+    formState: { errors },
+    setValue
+  } = useForm<FaucetTextInputFormData>();
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [processing, setProcessing] = useSafeState(false);

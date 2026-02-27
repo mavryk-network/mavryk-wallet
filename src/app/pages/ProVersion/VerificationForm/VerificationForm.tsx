@@ -38,7 +38,13 @@ const VerificationForm: FC<DelegateFormProps> = () => {
    * Form
    */
 
-  const { watch, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<FormData>({
+  const {
+    watch,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    control,
+    reset
+  } = useForm<FormData>({
     mode: 'onChange'
   });
 

@@ -10,11 +10,11 @@ import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/t
 import { ABTestGroup } from 'lib/apis/temple';
 import { T } from 'lib/i18n';
 import { HELP_UKRAINE_BAKER_ADDRESS, RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { useAccount, useDelegate, useKnownBakers } from 'lib/temple/front';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { navigate } from 'lib/woozie';
 
-import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { DelegateFormSelectors } from '../delegateForm.selectors';
 
 export enum SortOptions {

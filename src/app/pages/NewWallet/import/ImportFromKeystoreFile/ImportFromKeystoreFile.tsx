@@ -135,12 +135,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
                 required: t('required'),
                 validate: validateKeystoreFile
               }}
-              render={({ field }) => (
-                <KeystoreFileInput
-                  {...field}
-                  clearKeystoreFileInput={clearKeystoreFileInput}
-                />
-              )}
+              render={({ field }) => <KeystoreFileInput {...field} clearKeystoreFileInput={clearKeystoreFileInput} />}
             />
             <ErrorKeystoreComponent errors={errors} />
           </div>

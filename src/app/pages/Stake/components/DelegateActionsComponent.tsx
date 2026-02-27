@@ -7,13 +7,7 @@ import { T } from 'lib/i18n';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import {
-  CO_STAKE,
-  FINALIZE_UNLOCK,
-  MANAGE_STAKE,
-  UNLOCK_STAKE,
-  UNLOCKING
-} from 'lib/temple/front/baking/const';
+import { CO_STAKE, FINALIZE_UNLOCK, MANAGE_STAKE, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';

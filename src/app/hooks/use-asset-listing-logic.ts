@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 
 import { useDebounce } from 'use-debounce';
 
-import { AssetsType, useAreAssetsLoading } from 'lib/store/zustand/assets.store';
 import { searchAssetsWithNoMeta } from 'lib/assets/search.utils';
 import { TokenMetadataGetter } from 'lib/metadata';
+import { AssetsType, useAreAssetsLoading } from 'lib/store/zustand/assets.store';
 import { isSearchStringApplicable } from 'lib/utils/search-items';
 import { createLocationState } from 'lib/woozie/location';
 

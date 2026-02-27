@@ -99,26 +99,26 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
-            style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
-            className="flex flex-col gap-1 items-start justify-center  flex-wrap"
+            className={classNames(
+              'flex flex-col gap-1 items-start justify-center',
+              filteredMoneyDiffBase.length && 'max-w-[60%]'
+            )}
           >
             <OperationStack historyItem={historyItem} base={base} userAddress={address} />
 
             <div>
-              <div className="flex items-start gap-x-1">
+              <div className="flex items-center gap-x-2 flex-wrap">
                 <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
                 {rest.length > 0 && (
-                  <div className={classNames('flex items-center')}>
-                    <button
-                      className={classNames('flex items-center', 'text-accent-blue hover:underline')}
-                      onClick={e => {
-                        e.stopPropagation();
-                        setExpanded(e => !e);
-                      }}
-                    >
-                      <T id={expanded ? 'showLess' : 'showMore'} />
-                    </button>
-                  </div>
+                  <button
+                    className="text-accent-blue hover:underline text-sm whitespace-nowrap"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setExpanded(e => !e);
+                    }}
+                  >
+                    <T id={expanded ? 'showLess' : 'showMore'} />
+                  </button>
                 )}
               </div>
 
@@ -134,7 +134,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-end gap-1">
+        <div className="flex flex-col justify-center items-end gap-1 shrink-0">
           {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (
               <MoneyDiffView

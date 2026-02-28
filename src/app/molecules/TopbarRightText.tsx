@@ -14,5 +14,5 @@ export const TopbarRightText: FC<TopbarRightTextProps> = ({ onClick, label, link
     children: label
   };
 
-  return linkTo ? <Link to={linkTo} {...baseProps} /> : <div {...baseProps} onClick={onClick} />;
+  return linkTo ? <Link to={linkTo} {...baseProps} /> : <button type="button" {...baseProps} onClick={onClick} />;
 };

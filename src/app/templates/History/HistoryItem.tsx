@@ -94,7 +94,18 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-2">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => handleItemClick(hash)}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleItemClick(hash);
+          }
+        }}
+        className="flex items-start justify-between gap-2"
+      >
         <div className="flex items-start gap-2 min-w-0">
           <HistoryTokenIcon historyItem={historyItem} size={24} />
           <div className="flex flex-col gap-0.5 min-w-0">

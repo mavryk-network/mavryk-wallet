@@ -88,7 +88,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
         overrideClassNames="w-4 h-4 rounded"
         shouldFocus={false}
       />
-      <div className="flex items-center gap-2 cursor-pointer" onClick={toggleOpened}>
+      <button type="button" className="flex items-center gap-2 cursor-pointer" onClick={toggleOpened}>
         <p className="text-white text-sm capitalize">{t('selectedCount', [`${count}`])}</p>
         <ArrowIcon
           className={clsx(
@@ -96,7 +96,7 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
             opened && 'transform rotate-180'
           )}
         />
-      </div>
+      </button>
     </section>
   );
 };

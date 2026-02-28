@@ -10,15 +10,36 @@ export interface IconBaseProps {
   size?: Size;
   className?: string;
   onClick?: EmptyFn;
+  ariaLabel?: string;
 }
 
 /** For monochrome icons */
 export const IconBase = memo(
-  forwardRef<HTMLDivElement, IconBaseProps>(({ size = 16, className, Icon, onClick }, ref) => (
-    <div ref={ref} data-icon-size={size} className={clsx(CONTAINER_CLASSNAME[size], className)} onClick={onClick}>
-      <Icon className="w-full h-full stroke-current fill-current" transform={SCALE_TRANSFORMS[size]} />
-    </div>
-  ))
+  forwardRef<HTMLDivElement | HTMLButtonElement, IconBaseProps>(({ size = 16, className, Icon, onClick, ariaLabel }, ref) => {
+    const content = <Icon className="w-full h-full stroke-current fill-current" transform={SCALE_TRANSFORMS[size]} />;
+    const classes = clsx(CONTAINER_CLASSNAME[size], className);
+
+    if (onClick) {
+      return (
+        <button
+          type="button"
+          ref={ref as React.Ref<HTMLButtonElement>}
+          data-icon-size={size}
+          className={classes}
+          onClick={onClick}
+          aria-label={ariaLabel ?? 'icon action'}
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return (
+      <div ref={ref as React.Ref<HTMLDivElement>} data-icon-size={size} className={classes}>
+        {content}
+      </div>
+    );
+  })
 );
 
 /** Exact icons (icons' base containers) sizes */

@@ -101,7 +101,19 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   if (metadata == null) return null;
 
   return (
-    <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>
+    <div
+      className={classNameMemo}
+      {...setAnotherSelector('name', assetName)}
+      role="button"
+      tabIndex={0}
+      onClick={() => onClick(assetSlug)}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(assetSlug);
+        }
+      }}
+    >
       <AssetIcon assetSlug={assetSlug} size={44} className="mr-2 flex-shrink-0 self-start" />
 
       <div className={classNames('w-full')} style={{ maxWidth: popup ? '19rem' : 'auto' }}>

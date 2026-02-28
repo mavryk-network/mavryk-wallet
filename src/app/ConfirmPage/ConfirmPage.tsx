@@ -365,7 +365,7 @@ const ConfirmDAppForm: FC = () => {
                     />
                   </div>
 
-                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
+                  <div className="h-px bg-divider my-4 w-full" />
                 </>
               )}
 

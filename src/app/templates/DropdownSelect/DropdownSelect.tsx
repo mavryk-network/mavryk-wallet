@@ -236,9 +236,9 @@ const SelectSearch: FC<SelectSearchProps> = ({
               fieldWrapperBottomMargin={false}
               placeholder={t('tokenId')}
               style={{ borderRadius: 0 }}
+              className="text-base-plus border-none bg-opacity-0 focus:shadow-none"
               containerStyle={{ flexDirection: 'row' }}
               containerClassName="items-stretch"
-              className="text-base-plus border-none bg-opacity-0 focus:shadow-none"
               onChange={onTokenIdChange}
             />
           </div>

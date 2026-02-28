@@ -67,7 +67,7 @@ export const StakeTezosTag: FC = () => {
   const { trackEvent } = useAnalytics();
 
   const handleTagClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
@@ -96,7 +96,7 @@ export const StakeTezosTag: FC = () => {
 
 type BakerBannerProps = {
   myBakerPkh: DelegateResponse | undefined;
-  handleTagClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleTagClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {

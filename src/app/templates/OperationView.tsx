@@ -160,7 +160,7 @@ const OperationView: FC<OperationViewProps> = ({
       )}
 
       {isOperationPayload && (
-        <div style={{ marginBottom: 12 }}>
+        <div className="mb-3">
           <ModifyFeeAndLimitComponent
             id="external-modified-fees-id"
             name="external-modified-fees"

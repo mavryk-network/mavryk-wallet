@@ -248,7 +248,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">
-            <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
+            <button type="button" className="flex items-center gap-1" onClick={toggleFeesDropdown}>
               <T id="networkFees" />
               <ArrowIcon
                 className={clsx(
@@ -256,7 +256,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                   showFeeDetails && 'transform rotate-180'
                 )}
               />
-            </div>
+            </button>
 
             <div className="flex flex-col items-end">
               <FiatBalance

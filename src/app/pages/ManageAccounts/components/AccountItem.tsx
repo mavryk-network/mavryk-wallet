@@ -38,7 +38,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, onClick, keyC
         className="flex-shrink-0 shadow-xs-white rounded-full overflow-hidden"
       />
 
-      <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
+      <div className="ml-3 flex flex-col items-start">
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
           {keyColor && <KeyIcon style={{ fill: keyColor }} />}

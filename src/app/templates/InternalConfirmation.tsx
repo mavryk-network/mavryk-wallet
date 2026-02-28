@@ -321,7 +321,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   </div>
 
-                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
+                  <div className="h-px bg-divider my-4 w-full" />
 
                   {payloadError && (
                     <AlertWithCollapse
@@ -397,7 +397,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   )}
 
                   {isOperationPayload && (
-                    <div style={{ marginBottom: 12 }}>
+                    <div className="mb-3">
                       <ModifyFeeAndLimitComponent
                         id="internal-modified-fees-id"
                         name="internal-modified-fees"

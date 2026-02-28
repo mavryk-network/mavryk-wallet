@@ -16,6 +16,7 @@ import Dialogs from 'app/layouts/Dialogs';
 import { getMessage, T } from 'lib/i18n';
 import { clearAllStorages } from 'lib/temple/reset';
 import { AlertFn, ConfirmFn, DialogsProvider, useAlert, useConfirm } from 'lib/ui/dialog';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 const OptionsWrapper: FC = () => (
   <DialogsProvider>
@@ -80,10 +81,10 @@ async function handleReset(customAlert: AlertFn, confirm: ConfirmFn) {
       try {
         await clearAllStorages();
         browser.runtime.reload();
-      } catch (err: any) {
+      } catch (err: unknown) {
         await customAlert({
           title: getMessage('error'),
-          children: err.message
+          children: getErrorMessage(err)
         });
       }
     })();

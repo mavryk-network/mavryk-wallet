@@ -257,12 +257,12 @@ async function fetchMvktAccountRWAAssetsPage(
           });
 
           return mappedResult;
-        } catch (error: any) {
-          if (error.name === 'AbortError') {
+        } catch (error: unknown) {
+          if (error instanceof Error && error.name === 'AbortError') {
             throw new Error('Request timeout');
           }
 
-          if (error.message.includes('403')) {
+          if (error instanceof Error && error.message.includes('403')) {
             bail(new Error('Unauthorized'));
           }
 
@@ -285,9 +285,9 @@ async function fetchMvktAccountRWAAssetsPage(
 export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundInMS = 1000) {
   try {
     return await fetcher();
-  } catch (err: any) {
-    if (err.isAxiosError) {
-      const error: AxiosError = err;
+  } catch (err: unknown) {
+    if (typeof err === 'object' && err !== null && 'isAxiosError' in err && (err as { isAxiosError: boolean }).isAxiosError) {
+      const error = err as AxiosError;
       if (error.response?.status === 429) {
         await delay(delayAroundInMS);
         const res = await fetcher();

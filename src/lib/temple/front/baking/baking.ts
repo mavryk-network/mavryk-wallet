@@ -5,6 +5,7 @@ import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 
 import { BoundaryError } from 'app/ErrorBoundary';
+import { bakingKeys, chainKeys } from 'lib/query-keys';
 import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
@@ -39,7 +40,7 @@ export function useDelegate<T = MvktUserAccount>(
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(
-    () => ['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation],
+    () => [...chainKeys.delegate(tezos.checksum, address), chainId, shouldPreventErrorPropagation],
     [tezos.checksum, address, chainId, shouldPreventErrorPropagation]
   );
 
@@ -100,7 +101,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(
-    () => ['delegate_stats', tezos.checksum, accountAddress, chainId, shouldPreventErrorPropagation],
+    () => [...chainKeys.delegateStats(tezos.checksum, accountAddress), chainId, shouldPreventErrorPropagation],
     [tezos.checksum, accountAddress, chainId, shouldPreventErrorPropagation]
   );
 
@@ -324,7 +325,7 @@ export function useKnownBaker(address: string | null) {
     }
   }, [address]);
   return useQuery({
-    queryKey: ['baker', address],
+    queryKey: bakingKeys.baker(address ?? ''),
     queryFn: fetchBaker,
     enabled: net.type === 'main' && !!address,
     refetchInterval: 120_000,
@@ -361,7 +362,7 @@ export function useKnownBakers() {
   const baseApiUrl = chainId ? MVKT_API_BASE_URLS[chainId as MvktApiChainId] : '';
 
   const { data: bakers } = useQuery({
-    queryKey: ['bakers', baseApiUrl],
+    queryKey: bakingKeys.bakers(baseApiUrl),
     queryFn: () => getAllBakersBakingBad(baseApiUrl),
     enabled: !!baseApiUrl,
     refetchInterval: 120_000,

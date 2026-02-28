@@ -93,7 +93,7 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
         setSeedPhrase(mnemonic);
         setKeystorePassword(data.keystorePassword!);
         setIsSeedEntered(true);
-      } catch (err: any) {
+      } catch (err: unknown) {
         handleKukaiWalletError(err, customAlert);
       }
     },
@@ -263,10 +263,10 @@ const validateKeystoreFile = (value?: FileList) => {
   return true;
 };
 
-const handleKukaiWalletError = (err: any, customAlert: AlertFn) => {
+const handleKukaiWalletError = (err: unknown, customAlert: AlertFn) => {
   customAlert({
     title: t('errorImportingKukaiWallet'),
-    children: err instanceof SyntaxError ? t('fileHasSyntaxError') : err.message
+    children: err instanceof SyntaxError ? t('fileHasSyntaxError') : err instanceof Error ? err.message : String(err)
   });
 };
 

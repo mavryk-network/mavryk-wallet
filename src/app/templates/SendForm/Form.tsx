@@ -10,15 +10,8 @@ import React, {
   useState
 } from 'react';
 
-import {
-  DEFAULT_FEE,
-  TransferParams,
-  Estimate,
-  TransactionWalletOperation,
-  TransactionOperation,
-  WalletOperation
-} from '@mavrykdynamics/webmavryk';
-import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
+import { DEFAULT_FEE, TransactionWalletOperation, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
+
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
@@ -28,34 +21,34 @@ import { FormSubmitButton, Money, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import { getBaseFeeError, getFeeError } from 'app/hooks/useFeeValue/utils';
 import { useOperationStatus } from 'app/hooks/use-operation-status';
-import InFiat from 'app/templates/InFiat';
+
 import { useFormAnalytics } from 'lib/analytics';
 import { isMavSlug, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { useBalance } from 'lib/balances';
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
+import { feeKeys } from 'lib/query-keys';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
-import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { transferImplicit, transferToContract } from 'lib/michelson';
 import { loadContract } from 'lib/temple/contract';
 import {
-  ReactiveTezosToolkit,
-  isDomainNameValid,
   useAccount,
   useNetwork,
   useTezos,
   useTezosDomainsClient,
   useFilteredContacts,
+  useAddressResolution,
   validateRecipient,
   useChainId
 } from 'lib/temple/front';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { hasManager, isAddressValid, isKTAddress, mumavToTz, tokensToAtoms, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
-import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
+import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
 import { delay } from 'lib/utils';
@@ -64,8 +57,16 @@ import { getMaxAmountFiat, getMaxAmountToken } from 'lib/utils/amounts';
 import ContactsDropdown, { ContactsDropdownProps } from './ContactsDropdown';
 import { ContactsDropdownItemSecondary } from './ContactsDropdownItem';
 import { FeeSection } from './FeeSection';
+import {
+  estimateMaxFee,
+  getAssetPriceByNetwork,
+  getEstimateFallBackDisplayed,
+  getRestFormDisplayed,
+  getFilled
+} from './Form.utils';
 import { SendFormSelectors } from './selectors';
 import { SpinnerSection } from './SpinnerSection';
+import { TokenToFiat } from './TokenToFiat';
 import { useAddressFieldAnalytics } from './use-address-field-analytics';
 
 interface FormData {
@@ -179,21 +180,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const { onBlur } = useAddressFieldAnalytics(toValue, 'RECIPIENT_NETWORK');
 
-  const toFilledWithAddress = useMemo(() => Boolean(toValue && isAddressValid(toValue)), [toValue]);
-
-  const toFilledWithDomain = useMemo(
-    () => toValue && isDomainNameValid(toValue, domainsClient),
-    [toValue, domainsClient]
-  );
-
-  const { data: resolvedAddress } = useTezosAddressByDomainName(toValue);
-
-  const toFilled = useMemo(
-    () => (resolvedAddress ? toFilledWithDomain : toFilledWithAddress),
-    [toFilledWithAddress, toFilledWithDomain, resolvedAddress]
-  );
-
-  const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
+  const { resolvedAddress, toFilled, toResolved } = useAddressResolution(toValue);
   const lastValidReceiver = useRef<string | null>(null);
   const toFilledWithKTAddress = useMemo(() => isAddressValid(toResolved) && isKTAddress(toResolved), [toResolved]);
 
@@ -283,7 +270,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       }
 
       return estimatedBaseFee;
-    } catch (err: any) {
+    } catch (err: unknown) {
       await delay();
 
       if (err instanceof ArtificialError) {
@@ -300,7 +287,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
     error: estimateBaseFeeError,
     isFetching: estimating
   } = useQuery({
-    queryKey: ['transfer-base-fee', tezos.checksum, assetSlug, accountPkh, toResolved],
+    queryKey: feeKeys.transferBase(tezos.checksum, assetSlug, accountPkh, toResolved),
     queryFn: estimateBaseFee,
     enabled: Boolean(toFilled),
     retry: false,
@@ -426,10 +413,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
-        if (err.message === 'Declined') {
+        if (err instanceof Error && err.message === 'Declined') {
           return;
         }
 
@@ -671,53 +658,6 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   );
 };
 
-interface TokenToFiatProps {
-  amountValue: string;
-  assetMetadata: AssetMetadataBase | nullish;
-  shoudUseFiat: boolean;
-  assetSlug: string;
-  toAssetAmount: (fiatAmount: BigNumber.Value) => string;
-}
-
-const TokenToFiat: React.FC<TokenToFiatProps> = ({
-  amountValue = new BigNumber(0),
-  assetMetadata,
-  shoudUseFiat,
-  assetSlug,
-  toAssetAmount
-}) => {
-  if (!amountValue) return null;
-
-  return (
-    <div className="absolute left-4 bottom-4">
-      {shoudUseFiat ? (
-        <div className="text-secondary-white text-sm ">
-          <span className="text-base-plus">≈&nbsp;</span>
-          <span className="font-normal text-secondary-white mr-1">{toAssetAmount(amountValue)}</span>{' '}
-          <T id="inAsset" substitutions={getAssetSymbol(assetMetadata, true)} />
-        </div>
-      ) : (
-        <InFiat
-          assetSlug={assetSlug}
-          volume={amountValue}
-          roundingMode={BigNumber.ROUND_FLOOR}
-          smallFractionFont={false}
-        >
-          {({ balance, symbol }) => (
-            <div className="flex items-baseline text-sm text-secondary-white ">
-              <span>≈&nbsp;</span>
-              <span className="flex items-baseline">
-                <span className="pr-px">{symbol}</span>
-                {balance}
-              </span>
-            </div>
-          )}
-        </InFiat>
-      )}
-    </div>
-  );
-};
-
 interface FeeComponentProps {
   restFormDisplayed: boolean;
   submitError: any;
@@ -731,62 +671,7 @@ interface FeeComponentProps {
   isSubmitting: boolean;
 }
 
-type TransferParamsInvariant =
-  | TransferParams
-  | {
-      to: string;
-      amount: any;
-    };
-
-const estimateMaxFee = async (
-  acc: TempleAccount,
-  tez: boolean,
-  tezos: ReactiveTezosToolkit,
-  to: string,
-  balanceBN: BigNumber,
-  transferParams: TransferParamsInvariant,
-  manager: ManagerKeyResponse
-) => {
-  let estmtnMax: Estimate;
-  if (acc.type === TempleAccountType.ManagedKT) {
-    const michelsonLambda = isKTAddress(to) ? transferToContract : transferImplicit;
-
-    const contract = await loadContract(tezos, acc.publicKeyHash);
-    const transferParamsWrapper = contract.methods.do(michelsonLambda(to, tzToMumav(balanceBN))).toTransferParams();
-    estmtnMax = await tezos.estimate.transfer(transferParamsWrapper);
-  } else if (tez) {
-    const estmtn = await tezos.estimate.transfer(transferParams);
-    let amountMax = balanceBN.minus(mumavToTz(estmtn.totalCost));
-    if (!hasManager(manager)) {
-      amountMax = amountMax.minus(mumavToTz(DEFAULT_FEE.REVEAL));
-    }
-    estmtnMax = await tezos.estimate.transfer({
-      to,
-      amount: amountMax.toString() as any
-    });
-  } else {
-    estmtnMax = await tezos.estimate.transfer(transferParams);
-  }
-  return estmtnMax;
-};
-
-const getAssetPriceByNetwork = (network: TempleNetworkType, assetPrice: number | null) =>
-  network === 'main' && assetPrice !== null;
-
-const getBaseFeeError = (baseFee: BigNumber | ArtificialError | undefined, estimateBaseFeeError: any) =>
-  baseFee instanceof Error ? baseFee : estimateBaseFeeError;
-
-const getFeeError = (estimating: boolean, feeError: any) => (!estimating ? feeError : null);
-
-const getEstimateFallBackDisplayed = (toFilled: boolean | '', baseFee: any, estimating: boolean) =>
-  toFilled && !baseFee && estimating;
-
-const getRestFormDisplayed = (toFilled: boolean | '', baseFee: any, estimationError: any) =>
-  Boolean(toFilled && (baseFee || estimationError));
-
 const InnerDropDownComponentGuard: React.FC<ContactsDropdownProps> = ({ contacts, opened, onSelect, searchTerm }) => {
   if (contacts.length <= 0) return null;
   return <ContactsDropdown contacts={contacts} opened={opened} onSelect={onSelect} searchTerm={searchTerm} />;
 };
-
-const getFilled = (toFilled: boolean | '', toFieldFocused: boolean) => (!toFilled ? toFieldFocused : false);

@@ -57,7 +57,7 @@ const ActivateAccount = memo(() => {
             });
             break;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         const mes = t('failureSecretMayBeInvalid');

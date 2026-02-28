@@ -16,14 +16,15 @@ import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
-import { TID, T, t } from 'lib/i18n';
+import { T, t, TID } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { setDelegate } from 'lib/michelson';
+import { feeKeys } from 'lib/query-keys';
 import { loadContract } from 'lib/temple/contract';
 import {
-  isDomainNameValid,
   useAccount,
+  useAddressResolution,
   useChainId,
   useDelegate,
   useKnownBaker,
@@ -31,8 +32,7 @@ import {
   useTezosDomainsClient,
   validateDelegate
 } from 'lib/temple/front';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { atomsToTokens, hasManager, isAddressValid, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { atomsToTokens, hasManager, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -113,22 +113,9 @@ const DelegateForm: FC<DelegateFormProps> = ({
   });
 
   const toValue = watch('to');
-
-  const toFilledWithAddress = useMemo(() => Boolean(toValue && isAddressValid(toValue)), [toValue]);
-  const toFilledWithDomain = useMemo(
-    () => toValue && isDomainNameValid(toValue, domainsClient),
-    [toValue, domainsClient]
-  );
-  const { data: resolvedAddress } = useTezosAddressByDomainName(toValue);
+  const { resolvedAddress, toFilled, toResolved } = useAddressResolution(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
-
-  const toFilled = useMemo(
-    () => (resolvedAddress ? toFilledWithDomain : toFilledWithAddress),
-    [toFilledWithAddress, toFilledWithDomain, resolvedAddress]
-  );
-
-  const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
 
   const getEstimation = useCallback(async () => {
     const to = toResolved;
@@ -204,7 +191,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       }
 
       return baseFee;
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Human delay
       await delay();
 
@@ -214,12 +201,17 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
       console.error(err);
 
-      switch (true) {
-        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => err?.id.includes(errorLabel)):
-          return new UnchangedError(err.message);
+      const errObj = err != null && typeof err === 'object' ? err : {};
+      const errId =
+        'id' in errObj && typeof (errObj as { id: unknown }).id === 'string' ? (errObj as { id: string }).id : '';
+      const errMsg = err instanceof Error ? err.message : String(err);
 
-        case err?.id.includes('unregistered_delegate'):
-          return new UnregisteredDelegateError(err.message);
+      switch (true) {
+        case ['delegate.unchanged', 'delegate.already_active'].some(errorLabel => errId.includes(errorLabel)):
+          return new UnchangedError(errMsg);
+
+        case errId.includes('unregistered_delegate'):
+          return new UnregisteredDelegateError(errMsg);
 
         default:
           throw err;
@@ -232,7 +224,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
     error: estimateBaseFeeError,
     isFetching: estimating
   } = useQuery({
-    queryKey: ['delegate-base-fee', tezos.checksum, accountPkh, toResolved],
+    queryKey: feeKeys.delegateBase(tezos.checksum, accountPkh, toResolved),
     queryFn: estimateBaseFee,
     enabled: Boolean(toFilled),
     retry: false,
@@ -354,10 +346,10 @@ const DelegateForm: FC<DelegateFormProps> = ({
         }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail(analyticsProperties);
 
-        if (err.message === 'Declined') {
+        if (err instanceof Error && err.message === 'Declined') {
           return;
         }
 
@@ -365,7 +357,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
         // Human delay.
         await delay();
-        setSubmitError(err);
+        setSubmitError(err instanceof Error ? err.message : String(err));
       }
     },
     [

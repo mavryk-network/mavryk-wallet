@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
+import { balanceKeys } from 'lib/query-keys';
 import { isKnownChainId } from 'lib/apis/mvkt';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
 import {
@@ -110,7 +111,7 @@ export function useRawBalance(
   const queryClient = useQueryClient();
 
   const balanceQueryKey = useMemo(
-    () => ['balance', tezos.checksum, assetSlug, address],
+    () => balanceKeys.one(tezos.checksum, assetSlug, address),
     [tezos.checksum, assetSlug, address]
   );
 

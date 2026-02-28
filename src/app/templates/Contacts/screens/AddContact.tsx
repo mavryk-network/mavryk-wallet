@@ -12,6 +12,7 @@ import { t, T } from 'lib/i18n';
 import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { HistoryAction, goBack, navigate, useLocation } from 'lib/woozie';
 
 import { AddressBookSelectors } from '../Contacts.selectors';
@@ -96,12 +97,12 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
           description: 'addContactSuccessDesc',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('address', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('address', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, addContact, resetForm, setError, domainsClient]

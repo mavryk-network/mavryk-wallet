@@ -9,6 +9,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T, t } from 'lib/i18n';
 import { useContactsActions } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { PopupModalWithTitle } from '../PopupModalWithTitle';
 
@@ -43,12 +44,12 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
         });
         resetForm();
         onClose();
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('name', { type: 'submit-error', message: err.message });
+        setError('name', { type: 'submit-error', message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, addContact, address, resetForm, onClose, setError]

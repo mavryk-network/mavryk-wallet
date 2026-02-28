@@ -142,8 +142,8 @@ export const useBuyWithCreditCardForm = () => {
         }
 
         await browser.tabs.create({ url });
-      } catch (error: any) {
-        setPurchaseLinkError(error);
+      } catch (error: unknown) {
+        setPurchaseLinkError(error instanceof Error ? error : new Error(String(error)));
 
         const analyticsProperties = {
           inputAmount,

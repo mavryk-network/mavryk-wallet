@@ -231,7 +231,7 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({ amount });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail({ amount });
 
         console.error(err);

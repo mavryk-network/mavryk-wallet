@@ -21,6 +21,7 @@ import {
 } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
@@ -131,14 +132,14 @@ const ConnectLedger: FC = () => {
             }
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
 
       try {
@@ -154,14 +155,14 @@ const ConnectLedger: FC = () => {
         // });
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
     },
     [submitting, formAnalytics, createLedgerAccount, chainId]

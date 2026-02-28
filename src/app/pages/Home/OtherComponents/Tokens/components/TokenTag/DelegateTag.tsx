@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { DelegateResponse } from '@mavrykdynamics/webmavryk-rpc';
 import classNames from 'clsx';
 
-import { HashChip, Identicon } from 'app/atoms';
+import { BakerLogo, HashChip } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
@@ -109,26 +109,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
           <T id="delegatedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
-              {baker.logo ? (
-                <>
-                  {typeof baker.logo === 'string' ? (
-                    <img
-                      src={baker.logo}
-                      alt={baker.address}
-                      className="flex-shrink-0 bg-white rounded-full"
-                      style={{ width: 24, height: 24 }}
-                    />
-                  ) : (
-                    // @ts-expect-error // hardcoded svg logos for the time being
-                    <baker.logo
-                      className="flex-shrink-0 bg-transparent rounded-full"
-                      style={{ width: 24, height: 24 }}
-                    />
-                  )}
-                </>
-              ) : (
-                <Identicon type="bottts" hash={myBakerPkh} size={24} className="rounded-full" />
-              )}
+              <BakerLogo logo={baker.logo} address={myBakerPkh} size={24} />
 
               <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>
             </div>

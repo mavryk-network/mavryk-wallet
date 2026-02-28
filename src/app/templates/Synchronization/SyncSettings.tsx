@@ -10,6 +10,7 @@ import { T, t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SyncSettingsSelectors } from './SyncSettings.selectors';
@@ -48,14 +49,14 @@ const SyncSettings: FC = () => {
       try {
         const syncPayload = await generateSyncPayload(password);
         setPayload(syncPayload);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (process.env.NODE_ENV === 'development') {
           console.error(err);
         }
 
         // Human delay.
         await delay();
-        setError('password', { type: 'submit-error', message: err.message });
+        setError('password', { type: 'submit-error', message: getErrorMessage(err) });
         focusPasswordField();
       }
     },

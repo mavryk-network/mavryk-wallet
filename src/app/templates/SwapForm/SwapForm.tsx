@@ -389,9 +389,9 @@ export const SwapForm: FC = () => {
       setError(undefined);
       formAnalytics.trackSubmitSuccess(analyticsProperties);
       setOperation(batchOperation);
-    } catch (err: any) {
-      if (err.message !== 'Declined') {
-        setError(err);
+    } catch (err: unknown) {
+      if (!(err instanceof Error && err.message === 'Declined')) {
+        setError(err instanceof Error ? err : new Error(String(err)));
       }
       formAnalytics.trackSubmitFail(analyticsProperties);
     } finally {

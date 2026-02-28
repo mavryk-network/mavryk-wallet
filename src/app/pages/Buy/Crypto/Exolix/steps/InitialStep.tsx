@@ -12,6 +12,7 @@ import ErrorComponent from 'app/pages/Buy/Crypto/Exolix/steps/ErrorComponent';
 import WarningComponent from 'app/pages/Buy/Crypto/Exolix/steps/WarningComponent';
 import { TopUpInput } from 'app/templates/TopUpInput';
 import { T, t } from 'lib/i18n';
+import { miscKeys } from 'lib/query-keys';
 import { useAccount } from 'lib/temple/front';
 
 import { EXOLIX_PRIVICY_LINK, EXOLIX_TERMS_LINK, outputTokensList } from '../config';
@@ -44,7 +45,7 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
   const [debouncedAmount] = useDebounce(amount, 500);
 
   const { data: allCurrencies, isFetching: isCurrenciesLoading } = useQuery({
-    queryKey: ['exolix/api/currencies'],
+    queryKey: miscKeys.exolixCurrencies,
     queryFn: getCurrencies
   });
 
@@ -90,7 +91,7 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
   };
 
   const { data: ratesData } = useQuery({
-    queryKey: ['exolix/api/rate', coinFrom, coinTo, amount],
+    queryKey: miscKeys.exolixRate(String(coinFrom), String(coinTo), String(amount)),
     queryFn: () =>
       queryExchange({
         coinFrom: coinFrom.code,

@@ -71,10 +71,10 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
       formAnalytics.trackSubmitSuccess();
 
       setStep(2);
-    } catch (err: any) {
+    } catch (err: unknown) {
       formAnalytics.trackSubmitFail();
 
-      if (err.message === 'Declined') {
+      if (err instanceof Error && err.message === 'Declined') {
         return;
       }
 

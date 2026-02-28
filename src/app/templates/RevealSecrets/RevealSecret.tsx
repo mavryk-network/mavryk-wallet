@@ -12,6 +12,7 @@ import { useAccount, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 import { SecretField } from './SecretField';
@@ -81,12 +82,12 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
         }
 
         setSecret(scrt);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
         focusPasswordField();
       }
     },

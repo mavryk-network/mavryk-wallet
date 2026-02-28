@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { OptimalPromotionType, OptimalPromoVariantEnum, fetchOptimalPromotion } from 'lib/apis/optimal';
+import { miscKeys } from 'lib/query-keys';
 import { useAccountPkh } from 'lib/temple/front';
 
 import { useAppEnv } from '../env';
@@ -17,7 +18,7 @@ export const usePartnersPromoQuery = (options: PartnersPromoQueryOptions = {}) =
   const finalVariant = variant ?? (popup ? OptimalPromoVariantEnum.Popup : OptimalPromoVariantEnum.Fullview);
 
   return useQuery({
-    queryKey: ['partners-promo', finalVariant, accountAddress],
+    queryKey: miscKeys.partnersPromo(finalVariant, accountAddress),
     queryFn: () => fetchOptimalPromotion(finalVariant, accountAddress),
     enabled,
     staleTime: 5 * 60_000,

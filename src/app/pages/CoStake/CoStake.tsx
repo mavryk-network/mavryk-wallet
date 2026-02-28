@@ -147,7 +147,7 @@ export const CoStake: FC = () => {
         formAnalytics.trackSubmitSuccess({
           amount
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail({ amount });
 
         console.error(err);

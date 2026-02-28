@@ -13,6 +13,7 @@ import { useTempleClient, useAllAccounts, useSetAccountPkh } from 'lib/temple/fr
 import { useAccount } from 'lib/temple/front/ready';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -87,14 +88,14 @@ const CreateAccount: FC = () => {
         await createAccount(currentWalletId, name);
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('name', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('name', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, formAnalytics, createAccount, currentWalletId, setError]

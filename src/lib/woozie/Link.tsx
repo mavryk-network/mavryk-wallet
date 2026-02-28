@@ -48,7 +48,7 @@ const LinkAnchor = forwardRef<HTMLAnchorElement, LinkAnchorProps>(
           if (onClick) {
             onClick(evt);
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           evt.preventDefault();
           throw err;
         }

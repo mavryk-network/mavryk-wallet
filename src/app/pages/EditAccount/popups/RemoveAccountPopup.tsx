@@ -10,6 +10,7 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { EditableTitleSelectors } from '../editAccount.selectors';
@@ -66,12 +67,12 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
           removedWithCustomNavRef.current = true;
           onRemoved();
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, setError, removeAccount, accountId, onRemoved]

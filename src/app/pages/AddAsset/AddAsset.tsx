@@ -7,6 +7,7 @@ import { UseFormReturn, useForm } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
+import { balanceKeys } from 'lib/query-keys';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -29,6 +30,7 @@ import { loadContract } from 'lib/temple/contract';
 import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -146,7 +148,7 @@ const Form = memo(() => {
       stateToSet = {
         bottomSectionVisible: true
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
 
       await delay();
@@ -225,7 +227,7 @@ const Form = memo(() => {
         if (assetIsCollectible) assets.putCollectiblesAsIs([asset]);
         else assets.putTokensAsIs([asset]);
 
-        queryClient.removeQueries({ queryKey: ['balance', tezos.checksum, tokenSlug, accountPkh] });
+        queryClient.removeQueries({ queryKey: balanceKeys.one(tezos.checksum, tokenSlug, accountPkh) });
 
         formAnalytics.trackSubmitSuccess();
 
@@ -240,14 +242,14 @@ const Form = memo(() => {
           description: 'assetAddedSuccessMsg',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay
         await delay();
-        setSubmitError(err.message);
+        setSubmitError(getErrorMessage(err));
       }
     },
     [
@@ -478,7 +480,7 @@ const BottomSection: FC<BottomSectionProps> = props => {
   );
 };
 
-const errorHandler = (err: any, contractAddress: string, setValue: any) => {
+const errorHandler = (err: unknown, contractAddress: string, setValue: any) => {
   if (err instanceof ContractNotFoundError)
     return {
       tokenValidationError: t('referredByTokenContractNotFound', contractAddress)

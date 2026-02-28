@@ -69,8 +69,8 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
       try {
         await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '), chainId);
-      } catch (err: any) {
-        if (/Account already exists/.test(err?.message)) {
+      } catch (err: unknown) {
+        if (err instanceof Error && /Account already exists/.test(err.message)) {
           setAccountPkh(data.pkh);
           navigate('/');
           return;
@@ -96,7 +96,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         await importAccount(toFaucetJSON(formData.text));
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
@@ -104,7 +104,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         // Human delay.
         await delay();
 
-        setAlert(err);
+        setAlert(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setProcessing(false);
       }
@@ -134,7 +134,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
             reader.onload = (readEvt: any) => {
               try {
                 res(toFaucetJSON(readEvt.target.result));
-              } catch (err: any) {
+              } catch (err: unknown) {
                 rej(err);
               }
             };
@@ -146,13 +146,13 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         }
 
         await importAccount(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.
         await delay();
 
-        setAlert(err);
+        setAlert(err instanceof Error ? err : new Error(String(err)));
       } finally {
         formRef.current?.reset();
         setProcessing(false);

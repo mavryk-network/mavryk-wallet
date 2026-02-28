@@ -9,8 +9,10 @@ export function deserealizeError(data: any) {
   return Array.isArray(data) ? new IntercomError(data[0], data[1]) : new IntercomError(data);
 }
 
-export class IntercomError implements Error {
-  name: string = 'IntercomError';
+export class IntercomError extends Error {
+  override name: string = 'IntercomError';
 
-  constructor(public message: string, public errors?: any[]) {}
+  constructor(message: string, public errors?: any[]) {
+    super(message);
+  }
 }

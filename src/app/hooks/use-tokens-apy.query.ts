@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetchApyFromYupana } from 'lib/apis/yupana';
 import { KNOWN_TOKENS_SLUGS } from 'lib/assets/known-tokens';
+import { tokensKeys } from 'lib/query-keys';
 import { useChainId } from 'lib/temple/front';
 import { TempleChainId } from 'lib/temple/types';
 
@@ -24,7 +25,7 @@ export const useTokensApyQuery = () => {
   const isMainnet = chainId === TempleChainId.Mainnet;
 
   return useQuery({
-    queryKey: ['tokens-apy'],
+    queryKey: tokensKeys.apy,
     queryFn: fetchAllTokensApy,
     enabled: isMainnet,
     staleTime: 5 * 60_000,

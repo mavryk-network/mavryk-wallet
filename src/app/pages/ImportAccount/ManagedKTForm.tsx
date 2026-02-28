@@ -19,6 +19,7 @@ import { useRelevantAccounts, useTezos, useTempleClient, useChainId } from 'lib/
 import { isAddressValid } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -127,14 +128,14 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         await importKTManagedAccount(address, chain, owner);
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
     },
     [formState, tezos, accounts, importKTManagedAccount, formAnalytics, chainId]

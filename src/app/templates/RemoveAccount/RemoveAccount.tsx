@@ -10,6 +10,7 @@ import { T, t } from 'lib/i18n';
 import { useTempleClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { RemoveAccountSelectors } from './RemoveAccount.selectors';
@@ -52,12 +53,12 @@ const RemoveAccount: FC = () => {
       clearErrors('password');
       try {
         await removeAccount(account.id, password);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, setError, removeAccount, account.id]

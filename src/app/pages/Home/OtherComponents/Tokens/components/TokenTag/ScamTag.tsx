@@ -37,7 +37,7 @@ export const ScamTag = memo<Props>(({ assetSlug }) => {
             slug,
             status: 'removed'
           });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
       }
     },

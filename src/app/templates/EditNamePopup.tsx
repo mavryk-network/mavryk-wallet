@@ -10,6 +10,7 @@ import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useFormAnalytics, TestIDProperty } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useAlert } from 'lib/ui';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 interface EditNamePopupProps extends TestIDProperty {
   opened: boolean;
@@ -83,14 +84,14 @@ export const EditNamePopup: FC<EditNamePopupProps> = ({
 
           close();
           formAnalytics.trackSubmitSuccess();
-        } catch (err: any) {
+        } catch (err: unknown) {
           formAnalytics.trackSubmitFail();
 
           console.error(err);
 
           await customAlert({
             title: errorAlertTitle,
-            children: err.message
+            children: getErrorMessage(err)
           });
         }
       })();

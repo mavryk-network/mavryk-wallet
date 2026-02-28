@@ -21,6 +21,7 @@ import {
 } from 'lib/collectibles/use-collectibles-details.query';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
+import { tokensKeys } from 'lib/query-keys';
 import { getAssetName } from 'lib/metadata';
 import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount } from 'lib/temple/front';
@@ -51,7 +52,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
   const { data: extraDetails } = useQuery({
-    queryKey: ['fetchCollectibleExtraDetails', contractAddress, tokenId],
+    queryKey: tokensKeys.collectibleExtra(contractAddress, tokenId ?? ''),
     queryFn: () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
     refetchInterval: DETAILS_SYNC_INTERVAL,
     retry: 2

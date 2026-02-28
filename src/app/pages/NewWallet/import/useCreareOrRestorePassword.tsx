@@ -154,7 +154,7 @@ export const useCreareOrRestorePassword = (
         }
         !ownMnemonic && uiStore.getState().setOnRampPossibility(true);
         uiStore.getState().setShouldShowNewsletterModal(true);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
       }
     },

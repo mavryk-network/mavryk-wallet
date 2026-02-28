@@ -119,6 +119,7 @@ export interface SelectOptionsPropsBase<Type> {
   optionsListClassName?: string;
   dropdownWrapperClassName?: string;
   getKey: (option: Type) => string;
+  getDisabled?: (option: Type) => boolean;
   onOptionChange: (newValue: Type) => void;
   renderOptionContent: (option: Type) => ReactNode;
 }
@@ -135,6 +136,7 @@ const SelectOptions = <Type extends unknown>({
   optionsListClassName,
   dropdownWrapperClassName,
   getKey,
+  getDisabled,
   onOptionChange,
   setOpened,
   renderOptionContent
@@ -172,7 +174,7 @@ const SelectOptions = <Type extends unknown>({
             <button
               type="button"
               className="w-full"
-              disabled={(option as any).disabled}
+              disabled={getDisabled?.(option)}
               onClick={() => handleOptionClick(option)}
             >
               {renderOptionContent(option)}

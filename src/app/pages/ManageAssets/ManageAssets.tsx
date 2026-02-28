@@ -130,7 +130,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
         if (assetType === AssetTypesEnum.Collectibles) store.setCollectibleStatus(payload);
         else if (assetType === AssetTypesEnum.Rwas) store.setRwaStatus(payload);
         else store.setTokenStatus(payload);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
       }
     },

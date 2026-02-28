@@ -25,6 +25,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
 import { useGasToken } from 'lib/assets/hooks';
+import { bakingKeys } from 'lib/query-keys';
 import { T, t } from 'lib/i18n';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
@@ -89,7 +90,7 @@ const BakingSection = memo(() => {
   };
 
   const { data: bakingHistory, isFetching: loadingBakingHistory } = useSuspenseQuery({
-    queryKey: ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
+    queryKey: bakingKeys.history(acc.publicKeyHash, myBakerPkh ?? '', chainId ?? ''),
     queryFn: () => {
       if (!isKnownChainId(chainId!)) return [];
       return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []);

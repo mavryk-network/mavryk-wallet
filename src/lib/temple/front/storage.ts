@@ -4,6 +4,7 @@ import { isDefined } from '@rnw-community/shared';
 import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import browser, { Storage } from 'webextension-polyfill';
 
+import { storageKeys } from 'lib/query-keys';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { useDidUpdate } from 'lib/ui/hooks';
 
@@ -12,7 +13,7 @@ export function useStorage<T = any>(key: string, fallback: T): [T, (val: SetStat
 export function useStorage<T = any>(key: string, fallback?: T) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery<T | null>({
-    queryKey: ['storage', key],
+    queryKey: storageKeys.one(key),
     queryFn: () => fetchFromStorage<T>(key),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -23,7 +24,7 @@ export function useStorage<T = any>(key: string, fallback?: T) {
   useEffect(
     () =>
       onStorageChanged(key, (newValue: T) => {
-        queryClient.setQueryData(['storage', key], newValue);
+        queryClient.setQueryData(storageKeys.one(key), newValue);
       }),
     [key, queryClient]
   );
@@ -38,7 +39,7 @@ export function useStorage<T = any>(key: string, fallback?: T) {
       const nextValue = typeof val === 'function' ? (val as any)(valueRef.current) : val;
       await putToStorage(key, nextValue);
       valueRef.current = nextValue;
-      queryClient.setQueryData(['storage', key], nextValue);
+      queryClient.setQueryData(storageKeys.one(key), nextValue);
     },
     [key, queryClient]
   );
@@ -54,7 +55,7 @@ export function usePassiveStorage<T = any>(
 export function usePassiveStorage<T = any>(key: string, fallback?: T, shouldPutFallback = false) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery<T | null>({
-    queryKey: ['storage', key],
+    queryKey: storageKeys.one(key),
     queryFn: () => fetchFromStorage<T>(key),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -65,7 +66,7 @@ export function usePassiveStorage<T = any>(key: string, fallback?: T, shouldPutF
   useEffect(
     () =>
       onStorageChanged(key, (newValue: T) => {
-        queryClient.setQueryData(['storage', key], newValue);
+        queryClient.setQueryData(storageKeys.one(key), newValue);
       }),
     [key, queryClient]
   );
@@ -88,7 +89,7 @@ export function usePassiveStorage<T = any>(key: string, fallback?: T, shouldPutF
     (newValue: T | null | undefined) => {
       const newValueWithFallback = fallback === undefined ? newValue : newValue ?? fallback;
       putToStorage(key, newValueWithFallback);
-      setValue(newValueWithFallback);
+      setValue(newValueWithFallback as T | null);
     },
     [fallback, key]
   );

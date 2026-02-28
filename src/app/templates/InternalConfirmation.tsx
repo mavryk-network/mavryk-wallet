@@ -13,6 +13,7 @@ import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import { ContentPaper, Toolbar } from 'app/layouts/PageLayout';
+import { miscKeys } from 'lib/query-keys';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import AccountBanner from 'app/templates/AccountBanner';
@@ -65,7 +66,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         const unsignedBytes = payload.bytes.substr(0, payload.bytes.length - 128);
         try {
           return (await localForger.parse(unsignedBytes)) || [];
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error(err);
           return [];
         }
@@ -74,7 +75,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     }
   }, [payload]);
   const { data: contentToParse } = useSuspenseQuery({
-    queryKey: ['content-to-parse', payload.type, payload.type === 'sign' ? payload.bytes : null],
+    queryKey: miscKeys.contentToParse(payload.type, payload.type === 'sign' ? payload.bytes : null),
     queryFn: getContentToParse,
     retry: 2,
     staleTime: 0,

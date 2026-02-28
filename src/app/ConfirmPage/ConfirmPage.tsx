@@ -18,6 +18,7 @@ import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
+import { dAppKeys } from 'lib/query-keys';
 import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
 import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -126,7 +127,7 @@ const ConfirmDAppForm: FC = () => {
   }, [loc.search]);
 
   const { data } = useSuspenseQuery<TempleDAppPayload>({
-    queryKey: ['getDAppPayload', id],
+    queryKey: dAppKeys.payload(id),
     queryFn: () => getDAppPayload(id),
     retry: false,
     refetchOnWindowFocus: false,
@@ -189,7 +190,7 @@ const ConfirmDAppForm: FC = () => {
       setError(null);
       try {
         await onConfirm(confirmed, modifiedTotalFeeValue - revealFee, modifiedStorageLimitValue);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.

@@ -3,7 +3,7 @@ import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
+import { BakerLogo, Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
@@ -254,31 +254,7 @@ const BakerBanner = memo<BakerBannerProps>(
           <>
             <div className={classNames('flex items-center', 'text-white')}>
               <div>
-                {baker.logo ? (
-                  <>
-                    {typeof baker.logo === 'string' ? (
-                      <img
-                        src={baker.logo}
-                        alt={baker.address}
-                        className="flex-shrink-0 bg-transparent rounded-full"
-                        style={{ minHeight: '2rem', width: 59, height: 59 }}
-                      />
-                    ) : (
-                      // @ts-expect-error // hardcoded svg logos for the time being
-                      <baker.logo
-                        className="flex-shrink-0 bg-transparent rounded-full"
-                        style={{ minHeight: '2rem', width: 59, height: 59 }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <Identicon
-                    type="bottts"
-                    hash={baker.address}
-                    size={59}
-                    className="shadow-xs rounded-full flex-shrink-0"
-                  />
-                )}
+                <BakerLogo logo={baker.logo} address={baker.address} size={59} imgBg="bg-transparent" style={{ minHeight: '2rem' }} />
               </div>
 
               <div className="flex flex-col items-start flex-1 ml-4 relative">

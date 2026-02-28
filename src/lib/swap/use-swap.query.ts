@@ -13,19 +13,11 @@ import {
   Route3SwapParamsResponse,
   Route3TraditionalSwapParamsResponse
 } from 'lib/route3/interfaces';
+import { swapKeys } from 'lib/query-keys';
 import { getRoute3TokenBySlug } from 'lib/route3/utils/get-route3-token-by-slug';
 import { firstValueFrom } from 'rxjs';
 
 const DEFAULT_SWAP_PARAMS: Route3TraditionalSwapParamsResponse = { input: undefined, output: undefined, chains: [] };
-
-// --- Query keys ---
-
-const swapKeys = {
-  tokens: ['swap', 'tokens'] as const,
-  dexes: ['swap', 'dexes'] as const,
-  params: (fromSymbol: string, toSymbol: string, amount: string) =>
-    ['swap', 'params', fromSymbol, toSymbol, amount] as const
-};
 
 // --- Swap Tokens ---
 
@@ -102,6 +94,6 @@ export const useSwapParamsData = (
 export const useResetSwapParams = () => {
   const queryClient = useQueryClient();
   return () => {
-    queryClient.removeQueries({ queryKey: ['swap', 'params'] });
+    queryClient.removeQueries({ queryKey: swapKeys.allParams });
   };
 };

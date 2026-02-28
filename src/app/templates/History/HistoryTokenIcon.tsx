@@ -78,7 +78,10 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
   };
 
   return (
-    <div className={clsx('h-12 flex items-center justify-start', 'w-11 max-w-11 min-w-11')}>
+    <div
+      className="flex items-center justify-start shrink-0"
+      style={{ width: size + 12, minWidth: size + 12, height: size + 8 }}
+    >
       <div
         className="bg-primary-bg rounded-full flex items-center justify-center relative"
         style={{ width: size, height: size }}
@@ -87,18 +90,17 @@ export const HistoryTokenIcon: FC<HistoryTokenIconProps> = ({
         {renderOperationIcon()}
         {tokensMetadata &&
           tokensMetadata.map((token, idx, arr) => {
+            const overlaySize = fullSizeAssets ? 24 : arr.length > 1 ? 16 : 20;
+            const overlayCls = fullSizeAssets ? 'w-6 h-6' : arr.length > 1 ? 'w-4 h-4' : 'w-5 h-5';
             const baseProps = {
-              className: clsx(
-                'rounded-full overflow-hidden absolute top-1/2',
-                arr.length > 1 && !fullSizeAssets ? 'w-4 h-4' : 'w-6 h-6'
-              ),
+              className: clsx('rounded-full overflow-hidden absolute top-1/2', overlayCls),
               style: {
                 left: `${getLeftImagePosition(idx)}%`,
                 zIndex: arr.length - idx
               }
             };
 
-            const size = arr.length > 1 && !fullSizeAssets ? 16 : 24;
+            const size = overlaySize;
             return (
               <AssetImage
                 key={idx}

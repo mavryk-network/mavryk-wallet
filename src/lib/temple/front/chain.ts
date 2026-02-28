@@ -4,6 +4,7 @@ import { Subscription, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
 
+import { balanceKeys, chainKeys } from 'lib/query-keys';
 import { confirmOperation } from 'lib/temple/operation';
 import { useUpdatableRef } from 'lib/ui/hooks';
 
@@ -18,8 +19,8 @@ function useNewBlockTriggers() {
 
   const triggerNewBlock = useCallback(() => {
     for (const acc of allAccounts) {
-      queryClient.invalidateQueries({ queryKey: ['balance', tezos.checksum, 'mav', acc.publicKeyHash] });
-      queryClient.invalidateQueries({ queryKey: ['delegate', tezos.checksum, acc.publicKeyHash] });
+      queryClient.invalidateQueries({ queryKey: balanceKeys.mav(tezos.checksum, acc.publicKeyHash) });
+      queryClient.invalidateQueries({ queryKey: chainKeys.delegate(tezos.checksum, acc.publicKeyHash) });
     }
   }, [allAccounts, queryClient, tezos]);
 

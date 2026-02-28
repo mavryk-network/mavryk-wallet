@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
 
 import { Name } from 'app/atoms';
+import { dAppKeys } from 'lib/query-keys';
 import { Dropdown, DropdownHeader, DropdownOpened } from 'app/compound/CustomDropdown';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
@@ -33,7 +34,7 @@ export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
 
   // NOTE  connected - all, active - if current acc === connected site acc
   const { data, isLoading } = useQuery<TempleDAppSessions>({
-    queryKey: ['getAllDAppSessions'],
+    queryKey: dAppKeys.sessions,
     queryFn: getAllDAppSessions,
     retry: 2,
     refetchOnWindowFocus: false,
@@ -47,7 +48,7 @@ export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
   const handleRemoveClick = useCallback(
     async (origin: string) => {
       await removeDAppSession(origin);
-      queryClient.invalidateQueries({ queryKey: ['getAllDAppSessions'] });
+      queryClient.invalidateQueries({ queryKey: dAppKeys.sessions });
     },
     [removeDAppSession, queryClient]
   );

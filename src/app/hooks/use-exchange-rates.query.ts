@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchUsdToTokenRates, fetchRWAToUsdtRates } from 'lib/apis/temple';
 import { fetchFiatToTezosRates } from 'lib/fiat-currency';
 import { RATES_SYNC_INTERVAL } from 'lib/fixed-times';
+import { tokensKeys } from 'lib/query-keys';
 
 export type ExchangeRateRecord<V = string> = Record<string, V>;
 
@@ -29,7 +30,7 @@ const fetchAllExchangeRates = async (): Promise<ExchangeRatesData> => {
 
 export const useExchangeRatesQuery = () => {
   return useQuery({
-    queryKey: ['exchange-rates'],
+    queryKey: tokensKeys.exchangeRates,
     queryFn: fetchAllExchangeRates,
     staleTime: RATES_SYNC_INTERVAL,
     refetchInterval: RATES_SYNC_INTERVAL,

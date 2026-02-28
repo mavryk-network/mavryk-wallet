@@ -2,7 +2,7 @@ import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { HashChip, Identicon, Money } from 'app/atoms';
+import { BakerLogo, HashChip, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowDownSvg } from 'app/icons/arrow-down-v2.svg';
 import { AssetIcon } from 'app/templates/AssetIcon';
@@ -238,23 +238,7 @@ const BakerDataSection: FC<DefaultDelagtionTemplateProps & { labelChild?: ReactN
     <div className="flex items-center">
       {baker ? (
         <div className="flex items-center gap-2">
-          {baker.logo ? (
-            <>
-              {typeof baker.logo === 'string' ? (
-                <img
-                  src={baker.logo}
-                  alt={baker.address}
-                  className="flex-shrink-0 bg-white rounded-full"
-                  style={{ width: 24, height: 24 }}
-                />
-              ) : (
-                // @ts-expect-error // hardcoded svg logos for the time being
-                <baker.logo className="flex-shrink-0 bg-transparent rounded-full" style={{ width: 24, height: 24 }} />
-              )}
-            </>
-          ) : (
-            <Identicon type="bottts" hash={validatorAddress ?? ''} size={24} className="rounded-full" />
-          )}
+          <BakerLogo logo={baker.logo} address={validatorAddress ?? baker.address} size={24} />
 
           <span>
             {baker?.name ?? (

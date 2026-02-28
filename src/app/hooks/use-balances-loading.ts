@@ -21,6 +21,7 @@ import { fixBalances } from 'lib/balances/utils';
 import { balancesStore, useBalancesLoadingSelector, useBalancesErrorSelector } from 'lib/store/zustand/balances.store';
 import { useAccount, useChainId, useOnBlock, useMvktConnection } from 'lib/temple/front';
 import { useDidUpdate } from 'lib/ui/hooks';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 const { getState } = balancesStore;
 
@@ -29,8 +30,8 @@ const fetchAndSetGasBalance = async (publicKeyHash: string, chainId: MvktApiChai
   try {
     const balance = await fetchTezosBalanceFromMvkt(publicKeyHash, chainId);
     getState().setGasBalance(publicKeyHash, chainId, balance);
-  } catch (err: any) {
-    getState().setGasBalanceError(publicKeyHash, chainId, err?.message ?? String(err));
+  } catch (err: unknown) {
+    getState().setGasBalanceError(publicKeyHash, chainId, getErrorMessage(err));
   }
 };
 
@@ -41,8 +42,8 @@ const fetchAndSetAssetsBalances = async (publicKeyHash: string, chainId: MvktApi
     const balances = await fetchAllAssetsBalancesFromMvkt(publicKeyHash, chainId);
     fixBalances(balances);
     getState().setAssetsBalancesSuccess(publicKeyHash, chainId, balances);
-  } catch (err: any) {
-    getState().setAssetsBalancesError(publicKeyHash, chainId, err?.message ?? String(err));
+  } catch (err: unknown) {
+    getState().setAssetsBalancesError(publicKeyHash, chainId, getErrorMessage(err));
   }
 };
 

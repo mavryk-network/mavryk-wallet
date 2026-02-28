@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { fetchRWADetails$ } from 'lib/apis/rwa';
 import { toTokenSlug } from 'lib/assets';
 import { RWAS_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
+import { tokensKeys } from 'lib/query-keys';
 
 import type { RwaDetails, RwaDetailsRecord } from './types';
 
@@ -55,7 +56,7 @@ export const useRwasDetailsQuery = (slugs: string[]) =>
 export const useRwaDetails = (slug: string): RwaDetails | null | undefined => {
   const queryClient = useQueryClient();
   const queries = queryClient.getQueriesData<RwaDetailsRecord>({
-    queryKey: ['rwas-details']
+    queryKey: tokensKeys.rwasDetails
   });
 
   return useMemo(() => {
@@ -69,7 +70,7 @@ export const useRwaDetails = (slug: string): RwaDetails | null | undefined => {
 export const useAllRwasDetails = (): RwaDetailsRecord => {
   const queryClient = useQueryClient();
   const queries = queryClient.getQueriesData<RwaDetailsRecord>({
-    queryKey: ['rwas-details']
+    queryKey: tokensKeys.rwasDetails
   });
 
   return useMemo(() => {

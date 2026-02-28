@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { fetchObjktCollectibles$ } from 'lib/apis/objkt';
 import { toTokenSlug } from 'lib/assets';
 import { COLLECTIBLES_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
+import { tokensKeys } from 'lib/query-keys';
 
 import type { CollectibleDetails, CollectibleDetailsRecord } from './types';
 import { convertCollectibleObjktInfoToStateDetailsType } from './utils';
@@ -57,7 +58,7 @@ export const useCollectibleDetails = (slug: string): CollectibleDetails | null |
   // Use a broad query filter to find the details in any cached query
   const queryClient = useQueryClient();
   const queries = queryClient.getQueriesData<CollectibleDetailsRecord>({
-    queryKey: ['collectibles-details']
+    queryKey: tokensKeys.collectiblesDetails
   });
 
   return useMemo(() => {
@@ -71,7 +72,7 @@ export const useCollectibleDetails = (slug: string): CollectibleDetails | null |
 export const useAllCollectiblesDetails = (): CollectibleDetailsRecord => {
   const queryClient = useQueryClient();
   const queries = queryClient.getQueriesData<CollectibleDetailsRecord>({
-    queryKey: ['collectibles-details']
+    queryKey: tokensKeys.collectiblesDetails
   });
 
   return useMemo(() => {

@@ -12,6 +12,7 @@ import { useTempleClient } from 'lib/temple/front';
 import { TempleSharedStorageKey } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { Link } from 'lib/woozie';
 
 import { ABTestGroup, fetchABGroup } from '../../../lib/apis/temple';
@@ -87,7 +88,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         formAnalytics.trackSubmitSuccess();
         setAttempt(1);
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
         if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
         setAttempt(attempt + 1);
@@ -97,7 +98,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
         focusPasswordField();
       }
     },

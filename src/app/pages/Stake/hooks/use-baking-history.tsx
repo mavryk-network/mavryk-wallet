@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
+import { bakingKeys } from 'lib/query-keys';
 import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
@@ -31,7 +32,7 @@ export const useBakingHistory = () => {
   const testGroupName = useAbTestGroupName();
 
   const { data: bakingHistory, isFetching: loadingBakingHistory } = useSuspenseQuery({
-    queryKey: ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
+    queryKey: bakingKeys.history(acc.publicKeyHash, myBakerPkh ?? '', chainId ?? ''),
     queryFn: () => {
       if (!isKnownChainId(chainId!)) return [];
       return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []);

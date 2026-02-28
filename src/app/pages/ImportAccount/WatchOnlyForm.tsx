@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useRef, useState } from 'react';
 
 import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
@@ -7,11 +7,11 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useTezos, useTezosDomainsClient, validateDelegate } from 'lib/temple/front';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
+import { useTempleClient, useTezos, useTezosDomainsClient, useAddressResolution, validateDelegate } from 'lib/temple/front';
 import { isAddressValid, isKTAddress } from 'lib/temple/helpers';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -39,13 +39,7 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const addressFieldRef = useRef<HTMLTextAreaElement>(null);
 
   const addressValue = watch('address') ?? '';
-
-  const { data: resolvedAddress } = useTezosAddressByDomainName(addressValue);
-
-  const finalAddress = useMemo(
-    () => (resolvedAddress && resolvedAddress !== null ? resolvedAddress : addressValue),
-    [resolvedAddress, addressValue]
-  );
+  const { toResolved: finalAddress } = useAddressResolution(addressValue);
 
   const accName = watch('accName') ?? '';
   const finalAccName = accName?.trim() !== '' ? accName : undefined;
@@ -81,14 +75,14 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       await importWatchOnlyAccount(finalAddress, chainId, finalAccName);
 
       formAnalytics.trackSubmitSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       formAnalytics.trackSubmitFail();
 
       console.error(err);
 
       // Human delay
       await delay();
-      setError(err.message);
+      setError(getErrorMessage(err));
     }
   }, [
     formState.isSubmitting,

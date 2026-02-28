@@ -135,6 +135,7 @@ const LocaleSelect: FC = () => {
           options,
           noItemsText: 'No items',
           getKey: option => option.code,
+          getDisabled: option => option.disabled,
           renderOptionContent: option => renderOptionContent(option, option.code === value.code),
           onOptionChange: handleLocaleChange
         }}

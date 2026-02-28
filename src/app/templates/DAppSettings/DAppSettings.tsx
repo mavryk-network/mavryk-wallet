@@ -4,6 +4,7 @@ import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { Name, Divider } from 'app/atoms';
+import { dAppKeys } from 'lib/query-keys';
 import { Switcher } from 'app/atoms/Switcher';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
@@ -29,7 +30,7 @@ const DAppSettings: FC = () => {
 
   const queryClient = useQueryClient();
   const { data: dAppSessions } = useSuspenseQuery<TempleDAppSessions>({
-    queryKey: ['getAllDAppSessions'],
+    queryKey: dAppKeys.sessions,
     queryFn: getAllDAppSessions,
     retry: false,
     refetchOnWindowFocus: false,
@@ -66,7 +67,7 @@ const DAppSettings: FC = () => {
         })
       ) {
         await removeDAppSession(origin);
-        queryClient.invalidateQueries({ queryKey: ['getAllDAppSessions'] });
+        queryClient.invalidateQueries({ queryKey: dAppKeys.sessions });
       }
     },
     [removeDAppSession, queryClient, confirm]
@@ -81,7 +82,7 @@ const DAppSettings: FC = () => {
     ) {
       const origins = dAppEntries.map(([origin]) => origin);
       await removeAllDAppSessions(origins);
-      queryClient.invalidateQueries({ queryKey: ['getAllDAppSessions'] });
+      queryClient.invalidateQueries({ queryKey: dAppKeys.sessions });
     }
   }, [confirm, dAppEntries, queryClient, removeAllDAppSessions]);
 

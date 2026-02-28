@@ -9,6 +9,7 @@ import constate from 'constate';
 import { getKYCStatus } from 'lib/apis/mvkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
+import { chainKeys } from 'lib/query-keys';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import {
   ReadyTempleState,
@@ -201,7 +202,7 @@ export function useChainIdLoading(rpcUrl: string, suspense?: boolean) {
   const suspensePromiseRef = useRef<{ key: string; promise: Promise<unknown> } | null>(null);
 
   const result = useQuery({
-    queryKey: ['chain-id', rpcUrl],
+    queryKey: chainKeys.id(rpcUrl),
     queryFn: () => loadChainId(rpcUrl).catch(() => null),
     enabled: !!rpcUrl,
     refetchOnWindowFocus: false,

@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js';
 
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
+import { feeKeys } from 'lib/query-keys';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { hasManager, mumavToTz } from 'lib/temple/helpers';
@@ -76,7 +77,7 @@ export const useMavStakeFeeValue = ({
       }
 
       return { baseFee, est, hasManager: hasMgr };
-    } catch (err: any) {
+    } catch (err: unknown) {
       await delay();
 
       if (err instanceof ArtificialError) return err;
@@ -91,7 +92,7 @@ export const useMavStakeFeeValue = ({
     error: estimateBaseFeeError,
     isFetching: estimating
   } = useQuery({
-    queryKey: ['stake-base-fee', mode, tezos.checksum, accountPkh, amount.toFixed()],
+    queryKey: feeKeys.stakeBase(mode, tezos.checksum, accountPkh, amount.toFixed()),
     queryFn: estimateBaseFee,
     enabled: !balance.isZero(),
     retry: false,

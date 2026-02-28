@@ -14,6 +14,7 @@ import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -84,7 +85,7 @@ export const AddNetworkScreen: FC = () => {
         } else {
           setExplorerId('tzkt');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
@@ -123,12 +124,12 @@ export const AddNetworkScreen: FC = () => {
           description: 'addNetworkSuccessMsg',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('rpcBaseURL', { type: SUBMIT_ERROR_TYPE, message: err.message });
+        setError('rpcBaseURL', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
       }
     },
     [submitting, clearErrors, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]
@@ -181,7 +182,7 @@ export const AddNetworkScreen: FC = () => {
           errorCaption={
             errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('networkMustBeUnique') : '')
           }
-          containerClassName="mb-2shrink-1"
+          containerClassName="mb-2 shrink"
           testIDs={{
             input: CustomNetworkSettingsSelectors.RPCbaseURLinput,
             inputSection: CustomNetworkSettingsSelectors.RPCbaseURLinputSection

@@ -32,7 +32,7 @@ async function decrypt(chipher: string, password: string, salt: string) {
     } else {
       return null;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     return null;
   }
 }

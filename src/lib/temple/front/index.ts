@@ -49,3 +49,5 @@ export { useFilteredContacts } from './use-filtered-contacts.hook';
 export { decryptKukaiSeedPhrase } from './kukai';
 
 export { MvktConnectionProvider, useMvktConnection } from './mvkt-connection';
+
+export { useAddressResolution } from './use-address-resolution';

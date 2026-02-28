@@ -5,6 +5,7 @@ import { WebmavrykMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-web
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { useQuery } from '@tanstack/react-query';
 
+import { tzdnsKeys } from 'lib/query-keys';
 import { NETWORK_IDS } from 'lib/temple/networks';
 
 import { useTezos, useChainId } from './ready';
@@ -32,7 +33,7 @@ export function useTezosAddressByDomainName(domainName: string) {
   const tezos = useTezos();
 
   return useQuery({
-    queryKey: ['tzdns-address', tezos.checksum, domainName],
+    queryKey: tzdnsKeys.address(tezos.checksum, domainName),
     queryFn: () => domainsClient.resolver.resolveNameToAddress(domainName),
     retry: false,
     refetchOnWindowFocus: false
@@ -44,7 +45,7 @@ export function useTezosDomainNameByAddress(address: string) {
   const tezos = useTezos();
 
   return useQuery({
-    queryKey: ['tzdns-reverse-name', address, tezos.checksum],
+    queryKey: tzdnsKeys.reverseName(address, tezos.checksum),
     queryFn: () => domainsResolver.resolveAddressToName(address),
     retry: false,
     refetchOnWindowFocus: false

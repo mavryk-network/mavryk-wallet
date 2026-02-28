@@ -1,5 +1,6 @@
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
 
+import { useVirtualizer } from '@tanstack/react-virtual';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
@@ -241,7 +242,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const sortedAssets = useMemo(
     () =>
-      filteredAssets.sort((a, b) => {
+      [...filteredAssets].sort((a, b) => {
         if (tokensRecord[a]?.status === tokensRecord[b]?.status) {
           return 0;
         } else if (tokensRecord[a]?.status === 'disabled') {
@@ -254,6 +255,14 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   );
 
   const noItemsSelected = !selectedAssets.length;
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: sortedAssets.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 64,
+    overscan: 5
+  });
 
   return (
     <div className={classNames('w-full mx-auto mb-6 h-full', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
@@ -284,27 +293,43 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
       </div>
 
       {sortedAssets.length > 0 ? (
-        <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-base-plus">
-          {sortedAssets.map((slug, i, arr) => {
-            const last = i === arr.length - 1;
-
-            return (
-              <ListItem
-                key={slug.concat(i.toString())}
-                assetSlug={slug}
-                last={last}
-                checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
-                hidden={tokensRecord[slug]?.status === 'disabled'}
-                assetType={assetType}
-                balance={new BigNumber(balances[assetType] ?? 0)}
-                address={address}
-                setSelectedAssets={setSelectedAssets}
-              />
-            );
-          })}
+        <div
+          ref={scrollContainerRef}
+          className="w-full overflow-y-auto rounded-md text-white text-base-plus"
+          style={{ maxHeight: popup ? '60vh' : '70vh' }}
+        >
+          <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const slug = sortedAssets[virtualRow.index];
+              const last = virtualRow.index === sortedAssets.length - 1;
+              return (
+                <div
+                  key={slug}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`
+                  }}
+                >
+                  <ListItem
+                    assetSlug={slug}
+                    last={last}
+                    checked={selectedAssets.includes(slug)}
+                    hidden={tokensRecord[slug]?.status === 'disabled'}
+                    balance={new BigNumber(balances[slug] ?? 0)}
+                    setSelectedAssets={setSelectedAssets}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
-        <LoadingComponent loading={isSyncing} searchValue={searchValue} assetType={assetType} />
+        <LoadingComponent loading={isSyncing} searchValue={searchValue} />
       )}
     </div>
   );
@@ -315,9 +340,7 @@ type ListItemProps = {
   last: boolean;
   checked: boolean;
   setSelectedAssets: React.Dispatch<React.SetStateAction<string[]>>;
-  assetType: string;
   balance: BigNumber;
-  address: string;
   hidden: boolean;
 };
 
@@ -396,7 +419,6 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
 interface LoadingComponentProps {
   loading: boolean;
   searchValue: string;
-  assetType: string;
 }
 
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValue }) => {

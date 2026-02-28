@@ -42,6 +42,7 @@ export const AssetImage: FC<AssetImageProps> = ({
   return (
     <ImageStacked
       sources={sources}
+      loading="lazy"
       loader={loader}
       fallback={fallback}
       alt={metadata?.name}

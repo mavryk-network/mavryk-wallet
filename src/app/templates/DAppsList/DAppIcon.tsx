@@ -29,6 +29,7 @@ export const DAppIcon: React.FC<DAppIconProps> = ({ name, logo, className }) => 
     >
       <ImageStacked
         sources={sources}
+        loading="lazy"
         className="rounded-2xl"
         alt={name}
         loader={fallbackElement}

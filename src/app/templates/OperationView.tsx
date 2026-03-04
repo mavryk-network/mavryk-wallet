@@ -102,9 +102,12 @@ const OperationView: FC<OperationViewProps> = ({
 
   const [spFormat, setSpFormat] = useState(signPayloadFormats[0]);
 
-  // derived state for confirm_operations data
-  const estimates = payload.type === 'confirm_operations' ? payload.estimates : undefined;
-  const gasFeeError = useMemo(() => (modifyFeeAndLimit?.totalFee ?? 0) <= MIN_GAS_FEE, [modifyFeeAndLimit]);
+  const isOperationPayload = payload.type === 'confirm_operations';
+  const estimates = isOperationPayload ? payload.estimates : undefined;
+  const gasFeeError = useMemo(
+    () => (isOperationPayload ? (modifyFeeAndLimit?.totalFee ?? 0) <= MIN_GAS_FEE : false),
+    [isOperationPayload, modifyFeeAndLimit]
+  );
 
   return (
     <div className="w-full h-full flex flex-col flex-1">
@@ -149,25 +152,27 @@ const OperationView: FC<OperationViewProps> = ({
       {spFormat.key === 'preview' && (
         <ExpensesView
           expenses={expensesData}
-          estimates={payload.type === 'confirm_operations' ? payload.estimates : undefined}
-          modifyFeeAndLimit={modifyFeeAndLimit}
+          estimates={isOperationPayload ? payload.estimates : undefined}
+          modifyFeeAndLimit={isOperationPayload ? modifyFeeAndLimit : undefined}
           mainnet={mainnet}
           gasFeeError={gasFeeError}
         />
       )}
 
-      <div style={{ marginBottom: 12 }}>
-        <ModifyFeeAndLimitComponent
-          id="external-modified-fees-id"
-          name="external-modified-fees"
-          expenses={expensesData}
-          estimates={estimates}
-          modifyFeeAndLimit={modifyFeeAndLimit}
-          mainnet={mainnet}
-          gasFeeError={gasFeeError}
-          includeBurnedFee
-        />
-      </div>
+      {isOperationPayload && (
+        <div style={{ marginBottom: 12 }}>
+          <ModifyFeeAndLimitComponent
+            id="external-modified-fees-id"
+            name="external-modified-fees"
+            expenses={expensesData}
+            estimates={estimates}
+            modifyFeeAndLimit={modifyFeeAndLimit}
+            mainnet={mainnet}
+            gasFeeError={gasFeeError}
+            includeBurnedFee
+          />
+        </div>
+      )}
     </div>
   );
 };

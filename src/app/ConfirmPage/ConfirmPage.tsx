@@ -70,7 +70,7 @@ interface PayloadContentProps {
   setAccountPkhToConnect: (item: string) => void;
   payload: TempleDAppPayload;
   error?: any;
-  modifyFeeAndLimit: ModifyFeeAndLimit;
+  modifyFeeAndLimit?: ModifyFeeAndLimit;
 }
 
 const PayloadContent: React.FC<PayloadContentProps> = ({
@@ -99,7 +99,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
       error={error}
       networkRpc={payload.networkRpc}
       mainnet={mainnet}
-      modifyFeeAndLimit={modifyFeeAndLimit}
+      modifyFeeAndLimit={payload.type === 'confirm_operations' ? modifyFeeAndLimit : undefined}
     />
   );
 };

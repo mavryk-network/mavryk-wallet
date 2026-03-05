@@ -56,16 +56,16 @@ jobs:
       - name: Build extension
         run: yarn build
 
-      - name: Zip extension
+      - name: Check zip has manifest at root
         run: |
-          cd dist
-          zip -r ../chrome.zip .
+          unzip -l dist/chrome.zip | head -n 40
+          unzip -p dist/chrome.zip manifest.json | head -n 20
 
       - name: Deploy to Chrome Web Store
         uses: trmcnvn/chrome-addon@v2
         with:
           extension: ${{ secrets.CHROME_EXTENSION_ID }}
-          zip: chrome.zip
+          zip: dist/chrome.zip
           client-id: ${{ secrets.CHROME_CLIENT_ID }}
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}

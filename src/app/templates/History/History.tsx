@@ -34,8 +34,8 @@ import styles from './history.module.css';
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
 import { HistoryItem } from './HistoryItem';
 
-const INITIAL_NUMBER = 30;
-const LOAD_STEP = 30;
+const INITIAL_NUMBER = 20;
+const LOAD_STEP = 20;
 const LIST_MIN_HEIGHT = 320;
 
 const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
@@ -214,7 +214,7 @@ export const HistoryComponent: React.FC<Props> = memo(
         setIsSearchingByHash(true);
         if (chainId && isKnownChainId(chainId) && searchValueForFilter !== '') {
           try {
-            const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter);
+            const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter, assetSlug);
             setIsSearchingByHash(false);
 
             setFilteredHistory(arr);
@@ -229,7 +229,7 @@ export const HistoryComponent: React.FC<Props> = memo(
       }
 
       fetchOperationData();
-    }, [searchValueForFilter, chainId, accountAddress]);
+    }, [searchValueForFilter, chainId, accountAddress, assetSlug]);
 
     // popup states
     const [isOpen, setIsOpen] = useState(false);

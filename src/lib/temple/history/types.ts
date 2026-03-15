@@ -22,6 +22,14 @@ export interface UserHistoryItem {
   oldestOperation?: IndividualHistoryItem;
 }
 
+export interface HistoryOperationNetworkFees {
+  totalFee: number;
+  gasFee: number;
+  storageFee: number;
+  burnedFromFees: number;
+  usdAmount?: number;
+}
+
 type PickedPropsFromTzktOperation = Pick<TzktOperation, 'id' | 'level' | 'hash' | 'block'>;
 
 export enum HistoryItemOpTypeEnum {
@@ -63,6 +71,7 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   gasUsed: number;
   storageUsed: number;
   entrypoint?: string;
+  networkFees?: HistoryOperationNetworkFees;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {

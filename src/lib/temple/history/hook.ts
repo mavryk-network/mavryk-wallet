@@ -42,6 +42,7 @@ export default function useHistory(
   const [loading, setLoading] = useSafeState<TLoading>(isKnownChainId(chainId) && 'init');
   const [userHistory, setUserHistory] = useSafeState<UserHistoryItem[]>([]);
   const [reachedTheEnd, setReachedTheEnd] = useSafeState(false);
+  const [cursor, setCursor] = useSafeState<number | undefined>(undefined);
 
   const { stop: stopLoading, stopAndBuildChecker } = useStopper();
 
@@ -60,7 +61,12 @@ export default function useHistory(
     }
   }, [hasParameters, operationParams]);
 
-  async function loadUserHistory(pseudoLimit: number, historyItems: UserHistoryItem[], shouldStop: () => boolean) {
+  async function loadUserHistory(
+    pseudoLimit: number,
+    historyItems: UserHistoryItem[],
+    nextCursor: number | undefined,
+    shouldStop: () => boolean
+  ) {
     if (!isKnownChainId(chainId)) {
       setLoading(false);
       setReachedTheEnd(true);
@@ -68,18 +74,16 @@ export default function useHistory(
     }
 
     setLoading(historyItems.length ? 'more' : 'init');
-    const lastHistoryItem = historyItems[historyItems.length - 1];
-
-    let newHistoryItems: UserHistoryItem[];
+    let fetchResult;
 
     try {
-      newHistoryItems = await fetchUserHistory(
+      fetchResult = await fetchUserHistory(
         chainId,
         account,
         assetSlug,
         pseudoLimit,
         tezos,
-        lastHistoryItem,
+        nextCursor,
         operationParams
       );
       if (shouldStop()) return;
@@ -90,11 +94,13 @@ export default function useHistory(
       return;
     }
 
+    const { items: newHistoryItems, cursor: returnedCursor, hasMore } = fetchResult;
+
     setUserHistory(prev => {
       const newUniqueItems = newHistoryItems.filter(item => !prev.some(prevItem => prevItem.hash === item.hash));
 
       if (newUniqueItems.length === 0) {
-        setReachedTheEnd(true);
+        setReachedTheEnd(!hasMore);
         return prev;
       }
 
@@ -103,13 +109,14 @@ export default function useHistory(
       return Array.from(new Map(merged.map(item => [item.hash, item])).values());
     });
 
+    setCursor(returnedCursor);
     setLoading(false);
-    if (newHistoryItems.length === 0) setReachedTheEnd(true);
+    setReachedTheEnd(!hasMore);
   }
 
   function loadMore(pseudoLimit: number) {
     if (loading || reachedTheEnd) return;
-    loadUserHistory(pseudoLimit, userHistory, stopAndBuildChecker());
+    loadUserHistory(pseudoLimit, userHistory, cursor, stopAndBuildChecker());
   }
 
   useDidUpdate(() => {
@@ -120,9 +127,10 @@ export default function useHistory(
     setUserHistory([]);
     setLoading(isKnownChainId(chainId) ? 'init' : false);
     setReachedTheEnd(false);
+    setCursor(undefined);
 
     // fetch fresh
-    loadUserHistory(initialPseudoLimit, [], shouldStop);
+    loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
 
     // cleanup cancels in-flight if key changes/unmounts
     return stopLoading;
@@ -131,7 +139,7 @@ export default function useHistory(
   // If you want initial mount to also fetch, keep this:
   useDidMount(() => {
     const shouldStop = stopAndBuildChecker();
-    loadUserHistory(initialPseudoLimit, [], shouldStop);
+    loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
     return stopLoading;
   });
 

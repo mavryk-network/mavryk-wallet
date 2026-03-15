@@ -1,4 +1,5 @@
 import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { WalletHistoryFilter } from 'mavryk/api/history';
 
 import { HistoryItemOpTypeEnum } from './types';
 
@@ -226,4 +227,46 @@ const createQuery = (accountAddress: string, tokenId: number, isFrom: boolean | 
   return {
     'parameter.[*].in': filter
   };
+};
+
+export const getHistoryItemTypesFromParams = (
+  accountAddress: string,
+  operationParams?: GetOperationsTransactionsParams
+): HistoryItemOpTypeEnum[] => {
+  if (!operationParams || !Object.keys(operationParams).length) return [];
+
+  const types = new Set<HistoryItemOpTypeEnum>();
+  const operationType = operationParams.type;
+
+  if (operationType?.includes('delegation')) types.add(HistoryItemOpTypeEnum.Delegation);
+  if (operationType?.includes('staking')) types.add(HistoryItemOpTypeEnum.Staking);
+  if (operationType?.includes('origination')) types.add(HistoryItemOpTypeEnum.Origination);
+  if (operationType?.includes('reveal')) types.add(HistoryItemOpTypeEnum.Reveal);
+  if (operationType?.includes('other')) types.add(HistoryItemOpTypeEnum.Other);
+
+  if (operationParams.entrypoint === 'swap') types.add(HistoryItemOpTypeEnum.Swap);
+  if (operationParams['entrypoint.ne'] === 'transfer' || operationParams['entrypoint.null'] === false) {
+    types.add(HistoryItemOpTypeEnum.Interaction);
+  }
+
+  if (operationParams.sender === accountAddress) types.add(HistoryItemOpTypeEnum.TransferTo);
+  if (operationParams.target === accountAddress) types.add(HistoryItemOpTypeEnum.TransferFrom);
+
+  return Array.from(types);
+};
+
+export const getBackendHistoryFilters = (
+  accountAddress: string,
+  operationParams?: GetOperationsTransactionsParams
+): WalletHistoryFilter[] => {
+  if (!operationParams || !Object.keys(operationParams).length) return [];
+
+  const filters = new Set<WalletHistoryFilter>();
+
+  if (operationParams.type?.includes('delegation')) filters.add('delegation');
+  if (operationParams.type?.includes('staking')) filters.add('staking');
+  if (operationParams.sender === accountAddress) filters.add('sent');
+  if (operationParams.target === accountAddress) filters.add('received');
+
+  return Array.from(filters);
 };

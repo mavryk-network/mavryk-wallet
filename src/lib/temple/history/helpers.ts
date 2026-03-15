@@ -54,7 +54,8 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       bakerFee: oper.bakerFee,
       storageFee: oper.storageFee,
       gasUsed: oper.gasUsed,
-      storageUsed: oper.storageUsed ?? 0
+      storageUsed: oper.storageUsed ?? 0,
+      networkFees: oper.networkFees
     };
 
     switch (oper.type) {

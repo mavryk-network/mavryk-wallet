@@ -11,7 +11,9 @@ import {
   ParameterFa2
 } from 'lib/apis/tzkt/utils';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
+import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { isTruthy } from 'lib/utils';
+import { MavrykHistoryGroup, MavrykHistoryNetworkFees, MavrykHistoryOperation } from 'mavryk/api/history';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
@@ -38,6 +40,212 @@ import {
   TokenType,
   UserHistoryItem
 } from './types';
+
+type BackendHistoryNormalizationContext = {
+  address: string;
+  assetSlug?: string;
+};
+
+const backendNumberToMumav = (value?: number) => tzToMumav(value ?? 0).toNumber();
+
+const normalizeBackendFees = (fees?: MavrykHistoryNetworkFees) => {
+  if (!fees) return undefined;
+
+  return {
+    totalFee: fees.totalFee,
+    gasFee: fees.gasFee,
+    storageFee: fees.storageFee,
+    burnedFromFees: fees.burnedFromFees,
+    usdAmount: fees.usdAmount
+  };
+};
+
+const buildBackendOperationBase = (
+  operation: MavrykHistoryOperation,
+  address: string,
+  amount: number,
+  source: HistoryMember,
+  index: number
+): HistoryItemOperationBase => {
+  const networkFees = normalizeBackendFees(operation.networkFees);
+  const reducedOperation: HistoryItemOperationBase = {
+    id: operation.id,
+    level: operation.level ?? 0,
+    source,
+    amountSigned: getAmountSigned(
+      {
+        type: operation.type as TzktOperation['type'],
+        sender: source,
+        baker: undefined
+      } as TzktOperation,
+      address,
+      amount,
+      source
+    ),
+    status: stringToHistoryItemStatus(operation.status),
+    addedAt: operation.timestamp,
+    block: '',
+    hash: operation.hash,
+    isHighlighted: false,
+    opIndex: index,
+    bakerFee: backendNumberToMumav(networkFees?.gasFee),
+    gasUsed: 0,
+    storageUsed: 0,
+    storageFee: backendNumberToMumav(networkFees?.storageFee),
+    entrypoint: operation.parameter?.entrypoint,
+    networkFees
+  };
+
+  if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
+
+  return reducedOperation;
+};
+
+const getBackendTokenContext = (assetSlug?: string) => {
+  if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) return null;
+
+  const [contractAddress, tokenIdRaw] = assetSlug.split('_');
+  return {
+    contractAddress,
+    tokenId: Number(tokenIdRaw ?? '0')
+  };
+};
+
+const buildBackendTokenTransfer = (
+  operation: MavrykHistoryOperation,
+  contractAddress: string,
+  tokenId: number,
+  source: HistoryMember,
+  destination: HistoryMember
+): HistoryItemTokenTransfer => ({
+  totalAmount: String(operation.amount ?? operation.parameter?.amount ?? 0),
+  recipients: [{ to: destination, amount: String(operation.amount ?? operation.parameter?.amount ?? 0) }],
+  id: operation.id,
+  level: operation.level ?? 0,
+  sender: source,
+  tokenContractAddress: contractAddress,
+  tokenId,
+  tokenType: 'fa2',
+  assetSlug: toTokenSlug(contractAddress, tokenId)
+});
+
+const deriveBackendItemType = (
+  group: MavrykHistoryGroup,
+  items: IndividualHistoryItem[],
+  address: string
+): HistoryItemOpTypeEnum => {
+  if (group.transferType === 'sent') return HistoryItemOpTypeEnum.TransferTo;
+  if (group.transferType === 'received') return HistoryItemOpTypeEnum.TransferFrom;
+  if (group.type === 'delegation') return HistoryItemOpTypeEnum.Delegation;
+  if (group.type === 'staking') return HistoryItemOpTypeEnum.Staking;
+
+  if (items.some(item => item.entrypoint?.toLowerCase() === 'swap')) return HistoryItemOpTypeEnum.Swap;
+  if (items.length > 1 && items.some(item => item.type === HistoryItemOpTypeEnum.Interaction)) {
+    return HistoryItemOpTypeEnum.Multiple;
+  }
+
+  const firstItem = items[0];
+  if (!firstItem) return HistoryItemOpTypeEnum.Other;
+
+  if (firstItem.type === HistoryItemOpTypeEnum.Interaction) return HistoryItemOpTypeEnum.Interaction;
+  if (firstItem.type === HistoryItemOpTypeEnum.TransferTo && firstItem.source.address !== address) {
+    return HistoryItemOpTypeEnum.TransferFrom;
+  }
+
+  return firstItem.type ?? HistoryItemOpTypeEnum.Other;
+};
+
+const reduceOneBackendOperation = (
+  operation: MavrykHistoryOperation,
+  index: number,
+  context: BackendHistoryNormalizationContext
+): IndividualHistoryItem | null => {
+  const { address, assetSlug } = context;
+  const tokenContext = getBackendTokenContext(assetSlug);
+  const sourceAddress = operation.parameter?.from ?? operation.sender ?? '';
+  const destinationAddress = operation.parameter?.to ?? operation.target ?? '';
+  const source = transformToHistoryMember(sourceAddress);
+  const destination = transformToHistoryMember(destinationAddress);
+  const amount = operation.amount ?? operation.parameter?.amount ?? 0;
+
+  switch (operation.type) {
+    case 'delegation': {
+      const delegationOpBase = buildBackendOperationBase(operation, address, 0, source, index);
+      return {
+        ...delegationOpBase,
+        type: HistoryItemOpTypeEnum.Delegation,
+        newDelegate: destinationAddress ? destination : null
+      };
+    }
+    case 'staking': {
+      const stakingOpBase = buildBackendOperationBase(operation, address, amount, source, index);
+      return {
+        ...stakingOpBase,
+        amount,
+        action: (operation.parameter?.entrypoint ?? 'stake') as StakingActions,
+        sender: source,
+        baker: destinationAddress ? destination : null,
+        type: HistoryItemOpTypeEnum.Staking
+      };
+    }
+    case 'transaction':
+    default: {
+      const txBase = buildBackendOperationBase(operation, address, amount, source, index);
+      const entrypoint = operation.parameter?.entrypoint;
+      const isInteraction = Boolean(entrypoint && entrypoint !== 'transfer');
+      const historyTxOp: HistoryItemTransactionOp = {
+        ...txBase,
+        destination,
+        assetSlug: tokenContext ? toTokenSlug(tokenContext.contractAddress, tokenContext.tokenId) : MAV_TOKEN_SLUG,
+        type: isInteraction ? HistoryItemOpTypeEnum.Interaction : HistoryItemOpTypeEnum.TransferTo
+      };
+
+      if (tokenContext) {
+        historyTxOp.contractAddress = tokenContext.contractAddress;
+        historyTxOp.tokenTransfers = buildBackendTokenTransfer(
+          operation,
+          tokenContext.contractAddress,
+          tokenContext.tokenId,
+          source,
+          destination
+        );
+      } else {
+        historyTxOp.contractAddress = MAV_TOKEN_SLUG;
+      }
+
+      if (entrypoint) historyTxOp.entrypoint = entrypoint;
+
+      return historyTxOp;
+    }
+  }
+};
+
+export function mavrykHistoryGroupToHistoryItem(
+  group: MavrykHistoryGroup,
+  context: BackendHistoryNormalizationContext
+): UserHistoryItem {
+  const operations = [...group.operations].sort((a, b) => b.id - a.id);
+  const historyItemOperations = operations
+    .map((operation, index) => reduceOneBackendOperation(operation, index, context))
+    .filter(isTruthy);
+
+  const status = deriveHistoryItemStatus(historyItemOperations.length ? historyItemOperations : [{ status: 'failed' }]);
+  const type = deriveBackendItemType(group, historyItemOperations, context.address);
+  const firstOperation = historyItemOperations[0];
+  const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
+
+  return {
+    type,
+    hash: group.hash,
+    addedAt: group.timestamp,
+    status,
+    operations: historyItemOperations,
+    highlightedOperationIndex: 0,
+    isGroupedOp: historyItemOperations.length > 1,
+    firstOperation,
+    oldestOperation
+  };
+}
 
 export function operationsGroupToHistoryItem({ hash, operations }: OperationsGroup, address: string): UserHistoryItem {
   // TODO: This returns a userHistoryItem. Missing the money diffs. See the JIRA task.
@@ -582,6 +790,12 @@ export async function buildPendingOperationObject({
     storageUsed: estimation?.storageLimit ?? 0,
     bakerFee: Math.ceil((estimation?.suggestedFeeMumav ?? 0) * safetyMultiplier),
     storageFee: Math.ceil((estimation?.burnFeeMumav ?? 0) * safetyMultiplier),
+    networkFees: {
+      totalFee: mumavToTz((estimation?.suggestedFeeMumav ?? 0) + (estimation?.burnFeeMumav ?? 0)).toNumber(),
+      gasFee: mumavToTz(estimation?.suggestedFeeMumav ?? 0).toNumber(),
+      storageFee: mumavToTz(estimation?.burnFeeMumav ?? 0).toNumber(),
+      burnedFromFees: mumavToTz(estimation?.burnFeeMumav ?? 0).toNumber()
+    },
     status: 'pending',
     isPending: true
   };

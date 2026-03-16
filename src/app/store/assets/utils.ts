@@ -2,11 +2,16 @@ import memoizee from 'memoizee';
 
 import { fetchTokensMetadata, isKnownChainId } from 'lib/apis/temple';
 import { fetchTzktAccountAssets } from 'lib/apis/tzkt';
-import { fetchTzktAccountRWAAssets } from 'lib/apis/tzkt/api';
 import type { TzktAccountAsset } from 'lib/apis/tzkt/types';
 import { toTokenSlug } from 'lib/assets';
 import { isCollectible, isRwa } from 'lib/metadata';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
+import {
+  fetchWalletRwaAssets,
+  mapWalletRwaAssetsToFetchedMetadataRecord,
+  walletRwaAssetToAtomicBalance,
+  walletRwaAssetToSlug
+} from 'mavryk/api/rwas';
 
 import { MetadataMap } from '../collectibles-metadata/state';
 
@@ -54,18 +59,9 @@ export const loadAccountCollectibles = (account: string, chainId: string, knownM
     }
   );
 
-export const loadAccountRwas = (account: string, chainId: string, knownMeta: MetadataMap) =>
-  Promise.all([
-    // Fetching unknowns only, checking metadata to filter for RWAs
-    fetchTzktAccountRWAAssets(account, chainId, true).then(data => {
-      return finishRwasLoadingWithoutMeta(data, chainId, knownMeta);
-    })
-  ]).then(
-    ([data]) => ({
-      slugs: data.slugs,
-      balances: data.balances,
-      newMeta: data.newMeta
-    }),
+export const loadAccountRwas = (account: string, _chainId: string, _knownMeta: MetadataMap) =>
+  fetchWalletRwaAssets({ walletAddress: account }).then(
+    data => finishRwasLoading(data),
     error => {
       console.error(error);
       throw error;
@@ -173,36 +169,15 @@ const finishCollectiblesLoadingWithoutMeta = async (
 };
 
 // rwa ---------------
-const finishRwasLoadingWithoutMeta = async (data: TzktAccountAsset[], chainId: string, knownMeta: MetadataMap) => {
+const finishRwasLoading = async (data: Awaited<ReturnType<typeof fetchWalletRwaAssets>>) => {
   const slugs: string[] = [];
   const balances: StringRecord = {};
-  const newMeta: FetchedMetadataRecord = {};
-
-  const slugsWithoutMeta = data.reduce<string[]>((acc, curr) => {
-    const slug = tzktAssetToTokenSlug(curr);
-    return knownMeta.has(slug) ? acc : acc.concat(slug);
-  }, []);
-
-  const newMetadatas = isKnownChainId(chainId)
-    ? await fetchTokensMetadata(chainId, slugsWithoutMeta).catch(err => {
-        console.error(err);
-      })
-    : null;
+  const newMeta: FetchedMetadataRecord = mapWalletRwaAssetsToFetchedMetadataRecord(data);
 
   for (const asset of data) {
-    const slug = tzktAssetToTokenSlug(asset);
-
-    // Not optimal data pick, but we don't expect large arrays here
-    const metadataOfNew = asset.token.metadata || newMetadatas?.[slugsWithoutMeta.indexOf(slug)];
-
-    const metadata = metadataOfNew || knownMeta.get(slug);
-
-    if (!metadata || !isRwa(metadata)) continue;
-
-    if (metadataOfNew) newMeta[slug] = metadataOfNew;
-
+    const slug = walletRwaAssetToSlug(asset);
     slugs.push(slug);
-    balances[slug] = asset.balance;
+    balances[slug] = walletRwaAssetToAtomicBalance(asset);
   }
 
   return { slugs, balances, newMeta };

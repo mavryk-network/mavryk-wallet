@@ -1,9 +1,10 @@
 import { combineEpics, Epic } from 'redux-observable';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { from, of, switchMap } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { ofType, toPayload } from 'ts-action-operators';
 
-import { fetchRWADetails$ } from 'lib/apis/rwa';
 import { toTokenSlug } from 'lib/assets';
+import { fetchWalletRwaAssets, walletRwaAssetToDetails } from 'mavryk/api/rwas';
 
 import { loadRwasDetailsActions } from './actions';
 import type { RwaDetailsRecord } from './state';
@@ -12,14 +13,14 @@ const loadRwasDetailsEpic: Epic = action$ =>
   action$.pipe(
     ofType(loadRwasDetailsActions.submit),
     toPayload(),
-    switchMap(slugs => {
-      return fetchRWADetails$(slugs).pipe(
+    switchMap(({ slugs, walletAddress }) =>
+      from(fetchWalletRwaAssets({ walletAddress })).pipe(
         map(data => {
           const details: RwaDetailsRecord = {};
 
-          for (const info of data.tokens) {
-            const slug = toTokenSlug(info.address, info.token_id);
-            const itemDetails = info;
+          for (const asset of data) {
+            const slug = toTokenSlug(asset.address, 0);
+            const itemDetails = walletRwaAssetToDetails(asset);
 
             details[slug] = itemDetails;
           }
@@ -34,8 +35,8 @@ const loadRwasDetailsEpic: Epic = action$ =>
           console.error(error);
           return of(loadRwasDetailsActions.fail(error instanceof Error ? error.message : 'Unknown error'));
         })
-      );
-    })
+      )
+    )
   );
 
 export const rwasEpics = combineEpics(loadRwasDetailsEpic);

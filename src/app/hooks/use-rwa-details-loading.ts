@@ -17,9 +17,9 @@ export const useRWAsDetailsLoading = () => {
   useInterval(
     () => {
       // Is it necessary for collectibles on non-Mainnet networks too?
-      if (slugs.length) dispatch(loadRwasDetailsActions.submit(slugs));
+      if (slugs.length) dispatch(loadRwasDetailsActions.submit({ slugs, walletAddress: publicKeyHash }));
     },
     RWAS_DETAILS_SYNC_INTERVAL,
-    [slugs]
+    [publicKeyHash, slugs]
   );
 };

@@ -1,20 +1,47 @@
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import axios, { AxiosRequestConfig } from 'axios';
-
-import { EnvVars } from 'lib/env';
+import browser from 'webextension-polyfill';
 
 import { clearAuthTokensFromStorage, getAuthTokensFromStorage, setAuthTokensToStorage } from './storage';
 
-const baseUrl = new URL('/api/v1', EnvVars.MAVRYK_API_URL).href;
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = ['/auth/challenge', '/auth/verify', '/auth/refresh', '/auth/logout'] as const;
+const NETWORK_ID_STORAGE_KEY = 'network_id';
+const DEFAULT_NETWORK_ID = 'mainnet';
+const MAINNET_MAVRYK_API_URL = 'https://wallet.mavryk.network';
+const ATLASNET_MAVRYK_API_URL = 'https://atlasnet.wallet.mavryk.network';
+
+const MAVRYK_API_URLS: Record<string, string> = {
+  mainnet: MAINNET_MAVRYK_API_URL,
+  atlasnet: ATLASNET_MAVRYK_API_URL
+};
 
 type MavrykApiRequestConfig = AxiosRequestConfig & {
   _retry?: boolean;
   skipAuthRefresh?: boolean;
 };
 
+export const getMavrykApiUrl = (networkId?: string | null) => {
+  if (!networkId) {
+    return MAINNET_MAVRYK_API_URL;
+  }
+
+  return MAVRYK_API_URLS[networkId] ?? MAINNET_MAVRYK_API_URL;
+};
+
+export const getMavrykApiBaseUrl = (networkId?: string | null) => new URL('/api/v1', getMavrykApiUrl(networkId)).href;
+
+async function getCurrentMavrykApiBaseUrl() {
+  try {
+    const { [NETWORK_ID_STORAGE_KEY]: networkId } = await browser.storage.local.get(NETWORK_ID_STORAGE_KEY);
+
+    return getMavrykApiBaseUrl(networkId);
+  } catch {
+    return getMavrykApiBaseUrl(DEFAULT_NETWORK_ID);
+  }
+}
+
 export const mavrykApi = axios.create({
-  baseURL: baseUrl,
+  baseURL: getMavrykApiBaseUrl(DEFAULT_NETWORK_ID),
   adapter: axiosFetchAdapter
 });
 
@@ -53,7 +80,9 @@ async function refreshAccessTokenOrThrow() {
 }
 
 mavrykApi.interceptors.request.use(async config => {
-  const { accessToken } = await getAuthTokensFromStorage();
+  const [baseURL, { accessToken }] = await Promise.all([getCurrentMavrykApiBaseUrl(), getAuthTokensFromStorage()]);
+
+  config.baseURL = baseURL;
 
   if (accessToken) {
     config.headers = {

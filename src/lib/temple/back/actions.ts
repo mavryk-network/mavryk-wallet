@@ -24,7 +24,14 @@ import {
   TempleAccount
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
-import { logoutAuth, refreshAuthTokens, requestAuthChallenge, verifyAuthSignature } from 'mavryk/api';
+import {
+  getAuthTokensFromStorage,
+  isJwtExpiringSoon,
+  logoutAuth,
+  refreshAuthTokens,
+  requestAuthChallenge,
+  verifyAuthSignature
+} from 'mavryk/api';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import {
@@ -58,6 +65,7 @@ export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
 const AUTODECLINE_AFTER = 60_000;
+const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;
 
@@ -73,6 +81,13 @@ const performAuthForAccount = async (vault: Vault, accountPkh: string) => {
   const { nonce, challenge } = await requestAuthChallenge({ walletAddress: accountPkh });
   const signature = await signAuthChallengeWithVault(vault, accountPkh, challenge);
   await verifyAuthSignature({ nonce, signature, walletAddress: accountPkh });
+};
+
+const shouldLockOnSessionRecovery = async () => {
+  const { accessToken } = await getAuthTokensFromStorage();
+  if (!accessToken) return true;
+
+  return isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS);
 };
 
 export async function init() {
@@ -168,6 +183,12 @@ export async function unlockFromSession() {
   await enqueueUnlock(async () => {
     const vault = await Vault.recoverFromSession();
     if (vault == null) return;
+
+    if (await shouldLockOnSessionRecovery()) {
+      await lock();
+      return;
+    }
+
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });

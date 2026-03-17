@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { mavrykApi } from './client';
+import { isJwtExpiringSoon } from './jwt';
 import {
   clearAuthTokensFromStorage,
   getAuthTokensFromStorage,
@@ -44,6 +45,8 @@ export type AuthRefreshRequest = {
   refreshToken?: string;
 };
 
+const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
+
 async function getWalletAddressOrThrow(walletAddress?: string) {
   const stored = walletAddress ?? (await getWalletAddressFromStorage());
   if (!stored) throw new Error('No wallet address in storage');
@@ -85,7 +88,12 @@ export async function verifyAuthSignature(payload: AuthVerifyRequest) {
 }
 
 export async function refreshAuthTokens(params: AuthRefreshRequest = {}) {
-  const { refreshToken: storedRefreshToken } = await getAuthTokensFromStorage();
+  const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = await getAuthTokensFromStorage();
+
+  if (storedAccessToken && !isJwtExpiringSoon(storedAccessToken, ACCESS_TOKEN_REFRESH_THRESHOLD_MS)) {
+    return { accessToken: storedAccessToken };
+  }
+
   const refreshToken = params.refreshToken ?? storedRefreshToken;
   if (!refreshToken) throw new Error('No refresh token in storage');
 

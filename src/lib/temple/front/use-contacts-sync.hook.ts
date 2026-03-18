@@ -35,7 +35,6 @@ export function useContactsSync(account: TempleAccount, settings: TempleSettings
 
         const { contacts, recordId } = await fetchContactsRecord(publicKey);
 
-        console.log(contacts, 'contacts');
         if (cancelled) return;
 
         syncedAccountsRef.current.add(account.publicKeyHash);

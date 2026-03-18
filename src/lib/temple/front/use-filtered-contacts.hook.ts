@@ -7,10 +7,17 @@ import { useMemoWithCompare } from 'lib/ui/hooks';
 import { TempleContact } from '../types';
 
 import { useTempleClient } from './client';
-import { useRelevantAccounts, useSettings } from './ready';
+import {
+  buildContactsSettingsPatch,
+  getCurrentAccountStoredContacts,
+  hasContactsSettingsMismatch
+} from './contacts-settings';
+import { useAccount, useRelevantAccounts, useSettings } from './ready';
 
 export function useFilteredContacts() {
-  const { contacts } = useSettings();
+  const settings = useSettings();
+  const account = useAccount();
+  const contacts = getCurrentAccountStoredContacts(settings, account.publicKeyHash);
 
   const accounts = useRelevantAccounts();
   const accountContacts = useMemo<TempleContact[]>(
@@ -36,8 +43,12 @@ export function useFilteredContacts() {
 
   const { updateSettings } = useTempleClient();
   useEffect(() => {
-    if (contacts && contacts.length !== filteredContacts.length) updateSettings({ contacts: filteredContacts });
-  }, [contacts, filteredContacts, updateSettings]);
+    if (!hasContactsSettingsMismatch(settings, account.publicKeyHash, filteredContacts)) {
+      return;
+    }
+
+    void updateSettings(buildContactsSettingsPatch(settings, account.publicKeyHash, filteredContacts));
+  }, [account.publicKeyHash, filteredContacts, settings, updateSettings]);
 
   return { contacts: filteredContacts, allContacts, outsideWalletContacts: filteredContacts };
 }

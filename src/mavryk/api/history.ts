@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { z } from 'zod';
 
 import { mavrykApi } from './client';
+import { extractMavrykApiErrorMessage } from './errors';
 import { getWalletAddressFromStorage } from './storage';
 
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
@@ -112,21 +112,4 @@ export async function fetchTokenHistory(tokenAddress: string, params: FetchHisto
   return fetchHistory(`/wallets/${address}/tokens/${tokenAddress}/history`, params);
 }
 
-export function extractMavrykApiErrorMessage(error: unknown) {
-  if (axios.isAxiosError(error)) {
-    const responseData = error.response?.data;
-
-    if (responseData && typeof responseData === 'object') {
-      const values = Object.values(responseData).filter((value): value is string => typeof value === 'string');
-      if (values.length > 0) return values.join(', ');
-    }
-
-    if (typeof error.response?.status === 'number') {
-      return `History request failed with status ${error.response.status}`;
-    }
-  }
-
-  if (error instanceof Error && error.message) return error.message;
-
-  return 'Failed to load history';
-}
+export { extractMavrykApiErrorMessage } from './errors';

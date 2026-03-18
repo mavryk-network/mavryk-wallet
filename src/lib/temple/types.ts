@@ -158,11 +158,6 @@ export type TempleNetwork = TempleNetworkBase &
 
 export type TempleNetworkType = 'main' | 'test' | 'dcp';
 
-export interface TempleSettings {
-  customNetworks?: TempleNetwork[];
-  contacts?: TempleContact[];
-}
-
 export enum TempleSharedStorageKey {
   DAppEnabled = 'dappenabled',
   LockUpEnabled = 'lock_up',
@@ -177,6 +172,24 @@ export interface TempleContact {
   name: string;
   addedAt?: number;
   accountInWallet?: boolean;
+}
+
+export type TempleContactApiType = 'user' | 'validator' | 'contract';
+
+export interface TempleContactsAccountState {
+  contacts: TempleContact[];
+  recordId?: string;
+  typesByAddress?: Record<string, TempleContactApiType>;
+}
+
+export interface TempleContactsApiState {
+  accounts?: Record<string, TempleContactsAccountState>;
+}
+
+export interface TempleSettings {
+  customNetworks?: TempleNetwork[];
+  contacts?: TempleContact[];
+  contactsApi?: TempleContactsApiState;
 }
 
 /**

@@ -21,6 +21,7 @@ import {
 
 import { intercom, useTempleClient } from './client';
 import { usePassiveStorage } from './storage';
+import { useContactsSync } from './use-contacts-sync.hook';
 
 export const [
   ReadyTempleProvider,
@@ -115,6 +116,8 @@ function useReadyTemple() {
     () => allAccounts.find(a => a.publicKeyHash === accountPkh) ?? defaultAcc,
     [allAccounts, accountPkh, defaultAcc]
   );
+
+  useContactsSync(account, settings);
 
   /**
    * Error boundary reset

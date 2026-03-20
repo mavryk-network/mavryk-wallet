@@ -1,28 +1,56 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { fetchContactsRecord } from 'mavryk/api/contacts';
 
 import { TempleAccount, TempleSettings } from '../types';
 
 import { useTempleClient } from './client';
-import { buildContactsSettingsPatch, canUseEncryptedContacts } from './contacts-settings';
+import {
+  buildContactsSettingsPatch,
+  buildContactsStorageKey,
+  canUseEncryptedContacts,
+  getCachedContactsState,
+  getContactsOwnerAddress
+} from './contacts-settings';
 
-export function useContactsSync(account: TempleAccount, settings: TempleSettings) {
-  const { revealPublicKey, updateSettings } = useTempleClient();
+export function useContactsSync(
+  account: TempleAccount,
+  allAccounts: TempleAccount[],
+  networkId: string,
+  settings: TempleSettings
+) {
+  const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
 
-  const syncedAccountsRef = useRef<Set<string>>(new Set());
+  const previousNetworkIdRef = useRef<string>();
   const settingsRef = useRef(settings);
+  const contactsOwnerAddress = useMemo(
+    () => getContactsOwnerAddress(allAccounts, account.publicKeyHash),
+    [account.publicKeyHash, allAccounts]
+  );
+  const contactsStorageKey = useMemo(
+    () => buildContactsStorageKey(contactsOwnerAddress, networkId),
+    [contactsOwnerAddress, networkId]
+  );
 
+  // Keep the latest settings available for async sync work without retriggering the fetch logic.
+  // No cleanup is needed because this only updates an in-memory ref.
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
 
+  // Sync contacts for the selected auth wallet and network.
+  // This manages remote contacts fetches; cleanup only cancels applying stale async results.
   useEffect(() => {
     if (!canUseEncryptedContacts(account.type)) {
+      previousNetworkIdRef.current = networkId;
       return;
     }
 
-    if (syncedAccountsRef.current.has(account.publicKeyHash)) {
+    const shouldRefetchOnNetworkSwitch =
+      previousNetworkIdRef.current !== undefined && previousNetworkIdRef.current !== networkId;
+    previousNetworkIdRef.current = networkId;
+
+    if (getCachedContactsState(settingsRef.current, contactsStorageKey) && !shouldRefetchOnNetworkSwitch) {
       return;
     }
 
@@ -30,17 +58,18 @@ export function useContactsSync(account: TempleAccount, settings: TempleSettings
 
     void (async () => {
       try {
-        const publicKey = await revealPublicKey(account.publicKeyHash);
+        await ensureAuthorized(contactsOwnerAddress, networkId);
         if (cancelled) return;
 
-        const { contacts, recordId } = await fetchContactsRecord(publicKey);
-
+        const publicKey = await revealPublicKey(contactsOwnerAddress);
         if (cancelled) return;
 
-        syncedAccountsRef.current.add(account.publicKeyHash);
+        const { contacts, recordId, typesByAddress } = await fetchContactsRecord(publicKey);
+
+        if (cancelled) return;
 
         await updateSettings(
-          buildContactsSettingsPatch(settingsRef.current, account.publicKeyHash, contacts, recordId)
+          buildContactsSettingsPatch(settingsRef.current, contactsStorageKey, contacts, recordId, typesByAddress)
         );
       } catch (error) {
         if (!cancelled) {
@@ -52,5 +81,13 @@ export function useContactsSync(account: TempleAccount, settings: TempleSettings
     return () => {
       cancelled = true;
     };
-  }, [account.publicKeyHash, account.type, revealPublicKey, updateSettings]);
+  }, [
+    account.type,
+    contactsOwnerAddress,
+    contactsStorageKey,
+    ensureAuthorized,
+    networkId,
+    revealPublicKey,
+    updateSettings
+  ]);
 }

@@ -125,7 +125,7 @@ function useReadyTemple() {
     ensureAuthorized(account.publicKeyHash, network.id).catch(error => console.error(error));
   }, [account.publicKeyHash, ensureAuthorized, network.id]);
 
-  useContactsSync(account, settings);
+  useContactsSync(account, allAccounts, network.id, settings);
 
   /**
    * Error boundary reset

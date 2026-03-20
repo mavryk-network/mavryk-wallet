@@ -10,29 +10,37 @@ import { isAddressValid } from '../helpers';
 import { useTempleClient } from './client';
 import {
   buildContactsSettingsPatch,
+  buildContactsStorageKey,
   canUseEncryptedContacts,
   getCachedContactsState,
+  getContactsOwnerAddress,
   getStoredContactsRecordId,
   getStoredContactsTypesByAddress,
   normalizeContacts
 } from './contacts-settings';
-import { useAccount, useSettings } from './ready';
+import { useAccount, useAllAccounts, useNetwork, useSettings } from './ready';
 import { useFilteredContacts } from './use-filtered-contacts.hook';
 
 export function useContactsActions() {
-  const { revealPublicKey, updateSettings } = useTempleClient();
+  const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
   const account = useAccount();
+  const allAccounts = useAllAccounts();
+  const network = useNetwork();
   const settings = useSettings();
   const { allContacts } = useFilteredContacts();
   const settingsRef = useRef(settings);
+  const contactsOwnerAddress = getContactsOwnerAddress(allAccounts, account.publicKeyHash);
+  const contactsStorageKey = buildContactsStorageKey(contactsOwnerAddress, network.id);
 
+  // Keep the latest settings available for contact actions without rebuilding callbacks.
+  // No cleanup is needed because this only updates an in-memory ref.
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
 
   const loadCurrentContactsState = useCallback(async () => {
     const currentSettings = settingsRef.current;
-    const cachedState = getCachedContactsState(currentSettings, account.publicKeyHash);
+    const cachedState = getCachedContactsState(currentSettings, contactsStorageKey);
 
     if (cachedState) {
       return cachedState;
@@ -42,15 +50,16 @@ export function useContactsActions() {
       throw new Error('Encrypted contacts are unavailable for this account type');
     }
 
-    const publicKey = await revealPublicKey(account.publicKeyHash);
+    await ensureAuthorized(contactsOwnerAddress, network.id);
+    const publicKey = await revealPublicKey(contactsOwnerAddress);
     return fetchContactsRecord(publicKey);
-  }, [account.publicKeyHash, account.type, revealPublicKey]);
+  }, [account.type, contactsOwnerAddress, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
 
   const persistContacts = useCallback(
     async (
       nextContacts: TempleContact[],
-      recordId = getStoredContactsRecordId(settingsRef.current, account.publicKeyHash),
-      typesByAddress = getStoredContactsTypesByAddress(settingsRef.current, account.publicKeyHash)
+      recordId = getStoredContactsRecordId(settingsRef.current, contactsStorageKey),
+      typesByAddress = getStoredContactsTypesByAddress(settingsRef.current, contactsStorageKey)
     ) => {
       const normalizedContacts = normalizeContacts(nextContacts);
       let nextRecordId = recordId;
@@ -61,7 +70,8 @@ export function useContactsActions() {
           throw new Error('Encrypted contacts are unavailable for this account type');
         }
 
-        const publicKey = await revealPublicKey(account.publicKeyHash);
+        await ensureAuthorized(contactsOwnerAddress, network.id);
+        const publicKey = await revealPublicKey(contactsOwnerAddress);
         const saved = await saveContactsRecord({
           contacts: normalizedContacts,
           publicKey,
@@ -79,14 +89,22 @@ export function useContactsActions() {
       await updateSettings(
         buildContactsSettingsPatch(
           settingsRef.current,
-          account.publicKeyHash,
+          contactsStorageKey,
           normalizedContacts,
           nextRecordId,
           nextTypesByAddress
         )
       );
     },
-    [account.publicKeyHash, account.type, revealPublicKey, updateSettings]
+    [
+      account.type,
+      contactsOwnerAddress,
+      contactsStorageKey,
+      ensureAuthorized,
+      network.id,
+      revealPublicKey,
+      updateSettings
+    ]
   );
 
   const mutateContacts = useCallback(

@@ -275,6 +275,8 @@ export enum TempleMessageType {
   NewWalletResponse = 'TEMPLE_NEW_WALLET_RESPONSE',
   UnlockRequest = 'TEMPLE_UNLOCK_REQUEST',
   UnlockResponse = 'TEMPLE_UNLOCK_RESPONSE',
+  EnsureAuthorizedRequest = 'TEMPLE_ENSURE_AUTHORIZED_REQUEST',
+  EnsureAuthorizedResponse = 'TEMPLE_ENSURE_AUTHORIZED_RESPONSE',
   LockRequest = 'TEMPLE_LOCK_REQUEST',
   LockResponse = 'TEMPLE_LOCK_RESPONSE',
   CreateAccountRequest = 'TEMPLE_CREATE_ACCOUNT_REQUEST',
@@ -354,6 +356,7 @@ export type TempleRequest =
   | TempleGetStateRequest
   | TempleNewWalletRequest
   | TempleUnlockRequest
+  | TempleEnsureAuthorizedRequest
   | TempleLockRequest
   | TempleFreeHDAccountIndexRequest
   | TempleCreateAccountRequest
@@ -393,6 +396,7 @@ export type TempleResponse =
   | TempleAcknowledgeResponse
   | TempleNewWalletResponse
   | TempleUnlockResponse
+  | TempleEnsureAuthorizedResponse
   | TempleLockResponse
   | TempleCreateAccountResponse
   | TempleFreeHDAccountIndexResponse
@@ -485,6 +489,16 @@ interface TempleUnlockRequest extends TempleMessageBase {
 
 interface TempleUnlockResponse extends TempleMessageBase {
   type: TempleMessageType.UnlockResponse;
+}
+
+interface TempleEnsureAuthorizedRequest extends TempleMessageBase {
+  type: TempleMessageType.EnsureAuthorizedRequest;
+  accountPublicKeyHash?: string;
+  networkId?: string;
+}
+
+interface TempleEnsureAuthorizedResponse extends TempleMessageBase {
+  type: TempleMessageType.EnsureAuthorizedResponse;
 }
 
 interface TempleLockRequest extends TempleMessageBase {

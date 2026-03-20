@@ -83,6 +83,36 @@ export function getSameGroupAccounts(allAccounts: TempleAccount[], accountType: 
     acc => acc.type === accountType && (acc.type !== TempleAccountType.HD || acc.walletId === groupId)
   );
 }
+
+/**
+ * Resolves the canonical auth wallet address for the provided account.
+ * HD sub-accounts share the index-0 address of the same wallet.
+ */
+export function getAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash: string) {
+  const account = allAccounts.find(acc => acc.publicKeyHash === accountPublicKeyHash);
+
+  if (!account || account.type !== TempleAccountType.HD) {
+    return accountPublicKeyHash;
+  }
+
+  const mainHdAccount = allAccounts.find(
+    acc => acc.type === TempleAccountType.HD && acc.walletId === account.walletId && acc.hdIndex === 0
+  );
+
+  return mainHdAccount?.publicKeyHash ?? account.publicKeyHash;
+}
+
+/**
+ * Builds a lookup from each account address to the auth wallet address used for Mavryk auth storage.
+ */
+export function buildAuthWalletAddressesMap(allAccounts: TempleAccount[]) {
+  return allAccounts.reduce<Record<string, string>>((result, account) => {
+    result[account.publicKeyHash] = getAuthWalletAddress(allAccounts, account.publicKeyHash);
+
+    return result;
+  }, {});
+}
+
 async function pickUniqueName(
   startIndex: number,
   getNameCandidate: (i: number) => string | Promise<string>,

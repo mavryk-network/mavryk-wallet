@@ -58,6 +58,8 @@ function useReadyTemple() {
     accounts: allAccounts,
     settings,
     walletsSpecs,
+    ensureAuthorized,
+    updateAccountKYCStatus,
     createTaquitoSigner,
     createTaquitoWallet
   } = templeFront;
@@ -117,6 +119,12 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
+  // Ensure the selected account/network has a valid auth token before protected Mavryk API reads run.
+  // No cleanup is needed because this is an idempotent one-shot sync with background auth state.
+  useLayoutEffect(() => {
+    ensureAuthorized(account.publicKeyHash, network.id).catch(error => console.error(error));
+  }, [account.publicKeyHash, ensureAuthorized, network.id]);
+
   useContactsSync(account, settings);
 
   /**
@@ -153,9 +161,9 @@ function useReadyTemple() {
       const chainId = await loadChainId(rpcUrl).catch(() => null);
       const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
 
-      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      await updateAccountKYCStatus(account.publicKeyHash, isKYC);
     })();
-  }, [account.publicKeyHash, tezos?.rpc]);
+  }, [account.publicKeyHash, tezos?.rpc, updateAccountKYCStatus]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {

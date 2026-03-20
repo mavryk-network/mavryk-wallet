@@ -2,7 +2,7 @@
 
 ## Sources of Truth
 
-Before enforcing versions, scripts, or conventions, verify in `app/package.json` and local config files.
+Before enforcing versions, scripts, or conventions, verify in `package.json` and local config files.
 Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
@@ -136,4 +136,4 @@ Target architecture:
 
 ## AGENTS Maintenance Protocol
 
-When `app/package.json` scripts, versions, folder conventions, or testing workflow change, update this file and relevant child AGENTS in the same PR.
+When `package.json` scripts, versions, folder conventions, or testing workflow change, update this file and relevant child AGENTS in the same PR.

@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import { getMessage } from 'lib/i18n';
-import { TempleContact } from 'lib/temple/types';
+import { TempleContact, TempleContactApiType } from 'lib/temple/types';
 import { fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 
-import { isAddressValid } from '../helpers';
+import { isAddressValid, isKTAddress } from '../helpers';
 
+import { useKnownBakers } from './baking/baking';
+import { PREDEFINED_BAKERS_NAMES_MAINNET } from './baking/const';
 import { useTempleClient } from './client';
 import {
   buildContactsSettingsPatch,
@@ -21,22 +23,89 @@ import {
 import { useAccount, useAllAccounts, useNetwork, useSettings } from './ready';
 import { useFilteredContacts } from './use-filtered-contacts.hook';
 
+function isPredefinedValidatorAddress(address: string) {
+  return PREDEFINED_BAKERS_NAMES_MAINNET[address] !== undefined;
+}
+
 export function useContactsActions() {
   const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
   const account = useAccount();
   const allAccounts = useAllAccounts();
   const network = useNetwork();
+  const knownBakers = useKnownBakers(false);
   const settings = useSettings();
   const { allContacts } = useFilteredContacts();
   const settingsRef = useRef(settings);
   const contactsOwnerAddress = getContactsOwnerAddress(allAccounts, account.publicKeyHash);
   const contactsStorageKey = buildContactsStorageKey(contactsOwnerAddress, network.id);
+  const knownValidatorAddresses = useMemo(
+    () => new Set((knownBakers ?? []).map(({ address }) => address)),
+    [knownBakers]
+  );
 
   // Keep the latest settings available for contact actions without rebuilding callbacks.
   // No cleanup is needed because this only updates an in-memory ref.
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
+
+  const isKnownValidatorAddress = useCallback(
+    (address: string) =>
+      knownValidatorAddresses.has(address) || (network.type === 'main' && isPredefinedValidatorAddress(address)),
+    [knownValidatorAddresses, network.type]
+  );
+
+  const detectContactType = useCallback(
+    (address: string, fallbackType: TempleContactApiType = 'user'): TempleContactApiType => {
+      if (isKTAddress(address)) {
+        return 'contract';
+      }
+
+      if (isKnownValidatorAddress(address)) {
+        return 'validator';
+      }
+
+      return fallbackType;
+    },
+    [isKnownValidatorAddress]
+  );
+
+  const resolveContact = useCallback(
+    (contact: Partial<TempleContact>, fallbackType?: TempleContactApiType) => {
+      const address = contact.address?.trim() ?? '';
+      const type = detectContactType(address, fallbackType);
+      const resolvedContact: TempleContact = {
+        address,
+        name: contact.name?.trim() ?? '',
+        ...(typeof contact.addedAt === 'number' ? { addedAt: contact.addedAt } : {})
+      };
+
+      return {
+        contact: resolvedContact,
+        type
+      };
+    },
+    [detectContactType]
+  );
+
+  const prepareContactsForPersistence = useCallback(
+    (contacts: TempleContact[], currentTypesByAddress?: Record<string, TempleContactApiType>) => {
+      const normalizedContacts = normalizeContacts(
+        contacts.map(contact => resolveContact(contact, currentTypesByAddress?.[contact.address.trim()]).contact)
+      );
+      const nextTypesByAddress = normalizedContacts.reduce<Record<string, TempleContactApiType>>((acc, contact) => {
+        acc[contact.address] = detectContactType(contact.address, currentTypesByAddress?.[contact.address] ?? 'user');
+
+        return acc;
+      }, {});
+
+      return {
+        contacts: normalizedContacts,
+        typesByAddress: Object.keys(nextTypesByAddress).length > 0 ? nextTypesByAddress : undefined
+      };
+    },
+    [detectContactType, resolveContact]
+  );
 
   const loadCurrentContactsState = useCallback(async () => {
     const currentSettings = settingsRef.current;
@@ -61,9 +130,12 @@ export function useContactsActions() {
       recordId = getStoredContactsRecordId(settingsRef.current, contactsStorageKey),
       typesByAddress = getStoredContactsTypesByAddress(settingsRef.current, contactsStorageKey)
     ) => {
-      const normalizedContacts = normalizeContacts(nextContacts);
+      const { contacts: normalizedContacts, typesByAddress: resolvedTypesByAddress } = prepareContactsForPersistence(
+        nextContacts,
+        typesByAddress
+      );
       let nextRecordId = recordId;
-      let nextTypesByAddress = typesByAddress;
+      let nextTypesByAddress = resolvedTypesByAddress;
 
       if (normalizedContacts.length > 0 || recordId) {
         if (!canUseEncryptedContacts(account.type)) {
@@ -76,7 +148,7 @@ export function useContactsActions() {
           contacts: normalizedContacts,
           publicKey,
           recordId,
-          typesByAddress
+          typesByAddress: resolvedTypesByAddress
         });
 
         nextRecordId = saved.recordId;
@@ -102,6 +174,7 @@ export function useContactsActions() {
       contactsStorageKey,
       ensureAuthorized,
       network.id,
+      prepareContactsForPersistence,
       revealPublicKey,
       updateSettings
     ]
@@ -117,26 +190,28 @@ export function useContactsActions() {
 
   const addContact = useCallback(
     async (cToAdd: TempleContact) => {
-      if (allContacts.some(c => c.address === cToAdd.address && c.accountInWallet)) {
+      const { contact } = resolveContact(cToAdd);
+
+      if (allContacts.some(c => c.address === contact.address && c.accountInWallet)) {
         throw new Error(getMessage('contactWithTheSameAddressAlreadyExists'));
       }
 
       await mutateContacts(sourceContacts => {
-        if (sourceContacts.some(c => c.address === cToAdd.address)) {
+        if (sourceContacts.some(c => c.address === contact.address)) {
           throw new Error(getMessage('contactWithTheSameAddressAlreadyExists'));
         }
 
-        return [cToAdd, ...sourceContacts];
+        return [contact, ...sourceContacts];
       });
     },
-    [allContacts, mutateContacts]
+    [allContacts, mutateContacts, resolveContact]
   );
 
   const addMultipleContacts = useCallback(
     async (rawContacts: Partial<TempleContact>[]) => {
       const normalized: TempleContact[] = rawContacts.map((c, i) => {
-        const name = c.name?.trim();
-        const address = c.address?.trim();
+        const { contact } = resolveContact(c);
+        const { name, address } = contact;
 
         // Required fields
         if (!name || !address) {
@@ -181,7 +256,7 @@ export function useContactsActions() {
         return [...unique, ...sourceContacts];
       });
     },
-    [allContacts, mutateContacts]
+    [allContacts, mutateContacts, resolveContact]
   );
 
   const removeContact = useCallback(

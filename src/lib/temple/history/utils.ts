@@ -49,6 +49,7 @@ type BackendHistoryNormalizationContext = {
 type MavrykHistoryOperationsGroup = {
   hash: string;
   operations: MavrykHistoryOperation[];
+  summaryOperation?: MavrykHistoryOperation;
 };
 
 const MVRK_CURRENCY = 'MVRK';
@@ -62,7 +63,6 @@ const getBackendOperationEntrypoint = (operation: MavrykHistoryOperation) =>
 
 const getBackendOperationId = (operation: MavrykHistoryOperation, fallback = 0) => operation.id ?? fallback;
 const getBackendOperationType = (operation: MavrykHistoryOperation) => operation.details?.type ?? operation.type;
-const isBackendTransactionLikeType = (type: string) => type === 'transaction' || type === 'transfer';
 const isBackendMavCurrency = (currency?: string) => {
   const normalizedCurrency = currency?.toUpperCase();
 
@@ -75,55 +75,69 @@ const normalizeBackendContractAddress = (contractAddress?: string, currency?: st
   return contractAddress;
 };
 
-const getBackendOperationPriority = (operation: MavrykHistoryOperation) => {
-  if (operation.details) return 0;
-  if (!isBackendTransactionLikeType(getBackendOperationType(operation)) && operation.role !== 'internal') return 1;
-  if (operation.role !== 'internal') return 2;
+const getBackendOperationKey = (operation: MavrykHistoryOperation) =>
+  [
+    operation.hash,
+    getBackendOperationId(operation, -1),
+    operation.type,
+    operation.role ?? '',
+    operation.counter ?? '',
+    getBackendOperationTimestamp(operation),
+    operation.sender ?? '',
+    operation.target ?? ''
+  ].join(':');
 
-  return 3;
-};
+const getNestedBackendOperations = (operation: MavrykHistoryOperation): MavrykHistoryOperation[] => {
+  if (!operation.operations?.length) {
+    return [operation];
+  }
 
-const sortMavrykHistoryOperations = (a: MavrykHistoryOperation, b: MavrykHistoryOperation) => {
-  const priorityDiff = getBackendOperationPriority(a) - getBackendOperationPriority(b);
-  if (priorityDiff !== 0) return priorityDiff;
-
-  const timestampDiff = getBackendOperationTimestamp(b).localeCompare(getBackendOperationTimestamp(a));
-  if (timestampDiff !== 0) return timestampDiff;
-
-  return getBackendOperationId(b) - getBackendOperationId(a);
+  return operation.operations.flatMap(childOperation => getNestedBackendOperations(childOperation));
 };
 
 export const groupMavrykHistoryOperations = (operations: MavrykHistoryOperation[]): MavrykHistoryOperationsGroup[] => {
-  const groups = Object.values(
-    operations.reduce<StringRecord<MavrykHistoryOperationsGroup>>((acc, operation) => {
-      if (!acc[operation.hash]) {
-        acc[operation.hash] = {
-          hash: operation.hash,
-          operations: []
-        };
+  const groupedOperations = new Map<string, MavrykHistoryOperationsGroup>();
+  const groupOrder: string[] = [];
+  const operationKeys = new Map<string, Set<string>>();
+
+  operations.forEach(operation => {
+    if (!groupedOperations.has(operation.hash)) {
+      groupedOperations.set(operation.hash, {
+        hash: operation.hash,
+        operations: [],
+        summaryOperation: operation.operations?.length ? operation : undefined
+      });
+      operationKeys.set(operation.hash, new Set());
+      groupOrder.push(operation.hash);
+    }
+
+    const group = groupedOperations.get(operation.hash);
+    const groupOperationKeys = operationKeys.get(operation.hash);
+    const normalizedOperations = getNestedBackendOperations(operation);
+
+    if (!group || !groupOperationKeys) {
+      return;
+    }
+
+    if (operation.operations?.length && !group.summaryOperation) {
+      group.summaryOperation = operation;
+    }
+
+    normalizedOperations.forEach(normalizedOperation => {
+      const operationKey = getBackendOperationKey(normalizedOperation);
+
+      if (groupOperationKeys.has(operationKey)) {
+        return;
       }
 
-      acc[operation.hash].operations.push(operation);
-
-      return acc;
-    }, {})
-  );
-
-  groups.forEach(group => {
-    group.operations.sort(sortMavrykHistoryOperations);
+      groupOperationKeys.add(operationKey);
+      group.operations.push(normalizedOperation);
+    });
   });
 
-  return groups.sort((a, b) => {
-    const firstA = a.operations[0];
-    const firstB = b.operations[0];
-
-    if (!firstA || !firstB) return 0;
-
-    const timestampDiff = getBackendOperationTimestamp(firstB).localeCompare(getBackendOperationTimestamp(firstA));
-    if (timestampDiff !== 0) return timestampDiff;
-
-    return getBackendOperationId(firstB) - getBackendOperationId(firstA);
-  });
+  return groupOrder
+    .map(hash => groupedOperations.get(hash))
+    .filter((group): group is MavrykHistoryOperationsGroup => Boolean(group));
 };
 
 const normalizeBackendFees = (fees?: MavrykHistoryNetworkFees) => {
@@ -292,7 +306,7 @@ const deriveBackendItemType = (
   items: IndividualHistoryItem[],
   address: string
 ): HistoryItemOpTypeEnum => {
-  const firstOperation = group.operations[0];
+  const firstOperation = group.summaryOperation ?? group.operations[0];
   const firstItem = items[0];
 
   if (!firstOperation) return HistoryItemOpTypeEnum.Other;
@@ -304,14 +318,18 @@ const deriveBackendItemType = (
   if (firstOperationType === 'reveal') return HistoryItemOpTypeEnum.Reveal;
 
   if (items.some(item => item.entrypoint?.toLowerCase() === 'swap')) return HistoryItemOpTypeEnum.Swap;
-  if (items.length > 1 && !firstOperation.details?.transferType) return HistoryItemOpTypeEnum.Multiple;
   if (items.some(item => item.entrypoint === 'placeSellOrder' || item.entrypoint === 'placeBuyOrder')) {
     return HistoryItemOpTypeEnum.Multiple;
   }
 
-  if (firstOperation.details?.transferType === 'sent') return HistoryItemOpTypeEnum.TransferTo;
-  if (firstOperation.details?.transferType === 'received') return HistoryItemOpTypeEnum.TransferFrom;
   if (!firstItem) return HistoryItemOpTypeEnum.Other;
+
+  if (firstOperation.details?.transferType === 'sent' && items.length === 1) {
+    return HistoryItemOpTypeEnum.TransferTo;
+  }
+  if (firstOperation.details?.transferType === 'received' && items.length === 1) {
+    return HistoryItemOpTypeEnum.TransferFrom;
+  }
 
   if (
     firstItem.source.address === address &&
@@ -321,7 +339,7 @@ const deriveBackendItemType = (
     return HistoryItemOpTypeEnum.TransferTo;
   }
 
-  if (firstItem.entrypoint !== undefined && firstItem.entrypoint !== 'transfer') {
+  if (items.some(item => item.entrypoint !== undefined && item.entrypoint !== 'transfer')) {
     return HistoryItemOpTypeEnum.Interaction;
   }
 
@@ -331,11 +349,19 @@ const deriveBackendItemType = (
       : HistoryItemOpTypeEnum.TransferTo;
   }
 
-  if (firstItem.type === HistoryItemOpTypeEnum.TransferTo && firstItem.source.address !== address) {
+  if (
+    firstItem.type === HistoryItemOpTypeEnum.TransferTo &&
+    firstItem.source.address !== address &&
+    items.length === 1
+  ) {
     return HistoryItemOpTypeEnum.TransferFrom;
   }
 
-  return firstItem.type ?? HistoryItemOpTypeEnum.Other;
+  if (firstItem.type && items.length === 1) {
+    return firstItem.type;
+  }
+
+  return HistoryItemOpTypeEnum.Interaction;
 };
 
 const reduceOneBackendOperation = (
@@ -348,7 +374,7 @@ const reduceOneBackendOperation = (
   const details = operation.details ?? undefined;
   const effectiveOperationType = getBackendOperationType(operation);
   const sourceAddress = details?.from ?? operation.parameter?.from ?? operation.sender ?? '';
-  const destinationAddress = details?.to ?? operation.parameter?.to ?? operation.target ?? '';
+  const destinationAddress = details?.to ?? details?.contract ?? operation.parameter?.to ?? operation.target ?? '';
   const source = transformToHistoryMember(sourceAddress);
   const destination = transformToHistoryMember(destinationAddress);
   const amount = details?.amount ?? operation.amount ?? operation.parameter?.amount ?? 0;
@@ -410,6 +436,7 @@ const reduceOneBackendOperation = (
         type: HistoryItemOpTypeEnum.Reveal
       };
     }
+    case 'interaction':
     case 'transaction':
     case 'transfer': {
       if (details) {
@@ -513,12 +540,17 @@ export function mavrykHistoryGroupToHistoryItem(
   group: MavrykHistoryOperationsGroup,
   context: BackendHistoryNormalizationContext
 ): UserHistoryItem {
-  const operations = [...group.operations].sort(sortMavrykHistoryOperations);
+  const operations = [...group.operations];
+  const primaryOperation = group.summaryOperation ?? operations[0];
   const historyItemOperations = operations
     .map((operation, index) => reduceOneBackendOperation(operation, index, context))
     .filter(isTruthy);
 
-  const status = deriveHistoryItemStatus(historyItemOperations.length ? historyItemOperations : [{ status: 'failed' }]);
+  const status = deriveHistoryItemStatus(
+    historyItemOperations.length
+      ? historyItemOperations
+      : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
+  );
   const type = deriveBackendItemType(group, historyItemOperations, context.address);
   const firstOperation = historyItemOperations[0];
   const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
@@ -526,7 +558,7 @@ export function mavrykHistoryGroupToHistoryItem(
   return {
     type,
     hash: group.hash,
-    addedAt: firstOperation?.addedAt ?? getBackendOperationTimestamp(operations[0]),
+    addedAt: firstOperation?.addedAt ?? (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
     status,
     operations: historyItemOperations,
     highlightedOperationIndex: 0,

@@ -123,10 +123,10 @@ export default async function fetchUserHistory(
   try {
     let nextCursor = cursor;
     let hasMore = true;
-    const collected: UserHistoryItem[] = [];
-    const seenHashes = new Set<string>();
+    let normalizedItems: UserHistoryItem[] = [];
+    const collectedOperations: Awaited<ReturnType<typeof fetchWalletHistory>>['operations'] = [];
 
-    while (collected.length < pseudoLimit && hasMore) {
+    while (hasMore) {
       const response = tokenAddress
         ? await fetchTokenHistory(tokenAddress, {
             walletAddress: account.publicKeyHash,
@@ -139,29 +139,33 @@ export default async function fetchUserHistory(
             filter: backendFilters
           });
 
-      const normalizedItems = normalizeBackendHistoryItems(
-        response.operations,
+      collectedOperations.push(...response.operations);
+
+      normalizedItems = normalizeBackendHistoryItems(
+        collectedOperations,
         account.publicKeyHash,
         requestedTypes,
         assetSlug
       );
-
-      for (const item of normalizedItems) {
-        if (!seenHashes.has(item.hash)) {
-          seenHashes.add(item.hash);
-          collected.push(item);
-        }
-      }
+      const lastVisibleHash = normalizedItems[Math.min(normalizedItems.length, pseudoLimit) - 1]?.hash;
+      const responseLastHash = response.operations[response.operations.length - 1]?.hash;
+      const shouldCompleteTrailingGroup =
+        Boolean(lastVisibleHash) && response.hasMore && responseLastHash === lastVisibleHash;
 
       if (!response.hasMore || response.cursor == null || response.cursor === nextCursor) {
         hasMore = false;
-      } else {
-        nextCursor = response.cursor;
-        hasMore = true;
+        break;
+      }
+
+      nextCursor = response.cursor;
+      hasMore = true;
+
+      if (normalizedItems.length >= pseudoLimit && !shouldCompleteTrailingGroup) {
+        break;
       }
     }
 
-    const visibleCollected = collected.slice(0, pseudoLimit);
+    const visibleCollected = normalizedItems.slice(0, pseudoLimit);
 
     if (!isFirstPage) {
       return {

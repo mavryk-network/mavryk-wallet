@@ -21,6 +21,7 @@ const HistoryOperationDetailsSchema = z
     transferType: z.string().optional(),
     from: z.string().optional(),
     to: z.string().optional(),
+    contract: z.string().optional(),
     tokenAddress: z.string().optional(),
     tokenId: NumberLikeSchema.optional(),
     timestamp: z.string().optional(),
@@ -73,6 +74,7 @@ const HistoryOperationSchema = z.object({
   newDelegate: z.string().nullable().optional(),
   originatedContract: z.string().optional(),
   contractBalance: NumberLikeSchema.optional(),
+  operations: z.array(z.unknown()).optional(),
   networkFees: HistoryNetworkFeesSchema.optional(),
   status: z.string()
 });
@@ -88,8 +90,12 @@ export type WalletHistoryFilter = 'sent' | 'received' | 'delegation' | 'staking'
 export type MavrykHistoryNetworkFees = z.infer<typeof HistoryNetworkFeesSchema>;
 export type MavrykHistoryOperationDetails = z.infer<typeof HistoryOperationDetailsSchema>;
 export type MavrykHistoryParameter = z.infer<typeof HistoryParameterSchema>;
-export type MavrykHistoryOperation = z.infer<typeof HistoryOperationSchema>;
-export type MavrykHistoryResponse = z.infer<typeof HistoryResponseSchema>;
+export type MavrykHistoryOperation = Omit<z.infer<typeof HistoryOperationSchema>, 'operations'> & {
+  operations?: MavrykHistoryOperation[];
+};
+export type MavrykHistoryResponse = Omit<z.infer<typeof HistoryResponseSchema>, 'operations'> & {
+  operations: MavrykHistoryOperation[];
+};
 
 export type FetchHistoryRequest = {
   walletAddress?: string;
@@ -118,7 +124,7 @@ async function fetchHistory(path: string, params: FetchHistoryRequest = {}) {
       params: buildHistoryParams(params)
     });
 
-    return HistoryResponseSchema.parse(data);
+    return HistoryResponseSchema.parse(data) as MavrykHistoryResponse;
   } catch (error) {
     throw new Error(extractMavrykApiErrorMessage(error));
   }

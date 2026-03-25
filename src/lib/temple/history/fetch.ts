@@ -6,7 +6,7 @@ import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
 
-import { getBackendHistoryFilters, getHistoryItemTypesFromParams } from './filterParams';
+import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
 import { HistoryItemOpTypeEnum } from './types';
 import {
@@ -116,56 +116,33 @@ export default async function fetchUserHistory(
   operationParams?: GetOperationsTransactionsParams
 ): Promise<FetchUserHistoryResult> {
   const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
-  const backendFilters = getBackendHistoryFilters(account.publicKeyHash, operationParams);
+  const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
+  const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
   const tokenAddress = getTokenAddressFromSlug(assetSlug);
   const isFirstPage = cursor == null;
 
   try {
-    let nextCursor = cursor;
-    let hasMore = true;
-    let normalizedItems: UserHistoryItem[] = [];
-    const collectedOperations: Awaited<ReturnType<typeof fetchWalletHistory>>['operations'] = [];
+    const response = tokenAddress
+      ? await fetchTokenHistory(tokenAddress, {
+          walletAddress: account.publicKeyHash,
+          cursor,
+          filter: backendFilter
+        })
+      : await fetchWalletHistory({
+          walletAddress: account.publicKeyHash,
+          cursor,
+          filter: backendFilter
+        });
 
-    while (hasMore) {
-      const response = tokenAddress
-        ? await fetchTokenHistory(tokenAddress, {
-            walletAddress: account.publicKeyHash,
-            cursor: nextCursor,
-            filter: backendFilters
-          })
-        : await fetchWalletHistory({
-            walletAddress: account.publicKeyHash,
-            cursor: nextCursor,
-            filter: backendFilters
-          });
-
-      collectedOperations.push(...response.operations);
-
-      normalizedItems = normalizeBackendHistoryItems(
-        collectedOperations,
-        account.publicKeyHash,
-        requestedTypes,
-        assetSlug
-      );
-      const lastVisibleHash = normalizedItems[Math.min(normalizedItems.length, pseudoLimit) - 1]?.hash;
-      const responseLastHash = response.operations[response.operations.length - 1]?.hash;
-      const shouldCompleteTrailingGroup =
-        Boolean(lastVisibleHash) && response.hasMore && responseLastHash === lastVisibleHash;
-
-      if (!response.hasMore || response.cursor == null || response.cursor === nextCursor) {
-        hasMore = false;
-        break;
-      }
-
-      nextCursor = response.cursor;
-      hasMore = true;
-
-      if (normalizedItems.length >= pseudoLimit && !shouldCompleteTrailingGroup) {
-        break;
-      }
-    }
-
+    const normalizedItems = normalizeBackendHistoryItems(
+      response.operations,
+      account.publicKeyHash,
+      localRequestedTypes,
+      assetSlug
+    );
     const visibleCollected = normalizedItems.slice(0, pseudoLimit);
+    const nextCursor = response.cursor;
+    const hasMore = response.hasMore;
 
     if (!isFirstPage) {
       return {

@@ -172,7 +172,6 @@ const getReturnedTransactionParams = (
   let internalOperationParams = { ...operationParams };
   const hasTarget = Boolean(internalOperationParams.target);
   const hasSender = Boolean(internalOperationParams.sender);
-  console.log(internalOperationParams, 'internalOperationParams');
 
   // params for received transactions
   if (internalOperationParams['target'] === accountAddress) {
@@ -258,15 +257,25 @@ export const getHistoryItemTypesFromParams = (
 export const getBackendHistoryFilters = (
   accountAddress: string,
   operationParams?: GetOperationsTransactionsParams
-): WalletHistoryFilter[] => {
-  if (!operationParams || !Object.keys(operationParams).length) return [];
+): WalletHistoryFilter | undefined => {
+  if (!operationParams || !Object.keys(operationParams).length) return undefined;
 
-  const filters = new Set<WalletHistoryFilter>();
+  if (operationParams.sender === accountAddress) return 'sent';
+  if (operationParams.target === accountAddress) return 'received';
+  if (operationParams.type?.includes('delegation')) return 'delegation';
+  if (operationParams.type?.includes('staking')) return 'staking';
+  if (operationParams.type?.includes('origination')) return 'origination';
+  if (operationParams.type?.includes('reveal')) return 'reveal';
+  if (operationParams.entrypoint === 'swap') return 'interaction';
+  if (operationParams['entrypoint.ne'] === 'transfer' || operationParams['entrypoint.null'] === false) {
+    return 'interaction';
+  }
 
-  if (operationParams.type?.includes('delegation')) filters.add('delegation');
-  if (operationParams.type?.includes('staking')) filters.add('staking');
-  if (operationParams.sender === accountAddress) filters.add('sent');
-  if (operationParams.target === accountAddress) filters.add('received');
+  return undefined;
+};
 
-  return Array.from(filters);
+export const shouldApplyLocalTypeFilter = (operationParams?: GetOperationsTransactionsParams) => {
+  if (!operationParams || !Object.keys(operationParams).length) return false;
+
+  return operationParams.entrypoint === 'swap' || operationParams.type?.includes('other') === true;
 };

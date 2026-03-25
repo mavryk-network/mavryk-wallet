@@ -86,7 +86,14 @@ const HistoryResponseSchema = z.object({
   hasMore: z.boolean()
 });
 
-export type WalletHistoryFilter = 'sent' | 'received' | 'delegation' | 'staking';
+export type WalletHistoryFilter =
+  | 'sent'
+  | 'received'
+  | 'delegation'
+  | 'staking'
+  | 'origination'
+  | 'reveal'
+  | 'interaction';
 export type MavrykHistoryNetworkFees = z.infer<typeof HistoryNetworkFeesSchema>;
 export type MavrykHistoryOperationDetails = z.infer<typeof HistoryOperationDetailsSchema>;
 export type MavrykHistoryParameter = z.infer<typeof HistoryParameterSchema>;
@@ -101,7 +108,7 @@ export type FetchHistoryRequest = {
   walletAddress?: string;
   cursor?: number;
   search?: string;
-  filter?: WalletHistoryFilter[];
+  filter?: WalletHistoryFilter;
 };
 
 async function getWalletAddressOrThrow(walletAddress?: string) {
@@ -114,7 +121,7 @@ function buildHistoryParams(params: FetchHistoryRequest) {
   return {
     cursor: params.cursor,
     search: params.search,
-    filter: params.filter?.length ? params.filter.join(',') : undefined
+    filter: params.filter
   };
 }
 

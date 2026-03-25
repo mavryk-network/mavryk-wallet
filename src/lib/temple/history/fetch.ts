@@ -12,11 +12,10 @@ import { HistoryItemOpTypeEnum } from './types';
 import {
   buildStorageKeyForTx,
   CustomPendingOperation,
+  groupMavrykHistoryOperations,
   mavrykHistoryGroupToHistoryItem,
   operationsGroupToHistoryItem
 } from './utils';
-
-const MAX_BACKEND_PAGE_SIZE = 20;
 
 export type FetchUserHistoryResult = {
   items: UserHistoryItem[];
@@ -52,6 +51,23 @@ function getTokenAddressFromSlug(assetSlug?: string) {
   return assetSlug.split('_')[0];
 }
 
+function normalizeBackendHistoryItems(
+  operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
+  accountAddress: string,
+  requestedTypes: HistoryItemOpTypeEnum[],
+  assetSlug?: string
+) {
+  return applyLocalTypeFilter(
+    groupMavrykHistoryOperations(operations).map(group =>
+      mavrykHistoryGroupToHistoryItem(group, {
+        address: accountAddress,
+        assetSlug
+      })
+    ),
+    requestedTypes
+  );
+}
+
 async function fetchPendingHistoryItems(chainId: TzktApiChainId, account: TempleAccount) {
   const storageKey = buildStorageKeyForTx(account.publicKeyHash, chainId);
   const pendingOperations = (await fetchFromStorage<CustomPendingOperation[]>(storageKey)) ?? [];
@@ -76,21 +92,14 @@ export async function fetchUserOperationByHash(
     const response = tokenAddress
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: accountAddress,
-          search: hash,
-          limit: 20
+          search: hash
         })
       : await fetchWalletHistory({
           walletAddress: accountAddress,
-          search: hash,
-          limit: 20
+          search: hash
         });
 
-    return response.operations.map(group =>
-      mavrykHistoryGroupToHistoryItem(group, {
-        address: accountAddress,
-        assetSlug
-      })
-    );
+    return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug);
   } catch (error) {
     console.error('Error while fetching user operation by hash:', error);
     return [];
@@ -118,29 +127,23 @@ export default async function fetchUserHistory(
     const seenHashes = new Set<string>();
 
     while (collected.length < pseudoLimit && hasMore) {
-      const limit = Math.min(MAX_BACKEND_PAGE_SIZE, pseudoLimit - collected.length);
       const response = tokenAddress
         ? await fetchTokenHistory(tokenAddress, {
             walletAddress: account.publicKeyHash,
-            limit,
             cursor: nextCursor,
             filter: backendFilters
           })
         : await fetchWalletHistory({
             walletAddress: account.publicKeyHash,
-            limit,
             cursor: nextCursor,
             filter: backendFilters
           });
 
-      const normalizedItems = applyLocalTypeFilter(
-        response.operations.map(group =>
-          mavrykHistoryGroupToHistoryItem(group, {
-            address: account.publicKeyHash,
-            assetSlug
-          })
-        ),
-        requestedTypes
+      const normalizedItems = normalizeBackendHistoryItems(
+        response.operations,
+        account.publicKeyHash,
+        requestedTypes,
+        assetSlug
       );
 
       for (const item of normalizedItems) {
@@ -158,9 +161,11 @@ export default async function fetchUserHistory(
       }
     }
 
+    const visibleCollected = collected.slice(0, pseudoLimit);
+
     if (!isFirstPage) {
       return {
-        items: collected,
+        items: visibleCollected,
         cursor: nextCursor,
         hasMore
       };
@@ -169,13 +174,13 @@ export default async function fetchUserHistory(
     const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
     if (!pendingItems.length) {
       return {
-        items: collected,
+        items: visibleCollected,
         cursor: nextCursor,
         hasMore
       };
     }
 
-    const confirmedHashes = new Set(collected.map(item => item.hash));
+    const confirmedHashes = new Set(visibleCollected.map(item => item.hash));
     const filteredPendingOperations = pendingOperations.filter(
       operation => !confirmedHashes.has(operation?.hash ?? '')
     );
@@ -190,7 +195,7 @@ export default async function fetchUserHistory(
     );
 
     return {
-      items: [...filteredPendingItems, ...collected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
+      items: [...filteredPendingItems, ...visibleCollected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
       cursor: nextCursor,
       hasMore
     };

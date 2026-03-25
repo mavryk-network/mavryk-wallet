@@ -116,7 +116,7 @@ export const AddOrImportAccount: FC = () => {
       <div
         className={clsx('w-full mx-auto h-full flex flex-col justify-start', popup ? 'max-w-sm' : 'max-w-screen-xxs')}
       >
-        <p className="mb-4 text-sm text-white leading-none">
+        <p className="mb-4 text-sm text-cleanWhite leading-none">
           <T id="addOrImportAccountDescfiption" />
         </p>
         <div className="flex flex-col gap-3 items-stretch pb-4">
@@ -147,20 +147,20 @@ const AddOrImportAccountCard: FC<AddOrImportAccountCardProps> = ({ route, hovere
         className="mb-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
         style={{ backgroundColor: route.theme.accentColor }}
       >
-        <route.Icon className="h-6 w-6 text-white" />
+        <route.Icon className="h-6 w-6 text-cleanWhite" />
       </div>
 
       <div className="flex flex-col gap-2 w-full">
-        <p className="text-sm font-bold text-white leading-none">
+        <p className="text-sm font-bold text-cleanWhite leading-none capitalize">
           <T id={route.i18nKey} />
         </p>
 
-        <p className="text-sm text-white leading-none">{route.description}</p>
+        <p className="text-sm text-cleanWhite leading-none">{route.description}</p>
 
         {route.tags?.length ? (
           <div className="flex flex-wrap gap-1">
             {route.tags.map(tag => (
-              <span key={tag} className="rounded px-1 py-0.5 text-white" style={BADGE_STYLE}>
+              <span key={tag} className="rounded px-1 py-0.5 text-cleanWhite" style={BADGE_STYLE}>
                 <span className="text-xs" style={BADGE_COPY_STYLE}>
                   <T id={tag} />
                 </span>

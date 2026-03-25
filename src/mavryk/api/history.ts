@@ -10,9 +10,32 @@ const HistoryNetworkFeesSchema = z.object({
   totalFee: NumberLikeSchema,
   usdAmount: NumberLikeSchema.optional(),
   gasFee: NumberLikeSchema,
+  bakerFee: NumberLikeSchema.optional(),
   storageFee: NumberLikeSchema,
   burnedFromFees: NumberLikeSchema
 });
+
+const HistoryOperationDetailsSchema = z
+  .object({
+    type: z.string().optional(),
+    transferType: z.string().optional(),
+    from: z.string().optional(),
+    to: z.string().optional(),
+    tokenAddress: z.string().optional(),
+    tokenId: NumberLikeSchema.optional(),
+    timestamp: z.string().optional(),
+    amount: NumberLikeSchema.optional(),
+    currency: z.string().optional(),
+    usdAmount: NumberLikeSchema.optional(),
+    entrypoint: z.string().optional(),
+    action: z.string().optional(),
+    baker: z.string().optional(),
+    prevDelegate: z.string().nullable().optional(),
+    newDelegate: z.string().nullable().optional(),
+    originatedContract: z.string().optional(),
+    contractBalance: NumberLikeSchema.optional()
+  })
+  .passthrough();
 
 const HistoryParameterSchema = z
   .object({
@@ -21,53 +44,55 @@ const HistoryParameterSchema = z
     currency: z.string().optional(),
     usdAmount: NumberLikeSchema.optional(),
     from: z.string().optional(),
-    to: z.string().optional()
+    to: z.string().optional(),
+    value: z.unknown().optional()
   })
   .passthrough();
 
 const HistoryOperationSchema = z.object({
-  id: NumberLikeSchema,
+  id: NumberLikeSchema.optional(),
   hash: z.string(),
   type: z.string(),
+  role: z.string().optional(),
+  block: z.string().optional(),
   level: NumberLikeSchema.optional(),
-  timestamp: z.string(),
+  counter: NumberLikeSchema.optional(),
+  timestamp: z.string().optional(),
   sender: z.string().optional(),
   target: z.string().optional(),
   amount: NumberLikeSchema.optional(),
   parameter: HistoryParameterSchema.nullish(),
+  details: HistoryOperationDetailsSchema.nullish(),
+  gasLimit: NumberLikeSchema.optional(),
+  gasUsed: NumberLikeSchema.optional(),
+  storageLimit: NumberLikeSchema.optional(),
+  storageUsed: NumberLikeSchema.optional(),
+  action: z.string().optional(),
+  baker: z.string().optional(),
+  prevDelegate: z.string().nullable().optional(),
+  newDelegate: z.string().nullable().optional(),
+  originatedContract: z.string().optional(),
+  contractBalance: NumberLikeSchema.optional(),
   networkFees: HistoryNetworkFeesSchema.optional(),
   status: z.string()
 });
 
-const HistoryGroupSchema = z.object({
-  type: z.string(),
-  hash: z.string(),
-  timestamp: z.string(),
-  amount: NumberLikeSchema.optional(),
-  parameter: HistoryParameterSchema.nullish(),
-  networkFees: HistoryNetworkFeesSchema.optional(),
-  transferType: z.string().optional(),
-  status: z.string(),
-  operations: z.array(HistoryOperationSchema)
-});
-
 const HistoryResponseSchema = z.object({
   walletAddress: z.string(),
-  operations: z.array(HistoryGroupSchema),
+  operations: z.array(HistoryOperationSchema),
   cursor: NumberLikeSchema.nullish(),
   hasMore: z.boolean()
 });
 
 export type WalletHistoryFilter = 'sent' | 'received' | 'delegation' | 'staking';
 export type MavrykHistoryNetworkFees = z.infer<typeof HistoryNetworkFeesSchema>;
+export type MavrykHistoryOperationDetails = z.infer<typeof HistoryOperationDetailsSchema>;
 export type MavrykHistoryParameter = z.infer<typeof HistoryParameterSchema>;
 export type MavrykHistoryOperation = z.infer<typeof HistoryOperationSchema>;
-export type MavrykHistoryGroup = z.infer<typeof HistoryGroupSchema>;
 export type MavrykHistoryResponse = z.infer<typeof HistoryResponseSchema>;
 
 export type FetchHistoryRequest = {
   walletAddress?: string;
-  limit?: number;
   cursor?: number;
   search?: string;
   filter?: WalletHistoryFilter[];
@@ -81,7 +106,6 @@ async function getWalletAddressOrThrow(walletAddress?: string) {
 
 function buildHistoryParams(params: FetchHistoryRequest) {
   return {
-    limit: params.limit,
     cursor: params.cursor,
     search: params.search,
     filter: params.filter?.length ? params.filter.join(',') : undefined

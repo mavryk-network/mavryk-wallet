@@ -41,6 +41,7 @@ import {
   alterIpfsUrl,
   deriveStatusColorClassName,
   getAssetsFromOperations,
+  getHistoryOperationAddress,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
 } from './utils';
@@ -375,7 +376,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.Delegation:
         const opDelegate = item as HistoryItemDelegationOp;
 
-        const delegateAddress = opDelegate.newDelegate?.address || opDelegate.source.address;
+        const delegateAddress = getHistoryOperationAddress(opDelegate, historyItem);
         const delegateBaker = getPredefinedBaker(delegateAddress);
 
         return {
@@ -386,7 +387,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.Staking:
         const opStaking = item as HistoryItemStakingOp;
 
-        const stakingAddress = opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address;
+        const stakingAddress = getHistoryOperationAddress(opStaking, historyItem);
         const stakingBaker = getPredefinedBaker(stakingAddress);
 
         return {
@@ -399,13 +400,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opOriginate = item as HistoryItemOriginationOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opOriginate.originatedContract?.address
+          address: getHistoryOperationAddress(opOriginate, historyItem)
         };
 
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = item as HistoryItemTransactionOp;
 
-        const interactionAddress = opInteract.destination.address;
+        const interactionAddress = getHistoryOperationAddress(opInteract, historyItem);
         const interactionBaker = getPredefinedBaker(interactionAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -417,13 +418,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
 
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opSwap.destination.address
+          address: getHistoryOperationAddress(opSwap, historyItem)
         };
 
       case HistoryItemOpTypeEnum.TransferFrom:
         const opFrom = item as HistoryItemTransactionOp;
 
-        const transferFromAddress = opFrom.source.address;
+        const transferFromAddress = getHistoryOperationAddress(opFrom, historyItem);
         const transferFromBaker = getPredefinedBaker(transferFromAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -434,7 +435,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = item as HistoryItemTransactionOp;
 
-        const transferToAddress = opTo.destination.address;
+        const transferToAddress = getHistoryOperationAddress(opTo, historyItem);
         const transferToBaker = getPredefinedBaker(transferToAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -445,14 +446,14 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opReveal = item as HistoryItemTransactionOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opReveal.destination.address
+          address: getHistoryOperationAddress(opReveal, historyItem)
         };
 
       // Other
       default:
         const opOther = item as HistoryItemOtherOp;
 
-        const otherAddress = opOther.destination?.address || opOther.source.address || opOther.hash;
+        const otherAddress = getHistoryOperationAddress(opOther, historyItem);
         const otherBaker = getPredefinedBaker(otherAddress);
 
         return {

@@ -102,6 +102,7 @@ const OperationView: FC<OperationViewProps> = ({
 
   const [spFormat, setSpFormat] = useState(signPayloadFormats[0]);
 
+  // derived state for confirm_operations data
   const isOperationPayload = payload.type === 'confirm_operations';
   const estimates = isOperationPayload ? payload.estimates : undefined;
   const gasFeeError = useMemo(

@@ -17,18 +17,16 @@ export const AddBanner: FC<{ text: TID }> = ({ text }) => (
 
 export const DelegatePeriodBanner = () => {
   const account = useAccount();
+  const { data, isLoading } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const {
-    data: {
-      isInDelegationPeriod,
-      isInUnlockPeriod,
-      hasUnlockPeriodPassed,
-      unlockWaitTime,
-      delegationWaitTime,
-      isInCostakePeriod,
-      costakeWaitTime
-    },
-    isLoading
-  } = useAccountDelegatePeriodStats(account.publicKeyHash);
+    isInDelegationPeriod = false,
+    isInUnlockPeriod = false,
+    hasUnlockPeriodPassed = false,
+    unlockWaitTime,
+    delegationWaitTime,
+    isInCostakePeriod = false,
+    costakeWaitTime
+  } = data ?? {};
 
   const labelInfo = useMemo(() => {
     if (isInCostakePeriod) {

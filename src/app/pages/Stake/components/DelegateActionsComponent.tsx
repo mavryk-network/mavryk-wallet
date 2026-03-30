@@ -28,7 +28,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const chainId = useChainId();
   const tezos = useTezos();
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
-  const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance, myBakerPkh } = data;
+  const { canRedelegate, canCostake, canUnlock, stakedBalance = 0, unstakedBalance = 0, myBakerPkh } = data ?? {};
   const delegateLabel = getDelegateLabel(data);
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 

@@ -106,8 +106,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     }));
   }, [rawExpensesData]);
 
-  const estimates = payload.type === 'operations' ? payload.estimates : undefined;
   const isOperationPayload = payload.type === 'operations';
+  const estimates = isOperationPayload ? payload.estimates : undefined;
 
   const { value: tezBalanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const tezBalance = tezBalanceData!;

@@ -91,229 +91,135 @@ interface AssetsActions {
 
 export type AssetsStore = AssetsState & AssetsActions;
 
+// ---- Asset actions factory ------------------------------------------------
+
+type StoreSet = (partial: AssetsStore | Partial<AssetsStore> | ((state: AssetsStore) => AssetsStore | Partial<AssetsStore>)) => void;
+
+/**
+ * Generates the four standard actions for an asset type (tokens/collectibles/rwas).
+ * Pass removeStale=false for tokens (API returns only changed assets), true for collectibles/rwas.
+ */
+function createAssetActions(
+  assetKey: 'tokens' | 'collectibles' | 'rwas',
+  loadingKey: 'tokensLoading' | 'collectiblesLoading' | 'rwasLoading',
+  removeStale: boolean,
+  set: StoreSet
+) {
+  return {
+    setLoading: (loading: boolean) => set({ [loadingKey]: loading } as Partial<AssetsStore>),
+
+    loadSuccess: (account: string, chainId: string, slugs: string[]) =>
+      set(state => {
+        const key = getAccountAssetsStoreKey(account, chainId);
+        const existing = state[assetKey][key] ?? {};
+        const updated = { ...existing };
+
+        if (removeStale) {
+          for (const [slug, stored] of Object.entries(updated)) {
+            if (stored.manual || stored.status !== 'idle') continue;
+            if (!slugs.includes(slug)) delete updated[slug];
+          }
+        }
+
+        for (const slug of slugs) {
+          if (!updated[slug]) updated[slug] = { status: 'idle' };
+        }
+
+        return { [assetKey]: { ...state[assetKey], [key]: updated }, [loadingKey]: false } as Partial<AssetsStore>;
+      }),
+
+    setStatus: ({ account, chainId, slug, status }: AccountAssetForStore) =>
+      set(state => {
+        const key = getAccountAssetsStoreKey(account, chainId);
+        const accountAssets = state[assetKey][key];
+        if (!accountAssets?.[slug]) return state;
+
+        return {
+          [assetKey]: {
+            ...state[assetKey],
+            [key]: { ...accountAssets, [slug]: { ...accountAssets[slug], status } }
+          }
+        } as Partial<AssetsStore>;
+      }),
+
+    putAsIs: (assets: AssetToPut[]) =>
+      set(state => {
+        const updated = { ...state[assetKey] };
+
+        for (const { slug, account, chainId, status, manual } of assets) {
+          const key = getAccountAssetsStoreKey(account, chainId);
+          if (!updated[key]) updated[key] = {};
+          else updated[key] = { ...updated[key] };
+          updated[key][slug] = { status, manual };
+        }
+
+        return { [assetKey]: updated } as Partial<AssetsStore>;
+      })
+  };
+}
+
 // ---- Store ----------------------------------------------------------------
 
 export const assetsStore = createStore<AssetsStore>()(
   persist(
-    set => ({
-      // --- Initial state ---
-      tokens: {},
-      tokensLoading: false,
+    set => {
+      const tokens = createAssetActions('tokens', 'tokensLoading', false, set);
+      const collectibles = createAssetActions('collectibles', 'collectiblesLoading', true, set);
+      const rwas = createAssetActions('rwas', 'rwasLoading', true, set);
 
-      collectibles: {},
-      collectiblesLoading: false,
+      return {
+        // --- Initial state ---
+        tokens: {},
+        tokensLoading: false,
+        collectibles: {},
+        collectiblesLoading: false,
+        rwas: {},
+        rwasLoading: false,
+        mainnetWhitelist: [],
+        mainnetWhitelistLoading: false,
+        mainnetScamlist: {},
+        mainnetScamlistLoading: false,
 
-      rwas: {},
-      rwasLoading: false,
+        // --- Token actions ---
+        setTokensLoading: tokens.setLoading,
+        loadAccountTokensSuccess: tokens.loadSuccess,
+        setTokenStatus: tokens.setStatus,
+        putTokensAsIs: tokens.putAsIs,
 
-      mainnetWhitelist: [],
-      mainnetWhitelistLoading: false,
+        // --- Collectibles actions ---
+        setCollectiblesLoading: collectibles.setLoading,
+        loadAccountCollectiblesSuccess: collectibles.loadSuccess,
+        setCollectibleStatus: collectibles.setStatus,
+        putCollectiblesAsIs: collectibles.putAsIs,
 
-      mainnetScamlist: {},
-      mainnetScamlistLoading: false,
+        // --- RWAs actions ---
+        setRwasLoading: rwas.setLoading,
+        loadAccountRwasSuccess: rwas.loadSuccess,
+        setRwaStatus: rwas.setStatus,
+        putRwasAsIs: rwas.putAsIs,
 
-      // --- Tokens actions ---
-      setTokensLoading: loading => set({ tokensLoading: loading }),
+        // --- Whitelist ---
+        setWhitelistLoading: loading => set({ mainnetWhitelistLoading: loading }),
 
-      loadAccountTokensSuccess: (account, chainId, slugs) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const existing = state.tokens[key] ?? {};
-          const updated = { ...existing };
+        loadWhitelistSuccess: tokens =>
+          set(state => {
+            const updatedWhitelist = [...state.mainnetWhitelist];
 
-          for (const slug of slugs) {
-            if (!updated[slug]) {
-              updated[slug] = { status: 'idle' };
+            for (const token of tokens) {
+              if (token.contractAddress === MAV_TOKEN_SLUG) continue;
+              const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
+              if (!updatedWhitelist.includes(slug)) updatedWhitelist.push(slug);
             }
-          }
 
-          return {
-            tokens: { ...state.tokens, [key]: updated },
-            tokensLoading: false
-          };
-        }),
+            return { mainnetWhitelist: updatedWhitelist, mainnetWhitelistLoading: false };
+          }),
 
-      setTokenStatus: ({ account, chainId, slug, status }) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const accountTokens = state.tokens[key];
-          if (!accountTokens?.[slug]) return state;
+        // --- Scamlist ---
+        setScamlistLoading: loading => set({ mainnetScamlistLoading: loading }),
 
-          return {
-            tokens: {
-              ...state.tokens,
-              [key]: {
-                ...accountTokens,
-                [slug]: { ...accountTokens[slug], status }
-              }
-            }
-          };
-        }),
-
-      putTokensAsIs: assets =>
-        set(state => {
-          const updated = { ...state.tokens };
-
-          for (const { slug, account, chainId, status, manual } of assets) {
-            const key = getAccountAssetsStoreKey(account, chainId);
-            if (!updated[key]) updated[key] = {};
-            else updated[key] = { ...updated[key] };
-            updated[key][slug] = { status, manual };
-          }
-
-          return { tokens: updated };
-        }),
-
-      // --- Collectibles actions ---
-      setCollectiblesLoading: loading => set({ collectiblesLoading: loading }),
-
-      loadAccountCollectiblesSuccess: (account, chainId, slugs) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const existing = state.collectibles[key] ?? {};
-          const updated = { ...existing };
-
-          // Remove no-longer owned collectibles (if not 'idle' or added manually)
-          for (const [slug, stored] of Object.entries(updated)) {
-            if (stored.manual || stored.status !== 'idle') continue;
-            if (!slugs.includes(slug)) {
-              const { [slug]: _removed, ...rest } = updated;
-              Object.assign(updated, rest);
-              delete updated[slug];
-            }
-          }
-
-          for (const slug of slugs) {
-            if (!updated[slug]) {
-              updated[slug] = { status: 'idle' };
-            }
-          }
-
-          return {
-            collectibles: { ...state.collectibles, [key]: updated },
-            collectiblesLoading: false
-          };
-        }),
-
-      setCollectibleStatus: ({ account, chainId, slug, status }) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const accountCollectibles = state.collectibles[key];
-          if (!accountCollectibles?.[slug]) return state;
-
-          return {
-            collectibles: {
-              ...state.collectibles,
-              [key]: {
-                ...accountCollectibles,
-                [slug]: { ...accountCollectibles[slug], status }
-              }
-            }
-          };
-        }),
-
-      putCollectiblesAsIs: assets =>
-        set(state => {
-          const updated = { ...state.collectibles };
-
-          for (const { slug, account, chainId, status, manual } of assets) {
-            const key = getAccountAssetsStoreKey(account, chainId);
-            if (!updated[key]) updated[key] = {};
-            else updated[key] = { ...updated[key] };
-            updated[key][slug] = { status, manual };
-          }
-
-          return { collectibles: updated };
-        }),
-
-      // --- RWAs actions ---
-      setRwasLoading: loading => set({ rwasLoading: loading }),
-
-      loadAccountRwasSuccess: (account, chainId, slugs) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const existing = state.rwas[key] ?? {};
-          const updated = { ...existing };
-
-          // Remove no-longer owned RWAs (if not 'idle' or added manually)
-          for (const [slug, stored] of Object.entries(updated)) {
-            if (stored.manual || stored.status !== 'idle') continue;
-            if (!slugs.includes(slug)) {
-              delete updated[slug];
-            }
-          }
-
-          for (const slug of slugs) {
-            if (!updated[slug]) {
-              updated[slug] = { status: 'idle' };
-            }
-          }
-
-          return {
-            rwas: { ...state.rwas, [key]: updated },
-            rwasLoading: false
-          };
-        }),
-
-      setRwaStatus: ({ account, chainId, slug, status }) =>
-        set(state => {
-          const key = getAccountAssetsStoreKey(account, chainId);
-          const accountRwas = state.rwas[key];
-          if (!accountRwas?.[slug]) return state;
-
-          return {
-            rwas: {
-              ...state.rwas,
-              [key]: {
-                ...accountRwas,
-                [slug]: { ...accountRwas[slug], status }
-              }
-            }
-          };
-        }),
-
-      putRwasAsIs: assets =>
-        set(state => {
-          const updated = { ...state.rwas };
-
-          for (const { slug, account, chainId, status, manual } of assets) {
-            const key = getAccountAssetsStoreKey(account, chainId);
-            if (!updated[key]) updated[key] = {};
-            else updated[key] = { ...updated[key] };
-            updated[key][slug] = { status, manual };
-          }
-
-          return { rwas: updated };
-        }),
-
-      // --- Whitelist ---
-      setWhitelistLoading: loading => set({ mainnetWhitelistLoading: loading }),
-
-      loadWhitelistSuccess: tokens =>
-        set(state => {
-          const updatedWhitelist = [...state.mainnetWhitelist];
-
-          for (const token of tokens) {
-            if (token.contractAddress === MAV_TOKEN_SLUG) continue;
-            const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
-            if (!updatedWhitelist.includes(slug)) updatedWhitelist.push(slug);
-          }
-
-          return {
-            mainnetWhitelist: updatedWhitelist,
-            mainnetWhitelistLoading: false
-          };
-        }),
-
-      // --- Scamlist ---
-      setScamlistLoading: loading => set({ mainnetScamlistLoading: loading }),
-
-      loadScamlistSuccess: slugs =>
-        set({
-          mainnetScamlist: slugs,
-          mainnetScamlistLoading: false
-        })
-    }),
+        loadScamlistSuccess: slugs => set({ mainnetScamlist: slugs, mainnetScamlistLoading: false })
+      };
+    },
     {
       name: 'zustand-assets',
       storage: createThrottledPersistStorage(),

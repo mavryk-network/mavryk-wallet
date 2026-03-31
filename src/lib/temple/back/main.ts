@@ -22,8 +22,14 @@ export const start = async () => {
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
 
+  let broadcastPending = false;
   store.subscribe(() => {
-    intercom.broadcast({ type: TempleMessageType.StateUpdated });
+    if (broadcastPending) return;
+    broadcastPending = true;
+    queueMicrotask(() => {
+      broadcastPending = false;
+      intercom.broadcast({ type: TempleMessageType.StateUpdated });
+    });
   });
 };
 

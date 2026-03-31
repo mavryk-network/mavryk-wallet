@@ -51,7 +51,7 @@ export const intercom = new IntercomClient();
 // useEffect that would trigger the initial state fetch from ever firing.
 startIntercomSync(intercom);
 
-export const [TempleClientProvider, useTempleClient] = constate(() => {
+const useTempleClientImpl = () => {
   /**
    * State — now reads from Zustand walletStore (synced via intercom-sync.ts).
    * The Suspense hook throws a promise until the initial state fetch completes.
@@ -462,6 +462,40 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     removeAllDAppSessions,
     removeDAppSession
   };
+};
+
+export const [
+  TempleClientProvider,
+  useTempleState,
+  useTempleWallet,
+  useTempleAccounts,
+  useTempleImport,
+  useTempleDApp,
+  useTempleConfirm,
+  useTempleSigner,
+  useTempleSettings
+] = constate(
+  useTempleClientImpl,
+  v => ({ state: v.state, status: v.status, defaultNetworks: v.defaultNetworks, customNetworks: v.customNetworks, networks: v.networks, walletsSpecs: v.walletsSpecs, accounts: v.accounts, settings: v.settings, idle: v.idle, locked: v.locked, ready: v.ready }),
+  v => ({ registerWallet: v.registerWallet, unlock: v.unlock, lock: v.lock, createAccount: v.createAccount, revealPrivateKey: v.revealPrivateKey, revealMnemonic: v.revealMnemonic, generateSyncPayload: v.generateSyncPayload, updateAccountKYCStatus: v.updateAccountKYCStatus }),
+  v => ({ removeAccount: v.removeAccount, editAccountName: v.editAccountName, findFreeHdIndex: v.findFreeHdIndex }),
+  v => ({ importAccount: v.importAccount, importMnemonicAccount: v.importMnemonicAccount, importFundraiserAccount: v.importFundraiserAccount, importKTManagedAccount: v.importKTManagedAccount, importWatchOnlyAccount: v.importWatchOnlyAccount, createLedgerAccount: v.createLedgerAccount, createOrImportWallet: v.createOrImportWallet }),
+  v => ({ getAllDAppSessions: v.getAllDAppSessions, removeAllDAppSessions: v.removeAllDAppSessions, removeDAppSession: v.removeDAppSession, confirmDAppPermission: v.confirmDAppPermission, confirmDAppOperation: v.confirmDAppOperation, confirmDAppSign: v.confirmDAppSign, getDAppPayload: v.getDAppPayload }),
+  v => ({ confirmation: v.confirmation, resetConfirmation: v.resetConfirmation, confirmInternal: v.confirmInternal }),
+  v => ({ createWebMavrykWallet: v.createWebMavrykWallet, createWebMavrykSigner: v.createWebMavrykSigner }),
+  v => ({ updateSettings: v.updateSettings, removeHdGroup: v.removeHdGroup, removeAccountsByType: v.removeAccountsByType, editHdGroupName: v.editHdGroupName })
+);
+
+/** Backwards-compatible shim — keeps all existing consumers working without changes. */
+export const useTempleClient = () => ({
+  ...useTempleState(),
+  ...useTempleWallet(),
+  ...useTempleAccounts(),
+  ...useTempleImport(),
+  ...useTempleDApp(),
+  ...useTempleConfirm(),
+  ...useTempleSigner(),
+  ...useTempleSettings()
 });
 
 type WebMavrykWalletOps = {

@@ -370,7 +370,6 @@ export class Vault {
       try {
         await fetchAndDecryptOne<any>(checkStrgKey, passKey);
       } catch (error) {
-        console.error(error);
         doThrow();
       }
       return { passHash, passKey };
@@ -813,7 +812,7 @@ export class Vault {
       try {
         return await batch.send();
       } catch (err: any) {
-        console.error(err);
+        console.error('Operation send failed:', err.message);
 
         switch (true) {
           case err instanceof PublicError:

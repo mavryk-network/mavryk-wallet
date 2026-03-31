@@ -59,7 +59,7 @@ type DelegateFormProps = {
   unfamiliarWithDelegation: boolean;
   isFromCoStakeNavigation: boolean;
   isReDelegationActive: boolean;
-  avtivateReDelegation: () => void;
+  activateReDelegation: () => void;
   setToolbarRightSidedComponent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 };
 
@@ -68,7 +68,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   unfamiliarWithDelegation,
   isFromCoStakeNavigation,
   isReDelegationActive,
-  avtivateReDelegation
+  activateReDelegation
 }) => {
   const { registerBackHandler } = useAppEnv();
   const formAnalytics = useFormAnalytics('DelegateForm');
@@ -87,7 +87,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const myBakerPkh = accStats?.delegate?.address ?? null;
 
   const { value: balanceData } = useBalance(MAV_TOKEN_SLUG, accountPkh);
-  const balance = balanceData!;
+  const balance = balanceData ?? new BigNumber(0);
   const balanceNum = balance?.toNumber() ?? ZERO;
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
@@ -390,7 +390,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         />
       )}
       {!unfamiliarWithDelegation && myBakerPkh && !isReDelegationActive && (
-        <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} avtivateReDelegation={avtivateReDelegation} />
+        <AdvancedBakerBannerComponent bakerAddress={myBakerPkh} activateReDelegation={activateReDelegation} />
       )}
       {operation && <OperationStatus typeTitle={t('staking')} operation={operation} className="mb-8" />}
       {isReDelegationActive && (

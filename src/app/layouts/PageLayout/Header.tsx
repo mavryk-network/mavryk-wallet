@@ -18,7 +18,6 @@ import { SettingButton, SettingsDropdown, SettingsPopup } from './Header/Setting
 import styles from './Header.module.css';
 
 const Header: FC = () => {
-  const { fullPage } = useAppEnv();
   const { ready } = useTempleClient();
 
   return (

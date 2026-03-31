@@ -62,8 +62,8 @@ export const BakerBannerComponent: React.FC<BakerBannerComponentProps> = ({ tzEr
 
 export const AdvancedBakerBannerComponent: React.FC<{
   bakerAddress: string;
-  avtivateReDelegation: () => void;
-}> = ({ bakerAddress, avtivateReDelegation }) => {
+  activateReDelegation: () => void;
+}> = ({ bakerAddress, activateReDelegation }) => {
   const { data: baker } = useKnownBaker(bakerAddress || null);
 
   return baker ? (
@@ -75,7 +75,7 @@ export const AdvancedBakerBannerComponent: React.FC<{
           <ExternalLinkIcon className="w-6 h-6 text-white fill-current" />
         </Anchor>
       </div>
-      <DelegateActionsComponent avtivateReDelegation={avtivateReDelegation} />
+      <DelegateActionsComponent activateReDelegation={activateReDelegation} />
       <Divider className="my-6" color="bg-divider" ignoreParent />
     </div>
   ) : null;

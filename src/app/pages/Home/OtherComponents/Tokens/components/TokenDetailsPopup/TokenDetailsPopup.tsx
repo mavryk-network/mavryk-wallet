@@ -261,7 +261,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
             style={{ width: undefined }}
             extraComponent={
               <div className="mt-3">
-                <DelegateActionsComponent avtivateReDelegation={handleRedelegateClick} />
+                <DelegateActionsComponent activateReDelegation={handleRedelegateClick} />
               </div>
             }
           />

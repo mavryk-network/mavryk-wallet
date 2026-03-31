@@ -18,7 +18,7 @@ import { RedelegatePopup } from '../popups/Redelegate.popup';
 import { UnlockPopup } from '../popups/Unlock.popup';
 import { UnlockFisrtPopup } from '../popups/UnlockFirst.popup';
 
-export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> = ({ avtivateReDelegation }) => {
+export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> = ({ activateReDelegation }) => {
   const [opened, setOpened] = useState({
     redelegate: false,
     unlock: false,
@@ -43,9 +43,9 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   }, []);
 
   const handleReDelegateNavigation = useCallback(() => {
-    avtivateReDelegation();
+    activateReDelegation();
     close('redelegate');
-  }, [avtivateReDelegation, close]);
+  }, [activateReDelegation, close]);
 
   const handleDelegateClickbasedOnPeriod = useCallback(async () => {
     if (hasZeroStakingBalance && delegateLabel === CO_STAKE) {

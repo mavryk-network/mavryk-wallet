@@ -97,9 +97,6 @@ export const TokensTab: FC = () => {
     estimateSize: () => 76,
     overscan: 5
   });
-  const virtualizerRef = useRef(virtualizer);
-  virtualizerRef.current = virtualizer;
-
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 
   useEffect(() => {
@@ -127,7 +124,7 @@ export const TokensTab: FC = () => {
         case 'ArrowDown':
           setActiveIndex(i => {
             const next = Math.min(i + 1, sortedSlugs.length - 1);
-            virtualizerRef.current.scrollToIndex(next, { align: 'auto' });
+            virtualizer.scrollToIndex(next, { align: 'auto' });
             return next;
           });
           break;
@@ -135,7 +132,7 @@ export const TokensTab: FC = () => {
         case 'ArrowUp':
           setActiveIndex(i => {
             const prev = i > 0 ? i - 1 : 0;
-            virtualizerRef.current.scrollToIndex(prev, { align: 'auto' });
+            virtualizer.scrollToIndex(prev, { align: 'auto' });
             return prev;
           });
           break;

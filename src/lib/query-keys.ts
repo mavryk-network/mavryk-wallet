@@ -30,7 +30,7 @@ export const storageKeys = {
 // --- Baking ---
 
 export const bakingKeys = {
-  baker: (address: string) => ['baker', address] as const,
+  baker: (address: string, chainId: string) => ['baker', address, chainId] as const,
   bakers: (baseApiUrl: string) => ['bakers', baseApiUrl] as const,
   history: (pkh: string, bakerPkh: string, chainId: string) =>
     ['baking-history', pkh, bakerPkh, chainId] as const

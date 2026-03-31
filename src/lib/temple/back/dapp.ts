@@ -37,10 +37,10 @@ import {
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
+import { AUTODECLINE_AFTER } from './constants';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
-const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;
 const TEZ_MSG_SIGN_PATTERN = /^0501[a-f0-9]{8}54657a6f73205369676e6564204d6573736167653a20[a-f0-9]*$/;

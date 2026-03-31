@@ -73,6 +73,7 @@ window.addEventListener(
   'message',
   evt => {
     if (evt.source !== window) return;
+    if (evt.origin !== window.location.origin) return;
 
     const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
     const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;

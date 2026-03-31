@@ -89,7 +89,7 @@ export function useDelegate<T = MvktUserAccount>(
   return useQuery<T | undefined>({
     queryKey,
     queryFn: getDelegate,
-    staleTime: 20_000,
+    staleTime: 15_000,
     refetchInterval: 15_000
   });
 }
@@ -213,7 +213,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
   return useQuery({
     queryKey,
     queryFn: getDelegateStats,
-    staleTime: 20_000,
+    staleTime: 15_000,
     refetchInterval: 15_000,
     placeholderData: emptydelegateStatsResponse
   });
@@ -323,9 +323,9 @@ export function useKnownBaker(address: string | null) {
     } catch (_err) {
       return null;
     }
-  }, [address]);
+  }, [address, chainId]);
   return useQuery({
-    queryKey: bakingKeys.baker(address ?? ''),
+    queryKey: bakingKeys.baker(address ?? '', chainId ?? ''),
     queryFn: fetchBaker,
     enabled: net.type === 'main' && !!address,
     refetchInterval: 120_000,

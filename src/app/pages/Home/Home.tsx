@@ -65,9 +65,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   }, [registerBackHandler, assetSlug, search]);
 
   useEffect(() => {
-    if (shouldShowPartnersPromo) {
-      uiStore.getState().togglePartnersPromotion(false);
-    }
+    if (shouldShowPartnersPromo) uiStore.getState().togglePartnersPromotion(false);
   }, [shouldShowPartnersPromo]);
 
   const accountPkh = account.publicKeyHash;

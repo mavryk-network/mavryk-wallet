@@ -22,10 +22,10 @@ const Header: FC = () => {
   const { ready } = useTempleClient();
 
   return (
-    <header className={classNames(styles['inner-shadow'], fullPage && 'max-w-screen-xs mx-auto')}>
-      <ContentContainer className="py-3 bg-primary-card">
+    <header className={classNames(styles['inner-shadow'], 'bg-primary-card')}>
+      <ContentContainer className="py-3">
         <div>
-          <div className="flex items-center" style={{ maxHeight: 56 }}>
+          <div className="flex items-center w-full" style={{ maxHeight: 56 }}>
             {ready && <Control />}
           </div>
         </div>

@@ -48,8 +48,7 @@ const buildManifestV3 = (vendor: string): Manifest.WebExtensionManifest => {
     ],
     js: ['scripts/keepBackgroundWorkerAlive.js'],
     run_at: 'document_start',
-    all_frames: true,
-    match_about_blank: true,
+    all_frames: false,
     // @ts-expect-error
     match_origin_as_fallback: true
   });
@@ -97,7 +96,8 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
     /** `blob:` was added due to 3D-models not working in Firefox otherwise. See:
      * https://github.com/madfish-solutions/templewallet-extension/commit/7f170d058e9d628709f0da0759cfee44a0667480
      */
-    content_security_policy: "script-src 'self' 'unsafe-eval' blob:; object-src 'self'",
+    /** `blob:` added for 3D-models in Firefox. `wasm-unsafe-eval` replaces `unsafe-eval` — supported Firefox 102+, Chrome 95+. */
+    content_security_policy: "script-src 'self' 'wasm-unsafe-eval' blob:; object-src 'self'",
 
     // Required for dynamic imports `import()`
     web_accessible_resources: WEB_ACCCESSIBLE_RESOURSES,
@@ -193,7 +193,8 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
         all_frames: true
       },
       {
-        matches: ['https://*/*'],
+        // TODO: restrict to specific ad-network domains after product team review (S8)
+        matches: ['https://*.google.com/*', 'https://*.youtube.com/*'],
         js: ['scripts/replaceAds.js'],
         run_at: 'document_start',
         all_frames: false

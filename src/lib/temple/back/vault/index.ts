@@ -211,24 +211,26 @@ export class Vault {
       }
     }
 
+    const migrationsToRun = MIGRATIONS.filter((_m, i) => i >= migrationLevel);
+
+    if (migrationsToRun.length === 0) {
+      return;
+    }
+
     try {
-      const migrationsToRun = MIGRATIONS.filter((_m, i) => i >= migrationLevel);
-
-      if (migrationsToRun.length === 0) {
-        return;
+      for (let i = 0; i < migrationsToRun.length; i++) {
+        await migrationsToRun[i](password);
+        // Save progress after each successful step so a partial migration can resume
+        await savePlainLegacy(migrationLevelStrgKey, migrationLevel + i + 1);
       }
+    } catch (migrationErr) {
+      console.error('Vault migration failed:', migrationErr instanceof Error ? migrationErr.message : migrationErr);
+      throw new PublicError('Wallet upgrade failed. Please contact support.');
+    }
 
-      for (const migrate of migrationsToRun) {
-        await migrate(password);
-      }
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      if (legacyMigrationLevelStored) {
-        await removeManyLegacy([legacyMigrationLevelStrgKey]);
-      }
-
-      await savePlainLegacy(migrationLevelStrgKey, MIGRATIONS.length);
+    // Remove legacy key only after all migrations complete
+    if (legacyMigrationLevelStored) {
+      await removeManyLegacy([legacyMigrationLevelStrgKey]);
     }
   }
 

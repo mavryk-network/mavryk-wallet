@@ -10,7 +10,7 @@ import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import type { TokenMetadata } from 'lib/metadata/types';
 import { buildTokenMetadataFromFetched, buildTokenMetadataFromWhitelist } from 'lib/metadata/utils';
 
-import { browserStorage } from './persist-storage';
+import { createThrottledPersistStorage } from './throttled-storage';
 
 // Inlined to avoid circular dependency with lib/metadata/index.ts
 const RWA_SYMBOLS = ['ocean', 'mars1', 'ntbm', 'queen'];
@@ -173,18 +173,7 @@ export const metadataStore = createStore<MetadataStore>()(
     }),
     {
       name: 'zustand-metadata',
-      storage: {
-        getItem: async name => {
-          const value = await browserStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: async (name, value) => {
-          await browserStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: async name => {
-          await browserStorage.removeItem(name);
-        }
-      },
+      storage: createThrottledPersistStorage(),
       partialize: state =>
         ({
           tokensMetadata: state.tokensMetadata,

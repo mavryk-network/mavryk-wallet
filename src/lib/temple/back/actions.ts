@@ -32,7 +32,9 @@ import {
   requestBroadcast,
   getAllDApps,
   removeDApp,
-  removeAllDApps
+  removeAllDApps,
+  setDAppHmacKey,
+  clearDAppHmacKey
 } from './dapp';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
@@ -49,7 +51,9 @@ import {
   withUnlocked
 } from './store';
 import { Vault } from './vault';
+import { getPassHash as getSessionPassHash } from './vault/session-store';
 import { AUTODECLINE_AFTER } from './constants';
+import * as Passworder from 'lib/temple/passworder';
 
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
@@ -105,11 +109,15 @@ export function registerNewWallet(password: string, mnemonic?: string) {
 }
 
 export async function lock() {
-  if (!store.getState().inited) initLocked = true;
-  if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
-  return withInited(() => {
-    locked();
-  });
+  try {
+    if (!store.getState().inited) initLocked = true;
+    if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
+    return await withInited(() => {
+      locked();
+    });
+  } finally {
+    clearDAppHmacKey();
+  }
 }
 
 export function unlock(password: string) {
@@ -119,6 +127,8 @@ export function unlock(password: string) {
       const accounts = await vault.fetchAccounts();
       const settings = await vault.fetchSettings();
       unlocked({ vault, accounts, settings });
+      const passHash = await Passworder.generateHash(password);
+      await setDAppHmacKey(passHash);
     })
   );
 }
@@ -130,6 +140,8 @@ export async function unlockFromSession() {
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
+    const passHash = await getSessionPassHash();
+    if (passHash) await setDAppHmacKey(passHash);
   });
 }
 

@@ -45,6 +45,22 @@ const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;
 const TEZ_MSG_SIGN_PATTERN = /^0501[a-f0-9]{8}54657a6f73205369676e6564204d6573736167653a20[a-f0-9]*$/;
 
+// Security note: HMAC key is derived from passHash (SHA-256 of password), not a stretched key.
+// Security is bounded by password entropy — acceptable for tamper detection against passive
+// local storage readers. Not a substitute for full encryption.
+let hmacKey: CryptoKey | null = null;
+
+export async function setDAppHmacKey(passHash: ArrayBuffer) {
+  hmacKey = await crypto.subtle.importKey('raw', passHash, { name: 'HMAC', hash: 'SHA-256' }, false, [
+    'sign',
+    'verify'
+  ]);
+}
+
+export function clearDAppHmacKey() {
+  hmacKey = null;
+}
+
 export async function getCurrentPermission(origin: string): Promise<MavrykWalletDAppGetCurrentPermissionResponse> {
   const dApp = await getDApp(origin);
   const permission = dApp
@@ -354,9 +370,28 @@ export async function requestBroadcast(
   }
 }
 
-export async function getAllDApps() {
-  const dAppsSessions: TempleDAppSessions = (await browser.storage.local.get([STORAGE_KEY]))[STORAGE_KEY] || {};
-  return dAppsSessions;
+export async function getAllDApps(): Promise<TempleDAppSessions> {
+  const stored = (await browser.storage.local.get([STORAGE_KEY]))[STORAGE_KEY];
+  if (!stored) return {};
+
+  if (stored.data && stored.hmac && hmacKey) {
+    const sigBytes = new Uint8Array(
+      (stored.hmac as string).match(/.{2}/g)!.map((b: string) => parseInt(b, 16))
+    );
+    const valid = await crypto.subtle.verify('HMAC', hmacKey, sigBytes, new TextEncoder().encode(stored.data));
+    if (!valid) {
+      console.error('dApp session integrity check failed');
+      return {};
+    }
+    return JSON.parse(stored.data);
+  }
+
+  // Legacy: plain object without HMAC — validate shape before accepting
+  if (typeof stored === 'object' && !stored.data) {
+    return validateDAppSessions(stored) ? (stored as TempleDAppSessions) : {};
+  }
+
+  return {};
 }
 
 async function getDApp(origin: string): Promise<TempleDAppSession | undefined> {
@@ -391,8 +426,24 @@ export async function removeAllDApps(origins: string[]) {
   };
 }
 
-function setDApps(newDApps: TempleDAppSessions) {
-  return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
+async function setDApps(newDApps: TempleDAppSessions) {
+  const data = JSON.stringify(newDApps);
+  if (hmacKey) {
+    const sig = await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode(data));
+    const hmac = Array.from(new Uint8Array(sig))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    await browser.storage.local.set({ [STORAGE_KEY]: { data, hmac } });
+  } else {
+    await browser.storage.local.set({ [STORAGE_KEY]: newDApps });
+  }
+}
+
+function validateDAppSessions(obj: unknown): obj is TempleDAppSessions {
+  if (typeof obj !== 'object' || obj === null) return false;
+  return Object.values(obj as Record<string, unknown>).every(
+    v => typeof v === 'object' && v !== null && 'pkh' in v && 'network' in v && 'appMeta' in v
+  );
 }
 
 type RequestConfirmParams = {

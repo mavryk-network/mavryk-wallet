@@ -1,7 +1,7 @@
 import { createStore, useStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { browserStorage } from './persist-storage';
+import { createThrottledPersistStorage } from './throttled-storage';
 
 /**
  * Balances store -- replaces the Redux `balances` slice.
@@ -138,18 +138,7 @@ export const balancesStore = createStore<BalancesStore>()(
     }),
     {
       name: 'balances',
-      storage: {
-        getItem: async name => {
-          const raw = await browserStorage.getItem(name);
-          return raw ? JSON.parse(raw) : null;
-        },
-        setItem: async (name, value) => {
-          await browserStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: async name => {
-          await browserStorage.removeItem(name);
-        }
-      }
+      storage: createThrottledPersistStorage()
     }
   )
 );

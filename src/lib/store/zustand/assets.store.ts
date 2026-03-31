@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { WhitelistResponseToken } from 'lib/apis/temple';
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 
-import { browserStorage } from './persist-storage';
+import { createThrottledPersistStorage } from './throttled-storage';
 
 // ---- Types ----------------------------------------------------------------
 
@@ -316,18 +316,7 @@ export const assetsStore = createStore<AssetsStore>()(
     }),
     {
       name: 'zustand-assets',
-      storage: {
-        getItem: async name => {
-          const value = await browserStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: async (name, value) => {
-          await browserStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: async name => {
-          await browserStorage.removeItem(name);
-        }
-      },
+      storage: createThrottledPersistStorage(),
       partialize: state =>
         ({
           tokens: state.tokens,

@@ -21,8 +21,8 @@ import {
 } from 'lib/collectibles/use-collectibles-details.query';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
-import { tokensKeys } from 'lib/query-keys';
 import { getAssetName } from 'lib/metadata';
+import { tokensKeys } from 'lib/query-keys';
 import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';

@@ -5,7 +5,6 @@ import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 
 import { BoundaryError } from 'app/ErrorBoundary';
-import { bakingKeys, chainKeys } from 'lib/query-keys';
 import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
@@ -16,6 +15,7 @@ import {
 import { getAccountStatsFromMvkt, isKnownChainId, MvktRewardsEntry, MvktAccountType } from 'lib/apis/mvkt';
 import { fetchBakerDelegateParameters, MVKT_API_BASE_URLS, MvktApiChainId } from 'lib/apis/mvkt/api';
 import type { MvktUserAccount } from 'lib/apis/mvkt/types';
+import { bakingKeys, chainKeys } from 'lib/query-keys';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
 import { useChainId, useNetwork, useTezos } from '../ready';

@@ -254,7 +254,13 @@ const BakerBanner = memo<BakerBannerProps>(
           <>
             <div className={classNames('flex items-center', 'text-white')}>
               <div>
-                <BakerLogo logo={baker.logo} address={baker.address} size={59} imgBg="bg-transparent" style={{ minHeight: '2rem' }} />
+                <BakerLogo
+                  logo={baker.logo}
+                  address={baker.address}
+                  size={59}
+                  imgBg="bg-transparent"
+                  style={{ minHeight: '2rem' }}
+                />
               </div>
 
               <div className="flex flex-col items-start flex-1 ml-4 relative">

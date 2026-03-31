@@ -141,35 +141,33 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
 
   return (
     <div className="flex flex-col gap-3">
-      {unstakeError && (
-        <p className="text-xs text-red-400 text-center">{unstakeError}</p>
-      )}
-    <div className="grid gap-3 grid-cols-2">
-      <ButtonRounded
-        size="xs"
-        fill={false}
-        onClick={handleRedelegateClick}
-        disabled={isWatchOnlyAccount || !canRedelegate}
-      >
-        <T id="reDelegate" />
-      </ButtonRounded>
-      <ButtonRounded
-        size="xs"
-        fill
-        onClick={handleDelegateClickbasedOnPeriod}
-        disabled={isWatchOnlyAccount || isStakeButtonDisabled}
-      >
-        {delegationLabelToShow}
-      </ButtonRounded>
+      {unstakeError && <p className="text-xs text-red-400 text-center">{unstakeError}</p>}
+      <div className="grid gap-3 grid-cols-2">
+        <ButtonRounded
+          size="xs"
+          fill={false}
+          onClick={handleRedelegateClick}
+          disabled={isWatchOnlyAccount || !canRedelegate}
+        >
+          <T id="reDelegate" />
+        </ButtonRounded>
+        <ButtonRounded
+          size="xs"
+          fill
+          onClick={handleDelegateClickbasedOnPeriod}
+          disabled={isWatchOnlyAccount || isStakeButtonDisabled}
+        >
+          {delegationLabelToShow}
+        </ButtonRounded>
 
-      <RedelegatePopup
-        opened={opened.redelegate}
-        close={close.bind(null, 'redelegate')}
-        handleReDelegateNavigation={handleReDelegateNavigation}
-      />
-      <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} />
-      <UnlockFisrtPopup opened={opened.firstUnlock} close={close.bind(null, 'firstUnlock')} />
-    </div>
+        <RedelegatePopup
+          opened={opened.redelegate}
+          close={close.bind(null, 'redelegate')}
+          handleReDelegateNavigation={handleReDelegateNavigation}
+        />
+        <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} />
+        <UnlockFisrtPopup opened={opened.firstUnlock} close={close.bind(null, 'firstUnlock')} />
+      </div>
     </div>
   );
 };

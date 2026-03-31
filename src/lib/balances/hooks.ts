@@ -6,9 +6,9 @@ import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
-import { balanceKeys } from 'lib/query-keys';
 import { isKnownChainId } from 'lib/apis/mvkt';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
+import { balanceKeys } from 'lib/query-keys';
 import {
   useAllAccountBalancesSelector,
   useAllBalancesSelector,

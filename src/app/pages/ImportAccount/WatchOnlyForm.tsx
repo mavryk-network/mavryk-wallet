@@ -7,7 +7,13 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useTezos, useTezosDomainsClient, useAddressResolution, validateDelegate } from 'lib/temple/front';
+import {
+  useTempleClient,
+  useTezos,
+  useTezosDomainsClient,
+  useAddressResolution,
+  validateDelegate
+} from 'lib/temple/front';
 import { isAddressValid, isKTAddress } from 'lib/temple/helpers';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';

@@ -2,10 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import {
-  useCurrenciesErrors,
-  usePairLimitsErrors
-} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
+import { useCurrenciesErrors, usePairLimitsErrors } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { PAIR_NOT_FOUND_MESSAGE } from 'lib/buy-with-credit-card/constants';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
 import { PaymentProviderInterface } from 'lib/buy-with-credit-card/topup.interface';

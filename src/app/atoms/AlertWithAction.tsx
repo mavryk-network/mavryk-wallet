@@ -23,15 +23,7 @@ export const AlertWithAction: FC<AlertWithActionProps> = ({ children, linkTo, bt
       className={clsx('bg-accent-blue-hover p-2 text-sm text-gray-410 flex items-center justify-between rounded-lg')}
     >
       <div>{children}</div>
-      {linkTo ? (
-        <Anchor href={linkTo} {...baseProps} />
-      ) : (
-        <button
-          type="button"
-          {...baseProps}
-          onClick={onClick}
-        />
-      )}
+      {linkTo ? <Anchor href={linkTo} {...baseProps} /> : <button type="button" {...baseProps} onClick={onClick} />}
     </section>
   );
 };

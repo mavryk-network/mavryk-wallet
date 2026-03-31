@@ -367,11 +367,14 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
 
   // Enable performance hints for Firefox (4 MB chunk limit); disabled for other browsers
   // because we use our own FileSizeReporter hints instead.
-  performance: TARGET_BROWSER === 'firefox' ? {
-    hints: 'error',
-    maxAssetSize: 4 * 1024 * 1024,
-    maxEntrypointSize: 4 * 1024 * 1024
-  } : false
+  performance:
+    TARGET_BROWSER === 'firefox'
+      ? {
+          hints: 'error',
+          maxAssetSize: 4 * 1024 * 1024,
+          maxEntrypointSize: 4 * 1024 * 1024
+        }
+      : false
 });
 
 function getStyleLoaders(cssOptions = {}) {

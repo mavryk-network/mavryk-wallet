@@ -312,7 +312,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
-        const estmtn = estimationRef.current ?? await getEstimation();
+        const estmtn = estimationRef.current ?? (await getEstimation());
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;

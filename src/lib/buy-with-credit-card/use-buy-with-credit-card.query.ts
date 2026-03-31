@@ -3,11 +3,7 @@ import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isDefined } from '@rnw-community/shared';
 
-import {
-  mapAliceBobProviderCurrencies,
-  mapMoonPayProviderCurrencies,
-  mapUtorgProviderCurrencies
-} from './utils';
+import { mapAliceBobProviderCurrencies, mapMoonPayProviderCurrencies, mapUtorgProviderCurrencies } from './utils';
 import { getMoonPayCurrencies } from 'lib/apis/moonpay';
 import { getAliceBobPairsInfo } from 'lib/apis/temple';
 import { getCurrenciesInfo as getUtorgCurrenciesInfo } from 'lib/apis/utorg';
@@ -40,8 +36,7 @@ export type PairLimitsResult = Record<TopUpProviderId, LoadableEntityState<TopUp
 
 export const buyWithCreditCardKeys = {
   currencies: ['buy-with-credit-card', 'currencies'] as const,
-  pairLimits: (fiat: string, crypto: string) =>
-    ['buy-with-credit-card', 'pair-limits', fiat, crypto] as const,
+  pairLimits: (fiat: string, crypto: string) => ['buy-with-credit-card', 'pair-limits', fiat, crypto] as const,
   allPairLimits: ['buy-with-credit-card', 'pair-limits'] as const
 };
 
@@ -51,9 +46,7 @@ const EMPTY_CURRENCIES: TopUpProviderCurrencies = { fiat: [], crypto: [] };
 
 const ALL_PROVIDER_IDS = [TopUpProviderId.MoonPay, TopUpProviderId.Utorg, TopUpProviderId.AliceBob];
 
-function settledToCurrencyEntry(
-  result: PromiseSettledResult<TopUpProviderCurrencies>
-): ProviderCurrenciesEntry {
+function settledToCurrencyEntry(result: PromiseSettledResult<TopUpProviderCurrencies>): ProviderCurrenciesEntry {
   if (result.status === 'fulfilled') {
     return { data: result.value };
   }
@@ -82,29 +75,27 @@ async function fetchPairLimits(
   prevResult?: PairLimitsResult
 ): Promise<PairLimitsResult> {
   const results = await Promise.all(
-    ALL_PROVIDER_IDS.map(
-      async (providerId): Promise<LoadableEntityState<TopUpProviderPairLimits | undefined>> => {
-        const { fiat: fiatCurrencies, crypto: cryptoCurrencies } = currencies[providerId].data;
+    ALL_PROVIDER_IDS.map(async (providerId): Promise<LoadableEntityState<TopUpProviderPairLimits | undefined>> => {
+      const { fiat: fiatCurrencies, crypto: cryptoCurrencies } = currencies[providerId].data;
 
-        if (fiatCurrencies.length < 1 || cryptoCurrencies.length < 1) {
-          return { data: undefined, isLoading: false };
-        }
+      if (fiatCurrencies.length < 1 || cryptoCurrencies.length < 1) {
+        return { data: undefined, isLoading: false };
+      }
 
-        const prevEntry = prevResult?.[providerId];
-        if (prevEntry?.error === PAIR_NOT_FOUND_MESSAGE) {
-          return { data: undefined, isLoading: false, error: PAIR_NOT_FOUND_MESSAGE };
-        }
-
-        const fiatCurrency = fiatCurrencies.find(({ code }) => code === fiatSymbol);
-        const cryptoCurrency = cryptoCurrencies.find(({ code }) => code === cryptoSymbol);
-
-        if (isDefined(fiatCurrency) && isDefined(cryptoCurrency)) {
-          return getUpdatedFiatLimits(fiatCurrency, cryptoCurrency, providerId);
-        }
-
+      const prevEntry = prevResult?.[providerId];
+      if (prevEntry?.error === PAIR_NOT_FOUND_MESSAGE) {
         return { data: undefined, isLoading: false, error: PAIR_NOT_FOUND_MESSAGE };
       }
-    )
+
+      const fiatCurrency = fiatCurrencies.find(({ code }) => code === fiatSymbol);
+      const cryptoCurrency = cryptoCurrencies.find(({ code }) => code === cryptoSymbol);
+
+      if (isDefined(fiatCurrency) && isDefined(cryptoCurrency)) {
+        return getUpdatedFiatLimits(fiatCurrency, cryptoCurrency, providerId);
+      }
+
+      return { data: undefined, isLoading: false, error: PAIR_NOT_FOUND_MESSAGE };
+    })
   );
 
   return {
@@ -186,11 +177,7 @@ export const usePairLimitsData = (fiatSymbol: string, cryptoSymbol: string) => {
   return data;
 };
 
-export const useProviderPairLimitsData = (
-  fiatSymbol: string,
-  cryptoSymbol: string,
-  providerId: TopUpProviderId
-) => {
+export const useProviderPairLimitsData = (fiatSymbol: string, cryptoSymbol: string, providerId: TopUpProviderId) => {
   const data = usePairLimitsData(fiatSymbol, cryptoSymbol);
   return data?.[providerId];
 };

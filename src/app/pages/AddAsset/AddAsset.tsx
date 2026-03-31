@@ -7,7 +7,6 @@ import { UseFormReturn, useForm } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
-import { balanceKeys } from 'lib/query-keys';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -24,6 +23,7 @@ import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
 import { fetchOneTokenMetadata } from 'lib/metadata/fetch';
 import { TokenMetadataNotFoundError } from 'lib/metadata/on-chain';
+import { balanceKeys } from 'lib/query-keys';
 import { assetsStore } from 'lib/store/zustand/assets.store';
 import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { loadContract } from 'lib/temple/contract';

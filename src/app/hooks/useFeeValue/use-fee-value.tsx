@@ -6,8 +6,8 @@ import BigNumber from 'bignumber.js';
 
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
-import { feeKeys } from 'lib/query-keys';
 import { BLOCK_DURATION } from 'lib/fixed-times';
+import { feeKeys } from 'lib/query-keys';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { hasManager, mumavToTz } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';

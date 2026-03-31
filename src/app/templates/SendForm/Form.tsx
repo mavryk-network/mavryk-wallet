@@ -10,8 +10,12 @@ import React, {
   useState
 } from 'react';
 
-import { DEFAULT_FEE, TransactionWalletOperation, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
-
+import {
+  DEFAULT_FEE,
+  TransactionWalletOperation,
+  TransactionOperation,
+  WalletOperation
+} from '@mavrykdynamics/webmavryk';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
@@ -21,20 +25,19 @@ import { FormSubmitButton, Money, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
-import { getBaseFeeError, getFeeError } from 'app/hooks/useFeeValue/utils';
 import { useOperationStatus } from 'app/hooks/use-operation-status';
-
+import { getBaseFeeError, getFeeError } from 'app/hooks/useFeeValue/utils';
 import { useFormAnalytics } from 'lib/analytics';
 import { isMavSlug, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { useBalance } from 'lib/balances';
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
-import { feeKeys } from 'lib/query-keys';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { transferImplicit, transferToContract } from 'lib/michelson';
+import { feeKeys } from 'lib/query-keys';
 import { loadContract } from 'lib/temple/contract';
 import {
   useAccount,

@@ -4,13 +4,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
 
 import { Name } from 'app/atoms';
-import { dAppKeys } from 'lib/query-keys';
 import { Dropdown, DropdownHeader, DropdownOpened } from 'app/compound/CustomDropdown';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
+import { dAppKeys } from 'lib/query-keys';
 import { useRelevantAccounts, useTempleClient } from 'lib/temple/front';
 import { TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 

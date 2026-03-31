@@ -2,10 +2,7 @@ import { useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import {
-  useFiatCurrencies,
-  usePairLimitsData
-} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
+import { useFiatCurrencies, usePairLimitsData } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { mergeProvidersLimits } from 'lib/buy-with-credit-card/merge-limits';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
 import { TopUpInputInterface } from 'lib/buy-with-credit-card/topup.interface';

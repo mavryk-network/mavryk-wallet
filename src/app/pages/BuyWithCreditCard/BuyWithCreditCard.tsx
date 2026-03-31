@@ -15,10 +15,7 @@ import { TopUpInput } from 'app/templates/TopUpInput';
 import { MOONPAY_ASSETS_BASE_URL } from 'lib/apis/moonpay';
 import { getAssetSymbolToDisplay } from 'lib/buy-with-credit-card/get-asset-symbol-to-display';
 import { TopUpInputInterface } from 'lib/buy-with-credit-card/topup.interface';
-import {
-  buyWithCreditCardKeys,
-  useCurrenciesLoading
-} from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
+import { buyWithCreditCardKeys, useCurrenciesLoading } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { shouldShowFieldError } from 'lib/form/should-show-field-error';
 import { t, T, toLocalFormat } from 'lib/i18n';
 import { FIAT_ICONS_SRC } from 'lib/icons';

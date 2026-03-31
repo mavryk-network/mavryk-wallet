@@ -32,8 +32,7 @@ export const storageKeys = {
 export const bakingKeys = {
   baker: (address: string, chainId: string) => ['baker', address, chainId] as const,
   bakers: (baseApiUrl: string) => ['bakers', baseApiUrl] as const,
-  history: (pkh: string, bakerPkh: string, chainId: string) =>
-    ['baking-history', pkh, bakerPkh, chainId] as const
+  history: (pkh: string, bakerPkh: string, chainId: string) => ['baking-history', pkh, bakerPkh, chainId] as const
 };
 
 // --- DApps ---
@@ -58,8 +57,7 @@ export const swapKeys = {
 
 export const buyWithCreditCardKeys = {
   currencies: ['buy-with-credit-card', 'currencies'] as const,
-  pairLimits: (fiat: string, crypto: string) =>
-    ['buy-with-credit-card', 'pair-limits', fiat, crypto] as const,
+  pairLimits: (fiat: string, crypto: string) => ['buy-with-credit-card', 'pair-limits', fiat, crypto] as const,
   allPairLimits: ['buy-with-credit-card', 'pair-limits'] as const
 };
 
@@ -96,13 +94,11 @@ export const feeKeys = {
 
 export const miscKeys = {
   advertisingPromo: ['advertising-promotion'] as const,
-  partnersPromo: (variant: string, accountAddress: string) =>
-    ['partners-promo', variant, accountAddress] as const,
+  partnersPromo: (variant: string, accountAddress: string) => ['partners-promo', variant, accountAddress] as const,
   contentToParse: (payloadType: string, discriminator: string | null) =>
     ['content-to-parse', payloadType, discriminator] as const,
   i18n: ['i18n'] as const,
-  awaitFonts: (name: string, weights: number[], className: string) =>
-    ['awaitFonts', name, weights, className] as const,
+  awaitFonts: (name: string, weights: number[], className: string) => ['awaitFonts', name, weights, className] as const,
   exolixCurrencies: ['exolix/api/currencies'] as const,
   exolixRate: (coinFrom: string, coinTo: string, amount: string) =>
     ['exolix/api/rate', coinFrom, coinTo, amount] as const

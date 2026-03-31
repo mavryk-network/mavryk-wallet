@@ -15,31 +15,33 @@ export interface IconBaseProps {
 
 /** For monochrome icons */
 export const IconBase = memo(
-  forwardRef<HTMLDivElement | HTMLButtonElement, IconBaseProps>(({ size = 16, className, Icon, onClick, ariaLabel }, ref) => {
-    const content = <Icon className="w-full h-full stroke-current fill-current" transform={SCALE_TRANSFORMS[size]} />;
-    const classes = clsx(CONTAINER_CLASSNAME[size], className);
+  forwardRef<HTMLDivElement | HTMLButtonElement, IconBaseProps>(
+    ({ size = 16, className, Icon, onClick, ariaLabel }, ref) => {
+      const content = <Icon className="w-full h-full stroke-current fill-current" transform={SCALE_TRANSFORMS[size]} />;
+      const classes = clsx(CONTAINER_CLASSNAME[size], className);
 
-    if (onClick) {
+      if (onClick) {
+        return (
+          <button
+            type="button"
+            ref={ref as React.Ref<HTMLButtonElement>}
+            data-icon-size={size}
+            className={classes}
+            onClick={onClick}
+            aria-label={ariaLabel ?? 'icon action'}
+          >
+            {content}
+          </button>
+        );
+      }
+
       return (
-        <button
-          type="button"
-          ref={ref as React.Ref<HTMLButtonElement>}
-          data-icon-size={size}
-          className={classes}
-          onClick={onClick}
-          aria-label={ariaLabel ?? 'icon action'}
-        >
+        <div ref={ref as React.Ref<HTMLDivElement>} data-icon-size={size} className={classes}>
           {content}
-        </button>
+        </div>
       );
     }
-
-    return (
-      <div ref={ref as React.Ref<HTMLDivElement>} data-icon-size={size} className={classes}>
-        {content}
-      </div>
-    );
-  })
+  )
 );
 
 /** Exact icons (icons' base containers) sizes */

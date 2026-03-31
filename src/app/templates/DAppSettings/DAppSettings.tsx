@@ -4,7 +4,6 @@ import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { Name, Divider } from 'app/atoms';
-import { dAppKeys } from 'lib/query-keys';
 import { Switcher } from 'app/atoms/Switcher';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
@@ -12,6 +11,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
+import { dAppKeys } from 'lib/query-keys';
 import { useTempleClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';

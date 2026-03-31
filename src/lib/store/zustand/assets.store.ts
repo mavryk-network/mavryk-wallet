@@ -93,7 +93,9 @@ export type AssetsStore = AssetsState & AssetsActions;
 
 // ---- Asset actions factory ------------------------------------------------
 
-type StoreSet = (partial: AssetsStore | Partial<AssetsStore> | ((state: AssetsStore) => AssetsStore | Partial<AssetsStore>)) => void;
+type StoreSet = (
+  partial: AssetsStore | Partial<AssetsStore> | ((state: AssetsStore) => AssetsStore | Partial<AssetsStore>)
+) => void;
 
 /**
  * Generates the four standard actions for an asset type (tokens/collectibles/rwas).

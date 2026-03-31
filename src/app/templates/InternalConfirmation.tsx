@@ -13,7 +13,6 @@ import { ReactComponent as CodeAltIcon } from 'app/icons/code-alt.svg';
 import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import { ContentPaper, Toolbar } from 'app/layouts/PageLayout';
-import { miscKeys } from 'lib/query-keys';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import AccountBanner from 'app/templates/AccountBanner';
@@ -25,6 +24,7 @@ import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitche
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
+import { miscKeys } from 'lib/query-keys';
 import { uiStore } from 'lib/store/zustand/ui.store';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
 import { MAV_RPC_NETWORK } from 'lib/temple/networks';

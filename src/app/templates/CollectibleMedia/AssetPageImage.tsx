@@ -57,7 +57,9 @@ export const AssetPageImage = memo<Props>(
 
     if (objktArtifactUri && !isRenderFailedOnce) {
       if (isSvgDataUriInUtf8Encoding(objktArtifactUri)) {
-        return <img src={objktArtifactUri} loading="lazy" alt={metadata?.name} className={className} onError={handleError} />;
+        return (
+          <img src={objktArtifactUri} loading="lazy" alt={metadata?.name} className={className} onError={handleError} />
+        );
       }
 
       if (mime) {

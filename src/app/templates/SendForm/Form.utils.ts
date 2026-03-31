@@ -2,10 +2,10 @@ import { DEFAULT_FEE, TransferParams, Estimate } from '@mavrykdynamics/webmavryk
 import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 
-import { ReactiveTezosToolkit } from 'lib/temple/front';
-import { loadContract } from 'lib/temple/contract';
-import { hasManager, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { transferImplicit, transferToContract } from 'lib/michelson';
+import { loadContract } from 'lib/temple/contract';
+import { ReactiveTezosToolkit } from 'lib/temple/front';
+import { hasManager, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 
 export type TransferParamsInvariant =

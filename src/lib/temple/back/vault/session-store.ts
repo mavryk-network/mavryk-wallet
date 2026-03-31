@@ -4,8 +4,7 @@ import { stringToArrayBuffer } from 'lib/utils';
 const PASS_HASH_STORE_KEY = '@Vault:session.passHash';
 const B64_PREFIX = 'b64:';
 
-const toBase64 = (buf: ArrayBuffer) =>
-  B64_PREFIX + btoa(String.fromCharCode(...new Uint8Array(buf)));
+const toBase64 = (buf: ArrayBuffer) => B64_PREFIX + btoa(String.fromCharCode(...new Uint8Array(buf)));
 
 const fromBase64 = (str: string) => {
   const binary = atob(str.slice(B64_PREFIX.length));

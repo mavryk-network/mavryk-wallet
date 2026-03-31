@@ -286,7 +286,12 @@ export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundIn
   try {
     return await fetcher();
   } catch (err: unknown) {
-    if (typeof err === 'object' && err !== null && 'isAxiosError' in err && (err as { isAxiosError: boolean }).isAxiosError) {
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'isAxiosError' in err &&
+      (err as { isAxiosError: boolean }).isAxiosError
+    ) {
       const error = err as AxiosError;
       if (error.response?.status === 429) {
         await delay(delayAroundInMS);

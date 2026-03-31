@@ -12,6 +12,7 @@ import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { loadChainId } from 'lib/temple/helpers';
+import * as Passworder from 'lib/temple/passworder';
 import {
   TempleState,
   TempleMessageType,
@@ -24,6 +25,7 @@ import {
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
 
+import { AUTODECLINE_AFTER } from './constants';
 import {
   getCurrentPermission,
   requestPermission,
@@ -52,8 +54,6 @@ import {
 } from './store';
 import { Vault } from './vault';
 import { getPassHash as getSessionPassHash } from './vault/session-store';
-import { AUTODECLINE_AFTER } from './constants';
-import * as Passworder from 'lib/temple/passworder';
 
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
@@ -112,7 +112,7 @@ export async function lock() {
   try {
     if (!store.getState().inited) initLocked = true;
     if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
-    return await withInited(() => {
+    return withInited(() => {
       locked();
     });
   } finally {

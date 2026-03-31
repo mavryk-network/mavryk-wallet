@@ -34,10 +34,10 @@ import {
   TempleNotification
 } from 'lib/temple/types';
 
+import { AUTODECLINE_AFTER } from './constants';
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
-import { AUTODECLINE_AFTER } from './constants';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
@@ -375,9 +375,7 @@ export async function getAllDApps(): Promise<TempleDAppSessions> {
   if (!stored) return {};
 
   if (stored.data && stored.hmac && hmacKey) {
-    const sigBytes = new Uint8Array(
-      (stored.hmac as string).match(/.{2}/g)!.map((b: string) => parseInt(b, 16))
-    );
+    const sigBytes = new Uint8Array((stored.hmac as string).match(/.{2}/g)!.map((b: string) => parseInt(b, 16)));
     const valid = await crypto.subtle.verify('HMAC', hmacKey, sigBytes, new TextEncoder().encode(stored.data));
     if (!valid) {
       console.error('dApp session integrity check failed');

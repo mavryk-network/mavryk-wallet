@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
-import { DEFAULT_FEE, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
+import { DEFAULT_FEE, Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -116,6 +116,11 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const { resolvedAddress, toFilled, toResolved } = useAddressResolution(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
+  const estimationRef = useRef<Estimate | null>(null);
+
+  useEffect(() => {
+    estimationRef.current = null;
+  }, [toResolved]);
 
   const getEstimation = useCallback(async () => {
     const to = toResolved;
@@ -178,6 +183,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       }
 
       const estmtn = await getEstimation();
+      estimationRef.current = estmtn;
       const manager = await tezos.rpc.getManagerKey(
         acc.type === TempleAccountType.ManagedKT ? acc.publicKeyHash : accountPkh
       );
@@ -306,7 +312,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
       formAnalytics.trackSubmit(analyticsProperties);
       try {
-        const estmtn = await getEstimation();
+        const estmtn = estimationRef.current ?? await getEstimation();
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;

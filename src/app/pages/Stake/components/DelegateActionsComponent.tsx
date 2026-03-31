@@ -24,6 +24,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
     unlock: false,
     firstUnlock: false
   });
+  const [unstakeError, setUnstakeError] = useState<string | null>(null);
   const account = useAccount();
   const chainId = useChainId();
   const tezos = useTezos();
@@ -88,7 +89,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
           }
         });
       } catch (error) {
-        console.error(error);
+        setUnstakeError(error instanceof Error ? error.message : 'Failed to finalize unstake');
       }
     }
 
@@ -139,6 +140,10 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
   if (isWatchOnlyAccount) return null;
 
   return (
+    <div className="flex flex-col gap-3">
+      {unstakeError && (
+        <p className="text-xs text-red-400 text-center">{unstakeError}</p>
+      )}
     <div className="grid gap-3 grid-cols-2">
       <ButtonRounded
         size="xs"
@@ -164,6 +169,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
       />
       <UnlockPopup opened={opened.unlock} close={close.bind(null, 'unlock')} />
       <UnlockFisrtPopup opened={opened.firstUnlock} close={close.bind(null, 'firstUnlock')} />
+    </div>
     </div>
   );
 };

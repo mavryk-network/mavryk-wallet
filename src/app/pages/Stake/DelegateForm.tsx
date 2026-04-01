@@ -376,7 +376,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
           to,
           newDelegate: to,
           prevDelegate: myBakerPkh,
-          estimation: estmtn
+          estimation: estmtn,
+          feeMumav: acc.type === TempleAccountType.ManagedKT ? undefined : fee
         });
         if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
 
@@ -713,6 +714,7 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
           operation: op,
           type: 'staking',
           sender: account.publicKeyHash,
+          amount: atomsToTokens(unstakedBalance ?? 0, MAVEN_METADATA.decimals).toNumber(),
           estimation: estmtn,
           baker: myBakerPkh,
           kind: 'finalize_unstake'

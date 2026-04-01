@@ -18,7 +18,6 @@ import { MavrykHistoryNetworkFees, MavrykHistoryOperation, MavrykHistoryOperatio
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import { AssetMetadataBase } from '../../metadata';
 
-import { safetyMultiplier } from './consts';
 import { getMoneyDiff, isZero } from './helpers';
 import {
   Fa2TransferSummaryArray,
@@ -1075,7 +1074,70 @@ type BuildPendingOperationObjecttype = {
   baker?: string | null;
   kind?: string;
   estimation?: Estimate;
+  assetSlug?: string;
+  feeMumav?: number;
 };
+
+const normalizePendingAmount = (amount?: number | string) => {
+  if (amount == null) return undefined;
+
+  const amountBN = new BigNumber(amount);
+  if (amountBN.isNaN()) return undefined;
+
+  return amountBN.toNumber();
+};
+
+const getPendingAssetContext = (assetSlug?: string) => {
+  if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) {
+    return {
+      currency: MVRK_CURRENCY
+    };
+  }
+
+  const [tokenAddress, tokenIdRaw] = assetSlug.split('_');
+
+  return {
+    tokenAddress,
+    tokenId: Number(tokenIdRaw ?? '0')
+  };
+};
+
+const normalizePendingStakingAction = (kind?: string) => {
+  switch (kind) {
+    case StakingActions.unstake:
+      return StakingActions.unstake;
+
+    case StakingActions.restake:
+      return StakingActions.restake;
+
+    case 'finalize_unstake':
+    case StakingActions.finalize:
+      return StakingActions.finalize;
+
+    case StakingActions.slash_staked:
+      return StakingActions.slash_staked;
+
+    case StakingActions.slash_unstaked:
+      return StakingActions.slash_unstaked;
+
+    case StakingActions.stake:
+    default:
+      return StakingActions.stake;
+  }
+};
+
+const buildPendingNetworkFees = (estimation?: Estimate, feeMumav?: number): MavrykHistoryNetworkFees => {
+  const gasFeeMumav = feeMumav ?? estimation?.suggestedFeeMumav ?? 0;
+  const storageFeeMumav = estimation?.burnFeeMumav ?? 0;
+
+  return {
+    totalFee: mumavToTz(gasFeeMumav + storageFeeMumav).toNumber(),
+    gasFee: mumavToTz(gasFeeMumav).toNumber(),
+    storageFee: mumavToTz(storageFeeMumav).toNumber(),
+    burnedFromFees: mumavToTz(storageFeeMumav).toNumber()
+  };
+};
+
 export async function buildPendingOperationObject({
   operation,
   type,
@@ -1086,78 +1148,126 @@ export async function buildPendingOperationObject({
   prevDelegate,
   estimation,
   kind,
-  baker
+  baker,
+  assetSlug,
+  feeMumav
 }: BuildPendingOperationObjecttype) {
   if (!operation) return null;
 
-  const now = dayjs().toISOString();
+  const hash = operation.opHash || operation.hash;
+  if (!hash) return null;
 
-  const baseOperationFoelds = {
+  const now = dayjs().toISOString();
+  const normalizedAmount = normalizePendingAmount(amount);
+  const networkFees = buildPendingNetworkFees(estimation, feeMumav);
+
+  const baseOperationFields: MavrykHistoryOperation = {
     type,
     id: Date.now(),
-    level: null,
     timestamp: now,
-    allocationFee: estimation?.suggestedFeeMumav ?? 0,
-    block: null,
-    hash: operation.opHash || operation.hash,
-    counter: null,
-    sender: { address: sender },
-    source: { address: sender },
-    destination: to ? { address: to } : undefined,
+    hash,
+    sender,
     gasLimit: estimation?.gasLimit ?? 0,
     gasUsed: estimation?.consumedMilligas ? Math.ceil(Number(estimation.consumedMilligas) / 1000) : 0,
     storageLimit: estimation?.storageLimit ?? 0,
-    amount: amount ?? 0,
     storageUsed: estimation?.storageLimit ?? 0,
-    bakerFee: Math.ceil((estimation?.suggestedFeeMumav ?? 0) * safetyMultiplier),
-    storageFee: Math.ceil((estimation?.burnFeeMumav ?? 0) * safetyMultiplier),
-    networkFees: {
-      totalFee: mumavToTz((estimation?.suggestedFeeMumav ?? 0) + (estimation?.burnFeeMumav ?? 0)).toNumber(),
-      gasFee: mumavToTz(estimation?.suggestedFeeMumav ?? 0).toNumber(),
-      storageFee: mumavToTz(estimation?.burnFeeMumav ?? 0).toNumber(),
-      burnedFromFees: mumavToTz(estimation?.burnFeeMumav ?? 0).toNumber()
-    },
-    status: 'pending',
-    isPending: true
+    networkFees,
+    status: 'pending'
   };
 
+  if (normalizedAmount !== undefined) {
+    baseOperationFields.amount = normalizedAmount;
+  }
+
+  if (to) {
+    baseOperationFields.target = to;
+  }
+
   switch (type) {
-    case 'delegation':
+    case 'delegation': {
+      const delegationTarget = newDelegate ?? to;
+
       return {
-        ...baseOperationFoelds,
-        newDelegate: {
-          address: newDelegate
-        },
-        prevDelegate: {
-          address: prevDelegate
-        },
-        bakerFee: estimation?.suggestedFeeMumav ?? null
-      };
-    case 'staking':
-      return {
-        ...baseOperationFoelds,
-        kind,
-        baker: {
-          address: baker
+        ...baseOperationFields,
+        target: delegationTarget ?? undefined,
+        newDelegate: newDelegate ?? null,
+        prevDelegate: prevDelegate ?? null,
+        details: {
+          type: 'delegation',
+          from: sender,
+          to: delegationTarget ?? undefined,
+          newDelegate: newDelegate ?? null,
+          prevDelegate: prevDelegate ?? null
         }
       };
-    case 'transaction':
+    }
+
+    case 'staking': {
+      const action = normalizePendingStakingAction(kind);
+      const stakingTarget = baker ?? to;
+
       return {
-        ...baseOperationFoelds,
-        target: {
-          address: to
+        ...baseOperationFields,
+        target: stakingTarget ?? undefined,
+        action,
+        baker: baker ?? undefined,
+        details: {
+          type: 'staking',
+          action,
+          amount: normalizedAmount,
+          from: sender,
+          to: stakingTarget ?? undefined,
+          baker: baker ?? undefined
         }
       };
+    }
+
+    case 'transaction': {
+      const { tokenAddress, tokenId, currency } = getPendingAssetContext(assetSlug);
+
+      return {
+        ...baseOperationFields,
+        details: {
+          type: 'transfer',
+          transferType: 'sent',
+          from: sender,
+          to,
+          amount: normalizedAmount,
+          currency,
+          tokenAddress,
+          tokenId,
+          entrypoint: tokenAddress ? 'transfer' : undefined
+        }
+      };
+    }
+
     case 'origination':
+      return {
+        ...baseOperationFields,
+        details: {
+          type: 'origination',
+          from: sender,
+          to
+        }
+      };
+
     case 'reveal':
+      return {
+        ...baseOperationFields,
+        details: {
+          type: 'reveal',
+          from: sender
+        }
+      };
+
     default:
       return {
-        ...baseOperationFoelds
+        ...baseOperationFields
       };
   }
 }
 
-export type CustomPendingOperation = Awaited<ReturnType<typeof buildPendingOperationObject>>;
+export type CustomPendingOperation = MavrykHistoryOperation;
 
 export const putOperationIntoStorage = async (
   chainId: string | null | undefined,

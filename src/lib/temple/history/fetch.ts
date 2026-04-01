@@ -5,6 +5,7 @@ import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
+import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
 import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
@@ -23,19 +24,32 @@ export type FetchUserHistoryResult = {
   hasMore: boolean;
 };
 
-function groupPendingOperations(operations: TzktOperation[]) {
+type PendingOperationGroupable = {
+  hash: string;
+  id?: number;
+};
+
+type LegacyPendingOperation = TzktOperation;
+
+function groupPendingOperations<T extends PendingOperationGroupable>(operations: T[]) {
   return Object.values(
-    operations.reduce<StringRecord<OperationsGroup>>((acc, item) => {
+    operations.reduce<StringRecord<{ hash: string; operations: T[] }>>((acc, item) => {
       if (!acc[item.hash]) {
         acc[item.hash] = { hash: item.hash, operations: [] };
       }
 
       acc[item.hash].operations.push(item);
-      acc[item.hash].operations.sort((a, b) => b.id - a.id);
+      acc[item.hash].operations.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
       return acc;
     }, {})
   );
+}
+
+function isLegacyPendingOperation(
+  operation: CustomPendingOperation | LegacyPendingOperation
+): operation is LegacyPendingOperation {
+  return typeof (operation as LegacyPendingOperation).sender !== 'string';
 }
 
 function applyLocalTypeFilter(items: UserHistoryItem[], requestedTypes: HistoryItemOpTypeEnum[]) {
@@ -70,14 +84,32 @@ function normalizeBackendHistoryItems(
 
 async function fetchPendingHistoryItems(chainId: TzktApiChainId, account: TempleAccount) {
   const storageKey = buildStorageKeyForTx(account.publicKeyHash, chainId);
-  const pendingOperations = (await fetchFromStorage<CustomPendingOperation[]>(storageKey)) ?? [];
+  const pendingOperations =
+    (await fetchFromStorage<(CustomPendingOperation | LegacyPendingOperation)[]>(storageKey)) ?? [];
+  const legacyPendingOperations = pendingOperations.filter(isLegacyPendingOperation);
+  const backendPendingOperations = pendingOperations.filter(
+    (operation): operation is MavrykHistoryOperation => !isLegacyPendingOperation(operation)
+  );
+  const pendingItems = [
+    ...groupPendingOperations(backendPendingOperations).flatMap(group => {
+      const historyGroup = groupMavrykHistoryOperations(group.operations)[0];
+
+      return historyGroup ? [mavrykHistoryGroupToHistoryItem(historyGroup, { address: account.publicKeyHash })] : [];
+    }),
+    ...groupPendingOperations(legacyPendingOperations).map(group => {
+      const operationsGroup: OperationsGroup = {
+        hash: group.hash,
+        operations: group.operations
+      };
+
+      return operationsGroupToHistoryItem(operationsGroup, account.publicKeyHash);
+    })
+  ].sort((a, b) => b.addedAt.localeCompare(a.addedAt));
 
   return {
     storageKey,
     pendingOperations,
-    pendingItems: groupPendingOperations(pendingOperations as TzktOperation[]).map(group =>
-      operationsGroupToHistoryItem(group, account.publicKeyHash)
-    )
+    pendingItems
   };
 }
 

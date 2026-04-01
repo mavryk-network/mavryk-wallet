@@ -12,7 +12,7 @@ import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
-import { getAuthWalletAddress, loadChainId } from 'lib/temple/helpers';
+import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
 import {
   TempleState,
   TempleMessageType,
@@ -34,6 +34,7 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
+import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import {
@@ -79,21 +80,12 @@ const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
   return next.find(acc => !prevIds.has(acc.id));
 };
 
-const isSignableAccount = (account: TempleAccount) =>
-  account.type !== TempleAccountType.WatchOnly && account.type !== TempleAccountType.ManagedKT;
+const syncAuthWalletAddresses = (accounts: TempleAccount[]) =>
+  setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts));
 
-const resolveAuthWalletAddress = (accounts: TempleAccount[], accountPkh?: string) => {
-  if (accountPkh) {
-    const selectedAccount = accounts.find(acc => acc.publicKeyHash === accountPkh);
-
-    if (selectedAccount && isSignableAccount(selectedAccount)) {
-      return getAuthWalletAddress(accounts, accountPkh);
-    }
-  }
-
-  const fallbackAccount = accounts.find(isSignableAccount);
-
-  return fallbackAccount ? getAuthWalletAddress(accounts, fallbackAccount.publicKeyHash) : null;
+const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
+  accountsUpdated(accounts);
+  await syncAuthWalletAddresses(accounts);
 };
 
 const getStoredSelectedAccountPkh = async () => {
@@ -220,6 +212,7 @@ export function unlock(password: string) {
       const accounts = await vault.fetchAccounts();
       const settings = await vault.fetchSettings();
       unlocked({ vault, accounts, settings });
+      await syncAuthWalletAddresses(accounts);
 
       const [selectedAccountPkh, networkId] = await Promise.all([
         getStoredSelectedAccountPkh(),
@@ -248,6 +241,7 @@ export async function unlockFromSession() {
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
+    await syncAuthWalletAddresses(accounts);
   });
 }
 
@@ -266,7 +260,7 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
 
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.createHDAccount(walletId, name, hdIndex);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
       await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
@@ -298,7 +292,7 @@ export function removeAccount(id: string, password: string) {
       console.error(err);
     }
     const { newAccounts } = await Vault.removeAccount(id, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
@@ -317,7 +311,7 @@ export function editAccount(accPublicKeyHash: string, name: string) {
 export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.updateAccountKYCStatus(accPublicKeyHash, isKYC);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
@@ -325,7 +319,7 @@ export function importAccount(chainId: string, chain: TempleChainKind, privateKe
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importAccount(chain, chainId, privateKey, encPassword);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
       await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
@@ -337,7 +331,7 @@ export function importMnemonicAccount(mnemonic: string, chainId: string, passwor
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importMnemonicAccount(mnemonic, chainId, password, derivationPath);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
       await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
@@ -348,14 +342,14 @@ export function importMnemonicAccount(mnemonic: string, chainId: string, passwor
 export function importFundraiserAccount(email: string, password: string, mnemonic: string, chainId: string) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic, chainId);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
 export function importManagedKTAccount(address: string, chainId: string, owner: string) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.importManagedKTAccount(address, chainId, owner);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
@@ -363,7 +357,7 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importWatchOnlyAccount(chain, address, chainId, name);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
       await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
@@ -374,7 +368,7 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
 export function createLedgerAccount(input: SaveLedgerAccountInput) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.createLedgerAccount(input);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
@@ -394,14 +388,14 @@ export function removeHdWallet(id: string, password: string) {
       console.error(err);
     }
     const { newAccounts } = await Vault.removeHdWallet(id, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
 export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
   return withUnlocked(async () => {
     const newAccounts = await Vault.removeAccountsByType(type, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
@@ -409,7 +403,7 @@ export function createOrImportWallet(mnemonic?: string) {
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await vault.createOrImportWallet(mnemonic);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
     const newAccount = findNewAccount(prevAccounts, newAccounts);
     if (newAccount) {
       await performAuthForAccount(vault, newAccount.publicKeyHash, newAccounts);

@@ -37,7 +37,7 @@ export function useContactsActions() {
   const { allContacts } = useFilteredContacts();
   const settingsRef = useRef(settings);
   const contactsOwnerAddress = getContactsOwnerAddress(allAccounts, account.publicKeyHash);
-  const contactsStorageKey = buildContactsStorageKey(contactsOwnerAddress, network.id);
+  const contactsStorageKey = contactsOwnerAddress ? buildContactsStorageKey(contactsOwnerAddress, network.id) : null;
   const knownValidatorAddresses = useMemo(
     () => new Set((knownBakers ?? []).map(({ address }) => address)),
     [knownBakers]
@@ -109,45 +109,51 @@ export function useContactsActions() {
 
   const loadCurrentContactsState = useCallback(async () => {
     const currentSettings = settingsRef.current;
-    const cachedState = getCachedContactsState(currentSettings, contactsStorageKey);
+    const cachedState = contactsStorageKey ? getCachedContactsState(currentSettings, contactsStorageKey) : null;
 
     if (cachedState) {
       return cachedState;
     }
 
-    if (!canUseEncryptedContacts(account.type)) {
-      throw new Error('Encrypted contacts are unavailable for this account type');
+    if (!canUseEncryptedContacts(contactsOwnerAddress) || !contactsStorageKey) {
+      throw new Error('Encrypted contacts are unavailable for this account');
     }
 
     await ensureAuthorized(contactsOwnerAddress, network.id);
     const publicKey = await revealPublicKey(contactsOwnerAddress);
     return fetchContactsRecord(publicKey);
-  }, [account.type, contactsOwnerAddress, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
+  }, [contactsOwnerAddress, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
 
   const persistContacts = useCallback(
     async (
       nextContacts: TempleContact[],
-      recordId = getStoredContactsRecordId(settingsRef.current, contactsStorageKey),
-      typesByAddress = getStoredContactsTypesByAddress(settingsRef.current, contactsStorageKey)
+      recordId?: string | null,
+      typesByAddress?: Record<string, TempleContactApiType>
     ) => {
+      if (!canUseEncryptedContacts(contactsOwnerAddress) || !contactsStorageKey) {
+        throw new Error('Encrypted contacts are unavailable for this account');
+      }
+
+      const currentRecordId =
+        recordId === undefined ? getStoredContactsRecordId(settingsRef.current, contactsStorageKey) : recordId;
+      const currentTypesByAddress =
+        typesByAddress === undefined
+          ? getStoredContactsTypesByAddress(settingsRef.current, contactsStorageKey)
+          : typesByAddress;
       const { contacts: normalizedContacts, typesByAddress: resolvedTypesByAddress } = prepareContactsForPersistence(
         nextContacts,
-        typesByAddress
+        currentTypesByAddress
       );
-      let nextRecordId = recordId;
+      let nextRecordId = currentRecordId;
       let nextTypesByAddress = resolvedTypesByAddress;
 
-      if (normalizedContacts.length > 0 || recordId) {
-        if (!canUseEncryptedContacts(account.type)) {
-          throw new Error('Encrypted contacts are unavailable for this account type');
-        }
-
+      if (normalizedContacts.length > 0 || currentRecordId) {
         await ensureAuthorized(contactsOwnerAddress, network.id);
         const publicKey = await revealPublicKey(contactsOwnerAddress);
         const saved = await saveContactsRecord({
           contacts: normalizedContacts,
           publicKey,
-          recordId,
+          recordId: currentRecordId,
           typesByAddress: resolvedTypesByAddress
         });
 
@@ -169,7 +175,6 @@ export function useContactsActions() {
       );
     },
     [
-      account.type,
       contactsOwnerAddress,
       contactsStorageKey,
       ensureAuthorized,

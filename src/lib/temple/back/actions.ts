@@ -8,10 +8,11 @@ import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
 import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
+import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
-import { loadChainId } from 'lib/temple/helpers';
+import { getAuthWalletAddress, loadChainId } from 'lib/temple/helpers';
 import {
   TempleState,
   TempleMessageType,
@@ -24,7 +25,15 @@ import {
   TempleAccount
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
-import { logoutAuth, refreshAuthTokens, requestAuthChallenge, verifyAuthSignature } from 'mavryk/api';
+import {
+  getAuthTokensFromStorage,
+  getSelectedNetworkIdFromStorage,
+  isJwtExpiringSoon,
+  logoutAuth,
+  refreshAuthTokens,
+  requestAuthChallenge,
+  verifyAuthSignature
+} from 'mavryk/api';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import {
@@ -58,6 +67,7 @@ export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
 const AUTODECLINE_AFTER = 60_000;
+const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;
 
@@ -69,10 +79,79 @@ const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
   return next.find(acc => !prevIds.has(acc.id));
 };
 
-const performAuthForAccount = async (vault: Vault, accountPkh: string) => {
-  const { nonce, challenge } = await requestAuthChallenge({ walletAddress: accountPkh });
-  const signature = await signAuthChallengeWithVault(vault, accountPkh, challenge);
-  await verifyAuthSignature({ nonce, signature, walletAddress: accountPkh });
+const isSignableAccount = (account: TempleAccount) =>
+  account.type !== TempleAccountType.WatchOnly && account.type !== TempleAccountType.ManagedKT;
+
+const resolveAuthWalletAddress = (accounts: TempleAccount[], accountPkh?: string) => {
+  if (accountPkh) {
+    const selectedAccount = accounts.find(acc => acc.publicKeyHash === accountPkh);
+
+    if (selectedAccount && isSignableAccount(selectedAccount)) {
+      return getAuthWalletAddress(accounts, accountPkh);
+    }
+  }
+
+  const fallbackAccount = accounts.find(isSignableAccount);
+
+  return fallbackAccount ? getAuthWalletAddress(accounts, fallbackAccount.publicKeyHash) : null;
+};
+
+const getStoredSelectedAccountPkh = async () => {
+  const { [ACCOUNT_PKH_STORAGE_KEY]: selectedAccountPkh } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
+
+  return typeof selectedAccountPkh === 'string' ? selectedAccountPkh : undefined;
+};
+
+const performAuthForAccount = async (
+  vault: Vault,
+  accountPkh: string,
+  accounts?: TempleAccount[],
+  networkId?: string
+) => {
+  const allAccounts = accounts ?? (await vault.fetchAccounts());
+  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+
+  if (!authWalletAddress) {
+    return;
+  }
+
+  const { nonce, challenge } = await requestAuthChallenge({ walletAddress: authWalletAddress, networkId });
+  const signature = await signAuthChallengeWithVault(vault, authWalletAddress, challenge);
+  await verifyAuthSignature({ nonce, signature, walletAddress: authWalletAddress, networkId });
+};
+
+const ensureAuthorizedForAccount = async (
+  vault: Vault,
+  accountPkh?: string,
+  networkId?: string,
+  accounts?: TempleAccount[]
+) => {
+  const allAccounts = accounts ?? (await vault.fetchAccounts());
+  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+
+  if (!authWalletAddress) {
+    return;
+  }
+
+  const { accessToken } = await getAuthTokensFromStorage({ walletAddress: authWalletAddress, networkId });
+
+  if (accessToken && !isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS)) {
+    return;
+  }
+
+  try {
+    await refreshAuthTokens({ networkId, walletAddress: authWalletAddress });
+    return;
+  } catch {
+    await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId);
+  }
+};
+
+const shouldLockOnSessionRecovery = async () => {
+  const { accessToken } = await getAuthTokensFromStorage();
+  if (!accessToken) return true;
+
+  return isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS);
 };
 
 export async function init() {
@@ -141,24 +220,16 @@ export function unlock(password: string) {
       const accounts = await vault.fetchAccounts();
       const settings = await vault.fetchSettings();
       unlocked({ vault, accounts, settings });
+
+      const [selectedAccountPkh, networkId] = await Promise.all([
+        getStoredSelectedAccountPkh(),
+        getSelectedNetworkIdFromStorage()
+      ]);
+
       try {
-        await refreshAuthTokens();
-      } catch (refreshError) {
-        const authAccount = accounts.find(
-          acc => acc.type !== TempleAccountType.WatchOnly && acc.type !== TempleAccountType.ManagedKT
-        );
-
-        if (!authAccount) {
-          console.error(refreshError);
-          return;
-        }
-
-        try {
-          await performAuthForAccount(vault, authAccount.publicKeyHash);
-        } catch (authError) {
-          console.error(refreshError);
-          console.error(authError);
-        }
+        await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
+      } catch (error) {
+        console.error(error);
       }
     })
   );
@@ -168,6 +239,12 @@ export async function unlockFromSession() {
   await enqueueUnlock(async () => {
     const vault = await Vault.recoverFromSession();
     if (vault == null) return;
+
+    if (await shouldLockOnSessionRecovery()) {
+      await lock();
+      return;
+    }
+
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
@@ -192,7 +269,7 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
     accountsUpdated(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash);
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
     }
   });
 }
@@ -251,7 +328,7 @@ export function importAccount(chainId: string, chain: TempleChainKind, privateKe
     accountsUpdated(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash);
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
     }
   });
 }
@@ -263,7 +340,7 @@ export function importMnemonicAccount(mnemonic: string, chainId: string, passwor
     accountsUpdated(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash);
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
     }
   });
 }
@@ -289,7 +366,7 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
     accountsUpdated(updatedAccounts);
     const newAccount = findNewAccount(prevAccounts, updatedAccounts);
     if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash);
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
     }
   });
 }
@@ -335,8 +412,16 @@ export function createOrImportWallet(mnemonic?: string) {
     accountsUpdated(newAccounts);
     const newAccount = findNewAccount(prevAccounts, newAccounts);
     if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash);
+      await performAuthForAccount(vault, newAccount.publicKeyHash, newAccounts);
     }
+  });
+}
+
+export function ensureAuthorized(accountPkh?: string, networkId?: string) {
+  return withUnlocked(async ({ vault }) => {
+    const accounts = await vault.fetchAccounts();
+
+    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts);
   });
 }
 

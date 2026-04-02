@@ -140,6 +140,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UnlockResponse);
   }, []);
 
+  const ensureAuthorized = useCallback(async (accountPublicKeyHash?: string, networkId?: string) => {
+    const res = await request({
+      type: TempleMessageType.EnsureAuthorizedRequest,
+      accountPublicKeyHash,
+      networkId
+    });
+    assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
+  }, []);
+
   const lock = useCallback(async () => {
     const res = await request({
       type: TempleMessageType.LockRequest
@@ -173,6 +182,15 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     });
     assertResponse(res.type === TempleMessageType.RevealPrivateKeyResponse);
     return res.privateKey;
+  }, []);
+
+  const revealPublicKey = useCallback(async (accountPublicKeyHash: string) => {
+    const res = await request({
+      type: TempleMessageType.RevealPublicKeyRequest,
+      accountPublicKeyHash
+    });
+    assertResponse(res.type === TempleMessageType.RevealPublicKeyResponse);
+    return res.publicKey;
   }, []);
 
   const revealMnemonic = useCallback(async (walletId: string, password: string) => {
@@ -461,8 +479,10 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     // Actions
     registerWallet,
     unlock,
+    ensureAuthorized,
     lock,
     createAccount,
+    revealPublicKey,
     revealPrivateKey,
     revealMnemonic,
     generateSyncPayload,

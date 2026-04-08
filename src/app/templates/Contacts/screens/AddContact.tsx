@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
@@ -9,7 +9,14 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { t, T } from 'lib/i18n';
-import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
+import {
+  isDomainNameValid,
+  useContactsActions,
+  useKnownBakers,
+  useNetwork,
+  useTezosDomainsClient
+} from 'lib/temple/front';
+import { PREDEFINED_BAKERS_NAMES_MAINNET } from 'lib/temple/front/baking/const';
 import { isAddressValid } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
 import { HistoryAction, goBack, navigate, useLocation } from 'lib/woozie';
@@ -34,8 +41,11 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const { addContact } = useContactsActions();
+  const network = useNetwork();
+  const knownBakers = useKnownBakers(false);
   const domainsClient = useTezosDomainsClient();
   const { historyPosition, pathname } = useLocation();
+  const autofilledValidatorNameRef = useRef<string | null>(null);
 
   const {
     register,
@@ -44,6 +54,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
     formState,
     clearError,
     setError,
+    setValue,
     errors,
     watch
   } = useForm<ContactFormData>();
@@ -51,10 +62,84 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const submitting = formState.isSubmitting;
   const name = watch('name') ?? '';
   const address = watch('address') ?? '';
+  const knownValidatorAddresses = useMemo(
+    () => new Set((knownBakers ?? []).map(({ address: bakerAddress }) => bakerAddress)),
+    [knownBakers]
+  );
 
   const inHome = pathname === '/';
   const isSubmitDisabled = !name.length || !address.length;
   const properHistoryPosition = historyPosition > 0 || !inHome;
+
+  // Keep the contact name aligned with the entered validator address by resolving domains
+  // and applying the predefined validator label. Cleanup only ignores stale async lookups.
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncValidatorName = async () => {
+      const trimmedAddress = address.trim();
+      const previousAutofilledName = autofilledValidatorNameRef.current;
+
+      if (!trimmedAddress) {
+        if (previousAutofilledName && name === previousAutofilledName) {
+          setValue('name', '');
+        }
+
+        autofilledValidatorNameRef.current = null;
+
+        return;
+      }
+
+      let resolvedAddress = trimmedAddress;
+
+      if (isDomainNameValid(trimmedAddress, domainsClient)) {
+        const resolved = await domainsClient.resolver.resolveNameToAddress(trimmedAddress);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!resolved) {
+          resolvedAddress = '';
+        } else {
+          resolvedAddress = resolved;
+        }
+      }
+
+      const validatorName =
+        network.type === 'main' && knownValidatorAddresses.has(resolvedAddress)
+          ? PREDEFINED_BAKERS_NAMES_MAINNET[resolvedAddress]?.name ?? null
+          : null;
+
+      if (cancelled) {
+        return;
+      }
+
+      if (validatorName) {
+        if (!name || name === previousAutofilledName) {
+          if (name !== validatorName) {
+            setValue('name', validatorName);
+          }
+
+          autofilledValidatorNameRef.current = validatorName;
+        }
+
+        return;
+      }
+
+      if (previousAutofilledName && name === previousAutofilledName) {
+        setValue('name', '');
+      }
+
+      autofilledValidatorNameRef.current = null;
+    };
+
+    syncValidatorName();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, domainsClient, knownValidatorAddresses, name, network.type, setValue]);
 
   const onCancelSubmit = useCallback(() => {
     if (submitting) return;

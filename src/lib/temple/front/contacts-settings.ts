@@ -1,9 +1,8 @@
 import { isEqual } from 'lodash';
 
-import { getAuthWalletAddress } from 'lib/temple/helpers';
+import { resolveAuthWalletAddress } from 'lib/temple/helpers';
 import {
   TempleAccount,
-  TempleAccountType,
   TempleContact,
   TempleContactApiType,
   TempleContactsAccountState,
@@ -36,7 +35,7 @@ export function normalizeContacts(contacts: TempleContact[]) {
 }
 
 export function getContactsOwnerAddress(allAccounts: TempleAccount[], accountPkh: string) {
-  return getAuthWalletAddress(allAccounts, accountPkh);
+  return resolveAuthWalletAddress(allAccounts, accountPkh);
 }
 
 export function buildContactsStorageKey(walletAddress: string, networkId: string) {
@@ -129,6 +128,6 @@ export function hasContactsSettingsMismatch(
   );
 }
 
-export function canUseEncryptedContacts(accountType: TempleAccountType) {
-  return accountType !== TempleAccountType.WatchOnly && accountType !== TempleAccountType.ManagedKT;
+export function canUseEncryptedContacts(contactsOwnerAddress: string | null) {
+  return Boolean(contactsOwnerAddress);
 }

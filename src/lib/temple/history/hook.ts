@@ -95,16 +95,16 @@ export default function useHistory(
     }
 
     const { items: newHistoryItems, cursor: returnedCursor, hasMore } = fetchResult;
+    const newUniqueItems = newHistoryItems.filter(item => !historyItems.some(prevItem => prevItem.hash === item.hash));
+
+    if (newUniqueItems.length === 0) {
+      setCursor(returnedCursor);
+      setLoading(false);
+      setReachedTheEnd(true);
+      return;
+    }
 
     setUserHistory(prev => {
-      const newUniqueItems = newHistoryItems.filter(item => !prev.some(prevItem => prevItem.hash === item.hash));
-
-      if (newUniqueItems.length === 0) {
-        setReachedTheEnd(!hasMore);
-        return prev;
-      }
-
-      // merge + dedupe
       const merged = [...prev, ...newUniqueItems];
       return Array.from(new Map(merged.map(item => [item.hash, item])).values());
     });

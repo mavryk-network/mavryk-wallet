@@ -121,19 +121,19 @@ export const HistoryComponent: React.FC<Props> = memo(
                 selected: filterOptions.includes(HistoryItemOpTypeEnum.Reveal),
 
                 nameI18nKey: 'reveal'
-              },
-              {
-                id: HistoryItemOpTypeEnum.Swap.toString(),
-                selected: filterOptions.includes(HistoryItemOpTypeEnum.Swap),
-
-                nameI18nKey: 'swap'
-              },
-              {
-                id: HistoryItemOpTypeEnum.Other.toString(),
-                selected: filterOptions.includes(HistoryItemOpTypeEnum.Other),
-
-                nameI18nKey: 'other'
               }
+              // {
+              //   id: HistoryItemOpTypeEnum.Swap.toString(),
+              //   selected: filterOptions.includes(HistoryItemOpTypeEnum.Swap),
+
+              //   nameI18nKey: 'swap'
+              // },
+              // {
+              //   id: HistoryItemOpTypeEnum.Other.toString(),
+              //   selected: filterOptions.includes(HistoryItemOpTypeEnum.Other),
+
+              //   nameI18nKey: 'other'
+              // }
             ] as SortListItemType[]))
       ],
       [assetSlug, filterOptions]

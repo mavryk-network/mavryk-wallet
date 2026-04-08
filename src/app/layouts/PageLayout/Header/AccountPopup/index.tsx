@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 
@@ -41,7 +41,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
   const plusTippyOptions = useMemo<UseTippyOptions>(
     () => ({
       ...settingsTippyOptions,
-      content: 'Import Account'
+      content: 'Add or Import Account'
     }),
     [settingsTippyOptions]
   );
@@ -50,8 +50,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
   const plusRef = useTippy<HTMLAnchorElement>(plusTippyOptions);
 
   const [searchValue, setSearchValue] = useState('');
-  const [attractSelectedAccount, setAttractSelectedAccount] = useState(true);
-
   const filteredAccounts = useMemo(() => {
     if (searchValue.length === 0) {
       return allAccounts;
@@ -73,11 +71,6 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
     },
     [account, setAccountPkh, setOpened]
   );
-
-  useEffect(() => {
-    if (searchValue) setAttractSelectedAccount(false);
-    else if (opened === false) setAttractSelectedAccount(true);
-  }, [opened, searchValue]);
 
   const icons = useMemo(() => {
     return [

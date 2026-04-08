@@ -217,7 +217,9 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             <div className="z-10 flex flex-col items-center">
               <Identicon type="bottts" hash={accountHash} size={64} className="shadow-xs rounded-full flex-shrink-0" />
               <div className="text-white flex items-center gap-1 mb-2 mt-3">
-                <Name className="text-primary-white text-xl">{accountName}</Name>
+                <Name tooltipContent={accToChange?.name} className="text-primary-white text-xl">
+                  {accountName}
+                </Name>
 
                 <button onClick={editNamePopup.open} className="outline-none focus:outline-none">
                   <EditIcon className="min-w-6 w-6 h-6 fill-current" />

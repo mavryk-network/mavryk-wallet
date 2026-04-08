@@ -3571,7 +3571,7 @@
     "message": "Add or Import Account"
   },
   "addOrImportAccountDescfiption": {
-    "message": " Here you can create a brand new account, import an old account you currently use on a different platform or restore an account you no longer have access to but have kept the seed phrase or keystore file."
+    "message": "Choose how you'd like to set up your account. You can create a new one, bring in an existing account, or recover one you've lost access to."
   },
   "addNewAccount": {
     "message": "Add New Account"

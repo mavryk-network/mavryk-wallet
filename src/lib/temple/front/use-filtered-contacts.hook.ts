@@ -21,11 +21,18 @@ export function useFilteredContacts() {
   const account = useAccount();
   const allAccounts = useAllAccounts();
   const network = useNetwork();
-  const contactsStorageKey = useMemo(
-    () => buildContactsStorageKey(getContactsOwnerAddress(allAccounts, account.publicKeyHash), network.id),
-    [account.publicKeyHash, allAccounts, network.id]
+  const contactsOwnerAddress = useMemo(
+    () => getContactsOwnerAddress(allAccounts, account.publicKeyHash),
+    [account.publicKeyHash, allAccounts]
   );
-  const contacts = getCurrentAccountStoredContacts(settings, contactsStorageKey);
+  const contactsStorageKey = useMemo(
+    () => (contactsOwnerAddress ? buildContactsStorageKey(contactsOwnerAddress, network.id) : null),
+    [contactsOwnerAddress, network.id]
+  );
+  const contacts = useMemo(
+    () => (contactsStorageKey ? getCurrentAccountStoredContacts(settings, contactsStorageKey) : []),
+    [contactsStorageKey, settings]
+  );
 
   const accounts = useRelevantAccounts();
   const accountContacts = useMemo<TempleContact[]>(
@@ -54,6 +61,10 @@ export function useFilteredContacts() {
   // Keep the scoped contacts cache aligned with filtered contacts for the active wallet/network view.
   // No cleanup is needed because this is a one-shot settings synchronization.
   useEffect(() => {
+    if (!contactsStorageKey) {
+      return;
+    }
+
     if (!hasContactsSettingsMismatch(settings, contactsStorageKey, filteredContacts)) {
       return;
     }

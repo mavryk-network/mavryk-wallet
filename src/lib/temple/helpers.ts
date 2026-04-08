@@ -84,6 +84,10 @@ export function getSameGroupAccounts(allAccounts: TempleAccount[], accountType: 
   );
 }
 
+export function canAccountSignAuth(account: TempleAccount) {
+  return account.type !== TempleAccountType.WatchOnly && account.type !== TempleAccountType.ManagedKT;
+}
+
 /**
  * Resolves the canonical auth wallet address for the provided account.
  * HD sub-accounts share the index-0 address of the same wallet.
@@ -103,11 +107,30 @@ export function getAuthWalletAddress(allAccounts: TempleAccount[], accountPublic
 }
 
 /**
+ * Resolves the wallet address that should own Mavryk API auth for the provided account.
+ * Non-signable accounts reuse the first signable wallet available in the vault.
+ */
+export function resolveAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash?: string | null) {
+  if (accountPublicKeyHash) {
+    const selectedAccount = allAccounts.find(account => account.publicKeyHash === accountPublicKeyHash);
+
+    if (selectedAccount && canAccountSignAuth(selectedAccount)) {
+      return getAuthWalletAddress(allAccounts, selectedAccount.publicKeyHash);
+    }
+  }
+
+  const fallbackAccount = allAccounts.find(canAccountSignAuth);
+
+  return fallbackAccount ? getAuthWalletAddress(allAccounts, fallbackAccount.publicKeyHash) : null;
+}
+
+/**
  * Builds a lookup from each account address to the auth wallet address used for Mavryk auth storage.
  */
 export function buildAuthWalletAddressesMap(allAccounts: TempleAccount[]) {
   return allAccounts.reduce<Record<string, string>>((result, account) => {
-    result[account.publicKeyHash] = getAuthWalletAddress(allAccounts, account.publicKeyHash);
+    result[account.publicKeyHash] =
+      resolveAuthWalletAddress(allAccounts, account.publicKeyHash) ?? account.publicKeyHash;
 
     return result;
   }, {});

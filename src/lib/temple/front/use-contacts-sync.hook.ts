@@ -28,7 +28,7 @@ export function useContactsSync(
     [account.publicKeyHash, allAccounts]
   );
   const contactsStorageKey = useMemo(
-    () => buildContactsStorageKey(contactsOwnerAddress, networkId),
+    () => (contactsOwnerAddress ? buildContactsStorageKey(contactsOwnerAddress, networkId) : null),
     [contactsOwnerAddress, networkId]
   );
 
@@ -41,7 +41,7 @@ export function useContactsSync(
   // Sync contacts for the selected auth wallet and network.
   // This manages remote contacts fetches; cleanup only cancels applying stale async results.
   useEffect(() => {
-    if (!canUseEncryptedContacts(account.type)) {
+    if (!canUseEncryptedContacts(contactsOwnerAddress) || !contactsStorageKey) {
       previousNetworkIdRef.current = networkId;
       return;
     }
@@ -81,13 +81,5 @@ export function useContactsSync(
     return () => {
       cancelled = true;
     };
-  }, [
-    account.type,
-    contactsOwnerAddress,
-    contactsStorageKey,
-    ensureAuthorized,
-    networkId,
-    revealPublicKey,
-    updateSettings
-  ]);
+  }, [contactsOwnerAddress, contactsStorageKey, ensureAuthorized, networkId, revealPublicKey, updateSettings]);
 }

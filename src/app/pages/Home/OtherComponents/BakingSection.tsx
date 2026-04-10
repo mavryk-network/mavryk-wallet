@@ -24,6 +24,7 @@ import BakerBanner from 'app/templates/BakerBanner';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
+import { IS_DEV_ENV } from 'lib/env';
 import { useGasToken } from 'lib/assets/hooks';
 import { bakingKeys } from 'lib/query-keys';
 import { T, t } from 'lib/i18n';
@@ -93,7 +94,10 @@ const BakingSection = memo(() => {
     queryKey: bakingKeys.history(acc.publicKeyHash, myBakerPkh ?? '', chainId ?? ''),
     queryFn: () => {
       if (!isKnownChainId(chainId!)) return [];
-      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []);
+      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []).catch(err => {
+        if (IS_DEV_ENV) console.error('[BakingSection] getDelegatorRewards failed:', err);
+        return [];
+      });
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

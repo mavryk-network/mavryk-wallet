@@ -131,7 +131,7 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
   const amountValue = watch('amount');
 
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
       const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: config.successPageTitle,

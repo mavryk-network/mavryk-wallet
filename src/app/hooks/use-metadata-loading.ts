@@ -10,7 +10,7 @@ export const useMetadataLoading = () => {
   const { publicKeyHash: account } = useAccount();
 
   const tokens = useAccountTokensSelector(account, chainId);
-  const slugs = useMemo(() => Object.keys(tokens), [tokens]);
+  const slugs = useMemo(() => Object.keys(tokens ?? {}), [tokens]);
 
   useEffect(() => {
     metadataStore.getState().setTokensMetadataLoading(false);

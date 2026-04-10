@@ -261,7 +261,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 

@@ -126,12 +126,13 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
               const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
                 tezos.rpc.getBlockMetadata(),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
-                tezos.rpc.getUnstakeRequests(accountAddress)
+                tezos.rpc.getUnstakeRequests(accountAddress).catch(() => null)
               ]);
 
               const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
               const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
-              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 0;
+              // Default to 1 (allowed) when baker has not published set_delegate_parameters
+              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 1;
 
               // ~2.8 days for mainnet // get cycle in Ms ------<
               let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();

@@ -338,7 +338,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const maxAmountStr = maxAmount?.toString();
   useEffect(() => {
-    if (formState.dirtyFields.amount) {
+    if (formState.dirtyFields?.amount) {
       trigger('amount');
     }
   }, [formState.dirtyFields, trigger, maxAmountStr]);

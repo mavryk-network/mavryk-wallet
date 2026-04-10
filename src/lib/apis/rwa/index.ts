@@ -34,6 +34,9 @@ export async function fetchRwaAssetsContracts() {
       return MOCK_RWA_CONFIG.dodo_mav.map(item => item.base_token.address);
     }
     const { data } = await response.json();
+
+    if (!data) return [];
+
     const parsedAssetsResponse = dodoAssetsContractsSchema.validateSync(data, { abortEarly: false });
 
     return parsedAssetsResponse.dodo_mav.map(item => item.base_token.address);

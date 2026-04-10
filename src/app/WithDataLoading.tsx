@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 
 import { useScamlistQuery } from 'lib/assets/use-assets-query';
 
-import { useAdvertisingLoading } from './hooks/use-advertising.hook';
 import { useAssetsLoading } from './hooks/use-assets-loading';
 import { useAssetsMigrations } from './hooks/use-assets-migrations';
 import { useBalancesLoading } from './hooks/use-balances-loading';
@@ -29,7 +28,6 @@ export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
   useRWAsDetailsLoading();
 
   useLongRefreshLoading();
-  useAdvertisingLoading();
   useTokensApyLoading();
 
   useStorageAnalytics();

@@ -149,12 +149,8 @@ const SelectOptions = <Type extends unknown>({
   return (
     <DropdownWrapper
       opened={opened}
-      className={classNames('origin-top overflow-x-hidden overflow-y-auto no-scrollbar', dropdownWrapperClassName)}
-      style={{
-        // maxHeight: '15.125rem',
-        backgroundColor: '#010101',
-        borderColor: '#333'
-      }}
+      design="none"
+      className={merge('bg-primary-bg border-divider origin-top overflow-x-hidden overflow-y-auto no-scrollbar', dropdownWrapperClassName)}
     >
       {(options.length === 0 || isLoading) && (
         <div className="my-8 flex flex-col items-center justify-center text-white">

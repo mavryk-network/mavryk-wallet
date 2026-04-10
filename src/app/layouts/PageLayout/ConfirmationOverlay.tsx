@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useLayoutEffect, useMemo } from 'react';
+import React, { FC, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 import CSSTransition from 'react-transition-group/CSSTransition';
@@ -41,22 +41,25 @@ const ConfirmationOverlay: FC = () => {
 
   const memoizedBgClassname = useMemo(() => (popup ? 'bg-primary-bg' : styles.fullpageBg), [popup]);
 
+  const nodeRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
       {displayed && <DocBg bgClassName={memoizedBgClassname} />}
 
       <Portal>
         <CSSTransition
+          nodeRef={nodeRef}
           in={displayed}
           timeout={200}
-          clsx={{
+          classNames={{
             enter: 'opacity-0',
             enterActive: clsx('opacity-100', 'transition ease-out duration-200'),
             exit: clsx('opacity-0', 'transition ease-in duration-200')
           }}
           unmountOnExit
         >
-          <div className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
+          <div ref={nodeRef} className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
             {confirmation && (
               <InternalConfirmation
                 payload={confirmation.payload}

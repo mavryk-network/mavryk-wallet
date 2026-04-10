@@ -81,7 +81,7 @@ export const ContactsDropdownItemSecondary: FC<ContactsDropdownItemProps> = ({ c
       className={classNames(
         'w-full flex items-center',
         'px-4 py-14px text-left',
-        'bg-primary-bg border border-divider overflow-hidden rounded-xl'
+        'bg-primary-card border border-divider overflow-hidden rounded-xl'
       )}
       tabIndex={-1}
       {...rest}

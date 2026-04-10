@@ -83,6 +83,11 @@ export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => 
 
     const { data } = await response.json();
 
+    if (!data) {
+      const cachedPrices = await fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
+      return (cachedPrices ?? {}) as Record<string, string>;
+    }
+
     const parsedData = DodoStorageSchema.parse(data);
 
     const rwasAssetsPricesPair = getDodoMavTokenPrices(parsedData.dodo_mav);

@@ -21,7 +21,7 @@ export const useMetadataRefresh = () => {
 
   const tokensMetadata = useAllTokensMetadataSelector();
   const slugsOnAppLoad = useMemo(
-    () => Object.keys(tokensMetadata).filter(slug => !ALL_PREDEFINED_METADATAS_RECORD[slug]),
+    () => Object.keys(tokensMetadata ?? {}).filter(slug => !ALL_PREDEFINED_METADATAS_RECORD[slug]),
     []
   );
 

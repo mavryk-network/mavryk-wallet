@@ -5,7 +5,6 @@ import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 
 import { BoundaryError } from 'app/ErrorBoundary';
-import { IS_DEV_ENV } from 'lib/env';
 import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
@@ -16,6 +15,7 @@ import {
 import { getAccountStatsFromMvkt, isKnownChainId, MvktRewardsEntry, MvktAccountType } from 'lib/apis/mvkt';
 import { fetchBakerDelegateParameters, MVKT_API_BASE_URLS, MvktApiChainId } from 'lib/apis/mvkt/api';
 import type { MvktUserAccount } from 'lib/apis/mvkt/types';
+import { IS_DEV_ENV } from 'lib/env';
 import { bakingKeys, chainKeys } from 'lib/query-keys';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
@@ -90,8 +90,9 @@ export function useDelegate<T = MvktUserAccount>(
   return useQuery<T | undefined>({
     queryKey,
     queryFn: getDelegate,
-    staleTime: 15_000,
-    refetchInterval: 15_000
+    // 30 s — baking stats change at most once per block; reduce background RPC load
+    staleTime: 30_000,
+    refetchInterval: 30_000
   });
 }
 
@@ -220,8 +221,9 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
   return useQuery({
     queryKey,
     queryFn: getDelegateStats,
-    staleTime: 15_000,
-    refetchInterval: 15_000,
+    // 30 s — baking stats change at most once per block; reduce background RPC load
+    staleTime: 30_000,
+    refetchInterval: 30_000,
     placeholderData: emptydelegateStatsResponse
   });
 }

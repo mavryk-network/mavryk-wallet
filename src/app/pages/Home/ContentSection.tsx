@@ -44,9 +44,12 @@ export const ContentSection: FC<Props> = ({ className }) => {
     if (!tabBarElemRef.current) return;
 
     const stickyBarHeight = ToolbarElement?.scrollHeight ?? 0;
+    const tabBarTop = tabBarElemRef.current.getBoundingClientRect().top;
+
+    if (tabBarTop >= stickyBarHeight) return;
 
     window.scrollTo({
-      top: window.pageYOffset + tabBarElemRef.current.getBoundingClientRect().top - stickyBarHeight,
+      top: window.scrollY + tabBarTop - stickyBarHeight,
       behavior: 'smooth'
     });
   }, []);

@@ -119,6 +119,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
   const estimationRef = useEstimationRef(toResolved, tezos.checksum);
+  const myBakerPkhAtSubmitRef = useRef<string | null>(null);
 
   const getEstimation = useCallback(async () => {
     const to = toResolved;
@@ -269,7 +270,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         hash,
         assetSlug: MAV_TOKEN_SLUG,
         amount: atomsToTokens(balanceNum ?? 0, MAVEN_METADATA.decimals).toNumber(),
-        oldValidatorAddress: myBakerPkh,
+        oldValidatorAddress: myBakerPkhAtSubmitRef.current,
         validatorAddress: operation.to
       };
 
@@ -297,7 +298,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
       }
     }
-  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation, toResolved]);
+  }, [balanceNum, isReDelegationActive, operation, unfamiliarWithDelegation, toResolved]);
 
   const onSubmit = useCallback(
     async ({ fee: feeVal }: FormData) => {
@@ -305,6 +306,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
       if (formState.isSubmitting) return;
       setSubmitError(null);
       setOperation(null);
+
+      myBakerPkhAtSubmitRef.current = myBakerPkh;
 
       const analyticsProperties = { bakerAddress: to };
 

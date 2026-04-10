@@ -186,7 +186,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
               disabled && 'opacity-50',
               'bg-primary-card-op',
               'rounded mb-2 flex items-center text-white',
-              'border-transparent p-10 h-full'
+              'border border-primary-border p-10 h-full'
             )}
           >
             <Icon className={classNames('w-6 h-auto')} />

@@ -69,7 +69,9 @@ const ReadyClientMvktConnectionProvider: FC<PropsWithChildren> = ({ children }) 
           setConnectionReady(false);
           const delay = withJitter(Math.min(1000 * 2 ** retryCountRef.current, 30_000));
           retryCountRef.current++;
-          setTimeout(() => { initConnection().catch(() => void 0); }, delay);
+          setTimeout(() => {
+            initConnection().catch(() => void 0);
+          }, delay);
         }
       });
       setConnectionReady(true);
@@ -78,7 +80,9 @@ const ReadyClientMvktConnectionProvider: FC<PropsWithChildren> = ({ children }) 
       if (!shouldShutdownConnection.current && retryCountRef.current < MAX_WS_RETRIES) {
         const delay = withJitter(Math.min(5000 * 2 ** retryCountRef.current, 60_000));
         retryCountRef.current++;
-        setTimeout(() => { initConnection().catch(() => void 0); }, delay);
+        setTimeout(() => {
+          initConnection().catch(() => void 0);
+        }, delay);
       }
     }
   }, [connection, setConnectionReady]);

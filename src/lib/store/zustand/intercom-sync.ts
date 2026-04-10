@@ -1,7 +1,31 @@
 import { IntercomClient } from 'lib/intercom';
 import { TempleMessageType, TempleNotification } from 'lib/temple/types';
 
+import { queryClient } from './query-client';
 import { walletStore } from './wallet.store';
+
+/**
+ * Query key root segments that are network-dependent.
+ * When the active network changes, queries with these roots are cancelled and invalidated.
+ * Derived from src/lib/query-keys.ts — update if new network-dependent keys are added.
+ */
+const NETWORK_DEPENDENT_KEY_ROOTS = new Set([
+  'balance',
+  'chain-id',
+  'delegate',
+  'delegate_stats',
+  'baker',
+  'baking-history',
+  'tzdns-address',
+  'tzdns-reverse-name',
+  'transfer-base-fee',
+  'stake-base-fee',
+  'delegate-base-fee'
+]);
+
+function isNetworkDependentKey(queryKey: readonly unknown[]): boolean {
+  return typeof queryKey[0] === 'string' && NETWORK_DEPENDENT_KEY_ROOTS.has(queryKey[0]);
+}
 
 /**
  * Intercom → Zustand sync bridge.
@@ -41,7 +65,15 @@ export function startIntercomSync(intercom: IntercomClient) {
           .request({ type: TempleMessageType.GetStateRequest })
           .then(res => {
             if ('type' in res && res.type === TempleMessageType.GetStateResponse) {
+              const prevRpcBaseURL = walletStore.getState().networks[0]?.rpcBaseURL;
               store.syncState(res.state);
+              const nextRpcBaseURL = walletStore.getState().networks[0]?.rpcBaseURL;
+              // Cancel and invalidate all network-dependent queries when the active network changes.
+              // prevRpcBaseURL undefined means initial hydration — not a switch, skip.
+              if (prevRpcBaseURL !== undefined && prevRpcBaseURL !== nextRpcBaseURL) {
+                void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
+                void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
+              }
             }
           })
           .catch(err => {

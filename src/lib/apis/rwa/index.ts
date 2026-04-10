@@ -9,13 +9,9 @@ import { fetchWithTimeout } from '../mvkt/utils';
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
 import { MOCK_RWA_CONFIG, MOCKED_RWA_ASSETS } from './mock';
 import { RWA_ASSETS_CONTRACTS_QUERY, RWA_TOKEN_METADATA_QUERY } from './queries';
-import { AssetDetailsSchema, dodoAssetsContractsSchema, RwaTokenMetadataSchema } from './rwa.schema';
+import { dodoAssetsContractsSchema } from './rwa.schema';
 
 export async function fetchRwaAssetsContracts() {
-  if (!process.env.EXTERNAL_API) {
-    return MOCK_RWA_CONFIG.dodo_mav.map(item => item.base_token.address);
-  }
-
   try {
     const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
       method: 'POST',
@@ -28,14 +24,20 @@ export async function fetchRwaAssetsContracts() {
     });
 
     if (!response.ok) {
-      console.error(`GraphQL request failed with status ${response.status}`);
+      console.error(`GraphQL request failed: ${response.statusText}`);
 
-      return MOCK_RWA_CONFIG.dodo_mav.map(item => item.base_token.address);
+      return MOCK_RWA_CONFIG.dodo_mav.reduce<string[]>((acc, item) => {
+        acc.push(item.base_token.address);
+        return acc;
+      }, []);
     }
     const { data } = await response.json();
-    const parsedAssetsResponse = dodoAssetsContractsSchema.parse(data);
+    const parsedAssetsResponse = dodoAssetsContractsSchema.validateSync(data, { abortEarly: false });
 
-    return parsedAssetsResponse.dodo_mav.map(item => item.base_token.address);
+    return parsedAssetsResponse.dodo_mav.reduce<string[]>((acc, item) => {
+      acc.push(item.base_token.address);
+      return acc;
+    }, []);
   } catch (e) {
     console.error(e);
     return [];
@@ -43,13 +45,7 @@ export async function fetchRwaAssetsContracts() {
 }
 
 // api rwa metadata utils
-type RwaToken = (typeof RwaTokenMetadataSchema)['_output']['token'][number];
-
-export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<RwaToken[]> {
-  if (!process.env.EXTERNAL_API) {
-    return MOCKED_RWA_ASSETS;
-  }
-
+export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[]> {
   const variables = {
     addresses: contracts.map(address => fromAssetSlug(address)[0])
   };
@@ -66,13 +62,13 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<RwaT
   });
 
   if (!response.ok) {
-    console.error(`GraphQL request failed with status ${response.status}`);
+    console.error(`GraphQL request failed: ${response.statusText}`);
     return MOCKED_RWA_ASSETS;
   }
+  // TODO add zod schema // HERE
   const { data } = await response.json();
-  const parsed = RwaTokenMetadataSchema.parse(data);
 
-  return parsed.token;
+  return data.token;
 }
 
 export const fetchRWADetails$ = (slugs: string[]) =>
@@ -91,12 +87,8 @@ export const fetchRWADetails$ = (slugs: string[]) =>
           } = token_metadata;
           let assetDetails = null;
 
-          if (assetDetailsJSON && assetDetailsJSON.length < 10_000) {
-            try {
-              assetDetails = AssetDetailsSchema.parse(JSON.parse(assetDetailsJSON));
-            } catch {
-              assetDetails = null;
-            }
+          if (assetDetailsJSON) {
+            assetDetails = JSON.parse(assetDetailsJSON);
           }
 
           return {

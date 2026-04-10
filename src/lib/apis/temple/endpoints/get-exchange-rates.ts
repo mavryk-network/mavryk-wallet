@@ -1,5 +1,6 @@
 import { fetchWithTimeout } from 'lib/apis/mvkt/utils';
 import { MVRK_PRICE, RWA_ASSET_PRICES } from 'lib/constants';
+import { IS_DEV_ENV } from 'lib/env';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 
 import { getDodoMavTokenPrices } from './dodoMav';
@@ -25,25 +26,34 @@ export const fetchUsdToTokenRates = async () => {
 export const COINGECKO_MVRK_ID = 'mavryk-network';
 
 export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD') {
-  const url = `${coingecko_api}/simple/price?vs_currencies=${currency}&ids=${id}`;
+  if (!coingecko_api) return 0;
+
+  const endpoint = new URL('/simple/price', coingecko_api);
+  endpoint.searchParams.set('vs_currencies', currency.toLowerCase());
+  endpoint.searchParams.set('ids', id);
+  const url = endpoint.toString();
 
   try {
     const res = await fetch(url, {
-      // @ts-expect-error // api key
       headers: {
-        'x-cg-pro-api-key': coingecko_api_key
+        ...(coingecko_api_key ? { 'x-cg-pro-api-key': coingecko_api_key } : {})
       }
     });
 
-    const {
-      [COINGECKO_MVRK_ID]: { usd: tokenPrice }
-    } = (await res.json()) as CMCResponse;
+    if (!res.ok) {
+      throw new Error(`Coingecko request failed: ${res.status}`);
+    }
+
+    const json = (await res.json()) as CMCResponse;
+    const tokenPrice = json[COINGECKO_MVRK_ID]?.[currency.toLowerCase()];
+
+    if (tokenPrice == null) return 0;
 
     await putToStorage(MVRK_PRICE, tokenPrice);
 
     return tokenPrice || 0;
   } catch (err) {
-    console.error('Error fetching price:', err);
+    if (IS_DEV_ENV) console.error('[coingecko] Error fetching price:', err);
     const cachedPrice = await fetchFromStorage<string>(MVRK_PRICE);
     return Number(cachedPrice) || 0;
   }
@@ -51,8 +61,13 @@ export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD'
 
 // api rwa metadata utils
 export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => {
+  if (!process.env.EXTERNAL_API) {
+    const cachedPrices = await fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
+    return (cachedPrices ?? {}) as Record<string, string>;
+  }
+
   try {
-    const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
+    const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -76,9 +91,8 @@ export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => 
 
     return { ...rwasAssetsPricesPair };
   } catch (e) {
-    console.error('Equittez RWA_PRICES_QUERY error', e);
-    const cachedPrices = fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
-    // @ts-expect-error // null as price won't esist
-    return cachedPrices ?? {};
+    if (IS_DEV_ENV) console.error('[rwa] fetchRWAToUsdtRates error:', e);
+    const cachedPrices = await fetchFromStorage<StringRecord<string>>(RWA_ASSET_PRICES);
+    return (cachedPrices ?? {}) as Record<string, string>;
   }
 };

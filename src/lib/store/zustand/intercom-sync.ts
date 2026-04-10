@@ -57,10 +57,7 @@ export function startIntercomSync(intercom: IntercomClient) {
   // Cancel and invalidate network-dependent queries when the user switches networks.
   // Network selection is stored in browser.storage.local('network_id') — it is NOT part of
   // TempleState, so StateUpdated does not fire on network switch. We must watch storage directly.
-  const handleStorageChanged = (
-    changes: Record<string, browser.Storage.StorageChange>,
-    area: string
-  ) => {
+  const handleStorageChanged = (changes: Record<string, browser.Storage.StorageChange>, area: string) => {
     if (area === 'local' && 'network_id' in changes) {
       void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
       void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });

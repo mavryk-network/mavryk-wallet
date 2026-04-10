@@ -13,9 +13,13 @@ import React, {
 import { noop } from 'lodash';
 
 import { createWsConnection, MvktHubConnection } from 'lib/apis/mvkt';
+import { IS_DEV_ENV } from 'lib/env';
 
 import { useTempleClient } from './client';
 import { useChainId } from './ready';
+
+const MAX_WS_RETRIES = 8;
+const withJitter = (ms: number) => ms + Math.random() * 1000;
 
 interface MvktConnectionContextValue {
   connection: MvktHubConnection | undefined;
@@ -40,6 +44,7 @@ const ReadyClientMvktConnectionProvider: FC<PropsWithChildren> = ({ children }) 
   const [connectionReady, setConnectionReadyState] = useState(false);
   const connectionReadyRef = useRef(connectionReady);
   const shouldShutdownConnection = useRef(false);
+  const retryCountRef = useRef(0);
 
   const setConnectionReady = useCallback((newState: boolean) => {
     connectionReadyRef.current = newState;
@@ -56,29 +61,37 @@ const ReadyClientMvktConnectionProvider: FC<PropsWithChildren> = ({ children }) 
     setConnectionReady(false);
     try {
       await connection.start();
+      retryCountRef.current = 0;
       shouldShutdownConnection.current = false;
       connection.onclose(e => {
-        if (!shouldShutdownConnection.current) {
-          console.error(e);
+        if (!shouldShutdownConnection.current && retryCountRef.current < MAX_WS_RETRIES) {
+          if (IS_DEV_ENV) console.error('[mvkt-connection] WS closed:', e);
           setConnectionReady(false);
-          setTimeout(() => initConnection(), 1000);
+          const delay = withJitter(Math.min(1000 * 2 ** retryCountRef.current, 30_000));
+          retryCountRef.current++;
+          setTimeout(() => { initConnection().catch(() => void 0); }, delay);
         }
       });
       setConnectionReady(true);
     } catch (e) {
-      console.error(e);
+      if (IS_DEV_ENV) console.error('[mvkt-connection] WS start failed:', e);
+      if (!shouldShutdownConnection.current && retryCountRef.current < MAX_WS_RETRIES) {
+        const delay = withJitter(Math.min(5000 * 2 ** retryCountRef.current, 60_000));
+        retryCountRef.current++;
+        setTimeout(() => { initConnection().catch(() => void 0); }, delay);
+      }
     }
   }, [connection, setConnectionReady]);
 
   useEffect(() => {
     if (connection) {
+      retryCountRef.current = 0;
       initConnection();
 
       return () => {
-        if (connectionReadyRef.current) {
-          shouldShutdownConnection.current = true;
-          connection.stop().catch(e => console.error(e));
-        }
+        retryCountRef.current = 0;
+        shouldShutdownConnection.current = true;
+        connection.stop().catch(() => void 0);
       };
     }
 

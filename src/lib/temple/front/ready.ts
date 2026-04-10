@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
 import { Tzip16Module } from '@mavrykdynamics/webmavryk-tzip16';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
 
 import { getKYCStatus } from 'lib/apis/mvkt/api';
@@ -22,6 +22,9 @@ import {
 
 import { intercom, useTempleClient } from './client';
 import { usePassiveStorage } from './storage';
+
+// Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
+const CHAIN_ID_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const [
   ReadyTempleProvider,
@@ -61,6 +64,26 @@ function useReadyTemple() {
     createWebMavrykSigner,
     createWebMavrykWallet
   } = templeFront;
+
+  const queryClient = useQueryClient();
+
+  // Stable primitive array — avoids re-running the effect when allNetworks gets a new reference
+  // but the actual RPC URLs haven't changed.
+  const allNetworkRpcUrls = useMemo(() => allNetworks.map(n => n.rpcBaseURL), [allNetworks]);
+
+  // Pre-warm chain ID cache for all networks so switching networks is instant.
+  // Chain IDs never change for a given RPC endpoint, so a 24h staleTime is effectively permanent.
+  useEffect(() => {
+    for (const rpcUrl of allNetworkRpcUrls) {
+      if (rpcUrl && !queryClient.getQueryData(chainKeys.id(rpcUrl))) {
+        void queryClient.prefetchQuery({
+          queryKey: chainKeys.id(rpcUrl),
+          queryFn: () => loadChainId(rpcUrl).catch(() => null),
+          staleTime: CHAIN_ID_STALE_MS
+        });
+      }
+    }
+  }, [allNetworkRpcUrls, queryClient]);
 
   const hdGroups = useMemo(
     () =>
@@ -144,20 +167,28 @@ function useReadyTemple() {
   }, [createWebMavrykSigner, createWebMavrykWallet, network, account]);
 
   // Get user KYC status ---------------
+  // Cancellation flag prevents stale async writes if account/network changes mid-flight.
   useEffect(() => {
+    let cancelled = false;
+
     (async function () {
       const rpcUrl = tezos?.rpc?.getRpcUrl();
-
       const chainId = await loadChainId(rpcUrl).catch(() => null);
       const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
 
-      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      if (!cancelled) {
+        await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      }
     })();
-  }, [account.publicKeyHash, tezos?.rpc]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [account.publicKeyHash, tezos?.rpc, templeFront]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {
-      (window as any).tezos = tezos;
+      (window as any).mavryk = tezos;
     }
   }, [tezos]);
 
@@ -206,7 +237,9 @@ export function useChainIdLoading(rpcUrl: string, suspense?: boolean) {
     queryFn: () => loadChainId(rpcUrl).catch(() => null),
     enabled: !!rpcUrl,
     refetchOnWindowFocus: false,
-    retry: 2
+    retry: 2,
+    staleTime: CHAIN_ID_STALE_MS,
+    gcTime: CHAIN_ID_STALE_MS
   });
 
   if (suspense && result.isLoading && result.fetchStatus !== 'idle') {

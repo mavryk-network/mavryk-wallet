@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -30,14 +30,10 @@ import { useAccount, useChainId } from 'lib/temple/front';
 import styles from './Collectible.module.css';
 import { CollectibleItem } from './CollectibleItem';
 
-interface Props {
-  scrollToTheTabsBar: EmptyFn;
-}
-
 // show NFts details from metadata
 const areDetailsShown = true;
 
-export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
+export const CollectiblesTab = memo(() => {
   const chainId = useChainId(true)!;
   const { popup } = useAppEnv();
   const { publicKeyHash } = useAccount();
@@ -50,18 +46,12 @@ export const CollectiblesTab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const sortedAssets = useSortedAssetSlugs(sortOption, allSlugs, assetsDetails);
 
-  const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
+  const { displayedSlugs, isSyncing, isInSearchMode, loadNext, searchValue, setSearchValue } =
     useCollectiblesListingLogic(sortedAssets);
 
   const clearInput = useCallback(() => {
     setSearchValue('');
   }, []);
-
-  const shouldScrollToTheTabsBar = paginatedSlugs.length > 0;
-
-  useEffect(() => {
-    if (shouldScrollToTheTabsBar) void scrollToTheTabsBar();
-  }, [shouldScrollToTheTabsBar, scrollToTheTabsBar]);
 
   const contentElement = useMemo(
     () => (

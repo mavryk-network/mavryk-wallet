@@ -5,6 +5,7 @@ import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
 
 import { BoundaryError } from 'app/ErrorBoundary';
+import { IS_DEV_ENV } from 'lib/env';
 import {
   BakingBadBaker,
   BakingBadBakerValueHistoryItem,
@@ -65,7 +66,7 @@ export function useDelegate<T = MvktUserAccount>(
                   return accountStats as T;
               }
             } catch (e) {
-              console.error(e);
+              if (IS_DEV_ENV) console.error('[baking] getAccountStats error:', e);
             }
           }
 
@@ -101,8 +102,13 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(
-    () => [...chainKeys.delegateStats(tezos.checksum, accountAddress), chainId, shouldPreventErrorPropagation],
-    [tezos.checksum, accountAddress, chainId, shouldPreventErrorPropagation]
+    () => [
+      ...chainKeys.delegateStats(tezos.checksum, accountAddress),
+      accStats?.delegate?.address ?? null,
+      chainId,
+      shouldPreventErrorPropagation
+    ],
+    [tezos.checksum, accountAddress, accStats?.delegate?.address, chainId, shouldPreventErrorPropagation]
   );
 
   const resetDelegateStatsCache = useCallback(() => {
@@ -134,7 +140,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
                 const constants = await tezos.rpc.getConstants();
                 cycleDurationMs = getOneCycleinMs(constants);
               } catch {
-                console.error('Error getting RPC default constants');
+                if (IS_DEV_ENV) console.error('[baking] Error getting RPC default constants');
               }
               // -----------------------------------
 
@@ -181,7 +187,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
               };
             }
           } catch (e) {
-            console.error(e);
+            if (IS_DEV_ENV) console.error('[baking] getDelegateStats inner error:', e);
           }
 
           return emptydelegateStatsResponse;

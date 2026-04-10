@@ -15,6 +15,7 @@ import { submitDelegation } from 'lib/apis/everstake';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
+import { IS_DEV_ENV } from 'lib/env';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T, t, TID } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
@@ -171,7 +172,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
     return () => {
       setToolbarRightSidedComponent(null);
     };
-  }, [isStakeScreenWithBakersList]);
+  }, [isStakeScreenWithBakersList, setToolbarRightSidedComponent, AllValidatorsComponent]);
 
   const estimateBaseFee = useCallback(async () => {
     try {
@@ -202,7 +203,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         return err;
       }
 
-      console.error(err);
+      if (IS_DEV_ENV) console.error('[DelegateForm]', err);
 
       const errObj = err != null && typeof err === 'object' ? err : {};
       const errId =
@@ -310,6 +311,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       formAnalytics.trackSubmit(analyticsProperties);
       try {
         const estmtn = estimationRef.current ?? (await getEstimation());
+        if (!estmtn) throw new Error('Fee estimation unavailable');
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav ?? 0).toNumber();
         let op: WalletOperation | TransactionOperation;
@@ -341,9 +343,9 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
         if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
 
+        estimationRef.current = null;
         setOperation({ ...op, to });
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
-        estimationRef.current = null;
 
         if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {
           submitDelegation(opHash);
@@ -352,12 +354,13 @@ const DelegateForm: FC<DelegateFormProps> = ({
         formAnalytics.trackSubmitSuccess(analyticsProperties);
       } catch (err: unknown) {
         formAnalytics.trackSubmitFail(analyticsProperties);
+        estimationRef.current = null;
 
         if (err instanceof Error && err.message === 'Declined') {
           return;
         }
 
-        console.error(err);
+        if (IS_DEV_ENV) console.error('[DelegateForm]', err);
 
         // Human delay.
         await delay();

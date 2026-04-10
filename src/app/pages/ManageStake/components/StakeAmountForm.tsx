@@ -22,6 +22,7 @@ import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
+import { IS_DEV_ENV } from 'lib/env';
 import { delay } from 'lib/utils';
 import { ZERO } from 'lib/utils/numbers';
 import { goBack, navigate, useLocation } from 'lib/woozie';
@@ -114,7 +115,7 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
   } = useForm<FormData>({
     mode: 'onChange'
   });
-  const [submitError, setSubmitError] = useSafeState<any>(null);
+  const [submitError, setSubmitError] = useSafeState<Error | null>(null);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
   const canSubmit = mode === 'increase' ? canCostake : canUnlock;
@@ -234,11 +235,11 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
       } catch (err: unknown) {
         formAnalytics.trackSubmitFail({ amount });
 
-        console.error(err);
+        if (IS_DEV_ENV) console.error('[StakeAmountForm]', err);
 
         // Human delay.
         await delay();
-        setSubmitError(err);
+        setSubmitError(err instanceof Error ? err : new Error(String(err)));
       }
     },
     [

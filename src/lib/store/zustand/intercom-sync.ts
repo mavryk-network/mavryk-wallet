@@ -1,3 +1,5 @@
+import browser from 'webextension-polyfill';
+
 import { IntercomClient } from 'lib/intercom';
 import { TempleMessageType, TempleNotification } from 'lib/temple/types';
 
@@ -52,8 +54,22 @@ export function startIntercomSync(intercom: IntercomClient) {
       console.error('[intercom-sync] Failed to fetch initial state:', err);
     });
 
+  // Cancel and invalidate network-dependent queries when the user switches networks.
+  // Network selection is stored in browser.storage.local('network_id') — it is NOT part of
+  // TempleState, so StateUpdated does not fire on network switch. We must watch storage directly.
+  const handleStorageChanged = (
+    changes: Record<string, browser.Storage.StorageChange>,
+    area: string
+  ) => {
+    if (area === 'local' && 'network_id' in changes) {
+      void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
+      void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
+    }
+  };
+  browser.storage.onChanged.addListener(handleStorageChanged);
+
   // Subscribe to ongoing state updates
-  return intercom.subscribe((msg: TempleNotification) => {
+  const unsubscribeIntercom = intercom.subscribe((msg: TempleNotification) => {
     if (!msg?.type) return;
 
     const store = walletStore.getState();
@@ -65,15 +81,7 @@ export function startIntercomSync(intercom: IntercomClient) {
           .request({ type: TempleMessageType.GetStateRequest })
           .then(res => {
             if ('type' in res && res.type === TempleMessageType.GetStateResponse) {
-              const prevRpcBaseURL = walletStore.getState().networks[0]?.rpcBaseURL;
               store.syncState(res.state);
-              const nextRpcBaseURL = walletStore.getState().networks[0]?.rpcBaseURL;
-              // Cancel and invalidate all network-dependent queries when the active network changes.
-              // prevRpcBaseURL undefined means initial hydration — not a switch, skip.
-              if (prevRpcBaseURL !== undefined && prevRpcBaseURL !== nextRpcBaseURL) {
-                void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
-                void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
-              }
             }
           })
           .catch(err => {
@@ -94,4 +102,9 @@ export function startIntercomSync(intercom: IntercomClient) {
         break;
     }
   });
+
+  return () => {
+    unsubscribeIntercom();
+    browser.storage.onChanged.removeListener(handleStorageChanged);
+  };
 }

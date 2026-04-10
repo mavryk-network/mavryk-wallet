@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { AdvertisingPromotion, fetchAdvertisingInfo } from 'lib/apis/temple';
 import { miscKeys, storageKeys } from 'lib/query-keys';
 import { fetchFromStorage } from 'lib/storage';
-import { useWalletNetworks } from 'lib/store/zustand/wallet.store';
 import { useLastSeenPromotionName } from 'lib/store/zustand/ui.store';
+import { useWalletNetworks } from 'lib/store/zustand/wallet.store';
 
 export const useAdvertisingPromotionQuery = () => {
   const networks = useWalletNetworks();

@@ -59,7 +59,7 @@ export const NETWORKS: TempleNetwork[] = [
     rpcBaseURL: MAV_RPC_NETWORK,
     color: '#F86412',
     disabled: false
-  },
+  }
 
   // {
   //   id: 'marigold-mainnet',

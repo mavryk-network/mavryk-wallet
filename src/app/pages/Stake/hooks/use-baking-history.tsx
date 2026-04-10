@@ -36,10 +36,12 @@ export const useBakingHistory = () => {
     queryKey: bakingKeys.history(acc.publicKeyHash, myBakerPkh ?? '', chainId ?? ''),
     queryFn: () => {
       if (!isKnownChainId(chainId!)) return [];
-      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 }).then(res => res || []).catch(err => {
-        if (IS_DEV_ENV) console.error('[use-baking-history] getDelegatorRewards failed:', err);
-        return [];
-      });
+      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 })
+        .then(res => res || [])
+        .catch(err => {
+          if (IS_DEV_ENV) console.error('[use-baking-history] getDelegatorRewards failed:', err);
+          return [];
+        });
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

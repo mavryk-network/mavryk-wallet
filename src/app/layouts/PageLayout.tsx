@@ -27,8 +27,6 @@ import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
 import { useOnboardingProgress } from '../pages/Onboarding/hooks/useOnboardingProgress.hook';
 
-import { ChangelogOverlay } from './PageLayout/ChangelogOverlay/ChangelogOverlay';
-import ConfirmationOverlay from './PageLayout/ConfirmationOverlay';
 import Header from './PageLayout/Header';
 import styles from './pageLayout.module.css';
 import { PageLayoutSelectors } from './PageLayout.selectors';
@@ -87,9 +85,6 @@ const PageLayout: FC<PageLayoutProps> = ({
         </ContentPaper>
       </div>
 
-      {/* <AdvertisingOverlay /> */}
-      <ConfirmationOverlay />
-      <ChangelogOverlay />
       {/* <OnRampOverlay /> */}
       {/* <NewsletterOverlay /> */}
     </div>

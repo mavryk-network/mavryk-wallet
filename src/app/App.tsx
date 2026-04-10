@@ -14,6 +14,8 @@ import ConfirmPage from 'app/ConfirmPage';
 import { AppEnvProvider } from 'app/env';
 import ErrorBoundary from 'app/ErrorBoundary';
 import Dialogs from 'app/layouts/Dialogs';
+import { ChangelogOverlay } from 'app/layouts/PageLayout/ChangelogOverlay/ChangelogOverlay';
+import ConfirmationOverlay from 'app/layouts/PageLayout/ConfirmationOverlay';
 import { PageRouter } from 'app/PageRouter';
 import { QueryProvider } from 'lib/store/zustand/QueryProvider';
 import { TempleProvider } from 'lib/temple/front';
@@ -33,6 +35,9 @@ export const App: FC<Props> = ({ env }) => (
       <Suspense fallback={<RootSuspenseFallback />}>
         <AppProvider env={env}>
           <Dialogs />
+
+          {!env.confirmWindow && <ConfirmationOverlay />}
+          {!env.confirmWindow && <ChangelogOverlay />}
 
           <DisableOutlinesForClick />
 

@@ -1,19 +1,44 @@
-import React, { FC, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
-import CSSTransition from 'react-transition-group/CSSTransition';
 
 import DocBg from 'app/a11y/DocBg';
 import { useAppEnv } from 'app/env';
 import styles from 'app/layouts/pageLayout.module.css';
 import InternalConfirmation from 'app/templates/InternalConfirmation';
 import { useTempleClient } from 'lib/temple/front';
-import Portal from 'lib/ui/Portal';
 
 const ConfirmationOverlay: FC = () => {
   const { confirmation, resetConfirmation, confirmInternal } = useTempleClient();
   const { popup } = useAppEnv();
   const displayed = Boolean(confirmation);
+
+  // Two-state animation: rendered controls mount/unmount, visible drives CSS opacity transition
+  const [rendered, setRendered] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // rendered controls mount/unmount; visible drives the CSS opacity transition.
+  // confirmation and displayed are always in sync (same source), so InternalConfirmation
+  // is only rendered when a real confirmation payload is present.
+  useEffect(() => {
+    if (displayed) {
+      setRendered(true);
+      // Double-rAF ensures the browser has painted opacity-0 before transitioning to opacity-100.
+      // Cancel both frames on cleanup to avoid setVisible(true) firing after unmount.
+      let inner: number;
+      const outer = requestAnimationFrame(() => {
+        inner = requestAnimationFrame(() => setVisible(true));
+      });
+      return () => {
+        cancelAnimationFrame(outer);
+        cancelAnimationFrame(inner);
+      };
+    } else {
+      setVisible(false);
+      const t = setTimeout(() => setRendered(false), 200);
+      return () => clearTimeout(t);
+    }
+  }, [displayed]);
 
   useLayoutEffect(() => {
     if (displayed) {
@@ -41,35 +66,24 @@ const ConfirmationOverlay: FC = () => {
 
   const memoizedBgClassname = useMemo(() => (popup ? 'bg-primary-bg' : styles.fullpageBg), [popup]);
 
-  const nodeRef = useRef<HTMLDivElement>(null);
+  if (!rendered) return null;
 
   return (
     <>
       {displayed && <DocBg bgClassName={memoizedBgClassname} />}
 
-      <Portal>
-        <CSSTransition
-          nodeRef={nodeRef}
-          in={displayed}
-          timeout={200}
-          classNames={{
-            enter: 'opacity-0',
-            enterActive: clsx('opacity-100', 'transition ease-out duration-200'),
-            exit: clsx('opacity-0', 'transition ease-in duration-200')
-          }}
-          unmountOnExit
-        >
-          <div ref={nodeRef} className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
-            {confirmation && (
-              <InternalConfirmation
-                payload={confirmation.payload}
-                error={confirmation.error}
-                onConfirm={handleConfirm}
-              />
-            )}
-          </div>
-        </CSSTransition>
-      </Portal>
+      <div
+        className={clsx(
+          'fixed inset-0 z-30 overflow-y-auto',
+          'transition-opacity duration-200',
+          memoizedBgClassname,
+          visible ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        {confirmation && (
+          <InternalConfirmation payload={confirmation.payload} error={confirmation.error} onConfirm={handleConfirm} />
+        )}
+      </div>
     </>
   );
 };

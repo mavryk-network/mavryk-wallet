@@ -50,7 +50,6 @@ function settledToCurrencyEntry(result: PromiseSettledResult<TopUpProviderCurren
   if (result.status === 'fulfilled') {
     return { data: result.value };
   }
-  console.error(result.reason);
   return { data: EMPTY_CURRENCIES, error: getAxiosQueryErrorMessage(result.reason) };
 }
 

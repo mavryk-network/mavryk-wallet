@@ -12,12 +12,10 @@ import { useAccount, useMavrykClient, useWalletsSpecs } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { getErrorMessage } from 'lib/utils/get-error-message';
+import { toFieldError } from 'lib/utils/get-error-message';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 import { SecretField } from './SecretField';
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
 
 type FormData = {
   password: string;
@@ -88,7 +86,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
+        setError('password', toFieldError(err));
         focusPasswordField();
       }
     },

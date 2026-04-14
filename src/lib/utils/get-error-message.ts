@@ -15,3 +15,9 @@ export const getErrorMessage = (err: unknown, fallback = 'Something went wrong')
   }
   return fallback;
 };
+
+export const SUBMIT_ERROR_TYPE = 'submit-error';
+
+export function toFieldError(err: unknown): { type: string; message: string } {
+  return { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) };
+}

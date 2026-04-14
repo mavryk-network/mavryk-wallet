@@ -15,7 +15,7 @@ import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
-import { getErrorMessage } from 'lib/utils/get-error-message';
+import { SUBMIT_ERROR_TYPE, toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -27,8 +27,6 @@ interface NetworkFormData {
   name: string;
   rpcBaseURL: string;
 }
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
 
 export const AddNetworkScreen: FC = () => {
   const defaultNetworks = useWalletNetworks();
@@ -131,7 +129,7 @@ export const AddNetworkScreen: FC = () => {
 
         await delay();
 
-        setError('rpcBaseURL', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
+        setError('rpcBaseURL', toFieldError(err));
       }
     },
     [submitting, clearErrors, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]

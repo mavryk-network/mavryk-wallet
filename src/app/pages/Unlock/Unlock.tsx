@@ -12,7 +12,7 @@ import { useMavrykClient } from 'lib/temple/front';
 import { TempleSharedStorageKey } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { delay } from 'lib/utils';
-import { getErrorMessage } from 'lib/utils/get-error-message';
+import { toFieldError } from 'lib/utils/get-error-message';
 import { Link } from 'lib/woozie';
 
 import { ABTestGroup, fetchABGroup } from '../../../lib/apis/temple';
@@ -29,7 +29,6 @@ type FormData = {
   password: string;
 };
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
 const LOCK_TIME = 2 * USER_ACTION_TIMEOUT;
 const LAST_ATTEMPT = 3;
 
@@ -98,7 +97,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         // Human delay.
         await delay();
-        setError('password', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
+        setError('password', toFieldError(err));
         focusPasswordField();
       }
     },

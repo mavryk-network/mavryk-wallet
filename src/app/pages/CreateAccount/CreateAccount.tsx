@@ -13,7 +13,7 @@ import { useMavrykClient, useWalletsSpecs, useAllAccounts, useSetAccountPkh } fr
 import { useAccount } from 'lib/temple/front/ready';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
-import { getErrorMessage } from 'lib/utils/get-error-message';
+import { toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -23,8 +23,6 @@ import { CreateAccountSelectors } from './CreateAccount.selectors';
 type FormData = {
   name: string;
 };
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const CreateAccount: FC = () => {
   const walletsSpecs = useWalletsSpecs();
@@ -96,7 +94,7 @@ const CreateAccount: FC = () => {
 
         // Human delay.
         await delay();
-        setError('name', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
+        setError('name', toFieldError(err));
       }
     },
     [submitting, clearErrors, formAnalytics, createAccount, currentWalletId, setError]

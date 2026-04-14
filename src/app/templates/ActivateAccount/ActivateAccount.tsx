@@ -8,6 +8,7 @@ import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useTezos, useAccount, activateAccount } from 'lib/temple/front';
+import { SUBMIT_ERROR_TYPE } from 'lib/utils/get-error-message';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 
@@ -16,8 +17,6 @@ import { ActivateAccountSelectors } from './ActivateAccount.selectors';
 type FormData = {
   secret: string;
 };
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const ActivateAccount = memo(() => {
   const tezos = useTezos();

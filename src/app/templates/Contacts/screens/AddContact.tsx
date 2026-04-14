@@ -12,7 +12,7 @@ import { t, T } from 'lib/i18n';
 import { isDomainNameValid, useTezosDomainsClient, useContactsActions } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { delay } from 'lib/utils';
-import { getErrorMessage } from 'lib/utils/get-error-message';
+import { toFieldError } from 'lib/utils/get-error-message';
 import { HistoryAction, goBack, navigate, useLocation } from 'lib/woozie';
 
 import { AddressBookSelectors } from '../Contacts.selectors';
@@ -30,8 +30,6 @@ type ContactFormData = {
   address: string;
   name: string;
 };
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const { addContact } = useContactsActions();
@@ -102,7 +100,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
 
         await delay();
 
-        setError('address', { type: SUBMIT_ERROR_TYPE, message: getErrorMessage(err) });
+        setError('address', toFieldError(err));
       }
     },
     [submitting, clearErrors, addContact, resetForm, setError, domainsClient]

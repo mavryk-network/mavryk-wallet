@@ -67,6 +67,16 @@ export function isKTAddress(address: string) {
 
 export const isValidContractAddress = (address: string) => isAddressValid(address) && isKTAddress(address);
 
+/**
+ * Validates a Mavryk address. Returns an i18n error message key if invalid,
+ * or null if valid. Pass `allowKT: true` to allow KT1 contract addresses.
+ */
+export function validateMavrykAddress(value: string, allowKT = false): string | null {
+  if (!isAddressValid(value)) return 'invalidAddress';
+  if (!allowKT && isKTAddress(value)) return 'onlyNonContractAddressAllowed';
+  return null;
+}
+
 export function formatOpParamsBeforeSend(params: any) {
   if (params.kind === 'origination' && params.script) {
     const newParams = { ...params, ...params.script };

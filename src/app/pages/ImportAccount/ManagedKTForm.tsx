@@ -16,7 +16,7 @@ import { useFormAnalytics } from 'lib/analytics';
 import { getOneUserContracts, MvktRelatedContract, isKnownChainId } from 'lib/apis/mvkt';
 import { T, t } from 'lib/i18n';
 import { useRelevantAccounts, useTezos, useMavrykClient, useChainId } from 'lib/temple/front';
-import { isAddressValid } from 'lib/temple/helpers';
+import { isAddressValid, validateMavrykAddress } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
@@ -73,7 +73,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         case value?.length > 0:
           return true;
 
-        case isAddressValid(value):
+        case validateMavrykAddress(value, true) === null:
           return t('invalidAddress');
 
         case value.startsWith('KT'):

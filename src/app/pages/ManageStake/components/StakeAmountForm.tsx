@@ -19,7 +19,8 @@ import { T, t, TID, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
+import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
+import { tokensToAtoms } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -155,14 +156,16 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
     }
   }, [externalError, setSubmitError]);
 
+  const stakedBalanceAsTokens = useTokenAmount(stakedBalance, assetMetadata);
+
   // For decrease mode, maxAmount is derived from stakedBalance
   // For increase mode, maxAmount is passed in externally (computed with fees)
   const maxAmount = useMemo(() => {
     if (mode === 'decrease') {
-      return atomsToTokens(stakedBalance ?? 0, assetMetadata?.decimals ?? MAVEN_METADATA.decimals);
+      return stakedBalanceAsTokens;
     }
     return externalMaxAmount;
-  }, [mode, stakedBalance, assetMetadata?.decimals, externalMaxAmount]);
+  }, [mode, stakedBalanceAsTokens, externalMaxAmount]);
 
   // For increase mode, stakedAmountDisplay is passed in; for decrease, derive it from stakedBalance
   const computedStakedAmount = useMemo(() => {

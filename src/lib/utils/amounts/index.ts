@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 import { PENNY } from 'lib/constants';
+import { mumavToTz } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 
 export const formatAmountToTargetSize = (value: string | number, targetSize = 6) => {
@@ -37,3 +38,8 @@ export const getMaxStakeAmount = (balance: BigNumber, totalFee: BigNumber, decim
   const max = balance.minus(totalFee).minus(PENNY);
   return max.isGreaterThan(0) ? max.decimalPlaces(decimals, BigNumber.ROUND_FLOOR) : new BigNumber(0);
 };
+
+/** Converts mumav (integer) to a formatted Tz string. Returns '0' if value is nullish. */
+export function formatMumavAsTz(mumav: number | undefined): string {
+  return mumavToTz(mumav ?? 0).toFixed();
+}

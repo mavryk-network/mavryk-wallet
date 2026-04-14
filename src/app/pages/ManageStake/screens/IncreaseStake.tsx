@@ -5,10 +5,10 @@ import BigNumber from 'bignumber.js';
 import { FeeValueParams, STAKE_MODE, useMavStakeFeeValue } from 'app/hooks/useFeeValue/use-fee-value';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
-import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
+import { useAssetMetadata } from 'lib/metadata';
 import { useAccount, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
 import { getMaxStakeAmount } from 'lib/utils/amounts';
 import { ZERO } from 'lib/utils/numbers';
 
@@ -41,10 +41,7 @@ export const IncreaseStake = () => {
     return getMaxStakeAmount(balance, totalFeeBN, assetMetadata?.decimals ?? 6);
   }, [balance, totalFeeBN, assetMetadata?.decimals]);
 
-  const stakedAmountDisplay = useMemo(
-    () => atomsToTokens(stakedBalance, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),
-    [stakedBalance, assetMetadata?.decimals]
-  );
+  const stakedAmountDisplay = useTokenAmount(stakedBalance, assetMetadata);
 
   const externalError = useMemo(() => {
     const error = feeError ?? estimationError;

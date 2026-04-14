@@ -17,6 +17,13 @@ import { TempleAccount } from 'lib/temple/types';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 
+// ---------------------------------------------------------------------------
+// Internal hook — avoids duplicating the atomsToTokens call across sub-components
+// ---------------------------------------------------------------------------
+function useBakerSpace(freeSpace: number | undefined) {
+  return useMemo(() => atomsToTokens(freeSpace ?? 0, MAVEN_METADATA.decimals), [freeSpace]);
+}
+
 // const mockedBaker: any = {
 //   address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
 //   name: 'Everstake',
@@ -160,7 +167,7 @@ const BakerBanner = memo<BakerBannerProps>(
     const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
     // const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
-    const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
+    const bakerSpace = useBakerSpace(baker?.freeSpace);
 
     const feeTableItem: BakerTableData = useMemo(
       () => ({
@@ -355,7 +362,7 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
   }, [baker]);
 
   const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
-  const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
+  const bakerSpace = useBakerSpace(baker?.freeSpace);
 
   return baker ? (
     <div className={classNames('w-full', 'p-4', 'bg-gray-910 rounded-2xl-plus')}>

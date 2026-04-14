@@ -4,12 +4,11 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
-import { MAVEN_METADATA } from 'lib/metadata';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { CO_STAKE, FINALIZE_UNLOCK, MANAGE_STAKE, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
-import { atomsToTokens } from 'lib/temple/helpers';
+import { useTokenAmount } from '../hooks/use-token-amount';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
@@ -31,6 +30,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { canRedelegate, canCostake, canUnlock, stakedBalance = 0, unstakedBalance = 0, myBakerPkh } = data ?? {};
   const delegateLabel = getDelegateLabel(data);
+  const unstakedAmountDisplay = useTokenAmount(unstakedBalance, undefined);
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
   const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;
@@ -83,7 +83,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
           contentIdFnProps: {
             hash: pendingOpObject?.hash,
             assetSlug: MAV_TOKEN_SLUG,
-            amount: atomsToTokens(unstakedBalance ?? 0, MAVEN_METADATA.decimals).toNumber(),
+            amount: unstakedAmountDisplay.toNumber(),
             validatorAddress: myBakerPkh,
             type: 'finalize'
           }
@@ -104,7 +104,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
     myBakerPkh,
     tezos.estimate,
     tezos.wallet,
-    unstakedBalance
+    unstakedAmountDisplay
   ]);
 
   const isStakeButtonDisabled = useMemo(() => {

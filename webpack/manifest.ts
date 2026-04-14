@@ -93,11 +93,9 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
 
     permissions: [...PERMISSIONS, ...HOST_PERMISSIONS],
 
-    /** `blob:` was added due to 3D-models not working in Firefox otherwise. See:
-     * https://github.com/madfish-solutions/templewallet-extension/commit/7f170d058e9d628709f0da0759cfee44a0667480
-     */
-    /** `blob:` added for 3D-models in Firefox. `wasm-unsafe-eval` replaces `unsafe-eval` — supported Firefox 102+, Chrome 95+. */
-    content_security_policy: "script-src 'self' 'wasm-unsafe-eval' blob:; object-src 'self'",
+    /** `wasm-unsafe-eval` replaces `unsafe-eval` — supported Firefox 102+, Chrome 95+. */
+    // L1: `blob:` removed from script-src — it is not required for 3D model rendering and widens the attack surface.
+    content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
 
     // Required for dynamic imports `import()`
     web_accessible_resources: WEB_ACCCESSIBLE_RESOURSES,

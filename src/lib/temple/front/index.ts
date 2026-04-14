@@ -1,6 +1,6 @@
 export { useStorage } from './storage';
 
-export { useTempleClient, request, assertResponse } from './client';
+export { request, assertResponse } from './client';
 
 export { useMavrykClient } from './use-mavryk-client';
 

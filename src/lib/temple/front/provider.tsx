@@ -4,10 +4,9 @@ import { ShortcutAccountSelectStateProvider } from 'app/hooks/use-account-select
 import { usePushNotifications } from 'app/hooks/use-push-notifications';
 import { CustomRpcContext } from 'lib/analytics';
 
-import { useWalletReady } from 'lib/store/zustand/wallet.store';
+import { useWalletReady, useWalletSuspense } from 'lib/store/zustand/wallet.store';
 
 import { NewBlockTriggersProvider } from './chain';
-import { TempleClientProvider } from './client';
 import { ReadyTempleProvider, useNetwork } from './ready';
 
 export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -19,14 +18,14 @@ export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <CustomRpcContext.Provider value={undefined}>
-      <TempleClientProvider>
-        <ConditionalReadyTemple>{children}</ConditionalReadyTemple>
-      </TempleClientProvider>
+      <ConditionalReadyTemple>{children}</ConditionalReadyTemple>
     </CustomRpcContext.Provider>
   );
 };
 
 const ConditionalReadyTemple: FC<PropsWithChildren> = ({ children }) => {
+  // Suspend until the wallet store is hydrated from the background service worker.
+  useWalletSuspense();
   const ready = useWalletReady();
 
   return useMemo(

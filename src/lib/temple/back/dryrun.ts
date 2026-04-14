@@ -1,9 +1,29 @@
 import { Estimate, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
 import { ForgeOperationsParams } from '@mavrykdynamics/webmavryk-rpc';
+import { z } from 'zod';
 
 import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import { ReadOnlySigner } from 'lib/temple/read-only-signer';
+
+const opParamSchema = z
+  .object({
+    kind: z.enum(['transaction', 'origination', 'delegation', 'reveal', 'stake', 'unstake', 'finalize_unstake']),
+    fee: z.number().int().nonnegative().finite().optional(),
+    gasLimit: z.number().int().nonnegative().finite().optional(),
+    storageLimit: z.number().int().nonnegative().finite().optional()
+  })
+  .passthrough();
+
+const opParamsArraySchema = z.array(opParamSchema);
+
+function validateOpParams(opParams: any[]): void {
+  const result = opParamsArraySchema.safeParse(opParams);
+  if (!result.success) {
+    const issues = result.error.issues.map(i => `[${i.path.join('.')}] ${i.message}`).join('; ');
+    throw new Error(`Invalid operation parameters: ${issues}`);
+  }
+}
 
 type DryRunParams = {
   opParams: any[];
@@ -31,6 +51,8 @@ export async function dryRunOpParams({
   sourcePublicKey
 }: DryRunParams): Promise<DryRunResult | null> {
   try {
+    validateOpParams(opParams);
+
     const tezos = new MavrykToolkit(loadFastRpcClient(networkRpc));
 
     let bytesToSign: string | undefined;
@@ -101,14 +123,15 @@ export async function dryRunOpParams({
 }
 
 export function buildFinalOpParmas(opParams: any[], modifiedTotalFee?: number, modifiedStorageLimit?: number) {
+  let result = opParams;
+
   if (modifiedTotalFee !== undefined) {
-    opParams = opParams.map(op => ({ ...op, fee: 0 }));
-    opParams[0].fee = modifiedTotalFee;
+    result = result.map((op, i) => (i === 0 ? { ...op, fee: modifiedTotalFee } : { ...op, fee: 0 }));
   }
 
-  if (modifiedStorageLimit !== undefined && opParams.length < 2) {
-    opParams[0].storageLimit = modifiedStorageLimit;
+  if (modifiedStorageLimit !== undefined && result.length < 2) {
+    result = [{ ...result[0], storageLimit: modifiedStorageLimit }];
   }
 
-  return opParams;
+  return result;
 }

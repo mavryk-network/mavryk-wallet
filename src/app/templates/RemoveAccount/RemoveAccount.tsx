@@ -1,23 +1,17 @@
-import React, { FC, useCallback, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { usePasswordGateForm } from 'app/hooks/use-password-gate-form';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useMavrykClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
-import { delay } from 'lib/utils';
-import { toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { RemoveAccountSelectors } from './RemoveAccount.selectors';
-
-type FormData = {
-  password: string;
-};
 
 const RemoveAccount: FC = () => {
   const { removeAccount } = useMavrykClient();
@@ -34,32 +28,8 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting: submitting },
-    setError,
-    clearErrors,
-    watch
-  } = useForm<FormData>();
-  const password = watch('password') ?? '';
-
-  const onSubmit = useCallback<SubmitHandler<FormData>>(
-    async ({ password }) => {
-      if (submitting) return;
-
-      clearErrors('password');
-      try {
-        await removeAccount(account.id, password);
-      } catch (err: unknown) {
-        console.error(err);
-
-        // Human delay.
-        await delay();
-        setError('password', toFieldError(err));
-      }
-    },
-    [submitting, clearErrors, setError, removeAccount, account.id]
+  const { registerPassword, handleSubmit, errors, submitting, password, onSubmit, disabled } = usePasswordGateForm(
+    pw => removeAccount(account.id, pw)
   );
 
   return (
@@ -92,9 +62,9 @@ const RemoveAccount: FC = () => {
       ) : (
         <>
           <Alert title={t('attention')} description={t('removeAccountMessage')} className="mb-4" />
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
+          <form onSubmit={onSubmit} className="flex-grow flex flex-col">
             <FormField
-              {...register('password', { required: t('required') })}
+              {...registerPassword(t('required'))}
               label={t('password')}
               id="removeacc-secret-password"
               type="password"
@@ -106,7 +76,7 @@ const RemoveAccount: FC = () => {
 
             <FormSubmitButton
               loading={submitting}
-              disabled={submitting || !password.length}
+              disabled={disabled}
               testID={RemoveAccountSelectors.removeButton}
               testIDProperties={{ accountTypeEnum: account.type }}
               className="mt-8"

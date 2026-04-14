@@ -1,23 +1,17 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { usePasswordGateForm } from 'app/hooks/use-password-gate-form';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T, t } from 'lib/i18n';
 import { useAccount, useRelevantAccounts, useMavrykClient } from 'lib/temple/front';
-import { delay } from 'lib/utils';
-import { toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { EditableTitleSelectors } from '../editAccount.selectors';
-
-type FormData = {
-  password: string;
-};
 
 type RemoveAccountPopupProps = {
   opened: boolean;
@@ -44,37 +38,18 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting: submitting },
-    setError,
-    clearErrors,
-    watch
-  } = useForm<FormData>();
-  const password = watch('password') ?? '';
-
-  const onSubmit = useCallback<SubmitHandler<FormData>>(
-    async ({ password }) => {
-      if (submitting) return;
-
-      clearErrors('password');
-      try {
-        await removeAccount(accountId, password);
-        if (onRemoved) {
-          removedWithCustomNavRef.current = true;
-          onRemoved();
-        }
-      } catch (err: unknown) {
-        console.error(err);
-
-        // Human delay.
-        await delay();
-        setError('password', toFieldError(err));
+  const handleAction = useCallback(
+    async (pw: string) => {
+      await removeAccount(accountId, pw);
+      if (onRemoved) {
+        removedWithCustomNavRef.current = true;
+        onRemoved();
       }
     },
-    [submitting, clearErrors, setError, removeAccount, accountId, onRemoved]
+    [removeAccount, accountId, onRemoved]
   );
+
+  const { registerPassword, handleSubmit, errors, submitting, onSubmit, disabled } = usePasswordGateForm(handleAction);
 
   return (
     <PopupModalWithTitle
@@ -85,9 +60,9 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
       portalClassName="edit-account-name-popup-portal"
     >
       <div className={clsx('flex flex-col', popup ? 'px-4' : 'px-12')}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
+        <form onSubmit={onSubmit} className="flex-grow flex flex-col">
           <FormField
-            {...register('password', { required: t('required') })}
+            {...registerPassword(t('required'))}
             label={t('password')}
             id="removeacc-secret-password"
             type="password"
@@ -112,7 +87,7 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
             <FormSubmitButton
               btnType={BTN_ERROR}
               loading={submitting}
-              disabled={submitting || !password.length}
+              disabled={disabled}
               testID={EditableTitleSelectors.removeButton}
               testIDProperties={{ accountTypeEnum: account.type }}
               className="mt-8"

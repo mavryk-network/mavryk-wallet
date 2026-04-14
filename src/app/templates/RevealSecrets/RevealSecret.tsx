@@ -1,25 +1,19 @@
 import React, { FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
-import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { getAccountBadgeTitle } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import { usePasswordGateForm } from 'app/hooks/use-password-gate-form';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
 import { useAccount, useMavrykClient, useWalletsSpecs } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
-import { delay } from 'lib/utils';
-import { toFieldError } from 'lib/utils/get-error-message';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 import { SecretField } from './SecretField';
-
-type FormData = {
-  password: string;
-};
 
 type RevealSecretProps = {
   reveal: 'private-key' | 'seed-phrase';
@@ -31,17 +25,6 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
   const account = useAccount();
   const { popup } = useAppEnv();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting: submitting },
-    setError,
-    clearErrors,
-    watch
-  } = useForm<FormData>();
-
-  const walletPasswordValue = watch('password') ?? '';
 
   const [secret, setSecret] = useVanishingState();
 
@@ -62,47 +45,27 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     focusPasswordField();
   }, [focusPasswordField]);
 
-  const onSubmit = useCallback<SubmitHandler<FormData>>(
-    async ({ password }) => {
-      if (submitting) return;
+  const handleAction = useCallback(
+    async (pw: string) => {
+      let scrt: string;
 
-      clearErrors('password');
-      try {
-        let scrt: string;
+      switch (reveal) {
+        case 'private-key':
+          scrt = await revealPrivateKey(account.publicKeyHash, pw);
+          break;
 
-        switch (reveal) {
-          case 'private-key':
-            scrt = await revealPrivateKey(account.publicKeyHash, password);
-            break;
-
-          case 'seed-phrase':
-            scrt = await revealMnemonic(walletId, password);
-            break;
-        }
-
-        setSecret(scrt);
-      } catch (err: unknown) {
-        console.error(err);
-
-        // Human delay.
-        await delay();
-        setError('password', toFieldError(err));
-        focusPasswordField();
+        case 'seed-phrase':
+          scrt = await revealMnemonic(walletId, pw);
+          break;
       }
+
+      setSecret(scrt);
     },
-    [
-      walletId,
-      reveal,
-      submitting,
-      clearErrors,
-      setError,
-      revealPrivateKey,
-      revealMnemonic,
-      account.publicKeyHash,
-      setSecret,
-      focusPasswordField
-    ]
+    [reveal, revealPrivateKey, account.publicKeyHash, revealMnemonic, walletId, setSecret]
   );
+
+  const { registerPassword, handleSubmit, errors, submitting, password: walletPasswordValue, onSubmit } =
+    usePasswordGateForm(handleAction, { onError: focusPasswordField, clearOnChange: true });
 
   const texts = useMemo(() => {
     switch (reveal) {
@@ -196,11 +159,11 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     return (
       <form
         ref={formRef}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
       >
         <FormField
-          {...register('password', { required: t('required'), onChange: () => clearErrors() })}
+          {...registerPassword(t('required'))}
           label={t('password')}
           id="reveal-secret-password"
           type="password"
@@ -229,8 +192,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     errors.password?.message,
     walletPasswordValue.length,
     submitting,
-    account,
-    clearErrors
+    account
   ]);
 
   return (

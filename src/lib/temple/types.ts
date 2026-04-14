@@ -335,7 +335,8 @@ export type TempleNotification =
   | TempleStateUpdated
   | TempleConfirmationRequested
   | TempleConfirmationExpired
-  | TempleSelectedAccountChanged;
+  | TempleSelectedAccountChanged
+  | { type: TempleMessageType.DAppSessionsCorrupted };
 
 export type TempleRequest =
   | TempleAcknowledgeRequest

@@ -1,7 +1,8 @@
 import browser from 'webextension-polyfill';
 
 import { IntercomClient } from 'lib/intercom';
-import { TempleMessageType, TempleNotification } from 'lib/temple/types';
+import { TempleMessageType, TempleNotification, WalletSpecs } from 'lib/temple/types';
+import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 
 import { balancesStore, balancesInitialState } from './balances.store';
 import { queryClient } from './query-client';
@@ -59,11 +60,26 @@ export function startIntercomSync(intercom: IntercomClient) {
       console.error('[intercom-sync] Failed to fetch initial state:', err);
     });
 
+  // Load initial walletsSpecs from browser.storage.local
+  browser.storage.local
+    .get(WALLETS_SPECS_STORAGE_KEY)
+    .then(result => {
+      const raw = result[WALLETS_SPECS_STORAGE_KEY];
+      if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
+        walletStore.getState().setWalletsSpecs(raw as StringRecord<WalletSpecs>);
+      }
+    })
+    .catch(err => {
+      console.warn('[intercom-sync] Failed to load initial walletsSpecs:', err);
+    });
+
   // Cancel and invalidate network-dependent queries when the user switches networks.
   // Network selection is stored in browser.storage.local('network_id') — it is NOT part of
   // TempleState, so StateUpdated does not fire on network switch. We must watch storage directly.
   const handleStorageChanged = (changes: Record<string, browser.Storage.StorageChange>, area: string) => {
-    if (area === 'local' && 'network_id' in changes) {
+    if (area !== 'local') return;
+
+    if ('network_id' in changes) {
       // IMPORTANT: Reset Zustand stores BEFORE invalidating TanStack queries.
       // This ensures any query refetch triggered by invalidation writes into a clean store,
       // not alongside stale data from the previous network.
@@ -80,6 +96,21 @@ export function startIntercomSync(intercom: IntercomClient) {
 
       void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
       void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
+    }
+
+    if (WALLETS_SPECS_STORAGE_KEY in changes) {
+      // Fail-closed: validate before applying. Unhandled rejections in storage.onChanged
+      // are silent in MV3 service workers — never throw from this handler.
+      try {
+        const newValue = changes[WALLETS_SPECS_STORAGE_KEY].newValue;
+        if (newValue !== null && typeof newValue === 'object' && !Array.isArray(newValue)) {
+          walletStore.getState().setWalletsSpecs(newValue as StringRecord<WalletSpecs>);
+        } else {
+          console.warn('[intercom-sync] walletsSpecs storage change had invalid value, skipping update');
+        }
+      } catch (err) {
+        console.warn('[intercom-sync] Failed to apply walletsSpecs storage change:', err);
+      }
     }
   };
   browser.storage.onChanged.addListener(handleStorageChanged);
@@ -122,6 +153,11 @@ export function startIntercomSync(intercom: IntercomClient) {
         if (msg.id === store.confirmationId) {
           store.resetConfirmation();
         }
+        break;
+
+      case TempleMessageType.DAppSessionsCorrupted:
+        // Phase 4: surface a user-visible toast. For now, log the event.
+        console.warn('[intercom-sync] DAppSessionsCorrupted: connected dApps were cleared due to a storage integrity check failure — please reconnect.');
         break;
     }
   });

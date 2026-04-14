@@ -1,7 +1,8 @@
 import { createStore, useStore } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { TempleAccount, TempleNetwork, TempleSettings, TempleConfirmationPayload } from 'lib/temple/types';
+import type { TempleAccount, TempleNetwork, TempleSettings, TempleConfirmationPayload, WalletSpecs } from 'lib/temple/types';
 import { TempleStatus } from 'lib/temple/types';
 
 /**
@@ -38,6 +39,9 @@ export interface WalletState {
   idle: boolean;
   locked: boolean;
   ready: boolean;
+
+  // Wallet specs (mirrored from browser.storage.local via intercom-sync)
+  walletsSpecs: StringRecord<WalletSpecs>;
 }
 
 interface WalletActions {
@@ -57,6 +61,9 @@ interface WalletActions {
 
   /** Track the confirmation ID for matching incoming notifications */
   setConfirmationId: (id: string) => void;
+
+  /** Sync walletsSpecs from browser.storage.local */
+  setWalletsSpecs: (specs: StringRecord<WalletSpecs>) => void;
 }
 
 export type WalletStore = WalletState & WalletActions;
@@ -74,6 +81,7 @@ export const walletStore = createStore<WalletStore>()(
     idle: true,
     locked: false,
     ready: false,
+    walletsSpecs: {},
 
     // Actions
     syncState: ({ status, accounts, networks, settings }) =>
@@ -92,7 +100,9 @@ export const walletStore = createStore<WalletStore>()(
 
     resetConfirmation: () => set({ confirmation: null, confirmationId: null }),
 
-    setConfirmationId: id => set({ confirmationId: id })
+    setConfirmationId: id => set({ confirmationId: id }),
+
+    setWalletsSpecs: specs => set({ walletsSpecs: specs })
   }))
 );
 
@@ -108,6 +118,26 @@ export const useWalletReady = () => useWalletStore(s => s.ready);
 export const useWalletLocked = () => useWalletStore(s => s.locked);
 export const useWalletConfirmation = () => useWalletStore(s => s.confirmation);
 export const useWalletHydrated = () => useWalletStore(s => s.hydrated);
+
+// Phase 1 selectors
+export const useWalletIdle = () => useWalletStore(s => s.idle);
+
+export const useWalletsSpecs = () => useWalletStore(s => s.walletsSpecs);
+
+export const useCustomNetworks = () => useWalletStore(s => s.settings?.customNetworks ?? []);
+
+export const useAllNetworks = () =>
+  useWalletStore(useShallow(s => [...s.networks, ...(s.settings?.customNetworks ?? [])]));
+
+export const useWalletState = () =>
+  useWalletStore(
+    useShallow(s => ({
+      status: s.status,
+      accounts: s.accounts,
+      networks: s.networks,
+      settings: s.settings
+    }))
+  );
 
 /**
  * Suspense-compatible hook. Throws a promise until the wallet store is hydrated

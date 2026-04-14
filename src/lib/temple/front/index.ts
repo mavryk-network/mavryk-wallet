@@ -46,6 +46,11 @@ export { validateRecipient } from './validate-recipient';
 
 export { useFilteredContacts } from './use-filtered-contacts.hook';
 
+// Phase 1 Zustand selectors. Note: useAllNetworks is intentionally excluded here because
+// ready.ts already exports a constate-backed useAllNetworks under the same name.
+// The Zustand version (from wallet.store) will replace it in Phase 3 once ready.ts is migrated.
+export { useWalletIdle, useWalletsSpecs, useCustomNetworks, useWalletState } from 'lib/store/zustand/wallet.store';
+
 export { decryptKukaiSeedPhrase } from './kukai';
 
 export { MvktConnectionProvider, useMvktConnection } from './mvkt-connection';

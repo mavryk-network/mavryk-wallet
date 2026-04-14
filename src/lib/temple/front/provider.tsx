@@ -4,8 +4,10 @@ import { ShortcutAccountSelectStateProvider } from 'app/hooks/use-account-select
 import { usePushNotifications } from 'app/hooks/use-push-notifications';
 import { CustomRpcContext } from 'lib/analytics';
 
+import { useWalletReady } from 'lib/store/zustand/wallet.store';
+
 import { NewBlockTriggersProvider } from './chain';
-import { TempleClientProvider, useTempleClient } from './client';
+import { TempleClientProvider } from './client';
 import { ReadyTempleProvider, useNetwork } from './ready';
 
 export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -25,7 +27,7 @@ export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
 };
 
 const ConditionalReadyTemple: FC<PropsWithChildren> = ({ children }) => {
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
 
   return useMemo(
     () =>

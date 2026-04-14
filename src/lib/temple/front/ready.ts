@@ -12,15 +12,21 @@ import { IS_DEV_ENV } from 'lib/env';
 import { chainKeys } from 'lib/query-keys';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
 import {
-  ReadyTempleState,
   TempleAccountType,
   TempleStatus,
-  TempleState,
   TempleNotification,
   TempleMessageType
 } from 'lib/temple/types';
+import {
+  useWalletNetworks,
+  useWalletAccounts,
+  useWalletSettings,
+  useWalletsSpecs,
+  useWalletStatus
+} from 'lib/store/zustand/wallet.store';
 
-import { intercom, useTempleClient } from './client';
+import { intercom } from './client';
+import { useMavrykClient } from './use-mavryk-client';
 import { usePassiveStorage } from './storage';
 
 // Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
@@ -53,17 +59,16 @@ export const [
 );
 
 function useReadyTemple() {
-  const templeFront = useTempleClient();
-  assertReady(templeFront);
+  const status = useWalletStatus();
+  const allNetworks = useWalletNetworks();
+  const allAccounts = useWalletAccounts();
+  const settings = useWalletSettings();
+  const walletsSpecs = useWalletsSpecs();
+  const { createWebMavrykSigner, createWebMavrykWallet, updateAccountKYCStatus } = useMavrykClient();
 
-  const {
-    networks: allNetworks,
-    accounts: allAccounts,
-    settings,
-    walletsSpecs,
-    createWebMavrykSigner,
-    createWebMavrykWallet
-  } = templeFront;
+  // Provider tree guarantees this only mounts when ready, but keep explicit
+  // check so the remaining hook calls don't run on stale/empty state.
+  if (status !== TempleStatus.Ready) throw new Error('Mavryk not ready');
 
   const queryClient = useQueryClient();
 
@@ -177,14 +182,14 @@ function useReadyTemple() {
       const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
 
       if (!cancelled) {
-        await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+        await updateAccountKYCStatus(account.publicKeyHash, isKYC);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [account.publicKeyHash, tezos?.rpc, templeFront]);
+  }, [account.publicKeyHash, tezos?.rpc, updateAccountKYCStatus]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {
@@ -296,8 +301,3 @@ export class ReactiveTezosToolkit extends MavrykToolkit {
   }
 }
 
-function assertReady(state: TempleState): asserts state is ReadyTempleState {
-  if (state.status !== TempleStatus.Ready) {
-    throw new Error('Mavryk not ready');
-  }
-}

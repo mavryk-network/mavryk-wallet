@@ -229,7 +229,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
         if (payload) {
           return;
         }
-        if (!req) {
+        if (!res) {
           return;
         }
 

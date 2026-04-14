@@ -728,15 +728,12 @@ export function assertResponse(condition: any): asserts condition {
 }
 
 function withoutFeesOverride<T>(params: any, op: T): T {
-  try {
-    const { fee, gasLimit, storageLimit } = params;
-    return {
-      ...op,
-      fee,
-      gas_limit: gasLimit,
-      storage_limit: storageLimit
-    };
-  } catch {
-    return params;
-  }
+  // L5: re-throw on error — swallowing here would silently return wrong params and corrupt wallet ops.
+  const { fee, gasLimit, storageLimit } = params;
+  return {
+    ...op,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit
+  };
 }

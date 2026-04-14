@@ -531,7 +531,11 @@ export const [
   })
 );
 
-/** Backwards-compatible shim — keeps all existing consumers working without changes. */
+/**
+ * @deprecated Use `useMavrykClient()` for action callbacks and `useWallet*()` selectors
+ * (from `lib/store/zustand/wallet.store`) for state reads instead. This shim will be
+ * removed in Phase 5 of the useTempleClient refactor.
+ */
 export const useTempleClient = () => ({
   ...useTempleState(),
   ...useTempleWallet(),

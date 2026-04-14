@@ -6,6 +6,7 @@ import { KYC_CONTRACTS } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
 import { isKnownChainId } from 'lib/temple/types';
 
+// TODO: move SUPER_ADMIN_PRIVATE_KEY server-side — currently testnet-only for Pro demo
 const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
 export const signerTezos = (rpcUrl: string) => {

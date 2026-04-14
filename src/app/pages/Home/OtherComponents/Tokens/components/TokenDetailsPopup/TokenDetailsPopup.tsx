@@ -123,16 +123,10 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
         <div className="text-base-plus text-white mb-2">
           <div
             className={clsx(
-              'flex justify-around mx-auto w-full pb-4',
+              'flex justify-center gap-6 mx-auto w-full pb-4',
               popup ? 'max-w-sm px-2' : 'max-w-screen-xxs px-14'
             )}
           >
-            <ActionButton
-              label={<T id="receive" />}
-              Icon={ReceiveIcon}
-              to="/receive"
-              testID={HomeSelectors.receiveButton}
-            />
             <ActionButton
               label={<T id="send" />}
               Icon={SendIcon}
@@ -140,6 +134,12 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               disabled={!canSend}
               tippyProps={tippyPropsMock}
               testID={HomeSelectors.sendButton}
+            />
+            <ActionButton
+              label={<T id="receive" />}
+              Icon={ReceiveIcon}
+              to="/receive"
+              testID={HomeSelectors.receiveButton}
             />
           </div>
         </div>

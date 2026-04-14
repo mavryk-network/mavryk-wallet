@@ -15,7 +15,7 @@ interface TokenToFiatProps {
 }
 
 export const TokenToFiat: React.FC<TokenToFiatProps> = ({
-  amountValue = new BigNumber(0),
+  amountValue,
   assetMetadata,
   shoudUseFiat,
   assetSlug,

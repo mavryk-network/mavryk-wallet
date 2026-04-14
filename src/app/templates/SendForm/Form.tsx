@@ -80,7 +80,7 @@ interface FormData {
 
 const amountStyle: React.CSSProperties = {
   resize: 'none',
-  height: 66,
+  height: 48,
   position: 'relative'
 };
 
@@ -175,7 +175,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   }, [setShouldUseFiat, canToggleFiat, shoudUseFiat, setValue]);
 
   const toValue = watch('to');
-  const amountValue = watch('amount');
+  const amountValue = watch('amount') ?? '';
   const [finalAmount, setFinalAmount] = useSafeState('0');
   const feeValue = watch('fee') ?? RECOMMENDED_ADD_FEE;
 
@@ -257,11 +257,11 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       }
 
       const [transferParams, manager] = await Promise.all([
-        toTransferParams(tezos, assetSlug, assetMetadata, accountPkh, to, toPenny(assetMetadata)),
-        tezos.rpc.getManagerKey(acc.type === TempleAccountType.ManagedKT ? acc.owner : accountPkh)
+        toTransferParams(mavryk, assetSlug, assetMetadata, accountPkh, to, toPenny(assetMetadata)),
+        mavryk.rpc.getManagerKey(acc.type === TempleAccountType.ManagedKT ? acc.owner : accountPkh)
       ]);
 
-      const estmtnMax = await estimateMaxFee(acc, tez, tezos, to, balance, transferParams, manager);
+      const estmtnMax = await estimateMaxFee(acc, tez, mavryk, to, balance, transferParams, manager);
 
       let estimatedBaseFee = mumavToTz(estmtnMax.burnFeeMumav + estmtnMax.suggestedFeeMumav);
       if (!hasManager(manager)) {
@@ -283,14 +283,14 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       console.error(err);
       throw err;
     }
-  }, [assetMetadata, toResolved, assetSlug, balance, tezos, accountPkh, acc, tezBalance]);
+  }, [assetMetadata, toResolved, assetSlug, balance, mavryk, accountPkh, acc, tezBalance]);
 
   const {
     data: baseFee,
     error: estimateBaseFeeError,
     isFetching: estimating
   } = useQuery({
-    queryKey: feeKeys.transferBase(tezos.checksum, assetSlug, accountPkh, toResolved),
+    queryKey: feeKeys.transferBase(mavryk.checksum, assetSlug, accountPkh, toResolved),
     queryFn: estimateBaseFee,
     enabled: Boolean(toFilled),
     retry: false,
@@ -355,7 +355,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
     amountFieldRef.current?.focus({ preventScroll: true });
   }, []);
 
-  const [submitError, setSubmitError] = useSafeState<any>(null, `${tezos.checksum}_${toResolved}`);
+  const [submitError, setSubmitError] = useSafeState<any>(null, `${mavryk.checksum}_${toResolved}`);
 
   const toAssetAmount = useCallback(
     (fiatAmount: BigNumber.Value) =>
@@ -382,22 +382,22 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         if (isKTAddress(acc.publicKeyHash)) {
           const michelsonLambda = isKTAddress(toResolved) ? transferToContract : transferImplicit;
 
-          const contract = await loadContract(tezos, acc.publicKeyHash);
+          const contract = await loadContract(mavryk, acc.publicKeyHash);
           op = await contract.methods.do(michelsonLambda(toResolved, tzToMumav(amount))).send({ amount: 0 });
         } else {
           const actualAmount = shoudUseFiat ? toAssetAmount(amount) : amount;
           const transferParams = await toTransferParams(
-            tezos,
+            mavryk,
             assetSlug,
             assetMetadata,
             accountPkh,
             toResolved,
             actualAmount
           );
-          const estmtn = await tezos.estimate.transfer(transferParams);
+          const estmtn = await mavryk.estimate.transfer(transferParams);
           const addFee = tzToMumav(feeVal ?? 0);
           const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
-          op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
+          op = await mavryk.wallet.transfer({ ...transferParams, fee }).send();
 
           // create pending delegate operation
           const pendingOpObject = await buildPendingOperationObject({
@@ -433,7 +433,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
     [
       acc,
       formState.isSubmitting,
-      tezos,
+      mavryk,
       assetSlug,
       assetMetadata,
       setSubmitError,
@@ -491,7 +491,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const isContactsDropdownOpen = getFilled(toFilled, toFieldFocused);
 
   return (
-    <form className={clsx('min-h-96 flex flex-col flex-grow', popup && 'pb-8')} onSubmit={handleSubmit(onSubmit)}>
+    <form className={clsx('min-h-96 flex flex-col flex-grow', popup && 'pb-3')} onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="to"
         control={control}
@@ -501,10 +501,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         render={({ field: { ref: _ref, ...field } }) =>
           pickedFromDropdown && filledContact ? (
             <div>
-              <div className="text-base font-normal text-primary-white mb-3">
+              <div className="text-base font-normal text-primary-white mb-1">
                 <T id="sendTo" />
               </div>
-              <div className="bg-primary-card rounded-xl overflow-hidden mb-4">
+              <div className="bg-primary-card rounded-xl overflow-hidden mb-2">
                 <ContactsDropdownItemSecondary
                   contact={filledContact}
                   active={false}
@@ -647,7 +647,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         loading={formState.isSubmitting}
         disabled={Boolean(estimationError) || estimateFallbackDisplayed || !toResolved || Boolean(errors?.to)}
         testID={SendFormSelectors.sendButton}
-        className="mt-6"
+        className="mt-2"
       >
         <T id="send" />
       </FormSubmitButton>

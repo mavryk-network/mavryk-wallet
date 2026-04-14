@@ -108,7 +108,7 @@ export const AdditionalFeeInputContent: FC<AdditionalFeeInputContentProps> = pro
   return (
     <div className="flex flex-col w-full mb-2 flex-grow">
       {label ? (
-        <label className="flex flex-col mb-4 leading-tight" htmlFor={`${id}-select`}>
+        <label className="flex flex-col mb-2 leading-tight" htmlFor={`${id}-select`}>
           <span className="text-base-plus text-white">{label}</span>
 
           {labelDescription && <span className="mt-1 text-sm text-secondary-white">{labelDescription}</span>}

@@ -61,9 +61,12 @@ export const loadAccountTokens = async (account: string, chainId: string) => {
     if (newMeta && Object.keys(newMeta).length > 0) {
       metadataStore.getState().putTokensMetadata(newMeta);
     }
+
+    return null;
   } catch (err) {
     assetsStore.getState().setTokensLoading(false);
     console.error('loadAccountTokens failed:', err);
+    return null;
   }
 };
 
@@ -87,9 +90,12 @@ export const loadAccountCollectibles = async (account: string, chainId: string) 
     if (newMeta && Object.keys(newMeta).length > 0) {
       metadataStore.getState().putCollectiblesMetadata(newMeta);
     }
+
+    return null;
   } catch (err) {
     assetsStore.getState().setCollectiblesLoading(false);
     console.error('loadAccountCollectibles failed:', err);
+    return null;
   }
 };
 
@@ -113,8 +119,11 @@ export const loadAccountRwas = async (account: string, chainId: string) => {
     if (newMeta && Object.keys(newMeta).length > 0) {
       metadataStore.getState().putRwasMetadata(newMeta);
     }
+
+    return null;
   } catch (err) {
     assetsStore.getState().setRwasLoading(false);
     console.error('loadAccountRwas failed:', err);
+    return null;
   }
 };

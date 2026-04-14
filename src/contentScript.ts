@@ -7,6 +7,9 @@ import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
 import { getIntercom } from './intercom-client';
 
+// H1: Only run in the top frame — prevents duplicate message handling in iframes.
+if (window !== window.top) throw new Error('contentScript: skipping iframe frame');
+
 const TRACK_URL_CHANGE_INTERVAL = 5000;
 
 enum BeaconMessageTarget {

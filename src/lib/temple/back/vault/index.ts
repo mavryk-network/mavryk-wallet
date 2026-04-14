@@ -236,9 +236,10 @@ export class Vault {
 
       const legacyCheckStored = await isStoredLegacy(checkStrgKey);
 
+      const CURRENT_MIGRATION_LEVEL = 3;
       if (saved !== undefined && legacyCheckStored) {
         // Override migration level, force
-        migrationLevel = 3;
+        migrationLevel = CURRENT_MIGRATION_LEVEL;
       }
     }
 

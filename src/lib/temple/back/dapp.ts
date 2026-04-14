@@ -40,6 +40,7 @@ import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
 
 const CONFIRM_WINDOW_WIDTH = 400;
+let corruptionAlertSent = false;
 const CONFIRM_WINDOW_HEIGHT = 604;
 const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;
@@ -379,13 +380,26 @@ export async function getAllDApps(): Promise<TempleDAppSessions> {
     const valid = await crypto.subtle.verify('HMAC', hmacKey, sigBytes, new TextEncoder().encode(stored.data));
     if (!valid) {
       console.error('dApp session integrity check failed');
+      await browser.storage.local.remove(STORAGE_KEY);
+      if (!corruptionAlertSent) {
+        corruptionAlertSent = true;
+        intercom.broadcast({ type: TempleMessageType.DAppSessionsCorrupted });
+      }
       return {};
     }
     return JSON.parse(stored.data);
   }
 
-  // Legacy: plain object without HMAC — validate shape before accepting
+  // Legacy plain-object path
   if (typeof stored === 'object' && !stored.data) {
+    // After migration has run, a plain-object here means tampered storage — reject
+    const migrationResult = await browser.storage.local.get('dapp_sessions_migrated_v2');
+    if (migrationResult['dapp_sessions_migrated_v2']) {
+      console.error('dApp session data appears tampered — rejecting and clearing');
+      await browser.storage.local.remove(STORAGE_KEY);
+      return {};
+    }
+    // Pre-migration: validate and accept (migration will re-sign on next unlock)
     return validateDAppSessions(stored) ? (stored as TempleDAppSessions) : {};
   }
 
@@ -452,6 +466,13 @@ type RequestConfirmParams = {
 };
 
 async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }: RequestConfirmParams) {
+  // Defensive: declare closeWindow before registering the listener so the handler
+  // always has a defined reference. The real implementation is assigned after
+  // createConfirmationWindow resolves. (Note: the temporal dead zone race this
+  // guards against does not exist in practice due to JS closure semantics, but
+  // this makes the intent explicit.)
+  let closeWindow: () => Promise<void> = async () => {};
+
   let closing = false;
   const close = async () => {
     if (closing) return;
@@ -520,7 +541,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
 
   const confirmWin = await createConfirmationWindow(id, confirmToken!);
 
-  const closeWindow = async () => {
+  closeWindow = async () => {
     if (confirmWin.id) {
       const win = await browser.windows.get(confirmWin.id);
       if (win.id) {

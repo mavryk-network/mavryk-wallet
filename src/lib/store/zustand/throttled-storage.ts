@@ -52,6 +52,7 @@ export function createThrottledPersistStorage<S>() {
       if (existing) {
         clearTimeout(existing);
         pending.delete(name);
+        pendingWrites.delete(name);
       }
       await browserStorage.removeItem(name);
     }

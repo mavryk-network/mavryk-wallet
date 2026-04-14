@@ -327,7 +327,8 @@ export enum TempleMessageType {
   SendTrackEventRequest = 'SEND_TRACK_EVENT_REQUEST',
   SendTrackEventResponse = 'SEND_TRACK_EVENT_RESPONSE',
   SendPageEventRequest = 'SEND_PAGE_EVENT_REQUEST',
-  SendPageEventResponse = 'SEND_PAGE_EVENT_RESPONSE'
+  SendPageEventResponse = 'SEND_PAGE_EVENT_RESPONSE',
+  DAppSessionsCorrupted = 'DApp_SESSIONS_CORRUPTED'
 }
 
 export type TempleNotification =

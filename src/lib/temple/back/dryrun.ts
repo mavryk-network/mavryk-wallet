@@ -20,8 +20,8 @@ const opParamsArraySchema = z.array(opParamSchema);
 function validateOpParams(opParams: any[]): void {
   const result = opParamsArraySchema.safeParse(opParams);
   if (!result.success) {
-    const issues = result.error.issues.map(i => `[${i.path.join('.')}] ${i.message}`).join('; ');
-    throw new Error(`Invalid operation parameters: ${issues}`);
+    console.error('opParams validation failed:', result.error.issues);
+    throw new Error('Invalid operation parameters');
   }
 }
 

@@ -55,11 +55,15 @@ const ensureRecord = (state: BalancesState, key: string): BalanceRecord => {
   return { data: {}, isLoading: false };
 };
 
+export const balancesInitialState: BalancesState = {
+  balancesAtomic: {}
+};
+
 export const balancesStore = createStore<BalancesStore>()(
   persist(
     set => ({
       // --- State ---
-      balancesAtomic: {},
+      ...balancesInitialState,
 
       // --- Actions ---
       setGasBalance: (publicKeyHash, chainId, balance) =>

@@ -3,6 +3,7 @@ import browser from 'webextension-polyfill';
 import { IntercomClient } from 'lib/intercom';
 import { TempleMessageType, TempleNotification } from 'lib/temple/types';
 
+import { balancesStore, balancesInitialState } from './balances.store';
 import { queryClient } from './query-client';
 import { walletStore } from './wallet.store';
 
@@ -59,6 +60,20 @@ export function startIntercomSync(intercom: IntercomClient) {
   // TempleState, so StateUpdated does not fire on network switch. We must watch storage directly.
   const handleStorageChanged = (changes: Record<string, browser.Storage.StorageChange>, area: string) => {
     if (area === 'local' && 'network_id' in changes) {
+      // IMPORTANT: Reset Zustand stores BEFORE invalidating TanStack queries.
+      // This ensures any query refetch triggered by invalidation writes into a clean store,
+      // not alongside stale data from the previous network.
+      //
+      // balancesStore: reset because balance records are per pkh_chainId — old network values
+      //   would be displayed until the refetch completes, which is misleading.
+      // assetsStore: NOT reset — already naturally keyed by account@chainId; the new network
+      //   simply gets its own key and old data is never shown.
+      // metadataStore: NOT reset — token metadata (names, symbols, decimals) is network-agnostic;
+      //   resetting it forces expensive re-fetches for no correctness benefit.
+      // Partial setState (no replace flag) resets only state fields — actions are closures
+      // over the internal `set` function and must not be replaced.
+      balancesStore.setState(balancesInitialState);
+
       void queryClient.cancelQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
       void queryClient.invalidateQueries({ predicate: q => isNetworkDependentKey(q.queryKey) });
     }

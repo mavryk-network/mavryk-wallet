@@ -1,8 +1,14 @@
 import { createStore, useStore } from 'zustand';
-import { useShallow } from 'zustand/react/shallow';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
-import type { TempleAccount, TempleNetwork, TempleSettings, TempleConfirmationPayload, WalletSpecs } from 'lib/temple/types';
+import type {
+  TempleAccount,
+  TempleNetwork,
+  TempleSettings,
+  TempleConfirmationPayload,
+  WalletSpecs
+} from 'lib/temple/types';
 import { TempleStatus } from 'lib/temple/types';
 
 /**

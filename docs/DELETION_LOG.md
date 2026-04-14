@@ -9,13 +9,13 @@ All findings below are REPORT ONLY — no changes have been made.
 
 ### Summary of Findings
 
-| Category | Count | Risk |
-|---|---|---|
-| Unused named selector hooks (re-exports) | 8 | SAFE |
-| Unused UI state (BalanceMode) | 1 enum + 1 hook | SAFE |
-| Dead commented-out imports | 1 file, 3 lines | SAFE |
-| Orphaned `.selectors.ts` files (test automation) | 4 files | VERIFY |
-| Stale phase comment in intercom-sync.ts | 1 comment block | SAFE |
+| Category                                         | Count           | Risk   |
+| ------------------------------------------------ | --------------- | ------ |
+| Unused named selector hooks (re-exports)         | 8               | SAFE   |
+| Unused UI state (BalanceMode)                    | 1 enum + 1 hook | SAFE   |
+| Dead commented-out imports                       | 1 file, 3 lines | SAFE   |
+| Orphaned `.selectors.ts` files (test automation) | 4 files         | VERIFY |
+| Stale phase comment in intercom-sync.ts          | 1 comment block | SAFE   |
 
 No orphaned files, no remaining Redux/Effector/SWR imports, no dead Redux slices found.
 
@@ -29,6 +29,7 @@ These 8 hooks are exported from `wallet.store.ts` and re-exported via `index.ts`
 **Re-export file:** `src/lib/store/zustand/index.ts` lines 5–13
 
 Dead exports:
+
 - `useWalletStatus` — line 5 of index.ts, defined at wallet.store.ts
 - `useWalletAccounts` — line 6 of index.ts
 - `useWalletNetworks` — line 7 of index.ts
@@ -51,6 +52,7 @@ Dead exports:
 `BalanceMode` is defined as an enum, stored in UIState, and a selector hook is exported — but nothing outside `ui.store.ts` references any of these.
 
 **File:** `src/lib/store/zustand/ui.store.ts`
+
 - Line 23: `export enum BalanceMode { ... }`
 - Line 35: `balanceMode: BalanceMode` field in `UIState` interface
 - Line 56: `setBalanceMode: (mode: BalanceMode) => void` in `UIActions`
@@ -107,16 +109,17 @@ This is a migration note from Phase 5b which is now complete. The comment refere
 
 These files export selector enums used for E2E test automation (`data-testid` strings). Four have **zero consumers**:
 
-| File | Consumers |
-|---|---|
-| `src/app/layouts/PageLayout/Header.selectors.ts` | 0 |
-| `src/app/templates/DelegateForm.selectors.ts` | 0 |
-| `src/app/templates/About/About.selectors.ts` | 0 |
-| `src/app/templates/DAppSettings/DAppSettings.selectors.ts` | 0 |
-| `src/app/pages/Receive/Receive.selectors.ts` | 0 |
-| `src/lib/notifications/components/item/notifications-content.selectors.ts` | 0 |
+| File                                                                       | Consumers |
+| -------------------------------------------------------------------------- | --------- |
+| `src/app/layouts/PageLayout/Header.selectors.ts`                           | 0         |
+| `src/app/templates/DelegateForm.selectors.ts`                              | 0         |
+| `src/app/templates/About/About.selectors.ts`                               | 0         |
+| `src/app/templates/DAppSettings/DAppSettings.selectors.ts`                 | 0         |
+| `src/app/pages/Receive/Receive.selectors.ts`                               | 0         |
+| `src/lib/notifications/components/item/notifications-content.selectors.ts` | 0         |
 
 **Note:** These selectors files follow a project-wide convention (`*.selectors.ts` = test automation string enums). Before deleting, verify:
+
 1. That the corresponding component does not use `data-testid` attributes referencing these enums directly via string literal rather than import.
 2. That no E2E test suite outside `src/` imports them (e.g., a separate `e2e/` or `cypress/` directory).
 

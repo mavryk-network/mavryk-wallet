@@ -38,6 +38,7 @@ export function usePasswordGateForm(
     formState: { errors, isSubmitting: submitting },
     setError,
     clearErrors,
+    reset,
     watch
   } = useForm<PasswordFormValues>();
 
@@ -59,10 +60,9 @@ export function usePasswordGateForm(
     clearErrors('password');
     try {
       await onAction(pw);
+      reset();
       onSuccess?.();
     } catch (err: unknown) {
-      console.error(err);
-
       // Human delay to discourage brute-force.
       await delay();
       setError('password', toFieldError(err));

@@ -17,7 +17,6 @@ import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsM
 import { useAccount } from 'lib/temple/front';
 import { getPredefinedBaker } from 'lib/temple/front/baking/utils';
 import { mumavToTz } from 'lib/temple/helpers';
-import { formatMumavAsTz } from 'lib/utils/amounts';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
@@ -31,6 +30,7 @@ import {
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from 'lib/temple/history/types';
+import { formatMumavAsTz } from 'lib/utils/amounts';
 
 import { AssetImage } from '../AssetImage';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';

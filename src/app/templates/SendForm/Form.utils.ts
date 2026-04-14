@@ -1,6 +1,7 @@
 import { TempleNetworkType } from 'lib/temple/types';
 
-export { estimateMaxFee, TransferParamsInvariant } from 'app/hooks/useFeeValue/utils';
+export { estimateMaxFee } from 'app/hooks/useFeeValue/utils';
+export type { TransferParamsInvariant } from 'app/hooks/useFeeValue/utils';
 
 export const getAssetPriceByNetwork = (network: TempleNetworkType, assetPrice: number | null) =>
   network === 'main' && assetPrice !== null;

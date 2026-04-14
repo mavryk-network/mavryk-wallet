@@ -1,8 +1,9 @@
-import React, { FC, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { FC, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
 import DocBg from 'app/a11y/DocBg';
+import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import styles from 'app/layouts/pageLayout.module.css';
 import InternalConfirmation from 'app/templates/InternalConfirmation';
@@ -82,7 +83,15 @@ const ConfirmationOverlay: FC = () => {
         )}
       >
         {confirmation && (
-          <InternalConfirmation payload={confirmation.payload} error={confirmation.error} onConfirm={handleConfirm} />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-screen">
+                <Spinner theme="primary" className="w-20" />
+              </div>
+            }
+          >
+            <InternalConfirmation payload={confirmation.payload} error={confirmation.error} onConfirm={handleConfirm} />
+          </Suspense>
         )}
       </div>
     </>

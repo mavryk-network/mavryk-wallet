@@ -6,9 +6,9 @@ import type { WhitelistResponseToken } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';
 import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
 import { fromAssetSlug } from 'lib/assets/utils';
+import { IS_STAGE_ENV } from 'lib/env';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import type { TokenMetadata } from 'lib/metadata/types';
-import { IS_STAGE_ENV } from 'lib/env';
 import { buildTokenMetadataFromFetched, buildTokenMetadataFromWhitelist } from 'lib/metadata/utils';
 
 import { createThrottledPersistStorage } from './throttled-storage';

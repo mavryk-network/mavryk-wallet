@@ -209,7 +209,7 @@ export const assetsStore = createStore<AssetsStore>()(
             mainnetWhitelist: tokens
               .filter(t => t.contractAddress !== MAV_TOKEN_SLUG)
               .map(t => toTokenSlug(t.contractAddress, t.fa2TokenId)),
-            mainnetWhitelistLoading: false,
+            mainnetWhitelistLoading: false
           })),
 
         // --- Scamlist ---
@@ -221,7 +221,9 @@ export const assetsStore = createStore<AssetsStore>()(
     {
       name: 'zustand-assets',
       storage: createThrottledPersistStorage(),
-      partialize: (state): Pick<AssetsStore, 'tokens' | 'collectibles' | 'rwas' | 'mainnetWhitelist' | 'mainnetScamlist'> => ({
+      partialize: (
+        state
+      ): Pick<AssetsStore, 'tokens' | 'collectibles' | 'rwas' | 'mainnetWhitelist' | 'mainnetScamlist'> => ({
         tokens: state.tokens,
         collectibles: state.collectibles,
         rwas: state.rwas,

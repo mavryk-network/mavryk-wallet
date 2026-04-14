@@ -3,7 +3,6 @@ import React, { FC, useMemo } from 'react';
 import { ShortcutAccountSelectStateProvider } from 'app/hooks/use-account-select-shortcut';
 import { usePushNotifications } from 'app/hooks/use-push-notifications';
 import { CustomRpcContext } from 'lib/analytics';
-
 import { useWalletReady, useWalletSuspense } from 'lib/store/zustand/wallet.store';
 
 import { NewBlockTriggersProvider } from './chain';

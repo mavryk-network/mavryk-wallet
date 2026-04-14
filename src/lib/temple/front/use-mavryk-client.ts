@@ -15,16 +15,12 @@ import {
   WalletUnstakeParams,
   WalletFinalizeUnstakeParams
 } from '@mavrykdynamics/webmavryk';
-import {
-  DelegateParams,
-  FinalizeUnstakeParams,
-  TransferParams
-} from '@mavrykdynamics/webmavryk/dist/types/operations/types';
+import { DelegateParams, TransferParams } from '@mavrykdynamics/webmavryk/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/webmavryk-utils';
-import browser from 'webextension-polyfill';
 import { omit } from 'lodash';
 import { nanoid } from 'nanoid';
 import toBuffer from 'typedarray-to-buffer';
+import browser from 'webextension-polyfill';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { walletStore } from 'lib/store/zustand/wallet.store';
@@ -85,7 +81,10 @@ class WebMavrykWallet implements WalletProvider {
 
   async mapDelegateParamsToWalletParams(params: () => Promise<WalletDelegateParams>) {
     const walletParams = await params();
-    return withoutFeesOverride(walletParams, await createSetDelegateOperation(walletParams as unknown as DelegateParams));
+    return withoutFeesOverride(
+      walletParams,
+      await createSetDelegateOperation(walletParams as unknown as DelegateParams)
+    );
   }
 
   async mapStakeParamsToWalletParams(params: () => Promise<WalletStakeParams>) {

@@ -6,8 +6,8 @@ import { useMemoWithCompare } from 'lib/ui/hooks';
 
 import { TempleContact } from '../types';
 
-import { useMavrykClient } from './client';
 import { useRelevantAccounts, useSettings } from './ready';
+import { useMavrykClient } from './use-mavryk-client';
 
 export function useFilteredContacts() {
   const { contacts } = useSettings();

@@ -49,7 +49,7 @@ export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close,
     [removeAccount, accountId, onRemoved]
   );
 
-  const { registerPassword, handleSubmit, errors, submitting, onSubmit, disabled } = usePasswordGateForm(handleAction);
+  const { registerPassword, errors, submitting, onSubmit, disabled } = usePasswordGateForm(handleAction);
 
   return (
     <PopupModalWithTitle

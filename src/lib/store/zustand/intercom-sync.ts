@@ -1,8 +1,8 @@
 import browser from 'webextension-polyfill';
 
+import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
 import { TempleMessageType, TempleNotification, WalletSpecs } from 'lib/temple/types';
-import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 
 import { balancesStore, balancesInitialState } from './balances.store';
 import { queryClient } from './query-client';
@@ -157,7 +157,9 @@ export function startIntercomSync(intercom: IntercomClient) {
 
       case TempleMessageType.DAppSessionsCorrupted:
         // Phase 4: surface a user-visible toast. For now, log the event.
-        console.warn('[intercom-sync] DAppSessionsCorrupted: connected dApps were cleared due to a storage integrity check failure — please reconnect.');
+        console.warn(
+          '[intercom-sync] DAppSessionsCorrupted: connected dApps were cleared due to a storage integrity check failure — please reconnect.'
+        );
         break;
     }
   });

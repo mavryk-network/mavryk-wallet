@@ -7,14 +7,13 @@ import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
-import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { uiStore, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
-import { useAccount, useNetwork } from 'lib/temple/front';
+import { useAccount } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
 import * as Woozie from 'lib/woozie';
@@ -47,7 +46,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();
-  useNetwork();
 
   const shouldShowPartnersPromo = useShouldShowPromotion();
 
@@ -95,42 +93,13 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
-        <div className={classNames('flex justify-center mx-auto w-full pb-4 gap-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
+        <div className={classNames('flex justify-around mx-auto w-full pb-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
           <ActionButton
             label={<T id="receive" />}
             Icon={ReceiveIcon}
             to="/receive"
             testID={HomeSelectors.receiveButton}
           />
-
-          {/* <ActionButton
-            label={<T id="buyButton" />}
-            Icon={BuyIcon}
-            to={network.type === 'dcp' ? 'https://buy.chainbits.com' : '/buy'}
-            isAnchor={network.type === 'dcp'}
-            // disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
-            disabled
-            testID={HomeSelectors.buyButton}
-          /> */}
-          <ActionButton
-            label={<T id="swap" />}
-            Icon={SwapIcon}
-            to={{
-              pathname: '/swap',
-              search: `from=${assetSlug ?? ''}`
-            }}
-            // disabled={!canSend}
-            disabled
-            testID={HomeSelectors.swapButton}
-          />
-          {/* <ActionButton
-            label={<T id="withdraw" />}
-            Icon={WithdrawIcon}
-            to="/withdraw"
-            // disabled={!canSend || network.type !== 'main'}
-            disabled
-            testID={HomeSelectors.withdrawButton}
-          /> */}
           <ActionButton
             label={<T id="send" />}
             Icon={SendIcon}

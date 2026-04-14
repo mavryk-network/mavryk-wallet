@@ -68,13 +68,16 @@ jest.mock('lib/constants', () => ({
 
 // ---------------------------------------------------------------------------
 // Import subject under test (after mocks are set up)
+// Jest requires mocks before imports — disable import/first for this block.
 // ---------------------------------------------------------------------------
 
+/* eslint-disable import/first */
 import browser from 'webextension-polyfill';
 
 import { TempleMessageType } from 'lib/temple/types';
 
 import { useMavrykClient } from '../use-mavryk-client';
+/* eslint-enable import/first */
 
 // ---------------------------------------------------------------------------
 // Helpers

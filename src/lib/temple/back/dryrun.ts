@@ -6,8 +6,7 @@ import { z } from 'zod';
 import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient, isAddressValid } from 'lib/temple/helpers';
 import { ReadOnlySigner } from 'lib/temple/read-only-signer';
 
-const mavrykAddress = () =>
-  z.string().refine(isAddressValid, { message: 'Invalid Mavryk address' });
+const mavrykAddress = () => z.string().refine(isAddressValid, { message: 'Invalid Mavryk address' });
 
 const baseOpFields = {
   fee: z.number().int().nonnegative().finite().optional(),

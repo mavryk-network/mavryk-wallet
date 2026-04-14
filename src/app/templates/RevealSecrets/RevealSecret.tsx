@@ -64,8 +64,14 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     [reveal, revealPrivateKey, account.publicKeyHash, revealMnemonic, walletId, setSecret]
   );
 
-  const { registerPassword, handleSubmit, errors, submitting, password: walletPasswordValue, onSubmit } =
-    usePasswordGateForm(handleAction, { onError: focusPasswordField, clearOnChange: true });
+  const {
+    registerPassword,
+    handleSubmit,
+    errors,
+    submitting,
+    password: walletPasswordValue,
+    onSubmit
+  } = usePasswordGateForm(handleAction, { onError: focusPasswordField, clearOnChange: true });
 
   const texts = useMemo(() => {
     switch (reveal) {

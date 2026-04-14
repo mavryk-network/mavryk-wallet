@@ -14,8 +14,8 @@ import { noop } from 'lodash';
 
 import { createWsConnection, MvktHubConnection } from 'lib/apis/mvkt';
 import { IS_DEV_ENV } from 'lib/env';
-
 import { useWalletReady } from 'lib/store/zustand/wallet.store';
+
 import { useChainId } from './ready';
 
 const MAX_WS_RETRIES = 8;

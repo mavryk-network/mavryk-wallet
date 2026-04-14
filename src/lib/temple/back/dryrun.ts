@@ -3,17 +3,71 @@ import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
 import { ForgeOperationsParams } from '@mavrykdynamics/webmavryk-rpc';
 import { z } from 'zod';
 
-import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { formatOpParamsBeforeSend, michelEncoder, loadFastRpcClient, isAddressValid } from 'lib/temple/helpers';
 import { ReadOnlySigner } from 'lib/temple/read-only-signer';
 
-const opParamSchema = z
-  .object({
-    kind: z.enum(['transaction', 'origination', 'delegation', 'reveal', 'stake', 'unstake', 'finalize_unstake']),
-    fee: z.number().int().nonnegative().finite().optional(),
-    gasLimit: z.number().int().nonnegative().finite().optional(),
-    storageLimit: z.number().int().nonnegative().finite().optional()
-  })
-  .passthrough();
+const mavrykAddress = () =>
+  z.string().refine(isAddressValid, { message: 'Invalid Mavryk address' });
+
+const baseOpFields = {
+  fee: z.number().int().nonnegative().finite().optional(),
+  gasLimit: z.number().int().nonnegative().finite().optional(),
+  storageLimit: z.number().int().nonnegative().finite().optional()
+};
+
+const transactionSchema = z.object({
+  kind: z.literal('transaction'),
+  to: mavrykAddress(),
+  amount: z.number().int().nonnegative().finite(),
+  parameters: z.unknown().optional(),
+  ...baseOpFields
+});
+
+const delegationSchema = z.object({
+  kind: z.literal('delegation'),
+  delegate: mavrykAddress().optional(),
+  ...baseOpFields
+});
+
+const revealSchema = z.object({
+  kind: z.literal('reveal'),
+  publicKey: z.string().min(1),
+  ...baseOpFields
+});
+
+const originationSchema = z.object({
+  kind: z.literal('origination'),
+  balance: z.number().int().nonnegative().finite().optional(),
+  script: z.unknown(),
+  ...baseOpFields
+});
+
+const stakeSchema = z.object({
+  kind: z.literal('stake'),
+  amount: z.number().int().nonnegative().finite(),
+  ...baseOpFields
+});
+
+const unstakeSchema = z.object({
+  kind: z.literal('unstake'),
+  amount: z.number().int().nonnegative().finite(),
+  ...baseOpFields
+});
+
+const finalizeUnstakeSchema = z.object({
+  kind: z.literal('finalize_unstake'),
+  ...baseOpFields
+});
+
+const opParamSchema = z.discriminatedUnion('kind', [
+  transactionSchema,
+  delegationSchema,
+  revealSchema,
+  originationSchema,
+  stakeSchema,
+  unstakeSchema,
+  finalizeUnstakeSchema
+]);
 
 const opParamsArraySchema = z.array(opParamSchema);
 

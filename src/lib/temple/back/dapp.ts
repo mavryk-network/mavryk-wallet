@@ -451,6 +451,39 @@ async function setDApps(newDApps: TempleDAppSessions) {
   await browser.storage.local.set({ [STORAGE_KEY]: { data, hmac } });
 }
 
+export async function migrateLegacyDAppSessions(): Promise<void> {
+  // Guard: hmacKey must be available (wallet unlocked)
+  if (!hmacKey) return;
+
+  const result = await browser.storage.local.get('dapp_sessions_migrated_v2');
+  if (result['dapp_sessions_migrated_v2']) return;
+
+  const stored = await browser.storage.local.get(STORAGE_KEY);
+  const raw = stored[STORAGE_KEY];
+
+  // Only migrate plain-object format (no data/hmac envelope)
+  if (raw && typeof raw === 'object' && !raw.data && !raw.hmac) {
+    if (validateDAppSessions(raw)) {
+      try {
+        await setDApps(raw as TempleDAppSessions);
+        // Flag only written on success — transient failures allow retry on next unlock
+        await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+      } catch (err) {
+        console.error('Failed to migrate legacy dApp sessions — clearing', err);
+        await browser.storage.local.remove(STORAGE_KEY);
+        // Flag NOT written — will retry next unlock
+      }
+    } else {
+      // Invalid structure — remove and flag done
+      await browser.storage.local.remove(STORAGE_KEY);
+      await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+    }
+  } else {
+    // Already HMAC-envelope format or empty — flag done
+    await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+  }
+}
+
 function validateDAppSessions(obj: unknown): obj is TempleDAppSessions {
   if (typeof obj !== 'object' || obj === null) return false;
   return Object.values(obj as Record<string, unknown>).every(

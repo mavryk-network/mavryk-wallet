@@ -36,7 +36,8 @@ import {
   removeDApp,
   removeAllDApps,
   setDAppHmacKey,
-  clearDAppHmacKey
+  clearDAppHmacKey,
+  migrateLegacyDAppSessions
 } from './dapp';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
@@ -129,6 +130,7 @@ export function unlock(password: string) {
       unlocked({ vault, accounts, settings });
       const passHash = await Passworder.generateHash(password);
       await setDAppHmacKey(passHash);
+      await migrateLegacyDAppSessions();
     })
   );
 }
@@ -141,7 +143,10 @@ export async function unlockFromSession() {
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
     const passHash = await getSessionPassHash();
-    if (passHash) await setDAppHmacKey(passHash);
+    if (passHash) {
+      await setDAppHmacKey(passHash);
+      await migrateLegacyDAppSessions();
+    }
   });
 }
 

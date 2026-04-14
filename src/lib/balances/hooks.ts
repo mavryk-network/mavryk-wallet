@@ -107,7 +107,7 @@ export function useRawBalance(
    */
   const usingStore = address === currentAccountAddress && isKnownChainId(chainId);
 
-  const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeTezos), [networkRpc, nativeTezos]);
+  const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeMavryk), [networkRpc, nativeMavryk]);
   const queryClient = useQueryClient();
 
   const balanceQueryKey = useMemo(

@@ -69,16 +69,23 @@ export function startIntercomSync(intercom: IntercomClient) {
   const unsubscribeIntercom = intercom.subscribe((msg: TempleNotification) => {
     if (!msg?.type) return;
 
+    // walletStore.getState() called inline — not a stale closure.
+    // For synchronous cases (ConfirmationRequested/Expired) this snapshot is used immediately.
+    // For StateUpdated we call getState() again inside .then() to get the freshest snapshot
+    // after the async RPC round-trip, avoiding a stale-closure over the action reference.
     const store = walletStore.getState();
 
     switch (msg.type) {
       case TempleMessageType.StateUpdated:
-        // Re-fetch state from background (same as SWR mutate() does)
+        // Re-fetch state from background (same as SWR mutate() does).
+        // getState() is called again inside .then() so we always bind to the live
+        // syncState action, not the one captured before the async gap.
         intercom
           .request({ type: TempleMessageType.GetStateRequest })
           .then(res => {
             if ('type' in res && res.type === TempleMessageType.GetStateResponse) {
-              store.syncState(res.state);
+              // walletStore.getState() called inline — not a stale closure
+              walletStore.getState().syncState(res.state);
             }
           })
           .catch(err => {

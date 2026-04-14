@@ -205,12 +205,16 @@ export const assetsStore = createStore<AssetsStore>()(
 
         loadWhitelistSuccess: tokens =>
           set(state => {
+            const seen = new Set<string>(state.mainnetWhitelist);
             const updatedWhitelist = [...state.mainnetWhitelist];
 
             for (const token of tokens) {
               if (token.contractAddress === MAV_TOKEN_SLUG) continue;
               const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
-              if (!updatedWhitelist.includes(slug)) updatedWhitelist.push(slug);
+              if (!seen.has(slug)) {
+                seen.add(slug);
+                updatedWhitelist.push(slug);
+              }
             }
 
             return { mainnetWhitelist: updatedWhitelist, mainnetWhitelistLoading: false };

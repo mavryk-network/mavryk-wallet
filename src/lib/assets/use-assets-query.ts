@@ -8,7 +8,6 @@ import { assetsStore, useAreAssetsLoading } from 'lib/store/zustand/assets.store
 import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { TempleChainId } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
 
 import { loadAccountTokens, loadAccountCollectibles, loadAccountRwas } from './load-account-assets';
 
@@ -79,31 +78,35 @@ export const useAssetsLoading = () => {
   useWhitelistQuery(isMainnet);
 
   const tokensAreLoading = useAreAssetsLoading('tokens');
-
-  useInterval(
-    () => {
-      if (!tokensAreLoading && isKnownChainId(chainId)) {
-        loadAccountTokens(publicKeyHash, chainId);
-      }
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
-
   const collectiblesAreLoading = useAreAssetsLoading('collectibles');
   const rwasAreLoading = useAreAssetsLoading('rwas');
 
-  useInterval(
-    () => {
-      if (!collectiblesAreLoading && isKnownChainId(chainId)) {
-        loadAccountCollectibles(publicKeyHash, chainId);
-      }
+  const knownChain = isKnownChainId(chainId);
 
-      if (!rwasAreLoading && isKnownChainId(chainId)) {
-        loadAccountRwas(publicKeyHash, chainId);
-      }
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
+  useQuery({
+    queryKey: assetsKeys.accountTokens(publicKeyHash, chainId),
+    queryFn: () => loadAccountTokens(publicKeyHash, chainId),
+    enabled: knownChain && !tokensAreLoading,
+    refetchInterval: ASSETS_SYNC_INTERVAL,
+    refetchIntervalInBackground: false,
+    staleTime: ASSETS_SYNC_INTERVAL
+  });
+
+  useQuery({
+    queryKey: assetsKeys.accountCollectibles(publicKeyHash, chainId),
+    queryFn: () => loadAccountCollectibles(publicKeyHash, chainId),
+    enabled: knownChain && !collectiblesAreLoading,
+    refetchInterval: ASSETS_SYNC_INTERVAL,
+    refetchIntervalInBackground: false,
+    staleTime: ASSETS_SYNC_INTERVAL
+  });
+
+  useQuery({
+    queryKey: assetsKeys.accountRwas(publicKeyHash, chainId),
+    queryFn: () => loadAccountRwas(publicKeyHash, chainId),
+    enabled: knownChain && !rwasAreLoading,
+    refetchInterval: ASSETS_SYNC_INTERVAL,
+    refetchIntervalInBackground: false,
+    staleTime: ASSETS_SYNC_INTERVAL
+  });
 };

@@ -18,8 +18,9 @@ export const savePassHash = async (passHashBuffer: ArrayBuffer) => {
 
   try {
     await browser.storage.session.set({ [PASS_HASH_STORE_KEY]: toBase64(passHashBuffer) });
-  } catch (error) {
-    console.error('Failed to save pass hash');
+  } catch (err) {
+    console.error('Failed to save pass hash', err);
+    throw err; // propagate — caller (Vault.setup) must handle this
   }
 };
 

@@ -107,7 +107,7 @@ export function useRawBalance(
    */
   const usingStore = address === currentAccountAddress && isKnownChainId(chainId);
 
-  const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeMavryk), [networkRpc, nativeMavryk]);
+  const tezos = useMemo(() => (networkRpc ? buildMavrykToolKit(networkRpc) : nativeMavryk), [networkRpc, nativeMavryk]);
   const queryClient = useQueryClient();
 
   const balanceQueryKey = useMemo(
@@ -177,7 +177,7 @@ export function useBalance(assetSlug: string, address: string, networkRpc?: stri
   };
 }
 
-const buildTezosToolkit = memoizee(
+const buildMavrykToolKit = memoizee(
   (rpcUrl: string) => {
     const t = new ReactiveTezosToolkit(loadFastRpcClient(rpcUrl), rpcUrl);
     t.setPackerProvider(michelEncoder);

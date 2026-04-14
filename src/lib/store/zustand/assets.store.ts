@@ -225,14 +225,13 @@ export const assetsStore = createStore<AssetsStore>()(
     {
       name: 'zustand-assets',
       storage: createThrottledPersistStorage(),
-      partialize: state =>
-        ({
-          tokens: state.tokens,
-          collectibles: state.collectibles,
-          rwas: state.rwas,
-          mainnetWhitelist: state.mainnetWhitelist,
-          mainnetScamlist: state.mainnetScamlist
-        } as unknown as AssetsStore)
+      partialize: (state): Pick<AssetsStore, 'tokens' | 'collectibles' | 'rwas' | 'mainnetWhitelist' | 'mainnetScamlist'> => ({
+        tokens: state.tokens,
+        collectibles: state.collectibles,
+        rwas: state.rwas,
+        mainnetWhitelist: state.mainnetWhitelist,
+        mainnetScamlist: state.mainnetScamlist
+      })
     }
   )
 );

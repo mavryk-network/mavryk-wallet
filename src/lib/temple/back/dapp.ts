@@ -425,16 +425,16 @@ export async function removeAllDApps(origins: string[]) {
 }
 
 async function setDApps(newDApps: TempleDAppSessions) {
-  const data = JSON.stringify(newDApps);
-  if (hmacKey) {
-    const sig = await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode(data));
-    const hmac = Array.from(new Uint8Array(sig))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    await browser.storage.local.set({ [STORAGE_KEY]: { data, hmac } });
-  } else {
-    await browser.storage.local.set({ [STORAGE_KEY]: newDApps });
+  // NOTE: hmacKey is derived from SHA-256(passHash) — key derivation strength is a separate deferred concern.
+  if (!hmacKey) {
+    throw new Error('Cannot write dApp session: HMAC key unavailable — wallet is locked');
   }
+  const data = JSON.stringify(newDApps);
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode(data));
+  const hmac = Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  await browser.storage.local.set({ [STORAGE_KEY]: { data, hmac } });
 }
 
 function validateDAppSessions(obj: unknown): obj is TempleDAppSessions {

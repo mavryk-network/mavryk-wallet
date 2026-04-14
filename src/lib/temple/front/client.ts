@@ -16,8 +16,10 @@ import {
   WalletFinalizeUnstakeParams
 } from '@mavrykdynamics/webmavryk';
 import {
+  DelegateParams,
   FinalizeUnstakeParams,
   StakeParams,
+  TransferParams,
   UnstakeParams
 } from '@mavrykdynamics/webmavryk/dist/types/operations/types';
 import { buf2hex } from '@mavrykdynamics/webmavryk-utils';
@@ -605,23 +607,29 @@ class WebMavrykWallet implements WalletProvider {
 
   async mapDelegateParamsToWalletParams(params: () => Promise<WalletDelegateParams>) {
     const walletParams = await params();
-    return withoutFeesOverride(walletParams, await createSetDelegateOperation(walletParams as any));
+    // WalletDelegateParams intentionally omits `source` (WalletDefinedFields); the SDK
+    // fills it from the active account. Cast to internal DelegateParams is safe here.
+    return withoutFeesOverride(walletParams, await createSetDelegateOperation(walletParams as unknown as DelegateParams));
   }
 
   // ---- staking methods ----
   async mapStakeParamsToWalletParams(params: () => Promise<WalletStakeParams>) {
     const walletParams = await params();
-    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+    // WalletStakeParams has `to?: string` (optional) but createTransferOperation requires
+    // `to: string`. The SDK fills `to` with the pseudo-operation address at runtime.
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as unknown as TransferParams));
   }
 
   async mapUnstakeParamsToWalletParams(params: () => Promise<WalletUnstakeParams>) {
     const walletParams = await params();
-    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+    // Same structural gap: `to` is optional in WalletUnstakeParams, required in TransferParams.
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as unknown as TransferParams));
   }
 
   async mapFinalizeUnstakeParamsToWalletParams(params: () => Promise<WalletFinalizeUnstakeParams>) {
     const walletParams = await params();
-    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as any));
+    // Same structural gap: `to` is optional in WalletFinalizeUnstakeParams, required in TransferParams.
+    return withoutFeesOverride(walletParams, await createTransferOperation(walletParams as unknown as TransferParams));
   }
 
   async sendOperations(opParams: any[]) {

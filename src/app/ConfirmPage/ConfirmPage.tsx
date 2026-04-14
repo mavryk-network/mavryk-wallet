@@ -195,8 +195,6 @@ const ConfirmDAppForm: FC = () => {
       try {
         await onConfirm(confirmed, modifiedTotalFeeValue - revealFee, modifiedStorageLimitValue);
       } catch (err: unknown) {
-        console.error(err);
-
         // Human delay.
         await delay();
         setError(err);

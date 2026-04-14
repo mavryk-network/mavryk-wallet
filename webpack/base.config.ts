@@ -365,6 +365,14 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
     ]
   },
 
+  // Suppress known false-positive warnings from third-party packages
+  ignoreWarnings: [
+    {
+      module: /node_modules\/@google\/model-viewer/,
+      message: /Critical dependency/
+    }
+  ],
+
   // Enable performance hints for Firefox (4 MB chunk limit); disabled for other browsers
   // because we use our own FileSizeReporter hints instead.
   performance:

@@ -15,7 +15,7 @@ import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
-import { signKYCAction } from './utils/tezosSigner';
+import { signKYCAction } from './utils/mavrykSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {

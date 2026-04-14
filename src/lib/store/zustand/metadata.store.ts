@@ -8,14 +8,21 @@ import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
 import { fromAssetSlug } from 'lib/assets/utils';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import type { TokenMetadata } from 'lib/metadata/types';
+import { IS_STAGE_ENV } from 'lib/env';
 import { buildTokenMetadataFromFetched, buildTokenMetadataFromWhitelist } from 'lib/metadata/utils';
 
 import { createThrottledPersistStorage } from './throttled-storage';
 
 // Inlined to avoid circular dependency with lib/metadata/index.ts
+// RWA_SYMBOLS is a testnet/staging-only list — never classify tokens on mainnet.
 const RWA_SYMBOLS = ['ocean', 'mars1', 'ntbm', 'queen'];
-const isRwaMetadata = (metadata: Record<string, any>) =>
-  'symbol' in metadata && RWA_SYMBOLS.includes(metadata.symbol.toLowerCase());
+const isRwaMetadata = (metadata: Record<string, any>) => {
+  // This function uses a hardcoded testnet symbol list and must never run on mainnet
+  if (!IS_STAGE_ENV) {
+    return false;
+  }
+  return 'symbol' in metadata && RWA_SYMBOLS.includes(metadata.symbol.toLowerCase());
+};
 
 /**
  * Metadata cache store — replaces three Redux slices:

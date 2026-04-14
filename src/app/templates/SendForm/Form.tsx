@@ -42,7 +42,7 @@ import { loadContract } from 'lib/temple/contract';
 import {
   useAccount,
   useNetwork,
-  useTezos,
+  useMavryk,
   useTezosDomainsClient,
   useFilteredContacts,
   useAddressResolution,
@@ -102,7 +102,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const { allContacts } = useFilteredContacts();
   const network = useNetwork();
   const acc = useAccount();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId();
   const domainsClient = useTezosDomainsClient();
   const { popup } = useAppEnv();
@@ -645,13 +645,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
       <FormSubmitButton
         loading={formState.isSubmitting}
-        disabled={
-          Boolean(estimationError) ||
-          estimateFallbackDisplayed ||
-          formState.isSubmitting ||
-          !toResolved ||
-          Boolean(errors?.to)
-        }
+        disabled={Boolean(estimationError) || estimateFallbackDisplayed || !toResolved || Boolean(errors?.to)}
         testID={SendFormSelectors.sendButton}
         className="mt-6"
       >

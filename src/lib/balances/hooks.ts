@@ -15,7 +15,7 @@ import {
   getKeyForBalancesRecord
 } from 'lib/store/zustand/balances.store';
 import {
-  useTezos,
+  useMavryk,
   useAccount,
   useChainId,
   ReactiveTezosToolkit,
@@ -82,8 +82,8 @@ export function useRawBalance(
   refresh: EmptyFn;
 } {
   const { publicKeyHash: currentAccountAddress } = useAccount();
-  const nativeTezos = useTezos();
-  const nativeRpcUrl = useMemo(() => nativeTezos.rpc.getRpcUrl(), [nativeTezos]);
+  const nativeMavryk = useMavryk();
+  const nativeRpcUrl = useMemo(() => nativeMavryk.rpc.getRpcUrl(), [nativeMavryk]);
 
   const rpcUrl = networkRpc ?? nativeRpcUrl;
 

@@ -29,7 +29,7 @@ import {
   useChainId,
   useDelegate,
   useKnownBaker,
-  useTezos,
+  useMavryk,
   useTezosDomainsClient,
   validateDelegate
 } from 'lib/temple/front';
@@ -81,7 +81,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const isStakeScreenWithBakersList = useMemo(() => pathname.split('/').pop() === 'stake', [pathname]);
 
   const acc = useAccount();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const accountPkh = acc.publicKeyHash;
 
@@ -118,22 +118,22 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const { resolvedAddress, toFilled, toResolved } = useAddressResolution(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
-  const estimationRef = useEstimationRef(toResolved, tezos.checksum);
+  const estimationRef = useEstimationRef(toResolved, mavryk.checksum);
   const myBakerPkhAtSubmitRef = useRef<string | null>(null);
 
   const getEstimation = useCallback(async () => {
     const to = toResolved;
     if (acc.type === TempleAccountType.ManagedKT) {
-      const contract = await loadContract(tezos, accountPkh);
+      const contract = await loadContract(mavryk, accountPkh);
       const transferParams = contract.methods.do(setDelegate(to)).toTransferParams();
-      return tezos.estimate.transfer(transferParams);
+      return mavryk.estimate.transfer(transferParams);
     } else {
-      return tezos.estimate.setDelegate({
+      return mavryk.estimate.setDelegate({
         source: accountPkh,
         delegate: to
       });
     }
-  }, [tezos, accountPkh, acc.type, toResolved]);
+  }, [mavryk, accountPkh, acc.type, toResolved]);
 
   const cleanToField = useCallback(() => {
     setValue('to', '');
@@ -183,7 +183,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
       const estmtn = await getEstimation();
       estimationRef.current = estmtn;
-      const manager = await tezos.rpc.getManagerKey(
+      const manager = await mavryk.rpc.getManagerKey(
         acc.type === TempleAccountType.ManagedKT ? acc.publicKeyHash : accountPkh
       );
       let baseFee = mumavToTz(estmtn.burnFeeMumav + estmtn.suggestedFeeMumav);
@@ -222,14 +222,14 @@ const DelegateForm: FC<DelegateFormProps> = ({
           throw err;
       }
     }
-  }, [balance, getEstimation, tezos.rpc, acc.type, acc.publicKeyHash, accountPkh]);
+  }, [balance, getEstimation, mavryk.rpc, acc.type, acc.publicKeyHash, accountPkh]);
 
   const {
     data: baseFee,
     error: estimateBaseFeeError,
     isFetching: estimating
   } = useQuery({
-    queryKey: feeKeys.delegateBase(tezos.checksum, accountPkh, toResolved),
+    queryKey: feeKeys.delegateBase(mavryk.checksum, accountPkh, toResolved),
     queryFn: estimateBaseFee,
     enabled: Boolean(toFilled),
     retry: false,
@@ -258,8 +258,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
     [maxAddFee]
   );
 
-  const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
-  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+  const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${mavryk.checksum}_${toResolved}`);
+  const [operation, setOperation] = useSafeState<any>(null, mavryk.checksum);
 
   useEffect(() => {
     if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
@@ -320,10 +320,10 @@ const DelegateForm: FC<DelegateFormProps> = ({
         let op: WalletOperation | TransactionOperation;
         let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
-          const contract = await loadContract(tezos, acc.publicKeyHash);
+          const contract = await loadContract(mavryk, acc.publicKeyHash);
           op = await contract.methods.do(setDelegate(to)).send({ amount: 0 });
         } else {
-          op = await tezos.wallet
+          op = await mavryk.wallet
             .setDelegate({
               source: accountPkh,
               delegate: to,
@@ -383,7 +383,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
       myBakerPkh,
       chainId,
       reset,
-      tezos
+      mavryk
     ]
   );
 

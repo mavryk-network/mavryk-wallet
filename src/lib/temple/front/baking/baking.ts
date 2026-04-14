@@ -19,7 +19,7 @@ import { IS_DEV_ENV } from 'lib/env';
 import { bakingKeys, chainKeys } from 'lib/query-keys';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
-import { useChainId, useNetwork, useTezos } from '../ready';
+import { useChainId, useNetwork, useMavryk } from '../ready';
 
 import {
   DEFAULT_CYCLE_DURATION_MS,
@@ -36,13 +36,13 @@ export function useDelegate<T = MvktUserAccount>(
   suspense = true,
   shouldPreventErrorPropagation = true
 ) {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId(suspense);
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(
-    () => [...chainKeys.delegate(tezos.checksum, address), chainId, shouldPreventErrorPropagation],
-    [tezos.checksum, address, chainId, shouldPreventErrorPropagation]
+    () => [...chainKeys.delegate(mavryk.checksum, address), chainId, shouldPreventErrorPropagation],
+    [mavryk.checksum, address, chainId, shouldPreventErrorPropagation]
   );
 
   const resetDelegateCache = useCallback(() => {
@@ -53,7 +53,7 @@ export function useDelegate<T = MvktUserAccount>(
     try {
       return await retry(
         async () => {
-          const freshChainId = chainId ?? (await tezos.rpc.getChainId());
+          const freshChainId = chainId ?? (await mavryk.rpc.getChainId());
           if (freshChainId && isKnownChainId(freshChainId)) {
             try {
               const accountStats = await getAccountStatsFromMvkt(address, freshChainId);
@@ -70,7 +70,7 @@ export function useDelegate<T = MvktUserAccount>(
             }
           }
 
-          const delegateAddress = await tezos.rpc.getDelegate(address);
+          const delegateAddress = await mavryk.rpc.getDelegate(address);
           return { delegate: { address: delegateAddress } } as T;
         },
         { retries: 3, minTimeout: 3000, maxTimeout: 5000 }
@@ -85,7 +85,7 @@ export function useDelegate<T = MvktUserAccount>(
         resetDelegateCache
       );
     }
-  }, [chainId, tezos, address, shouldPreventErrorPropagation, resetDelegateCache]);
+  }, [chainId, mavryk, address, shouldPreventErrorPropagation, resetDelegateCache]);
 
   return useQuery<T | undefined>({
     queryKey,
@@ -98,18 +98,18 @@ export function useDelegate<T = MvktUserAccount>(
 
 export function useAccountDelegatePeriodStats(accountAddress: string, shouldPreventErrorPropagation = true) {
   const { data: accStats } = useDelegate<MvktUserAccount>(accountAddress);
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId();
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(
     () => [
-      ...chainKeys.delegateStats(tezos.checksum, accountAddress),
+      ...chainKeys.delegateStats(mavryk.checksum, accountAddress),
       accStats?.delegate?.address ?? null,
       chainId,
       shouldPreventErrorPropagation
     ],
-    [tezos.checksum, accountAddress, accStats?.delegate?.address, chainId, shouldPreventErrorPropagation]
+    [mavryk.checksum, accountAddress, accStats?.delegate?.address, chainId, shouldPreventErrorPropagation]
   );
 
   const resetDelegateStatsCache = useCallback(() => {
@@ -125,9 +125,9 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
           try {
             if (accStats?.delegate?.address) {
               const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
-                tezos.rpc.getBlockMetadata(),
+                mavryk.rpc.getBlockMetadata(),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
-                tezos.rpc.getUnstakeRequests(accountAddress).catch(() => null)
+                mavryk.rpc.getUnstakeRequests(accountAddress).catch(() => null)
               ]);
 
               const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
@@ -139,7 +139,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
               let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
 
               try {
-                const constants = await tezos.rpc.getConstants();
+                const constants = await mavryk.rpc.getConstants();
                 cycleDurationMs = getOneCycleinMs(constants);
               } catch {
                 if (IS_DEV_ENV) console.error('[baking] Error getting RPC default constants');
@@ -211,7 +211,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
     accStats?.delegationTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    tezos.rpc,
+    mavryk.rpc,
     chainId,
     accountAddress,
     shouldPreventErrorPropagation,

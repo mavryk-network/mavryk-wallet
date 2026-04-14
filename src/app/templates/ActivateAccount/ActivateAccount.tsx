@@ -7,10 +7,10 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useTezos, useAccount, activateAccount } from 'lib/temple/front';
-import { SUBMIT_ERROR_TYPE } from 'lib/utils/get-error-message';
+import { useMavryk, useAccount, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
+import { SUBMIT_ERROR_TYPE } from 'lib/utils/get-error-message';
 
 import { ActivateAccountSelectors } from './ActivateAccount.selectors';
 
@@ -19,7 +19,7 @@ type FormData = {
 };
 
 const ActivateAccount = memo(() => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const account = useAccount();
   const { popup } = useAppEnv();
 
@@ -43,7 +43,7 @@ const ActivateAccount = memo(() => {
       setSuccess(null);
 
       try {
-        const activation = await activateAccount(account.publicKeyHash, data.secret.replace(/\s/g, ''), tezos);
+        const activation = await activateAccount(account.publicKeyHash, data.secret.replace(/\s/g, ''), mavryk);
         switch (activation.status) {
           case 'ALREADY_ACTIVATED':
             setSuccess(`🏁 ${t('accountAlreadyActivated')}`);
@@ -51,7 +51,7 @@ const ActivateAccount = memo(() => {
 
           case 'SENT':
             setSuccess(`🛫 ${t('requestSent', t('activationOperationType'))}`);
-            confirmOperation(tezos, activation.operation.hash).then(() => {
+            confirmOperation(mavryk, activation.operation.hash).then(() => {
               setSuccess(`✅ ${t('accountActivated')}`);
             });
             break;
@@ -63,7 +63,7 @@ const ActivateAccount = memo(() => {
         setError('secret', { type: SUBMIT_ERROR_TYPE, message: mes });
       }
     },
-    [clearErrors, submitting, setError, setSuccess, account.publicKeyHash, tezos]
+    [clearErrors, submitting, setError, setSuccess, account.publicKeyHash, mavryk]
   );
 
   const submit = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);

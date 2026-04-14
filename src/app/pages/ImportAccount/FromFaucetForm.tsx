@@ -7,7 +7,7 @@ import { Alert, FileInputProps, FileInput, FormField, FormSubmitButton } from 'a
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useMavrykClient, useSetAccountPkh, useTezos, useChainId, activateAccount } from 'lib/temple/front';
+import { useMavrykClient, useSetAccountPkh, useMavryk, useChainId, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -34,7 +34,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
   const { importFundraiserAccount } = useMavrykClient();
   const { popup } = useAppEnv();
   const setAccountPkh = useSetAccountPkh();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId() ?? '';
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
 
@@ -60,11 +60,11 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
   const importAccount = useCallback(
     async (data: FaucetData) => {
-      const activation = await activateAccount(data.pkh, data.secret ?? data.activation_code, tezos);
+      const activation = await activateAccount(data.pkh, data.secret ?? data.activation_code, mavryk);
 
       if (activation.status === 'SENT') {
         setAlert(`🛫 ${t('requestSent', t('activationOperationType'))}`);
-        await confirmOperation(tezos, activation.operation.hash);
+        await confirmOperation(mavryk, activation.operation.hash);
       }
 
       try {
@@ -79,7 +79,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         throw err;
       }
     },
-    [importFundraiserAccount, setAccountPkh, setAlert, tezos]
+    [importFundraiserAccount, setAccountPkh, setAlert, mavryk]
   );
 
   const onTextFormSubmit = useCallback(

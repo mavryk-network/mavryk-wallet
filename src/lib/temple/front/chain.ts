@@ -8,21 +8,21 @@ import { balanceKeys, chainKeys } from 'lib/query-keys';
 import { confirmOperation } from 'lib/temple/operation';
 import { useUpdatableRef } from 'lib/ui/hooks';
 
-import { useTezos, useRelevantAccounts } from './ready';
+import { useMavryk, useRelevantAccounts } from './ready';
 
 export const [NewBlockTriggersProvider, useBlockTriggers] = constate(useNewBlockTriggers);
 
 function useNewBlockTriggers() {
   const queryClient = useQueryClient();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const allAccounts = useRelevantAccounts();
 
   const triggerNewBlock = useCallback(() => {
     for (const acc of allAccounts) {
-      queryClient.invalidateQueries({ queryKey: balanceKeys.mav(tezos.checksum, acc.publicKeyHash) });
-      queryClient.invalidateQueries({ queryKey: chainKeys.delegate(tezos.checksum, acc.publicKeyHash) });
+      queryClient.invalidateQueries({ queryKey: balanceKeys.mav(mavryk.checksum, acc.publicKeyHash) });
+      queryClient.invalidateQueries({ queryKey: chainKeys.delegate(mavryk.checksum, acc.publicKeyHash) });
     }
-  }, [allAccounts, queryClient, tezos]);
+  }, [allAccounts, queryClient, mavryk]);
 
   useOnBlock(triggerNewBlock);
 
@@ -41,12 +41,12 @@ function useNewBlockTriggers() {
   };
 }
 
-export function useOnBlock(callback: (blockHash: string) => void, altTezos?: MavrykToolkit, pause = false) {
-  const currentTezos = useTezos();
+export function useOnBlock(callback: (blockHash: string) => void, altMavryk?: MavrykToolkit, pause = false) {
+  const currentMavryk = useMavryk();
   const blockHashRef = useRef<string>();
   const callbackRef = useUpdatableRef(callback);
 
-  const tezos = altTezos || currentTezos;
+  const mavryk = altMavryk || currentMavryk;
 
   useEffect(() => {
     if (pause) return;
@@ -56,7 +56,7 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
     return () => sub.close();
 
     function spawnSub() {
-      sub = tezos.stream.subscribe('head');
+      sub = mavryk.stream.subscribe('head');
 
       sub.on('data', hash => {
         if (blockHashRef.current && blockHashRef.current !== hash) {
@@ -70,5 +70,5 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
         spawnSub();
       });
     }
-  }, [pause, tezos]);
+  }, [pause, mavryk]);
 }

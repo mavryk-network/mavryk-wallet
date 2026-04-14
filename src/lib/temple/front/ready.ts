@@ -10,13 +10,6 @@ import { getKYCStatus } from 'lib/apis/mvkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { chainKeys } from 'lib/query-keys';
-import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
-import {
-  TempleAccountType,
-  TempleStatus,
-  TempleNotification,
-  TempleMessageType
-} from 'lib/temple/types';
 import {
   useWalletNetworks,
   useWalletAccounts,
@@ -24,10 +17,12 @@ import {
   useWalletsSpecs,
   useWalletStatus
 } from 'lib/store/zustand/wallet.store';
+import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { TempleAccountType, TempleStatus, TempleNotification, TempleMessageType } from 'lib/temple/types';
 
 import { intercom } from './client';
-import { useMavrykClient } from './use-mavryk-client';
 import { usePassiveStorage } from './storage';
+import { useMavrykClient } from './use-mavryk-client';
 
 // Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
 const CHAIN_ID_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -43,7 +38,7 @@ export const [
   useAccountPkh,
   useSettings,
   useHDGroups,
-  useTezos
+  useMavryk
 ] = constate(
   useReadyTemple,
   v => v.allNetworks,
@@ -215,8 +210,8 @@ function useReadyTemple() {
 }
 
 export function useChainId(suspense?: boolean) {
-  const tezos = useTezos();
-  const rpcUrl = useMemo(() => tezos?.rpc?.getRpcUrl(), [tezos]);
+  const mavryk = useMavryk();
+  const rpcUrl = useMemo(() => mavryk?.rpc?.getRpcUrl(), [mavryk]);
 
   const { data: chainId } = useChainIdLoading(rpcUrl, suspense);
   return chainId;
@@ -300,4 +295,3 @@ export class ReactiveTezosToolkit extends MavrykToolkit {
     this.addExtension(new Tzip16Module());
   }
 }
-

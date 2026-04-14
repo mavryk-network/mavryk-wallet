@@ -27,7 +27,7 @@ import { balanceKeys } from 'lib/query-keys';
 import { assetsStore } from 'lib/store/zustand/assets.store';
 import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { loadContract } from 'lib/temple/contract';
-import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
+import { useMavryk, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
@@ -78,7 +78,7 @@ const INITIAL_STATE: ComponentState = {
 class ContractNotFoundError extends Error {}
 
 const Form = memo(() => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { id: networkId } = useNetwork();
   const chainId = useChainId(true)!;
   const { publicKeyHash: accountPkh } = useAccount();
@@ -121,19 +121,19 @@ const Form = memo(() => {
     try {
       let contract: ContractAbstraction<Wallet | ContractProvider>;
       try {
-        contract = await loadContract(tezos, contractAddress, false);
+        contract = await loadContract(mavryk, contractAddress, false);
       } catch {
         throw new ContractNotFoundError();
       }
 
-      const tokenStandard = await detectTokenStandard(tezos, contract);
+      const tokenStandard = await detectTokenStandard(mavryk, contract);
       if (!tokenStandard) {
         throw new NotMatchingStandardError('Failed when detecting token standard');
       }
 
-      if (tokenStandard === 'fa2') await assertFa2TokenDefined(tezos, contract, tokenId);
+      if (tokenStandard === 'fa2') await assertFa2TokenDefined(mavryk, contract, tokenId);
 
-      const rpcUrl = tezos.rpc.getRpcUrl();
+      const rpcUrl = mavryk.rpc.getRpcUrl();
       const metadata = await fetchOneTokenMetadata(rpcUrl, contractAddress, String(tokenId));
 
       if (metadata) {
@@ -163,7 +163,7 @@ const Form = memo(() => {
         processing: false
       }));
     }
-  }, [tezos, setValue, setState, formValid, contractAddress, tokenId]);
+  }, [mavryk, setValue, setState, formValid, contractAddress, tokenId]);
 
   const loadMetadata = useDebouncedCallback(loadMetadataPure, 500);
 
@@ -227,7 +227,7 @@ const Form = memo(() => {
         if (assetIsCollectible) assets.putCollectiblesAsIs([asset]);
         else assets.putTokensAsIs([asset]);
 
-        queryClient.removeQueries({ queryKey: balanceKeys.one(tezos.checksum, tokenSlug, accountPkh) });
+        queryClient.removeQueries({ queryKey: balanceKeys.one(mavryk.checksum, tokenSlug, accountPkh) });
 
         formAnalytics.trackSubmitSuccess();
 
@@ -253,7 +253,7 @@ const Form = memo(() => {
       }
     },
     [
-      tezos,
+      mavryk,
       queryClient,
       formState.isSubmitting,
       chainId,

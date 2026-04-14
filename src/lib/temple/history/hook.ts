@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/mvkt/api';
-import { useAccount, useChainId, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useMavryk } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
 import { TempleAccount } from '../types';
@@ -31,7 +31,7 @@ export default function useHistory(
   operationParams?: GetOperationsTransactionsParams,
   differentAccount?: TempleAccount
 ) {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId(true);
   const originalAccount = useAccount();
 
@@ -78,7 +78,7 @@ export default function useHistory(
         account,
         assetSlug,
         pseudoLimit,
-        tezos,
+        mavryk,
         lastHistoryItem,
         operationParams
       );

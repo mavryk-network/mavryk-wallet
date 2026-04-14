@@ -9,7 +9,7 @@ import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import {
   useMavrykClient,
-  useTezos,
+  useMavryk,
   useTezosDomainsClient,
   useAddressResolution,
   validateDelegate
@@ -29,7 +29,7 @@ interface WatchOnlyFormData {
 
 export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
   const { importWatchOnlyAccount } = useMavrykClient();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
   const formAnalytics = useFormAnalytics(ImportAccountFormType.WatchOnly);
@@ -70,12 +70,12 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
       if (isKTAddress(finalAddress)) {
         try {
-          await tezos.contract.at(finalAddress);
+          await mavryk.contract.at(finalAddress);
         } catch {
           throw new Error(t('contractNotExistOnNetwork'));
         }
 
-        chainId = await tezos.rpc.getChainId();
+        chainId = await mavryk.rpc.getChainId();
       }
 
       await importWatchOnlyAccount(finalAddress, chainId, finalAccName);
@@ -95,8 +95,8 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
     formAnalytics,
     finalAddress,
     importWatchOnlyAccount,
-    tezos.rpc,
-    tezos.contract,
+    mavryk.rpc,
+    mavryk.contract,
     finalAccName
   ]);
 

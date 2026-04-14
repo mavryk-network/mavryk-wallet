@@ -5,7 +5,7 @@ import type { WalletOperation } from '@mavrykdynamics/webmavryk';
 import { HashChip, Alert } from 'app/atoms';
 import { setTestID } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTezos, useBlockTriggers } from 'lib/temple/front';
+import { useMavryk, useBlockTriggers } from 'lib/temple/front';
 import { CONFIRMATION_TIMED_OUT_ERROR_MSG } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 
@@ -21,7 +21,7 @@ type OperationStatusProps = {
 };
 
 const OperationStatus: FC<OperationStatusProps> = ({ typeTitle, operation, className, closable, onClose }) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { confirmOperationAndTriggerNewBlock } = useBlockTriggers();
 
   const hash = useMemo(
@@ -63,7 +63,7 @@ const OperationStatus: FC<OperationStatusProps> = ({ typeTitle, operation, class
   }));
 
   useEffect(() => {
-    confirmOperationAndTriggerNewBlock(tezos, hash)
+    confirmOperationAndTriggerNewBlock(mavryk, hash)
       .then(() => {
         setAlert(a => ({
           ...a,
@@ -86,7 +86,7 @@ const OperationStatus: FC<OperationStatusProps> = ({ typeTitle, operation, class
               : err?.message || 'Operation confirmation failed'
         });
       });
-  }, [confirmOperationAndTriggerNewBlock, tezos, hash, setAlert, descFooter, typeTitle]);
+  }, [confirmOperationAndTriggerNewBlock, mavryk, hash, setAlert, descFooter, typeTitle]);
 
   return (
     <Alert

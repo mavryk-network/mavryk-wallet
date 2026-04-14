@@ -35,7 +35,7 @@ import { isLiquidityBakingParamsResponse } from 'lib/route3/interfaces';
 import { getPercentageRatio } from 'lib/route3/utils/get-percentage-ratio';
 import { useSwapParamsData, useSwapTokenBySlug } from 'lib/swap/use-swap.query';
 import { ROUTING_FEE_PERCENT } from 'lib/swap-router/config';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
 import useTippy from 'lib/ui/useTippy';
 import { ZERO } from 'lib/utils/numbers';
@@ -60,7 +60,7 @@ import { SwapRoute } from './SwapRoute/SwapRoute';
 const EXCHANGE_XTZ_RESERVE = new BigNumber('0.3');
 
 export const SwapForm: FC = () => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { publicKeyHash } = useAccount();
   const getSwapParams = useSwap();
   const allUsdToTokenRates = useUsdToTokenRates();
@@ -266,7 +266,7 @@ export const SwapForm: FC = () => {
         routingFeeFromOutputAtomic,
         publicKeyHash,
         ROUTING_FEE_ADDRESS,
-        tezos
+        mavryk
       );
 
       const route3SwapOpParams = await getSwapParams(
@@ -293,7 +293,7 @@ export const SwapForm: FC = () => {
           routingFeeFromInputAtomic.dividedToIntegerBy(2),
           publicKeyHash,
           BURN_ADDREESS,
-          tezos
+          mavryk
         );
         allSwapParams.push(...routingInputFeeOpParams);
       } else if (isInputTokenTempleToken && !isSwapAmountMoreThreshold) {
@@ -302,7 +302,7 @@ export const SwapForm: FC = () => {
           routingFeeFromInputAtomic,
           publicKeyHash,
           ROUTING_FEE_ADDRESS,
-          tezos
+          mavryk
         );
         allSwapParams.push(...routingFeeOpParams);
       } else if (!isInputTokenTempleToken && isSwapAmountMoreThreshold && routingFeeFromInputAtomic.gt(0)) {
@@ -335,7 +335,7 @@ export const SwapForm: FC = () => {
           templeOutputAtomic.dividedToIntegerBy(2),
           publicKeyHash,
           BURN_ADDREESS,
-          tezos
+          mavryk
         );
         allSwapParams.push(...routingFeeOpParams);
       } else if (!isInputTokenTempleToken && isSwapAmountMoreThreshold) {
@@ -366,7 +366,7 @@ export const SwapForm: FC = () => {
           templeOutputAtomic.dividedToIntegerBy(2),
           publicKeyHash,
           BURN_ADDREESS,
-          tezos
+          mavryk
         );
         routingOutputFeeTransferParams = [...swapToTempleTokenOpParams, ...routingFeeOpParams];
       } else if (!isInputTokenTempleToken && !isSwapAmountMoreThreshold) {
@@ -375,7 +375,7 @@ export const SwapForm: FC = () => {
           routingFeeFromInputAtomic,
           publicKeyHash,
           ROUTING_FEE_ADDRESS,
-          tezos
+          mavryk
         );
         allSwapParams.push(...routingInputFeeOpParams);
       }
@@ -384,7 +384,7 @@ export const SwapForm: FC = () => {
 
       const opParams = allSwapParams.map(param => parseTransferParamsToParamsWithKind(param));
 
-      const batchOperation = await tezos.wallet.batch(opParams).send();
+      const batchOperation = await mavryk.wallet.batch(opParams).send();
 
       setError(undefined);
       formAnalytics.trackSubmitSuccess(analyticsProperties);

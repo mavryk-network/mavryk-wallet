@@ -10,7 +10,7 @@ import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, TID } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { Baker, useKnownBaker, useTezos } from 'lib/temple/front';
+import { Baker, useKnownBaker, useMavryk } from 'lib/temple/front';
 import { DEFAULT_CYCLE_DURATION_MS } from 'lib/temple/front/baking/const';
 import { getDelegationWaitTimeFromNow, getOneCycleinMs } from 'lib/temple/front/baking/utils';
 
@@ -170,7 +170,7 @@ type RetDelagtionTemplateProps = DefaultDelagtionTemplateProps & {
 };
 
 const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, validatorAddress, popup }) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const [daysData, setDaysData] = useState<{ activeForXDays: string | null; activeInYDays: string | null }>(() => ({
     activeForXDays: null,
@@ -185,7 +185,7 @@ const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, 
         let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
 
         try {
-          const constants = await tezos.rpc.getConstants();
+          const constants = await mavryk.rpc.getConstants();
           cycleDurationMs = getOneCycleinMs(constants);
           const days = getDelegationWaitTimeFromNow(cycleDurationMs);
 
@@ -197,7 +197,7 @@ const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, 
         console.error('Error getting delegation time');
       }
     })();
-  }, [tezos.rpc]);
+  }, [mavryk.rpc]);
 
   return (
     <section className="bg-primary-card rounded-2xl-plus p-3 w-full mt-3">

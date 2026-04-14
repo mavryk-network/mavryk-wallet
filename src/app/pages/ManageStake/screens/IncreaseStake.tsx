@@ -3,12 +3,12 @@ import React, { useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 
 import { FeeValueParams, STAKE_MODE, useMavStakeFeeValue } from 'app/hooks/useFeeValue/use-fee-value';
+import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
 import { getMaxStakeAmount } from 'lib/utils/amounts';
 import { ZERO } from 'lib/utils/numbers';
 
@@ -21,12 +21,12 @@ export const IncreaseStake = () => {
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const amountValue = '0'; // Initial value for fee estimation; the form manages its own state
   const mavFeeProps: FeeValueParams = useMemo(
-    () => ({ balance, acc: account, tezos, mode: STAKE_MODE, amount: new BigNumber(amountValue) }),
-    [account, balance, tezos]
+    () => ({ balance, acc: account, mavryk, mode: STAKE_MODE, amount: new BigNumber(amountValue) }),
+    [account, balance, mavryk]
   );
   const { estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);
 

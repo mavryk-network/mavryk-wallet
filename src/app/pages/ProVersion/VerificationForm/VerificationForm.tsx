@@ -9,14 +9,14 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useChainId, useNetwork, useTezos, useAddressResolution, validateContractAddress } from 'lib/temple/front';
+import { useChainId, useNetwork, useMavryk, useAddressResolution, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { isNumeric } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
-import { signKYCAction } from '../utils/tezosSigner';
+import { signKYCAction } from '../utils/mavrykSigner';
 
 import { VerificationFormSelectors } from './verificationForm.selectors';
 
@@ -30,7 +30,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
   const formAnalytics = useFormAnalytics('AddressValidationForm');
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId();
 
   /**
@@ -56,7 +56,7 @@ const VerificationForm: FC<DelegateFormProps> = () => {
 
   const [submitError, setSubmitError] = useSafeState<{ message: string } | null>(
     null,
-    `${tezos.checksum}_${toResolved}`
+    `${mavryk.checksum}_${toResolved}`
   );
 
   const onSubmit = useCallback(

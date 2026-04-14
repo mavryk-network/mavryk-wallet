@@ -9,6 +9,7 @@ import { MaxButton } from 'app/atoms/MaxButton';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
+import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
@@ -17,9 +18,8 @@ import { useBalance } from 'lib/balances';
 import { IS_DEV_ENV } from 'lib/env';
 import { T, t, TID, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useChainId, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useMavryk } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { useTokenAmount } from 'app/pages/Stake/hooks/use-token-amount';
 import { tokensToAtoms } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
@@ -102,7 +102,7 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
 
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const formAnalytics = useFormAnalytics(config.formAnalyticsName);
 
@@ -117,7 +117,7 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<Error | null>(null);
-  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+  const [operation, setOperation] = useSafeState<any>(null, mavryk.checksum);
 
   const canSubmit = mode === 'increase' ? canCostake : canUnlock;
 
@@ -211,10 +211,10 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
         let estmtn: any;
 
         if (mode === 'decrease') {
-          estmtn = await tezos.estimate.unstake({ amount: Number(amount) });
-          op = await tezos.wallet.unstake({ amount: Number(amount) }).send();
+          estmtn = await mavryk.estimate.unstake({ amount: Number(amount) });
+          op = await mavryk.wallet.unstake({ amount: Number(amount) }).send();
         } else {
-          op = await tezos.wallet
+          op = await mavryk.wallet
             // eslint-disable-next-line no-type-assertion/no-type-assertion
             .stake({ amount: new BigNumber(amount).toNumber() } as any)
             .send();
@@ -252,8 +252,8 @@ export const StakeAmountForm: FC<StakeAmountFormProps> = ({
       formAnalytics,
       assetMetadata,
       mode,
-      tezos.estimate,
-      tezos.wallet,
+      mavryk.estimate,
+      mavryk.wallet,
       externalEstimation,
       account.publicKeyHash,
       chainId,

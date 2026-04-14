@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { tzdnsKeys } from 'lib/query-keys';
 import { NETWORK_IDS } from 'lib/temple/networks';
 
-import { useTezos, useChainId } from './ready';
+import { useMavryk, useChainId } from './ready';
 
 function getClient(networkId: 'mainnet' | 'custom', tezos: MavrykToolkit) {
   return isMavrykDomainsSupportedNetwork(networkId)
@@ -22,18 +22,18 @@ export function isDomainNameValid(name: string, client: WebmavrykMavrykDomainsCl
 
 export function useTezosDomainsClient() {
   const chainId = useChainId(true)!;
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const networkId = NETWORK_IDS.get(chainId)!;
-  return useMemo(() => getClient(networkId === 'mainnet' ? networkId : 'custom', tezos), [networkId, tezos]);
+  return useMemo(() => getClient(networkId === 'mainnet' ? networkId : 'custom', mavryk), [networkId, mavryk]);
 }
 
 export function useTezosAddressByDomainName(domainName: string) {
   const domainsClient = useTezosDomainsClient();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   return useQuery({
-    queryKey: tzdnsKeys.address(tezos.checksum, domainName),
+    queryKey: tzdnsKeys.address(mavryk.checksum, domainName),
     queryFn: () => domainsClient.resolver.resolveNameToAddress(domainName),
     retry: false,
     refetchOnWindowFocus: false
@@ -42,10 +42,10 @@ export function useTezosAddressByDomainName(domainName: string) {
 
 export function useTezosDomainNameByAddress(address: string) {
   const { resolver: domainsResolver } = useTezosDomainsClient();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   return useQuery({
-    queryKey: tzdnsKeys.reverseName(address, tezos.checksum),
+    queryKey: tzdnsKeys.reverseName(address, mavryk.checksum),
     queryFn: () => domainsResolver.resolveAddressToName(address),
     retry: false,
     refetchOnWindowFocus: false

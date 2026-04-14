@@ -14,7 +14,7 @@ export {
   useAccount,
   useAccountPkh,
   useSettings,
-  useTezos,
+  useMavryk,
   useChainId,
   useRelevantAccounts,
   useChainIdValue,

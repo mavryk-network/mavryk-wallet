@@ -4,11 +4,11 @@ import { BigNumber } from 'bignumber.js';
 
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
 import { Route3LiquidityBakingChains, Route3SwapChains } from 'lib/route3/interfaces';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { getSwapTransferParams } from 'lib/utils/swap.utils';
 
 export const useSwap = () => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { publicKeyHash } = useAccount();
 
   return useCallback(
@@ -25,9 +25,9 @@ export const useSwap = () => {
         inputAmountAtomic,
         minimumReceivedAtomic,
         chains,
-        tezos,
+        mavryk,
         publicKeyHash
       ),
-    [tezos, publicKeyHash]
+    [mavryk, publicKeyHash]
   );
 };

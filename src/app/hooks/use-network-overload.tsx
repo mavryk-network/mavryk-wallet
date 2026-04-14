@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 
 import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
 
-import { useTezos } from 'lib/temple/front';
+import { useMavryk } from 'lib/temple/front';
 
 const DEFAULT_LATENCY = 2500;
 const LATENCY_SAMPLES_COUNT = 10;
@@ -19,10 +19,10 @@ export function useNetworkOverload(options: UseNetworkOverloadOptions = {}) {
   const { sampleSize = LATENCY_SAMPLES_COUNT, overloadThreshold = DEFAULT_LATENCY } = options;
   const [isOverloaded, setIsOverloaded] = useState(false);
   const latencies = useRef<number[]>([]);
-  const tezosToolkit = useTezos();
+  const mavrykToolkit = useMavryk();
 
   useEffect(() => {
-    const rpc: RpcClientInterface & { __patched?: boolean } = tezosToolkit.rpc;
+    const rpc: RpcClientInterface & { __patched?: boolean } = mavrykToolkit.rpc;
     if (rpc.__patched) return; // don’t patch twice
 
     // Helper to wrap an RPC method
@@ -52,7 +52,7 @@ export function useNetworkOverload(options: UseNetworkOverloadOptions = {}) {
     }
 
     rpc.__patched = true;
-  }, [tezosToolkit, sampleSize, overloadThreshold]);
+  }, [mavrykToolkit, sampleSize, overloadThreshold]);
 
   return { isOverloaded };
 }

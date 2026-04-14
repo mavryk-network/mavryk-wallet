@@ -11,7 +11,7 @@ import { AliceBobOrderStatus, cancelAliceBobOrder } from 'lib/apis/temple';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { T, TID } from 'lib/i18n';
 import { MAVEN_METADATA } from 'lib/metadata/defaults';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 
 import { useUpdatedOrderInfo } from '../hooks/useUpdatedOrderInfo';
@@ -19,7 +19,7 @@ import { useUpdatedOrderInfo } from '../hooks/useUpdatedOrderInfo';
 import { StepProps } from './step.props';
 
 export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrderInfo, setIsApiError }) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { publicKeyHash } = useAccount();
   const { copy } = useCopyToClipboard();
 
@@ -58,15 +58,15 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
     formAnalytics.trackSubmit();
     try {
       const transferParams = await toTransferParams(
-        tezos,
+        mavryk,
         'mav',
         MAVEN_METADATA,
         publicKeyHash,
         payCryptoAddress,
         fromAmount
       );
-      const { suggestedFeeMumav } = await tezos.estimate.transfer(transferParams);
-      await tezos.wallet.transfer({ ...transferParams, fee: suggestedFeeMumav }).send();
+      const { suggestedFeeMumav } = await mavryk.estimate.transfer(transferParams);
+      await mavryk.wallet.transfer({ ...transferParams, fee: suggestedFeeMumav }).send();
 
       formAnalytics.trackSubmitSuccess();
 

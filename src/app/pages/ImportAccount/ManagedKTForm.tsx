@@ -15,7 +15,7 @@ import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { getOneUserContracts, MvktRelatedContract, isKnownChainId } from 'lib/apis/mvkt';
 import { T, t } from 'lib/i18n';
-import { useRelevantAccounts, useTezos, useMavrykClient, useChainId } from 'lib/temple/front';
+import { useRelevantAccounts, useMavryk, useMavrykClient, useChainId } from 'lib/temple/front';
 import { isAddressValid, validateMavrykAddress } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -32,7 +32,7 @@ const getContractAddress = (contract: MvktRelatedContract) => contract.address;
 
 export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const accounts = useRelevantAccounts();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { importKTManagedAccount } = useMavrykClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.ManagedKT);
   const chainId = useChainId(true);
@@ -114,7 +114,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
       formAnalytics.trackSubmit();
       setError(null);
       try {
-        const contract = await tezos.contract.at(address);
+        const contract = await mavryk.contract.at(address);
         const owner = await contract.storage();
         if (typeof owner !== 'string') {
           throw new Error(t('invalidManagedContract'));
@@ -124,7 +124,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
           throw new Error(t('youAreNotContractManager'));
         }
 
-        const chain = await tezos.rpc.getChainId();
+        const chain = await mavryk.rpc.getChainId();
         await importKTManagedAccount(address, chain, owner);
 
         formAnalytics.trackSubmitSuccess();
@@ -138,7 +138,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         setError(getErrorMessage(err));
       }
     },
-    [formState, tezos, accounts, importKTManagedAccount, formAnalytics, chainId]
+    [formState, mavryk, accounts, importKTManagedAccount, formAnalytics, chainId]
   );
 
   const handleKnownContractSelect = useCallback(

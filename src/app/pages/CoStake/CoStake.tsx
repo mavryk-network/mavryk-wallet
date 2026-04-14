@@ -19,7 +19,7 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -46,7 +46,7 @@ export const CoStake: FC = () => {
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
@@ -67,7 +67,7 @@ export const CoStake: FC = () => {
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
-  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+  const [operation, setOperation] = useSafeState<any>(null, mavryk.checksum);
 
   useEffect(() => {
     if (account.type === TempleAccountType.WatchOnly) {
@@ -136,7 +136,7 @@ export const CoStake: FC = () => {
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
-        const op = await tezos.wallet
+        const op = await mavryk.wallet
           .stake({
             amount: Number(amount)
           })
@@ -156,7 +156,7 @@ export const CoStake: FC = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
+    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, mavryk.wallet]
   );
 
   return (

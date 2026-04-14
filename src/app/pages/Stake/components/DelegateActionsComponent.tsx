@@ -4,15 +4,15 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
-import { useAccount, useChainId, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useMavryk } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { CO_STAKE, FINALIZE_UNLOCK, MANAGE_STAKE, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
-import { useTokenAmount } from '../hooks/use-token-amount';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
+import { useTokenAmount } from '../hooks/use-token-amount';
 import { RedelegatePopup } from '../popups/Redelegate.popup';
 import { UnlockPopup } from '../popups/Unlock.popup';
 import { UnlockFisrtPopup } from '../popups/UnlockFirst.popup';
@@ -26,7 +26,7 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
   const [unstakeError, setUnstakeError] = useState<string | null>(null);
   const account = useAccount();
   const chainId = useChainId();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
   const { canRedelegate, canCostake, canUnlock, stakedBalance = 0, unstakedBalance = 0, myBakerPkh } = data ?? {};
   const delegateLabel = getDelegateLabel(data);
@@ -61,8 +61,8 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
 
     if (delegateLabel === FINALIZE_UNLOCK) {
       try {
-        const estmtn = await tezos.estimate.finalizeUnstake({});
-        const op = await tezos.wallet.finalizeUnstake({}).send();
+        const estmtn = await mavryk.estimate.finalizeUnstake({});
+        const op = await mavryk.wallet.finalizeUnstake({}).send();
 
         // create pending delegate operation
         const pendingOpObject = await buildPendingOperationObject({
@@ -102,8 +102,8 @@ export const DelegateActionsComponent: FC<{ activateReDelegation: () => void }> 
     delegateLabel,
     hasZeroStakingBalance,
     myBakerPkh,
-    tezos.estimate,
-    tezos.wallet,
+    mavryk.estimate,
+    mavryk.wallet,
     unstakedAmountDisplay
   ]);
 

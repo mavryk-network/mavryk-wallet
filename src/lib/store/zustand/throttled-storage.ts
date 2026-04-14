@@ -14,6 +14,19 @@ const THROTTLE_MS = 1000;
  */
 export function createThrottledPersistStorage<S>() {
   const pending = new Map<string, ReturnType<typeof setTimeout>>();
+  const pendingWrites = new Map<string, string>();
+
+  const flushPendingWrites = async () => {
+    for (const [name, serialized] of pendingWrites) {
+      await browserStorage.setItem(name, serialized);
+    }
+    pendingWrites.clear();
+  };
+
+  // Flush any pending throttled writes before the popup closes to prevent write-loss
+  window.addEventListener('beforeunload', () => {
+    void flushPendingWrites();
+  });
 
   return {
     getItem: async (name: string): Promise<StorageValue<S> | null> => {
@@ -25,8 +38,10 @@ export function createThrottledPersistStorage<S>() {
       const existing = pending.get(name);
       if (existing) clearTimeout(existing);
       const serialized = JSON.stringify(value);
+      pendingWrites.set(name, serialized);
       const timer = setTimeout(async () => {
         pending.delete(name);
+        pendingWrites.delete(name);
         await browserStorage.setItem(name, serialized);
       }, THROTTLE_MS);
       pending.set(name, timer);

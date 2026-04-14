@@ -18,7 +18,7 @@ import {
   useMavryk,
   useAccount,
   useChainId,
-  ReactiveTezosToolkit,
+  ReactiveMavrykToolkit,
   useChainIdLoading,
   useOnBlock
 } from 'lib/temple/front';
@@ -179,7 +179,7 @@ export function useBalance(assetSlug: string, address: string, networkRpc?: stri
 
 const buildMavrykToolKit = memoizee(
   (rpcUrl: string) => {
-    const t = new ReactiveTezosToolkit(loadFastRpcClient(rpcUrl), rpcUrl);
+    const t = new ReactiveMavrykToolkit(loadFastRpcClient(rpcUrl), rpcUrl);
     t.setPackerProvider(michelEncoder);
     return t;
   },

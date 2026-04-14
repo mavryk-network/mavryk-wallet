@@ -8,7 +8,7 @@ import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defa
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { feeKeys } from 'lib/query-keys';
-import { ReactiveTezosToolkit } from 'lib/temple/front';
+import { ReactiveMavrykToolkit } from 'lib/temple/front';
 import { hasManager, mumavToTz } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -23,7 +23,7 @@ export type FeeValueParams = {
   mode: StakeMode;
   balance: BigNumber; // MAV balance
   acc: TempleAccount;
-  tezos: ReactiveTezosToolkit;
+  tezos: ReactiveMavrykToolkit;
   feeValue?: number; // extra fee user adds
   amount: BigNumber; // stake/unstake amount entered
   decimals?: number; // MAV decimals (default 6)

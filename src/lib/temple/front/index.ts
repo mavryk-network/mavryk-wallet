@@ -5,7 +5,7 @@ export { request, assertResponse } from './client';
 export { useMavrykClient } from './use-mavryk-client';
 
 export {
-  ReactiveTezosToolkit,
+  ReactiveMavrykToolkit,
   useAllNetworks,
   useSetNetworkId,
   useNetwork,

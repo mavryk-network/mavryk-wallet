@@ -4,7 +4,7 @@ import { fetchGetAccountOperationByHash, GetOperationsTransactionsParams } from 
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { detectTokenStandard } from 'lib/assets/standards';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
-import { ReactiveTezosToolkit } from 'lib/temple/front';
+import { ReactiveMavrykToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { filterUnique } from 'lib/utils';
 
@@ -35,7 +35,7 @@ export default async function fetchUserHistory(
   account: TempleAccount,
   assetSlug: string | undefined,
   pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
+  tezos: ReactiveMavrykToolkit,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
@@ -105,7 +105,7 @@ async function fetchOperations(
   account: TempleAccount,
   assetSlug: string | undefined,
   pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
+  tezos: ReactiveMavrykToolkit,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ): Promise<MvktOperation[]> {

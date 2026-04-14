@@ -158,7 +158,7 @@ function useReadyTemple() {
     const rpc = network.rpcBaseURL;
     const pkh = account.type === TempleAccountType.ManagedKT ? account.owner : account.publicKeyHash;
 
-    const t = new ReactiveTezosToolkit(loadFastRpcClient(rpc), checksum);
+    const t = new ReactiveMavrykToolkit(loadFastRpcClient(rpc), checksum);
     t.setSignerProvider(createWebMavrykSigner(pkh));
     t.setWalletProvider(createWebMavrykWallet(pkh, rpc));
     t.setPackerProvider(michelEncoder);
@@ -289,7 +289,7 @@ export function useRelevantAccounts(withExtraTypes = true) {
   return useMemo(() => relevantAccounts, [relevantAccounts]);
 }
 
-export class ReactiveTezosToolkit extends MavrykToolkit {
+export class ReactiveMavrykToolkit extends MavrykToolkit {
   constructor(rpc: string | RpcClientInterface, public checksum: string) {
     super(rpc);
     this.addExtension(new Tzip16Module());

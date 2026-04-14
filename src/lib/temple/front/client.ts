@@ -320,10 +320,11 @@ const useTempleClientImpl = () => {
     []
   );
 
-  const getDAppPayload = useCallback(async (id: string) => {
+  const getDAppPayload = useCallback(async (id: string, token: string) => {
     const res = await request({
       type: TempleMessageType.DAppGetPayloadRequest,
-      id
+      id,
+      token
     });
     assertResponse(res.type === TempleMessageType.DAppGetPayloadResponse);
     return res.payload;

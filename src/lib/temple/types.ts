@@ -751,6 +751,7 @@ interface TemplePageResponse extends TempleMessageBase {
 interface TempleDAppGetPayloadRequest extends TempleMessageBase {
   type: TempleMessageType.DAppGetPayloadRequest;
   id: string;
+  token: string;
 }
 
 interface TempleDAppGetPayloadResponse extends TempleMessageBase {

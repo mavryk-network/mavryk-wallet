@@ -117,18 +117,22 @@ const ConfirmDAppForm: FC = () => {
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
   const loc = useLocation();
-  const id = useMemo(() => {
+  const { id, token } = useMemo(() => {
     const usp = new URLSearchParams(loc.search);
     const pageId = usp.get('id');
+    const pageToken = usp.get('token');
     if (!pageId) {
       throw new Error(t('notIdentified'));
     }
-    return pageId;
+    if (!pageToken) {
+      throw new Error(t('notIdentified'));
+    }
+    return { id: pageId, token: pageToken };
   }, [loc.search]);
 
   const { data } = useSuspenseQuery<TempleDAppPayload>({
     queryKey: dAppKeys.payload(id),
-    queryFn: () => getDAppPayload(id),
+    queryFn: () => getDAppPayload(id, token),
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false

@@ -471,9 +471,20 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     close();
   };
 
+  // One-time token: binds the confirm window that opened with this id to the port
+  // that first sends a matching DAppGetPayloadRequest. Prevents a second window
+  // (double-click, malicious iframe) from hijacking knownPort before the legitimate
+  // window registers.
+  let confirmToken: string | null = crypto.randomUUID();
+
   let knownPort: Runtime.Port | undefined;
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port) => {
     if (req?.type === TempleMessageType.DAppGetPayloadRequest && req.id === id) {
+      // Token must be present, match, and not already consumed.
+      if (!confirmToken || req.token !== confirmToken) return;
+      // Consume the token — cannot be reused by a second window.
+      confirmToken = null;
+
       knownPort = port;
 
       if (payload.type === 'confirm_operations') {
@@ -507,7 +518,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     }
   });
 
-  const confirmWin = await createConfirmationWindow(id);
+  const confirmWin = await createConfirmationWindow(id, confirmToken!);
 
   const closeWindow = async () => {
     if (confirmWin.id) {
@@ -574,7 +585,7 @@ function removeLastSlash(str: string) {
   return str.endsWith('/') ? str.slice(0, -1) : str;
 }
 
-async function createConfirmationWindow(confirmationId: string) {
+async function createConfirmationWindow(confirmationId: string, token: string) {
   const isWin = (await browser.runtime.getPlatformInfo()).os === 'win';
 
   const height = isWin ? CONFIRM_WINDOW_HEIGHT + 17 : CONFIRM_WINDOW_HEIGHT;
@@ -584,7 +595,7 @@ async function createConfirmationWindow(confirmationId: string) {
 
   const options: browser.Windows.CreateCreateDataType = {
     type: 'popup',
-    url: browser.runtime.getURL(`confirm.html#?id=${confirmationId}`),
+    url: browser.runtime.getURL(`confirm.html#?id=${confirmationId}&token=${token}`),
     width,
     height
   };

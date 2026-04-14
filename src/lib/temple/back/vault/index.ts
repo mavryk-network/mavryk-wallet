@@ -81,6 +81,36 @@ const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
 const libthemisWasmSrc = '/wasm/libthemis.wasm';
 
+const WALLET_NAME_MAX_LENGTH = 64;
+const CONTROL_CHAR_REGEX = /[\x00-\x1F\x7F]/;
+const CONTROL_CHAR_REPLACE_REGEX = /[\x00-\x1F\x7F]/g;
+
+/**
+ * Sanitize a wallet name read from storage (read-time path).
+ * Strips control characters and truncates to WALLET_NAME_MAX_LENGTH.
+ * Warns if truncation occurs so corrupted/legacy data stays visible in the UI.
+ */
+function sanitizeWalletName(name: string, walletId: string): string {
+  const stripped = name.replace(CONTROL_CHAR_REPLACE_REGEX, '');
+  if (stripped.length > WALLET_NAME_MAX_LENGTH) {
+    console.warn(`[Vault] Wallet name for id "${walletId}" exceeds ${WALLET_NAME_MAX_LENGTH} chars — truncating.`);
+    return stripped.slice(0, WALLET_NAME_MAX_LENGTH);
+  }
+  return stripped;
+}
+
+/**
+ * Validate a wallet name at write time. Throws a user-visible error on violation.
+ */
+function validateWalletName(name: string): void {
+  if (name.length > WALLET_NAME_MAX_LENGTH) {
+    throw new PublicError(`Wallet name must be ${WALLET_NAME_MAX_LENGTH} characters or fewer`);
+  }
+  if (CONTROL_CHAR_REGEX.test(name)) {
+    throw new PublicError('Wallet name contains invalid characters');
+  }
+}
+
 interface RemoveAccountEventPayload {
   publicKeyhash?: string;
 }
@@ -135,6 +165,7 @@ export class Vault {
 
       const walletId = nanoid();
       const walletName = await fetchMessage('hdWalletDefaultName', 'A');
+      validateWalletName(walletName);
       const initialAccount: TempleAccount = {
         id: nanoid(),
         type: TempleAccountType.HD,
@@ -418,7 +449,14 @@ export class Vault {
   }
 
   async fetchWalletsSpecs() {
-    return (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+    const raw = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+    // Sanitize names at read time to handle corrupted or pre-validation legacy data
+    return Object.fromEntries(
+      Object.entries(raw).map(([walletId, specs]) => [
+        walletId,
+        { ...specs, name: sanitizeWalletName(specs.name, walletId) }
+      ])
+    ) as StringRecord<WalletSpecs>;
   }
 
   async fetchSettings() {
@@ -546,6 +584,7 @@ export class Vault {
       const walletName = await fetchNewGroupName(walletsSpecs, i =>
         fetchMessage('hdWalletDefaultName', toExcelColumnName(i))
       );
+      validateWalletName(walletName);
       const accountToReplace = allAccounts.find(acc => {
         if (acc.type === TempleAccountType.HD) {
           return false;
@@ -742,6 +781,8 @@ export class Vault {
 
   async editGroupName(id: string, name: string) {
     return withError('Failed to edit group name', async () => {
+      validateWalletName(name);
+
       const walletsSpecs = await this.fetchWalletsSpecs();
 
       if (!(id in walletsSpecs)) {

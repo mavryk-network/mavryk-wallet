@@ -7,7 +7,7 @@ import { QRCode } from 'react-qr-svg';
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
@@ -20,7 +20,7 @@ type FormData = {
 };
 
 const SyncSettings: FC = () => {
-  const { generateSyncPayload } = useTempleClient();
+  const { generateSyncPayload } = useMavrykClient();
   const { popup } = useAppEnv();
 
   const formRef = useRef<HTMLFormElement>(null);

@@ -8,7 +8,7 @@ import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { ReactComponent as EditIcon } from 'app/icons/edit.svg';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useAccount } from 'lib/temple/front';
+import { useMavrykClient, useAccount } from 'lib/temple/front';
 import { useAlert } from 'lib/ui/dialog';
 import { getErrorMessage } from 'lib/utils/get-error-message';
 
@@ -25,7 +25,7 @@ const buttonClassNames = [
 ];
 
 const EditableTitle: FC = () => {
-  const { editAccountName } = useTempleClient();
+  const { editAccountName } = useMavrykClient();
   const account = useAccount();
   const customAlert = useAlert();
   const formAnalytics = useFormAnalytics('ChangeAccountName');

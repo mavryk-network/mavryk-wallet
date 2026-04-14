@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 
 // import { getKYCStatus } from 'lib/temple/back/vault/misc';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 
 export const useInitialKYC = (acc: TempleAccount) => {
-  const { updateAccountKYCStatus } = useTempleClient();
+  const { updateAccountKYCStatus } = useMavrykClient();
   useEffect(() => {
     (async function () {
       // run only ones for older accounts without KYC stored in their browser storage

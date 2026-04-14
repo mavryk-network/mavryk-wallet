@@ -16,7 +16,7 @@ import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
 import { uiStore } from 'lib/store/zustand/ui.store';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { PasswordValidation } from 'lib/ui/PasswordStrengthIndicator';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -42,7 +42,7 @@ export const useCreareOrRestorePassword = (
   seedPhrase: string,
   keystorePassword: string | undefined = undefined
 ) => {
-  const { registerWallet } = useTempleClient();
+  const { registerWallet } = useMavrykClient();
   const { popup } = useAppEnv();
   const { trackEvent } = useAnalytics();
 

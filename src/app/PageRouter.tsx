@@ -8,7 +8,7 @@ import { ImportWallet } from 'app/pages/NewWallet/ImportWallet';
 import Unlock from 'app/pages/Unlock/Unlock';
 import Welcome from 'app/pages/Welcome/Welcome';
 import { usePageRouterAnalytics } from 'lib/analytics';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletReady, useWalletLocked } from 'lib/temple/front';
 import * as Woozie from 'lib/woozie';
 
 import { WithDataLoading } from './WithDataLoading';
@@ -137,16 +137,17 @@ export const PageRouter: FC = () => {
   }, [trigger, pathname]);
 
   const appEnv = useAppEnv();
-  const temple = useTempleClient();
+  const ready = useWalletReady();
+  const locked = useWalletLocked();
 
   const ctx = useMemo<RouteContext>(
     () => ({
       popup: appEnv.popup,
       fullPage: appEnv.fullPage,
-      ready: temple.ready,
-      locked: temple.locked
+      ready,
+      locked
     }),
-    [appEnv.popup, appEnv.fullPage, temple.ready, temple.locked]
+    [appEnv.popup, appEnv.fullPage, ready, locked]
   );
 
   usePageRouterAnalytics(pathname, search, ctx.ready);

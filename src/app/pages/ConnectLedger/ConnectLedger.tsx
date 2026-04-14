@@ -16,7 +16,7 @@ import {
   useAllAccounts,
   useChainId,
   useSetAccountPkh,
-  useTempleClient,
+  useMavrykClient,
   validateDerivationPath
 } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
@@ -67,7 +67,7 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount } = useMavrykClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');

@@ -6,7 +6,7 @@ import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T } from 'lib/i18n';
-import { useAccount, useBlockExplorer, useTempleClient } from 'lib/temple/front';
+import { useAccount, useBlockExplorer, useWalletReady } from 'lib/temple/front';
 
 import { AccountPopupButton } from './Header/AccountPopup/AccountPopupButton';
 import { DAapsDropdownButton } from './Header/DAapsPopup/DAapsDropdownButton';
@@ -18,7 +18,7 @@ import { SettingButton, SettingsDropdown, SettingsPopup } from './Header/Setting
 import styles from './Header.module.css';
 
 const Header: FC = () => {
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
 
   return (
     <header className={classNames(styles['inner-shadow'], 'bg-primary-card')}>

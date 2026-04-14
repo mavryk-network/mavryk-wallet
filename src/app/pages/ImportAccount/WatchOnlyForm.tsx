@@ -8,7 +8,7 @@ import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import {
-  useTempleClient,
+  useMavrykClient,
   useTezos,
   useTezosDomainsClient,
   useAddressResolution,
@@ -28,7 +28,7 @@ interface WatchOnlyFormData {
 }
 
 export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
-  const { importWatchOnlyAccount } = useTempleClient();
+  const { importWatchOnlyAccount } = useMavrykClient();
   const tezos = useTezos();
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;

@@ -21,7 +21,7 @@ import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { T } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletConfirmation } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
@@ -167,7 +167,7 @@ export const Toolbar: FC<ToolbarProps> = ({
   const { fullPage } = useAppEnv();
   const { setOnboardingCompleted } = useOnboardingProgress();
   // hide back icon on the confirm operation screen
-  const { confirmation } = useTempleClient();
+  const confirmation = useWalletConfirmation();
   const displayed = Boolean(confirmation);
 
   const onStepBack = () => {

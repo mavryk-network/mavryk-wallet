@@ -12,7 +12,7 @@ import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
 import { dAppKeys } from 'lib/query-keys';
-import { useTempleClient, useStorage } from 'lib/temple/front';
+import { useMavrykClient, useStorage } from 'lib/temple/front';
 import { TempleSharedStorageKey, TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 import { useConfirm } from 'lib/ui/dialog';
 
@@ -24,7 +24,7 @@ type DAppActions = {
 const getDAppKey = (entry: DAppEntry) => entry[0];
 
 const DAppSettings: FC = () => {
-  const { getAllDAppSessions, removeDAppSession, removeAllDAppSessions } = useTempleClient();
+  const { getAllDAppSessions, removeDAppSession, removeAllDAppSessions } = useMavrykClient();
   const confirm = useConfirm();
   const { popup } = useAppEnv();
 

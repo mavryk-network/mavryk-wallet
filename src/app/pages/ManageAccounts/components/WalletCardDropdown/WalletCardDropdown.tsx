@@ -9,7 +9,7 @@ import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { ACCOUNT_EXISTS_SHOWN_WARNINGS_STORAGE_KEY } from 'lib/constants';
-import { useStorage, useTempleClient } from 'lib/temple/front';
+import { useStorage, useMavrykClient } from 'lib/temple/front';
 import { useHDGroups } from 'lib/temple/front/ready';
 import { DisplayedGroup, TempleAccount } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
@@ -28,7 +28,7 @@ export const WalletCardDropdown: FC<WalletCardDropdownProps> = ({
   handleRenameClick
 }) => {
   const { id: walletId } = group;
-  const { createAccount, findFreeHdIndex } = useTempleClient();
+  const { createAccount, findFreeHdIndex } = useMavrykClient();
   const hdGroups = useHDGroups();
   const customAlert = useAlert();
 

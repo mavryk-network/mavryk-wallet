@@ -19,7 +19,7 @@ import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { dAppKeys } from 'lib/query-keys';
-import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
+import { useMavrykClient, useWalletReady, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
 import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -39,7 +39,7 @@ const DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES = 30000;
 const DEFAULT_STORAGE_WHEN_NO_ESTIMATES = 500;
 
 const ConfirmPage: FC = () => {
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
 
   if (ready)
     return (
@@ -108,7 +108,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
 export default ConfirmPage;
 
 const ConfirmDAppForm: FC = () => {
-  const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useTempleClient();
+  const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useMavrykClient();
   const allAccounts = useRelevantAccounts(false);
   const account = useAccount();
 

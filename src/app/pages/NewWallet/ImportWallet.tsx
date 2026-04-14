@@ -6,7 +6,7 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { TID, t } from 'lib/i18n';
 
-import { useTempleClient } from '../../../lib/temple/front';
+import { useWalletLocked, useWalletReady } from '../../../lib/temple/front';
 import ImportTabSwitcher from '../../atoms/ImportTabSwitcher';
 
 import { ImportFromKeystoreFile } from './import/ImportFromKeystoreFile/ImportFromKeystoreFile';
@@ -34,7 +34,8 @@ const importWalletOptions: {
 ];
 
 export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', ownMnemonic }) => {
-  const { locked, ready } = useTempleClient();
+  const locked = useWalletLocked();
+  const ready = useWalletReady();
   const { fullPage } = useAppEnv();
 
   const [seedPhrase, setSeedPhrase] = useState('');

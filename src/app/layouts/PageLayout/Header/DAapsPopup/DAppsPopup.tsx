@@ -11,7 +11,7 @@ import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
 import { dAppKeys } from 'lib/query-keys';
-import { useRelevantAccounts, useTempleClient } from 'lib/temple/front';
+import { useRelevantAccounts, useMavrykClient } from 'lib/temple/front';
 import { TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 
 import { areUrlsContainSameHost, getActiveTabUrl } from './utils/activeTab';
@@ -28,7 +28,7 @@ type DappsContextType = {
 const dappsContext = createContext<DappsContextType>(undefined!);
 
 export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
-  const { getAllDAppSessions, removeDAppSession } = useTempleClient();
+  const { getAllDAppSessions, removeDAppSession } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
   const queryClient = useQueryClient();
 

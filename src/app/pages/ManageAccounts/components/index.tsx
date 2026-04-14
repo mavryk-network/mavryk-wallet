@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { DisplayedGroup, TempleAccount } from 'lib/temple/types';
 import { useAlert } from 'lib/ui/dialog';
 
@@ -27,7 +27,7 @@ enum AccountsManagementModal {
 }
 
 export const Accountsmanagement: FC<AccountsmanagementProps> = ({ group }) => {
-  const { createAccount } = useTempleClient();
+  const { createAccount } = useMavrykClient();
   const customAlert = useAlert();
 
   const [selectedGroup, setSelectedGroup] = useState<DisplayedGroup | null>(null);

@@ -8,7 +8,7 @@ import { useAppEnv } from 'app/env';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { T, t } from 'lib/i18n';
-import { useAccount, useRelevantAccounts, useTempleClient } from 'lib/temple/front';
+import { useAccount, useRelevantAccounts, useMavrykClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
@@ -29,7 +29,7 @@ type RemoveAccountPopupProps = {
 };
 
 export const RemoveAccountPopup: FC<RemoveAccountPopupProps> = ({ opened, close, accountId, onRemoved }) => {
-  const { removeAccount } = useTempleClient();
+  const { removeAccount } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const { popup } = useAppEnv();

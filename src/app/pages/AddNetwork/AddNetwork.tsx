@@ -8,7 +8,8 @@ import { URL_PATTERN } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
-import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
+import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useMavrykClient } from 'lib/temple/front';
+import { useWalletNetworks } from 'lib/store/zustand/wallet.store';
 import { loadChainId } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleChainId } from 'lib/temple/types';
@@ -30,7 +31,8 @@ interface NetworkFormData {
 const SUBMIT_ERROR_TYPE = 'submit-error';
 
 export const AddNetworkScreen: FC = () => {
-  const { updateSettings, defaultNetworks } = useTempleClient();
+  const defaultNetworks = useWalletNetworks();
+  const { updateSettings } = useMavrykClient();
   const { customNetworks = [] } = useSettings();
   const { setExplorerId } = useBlockExplorer();
   const setNetworkId = useSetNetworkId();

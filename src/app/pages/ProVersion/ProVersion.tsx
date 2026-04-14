@@ -9,7 +9,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
-import { useAccount, useChainId, useNetwork, useTempleClient } from 'lib/temple/front';
+import { useAccount, useChainId, useNetwork, useMavrykClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { navigate } from 'lib/woozie';
 
@@ -87,7 +87,7 @@ type FormData = {
 };
 
 const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }) => {
-  const { updateAccountKYCStatus } = useTempleClient();
+  const { updateAccountKYCStatus } = useMavrykClient();
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
   const { publicKeyHash } = useAccount();

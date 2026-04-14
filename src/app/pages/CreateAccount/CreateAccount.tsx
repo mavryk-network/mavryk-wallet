@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
+import { useMavrykClient, useWalletsSpecs, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
 import { useAccount } from 'lib/temple/front/ready';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -27,7 +27,8 @@ type FormData = {
 const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const CreateAccount: FC = () => {
-  const { createAccount, walletsSpecs } = useTempleClient();
+  const walletsSpecs = useWalletsSpecs();
+  const { createAccount } = useMavrykClient();
   const { popup } = useAppEnv();
   const account = useAccount();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : undefined;

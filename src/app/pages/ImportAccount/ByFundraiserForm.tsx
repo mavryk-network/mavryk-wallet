@@ -9,7 +9,7 @@ import { useAppEnv } from 'app/env';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { t } from 'lib/i18n';
-import { useChainId, useTempleClient } from 'lib/temple/front';
+import { useChainId, useMavrykClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
 
@@ -24,7 +24,7 @@ interface ByFundraiserFormData {
 }
 
 export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
-  const { importFundraiserAccount } = useTempleClient();
+  const { importFundraiserAccount } = useMavrykClient();
   const { register, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
   const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);

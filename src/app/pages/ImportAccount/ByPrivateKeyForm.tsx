@@ -7,7 +7,7 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useChainId, useTempleClient } from 'lib/temple/front';
+import { useChainId, useMavrykClient } from 'lib/temple/front';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
@@ -22,7 +22,7 @@ interface ByPrivateKeyFormData {
 
 export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { importAccount } = useTempleClient();
+  const { importAccount } = useMavrykClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
   const chainId = useChainId();
 

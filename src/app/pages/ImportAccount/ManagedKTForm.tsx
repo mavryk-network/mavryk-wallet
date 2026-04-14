@@ -15,7 +15,7 @@ import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { getOneUserContracts, MvktRelatedContract, isKnownChainId } from 'lib/apis/mvkt';
 import { T, t } from 'lib/i18n';
-import { useRelevantAccounts, useTezos, useTempleClient, useChainId } from 'lib/temple/front';
+import { useRelevantAccounts, useTezos, useMavrykClient, useChainId } from 'lib/temple/front';
 import { isAddressValid } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -33,7 +33,7 @@ const getContractAddress = (contract: MvktRelatedContract) => contract.address;
 export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const accounts = useRelevantAccounts();
   const tezos = useTezos();
-  const { importKTManagedAccount } = useTempleClient();
+  const { importKTManagedAccount } = useMavrykClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.ManagedKT);
   const chainId = useChainId(true);
   const { popup } = useAppEnv();

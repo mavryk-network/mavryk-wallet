@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react';
 
 import { EditNamePopup } from 'app/templates/EditNamePopup';
 import { t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { DisplayedGroup } from 'lib/temple/types';
 
 type EditWalletGroupNamePopupProps = {
@@ -13,7 +13,7 @@ type EditWalletGroupNamePopupProps = {
 
 export const EditWalletGroupNamePopup: FC<EditWalletGroupNamePopupProps> = ({ opened, close, group }) => {
   const { name: walletName, id: walletId } = group;
-  const { editHdGroupName } = useTempleClient();
+  const { editHdGroupName } = useMavrykClient();
 
   const handleSave = useCallback(
     async (newName: string) => {

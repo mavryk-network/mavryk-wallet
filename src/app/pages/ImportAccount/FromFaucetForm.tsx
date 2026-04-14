@@ -7,7 +7,7 @@ import { Alert, FileInputProps, FileInput, FormField, FormSubmitButton } from 'a
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useTempleClient, useSetAccountPkh, useTezos, useChainId, activateAccount } from 'lib/temple/front';
+import { useMavrykClient, useSetAccountPkh, useTezos, useChainId, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -31,7 +31,7 @@ interface FaucetTextInputFormData {
 }
 
 export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
-  const { importFundraiserAccount } = useTempleClient();
+  const { importFundraiserAccount } = useMavrykClient();
   const { popup } = useAppEnv();
   const setAccountPkh = useSetAccountPkh();
   const tezos = useTezos();

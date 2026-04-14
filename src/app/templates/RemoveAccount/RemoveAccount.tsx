@@ -7,7 +7,7 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
+import { useMavrykClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
@@ -22,7 +22,7 @@ type FormData = {
 };
 
 const RemoveAccount: FC = () => {
-  const { removeAccount } = useTempleClient();
+  const { removeAccount } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const { popup } = useAppEnv();

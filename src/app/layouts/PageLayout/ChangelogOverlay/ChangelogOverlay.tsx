@@ -7,7 +7,7 @@ import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { APP_VERSION } from 'lib/env';
 import { T } from 'lib/i18n';
-import { useTempleClient, useStorage } from 'lib/temple/front';
+import { useWalletReady, useStorage } from 'lib/temple/front';
 
 import { changelogData, ChangelogItem } from './ChangelogOverlay.data';
 import s from './ChangelogOverlay.module.css';
@@ -15,7 +15,7 @@ import { ChangelogOverlaySelectors } from './ChangelogOverlay.selectors';
 
 export const ChangelogOverlay: FC = () => {
   const { popup } = useAppEnv();
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
   const [lastShownVersion, setLastShownVersion] = useStorage(`last_shown_changelog_version`, APP_VERSION);
 
   const handleContinue = () => {

@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { EditNamePopup } from 'app/templates/EditNamePopup';
 import { t } from 'lib/i18n';
-import { useContactsActions, useTempleClient } from 'lib/temple/front';
+import { useContactsActions, useMavrykClient } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 
 import { EditableTitleSelectors } from '../editAccount.selectors';
@@ -24,7 +24,7 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupProps> = ({
   accToChange,
   name
 }) => {
-  const { editAccountName } = useTempleClient();
+  const { editAccountName } = useMavrykClient();
   const { editContact } = useContactsActions();
 
   const accountName = useMemo(() => (accToChange ? accToChange.name : name), [accToChange, name]);

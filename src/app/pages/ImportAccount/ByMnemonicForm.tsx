@@ -10,7 +10,7 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useChainId, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import { useChainId, useMavrykClient, validateDerivationPath } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { getErrorMessage } from 'lib/utils/get-error-message';
 
@@ -37,7 +37,7 @@ interface ByMnemonicFormData {
 
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { createOrImportWallet } = useTempleClient();
+  const { createOrImportWallet } = useMavrykClient();
   useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 

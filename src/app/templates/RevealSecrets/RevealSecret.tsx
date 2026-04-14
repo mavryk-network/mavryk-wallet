@@ -8,7 +8,7 @@ import { getAccountBadgeTitle } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import { useAccount, useMavrykClient, useWalletsSpecs } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -28,7 +28,8 @@ type RevealSecretProps = {
 };
 
 const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
-  const { revealPrivateKey, revealMnemonic, walletsSpecs } = useTempleClient();
+  const walletsSpecs = useWalletsSpecs();
+  const { revealPrivateKey, revealMnemonic } = useMavrykClient();
   const account = useAccount();
   const { popup } = useAppEnv();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];

@@ -6,7 +6,7 @@ import { FormField, FormSubmitButton, PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import { PASSWORD_PATTERN } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletReady } from 'lib/temple/front';
 import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
 import { ImportPartialFormCheckboxes } from '../import/importPartialFormCheckboxes/ImportPartialFormCheckboxes';
@@ -29,7 +29,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   submitBtnLabel
 }) => {
   const { fullPage } = useAppEnv();
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
   const [focused, setFocused] = useState(false);
   const {
     control,

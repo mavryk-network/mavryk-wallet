@@ -6,10 +6,11 @@ import DocBg from 'app/a11y/DocBg';
 import { useAppEnv } from 'app/env';
 import styles from 'app/layouts/pageLayout.module.css';
 import InternalConfirmation from 'app/templates/InternalConfirmation';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient, useWalletConfirmation } from 'lib/temple/front';
 
 const ConfirmationOverlay: FC = () => {
-  const { confirmation, resetConfirmation, confirmInternal } = useTempleClient();
+  const confirmation = useWalletConfirmation();
+  const { resetConfirmation, confirmInternal } = useMavrykClient();
   const { popup } = useAppEnv();
   const displayed = Boolean(confirmation);
 

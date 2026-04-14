@@ -9,11 +9,11 @@ import { useActivePromotion, useIsNewPromotionAvailable } from 'app/hooks/use-ad
 import ContentContainer from 'app/layouts/ContentContainer';
 import { T } from 'lib/i18n/react';
 import { uiStore } from 'lib/store/zustand/ui.store';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletReady } from 'lib/temple/front';
 
 export const AdvertisingOverlay: FC = () => {
   const { popup } = useAppEnv();
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
   const activePromotion = useActivePromotion();
   const isNewPromotionAvailable = useIsNewPromotionAvailable();
 

@@ -41,6 +41,10 @@ function isNetworkDependentKey(queryKey: readonly unknown[]): boolean {
  *           at which point the SWR sync becomes unnecessary and can be removed.
  *
  * Call `startIntercomSync(intercom)` once at app startup.
+ *
+ * startIntercomSync is intentionally called at module level.
+ * It must run before React Suspense to prevent a deadlock where
+ * useWalletSuspense() suspends before any useEffect can trigger the initial state fetch.
  */
 export function startIntercomSync(intercom: IntercomClient) {
   // Fetch initial state from background

@@ -117,9 +117,10 @@ function createAssetActions(
         const updated = { ...existing };
 
         if (removeStale) {
+          const slugSet = new Set(slugs);
           for (const [slug, stored] of Object.entries(updated)) {
             if (stored.manual || stored.status !== 'idle') continue;
-            if (!slugs.includes(slug)) delete updated[slug];
+            if (!slugSet.has(slug)) delete updated[slug];
           }
         }
 
@@ -204,21 +205,12 @@ export const assetsStore = createStore<AssetsStore>()(
         setWhitelistLoading: loading => set({ mainnetWhitelistLoading: loading }),
 
         loadWhitelistSuccess: tokens =>
-          set(state => {
-            const seen = new Set<string>(state.mainnetWhitelist);
-            const updatedWhitelist = [...state.mainnetWhitelist];
-
-            for (const token of tokens) {
-              if (token.contractAddress === MAV_TOKEN_SLUG) continue;
-              const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
-              if (!seen.has(slug)) {
-                seen.add(slug);
-                updatedWhitelist.push(slug);
-              }
-            }
-
-            return { mainnetWhitelist: updatedWhitelist, mainnetWhitelistLoading: false };
-          }),
+          set(() => ({
+            mainnetWhitelist: tokens
+              .filter(t => t.contractAddress !== MAV_TOKEN_SLUG)
+              .map(t => toTokenSlug(t.contractAddress, t.fa2TokenId)),
+            mainnetWhitelistLoading: false,
+          })),
 
         // --- Scamlist ---
         setScamlistLoading: loading => set({ mainnetScamlistLoading: loading }),

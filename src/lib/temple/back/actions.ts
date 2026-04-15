@@ -10,6 +10,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
+import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
@@ -69,7 +70,7 @@ const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}
 
 const AUTODECLINE_AFTER = 60_000;
 const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
-const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
+const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
 
 const enqueueDApp = createQueue();

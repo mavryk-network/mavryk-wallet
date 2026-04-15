@@ -70,7 +70,7 @@ const BalanceInfo: FC = () => {
           type="button"
           onClick={togglePrivacyMode}
           className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
-          title="Hide balances on home screen"
+          title={privacyMode ? 'Show balances on home screen' : 'Hide balances on home screen'}
         >
           {privacyMode ? <EyeClosedBoldIcon className="w-4 h-auto" /> : <EyeOpenBoldIcon className="w-4 h-auto" />}
         </button>

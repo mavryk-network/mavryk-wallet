@@ -3,6 +3,7 @@ import React, { memo, useMemo } from 'react';
 import classNames from 'clsx';
 
 import { DelegatePeriodBanner } from 'app/atoms/AddBanner';
+import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
 import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
@@ -17,8 +18,6 @@ import { ZERO } from 'lib/utils/numbers';
 import { AssetsSelectors } from '../../Assets.selectors';
 import { upgradeBalanceWithStakingBalance } from '../../MainBanner/use-total-balance';
 import styles from '../Tokens.module.css';
-
-import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
 
 import { CryptoBalance, FiatBalance } from './Balance';
 
@@ -149,7 +148,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <PrivacyAmount className="contents">
+            <PrivacyAmount>
               <FiatBalance
                 assetSlug={assetSlug}
                 value={balanceToDisplay ?? ZERO}

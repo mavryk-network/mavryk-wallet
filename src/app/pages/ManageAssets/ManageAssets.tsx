@@ -6,6 +6,7 @@ import classNames from 'clsx';
 
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
+import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
@@ -27,8 +28,6 @@ import { useTokensMetadataLoadingSelector } from 'lib/store/zustand/metadata.sto
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useConfirm } from 'lib/ui/dialog';
 import useTippy from 'lib/ui/useTippy';
-
-import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance';
 
 import { useAssetsListingLogic } from './hooks/useAssetsListingLogic';
 import { useAssetsTokens } from './hooks/useAssetsTokens';
@@ -295,7 +294,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
       {sortedAssets.length > 0 ? (
         <div
           ref={scrollContainerRef}
-          className="w-full overflow-y-auto rounded-md text-white text-base-plus"
+          className="w-full overflow-y-auto rounded-md text-white"
           style={{ maxHeight: popup ? '60vh' : '70vh' }}
         >
           <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
@@ -384,7 +383,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
           <div
-            className="text-base-plus text-white truncate w-full"
+            className="text-sm text-white truncate w-full"
             style={{ marginBottom: '0.125rem', lineHeight: '19px' }}
           >
             {getAssetName(metadata)}
@@ -404,13 +403,10 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
         </div>
       </div>
       <div className="flex-1" />
-      <div
-        className={classNames(
-          'flex items-center gap-1 p-1 rounded-full text-white text-sm flex-wrap',
-          'transition ease-in-out duration-200'
-        )}
-      >
-        <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
+      <div className="text-xs text-white text-right truncate ml-2 flex-shrink-0 max-w-[40%]">
+        <Money smallFractionFont={false} testIDProperties={{ assetSlug }}>
+          {balance}
+        </Money>
       </div>
     </label>
   );

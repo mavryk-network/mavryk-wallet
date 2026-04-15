@@ -1,3 +1,5 @@
+require('@testing-library/jest-dom');
+
 const { Crypto, CryptoKey } = require('@peculiar/webcrypto');
 
 const cryptoInstance = new Crypto();

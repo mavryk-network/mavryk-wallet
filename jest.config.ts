@@ -7,7 +7,8 @@ const config = {
   coverageProvider: 'v8',
   moduleNameMapper: {
     '^app/(.*)$': '<rootDir>/src/app/$1',
-    '^lib/(.*)$': '<rootDir>/src/lib/$1'
+    '^lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^nanoid$': '<rootDir>/node_modules/nanoid/index.cjs'
   },
   testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/', '\\.claude/'],

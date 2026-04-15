@@ -150,14 +150,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            {!privacyMode && (
+            <div className={classNames(privacyMode && 'invisible')}>
               <FiatBalance
                 assetSlug={assetSlug}
                 value={balanceToDisplay ?? ZERO}
                 testID={AssetsSelectors.assetItemFiatBalanceButton}
                 testIDProperties={{ assetSlug }}
               />
-            )}
+            </div>
             {additionalDelegateBlock?.map((row, i) => (
               <div key={i} className={classNames(i === 0 && 'mt-1')}>
                 {row.Column2}

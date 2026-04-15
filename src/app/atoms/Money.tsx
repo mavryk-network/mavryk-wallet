@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import { AnalyticsEventCategory, setTestID, TestIDProps, useAnalytics } from 'lib/analytics';
-import { getNumberSymbols, toLocalFixed, toLocalFormat, toShortened, t } from 'lib/i18n';
+import { getNumberSymbols, toLocalFormat, toShortened, t } from 'lib/i18n';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 import useTippy, { TippyInstance, UseTippyOptions } from 'lib/ui/useTippy';
 
@@ -238,7 +238,7 @@ const FullAmountTippy: FC<FullAmountTippyProps> = ({
   testIDProperties,
   ...rest
 }) => {
-  const fullAmountStr = useMemo(() => toLocalFixed(fullAmount), [fullAmount]);
+  const fullAmountStr = useMemo(() => toLocalFormat(fullAmount, {}), [fullAmount]);
 
   const { fieldRef, copy, copied, setCopied } = useCopyToClipboard();
 

@@ -142,8 +142,8 @@ const EditableTitle: FC = () => {
       ) : (
         <>
           <Name
-            className="pl-1 text-gray-700 text-center text-gray-910"
-            style={{ maxWidth: '24rem', fontSize: 23 }}
+            className="text-2xl pl-1 text-gray-700 text-center text-gray-910"
+            style={{ maxWidth: '24rem' }}
             testID={HomeSelectors.accountNameText}
           >
             {account.name}

@@ -49,13 +49,13 @@ export const ChangelogOverlay: FC = () => {
           }}
         >
           <div className={classNames('flex flex-col max-w-sm mx-auto w-full')}>
-            <p className="text-xl font-aeonik font-semibold" style={{ fontSize: 23, color: '#ED8936' }}>
+            <p className="text-2xl font-medium font-aeonik" style={{ color: '#ED8936' }}>
               <T id="changelogTitle" />
             </p>
 
             {filteredChangelog.map(({ version, data }) => (
               <React.Fragment key={version}>
-                <p className="mb-5 mt-8 font-aeonik" style={{ fontSize: 16 }}>
+                <p className="text-base mb-5 mt-8 font-aeonik">
                   <T id="update" /> {version}
                 </p>
 
@@ -80,7 +80,7 @@ export const ChangelogOverlay: FC = () => {
             >
               <Button
                 className={classNames(
-                  'mx-auto py-2 text-white font-aeonik rounded font-semibold uppercase',
+                  'mx-auto py-2 text-white font-aeonik rounded font-medium uppercase',
                   s.overlay_ok_button
                 )}
                 onClick={handleContinue}

@@ -2,7 +2,7 @@ import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { HashChip, Identicon, Money } from 'app/atoms';
+import { BakerLogo, HashChip, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ArrowDownSvg } from 'app/icons/arrow-down-v2.svg';
 import { AssetIcon } from 'app/templates/AssetIcon';
@@ -10,7 +10,7 @@ import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, TID } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { Baker, useKnownBaker, useTezos } from 'lib/temple/front';
+import { Baker, useKnownBaker, useMavryk } from 'lib/temple/front';
 import { DEFAULT_CYCLE_DURATION_MS } from 'lib/temple/front/baking/const';
 import { getDelegationWaitTimeFromNow, getOneCycleinMs } from 'lib/temple/front/baking/utils';
 
@@ -140,7 +140,7 @@ export const DelegationOperation: FC<DelegationOperationProps> = props => {
           showIcon={false}
           key="hash"
           className="ml-2 mr-1 bg-primary-card px-1 rounded text-xs"
-          style={{ paddingBlock: 3, fontSize: 12 }}
+          style={{ paddingBlock: 3 }}
         />
         <OpenInExplorerChip hash={hash} small />
       </div>
@@ -170,7 +170,7 @@ type RetDelagtionTemplateProps = DefaultDelagtionTemplateProps & {
 };
 
 const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, validatorAddress, popup }) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const [daysData, setDaysData] = useState<{ activeForXDays: string | null; activeInYDays: string | null }>(() => ({
     activeForXDays: null,
@@ -185,19 +185,19 @@ const ReDelegationTemplate: FC<RetDelagtionTemplateProps> = ({ baker, oldBaker, 
         let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
 
         try {
-          const constants = await tezos.rpc.getConstants();
+          const constants = await mavryk.rpc.getConstants();
           cycleDurationMs = getOneCycleinMs(constants);
           const days = getDelegationWaitTimeFromNow(cycleDurationMs);
 
           setDaysData(prev => ({ ...prev, activeInYDays: days, activeForXDays: days }));
         } catch {
-          console.log('Error getting RPC default constants');
+          console.error('Error getting RPC default constants');
         }
       } catch (err) {
         console.error('Error getting delegation time');
       }
     })();
-  }, [tezos.rpc]);
+  }, [mavryk.rpc]);
 
   return (
     <section className="bg-primary-card rounded-2xl-plus p-3 w-full mt-3">
@@ -238,23 +238,7 @@ const BakerDataSection: FC<DefaultDelagtionTemplateProps & { labelChild?: ReactN
     <div className="flex items-center">
       {baker ? (
         <div className="flex items-center gap-2">
-          {baker.logo ? (
-            <>
-              {typeof baker.logo === 'string' ? (
-                <img
-                  src={baker.logo}
-                  alt={baker.address}
-                  className="flex-shrink-0 bg-white rounded-full"
-                  style={{ width: 24, height: 24 }}
-                />
-              ) : (
-                // @ts-expect-error // hardcoded svg logos for the time being
-                <baker.logo className="flex-shrink-0 bg-transparent rounded-full" style={{ width: 24, height: 24 }} />
-              )}
-            </>
-          ) : (
-            <Identicon type="bottts" hash={validatorAddress ?? ''} size={24} className="rounded-full" />
-          )}
+          <BakerLogo logo={baker.logo} address={validatorAddress ?? baker.address} size={24} />
 
           <span>
             {baker?.name ?? (

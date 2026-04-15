@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
 
 import { stringToUInt8Array } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { getLedgerTransportType } from '../helpers';
 import type { TempleLedgerSigner } from '../signer';
@@ -60,10 +61,10 @@ const buildSignerCallResponse = async (
     try {
       const value = await callSignerMethod(signer, message);
       return { type: 'success', value };
-    } catch (err: any) {
-      return { type: 'error', message: err.message };
+    } catch (err: unknown) {
+      return { type: 'error', message: getErrorMessage(err) };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
     return { type: 'error', message: `Error, when creating a signer` };
   }

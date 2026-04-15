@@ -1,10 +1,7 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 
-import { dispatch } from 'app/store';
-import { loadTokensScamlistActions } from 'app/store/assets/actions';
-import { loadSwapDexesAction, loadSwapTokensAction } from 'app/store/swap/actions';
+import { useScamlistQuery } from 'lib/assets/use-assets-query';
 
-import { useAdvertisingLoading } from './hooks/use-advertising.hook';
 import { useAssetsLoading } from './hooks/use-assets-loading';
 import { useAssetsMigrations } from './hooks/use-assets-migrations';
 import { useBalancesLoading } from './hooks/use-balances-loading';
@@ -20,7 +17,8 @@ import { useUserIdSync } from './hooks/use-user-id-sync';
 export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
   useAssetsMigrations();
 
-  useEffect(() => void dispatch(loadTokensScamlistActions.submit()), []);
+  // Scamlist is loaded once on mount via TanStack Query (replaces Redux epic dispatch)
+  useScamlistQuery();
 
   useAssetsLoading();
   useMetadataLoading();
@@ -30,13 +28,7 @@ export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
   useRWAsDetailsLoading();
 
   useLongRefreshLoading();
-  useAdvertisingLoading();
   useTokensApyLoading();
-
-  useEffect(() => {
-    dispatch(loadSwapDexesAction.submit());
-    dispatch(loadSwapTokensAction.submit());
-  }, []);
 
   useStorageAnalytics();
   useUserIdSync();

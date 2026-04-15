@@ -1,4 +1,4 @@
-import { createStore, createEvent } from 'effector';
+import { createStore } from 'zustand/vanilla';
 
 import { NETWORKS } from 'lib/temple/networks';
 import { TempleState, TempleStatus, TempleAccount, TempleSettings } from 'lib/temple/types';
@@ -24,69 +24,65 @@ export function toFront({ status, accounts, networks, settings }: StoreState): T
 }
 
 /**
- * Events
- */
-
-export const inited = createEvent<boolean>('Inited');
-
-export const locked = createEvent('Locked');
-
-export const unlocked = createEvent<{
-  vault: Vault;
-  accounts: TempleAccount[];
-  settings: TempleSettings;
-}>('Unlocked');
-
-export const accountsUpdated = createEvent<TempleAccount[]>('Accounts updated');
-
-export const settingsUpdated = createEvent<TempleSettings>('Settings updated');
-
-/**
  * Store
  */
 
-export const store = createStore<StoreState>({
+export const store = createStore<StoreState>(() => ({
   inited: false,
   vault: null,
   status: TempleStatus.Idle,
   accounts: [],
   networks: [],
   settings: null
-})
-  .on(inited, (state, vaultExist) => ({
-    ...state,
+}));
+
+/**
+ * Actions (replace Effector events)
+ */
+
+export function inited(vaultExist: boolean) {
+  store.setState({
     inited: true,
     status: vaultExist ? TempleStatus.Locked : TempleStatus.Idle,
     networks: NETWORKS
-  }))
-  .on(locked, () => ({
-    // Attention!
-    // Security stuff!
-    // Don't merge new state to exisitng!
-    // Build a new state from scratch
-    // Reset all properties!
-    inited: true,
-    vault: null,
-    status: TempleStatus.Locked,
-    accounts: [],
-    networks: NETWORKS,
-    settings: null
-  }))
-  .on(unlocked, (state, { vault, accounts, settings }) => ({
-    ...state,
-    vault,
+  });
+}
+
+export function locked() {
+  // Attention!
+  // Security stuff!
+  // Don't merge new state to existing!
+  // Build a new state from scratch
+  // Reset all properties!
+  store.setState(
+    {
+      inited: true,
+      vault: null,
+      status: TempleStatus.Locked,
+      accounts: [],
+      networks: NETWORKS,
+      settings: null
+    },
+    true
+  );
+}
+
+export function unlocked(payload: { vault: Vault; accounts: TempleAccount[]; settings: TempleSettings }) {
+  store.setState({
+    vault: payload.vault,
     status: TempleStatus.Ready,
-    accounts,
-    settings
-  }))
-  .on(accountsUpdated, (state, accounts) => ({
-    ...state,
-    accounts
-  }))
-  .on(settingsUpdated, (state, settings) => ({
-    ...state,
-    settings
-  }));
+    accounts: payload.accounts,
+    settings: payload.settings
+  });
+}
+
+export function accountsUpdated(accounts: TempleAccount[]) {
+  store.setState({ accounts });
+}
+
+export function settingsUpdated(settings: TempleSettings) {
+  store.setState({ settings });
+}
 
 /**
  * Helpers

@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { DelegateResponse } from '@mavrykdynamics/webmavryk-rpc';
 import classNames from 'clsx';
 
-import { HashChip, Identicon } from 'app/atoms';
+import { BakerLogo, HashChip } from 'app/atoms';
 import { AlertWithAction } from 'app/atoms/AlertWithAction';
 import { Button } from 'app/atoms/Button';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
@@ -48,7 +48,7 @@ export const DelegateTezosTag: FC = () => {
     () => (
       <Button
         onClick={handleTagClick}
-        className={classNames('inline-flex items-center px-1.5 ml-2 py-1', modStyles['apyTag'])}
+        className={classNames('text-xs inline-flex items-center px-1.5 ml-2 py-1', modStyles['apyTag'])}
         testID={AssetsSelectors.assetItemApyButton}
       >
         APY: 5.6%
@@ -67,7 +67,7 @@ export const StakeTezosTag: FC = () => {
   const { trackEvent } = useAnalytics();
 
   const handleTagClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
       trackEvent(HomeSelectors.delegateButton, AnalyticsEventCategory.ButtonPress);
@@ -96,7 +96,7 @@ export const StakeTezosTag: FC = () => {
 
 type BakerBannerProps = {
   myBakerPkh: DelegateResponse | undefined;
-  handleTagClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleTagClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
@@ -109,26 +109,7 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
           <T id="delegatedTo" />
           {baker ? (
             <div className="flex items-center gap-2">
-              {baker.logo ? (
-                <>
-                  {typeof baker.logo === 'string' ? (
-                    <img
-                      src={baker.logo}
-                      alt={baker.address}
-                      className="flex-shrink-0 bg-white rounded-full"
-                      style={{ width: 24, height: 24 }}
-                    />
-                  ) : (
-                    // @ts-expect-error // hardcoded svg logos for the time being
-                    <baker.logo
-                      className="flex-shrink-0 bg-transparent rounded-full"
-                      style={{ width: 24, height: 24 }}
-                    />
-                  )}
-                </>
-              ) : (
-                <Identicon type="bottts" hash={myBakerPkh} size={24} className="rounded-full" />
-              )}
+              <BakerLogo logo={baker.logo} address={myBakerPkh} size={24} />
 
               <span>{baker?.name ?? <HashChip hash={myBakerPkh} small />}</span>
             </div>

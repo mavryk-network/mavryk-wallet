@@ -2,11 +2,11 @@ import { FC, useEffect } from 'react';
 
 import browser from 'webextension-polyfill';
 
-import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
+import { useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 import { EnvVars, IS_STAGE_ENV } from 'lib/env';
 
 export const LoadHypelabScript: FC = () => {
-  const isAdsEnabled = useShouldShowPartnersPromoSelector();
+  const isAdsEnabled = useShouldShowPromotion();
 
   useEffect(() => {
     if (!isAdsEnabled || document.querySelector('[hypelab-script]')) {

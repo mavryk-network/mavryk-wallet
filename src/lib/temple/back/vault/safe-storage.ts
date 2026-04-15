@@ -28,7 +28,7 @@ export async function fetchAndDecryptOne<T>(storageKey: string, passKey: CryptoK
   const encrypted = { dt, iv };
   const salt = Buffer.from(saltHex, 'hex');
 
-  const derivedPassKey = await Passworder.deriveKey(passKey, salt);
+  const derivedPassKey = await Passworder.deriveKey(passKey, new Uint8Array(salt));
   return Passworder.decrypt<T>(encrypted, derivedPassKey);
 }
 
@@ -115,7 +115,7 @@ export async function removeManyLegacy(keys: string[]) {
 export async function fetchAndDecryptOneLegacy<T>(storageKey: string, passKey: CryptoKey) {
   const { salt: saltHex, encrypted } = await fetchEncryptedOne<EncryptedStorage>(storageKey);
   const salt = Buffer.from(saltHex, 'hex');
-  const derivedPassKey = await Passworder.deriveKeyLegacy(passKey, salt);
+  const derivedPassKey = await Passworder.deriveKeyLegacy(passKey, new Uint8Array(salt));
   return Passworder.decrypt<T>(encrypted, derivedPassKey);
 }
 

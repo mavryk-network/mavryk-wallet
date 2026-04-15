@@ -34,7 +34,7 @@ export const Stake: FC = () => {
     return labelToShow;
   }, [isReDelegationActive, showStakeScreen, unfamiliarWithDelegation]);
 
-  const avtivateReDelegation = useCallback(() => {
+  const activateReDelegation = useCallback(() => {
     setIsReDelegationActive(true);
   }, [setIsReDelegationActive]);
 
@@ -57,7 +57,7 @@ export const Stake: FC = () => {
             unfamiliarWithDelegation={unfamiliarWithDelegation}
             isFromCoStakeNavigation={isFromCoStakeNavigation}
             isReDelegationActive={isReDelegationActive}
-            avtivateReDelegation={avtivateReDelegation}
+            activateReDelegation={activateReDelegation}
           />
         )}
       </div>
@@ -144,7 +144,7 @@ type UnfamiliarWithDelegationScreenProps = {
 
 const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({
   setShowStakeScreen,
-  setIsFromCoStakeNavigation
+  setIsFromCoStakeNavigation: _setIsFromCoStakeNavigation
 }) => {
   const { popup } = useAppEnv();
   const handleBtnClick = useCallback(() => {

@@ -1,30 +1,25 @@
-import React, { useCallback, useEffect } from 'react';
-
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
 
 import { DataPlaceholder } from 'app/atoms';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import PageLayout from 'app/layouts/PageLayout';
-import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { PartnersPromotion, PartnersPromotionVariant } from 'app/templates/partners-promotion';
 import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
+import { useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 import { useTimeout } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
-import { viewAllNotificationsAction } from '../../store/actions';
-import { useNotificationsSelector } from '../../store/selectors';
+import { useNotifications, useViewAllNotifications } from '../../hooks/use-notifications.query';
 
 import { NotificationPreviewItem } from './preview-item';
 
 const VIEW_ALL_NOTIFICATIONS_TIMEOUT = 5 * 1000;
 
 export const Notifications = () => {
-  const dispatch = useDispatch();
-  const notifications = useNotificationsSelector();
-  const shouldShowPartnersPromoState = useShouldShowPartnersPromoSelector();
-
-  const viewAllNotifications = useCallback(() => void dispatch(viewAllNotificationsAction()), [dispatch]);
+  const notifications = useNotifications();
+  const shouldShowPartnersPromoState = useShouldShowPromotion();
+  const viewAllNotifications = useViewAllNotifications();
 
   useTimeout(viewAllNotifications, VIEW_ALL_NOTIFICATIONS_TIMEOUT, true, [notifications]);
   useLoadPartnersPromo();

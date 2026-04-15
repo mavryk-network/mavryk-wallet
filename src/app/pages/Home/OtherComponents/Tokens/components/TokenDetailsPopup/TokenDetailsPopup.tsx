@@ -7,17 +7,13 @@ import { Alert, HashChip, Money } from 'app/atoms';
 import { DelegatePeriodBanner } from 'app/atoms/AddBanner';
 import { DARK_LIGHT_THEME } from 'app/consts/appTheme';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ConfirmedIcon } from 'app/icons/confirmed.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
-import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
-import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ActionButton, tippyPropsMock } from 'app/pages/Home/Home';
 import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { DelegateActionsComponent } from 'app/pages/Stake/DelegateForm';
-import { useTokenMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import BakerBanner from 'app/templates/BakerBanner';
 import { HistoryComponent } from 'app/templates/History/History';
@@ -28,7 +24,8 @@ import { useBalance } from 'lib/balances';
 import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol } from 'lib/metadata';
-import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
+import { useTokenMetadataSelector } from 'lib/store/zustand/metadata.store';
+import { useAccount, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { ZERO } from 'lib/utils/numbers';
 import { HistoryAction, navigate } from 'lib/woozie';
@@ -82,7 +79,6 @@ type TokenDetailsPopupContentProps = {
 
 const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug, assetMetadata, balance }) => {
   const account = useAccount();
-  const network = useNetwork();
   const price = useAssetFiatCurrencyPrice(assetSlug ?? MAV_TOKEN_SLUG);
   const tokenMetadata = useTokenMetadataSelector(assetSlug);
   const { selectedFiatCurrency } = useFiatCurrency();
@@ -123,49 +119,14 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
             <span>{assetSymbol}</span>
           </div>
         </div>
-        {/* send swap receive withdraw - section */}
+        {/* actions section */}
         <div className="text-base-plus text-white mb-2">
           <div
             className={clsx(
-              'flex justify-between mx-auto w-full pb-4',
+              'flex justify-center gap-6 mx-auto w-full pb-4',
               popup ? 'max-w-sm px-2' : 'max-w-screen-xxs px-14'
             )}
           >
-            <ActionButton
-              label={<T id="receive" />}
-              Icon={ReceiveIcon}
-              to="/receive"
-              testID={HomeSelectors.receiveButton}
-            />
-
-            <ActionButton
-              label={<T id="buyButton" />}
-              Icon={BuyIcon}
-              to={network.type === 'dcp' ? 'https://buy.chainbits.com' : '/buy'}
-              isAnchor={network.type === 'dcp'}
-              // disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
-              disabled
-              testID={HomeSelectors.buyButton}
-            />
-            <ActionButton
-              label={<T id="swap" />}
-              Icon={SwapIcon}
-              to={{
-                pathname: '/swap',
-                search: `from=${assetSlug ?? ''}`
-              }}
-              // disabled={!canSend}
-              disabled
-              testID={HomeSelectors.swapButton}
-            />
-            <ActionButton
-              label={<T id="withdraw" />}
-              Icon={WithdrawIcon}
-              to="/withdraw"
-              // disabled={!canSend || network.type !== 'main'}
-              disabled
-              testID={HomeSelectors.withdrawButton}
-            />
             <ActionButton
               label={<T id="send" />}
               Icon={SendIcon}
@@ -173,6 +134,12 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
               disabled={!canSend}
               tippyProps={tippyPropsMock}
               testID={HomeSelectors.sendButton}
+            />
+            <ActionButton
+              label={<T id="receive" />}
+              Icon={ReceiveIcon}
+              to="/receive"
+              testID={HomeSelectors.receiveButton}
             />
           </div>
         </div>
@@ -261,7 +228,7 @@ const BakerBannerSection: FC<BakerBannerSectionProps> = ({ myBakerPkh }) => {
             style={{ width: undefined }}
             extraComponent={
               <div className="mt-3">
-                <DelegateActionsComponent avtivateReDelegation={handleRedelegateClick} />
+                <DelegateActionsComponent activateReDelegation={handleRedelegateClick} />
               </div>
             }
           />

@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 
 import clsx from 'clsx';
-import { Control, Controller, FieldError, NestDataObject } from 'react-hook-form';
+import { Control, Controller, FieldErrors } from 'react-hook-form';
 
 import { FormCheckbox } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -15,41 +15,60 @@ import styles from './importPartialFromCheckboxes.module.css';
 type ImportPartialFormCheckboxesProps = {
   control: Control<FormData>;
   register: (...args: any) => any;
-  errors: NestDataObject<FormData, FieldError>;
+  errors: FieldErrors<FormData>;
 };
 
 export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> = ({ control, register, errors }) => {
   const { popup } = useAppEnv();
+
+  const { ref: betaRef, ...betaRest } = register('betaAgreement', {
+    validate: (val: unknown) => val || t('confirmBetaError')
+  });
+  const { ref: termsRef, ...termsRest } = register('termsAccepted', {
+    validate: (val: unknown) => val || t('confirmTermsError')
+  });
 
   return (
     <>
       <Controller
         control={control}
         name="skipOnboarding"
-        as={p => <FormCheckbox {...p} testID={setWalletPasswordSelectors.skipOnboardingCheckbox} />}
-        label={t('skipOnboarding')}
-        testID={setWalletPasswordSelectors.skipOnboardingCheckbox}
+        render={({ field: { value, onChange, ref } }) => (
+          <FormCheckbox
+            ref={ref}
+            checked={Boolean(value)}
+            onChange={checked => onChange(checked)}
+            label={t('skipOnboarding')}
+            testID={setWalletPasswordSelectors.skipOnboardingCheckbox}
+          />
+        )}
       />
       <Controller
         control={control}
         name="analytics"
-        as={FormCheckbox}
-        label={
-          <T
-            id="analyticsInputDescription"
-            substitutions={[
-              <a
-                href="https://docs.google.com/document/d/1CxGYpRhMHoqTZda4O9FoVFfL5iNKpowjsPBRrlWWok0/edit?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-secondary text-accent-blue"
-              >
-                <T id="analyticsCollecting" key="analyticsLink" />
-              </a>
-            ]}
+        render={({ field: { value, onChange, ref } }) => (
+          <FormCheckbox
+            ref={ref}
+            checked={Boolean(value)}
+            onChange={checked => onChange(checked)}
+            label={
+              <T
+                id="analyticsInputDescription"
+                substitutions={[
+                  <a
+                    href="https://docs.google.com/document/d/1CxGYpRhMHoqTZda4O9FoVFfL5iNKpowjsPBRrlWWok0/edit?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-secondary text-accent-blue"
+                  >
+                    <T id="analyticsCollecting" key="analyticsLink" />
+                  </a>
+                ]}
+              />
+            }
+            testID={setWalletPasswordSelectors.analyticsCheckBox}
           />
-        }
-        testID={setWalletPasswordSelectors.analyticsCheckBox}
+        )}
       />
 
       {/* <Controller
@@ -61,21 +80,21 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
       /> */}
 
       <FormCheckbox
-        ref={register({
-          validate: (val: unknown) => val || t('confirmBetaError')
-        })}
+        ref={betaRef}
+        name={betaRest.name}
+        onNativeChange={betaRest.onChange}
+        onBlur={betaRest.onBlur}
         errorCaption={errors.betaAgreement?.message}
-        name="betaAgreement"
         testID={setWalletPasswordSelectors.betaAgreementCheckbox}
         label={<T id="betaAgreementMsg" />}
       />
 
       <FormCheckbox
-        ref={register({
-          validate: (val: unknown) => val || t('confirmTermsError')
-        })}
+        ref={termsRef}
+        name={termsRest.name}
+        onNativeChange={termsRest.onChange}
+        onBlur={termsRest.onBlur}
         errorCaption={errors.termsAccepted?.message}
-        name="termsAccepted"
         testID={setWalletPasswordSelectors.acceptTermsCheckbox}
         labelClassName={clsx(popup && styles['max-w-295'])}
         label={

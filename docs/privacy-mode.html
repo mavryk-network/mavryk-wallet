@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Mode — Mavryk Wallet</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    nav {
+      width: 240px;
+      flex-shrink: 0;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #8b949e;
+      padding: 0 20px 16px;
+      border-bottom: 1px solid #30363d;
+      margin-bottom: 12px;
+    }
+
+    nav a {
+      display: block;
+      padding: 5px 20px;
+      color: #8b949e;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+    }
+
+    nav a:hover {
+      color: #c9d1d9;
+      background: #21262d;
+      border-left-color: #58a6ff;
+    }
+
+    nav a.sub {
+      padding-left: 32px;
+      font-size: 12px;
+      color: #6e7681;
+    }
+
+    nav a.sub:hover { color: #8b949e; }
+
+    /* Main content */
+    main {
+      flex: 1;
+      max-width: 860px;
+      padding: 48px 56px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      margin-top: 12px;
+    }
+
+    .meta-item {
+      font-size: 12px;
+      color: #8b949e;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 3px 10px;
+    }
+
+    .meta-item strong { color: #c9d1d9; }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e6edf3;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    ul, ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    li { margin-bottom: 6px; }
+
+    li ul, li ol { margin-top: 6px; margin-bottom: 4px; }
+
+    code {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.85em;
+      color: #ff7b72;
+    }
+
+    pre {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #c9d1d9;
+      font-size: 0.88em;
+      line-height: 1.6;
+    }
+
+    .lang-label {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 10px;
+      color: #6e7681;
+      font-family: 'SF Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    th {
+      background: #161b22;
+      color: #8b949e;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 8px 12px;
+      border: 1px solid #30363d;
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 12px;
+      border: 1px solid #30363d;
+      vertical-align: top;
+    }
+
+    tr:hover td { background: #161b22; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #21262d;
+      margin: 32px 0;
+    }
+
+    strong { color: #e6edf3; }
+
+    a { color: #58a6ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .callout {
+      border-left: 3px solid #58a6ff;
+      background: #161b22;
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .callout.warn { border-left-color: #d29922; }
+    .callout.danger { border-left-color: #f85149; }
+    .callout.success { border-left-color: #3fb950; }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-right: 4px;
+    }
+
+    .badge.green { background: #1f4e28; color: #3fb950; }
+    .badge.yellow { background: #3d2e00; color: #d29922; }
+    .badge.red { background: #3d1212; color: #f85149; }
+
+    .reviewed-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #1f4e28;
+      border: 1px solid #3fb950;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: #3fb950;
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .phase-num {
+      background: #1c3a5e;
+      color: #58a6ff;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .critical {
+      color: #f85149;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      nav { display: none; }
+      main { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <nav>
+    <div class="logo">Mavryk Wallet</div>
+    <a href="#key-design-decisions">Key Design Decisions</a>
+    <a href="#sub-phases">Sub-phases</a>
+    <a href="#phase-1" class="sub">Phase 1 — Store + Atom</a>
+    <a href="#phase-2" class="sub">Phase 2 — Toggle Button</a>
+    <a href="#phase-3" class="sub">Phase 3 — Apply Masking</a>
+    <a href="#phase-4" class="sub">Phase 4 — Tests</a>
+    <a href="#deferred-items">Deferred Items</a>
+    <a href="#verification">Verification</a>
+    <a href="#commit-strategy">Commit Strategy</a>
+  </nav>
+
+  <main>
+    <h1>Privacy Mode</h1>
+
+    <div class="meta">
+      <div class="meta-item"><strong>Branch:</strong> feat/privacy-mode off dev-architecture-update</div>
+      <div class="meta-item"><strong>Repo:</strong> mavrykwallet-extension</div>
+    </div>
+
+    <div class="reviewed-banner">
+      ✅ Reviewed 2026-04-15 — all three agents GO WITH AMENDMENTS (amendments applied)
+    </div>
+
+    <h2 id="key-design-decisions">Key Design Decisions</h2>
+
+    <ul>
+      <li>Privacy mode hides all financial amounts with <code>••••</code> — visually clean and universally understood.</li>
+      <li>Toggle lives in <code>MainBanner</code> (home screen balance area) — an eye icon next to the total balance.</li>
+      <li>Icons available: <code>app/icons/eye-open-bold.svg</code> and <code>app/icons/eye-closed-bold.svg</code>.</li>
+      <li>State in <code>UIStore</code> (<code>privacyMode: boolean</code>, default <code>false</code>) — persisted to <code>browser.storage.local</code> via explicit <code>partialize</code> allowlist.</li>
+      <li>A single <code>PrivacyAmount</code> atom wraps any rendered value. When <code>privacyMode=true</code>, renders <code>••••</code> instead of children. Avoids modifying <code>Money.tsx</code> globally.</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>Known limitation (accepted):</strong> Raw balance values are still passed as <code>children</code> props to <code>PrivacyAmount</code> and are visible in React DevTools. For a browser extension threat model (no remote DOM access), this is acceptable. Document but do not change architecture.
+    </div>
+
+    <div class="callout">
+      <strong>Scope:</strong> Home screen only for Phase 1 — MainBanner total + token list balances. Toggle tooltip must say "Hide balances on home screen". Send form and staking balances deferred to follow-on PR.
+    </div>
+
+    <h2 id="sub-phases">Sub-phases</h2>
+
+    <h3 id="phase-1">Phase 1 — Store + Atom</h3>
+
+    <p><strong>File:</strong> <code>src/lib/store/zustand/ui.store.ts</code></p>
+
+    <ol>
+      <li>Add <code>privacyMode: boolean</code> to the <code>UIState</code> interface.</li>
+      <li>Add <code>togglePrivacyMode: () =&gt; void</code> to the <code>UIActions</code> interface. <em>(Required — TS strict mode will error if omitted.)</em></li>
+      <li>Add <code>privacyMode: false</code> to the initial state object.</li>
+      <li>Add the action implementation:</li>
+    </ol>
+
+    <pre><span class="lang-label">ts</span><code>togglePrivacyMode: () =&gt; set(s =&gt; ({ privacyMode: !s.privacyMode })),</code></pre>
+
+    <div class="callout danger">
+      <strong>Critical:</strong> Add <code>privacyMode: state.privacyMode</code> to the existing <code>partialize</code> return object (lines ~129–141). Without this, the field is never written to <code>browser.storage.local</code> and silently reverts to <code>false</code> on every reload. Verification step 3 (persistence) will fail if missed.
+    </div>
+
+    <p>Add selector hook at the bottom with existing selectors:</p>
+
+    <pre><span class="lang-label">ts</span><code>export const usePrivacyMode = () =&gt; useUIStore(s =&gt; s.privacyMode);</code></pre>
+
+    <hr>
+
+    <p><strong>New file:</strong> <code>src/app/atoms/PrivacyAmount.tsx</code></p>
+
+    <pre><span class="lang-label">tsx</span><code>import React, { FC } from 'react';
+import { usePrivacyMode } from 'lib/store/zustand/ui.store';
+
+interface Props {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const PrivacyAmount: FC&lt;Props&gt; = ({ children, className }) =&gt; {
+  const privacyMode = usePrivacyMode();
+
+  if (privacyMode) {
+    return (
+      &lt;span className={className} aria-label="Hidden balance"&gt;
+        ••••
+      &lt;/span&gt;
+    );
+  }
+
+  return &lt;span className={className}&gt;{children}&lt;/span&gt;;
+};</code></pre>
+
+    <div class="callout">
+      <strong>Note on layout:</strong> The wrapping <code>&lt;span&gt;</code> may affect flex layout at some callsites. If the parent uses flex and the balance is a flex child, add <code>className="contents"</code> so the span is transparent to layout. Assess per callsite during Phase 3.
+    </div>
+
+    <p>Export from <code>src/app/atoms/index.ts</code> alongside other atoms.</p>
+
+    <h3 id="phase-2">Phase 2 — Toggle Button in MainBanner</h3>
+
+    <p><strong>File:</strong> <code>src/app/pages/Home/OtherComponents/MainBanner/index.tsx</code></p>
+
+    <ol>
+      <li>Add <code>relative</code> to the banner container div if not already present (required for absolute positioning of the toggle).</li>
+      <li>Import <code>eye-open-bold.svg</code> and <code>eye-closed-bold.svg</code> as React components.</li>
+      <li>Import <code>useUIStore</code> and select <code>privacyMode</code> + <code>togglePrivacyMode</code>.</li>
+      <li>Render the toggle button:</li>
+    </ol>
+
+    <pre><span class="lang-label">tsx</span><code>&lt;button
+  type="button"
+  onClick={togglePrivacyMode}
+  className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
+  title="Hide balances on home screen"
+&gt;
+  {privacyMode
+    ? &lt;EyeClosedBoldIcon className="w-4 h-auto" /&gt;
+    : &lt;EyeOpenBoldIcon className="w-4 h-auto" /&gt;
+  }
+&lt;/button&gt;</code></pre>
+
+    <div class="callout warn">
+      <strong>Note:</strong> <code>MainBanner/index.tsx</code> contains a local inline <code>BalanceFiat</code> component (lines ~72–80) that renders the actual fiat total. This is the Phase 3 target — <strong>not</strong> the separate <code>BalanceFiat.tsx</code> file (dead code from unfinished BalanceMode feature).
+    </div>
+
+    <h3 id="phase-3">Phase 3 — Apply PrivacyAmount to Balance Display Points</h3>
+
+    <div class="callout danger">
+      <strong>Do NOT touch:</strong> <code>BalanceFiat.tsx</code> and <code>BalanceGas.tsx</code> — these are dead code not rendered anywhere.
+    </div>
+
+    <p><strong>Target: <code>MainBanner/index.tsx</code></strong></p>
+    <p>Wrap the local inline <code>BalanceFiat</code> component's <code>&lt;Money&gt;</code> output and the <code>BalanceGas</code> inline component's output with <code>&lt;PrivacyAmount&gt;</code>.</p>
+
+    <hr>
+
+    <p><strong>Target: <code>src/app/pages/Home/OtherComponents/Tokens/components/ListItem.tsx</code></strong></p>
+    <p>Enumerate all balance display points and wrap each:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Display</th>
+          <th>Location in file</th>
+          <th>Wrapper pattern</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Main crypto balance</td>
+          <td><code>&lt;CryptoBalance&gt;</code> callsite</td>
+          <td><code>&lt;PrivacyAmount&gt;&lt;CryptoBalance .../&gt;&lt;/PrivacyAmount&gt;</code></td>
+        </tr>
+        <tr>
+          <td>Main fiat balance</td>
+          <td>Inside <code>&lt;FiatBalance&gt;</code> render-prop callback</td>
+          <td><code>{({ balance, symbol }) =&gt; &lt;PrivacyAmount&gt;...&lt;/PrivacyAmount&gt;}</code></td>
+        </tr>
+        <tr>
+          <td>Delegated crypto balance</td>
+          <td><code>&lt;CryptoBalance&gt;</code> for delegated row</td>
+          <td>Same as main crypto</td>
+        </tr>
+        <tr>
+          <td>Staked crypto balance</td>
+          <td><code>&lt;CryptoBalance&gt;</code> for staked row</td>
+          <td>Same as main crypto</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Important:</strong> <code>FiatBalance</code> uses a render-prop pattern. <code>PrivacyAmount</code> cannot wrap <code>&lt;FiatBalance&gt;</code> at the component boundary — it must go <em>inside</em> the render-prop callback. Wrap the rendered output JSX, not the <code>&lt;FiatBalance&gt;</code> element itself.
+    </div>
+
+    <div class="callout">
+      <strong>Balance.tsx:</strong> Do NOT wrap inside <code>Balance.tsx</code> itself — keep the mask opt-in at the callsite level, consistent with not modifying <code>Money.tsx</code> globally.
+    </div>
+
+    <h3 id="phase-4">Phase 4 — Tests</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>What to verify</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>UIStore</code> unit test</td>
+          <td><code>togglePrivacyMode</code> flips <code>privacyMode</code> from false→true→false</td>
+        </tr>
+        <tr>
+          <td><code>PrivacyAmount</code> component test</td>
+          <td>Renders children when off; renders <code>••••</code> when on; <code>className</code> applied in both states; <code>aria-label="Hidden balance"</code> present when masked</td>
+        </tr>
+        <tr>
+          <td><code>MainBanner</code> component test</td>
+          <td>Toggle button present; clicking calls <code>togglePrivacyMode</code>; eye icon changes state</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="deferred-items">Deferred Items</h2>
+
+    <ul>
+      <li>Send form "Max to send" amount</li>
+      <li>Staking/baking balance displays</li>
+      <li>Collectibles/RWAs pages</li>
+      <li>NFT estimated values</li>
+      <li>Wallet-wide privacy mode (all pages, not just home)</li>
+    </ul>
+
+    <h2 id="verification">Verification</h2>
+
+    <ol>
+      <li>Toggle eye icon → all home balances replace with <code>••••</code></li>
+      <li>Toggle again → balances restore</li>
+      <li>Reload page → privacy mode state persists (<code>browser.storage.local</code>)</li>
+      <li>Navigate to Send form → max amount is <strong>NOT</strong> masked (expected — deferred scope)</li>
+      <li>Token list virtualized scroll → all visible rows masked (crypto + fiat + delegated + staked)</li>
+      <li>Screen reader announces "Hidden balance" for masked amounts</li>
+      <li>Eye icon tooltip reads "Hide balances on home screen"</li>
+    </ol>
+
+    <h2 id="commit-strategy">Commit Strategy</h2>
+
+    <ol>
+      <li><code>feat: add privacyMode to UIStore with togglePrivacyMode action and persistence</code></li>
+      <li><code>feat: add PrivacyAmount atom with accessibility support</code></li>
+      <li><code>feat: add privacy mode toggle to MainBanner</code></li>
+      <li><code>feat: apply PrivacyAmount to token list balance display points</code></li>
+      <li><code>test: add unit tests for privacyMode store action and PrivacyAmount atom</code></li>
+    </ol>
+
+  </main>
+</div>
+</body>
+</html>

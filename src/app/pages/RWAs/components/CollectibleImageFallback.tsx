@@ -57,7 +57,7 @@ export const RwaImageFallback = memo<Props>(({ large = false, isAudioCollectible
         </div>
       ) : (
         // if both are undefined -> return broken image
-        <BrokenImageSvg height={height} /> ?? <BrokenImageSvg height={height} />
+        <BrokenImageSvg height={height} />
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import React, { FC, HTMLAttributes, memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
+import { BakerLogo, Identicon, Name, Money, HashChip, ABContainer } from 'app/atoms';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { BakerTable, BakerTableData } from 'app/molecules/BakerTable/BakerTable';
 import { BakingSectionSelectors } from 'app/pages/Home/OtherComponents/BakingSection.selectors';
@@ -17,105 +17,12 @@ import { TempleAccount } from 'lib/temple/types';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 
-// const mockedBaker: any = {
-//   address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//   name: 'Everstake',
-//   logo: 'https://services.tzkt.io/v1/avatars/tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//   balance: 12923.010257,
-//   stakingBalance: 113315.976957,
-//   stakingCapacity: 114000,
-//   maxStakingBalance: 114000,
-//   freeSpace: 684.0230429999938,
-//   fee: 0.04,
-//   minDelegation: 5,
-//   payoutDelay: 6,
-//   payoutPeriod: 1,
-//   openForDelegation: true,
-//   estimatedRoi: 0.06024,
-//   serviceType: 'tezos_only',
-//   serviceHealth: 'active',
-//   payoutTiming: 'suspicious',
-//   payoutAccuracy: 'inaccurate',
-//   audit: '64e7621dd0970a602a90d4b1',
-//   insuranceCoverage: 0,
-//   config: {
-//     address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//     fee: [
-//       {
-//         cycle: 586,
-//         value: 0.04
-//       },
-//       {
-//         cycle: 0,
-//         value: 0.15
-//       }
-//     ],
-//     minDelegation: [
-//       {
-//         cycle: 586,
-//         value: 5
-//       },
-//       {
-//         cycle: 0,
-//         value: 50
-//       }
-//     ],
-//     payoutFee: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ],
-//     payoutDelay: [
-//       {
-//         cycle: 0,
-//         value: 6
-//       }
-//     ],
-//     payoutPeriod: [
-//       {
-//         cycle: 0,
-//         value: 1
-//       }
-//     ],
-//     minPayout: [
-//       {
-//         cycle: 0,
-//         value: 0
-//       }
-//     ],
-//     rewardStruct: [
-//       {
-//         cycle: 0,
-//         value: 21
-//       }
-//     ],
-//     payoutRatio: [
-//       {
-//         cycle: 0,
-//         value: 666
-//       }
-//     ],
-//     maxStakingThreshold: [
-//       {
-//         cycle: 0,
-//         value: 1
-//       }
-//     ],
-//     openForDelegation: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ],
-//     allocationFee: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ]
-//   }
-// };
+// ---------------------------------------------------------------------------
+// Internal hook — avoids duplicating the atomsToTokens call across sub-components
+// ---------------------------------------------------------------------------
+function useBakerSpace(freeSpace: number | undefined) {
+  return useMemo(() => atomsToTokens(freeSpace ?? 0, MAVEN_METADATA.decimals), [freeSpace]);
+}
 
 type BakerBannerProps = HTMLAttributes<HTMLDivElement> & {
   bakerPkh: string;
@@ -160,7 +67,7 @@ const BakerBanner = memo<BakerBannerProps>(
     const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
     // const isHelpUkraineBaker = bakerPkh === HELP_UKRAINE_BAKER_ADDRESS;
 
-    const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
+    const bakerSpace = useBakerSpace(baker?.freeSpace);
 
     const feeTableItem: BakerTableData = useMemo(
       () => ({
@@ -254,31 +161,13 @@ const BakerBanner = memo<BakerBannerProps>(
           <>
             <div className={classNames('flex items-center', 'text-white')}>
               <div>
-                {baker.logo ? (
-                  <>
-                    {typeof baker.logo === 'string' ? (
-                      <img
-                        src={baker.logo}
-                        alt={baker.address}
-                        className="flex-shrink-0 bg-transparent rounded-full"
-                        style={{ minHeight: '2rem', width: 59, height: 59 }}
-                      />
-                    ) : (
-                      // @ts-expect-error // hardcoded svg logos for the time being
-                      <baker.logo
-                        className="flex-shrink-0 bg-transparent rounded-full"
-                        style={{ minHeight: '2rem', width: 59, height: 59 }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <Identicon
-                    type="bottts"
-                    hash={baker.address}
-                    size={59}
-                    className="shadow-xs rounded-full flex-shrink-0"
-                  />
-                )}
+                <BakerLogo
+                  logo={baker.logo}
+                  address={baker.address}
+                  size={59}
+                  imgBg="bg-transparent"
+                  style={{ minHeight: '2rem' }}
+                />
               </div>
 
               <div className="flex flex-col items-start flex-1 ml-4 relative">
@@ -373,19 +262,18 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
   }, [baker]);
 
   const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
-  const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
+  const bakerSpace = useBakerSpace(baker?.freeSpace);
 
   return baker ? (
     <div className={classNames('w-full', 'p-4', 'bg-gray-910 rounded-2xl-plus')}>
       <div className="flex items-center gap-2 mb-4">
         <Identicon type="bottts" hash={baker.address} size={32} className="shadow-xs rounded-full flex-shrink-0" />
 
-        <div className="flex flex-col items-start flex-1 relative gap-1">
+        <div className="flex flex-col items-start flex-1 relative gap-1 min-w-0">
           <Name
-            style={{
-              maxWidth: '8rem'
-            }}
-            className="text-base-plus text-white"
+            style={{ maxWidth: '100%' }}
+            className="text-base-plus text-white truncate"
+            title={baker.name || baker.address}
             testID={BakingSectionSelectors.delegatedBakerName}
           >
             {baker.name || baker.address}
@@ -453,18 +341,12 @@ const BakerAccount: React.FC<{
 };
 
 const SponsoredBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-  <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
-    style={{ borderRadius: '4px' }}
-  >
+  <div className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2 rounded')}>
     <T id={isRecommendedBaker ? 'ad' : 'helpUkraine'} />
   </div>
 );
 const PromotedBaker: FC<{ isRecommendedBaker: boolean }> = ({ isRecommendedBaker }) => (
-  <div
-    className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2')}
-    style={{ borderRadius: '4px' }}
-  >
+  <div className={classNames('font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2 rounded')}>
     <T id={isRecommendedBaker ? 'recommended' : 'helpUkraine'} />
   </div>
 );

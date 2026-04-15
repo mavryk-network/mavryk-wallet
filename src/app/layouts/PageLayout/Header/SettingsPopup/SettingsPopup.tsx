@@ -16,7 +16,7 @@ import { ReactComponent as UserGearIcon } from 'app/icons/user-gear.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { T } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import { useAccount, useMavrykClient } from 'lib/temple/front';
 import { translateYModifiers } from 'lib/ui/general-modifiers';
 import { Link } from 'lib/woozie';
 
@@ -31,7 +31,7 @@ type SettingsPopupProps = {
 export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   const appEnv = useAppEnv();
   const { publicKeyHash } = useAccount();
-  const { lock } = useTempleClient();
+  const { lock } = useMavrykClient();
 
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
@@ -132,7 +132,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
 export const SettingsDropdown: FC = () => {
   const appEnv = useAppEnv();
   const { publicKeyHash } = useAccount();
-  const { lock } = useTempleClient();
+  const { lock } = useMavrykClient();
 
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
@@ -222,7 +222,7 @@ export const SettingsDropdown: FC = () => {
         optionsListClassName="bg-primary-card w-auto py-2"
         dropdownButtonClassName="bg-transparent gap-0 w-auto"
         fontContentWrapperClassname="border-none bg-transparent"
-        DropdownFaceContent={<SettingButton onClick={() => console.log('clicked')} />}
+        DropdownFaceContent={<SettingButton onClick={() => void 0} />}
         showIcon={false}
         poperModifiers={translateYModifiers}
         poperPlacement="bottom-end"

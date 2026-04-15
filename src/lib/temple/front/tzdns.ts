@@ -1,57 +1,53 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { DomainNameValidationResult, isMavrykDomainsSupportedNetwork } from '@mavrykdynamics/mavryk-domains-core';
-import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
+import { WebmavrykMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-webmavryk-client';
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { useQuery } from '@tanstack/react-query';
 
-import { useTypedSWR } from 'lib/swr';
+import { tzdnsKeys } from 'lib/query-keys';
 import { NETWORK_IDS } from 'lib/temple/networks';
 
-import { useTezos, useChainId } from './ready';
+import { useMavryk, useChainId } from './ready';
 
 function getClient(networkId: 'mainnet' | 'custom', tezos: MavrykToolkit) {
   return isMavrykDomainsSupportedNetwork(networkId)
-    ? new TaquitoMavrykDomainsClient({ network: networkId, tezos })
-    : TaquitoMavrykDomainsClient.Unsupported;
+    ? new WebmavrykMavrykDomainsClient({ network: networkId, mavryk: tezos })
+    : WebmavrykMavrykDomainsClient.Unsupported;
 }
 
-export function isDomainNameValid(name: string, client: TaquitoMavrykDomainsClient) {
+export function isDomainNameValid(name: string, client: WebmavrykMavrykDomainsClient) {
   return client.validator.validateDomainName(name, { minLevel: 2 }) === DomainNameValidationResult.VALID;
 }
 
 export function useTezosDomainsClient() {
   const chainId = useChainId(true)!;
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const networkId = NETWORK_IDS.get(chainId)!;
-  return useMemo(() => getClient(networkId === 'mainnet' ? networkId : 'custom', tezos), [networkId, tezos]);
+  return useMemo(() => getClient(networkId === 'mainnet' ? networkId : 'custom', mavryk), [networkId, mavryk]);
 }
 
 export function useTezosAddressByDomainName(domainName: string) {
   const domainsClient = useTezosDomainsClient();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
-  const domainAddressFactory = useCallback(
-    ([, , name]: [string, string, string]) => domainsClient.resolver.resolveNameToAddress(name),
-    [domainsClient]
-  );
-
-  return useTypedSWR(['tzdns-address', tezos.checksum, domainName], domainAddressFactory, {
-    shouldRetryOnError: false,
-    revalidateOnFocus: false
+  return useQuery({
+    queryKey: tzdnsKeys.address(mavryk.checksum, domainName),
+    queryFn: () => domainsClient.resolver.resolveNameToAddress(domainName),
+    retry: false,
+    refetchOnWindowFocus: false
   });
 }
 
 export function useTezosDomainNameByAddress(address: string) {
   const { resolver: domainsResolver } = useTezosDomainsClient();
-  const tezos = useTezos();
-  const resolveDomainReverseName = useCallback(
-    ([, pkh]: [string, string, string]) => domainsResolver.resolveAddressToName(pkh),
-    [domainsResolver]
-  );
+  const mavryk = useMavryk();
 
-  return useTypedSWR(['tzdns-reverse-name', address, tezos.checksum], resolveDomainReverseName, {
-    shouldRetryOnError: false,
-    revalidateOnFocus: false
+  return useQuery({
+    queryKey: tzdnsKeys.reverseName(address, mavryk.checksum),
+    queryFn: () => domainsResolver.resolveAddressToName(address),
+    retry: false,
+    refetchOnWindowFocus: false
   });
 }

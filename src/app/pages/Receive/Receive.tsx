@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import clsx from 'clsx';
 import { QRCode } from 'react-qr-svg';
@@ -32,12 +32,11 @@ const Receive: FC = () => {
   const account = useAccount();
   const { isSupported } = useTezosDomainsClient();
   const address = account.publicKeyHash;
-  const { popup, fullPage } = useAppEnv();
+  const { popup } = useAppEnv();
 
   const [activeView, setActiveView] = useSafeState(ADDRESS_FIELD_VIEWS[1]);
 
   const { data: reverseName } = useTezosDomainNameByAddress(address);
-  const memoizedStyle = useMemo(() => (fullPage ? { maxWidth: 'auto' } : { maxWidth: 271 }), [fullPage]);
 
   useEffect(() => {
     if (!isSupported) {
@@ -50,36 +49,23 @@ const Receive: FC = () => {
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<>{t('receive')}</>}>
       <div className={clsx('w-full mx-auto h-full flex flex-col', popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs pb-16 ')}>
-        <div className="text-primary-white text-base-plus mb-4">
+        <div className="text-secondary-white text-sm mb-3">
           <T id="myAddress" />
         </div>
 
-        <div
-          style={{ padding: fullPage ? '10.5px 16px' : '16px' }}
-          className={clsx('rounded-2xl-plus bg-primary-card relative')}
+        <CopyButton
+          type="button"
+          text={hash}
+          className="flex items-center gap-2 w-full px-3 py-3 rounded-xl bg-primary-card"
         >
-          <CopyButton
-            type="button"
-            text={hash}
-            className={clsx('flex', fullPage && 'w-full flex items-center justify-between')}
-          >
-            <div className="break-all text-left text-base-plus" style={memoizedStyle}>
-              <HashShortView hash={hash} trim={false} />
-            </div>
-
-            <div
-              className={clsx(
-                'bg-transparent flex items-center',
-                !fullPage ? 'absolute top-4 right-4 justify-end w-11' : 'justify-start h-6 w0auto'
-              )}
-            >
-              <CopyIcon className="w-6 h-6 text-blue-200 fill-current" />
-            </div>
-          </CopyButton>
-        </div>
+          <div className="text-[14px] font-mono text-white flex-1 min-w-0 overflow-hidden whitespace-nowrap">
+            <HashShortView hash={hash} trim={false} />
+          </div>
+          <CopyIcon className="w-4 h-4 text-blue-200 fill-current flex-shrink-0" />
+        </CopyButton>
 
         <div className="flex flex-col items-center">
-          <div className="p-6 bg-white rounded-2xl self-center my-8">
+          <div className="p-6 bg-white rounded-2xl self-center my-6">
             <QRCode value={address} bgColor="#f4f4f4" fgColor="#000000" level="L" style={{ width: 196 }} />
           </div>
 

@@ -9,8 +9,9 @@ import { useAppEnv } from 'app/env';
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { t } from 'lib/i18n';
-import { useChainId, useTempleClient } from 'lib/temple/front';
+import { useChainId, useMavrykClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
@@ -23,8 +24,9 @@ interface ByFundraiserFormData {
 }
 
 export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
-  const { importFundraiserAccount } = useTempleClient();
-  const { register, errors, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
+  const { importFundraiserAccount } = useMavrykClient();
+  const { register, handleSubmit, formState, watch } = useForm<ByFundraiserFormData>();
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Fundraiser);
   const { popup } = useAppEnv();
@@ -46,14 +48,14 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
           await importFundraiserAccount(data.email, data.password, formatMnemonic(seedPhrase), chainId!);
 
           formAnalytics.trackSubmitSuccess();
-        } catch (err: any) {
+        } catch (err: unknown) {
           formAnalytics.trackSubmitFail();
 
           console.error(err);
 
           // Human delay
           await delay();
-          setError(err.message);
+          setError(getErrorMessage(err));
         }
       } else if (seedError === '') {
         setSeedError(t('mnemonicWordsAmountConstraint', [numberOfWords]) as string);
@@ -77,8 +79,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       {error && <Alert type="error" title={t('error')} description={error} autoFocus className="mb-6" />}
 
       <FormField
-        ref={register({ required: t('required') })}
-        name="email"
+        {...register('email', { required: t('required') })}
         id="importfundacc-email"
         label={t('email')}
         placeholder={t('enterEmailPlaceholder')}
@@ -88,8 +89,7 @@ export const ByFundraiserForm: FC<ImportformProps> = ({ className }) => {
       />
 
       <FormField
-        ref={register({ required: t('required') })}
-        name="password"
+        {...register('password', { required: t('required') })}
         type="password"
         id="importfundacc-password"
         label={t('password')}

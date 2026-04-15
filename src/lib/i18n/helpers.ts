@@ -37,7 +37,7 @@ export async function fetchLocaleMessages(locale: string) {
 
     appendPlaceholderLists(messages);
     return messages;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
 
     return null;
@@ -70,7 +70,7 @@ export function applySubstitutions(value: LocaleMessage, substitutions?: Substit
     }
 
     return value.message;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
 
     return '';

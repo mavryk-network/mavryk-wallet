@@ -1,26 +1,31 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
 import { Tzip16Module } from '@mavrykdynamics/webmavryk-tzip16';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
 
-import { getKYCStatus } from 'lib/apis/tzkt/api';
+import { getKYCStatus } from 'lib/apis/mvkt/api';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
-import { useRetryableSWR } from 'lib/swr';
-import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { chainKeys } from 'lib/query-keys';
 import {
-  ReadyTempleState,
-  TempleAccountType,
-  TempleStatus,
-  TempleState,
-  TempleNotification,
-  TempleMessageType
-} from 'lib/temple/types';
+  useWalletNetworks,
+  useWalletAccounts,
+  useWalletSettings,
+  useWalletsSpecs,
+  useWalletStatus
+} from 'lib/store/zustand/wallet.store';
+import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { TempleAccountType, TempleStatus, TempleNotification, TempleMessageType } from 'lib/temple/types';
 
-import { intercom, useTempleClient } from './client';
+import { intercom } from './client';
 import { usePassiveStorage } from './storage';
+import { useMavrykClient } from './use-mavryk-client';
+
+// Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
+const CHAIN_ID_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const [
   ReadyTempleProvider,
@@ -33,7 +38,7 @@ export const [
   useAccountPkh,
   useSettings,
   useHDGroups,
-  useTezos
+  useMavryk
 ] = constate(
   useReadyTemple,
   v => v.allNetworks,
@@ -49,17 +54,36 @@ export const [
 );
 
 function useReadyTemple() {
-  const templeFront = useTempleClient();
-  assertReady(templeFront);
+  const status = useWalletStatus();
+  const allNetworks = useWalletNetworks();
+  const allAccounts = useWalletAccounts();
+  const settings = useWalletSettings();
+  const walletsSpecs = useWalletsSpecs();
+  const { createWebMavrykSigner, createWebMavrykWallet, updateAccountKYCStatus } = useMavrykClient();
 
-  const {
-    networks: allNetworks,
-    accounts: allAccounts,
-    settings,
-    walletsSpecs,
-    createTaquitoSigner,
-    createTaquitoWallet
-  } = templeFront;
+  // Provider tree guarantees this only mounts when ready, but keep explicit
+  // check so the remaining hook calls don't run on stale/empty state.
+  if (status !== TempleStatus.Ready) throw new Error('Mavryk not ready');
+
+  const queryClient = useQueryClient();
+
+  // Stable primitive array — avoids re-running the effect when allNetworks gets a new reference
+  // but the actual RPC URLs haven't changed.
+  const allNetworkRpcUrls = useMemo(() => allNetworks.map(n => n.rpcBaseURL), [allNetworks]);
+
+  // Pre-warm chain ID cache for all networks so switching networks is instant.
+  // Chain IDs never change for a given RPC endpoint, so a 24h staleTime is effectively permanent.
+  useEffect(() => {
+    for (const rpcUrl of allNetworkRpcUrls) {
+      if (rpcUrl && !queryClient.getQueryData(chainKeys.id(rpcUrl))) {
+        void queryClient.prefetchQuery({
+          queryKey: chainKeys.id(rpcUrl),
+          queryFn: () => loadChainId(rpcUrl).catch(() => null),
+          staleTime: CHAIN_ID_STALE_MS
+        });
+      }
+    }
+  }, [allNetworkRpcUrls, queryClient]);
 
   const hdGroups = useMemo(
     () =>
@@ -134,29 +158,37 @@ function useReadyTemple() {
     const rpc = network.rpcBaseURL;
     const pkh = account.type === TempleAccountType.ManagedKT ? account.owner : account.publicKeyHash;
 
-    const t = new ReactiveTezosToolkit(loadFastRpcClient(rpc), checksum);
-    t.setSignerProvider(createTaquitoSigner(pkh));
-    t.setWalletProvider(createTaquitoWallet(pkh, rpc));
+    const t = new ReactiveMavrykToolkit(loadFastRpcClient(rpc), checksum);
+    t.setSignerProvider(createWebMavrykSigner(pkh));
+    t.setWalletProvider(createWebMavrykWallet(pkh, rpc));
     t.setPackerProvider(michelEncoder);
 
     return t;
-  }, [createTaquitoSigner, createTaquitoWallet, network, account]);
+  }, [createWebMavrykSigner, createWebMavrykWallet, network, account]);
 
   // Get user KYC status ---------------
+  // Cancellation flag prevents stale async writes if account/network changes mid-flight.
   useEffect(() => {
+    let cancelled = false;
+
     (async function () {
       const rpcUrl = tezos?.rpc?.getRpcUrl();
-
       const chainId = await loadChainId(rpcUrl).catch(() => null);
       const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
 
-      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      if (!cancelled) {
+        await updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      }
     })();
-  }, [account.publicKeyHash, tezos?.rpc]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [account.publicKeyHash, tezos?.rpc, updateAccountKYCStatus]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {
-      (window as any).tezos = tezos;
+      (window as any).mavryk = tezos;
     }
   }, [tezos]);
 
@@ -178,8 +210,8 @@ function useReadyTemple() {
 }
 
 export function useChainId(suspense?: boolean) {
-  const tezos = useTezos();
-  const rpcUrl = useMemo(() => tezos?.rpc?.getRpcUrl(), [tezos]);
+  const mavryk = useMavryk();
+  const rpcUrl = useMemo(() => mavryk?.rpc?.getRpcUrl(), [mavryk]);
 
   const { data: chainId } = useChainIdLoading(rpcUrl, suspense);
   return chainId;
@@ -192,9 +224,37 @@ export function useChainIdValue(rpcUrl: string, suspense?: boolean) {
 }
 
 export function useChainIdLoading(rpcUrl: string, suspense?: boolean) {
-  const fetchChainId = useCallback(() => loadChainId(rpcUrl).catch(() => null), [rpcUrl]);
+  /**
+   * Stable promise ref for Suspense support. The previous `throw result.refetch()`
+   * created a new Promise each render, causing React Suspense to infinite-loop
+   * (catch → re-render → new promise → catch → ...). Caching the promise by rpcUrl
+   * ensures Suspense receives the same reference until it resolves.
+   */
+  const suspensePromiseRef = useRef<{ key: string; promise: Promise<unknown> } | null>(null);
 
-  return useRetryableSWR(['chain-id', rpcUrl], fetchChainId, { suspense, revalidateOnFocus: false });
+  const result = useQuery({
+    queryKey: chainKeys.id(rpcUrl),
+    queryFn: () => loadChainId(rpcUrl).catch(() => null),
+    enabled: !!rpcUrl,
+    refetchOnWindowFocus: false,
+    retry: 2,
+    staleTime: CHAIN_ID_STALE_MS,
+    gcTime: CHAIN_ID_STALE_MS
+  });
+
+  if (suspense && result.isLoading && result.fetchStatus !== 'idle') {
+    if (!suspensePromiseRef.current || suspensePromiseRef.current.key !== rpcUrl) {
+      suspensePromiseRef.current = {
+        key: rpcUrl,
+        promise: result.refetch().finally(() => {
+          suspensePromiseRef.current = null;
+        })
+      };
+    }
+    throw suspensePromiseRef.current.promise;
+  }
+
+  return result;
 }
 
 export function useRelevantAccounts(withExtraTypes = true) {
@@ -229,15 +289,9 @@ export function useRelevantAccounts(withExtraTypes = true) {
   return useMemo(() => relevantAccounts, [relevantAccounts]);
 }
 
-export class ReactiveTezosToolkit extends MavrykToolkit {
+export class ReactiveMavrykToolkit extends MavrykToolkit {
   constructor(rpc: string | RpcClientInterface, public checksum: string) {
     super(rpc);
     this.addExtension(new Tzip16Module());
-  }
-}
-
-function assertReady(state: TempleState): asserts state is ReadyTempleState {
-  if (state.status !== TempleStatus.Ready) {
-    throw new Error('Mavryk not ready');
   }
 }

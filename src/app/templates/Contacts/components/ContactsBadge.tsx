@@ -18,8 +18,7 @@ export const ContactsBadge: FC<ContactsBadgeProps> = ({ own, isCurrent }) => {
   return (
     <div className="flex items-center">
       <span
-        style={{ padding: '2px 4px' }}
-        className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
+        className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue px-1 py-0.5')}
         {...setTestID(AddressBookSelectors.contactOwnLabelText)}
       >
         {isCurrent ? <T id="current" /> : <T id="ownAccount" />}

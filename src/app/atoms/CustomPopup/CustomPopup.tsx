@@ -24,7 +24,7 @@ const CustomPopup: FC<CustomPopupProps> = props => {
       closeTimeoutMS={200}
       overlayClassName={classNames(
         'fixed inset-0 z-30',
-        'bg-primary-bg bg-opacity-60',
+        'bg-black/50 backdrop-blur-sm',
         contentPosition === 'bottom' ? 'flex items-end justify-center' : 'flex items-center justify-center',
         overlayClassName
       )}

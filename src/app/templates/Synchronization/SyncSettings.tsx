@@ -1,15 +1,16 @@
 import React, { FC, useCallback, useLayoutEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { QRCode } from 'react-qr-svg';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { useVanishingState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SyncSettingsSelectors } from './SyncSettings.selectors';
@@ -19,12 +20,19 @@ type FormData = {
 };
 
 const SyncSettings: FC = () => {
-  const { generateSyncPayload } = useTempleClient();
+  const { generateSyncPayload } = useMavrykClient();
   const { popup } = useAppEnv();
 
   const formRef = useRef<HTMLFormElement>(null);
   const [payload, setPayload] = useVanishingState();
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors,
+    watch
+  } = useForm<FormData>();
 
   const focusPasswordField = useCallback(
     () => formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus(),
@@ -33,26 +41,26 @@ const SyncSettings: FC = () => {
 
   useLayoutEffect(() => focusPasswordField(), [focusPasswordField]);
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
-      if (formState.isSubmitting) return;
+      if (isSubmitting) return;
 
-      clearError('password');
+      clearErrors('password');
       try {
         const syncPayload = await generateSyncPayload(password);
         setPayload(syncPayload);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (process.env.NODE_ENV === 'development') {
           console.error(err);
         }
 
         // Human delay.
         await delay();
-        setError('password', 'submit-error', err.message);
+        setError('password', { type: 'submit-error', message: getErrorMessage(err) });
         focusPasswordField();
       }
     },
-    [formState.isSubmitting, clearError, setError, generateSyncPayload, setPayload, focusPasswordField]
+    [isSubmitting, clearErrors, setError, generateSyncPayload, setPayload, focusPasswordField]
   );
 
   const handleQRBttonClick = useCallback(() => {
@@ -108,12 +116,11 @@ const SyncSettings: FC = () => {
             className={clsx('flex flex-col flex-grow justify-between', popup && 'pb-8')}
           >
             <FormField
-              ref={register({ required: t('required') })}
+              {...register('password', { required: t('required') })}
               label={t('password')}
               // labelDescription={t('syncPasswordDescription')}
               id="reveal-secret-password"
               type="password"
-              name="password"
               placeholder={t('enterWalletPassword')}
               errorCaption={errors.password?.message}
               containerClassName="mb-4"
@@ -122,7 +129,7 @@ const SyncSettings: FC = () => {
 
             <FormSubmitButton
               disabled={!isPasswordEntered}
-              loading={formState.isSubmitting}
+              loading={isSubmitting}
               testID={SyncSettingsSelectors.syncButton}
             >
               <T id="sync" />

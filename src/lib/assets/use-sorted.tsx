@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { BigNumber } from 'bignumber.js';
 
-import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
+import { useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 
 import { MAV_TOKEN_SLUG } from './utils';
 
@@ -23,7 +23,7 @@ export function useSortededAssetsSlugs(
   const assetsSlugNames = useMemo(
     () =>
       assetsSlugs.map(slug => ({
-        name: tokensMetadata[slug]?.name ?? 'Unknwon token',
+        name: tokensMetadata[slug]?.name ?? 'Unknown token',
         slug
       })),
     [assetsSlugs, tokensMetadata]

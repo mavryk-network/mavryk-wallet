@@ -19,3 +19,12 @@ interface GetAdvertisingInfoResponse {
 
 export const getAdvertisingInfo$ = () =>
   from(templeWalletApi.get<GetAdvertisingInfoResponse>('/advertising-info')).pipe(map(response => response.data.data));
+
+export const fetchAdvertisingInfo = async (): Promise<AdvertisingPromotion | null> => {
+  try {
+    const response = await templeWalletApi.get<GetAdvertisingInfoResponse>('/advertising-info');
+    return response.data.data ?? null;
+  } catch {
+    return null;
+  }
+};

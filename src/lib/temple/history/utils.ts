@@ -1,15 +1,14 @@
 import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics/webmavryk';
 import { BigNumber } from 'bignumber.js';
-import dayjs from 'dayjs';
 
-import { isKnownChainId, TzktAlias, TzktApiChainId, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
+import { isKnownChainId, MvktAlias, MvktApiChainId, MvktOperation, MvktTransactionOperation } from 'lib/apis/mvkt';
 import {
-  isTzktOperParam,
-  isTzktOperParam_Fa12,
-  isTzktOperParam_Fa2,
-  isTzktOperParam_LiquidityBaking,
+  isMvktOperParam,
+  isMvktOperParam_Fa12,
+  isMvktOperParam_Fa2,
+  isMvktOperParam_LiquidityBaking,
   ParameterFa2
-} from 'lib/apis/tzkt/utils';
+} from 'lib/apis/mvkt/utils';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { isTruthy } from 'lib/utils';
 
@@ -45,13 +44,13 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
     oldestOperation = undefined;
 
   if (operations[0]) {
-    firstOperation = reduceOneTzktOperation(operations[0], 0, address);
+    firstOperation = reduceOneMvktOperation(operations[0], 0, address);
   }
   if (operations[operations.length - 1]) {
-    oldestOperation = reduceOneTzktOperation(operations[operations.length - 1], operations.length - 1, address);
+    oldestOperation = reduceOneMvktOperation(operations[operations.length - 1], operations.length - 1, address);
   }
 
-  const historyItemOperations = reduceTzktOperations(operations, address);
+  const historyItemOperations = reduceMvktOperations(operations, address);
 
   const status = deriveHistoryItemStatus(!historyItemOperations.length ? operations : historyItemOperations);
   const type = deriveHistoryItemType(historyItemOperations, address, operations[0]);
@@ -71,8 +70,8 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
   return newUserHistoryItem;
 }
 
-function reduceTzktOperations(operations: TzktOperation[], address: string): IndividualHistoryItem[] {
-  const reducedOperations = operations.map((op, index) => reduceOneTzktOperation(op, index, address)).filter(isTruthy);
+function reduceMvktOperations(operations: MvktOperation[], address: string): IndividualHistoryItem[] {
+  const reducedOperations = operations.map((op, index) => reduceOneMvktOperation(op, index, address)).filter(isTruthy);
 
   return reducedOperations;
 }
@@ -81,14 +80,14 @@ function reduceTzktOperations(operations: TzktOperation[], address: string): Ind
  * (i) Does not mutate operation object
  * works with original operation type, nit the custom one like interaction, multiole etc. from the enum
  */
-function reduceOneTzktOperation(
-  operation: TzktOperation,
+function reduceOneMvktOperation(
+  operation: MvktOperation,
   index: number,
   address: string
 ): IndividualHistoryItem | null {
   switch (operation.type) {
     case 'transaction':
-      return reduceOneTzktTransactionOperation(address, operation, index);
+      return reduceOneMvktTransactionOperation(address, operation, index);
 
     case 'staking':
       const stakingOpBase = buildHistoryItemOpBase(operation, address, operation.amount || 0, operation.sender, index);
@@ -142,9 +141,9 @@ function reduceOneTzktOperation(
   }
 }
 
-function reduceOneTzktTransactionOperation(
+function reduceOneMvktTransactionOperation(
   address: string,
-  operation: TzktTransactionOperation,
+  operation: MvktTransactionOperation,
   index: number
 ): HistoryItemTransactionOp | null {
   function _buildReturn(args: {
@@ -169,7 +168,7 @@ function reduceOneTzktTransactionOperation(
       type: HistoryItemOpTypeEnum.TransferTo
     };
     if (contractAddress != null) historyTxOp.contractAddress = contractAddress;
-    if (isTzktOperParam(operation.parameter)) {
+    if (isMvktOperParam(operation.parameter)) {
       historyTxOp.entrypoint = operation.parameter.entrypoint;
       historyTxOp.type = HistoryItemOpTypeEnum.Interaction;
     }
@@ -206,7 +205,7 @@ function reduceOneTzktTransactionOperation(
       contractAddress: MAV_TOKEN_SLUG,
       tokenTransfers
     });
-  } else if (isTzktOperParam_Fa2(parameter)) {
+  } else if (isMvktOperParam_Fa2(parameter)) {
     const tokenTransfers = buildTokenTransferItem(operation, 'fa2', address);
     // console.log('FA2 - Got to here in buildTokenTransferItem. Hash & Op:', operation.hash, operation, tokenTransfers);
     const source = tokenTransfers?.sender.address === address ? { ...operation.sender, address } : operation.sender;
@@ -216,7 +215,7 @@ function reduceOneTzktTransactionOperation(
     if (!tokenTransfers) return _buildReturn({ amount, source, contractAddress });
 
     return _buildReturn({ amount, source, contractAddress, tokenTransfers });
-  } else if (isTzktOperParam_Fa12(parameter)) {
+  } else if (isMvktOperParam_Fa12(parameter)) {
     if (parameter.entrypoint === 'approve') return null;
 
     const source = { ...operation.sender };
@@ -231,7 +230,7 @@ function reduceOneTzktTransactionOperation(
     if (!tokenTransfers) return _buildReturn({ amount, source, contractAddress });
 
     return _buildReturn({ amount, source, contractAddress, tokenTransfers });
-  } else if (isTzktOperParam_LiquidityBaking(parameter)) {
+  } else if (isMvktOperParam_LiquidityBaking(parameter)) {
     const source = operation.sender;
     const contractAddress = operation.target.address;
     const amount = parameter.value.quantity;
@@ -246,7 +245,7 @@ function reduceOneTzktTransactionOperation(
 }
 
 // Money utils ------------------------------------------
-function getDelegationAmountSigned(operation: TzktOperation, address: string, amount: number) {
+function getDelegationAmountSigned(operation: MvktOperation, address: string, amount: number) {
   return operation.type === 'delegation' &&
     operation.newDelegate?.address !== address &&
     operation.prevDelegate?.address === address
@@ -254,7 +253,7 @@ function getDelegationAmountSigned(operation: TzktOperation, address: string, am
     : `${amount}`;
 }
 
-function getStakingAmountSigned(operation: TzktOperation, address: string, amount: number) {
+function getStakingAmountSigned(operation: MvktOperation, address: string, amount: number) {
   if (operation.type !== 'staking') return '';
   let isMinus: boolean;
   const isValidator = address === operation.baker?.address;
@@ -288,7 +287,7 @@ function getStakingAmountSigned(operation: TzktOperation, address: string, amoun
   return `${isMinus ? '-' : ''}${amount}`;
 }
 
-function getAmountSigned(operation: TzktOperation, address: string, amount: number, source: HistoryMember) {
+function getAmountSigned(operation: MvktOperation, address: string, amount: number, source: HistoryMember) {
   if (operation.type === 'delegation') return getDelegationAmountSigned(operation, address, amount);
 
   if (operation.type === 'staking') return getStakingAmountSigned(operation, address, amount);
@@ -299,7 +298,7 @@ function getAmountSigned(operation: TzktOperation, address: string, amount: numb
 // END OF Money utils ------------------------------------------
 
 function buildHistoryItemOpBase(
-  operation: TzktOperation,
+  operation: MvktOperation,
   address: string,
   amount: number,
   source: HistoryMember,
@@ -321,7 +320,7 @@ function buildHistoryItemOpBase(
     gasUsed,
     storageUsed,
     storageFee: storageFee ?? 0, // storage fee
-    entrypoint: (operation as TzktTransactionOperation).entrypoint
+    entrypoint: (operation as MvktTransactionOperation).entrypoint
   };
   if (!isZero(reducedOperation.amountSigned)) reducedOperation.amountDiff = getMoneyDiff(reducedOperation.amountSigned);
   return reducedOperation;
@@ -380,7 +379,7 @@ function reduceParameterFa2Values(values: ParameterFa2['value'], relAddress: str
       }
     }
   } catch (e) {
-    console.log(values);
+    console.error('Failed to build token transfer items:', e);
   }
 
   return result;
@@ -405,7 +404,7 @@ function deriveHistoryItemStatus(items: { status: HistoryItemStatus }[]): Histor
 function deriveHistoryItemType(
   items: IndividualHistoryItem[], // [5, 2]
   address: string,
-  firstOperation: TzktOperation // 5
+  firstOperation: MvktOperation // 5
 ): HistoryItemOpTypeEnum {
   let type = HistoryItemOpTypeEnum.Interaction;
 
@@ -454,7 +453,7 @@ function deriveHistoryItemType(
 }
 
 function buildTokenTransferItem(
-  operation: TzktTransactionOperation,
+  operation: MvktTransactionOperation,
   tokenType: TokenType,
   address: string
 ): HistoryItemTokenTransfer | null {
@@ -512,8 +511,8 @@ function buildTokenTransferItem(
   }
 }
 
-function transformToHistoryMember(address: string, alias: string = ''): TzktAlias {
-  // Transform the data into TzktAlias format
+function transformToHistoryMember(address: string, alias: string = ''): MvktAlias {
+  // Transform the data into MvktAlias format
   return { alias: alias, address: address };
 }
 
@@ -521,7 +520,7 @@ function transformToHistoryMember(address: string, alias: string = ''): TzktAlia
 // f.e. JPD 200 -> SIRS -> Mavryk Finance
 // we wend to SIRS but the end address is Mavryk Finance so we show that address instead of SIRS address
 // NOTE - It doesn't apply to simple transfers where we have amount
-function getDestinationAddress(operation: TzktTransactionOperation) {
+function getDestinationAddress(operation: MvktTransactionOperation) {
   return operation.parameter?.entrypoint &&
     operation.parameter.entrypoint === 'transfer' &&
     operation.parameter.value.length === 1 &&
@@ -531,7 +530,7 @@ function getDestinationAddress(operation: TzktTransactionOperation) {
 }
 
 // For custom pending transactions stored in browser storage
-export const buildStorageKeyForTx = (pkh: string, chainId: TzktApiChainId) => {
+export const buildStorageKeyForTx = (pkh: string, chainId: MvktApiChainId) => {
   return `${pkh}_${chainId}_pending_transactions`;
 };
 
@@ -561,7 +560,7 @@ export async function buildPendingOperationObject({
 }: BuildPendingOperationObjecttype) {
   if (!operation) return null;
 
-  const now = dayjs().toISOString();
+  const now = new Date().toISOString();
 
   const baseOperationFoelds = {
     type,
@@ -636,6 +635,6 @@ export const putOperationIntoStorage = async (
       await putToStorage(storageKey, [...operations, pendingOpObject]);
     }
   } catch (e) {
-    console.log('Error putting pending operation into browser storage');
+    console.error('Error putting pending operation into browser storage');
   }
 };

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { useAccountRwasSelector } from 'app/store/assets/selectors';
-import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
+import { useAccountRwasSelector } from 'lib/store/zustand/assets.store';
+import { useAllAccountBalancesSelector } from 'lib/store/zustand/balances.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useMemoWithCompare } from 'lib/ui/hooks';
 
@@ -18,7 +18,7 @@ export const useAccountRwas = (account: string, chainId: string) => {
     () => {
       const result: AccountAsset[] = [];
 
-      for (const [slug, { status }] of Object.entries(stored)) {
+      for (const [slug, { status }] of Object.entries(stored ?? {})) {
         if (status !== 'removed') result.push({ slug, status: getAssetStatus(balances[slug], status) });
       }
 

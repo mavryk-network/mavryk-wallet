@@ -1,39 +1,40 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
-import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
+import { AssetPageImage } from 'app/templates/CollectibleMedia';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
+import {
+  useCollectiblesDetailsLoading,
+  useCollectibleDetails,
+  useCollectiblesDetailsQuery
+} from 'lib/collectibles/use-collectibles-details.query';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
-import { useRetryableSWR } from 'lib/swr';
+import { tokensKeys } from 'lib/query-keys';
+import { useCollectibleMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
+import { CollectibleImageFallback } from '../components/CollectibleImageFallback';
+import { LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY } from '../constants';
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
 import { CollectibleSelectors } from '../selectors';
 import { getDetailsListing } from '../utils';
 
-import { CardWithLabel } from './CardWithLabel';
-import { CollectiblePageImage } from './CollectiblePageImage';
 import { PropertiesItems } from './PropertiesItems';
 
 const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
@@ -44,19 +45,18 @@ interface Props {
 
 const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const metadata = useCollectibleMetadataSelector(assetSlug);
-  const details = useCollectibleDetailsSelector(assetSlug);
-  const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const details = useCollectibleDetails(assetSlug);
+  const areAnyNFTsDetailsLoading = useCollectiblesDetailsLoading();
   const { fullPage } = useAppEnv();
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
 
-  const { data: extraDetails } = useRetryableSWR(
-    ['fetchCollectibleExtraDetails', contractAddress, tokenId],
-    () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
-    {
-      refreshInterval: DETAILS_SYNC_INTERVAL
-    }
-  );
+  const { data: extraDetails } = useQuery({
+    queryKey: tokensKeys.collectibleExtra(contractAddress, tokenId ?? ''),
+    queryFn: () => (tokenId ? fetchCollectibleExtraDetails(contractAddress, tokenId) : Promise.resolve(null)),
+    refetchInterval: DETAILS_SYNC_INTERVAL,
+    retry: 2
+  });
 
   const account = useAccount();
 
@@ -85,11 +85,8 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
-  const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
-    dispatch,
-    assetSlug
-  ]);
+  // TanStack Query handles fetching + refetch interval automatically
+  useCollectiblesDetailsQuery([assetSlug]);
 
   const displayedOffer = useMemo(() => {
     const highestOffer = offers?.[0];
@@ -165,13 +162,16 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
         <div className={clsx(fullPage && 'grid grid-cols-2 items-start gap-x-4')}>
           <div className={clsx('rounded-2xl mb-6 bg-primary-card overflow-hidden')} style={{ aspectRatio: '1/1' }}>
-            <CollectiblePageImage
+            <AssetPageImage
               metadata={metadata}
               areDetailsLoading={areDetailsLoading}
               objktArtifactUri={details?.objktArtifactUri}
               isAdultContent={details?.isAdultContent}
               mime={details?.mime}
               className="h-full w-full"
+              fallback={<CollectibleImageFallback large />}
+              audioFallback={<CollectibleImageFallback large isAudioCollectible />}
+              adultBlurToggleKey={LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY}
             />
           </div>
           {fullPage && <CollectibleTextSection />}

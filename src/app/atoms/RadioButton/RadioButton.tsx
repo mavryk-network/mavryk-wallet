@@ -30,7 +30,7 @@ export const RadioButton: FC<RadioButtonProps> = ({
   return (
     <label
       htmlFor={id}
-      className={classNames(styles.radioLabel, disabled && styles.disabled)}
+      className={classNames('text-sm', styles.radioLabel, disabled && styles.disabled)}
       style={{ '--bg': bg } as React.CSSProperties}
     >
       <input

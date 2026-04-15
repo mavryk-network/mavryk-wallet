@@ -4,10 +4,10 @@ import { isDefined } from '@rnw-community/shared';
 
 import { Anchor } from 'app/atoms/Anchor';
 import { useAppEnv } from 'app/env';
-import { useActivePromotionSelector } from 'app/store/advertising/selectors';
+import { useActivePromotion } from 'app/hooks/use-advertising-promotion.query';
 
 export const AdvertisingBanner: FC = () => {
-  const activePromotion = useActivePromotionSelector();
+  const activePromotion = useActivePromotion();
   const { popup } = useAppEnv();
 
   if (!isDefined(activePromotion)) return null;

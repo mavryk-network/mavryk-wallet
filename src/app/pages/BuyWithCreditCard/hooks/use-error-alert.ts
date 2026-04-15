@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import { useCurrenciesErrorsSelector, usePairLimitsErrorsSelector } from 'app/store/buy-with-credit-card/selectors';
+import { useCurrenciesErrors, usePairLimitsErrors } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { PAIR_NOT_FOUND_MESSAGE } from 'lib/buy-with-credit-card/constants';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
 import { PaymentProviderInterface } from 'lib/buy-with-credit-card/topup.interface';
@@ -20,8 +20,8 @@ export const useErrorAlert = (
 ) => {
   const { formValues } = form;
   const { inputCurrency, outputToken } = formValues;
-  const currenciesErrors = useCurrenciesErrorsSelector();
-  const updatePairLimitsErrors = usePairLimitsErrorsSelector(inputCurrency.code, outputToken.code);
+  const currenciesErrors = useCurrenciesErrors();
+  const updatePairLimitsErrors = usePairLimitsErrors(inputCurrency.code, outputToken.code);
 
   const [shouldHideErrorAlert, setShouldHideErrorAlert] = useState(false);
 

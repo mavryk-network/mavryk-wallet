@@ -13,20 +13,18 @@ import 'lib/keep-bg-worker-alive/script';
 import DisableOutlinesForClick from 'app/a11y/DisableOutlinesForClick';
 import DocBg from 'app/a11y/DocBg';
 import Dialogs from 'app/layouts/Dialogs';
-import { StoreProvider } from 'app/store/provider';
 import { getMessage, T } from 'lib/i18n';
 import { clearAllStorages } from 'lib/temple/reset';
 import { AlertFn, ConfirmFn, DialogsProvider, useAlert, useConfirm } from 'lib/ui/dialog';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 const OptionsWrapper: FC = () => (
-  <StoreProvider>
-    <DialogsProvider>
-      <Options />
-      <Dialogs />
-      <DisableOutlinesForClick />
-    </DialogsProvider>
+  <DialogsProvider>
+    <Options />
+    <Dialogs />
+    <DisableOutlinesForClick />
     <DocBg bgClassName="bg-primary-bg" />
-  </StoreProvider>
+  </DialogsProvider>
 );
 
 const Options: FC = () => {
@@ -39,7 +37,7 @@ const Options: FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="mb-2 text-xl font-semibold text-white">
+      <h1 className="mb-2 text-xl font-medium text-white">
         <T id="templeWalletOptions" />
       </h1>
 
@@ -51,7 +49,7 @@ const Options: FC = () => {
             'bg-accent-blue rounded',
             'flex items-center',
             'text-white',
-            'text-sm font-semibold',
+            'text-sm font-medium',
             'transition duration-200 ease-in-out',
             'opacity-90 hover:opacity-100 focus:opacity-100',
             'shadow-sm hover:shadow focus:shadow'
@@ -83,10 +81,10 @@ async function handleReset(customAlert: AlertFn, confirm: ConfirmFn) {
       try {
         await clearAllStorages();
         browser.runtime.reload();
-      } catch (err: any) {
+      } catch (err: unknown) {
         await customAlert({
           title: getMessage('error'),
-          children: err.message
+          children: getErrorMessage(err)
         });
       }
     })();

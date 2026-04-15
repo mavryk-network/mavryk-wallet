@@ -1,21 +1,18 @@
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
 
+import { useVirtualizer } from '@tanstack/react-virtual';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
 import { Divider, HashChip, Spinner } from 'app/atoms';
 import Checkbox from 'app/atoms/Checkbox';
+import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EyeIcon } from 'app/icons/eye-closed-thin.svg';
 import { ReactComponent as SearchIcon } from 'app/icons/search.svg';
 import { ReactComponent as TrashIcon } from 'app/icons/trash.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
-import { dispatch } from 'app/store';
-import { setCollectibleStatusAction, setTokenStatusAction, setRwaStatusAction } from 'app/store/assets/actions';
-import { useAreAssetsLoading } from 'app/store/assets/selectors';
-import { StoredAssetStatus } from 'app/store/assets/state';
-import { useTokensMetadataLoadingSelector } from 'app/store/tokens-metadata/selectors';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { CounterSelect, CounterSelectOptionType } from 'app/templates/CounterSelect';
 import SearchAssetField from 'app/templates/SearchAssetField';
@@ -26,11 +23,11 @@ import { AssetTypesEnum } from 'lib/assets/types';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetName, getAssetSymbol } from 'lib/metadata';
+import { assetsStore, useAreAssetsLoading, StoredAssetStatus } from 'lib/store/zustand/assets.store';
+import { useTokensMetadataLoadingSelector } from 'lib/store/zustand/metadata.store';
 import { useAccount, useChainId } from 'lib/temple/front';
 import { useConfirm } from 'lib/ui/dialog';
 import useTippy from 'lib/ui/useTippy';
-
-import { CryptoBalance } from '../Home/OtherComponents/Tokens/components/Balance';
 
 import { useAssetsListingLogic } from './hooks/useAssetsListingLogic';
 import { useAssetsTokens } from './hooks/useAssetsTokens';
@@ -122,21 +119,19 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   const handleAssetUpdate = useCallback(
     async (assetSlug: string, status: StoredAssetStatus) => {
       try {
-        dispatch(
-          (assetType === AssetTypesEnum.Collectibles
-            ? setCollectibleStatusAction
-            : assetType === AssetTypesEnum.Rwas
-            ? setRwaStatusAction
-            : setTokenStatusAction)({
-            account: account.publicKeyHash,
-            chainId,
-            slug: assetSlug,
-            status
-          })
-        );
-      } catch (err: any) {
+        const store = assetsStore.getState();
+        const payload = {
+          account: account.publicKeyHash,
+          chainId,
+          slug: assetSlug,
+          status
+        };
+
+        if (assetType === AssetTypesEnum.Collectibles) store.setCollectibleStatus(payload);
+        else if (assetType === AssetTypesEnum.Rwas) store.setRwaStatus(payload);
+        else store.setTokenStatus(payload);
+      } catch (err: unknown) {
         console.error(err);
-        alert(err.message);
       }
     },
     [assetType, account.publicKeyHash, chainId]
@@ -246,7 +241,7 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
 
   const sortedAssets = useMemo(
     () =>
-      filteredAssets.sort((a, b) => {
+      [...filteredAssets].sort((a, b) => {
         if (tokensRecord[a]?.status === tokensRecord[b]?.status) {
           return 0;
         } else if (tokensRecord[a]?.status === 'disabled') {
@@ -259,6 +254,14 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
   );
 
   const noItemsSelected = !selectedAssets.length;
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: sortedAssets.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 64,
+    overscan: 5
+  });
 
   return (
     <div className={classNames('w-full mx-auto mb-6 h-full', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
@@ -289,27 +292,43 @@ const ManageAssetsContent: FC<Props> = ({ assetType }) => {
       </div>
 
       {sortedAssets.length > 0 ? (
-        <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-base-plus">
-          {sortedAssets.map((slug, i, arr) => {
-            const last = i === arr.length - 1;
-
-            return (
-              <ListItem
-                key={slug.concat(i.toString())}
-                assetSlug={slug}
-                last={last}
-                checked={Boolean(selectedAssets.find(asset => asset === slug)) ?? false}
-                hidden={tokensRecord[slug]?.status === 'disabled' ?? false}
-                assetType={assetType}
-                balance={new BigNumber(balances[assetType] ?? 0)}
-                address={address}
-                setSelectedAssets={setSelectedAssets}
-              />
-            );
-          })}
+        <div
+          ref={scrollContainerRef}
+          className="w-full overflow-y-auto rounded-md text-white"
+          style={{ maxHeight: popup ? '60vh' : '70vh' }}
+        >
+          <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const slug = sortedAssets[virtualRow.index];
+              const last = virtualRow.index === sortedAssets.length - 1;
+              return (
+                <div
+                  key={slug}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`
+                  }}
+                >
+                  <ListItem
+                    assetSlug={slug}
+                    last={last}
+                    checked={selectedAssets.includes(slug)}
+                    hidden={tokensRecord[slug]?.status === 'disabled'}
+                    balance={new BigNumber(balances[slug] ?? 0)}
+                    setSelectedAssets={setSelectedAssets}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
-        <LoadingComponent loading={isSyncing} searchValue={searchValue} assetType={assetType} />
+        <LoadingComponent loading={isSyncing} searchValue={searchValue} />
       )}
     </div>
   );
@@ -320,9 +339,7 @@ type ListItemProps = {
   last: boolean;
   checked: boolean;
   setSelectedAssets: React.Dispatch<React.SetStateAction<string[]>>;
-  assetType: string;
   balance: BigNumber;
-  address: string;
   hidden: boolean;
 };
 
@@ -365,10 +382,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       </div>
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
-          <div
-            className="text-base-plus text-white truncate w-full"
-            style={{ marginBottom: '0.125rem', lineHeight: '19px' }}
-          >
+          <div className="text-sm text-white truncate w-full" style={{ marginBottom: '0.125rem', lineHeight: '19px' }}>
             {getAssetName(metadata)}
           </div>
 
@@ -386,13 +400,10 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
         </div>
       </div>
       <div className="flex-1" />
-      <div
-        className={classNames(
-          'flex items-center gap-1 p-1 rounded-full text-white text-sm flex-wrap',
-          'transition ease-in-out duration-200'
-        )}
-      >
-        <CryptoBalance value={balance} testIDProperties={{ assetSlug }} />
+      <div className="text-xs text-white text-right truncate ml-2 flex-shrink-0 max-w-[40%]">
+        <Money smallFractionFont={false} testIDProperties={{ assetSlug }}>
+          {balance}
+        </Money>
       </div>
     </label>
   );
@@ -401,7 +412,6 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
 interface LoadingComponentProps {
   loading: boolean;
   searchValue: string;
-  assetType: string;
 }
 
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ loading, searchValue }) => {

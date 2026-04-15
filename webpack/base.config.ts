@@ -71,7 +71,11 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
       assert: require.resolve('assert/'),
       vm: require.resolve('vm-browserify'),
       /* Current package version has a bug with false import path */
-      '@ledgerhq/devices/hid-framing': require.resolve('@ledgerhq/devices/lib-es/hid-framing')
+      '@ledgerhq/devices/hid-framing': require.resolve('@ledgerhq/devices/lib-es/hid-framing'),
+      /* Deprecated webauthn transport uses @ledgerhq/devices v5 scrambling module removed in v8 */
+      '@ledgerhq/devices/lib/scrambling': require.resolve(
+        '@ledgerhq/hw-transport-webauthn/node_modules/@ledgerhq/devices/lib/scrambling'
+      )
     },
 
     alias: {
@@ -361,9 +365,24 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
     ]
   },
 
-  // Turn off performance processing because we utilize
-  // our own hints via the FileSizeReporter
-  performance: false
+  // Suppress known false-positive warnings from third-party packages
+  ignoreWarnings: [
+    {
+      module: /node_modules\/@google\/model-viewer/,
+      message: /Critical dependency/
+    }
+  ],
+
+  // Enable performance hints for Firefox (4 MB chunk limit); disabled for other browsers
+  // because we use our own FileSizeReporter hints instead.
+  performance:
+    TARGET_BROWSER === 'firefox'
+      ? {
+          hints: 'error',
+          maxAssetSize: 4 * 1024 * 1024,
+          maxEntrypointSize: 4 * 1024 * 1024
+        }
+      : false
 });
 
 function getStyleLoaders(cssOptions = {}) {
@@ -382,18 +401,7 @@ function getStyleLoaders(cssOptions = {}) {
       loader: require.resolve('postcss-loader'),
       options: {
         postcssOptions: {
-          ident: 'postcss',
-          plugins: [
-            require('postcss-flexbugs-fixes'),
-            require('postcss-preset-env')({
-              autoprefixer: {
-                flexbox: 'no-2009'
-              },
-              stage: 3
-            }),
-            require('tailwindcss'),
-            require('autoprefixer')
-          ]
+          plugins: [require('@tailwindcss/postcss')]
         }
       }
     }

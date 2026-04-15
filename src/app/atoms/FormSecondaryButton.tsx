@@ -30,7 +30,7 @@ export const FormSecondaryButton: FC<FormSecondaryButtonProps> = ({
     () =>
       classNames(
         'relative flex items-center justify-center',
-        'bg-white border-2 font-semibold',
+        'bg-white border-2 font-medium',
         'transition duration-200 ease-in-out',
         rounder ? 'rounded-md' : 'rounded',
         small ? 'px-6 text-sm' : 'px-8 text-base',

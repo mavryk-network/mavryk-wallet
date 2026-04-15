@@ -39,6 +39,10 @@ const ApproveStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
 
   useEffect(() => {
     if (exchangeData) {
+      if (!exchangeData.coinFrom) {
+        setIsError(true);
+        return;
+      }
       if (exchangeData.status === ExchangeDataStatusEnum.CONFIRMATION) {
         setStep(2);
       }
@@ -50,11 +54,6 @@ const ApproveStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
       }
     }
   }, [exchangeData, setStep, setIsError]);
-
-  if (exchangeData && !exchangeData.coinFrom) {
-    setIsError(true);
-    return null;
-  }
 
   return (
     <>

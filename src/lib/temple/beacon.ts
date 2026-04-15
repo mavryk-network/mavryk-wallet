@@ -257,7 +257,7 @@ export async function decryptMessage(payload: string, senderPublicKey: string) {
 
   if (hexPayload.length >= crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES) {
     try {
-      return await decryptCryptoboxPayload(hexPayload, sharedRx);
+      return await decryptCryptoboxPayload(new Uint8Array(hexPayload), sharedRx);
     } catch (decryptionError) {
       /* NO-OP. We try to decode every message, but some might not be addressed to us. */
     }
@@ -269,8 +269,11 @@ export async function decryptMessage(payload: string, senderPublicKey: string) {
 export async function sealCryptobox(payload: string | Buffer, publicKey: Uint8Array): Promise<string> {
   await ready;
 
-  const kxSelfPublicKey = crypto_sign_ed25519_pk_to_curve25519(Buffer.from(publicKey)); // Secret bytes to scalar bytes
-  const encryptedMessage = crypto_box_seal(payload, kxSelfPublicKey);
+  const kxSelfPublicKey = crypto_sign_ed25519_pk_to_curve25519(new Uint8Array(publicKey)); // Secret bytes to scalar bytes
+  const encryptedMessage = crypto_box_seal(
+    payload instanceof Buffer ? new Uint8Array(payload) : payload,
+    kxSelfPublicKey
+  );
 
   return toHex(encryptedMessage);
 }
@@ -278,11 +281,11 @@ export async function sealCryptobox(payload: string | Buffer, publicKey: Uint8Ar
 export async function encryptCryptoboxPayload(message: string, sharedKey: Uint8Array): Promise<string> {
   await ready;
 
-  const nonce = Buffer.from(randombytes_buf(crypto_secretbox_NONCEBYTES));
-  const combinedPayload = Buffer.concat([
-    nonce,
-    Buffer.from(crypto_secretbox_easy(Buffer.from(message, 'utf8'), nonce, sharedKey))
-  ]);
+  const nonce = new Uint8Array(randombytes_buf(crypto_secretbox_NONCEBYTES));
+  const encrypted = crypto_secretbox_easy(new Uint8Array(Buffer.from(message, 'utf8')), nonce, sharedKey);
+  const combinedPayload = new Uint8Array(nonce.length + encrypted.length);
+  combinedPayload.set(nonce, 0);
+  combinedPayload.set(encrypted, nonce.length);
 
   return toHex(combinedPayload);
 }
@@ -293,7 +296,8 @@ export async function decryptCryptoboxPayload(payload: Uint8Array, sharedKey: Ui
   const nonce = payload.slice(0, crypto_secretbox_NONCEBYTES);
   const ciphertext = payload.slice(crypto_secretbox_NONCEBYTES);
 
-  return Buffer.from(crypto_secretbox_open_easy(ciphertext, nonce, sharedKey)).toString('utf8');
+  const decrypted = crypto_secretbox_open_easy(ciphertext, nonce, sharedKey);
+  return Buffer.from(decrypted as unknown as ArrayBuffer).toString('utf8');
 }
 
 export async function createCryptoBoxServer(otherPublicKey: string, selfKeyPair: KeyPair): Promise<CryptoKX> {
@@ -313,11 +317,11 @@ export async function createCryptoBox(
   selfKeyPair: KeyPair
 ): Promise<[Uint8Array, Uint8Array, Uint8Array]> {
   // TODO: Don't calculate it every time?
-  const kxSelfPrivateKey = crypto_sign_ed25519_sk_to_curve25519(Buffer.from(selfKeyPair.privateKey)); // Secret bytes to scalar bytes
-  const kxSelfPublicKey = crypto_sign_ed25519_pk_to_curve25519(Buffer.from(selfKeyPair.publicKey)); // Secret bytes to scalar bytes
-  const kxOtherPublicKey = crypto_sign_ed25519_pk_to_curve25519(Buffer.from(otherPublicKey, 'hex')); // Secret bytes to scalar bytes
+  const kxSelfPrivateKey = crypto_sign_ed25519_sk_to_curve25519(new Uint8Array(selfKeyPair.privateKey));
+  const kxSelfPublicKey = crypto_sign_ed25519_pk_to_curve25519(new Uint8Array(selfKeyPair.publicKey));
+  const kxOtherPublicKey = crypto_sign_ed25519_pk_to_curve25519(new Uint8Array(Buffer.from(otherPublicKey, 'hex')));
 
-  return [Buffer.from(kxSelfPublicKey), Buffer.from(kxSelfPrivateKey), Buffer.from(kxOtherPublicKey)];
+  return [new Uint8Array(kxSelfPublicKey), new Uint8Array(kxSelfPrivateKey), new Uint8Array(kxOtherPublicKey)];
 }
 
 export const getOrCreateKeyPair = memoizee(
@@ -363,7 +367,7 @@ export function generateNewSeed() {
 }
 
 export function toHex(term: Uint8Array | Buffer) {
-  return Buffer.from(term).toString('hex');
+  return Buffer.from(term as Uint8Array).toString('hex');
 }
 
 export function fromHex(term: string) {

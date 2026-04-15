@@ -15,7 +15,7 @@ import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import SearchField from 'app/templates/SearchField/SearchField';
 import { useGasToken } from 'lib/assets/hooks';
 import { T, t } from 'lib/i18n';
-import { useAccount, useRelevantAccounts, useSetAccountPkh, useTempleClient } from 'lib/temple/front';
+import { useAccount, useRelevantAccounts, useSetAccountPkh, useMavrykClient } from 'lib/temple/front';
 import { PopperRenderProps } from 'lib/ui/Popper';
 import { HistoryAction, navigate } from 'lib/woozie';
 
@@ -31,7 +31,7 @@ interface TDropdownAction extends ActionButtonProps {
 
 const AccountDropdown: FC<AccountDropdownProps> = ({ opened, setOpened }) => {
   const appEnv = useAppEnv();
-  const { lock } = useTempleClient();
+  const { lock } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const setAccountPkh = useSetAccountPkh();

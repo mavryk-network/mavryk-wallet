@@ -150,7 +150,6 @@ export const MIGRATIONS = [
 
   // [5] Extend data formats for EVM support
   async (password: string) => {
-    console.log('VAULT.MIGRATIONS: migration started');
     const passKey = await Passworder.generateKey(password);
 
     /* ACCOUNTS */
@@ -194,7 +193,6 @@ export const MIGRATIONS = [
 
     removeFromStorage(['network_id', 'tokens_base_metadata', 'block_explorer', CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY]);
 
-    console.log('VAULT.MIGRATIONS: EVM migration finished');
   },
 
   // [6] Prepare to extend public accounts data

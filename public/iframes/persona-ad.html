@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+    />
     <style>
-      html, body, #container {
+      html,
+      body,
+      #container {
         margin: 0;
         height: 100%;
         width: 100%;
@@ -26,7 +32,7 @@
         object-fit: contain;
       }
 
-      [data-test=persona-watermark] {
+      [data-test='persona-watermark'] {
         top: 0; /* Missing, needed explicit after img.style.display = 'block' */
       }
 
@@ -41,10 +47,8 @@
     </style>
   </head>
   <body>
-
     <div id="loader">Loading...</div>
 
     <div id="container"></div>
-
   </body>
 </html>

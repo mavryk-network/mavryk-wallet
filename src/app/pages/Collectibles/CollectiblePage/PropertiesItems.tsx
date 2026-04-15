@@ -3,13 +3,12 @@ import React, { memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 
 import { HashChip, ExternalLinkChip } from 'app/atoms';
-import type { CollectibleDetails } from 'app/store/collectibles/state';
+import { CardWithLabel } from 'app/templates/CardWithLabel';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
+import type { CollectibleDetails } from 'lib/collectibles/types';
 import { formatDate } from 'lib/i18n';
 import { useExplorerBaseUrls } from 'lib/temple/front';
-
-import { CardWithLabel } from './CardWithLabel';
 
 interface PropertiesItemsProps {
   assetSlug: string;

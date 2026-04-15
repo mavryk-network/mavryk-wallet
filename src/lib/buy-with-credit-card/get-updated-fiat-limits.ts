@@ -1,14 +1,13 @@
 import { isDefined } from '@rnw-community/shared';
 import axios from 'axios';
 
-import { PairLimits } from 'app/store/buy-with-credit-card/state';
 import { getMoonPayBuyQuote } from 'lib/apis/moonpay';
 import { convertFiatAmountToCrypto as utorgConvertFiatAmountToCrypto } from 'lib/apis/utorg';
-import { createEntity } from 'lib/store';
+import { createEntity, LoadableEntityState } from './loadable-entity';
 import { getAxiosQueryErrorMessage } from 'lib/utils/get-axios-query-error-message';
 
 import { TopUpProviderId } from './top-up-provider-id.enum';
-import { TopUpInputInterface, TopUpOutputInterface } from './topup.interface';
+import { TopUpInputInterface, TopUpOutputInterface, TopUpProviderPairLimits } from './topup.interface';
 
 const getInputAmountFunctions: Partial<
   Record<TopUpProviderId, (fiatSymbol: string, cryptoSymbol: string, amount: number) => Promise<number>>
@@ -31,7 +30,7 @@ export const getUpdatedFiatLimits = async (
   fiatCurrency: TopUpInputInterface,
   cryptoCurrency: TopUpOutputInterface,
   providerId: TopUpProviderId
-): Promise<PairLimits[TopUpProviderId]> => {
+): Promise<LoadableEntityState<TopUpProviderPairLimits | undefined>> => {
   const { minAmount: minCryptoAmount, maxAmount: maxCryptoAmount } = cryptoCurrency;
 
   const limitsResult = await Promise.all(

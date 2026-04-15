@@ -32,12 +32,16 @@ export default class ErrorBoundary extends Component<Props, ErrorBoundaryState> 
     console.error(error.message, errorInfo.componentStack);
   }
 
+  private resetHandler = () => {
+    if (this.state.error) this.tryAgain();
+  };
+
   componentDidMount() {
-    window.addEventListener('reseterrorboundary', () => {
-      if (this.state.error) {
-        this.tryAgain();
-      }
-    });
+    window.addEventListener('reseterrorboundary', this.resetHandler);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('reseterrorboundary', this.resetHandler);
   }
 
   tryAgain = () => {
@@ -94,7 +98,7 @@ export const ErrorBoundaryContent = memo<ErrorBoundaryContentProps>(({ errorMess
           'border border-black border-opacity-5',
           'flex items-center',
           'text-white text-shadow-black',
-          'text-sm font-semibold',
+          'text-sm font-medium',
           'transition duration-300 ease-in-out',
           'opacity-90 hover:opacity-100',
           'shadow-sm hover:shadow'

@@ -7,14 +7,14 @@ import { useFormAnalytics } from 'lib/analytics';
 import { getObjktMarketplaceContract } from 'lib/apis/objkt';
 import type { ObjktOffer } from 'lib/apis/objkt/types';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { getTransferPermissions } from 'lib/utils/get-transfer-permissions';
 import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-params';
 
 const DEFAULT_OBJKT_STORAGE_LIMIT = 350;
 
 export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { publicKeyHash } = useAccount();
   const [isSelling, setIsSelling] = useState(false);
   const [operation, setOperation] = useState<WalletOperation | nullish>();
@@ -32,7 +32,7 @@ export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => 
     const { contract: tokenAddress, id } = fromFa2TokenSlug(assetSlug);
     const tokenId = Number(id.toString());
 
-    const contract = await getObjktMarketplaceContract(tezos, offer.marketplace_contract);
+    const contract = await getObjktMarketplaceContract(mavryk, offer.marketplace_contract);
 
     const transferParams =
       'fulfill_offer' in contract.methods
@@ -46,7 +46,7 @@ export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => 
     };
 
     const { approve, revoke } = await getTransferPermissions(
-      tezos,
+      mavryk,
       offer.marketplace_contract,
       publicKeyHash,
       tokenToSpend,
@@ -58,7 +58,7 @@ export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => 
       .concat(revoke)
       .map(params => parseTransferParamsToParamsWithKind({ ...params, storageLimit: DEFAULT_OBJKT_STORAGE_LIMIT }));
 
-    await tezos.wallet
+    await mavryk.wallet
       .batch(operationParams)
       .send()
       .then(
@@ -79,7 +79,7 @@ export const useCollectibleSelling = (assetSlug: string, offer?: ObjktOffer) => 
         }
       )
       .finally(() => void setIsSelling(false));
-  }, [tezos, isSelling, offer, assetSlug, publicKeyHash, setOperation, setOperationError, formAnalytics]);
+  }, [mavryk, isSelling, offer, assetSlug, publicKeyHash, setOperation, setOperationError, formAnalytics]);
 
   return { isSelling, initiateSelling, operation, operationError };
 };

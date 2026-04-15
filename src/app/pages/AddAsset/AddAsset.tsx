@@ -1,19 +1,15 @@
 import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } from 'react';
 
 import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/webmavryk';
+import { useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
-import { FormContextValues, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { useSWRConfig, unstable_serialize } from 'swr';
+import { UseFormReturn, useForm } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
-import { putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
-import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
-import { putTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import { useFormAnalytics } from 'lib/analytics';
 import { TokenMetadataResponse } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';
@@ -23,15 +19,18 @@ import {
   detectTokenStandard,
   IncorrectTokenIdError
 } from 'lib/assets/standards';
-import { getBalanceSWRKey } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
 import { fetchOneTokenMetadata } from 'lib/metadata/fetch';
 import { TokenMetadataNotFoundError } from 'lib/metadata/on-chain';
+import { balanceKeys } from 'lib/query-keys';
+import { assetsStore } from 'lib/store/zustand/assets.store';
+import { metadataStore } from 'lib/store/zustand/metadata.store';
 import { loadContract } from 'lib/temple/contract';
-import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
+import { useMavryk, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -79,20 +78,19 @@ const INITIAL_STATE: ComponentState = {
 class ContractNotFoundError extends Error {}
 
 const Form = memo(() => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { id: networkId } = useNetwork();
   const chainId = useChainId(true)!;
   const { publicKeyHash: accountPkh } = useAccount();
-  const { cache: swrCache } = useSWRConfig();
+  const queryClient = useQueryClient();
   const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('AddAsset');
-  const dispatch = useDispatch();
 
-  const { register, handleSubmit, errors, formState, watch, setValue, triggerValidation, clearError } =
-    useForm<FormData>({
-      mode: 'onChange'
-    });
+  const { register, handleSubmit, formState, watch, setValue, trigger, clearErrors } = useForm<FormData>({
+    mode: 'onChange'
+  });
+  const { errors } = formState;
 
   const contractAddress = watch('address');
   const tokenId = watch('id') || 0;
@@ -123,36 +121,34 @@ const Form = memo(() => {
     try {
       let contract: ContractAbstraction<Wallet | ContractProvider>;
       try {
-        contract = await loadContract(tezos, contractAddress, false);
+        contract = await loadContract(mavryk, contractAddress, false);
       } catch {
         throw new ContractNotFoundError();
       }
 
-      const tokenStandard = await detectTokenStandard(tezos, contract);
+      const tokenStandard = await detectTokenStandard(mavryk, contract);
       if (!tokenStandard) {
         throw new NotMatchingStandardError('Failed when detecting token standard');
       }
 
-      if (tokenStandard === 'fa2') await assertFa2TokenDefined(tezos, contract, tokenId);
+      if (tokenStandard === 'fa2') await assertFa2TokenDefined(mavryk, contract, tokenId);
 
-      const rpcUrl = tezos.rpc.getRpcUrl();
+      const rpcUrl = mavryk.rpc.getRpcUrl();
       const metadata = await fetchOneTokenMetadata(rpcUrl, contractAddress, String(tokenId));
 
       if (metadata) {
         metadataRef.current = metadata;
 
-        setValue([
-          { symbol: metadata.symbol },
-          { name: metadata.name },
-          { decimals: metadata.decimals },
-          { thumbnailUri: metadata.thumbnailUri }
-        ]);
+        setValue('symbol', metadata.symbol ?? '');
+        setValue('name', metadata.name ?? '');
+        setValue('decimals', metadata.decimals ?? 0);
+        setValue('thumbnailUri', metadata.thumbnailUri ?? '');
       }
 
       stateToSet = {
         bottomSectionVisible: true
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
 
       await delay();
@@ -167,7 +163,7 @@ const Form = memo(() => {
         processing: false
       }));
     }
-  }, [tezos, setValue, setState, formValid, contractAddress, tokenId]);
+  }, [mavryk, setValue, setState, formValid, contractAddress, tokenId]);
 
   const loadMetadata = useDebouncedCallback(loadMetadataPure, 500);
 
@@ -178,7 +174,7 @@ const Form = memo(() => {
 
   useEffect(() => {
     if (formValid) {
-      clearError();
+      clearErrors();
       loadMetadataRef.current();
     } else {
       setState(INITIAL_STATE);
@@ -188,8 +184,8 @@ const Form = memo(() => {
 
   const cleanContractAddress = useCallback(() => {
     setValue('address', '');
-    triggerValidation('address');
-  }, [setValue, triggerValidation]);
+    trigger('address');
+  }, [setValue, trigger]);
 
   const onSubmit = useCallback(
     async ({ address, symbol, name, decimals, thumbnailUri, id }: FormData) => {
@@ -216,9 +212,9 @@ const Form = memo(() => {
 
         const assetIsCollectible = isCollectible(tokenMetadata);
 
-        const actionPayload = { records: { [tokenSlug]: tokenMetadata } };
-        if (assetIsCollectible) dispatch(putCollectiblesMetadataAction(actionPayload));
-        else dispatch(putTokensMetadataAction(actionPayload));
+        const store = metadataStore.getState();
+        if (assetIsCollectible) store.putCollectibleMetadataDirectly(tokenSlug, tokenMetadata);
+        else store.putTokenMetadataDirectly(tokenSlug, tokenMetadata);
 
         const asset = {
           chainId,
@@ -227,9 +223,11 @@ const Form = memo(() => {
           status: 'enabled' as const
         };
 
-        dispatch(assetIsCollectible ? putCollectiblesAsIsAction([asset]) : putTokensAsIsAction([asset]));
+        const assets = assetsStore.getState();
+        if (assetIsCollectible) assets.putCollectiblesAsIs([asset]);
+        else assets.putTokensAsIs([asset]);
 
-        swrCache.delete(unstable_serialize(getBalanceSWRKey(tezos, tokenSlug, accountPkh)));
+        queryClient.removeQueries({ queryKey: balanceKeys.one(mavryk.checksum, tokenSlug, accountPkh) });
 
         formAnalytics.trackSubmitSuccess();
 
@@ -244,25 +242,24 @@ const Form = memo(() => {
           description: 'assetAddedSuccessMsg',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay
         await delay();
-        setSubmitError(err.message);
+        setSubmitError(getErrorMessage(err));
       }
     },
     [
-      tezos,
-      swrCache,
+      mavryk,
+      queryClient,
       formState.isSubmitting,
       chainId,
       accountPkh,
       setSubmitError,
       formAnalytics,
-      dispatch,
       contractAddress,
       tokenId
     ]
@@ -278,10 +275,12 @@ const Form = memo(() => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <NoSpaceField
-        ref={register({
-          required: t('required'),
-          validate: validateContractAddress
-        })}
+        ref={
+          register('address', {
+            required: t('required'),
+            validate: validateContractAddress
+          }).ref as unknown as React.Ref<HTMLTextAreaElement>
+        }
         name="address"
         id="addtoken-address"
         textarea
@@ -304,12 +303,11 @@ const Form = memo(() => {
       />
 
       <FormField
-        ref={register({
+        {...register('id', {
           min: { value: 0, message: t('nonNegativeIntMessage') }
         })}
         min={0}
         type="number"
-        name="id"
         id="token-id"
         label={`${t('assetId')} ${t('optionalComment')}`}
         labelDescription={t('tokenIdInputDescription')}
@@ -361,7 +359,8 @@ const Form = memo(() => {
   );
 });
 
-type BottomSectionProps = Pick<FormContextValues, 'register' | 'errors' | 'formState'> & {
+type BottomSectionProps = Pick<UseFormReturn<FormData>, 'register' | 'formState'> & {
+  errors: UseFormReturn<FormData>['formState']['errors'];
   submitError?: ReactNode;
 };
 
@@ -371,14 +370,13 @@ const BottomSection: FC<BottomSectionProps> = props => {
   return (
     <>
       <FormField
-        ref={register({
+        {...register('symbol', {
           required: t('required'),
           pattern: {
             value: /^[a-zA-Z0-9]{2,10}$/,
             message: t('tokenSymbolPatternDescription')
           }
         })}
-        name="symbol"
         id="addtoken-symbol"
         label={t('symbol')}
         labelDescription={t('tokenSymbolInputDescription')}
@@ -392,14 +390,13 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('name', {
           required: t('required'),
           pattern: {
             value: /^.{3,25}$/,
             message: t('tokenNamePatternDescription')
           }
         })}
-        name="name"
         id="addtoken-name"
         label={t('name')}
         labelDescription={t('tokenNameInputDescription')}
@@ -413,11 +410,10 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('decimals', {
           min: { value: 0, message: t('nonNegativeIntMessage') }
         })}
         type="number"
-        name="decimals"
         id="addtoken-decimals"
         label={t('decimals')}
         labelDescription={t('decimalsInputDescription')}
@@ -431,32 +427,16 @@ const BottomSection: FC<BottomSectionProps> = props => {
       />
 
       <FormField
-        ref={register({
+        {...register('thumbnailUri', {
           validate: (val: string) => {
             if (!val) return true;
             if (val.match(/(https:\/\/.*)/i) || val.match(/(ipfs:\/\/.*)/i) || val.match(/(data:image\/.*)/i)) {
               return true;
             }
 
-            return (
-              <ul className="list-disc list-inside">
-                <li>
-                  <T id="validImageURL" />
-                </li>
-                <li>
-                  <T id="onlyHTTPS" />
-                </li>
-                <li>
-                  <T id="formatsAllowed" />
-                </li>
-                <li>
-                  <T id="orIPFSImageURL" />
-                </li>
-              </ul>
-            );
+            return 'invalidThumbnailUri';
           }
         })}
-        name="thumbnailUri"
         id="addtoken-thumbnailUri"
         label={
           <>
@@ -468,7 +448,26 @@ const BottomSection: FC<BottomSectionProps> = props => {
         }
         labelDescription={t('iconURLInputDescription')}
         placeholder="e.g. https://cdn.com/mytoken.png"
-        errorCaption={errors.thumbnailUri?.message}
+        errorCaption={
+          errors.thumbnailUri?.message === 'invalidThumbnailUri' ? (
+            <ul className="list-disc list-inside">
+              <li>
+                <T id="validImageURL" />
+              </li>
+              <li>
+                <T id="onlyHTTPS" />
+              </li>
+              <li>
+                <T id="formatsAllowed" />
+              </li>
+              <li>
+                <T id="orIPFSImageURL" />
+              </li>
+            </ul>
+          ) : (
+            errors.thumbnailUri?.message
+          )
+        }
         containerClassName="mb-4"
         testIDs={{
           inputSection: AddAssetSelectors.iconURLInputSection,
@@ -481,7 +480,7 @@ const BottomSection: FC<BottomSectionProps> = props => {
   );
 };
 
-const errorHandler = (err: any, contractAddress: string, setValue: any) => {
+const errorHandler = (err: unknown, contractAddress: string, setValue: any) => {
   if (err instanceof ContractNotFoundError)
     return {
       tokenValidationError: t('referredByTokenContractNotFound', contractAddress)
@@ -497,7 +496,9 @@ const errorHandler = (err: any, contractAddress: string, setValue: any) => {
   const errorMessage = t(
     err instanceof TokenMetadataNotFoundError ? 'failedToParseMetadata' : 'unknownParseErrorOccurred'
   );
-  setValue([{ symbol: '' }, { name: '' }, { decimals: 0 }]);
+  setValue('symbol', '');
+  setValue('name', '');
+  setValue('decimals', 0);
 
   return {
     bottomSectionVisible: true,

@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { FormField, FormSubmitButton } from 'app/atoms';
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
@@ -9,10 +9,11 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
+import { useMavrykClient, useWalletsSpecs, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
 import { useAccount } from 'lib/temple/front/ready';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -23,10 +24,9 @@ type FormData = {
   name: string;
 };
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
-
 const CreateAccount: FC = () => {
-  const { createAccount, walletsSpecs } = useTempleClient();
+  const walletsSpecs = useWalletsSpecs();
+  const { createAccount } = useMavrykClient();
   const { popup } = useAppEnv();
   const account = useAccount();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : undefined;
@@ -65,33 +65,39 @@ const CreateAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting }
+  } = useForm<FormData>({
     defaultValues: { name: defaultName }
   });
-  const submitting = formState.isSubmitting;
+  const submitting = isSubmitting;
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ name }) => {
       if (submitting) return;
 
-      clearError('name');
+      clearErrors('name');
 
       formAnalytics.trackSubmit();
       try {
         await createAccount(currentWalletId, name);
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('name', SUBMIT_ERROR_TYPE, err.message);
+        setError('name', toFieldError(err));
       }
     },
-    [submitting, clearError, formAnalytics, createAccount, currentWalletId, setError]
+    [submitting, clearErrors, formAnalytics, createAccount, currentWalletId, setError]
   );
 
   return (
@@ -111,7 +117,7 @@ const CreateAccount: FC = () => {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 h-full justify-between">
           <FormField
-            ref={register({
+            {...register('name', {
               pattern: {
                 value: ACCOUNT_NAME_PATTERN,
                 message: t('accountNameInputTitle')
@@ -121,7 +127,6 @@ const CreateAccount: FC = () => {
             labelDescription={t('accountNameInputDescription')}
             id="create-account-name"
             type="text"
-            name="name"
             placeholder={defaultName}
             errorCaption={errors.name?.message}
             containerClassName="mb-4"

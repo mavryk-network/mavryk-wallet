@@ -6,8 +6,8 @@ import { useMemoWithCompare } from 'lib/ui/hooks';
 
 import { TempleContact } from '../types';
 
-import { useTempleClient } from './client';
 import { useRelevantAccounts, useSettings } from './ready';
+import { useMavrykClient } from './use-mavryk-client';
 
 export function useFilteredContacts() {
   const { contacts } = useSettings();
@@ -34,7 +34,7 @@ export function useFilteredContacts() {
 
   const allContacts = useMemo(() => [...filteredContacts, ...accountContacts], [filteredContacts, accountContacts]);
 
-  const { updateSettings } = useTempleClient();
+  const { updateSettings } = useMavrykClient();
   useEffect(() => {
     if (contacts && contacts.length !== filteredContacts.length) updateSettings({ contacts: filteredContacts });
   }, [contacts, filteredContacts, updateSettings]);

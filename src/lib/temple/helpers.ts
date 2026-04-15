@@ -4,7 +4,7 @@ import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-uti
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
-import { FastRpcClient } from 'lib/taquito-fast-rpc';
+import { FastRpcClient } from 'lib/webmavryk-fast-rpc';
 
 import { TempleAccount, TempleAccountType } from './types';
 
@@ -66,6 +66,16 @@ export function isKTAddress(address: string) {
 }
 
 export const isValidContractAddress = (address: string) => isAddressValid(address) && isKTAddress(address);
+
+/**
+ * Validates a Mavryk address. Returns an i18n error message key if invalid,
+ * or null if valid. Pass `allowKT: true` to allow KT1 contract addresses.
+ */
+export function validateMavrykAddress(value: string, allowKT = false): string | null {
+  if (!isAddressValid(value)) return 'invalidAddress';
+  if (!allowKT && isKTAddress(value)) return 'onlyNonContractAddressAllowed';
+  return null;
+}
 
 export function formatOpParamsBeforeSend(params: any) {
   if (params.kind === 'origination' && params.script) {

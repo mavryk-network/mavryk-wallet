@@ -17,3 +17,12 @@ export const getABGroup$ = () =>
     map(response => response.data.ab),
     catchError(() => of(ABTestGroup.Unknown))
   );
+
+export const fetchABGroup = async (): Promise<ABTestGroup> => {
+  try {
+    const response = await templeWalletApi.get<GetABGroupResponse>('/abtest');
+    return response.data.ab;
+  } catch {
+    return ABTestGroup.Unknown;
+  }
+};

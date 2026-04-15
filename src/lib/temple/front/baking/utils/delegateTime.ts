@@ -1,20 +1,19 @@
 import { ConstantsResponse, UnstakeRequestsResponse } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
+import { addMilliseconds, differenceInMilliseconds } from 'date-fns';
 
 import { DEFAULT_BLOCK_DELAY } from '../const';
-
-dayjs.extend(duration);
 
 function formatTimeLeft(ms: number): string {
   if (ms <= 0) return 'allowed';
 
-  const d = dayjs.duration(ms);
-  const days = d.days();
-  const hours = d.hours();
-  const minutes = d.minutes();
-  const seconds = d.seconds();
+  const totalSeconds = Math.floor(ms / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  const minutes = totalMinutes % 60;
+  const seconds = totalSeconds % 60;
 
   if (days > 0 && hours > 0) return `${days}d ${hours}h`;
   if (days > 0) return `${days}d`;
@@ -37,11 +36,11 @@ export function getOneCycleinMs(constants: ConstantsResponse) {
 export function getDelegationWaitTime(cycleDurationMs: number, delegationTime?: string | null): string | null {
   if (!delegationTime) return null;
 
-  const start = dayjs(delegationTime);
-  const end = start.add(cycleDurationMs * 7, 'millisecond');
-  const now = dayjs();
+  const start = new Date(delegationTime);
+  const end = addMilliseconds(start, cycleDurationMs * 7);
+  const now = new Date();
 
-  const diff = end.diff(now);
+  const diff = differenceInMilliseconds(end, now);
 
   return diff > 0 ? formatTimeLeft(diff) : 'allowed';
 }
@@ -51,9 +50,9 @@ export function getDelegationWaitTimeFromNow(
   cyclesToActivate = 7,
   startedAt: string | Date = new Date()
 ): string {
-  const start = dayjs(startedAt);
-  const end = start.add(cycleDurationMs * cyclesToActivate, 'millisecond');
-  const diff = end.diff(dayjs());
+  const start = new Date(startedAt);
+  const end = addMilliseconds(start, cycleDurationMs * cyclesToActivate);
+  const diff = differenceInMilliseconds(end, new Date());
   return formatTimeLeft(diff);
 }
 
@@ -110,9 +109,5 @@ export function getCoStakeWaitTime(
   // already reached or passed required cycle
   if (cyclesLeft <= 0) return 'allowed';
 
-  const start = dayjs();
-  const end = start.add(cyclesLeft * cycleDurationMs, 'millisecond');
-  const diff = end.diff(start);
-
-  return formatTimeLeft(diff);
+  return formatTimeLeft(cyclesLeft * cycleDurationMs);
 }

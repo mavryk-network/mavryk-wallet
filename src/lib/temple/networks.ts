@@ -59,7 +59,7 @@ export const NETWORKS: TempleNetwork[] = [
     rpcBaseURL: MAV_RPC_NETWORK,
     color: '#F86412',
     disabled: false
-  },
+  }
 
   // {
   //   id: 'marigold-mainnet',
@@ -124,36 +124,36 @@ export const NETWORKS: TempleNetwork[] = [
   //   color: '#FBBF24',
   //   disabled: false
   // },
-  {
-    id: 'sandbox',
-    name: 'localhost:8732',
-    description: 'Local Sandbox',
-    type: 'test',
-    rpcBaseURL: 'http://localhost:8732',
-    color: '#10DEEB',
-    disabled: false
-  },
-  // Hidden
-  {
-    id: 'smartpy-ithacanet',
-    name: 'Ithacanet Testnet Smartpy',
-    description: 'Ithacanet testnet',
-    type: 'test',
-    rpcBaseURL: 'https://ithacanet.smartpy.io',
-    color: '#FBBF24',
-    disabled: false,
-    hidden: true
-  },
-  {
-    id: 'tzbeta-rpczero',
-    name: 'Edo Testnet @rpczero.tzbeta.net',
-    description: 'Highly available Edo Testnet nodes operated by Blockscale',
-    type: 'test',
-    rpcBaseURL: 'https://rpczero.tzbeta.net',
-    color: '#FBBF24',
-    disabled: false,
-    hidden: true
-  }
+  // {
+  //   id: 'sandbox',
+  //   name: 'localhost:8732',
+  //   description: 'Local Sandbox',
+  //   type: 'test',
+  //   rpcBaseURL: 'http://localhost:8732',
+  //   color: '#10DEEB',
+  //   disabled: false
+  // },
+  // // Hidden
+  // {
+  //   id: 'smartpy-ithacanet',
+  //   name: 'Ithacanet Testnet Smartpy',
+  //   description: 'Ithacanet testnet',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://ithacanet.smartpy.io',
+  //   color: '#FBBF24',
+  //   disabled: false,
+  //   hidden: true
+  // },
+  // {
+  //   id: 'tzbeta-rpczero',
+  //   name: 'Edo Testnet @rpczero.tzbeta.net',
+  //   description: 'Highly available Edo Testnet nodes operated by Blockscale',
+  //   type: 'test',
+  //   rpcBaseURL: 'https://rpczero.tzbeta.net',
+  //   color: '#FBBF24',
+  //   disabled: false,
+  //   hidden: true
+  // }
   // {
   //   id: 'mainnet',
   //   nameI18nKey: 'mavrykMainnet',

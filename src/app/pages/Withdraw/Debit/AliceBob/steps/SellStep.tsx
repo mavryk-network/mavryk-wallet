@@ -11,7 +11,7 @@ import { AliceBobOrderStatus, cancelAliceBobOrder } from 'lib/apis/temple';
 import { toTransferParams } from 'lib/assets/contract.utils';
 import { T, TID } from 'lib/i18n';
 import { MAVEN_METADATA } from 'lib/metadata/defaults';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import useCopyToClipboard from 'lib/ui/useCopyToClipboard';
 
 import { useUpdatedOrderInfo } from '../hooks/useUpdatedOrderInfo';
@@ -19,7 +19,7 @@ import { useUpdatedOrderInfo } from '../hooks/useUpdatedOrderInfo';
 import { StepProps } from './step.props';
 
 export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrderInfo, setIsApiError }) => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const { publicKeyHash } = useAccount();
   const { copy } = useCopyToClipboard();
 
@@ -58,23 +58,23 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
     formAnalytics.trackSubmit();
     try {
       const transferParams = await toTransferParams(
-        tezos,
+        mavryk,
         'mav',
         MAVEN_METADATA,
         publicKeyHash,
         payCryptoAddress,
         fromAmount
       );
-      const { suggestedFeeMumav } = await tezos.estimate.transfer(transferParams);
-      await tezos.wallet.transfer({ ...transferParams, fee: suggestedFeeMumav }).send();
+      const { suggestedFeeMumav } = await mavryk.estimate.transfer(transferParams);
+      await mavryk.wallet.transfer({ ...transferParams, fee: suggestedFeeMumav }).send();
 
       formAnalytics.trackSubmitSuccess();
 
       setStep(2);
-    } catch (err: any) {
+    } catch (err: unknown) {
       formAnalytics.trackSubmitFail();
 
-      if (err.message === 'Declined') {
+      if (err instanceof Error && err.message === 'Declined') {
         return;
       }
 
@@ -87,11 +87,11 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
   return (
     <>
       <div className="font-aeonik text-gray-700 text-center">
-        <p style={{ fontSize: 19 }} className="mt-6 mb-2">
+        <p className="text-xl mt-6 mb-2">
           <T id={'transactionId'} />
         </p>
         <span className="flex flex-row justify-center">
-          <p className="text-gray-910" style={{ fontSize: 17 }}>
+          <p className="text-gray-910 text-ulg">
             {truncatedOrderId}
           </p>
           <CopyButton text={orderId} type="link">

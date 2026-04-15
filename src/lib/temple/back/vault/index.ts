@@ -1,12 +1,12 @@
 import { CompositeForger, RpcForger, Signer, MavrykOperationError, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { HttpResponseError } from '@mavrykdynamics/webmavryk-http-utils';
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
-import * as TaquitoUtils from '@mavrykdynamics/webmavryk-utils';
+import * as WebMavrykUtils from '@mavrykdynamics/webmavryk-utils';
 import * as Bip39 from 'bip39';
 import { nanoid } from 'nanoid';
 import type * as WasmThemisPackageInterface from 'wasm-themis';
 
-import { getKYCStatus } from 'lib/apis/tzkt/api';
+import { getKYCStatus } from 'lib/apis/mvkt/api';
 import {
   ACCOUNT_ALREADY_EXISTS_ERR_MSG,
   ACCOUNT_NAME_COLLISION_ERR_MSG,
@@ -81,6 +81,36 @@ const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
 const libthemisWasmSrc = '/wasm/libthemis.wasm';
 
+const WALLET_NAME_MAX_LENGTH = 64;
+const CONTROL_CHAR_REGEX = /[\x00-\x1F\x7F]/;
+const CONTROL_CHAR_REPLACE_REGEX = /[\x00-\x1F\x7F]/g;
+
+/**
+ * Sanitize a wallet name read from storage (read-time path).
+ * Strips control characters and truncates to WALLET_NAME_MAX_LENGTH.
+ * Warns if truncation occurs so corrupted/legacy data stays visible in the UI.
+ */
+function sanitizeWalletName(name: string, walletId: string): string {
+  const stripped = name.replace(CONTROL_CHAR_REPLACE_REGEX, '');
+  if (stripped.length > WALLET_NAME_MAX_LENGTH) {
+    console.warn(`[Vault] Wallet name for id "${walletId}" exceeds ${WALLET_NAME_MAX_LENGTH} chars — truncating.`);
+    return stripped.slice(0, WALLET_NAME_MAX_LENGTH);
+  }
+  return stripped;
+}
+
+/**
+ * Validate a wallet name at write time. Throws a user-visible error on violation.
+ */
+function validateWalletName(name: string): void {
+  if (name.length > WALLET_NAME_MAX_LENGTH) {
+    throw new PublicError(`Wallet name must be ${WALLET_NAME_MAX_LENGTH} characters or fewer`);
+  }
+  if (CONTROL_CHAR_REGEX.test(name)) {
+    throw new PublicError('Wallet name contains invalid characters');
+  }
+}
+
 interface RemoveAccountEventPayload {
   publicKeyhash?: string;
 }
@@ -135,6 +165,7 @@ export class Vault {
 
       const walletId = nanoid();
       const walletName = await fetchMessage('hdWalletDefaultName', 'A');
+      validateWalletName(walletName);
       const initialAccount: TempleAccount = {
         id: nanoid(),
         type: TempleAccountType.HD,
@@ -205,30 +236,33 @@ export class Vault {
 
       const legacyCheckStored = await isStoredLegacy(checkStrgKey);
 
+      const CURRENT_MIGRATION_LEVEL = 3;
       if (saved !== undefined && legacyCheckStored) {
         // Override migration level, force
-        migrationLevel = 3;
+        migrationLevel = CURRENT_MIGRATION_LEVEL;
       }
     }
 
+    const migrationsToRun = MIGRATIONS.filter((_m, i) => i >= migrationLevel);
+
+    if (migrationsToRun.length === 0) {
+      return;
+    }
+
     try {
-      const migrationsToRun = MIGRATIONS.filter((_m, i) => i >= migrationLevel);
-
-      if (migrationsToRun.length === 0) {
-        return;
+      for (let i = 0; i < migrationsToRun.length; i++) {
+        await migrationsToRun[i](password);
+        // Save progress after each successful step so a partial migration can resume
+        await savePlainLegacy(migrationLevelStrgKey, migrationLevel + i + 1);
       }
+    } catch (migrationErr) {
+      console.error('Vault migration failed:', migrationErr instanceof Error ? migrationErr.message : migrationErr);
+      throw new PublicError('Wallet upgrade failed. Please contact support.');
+    }
 
-      for (const migrate of migrationsToRun) {
-        await migrate(password);
-      }
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      if (legacyMigrationLevelStored) {
-        await removeManyLegacy([legacyMigrationLevelStrgKey]);
-      }
-
-      await savePlainLegacy(migrationLevelStrgKey, MIGRATIONS.length);
+    // Remove legacy key only after all migrations complete
+    if (legacyMigrationLevelStored) {
+      await removeManyLegacy([legacyMigrationLevelStrgKey]);
     }
   }
 
@@ -370,7 +404,6 @@ export class Vault {
       try {
         await fetchAndDecryptOne<any>(checkStrgKey, passKey);
       } catch (error) {
-        console.error(error);
         doThrow();
       }
       return { passHash, passKey };
@@ -417,7 +450,14 @@ export class Vault {
   }
 
   async fetchWalletsSpecs() {
-    return (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+    const raw = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+    // Sanitize names at read time to handle corrupted or pre-validation legacy data
+    return Object.fromEntries(
+      Object.entries(raw).map(([walletId, specs]) => [
+        walletId,
+        { ...specs, name: sanitizeWalletName(specs.name, walletId) }
+      ])
+    ) as StringRecord<WalletSpecs>;
   }
 
   async fetchSettings() {
@@ -545,6 +585,7 @@ export class Vault {
       const walletName = await fetchNewGroupName(walletsSpecs, i =>
         fetchMessage('hdWalletDefaultName', toExcelColumnName(i))
       );
+      validateWalletName(walletName);
       const accountToReplace = allAccounts.find(acc => {
         if (acc.type === TempleAccountType.HD) {
           return false;
@@ -741,6 +782,8 @@ export class Vault {
 
   async editGroupName(id: string, name: string) {
     return withError('Failed to edit group name', async () => {
+      validateWalletName(name);
+
       const walletsSpecs = await this.fetchWalletsSpecs();
 
       if (!(id in walletsSpecs)) {
@@ -794,7 +837,7 @@ export class Vault {
   async sign(accPublicKeyHash: string, bytes: string, watermark?: string) {
     return withError('Failed to sign', () =>
       this.withSigner(accPublicKeyHash, async signer => {
-        const watermarkBuf = watermark ? TaquitoUtils.hex2buf(watermark) : undefined;
+        const watermarkBuf = watermark ? WebMavrykUtils.hex2buf(watermark) : undefined;
         return signer.sign(bytes, watermarkBuf);
       })
     );
@@ -813,7 +856,7 @@ export class Vault {
       try {
         return await batch.send();
       } catch (err: any) {
-        console.error(err);
+        console.error('Operation send failed:', err.message);
 
         switch (true) {
           case err instanceof PublicError:

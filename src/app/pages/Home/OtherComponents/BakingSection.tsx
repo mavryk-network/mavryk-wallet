@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -19,12 +19,15 @@ import { ReactComponent as ClockIcon } from 'app/icons/time.svg';
 import { ReactComponent as UnlockIcon } from 'app/icons/unlock.svg';
 //
 import BakingHistoryItem from 'app/pages/Home/OtherComponents/BakingHistoryItem';
-import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
+import { useAbTestGroupName } from 'lib/store/zustand/ui.store';
 import BakerBanner from 'app/templates/BakerBanner';
-import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+import { getDelegatorRewards, isKnownChainId } from 'lib/apis/mvkt';
+import { IS_DEV_ENV } from 'lib/env';
 import { useGasToken } from 'lib/assets/hooks';
+import { bakingKeys } from 'lib/query-keys';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
@@ -76,7 +79,7 @@ const BakingSection = memo(() => {
   const canDelegate = acc.type !== TempleAccountType.WatchOnly;
   const chainId = useChainId(true);
   const { isDcpNetwork } = useGasToken();
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
 
   const { popup } = useAppEnv();
 
@@ -87,25 +90,21 @@ const BakingSection = memo(() => {
     animation: 'shift-away-subtle'
   };
 
-  const getBakingHistory = useCallback(
-    async ([, accountPkh, , chainId]: [string, string, string | nullish, string | nullish]) => {
-      if (!isKnownChainId(chainId!)) {
-        return [];
-      }
-      return (
-        (await getDelegatorRewards(chainId, {
-          address: accountPkh,
-          limit: 30
-        })) || []
-      );
+  const { data: bakingHistory, isFetching: loadingBakingHistory } = useSuspenseQuery({
+    queryKey: bakingKeys.history(acc.publicKeyHash, myBakerPkh ?? '', chainId ?? ''),
+    queryFn: () => {
+      if (!isKnownChainId(chainId!)) return [];
+      return getDelegatorRewards(chainId!, { address: acc.publicKeyHash, limit: 30 })
+        .then(res => res || [])
+        .catch(err => {
+          if (IS_DEV_ENV) console.error('[BakingSection] getDelegatorRewards failed:', err);
+          return [];
+        });
     },
-    []
-  );
-  const { data: bakingHistory, isValidating: loadingBakingHistory } = useRetryableSWR(
-    ['baking-history', acc.publicKeyHash, myBakerPkh, chainId],
-    getBakingHistory,
-    { suspense: true, revalidateOnFocus: false, revalidateOnReconnect: false }
-  );
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 2
+  });
 
   const delegateButtonRef = useTippy<HTMLButtonElement>(tippyProps);
   const commonDelegateButtonProps = useMemo(

@@ -126,7 +126,18 @@ const NetworkListItem: FC<NetworkListItemProps> = ({ network, selected, onClick 
   const NetworkIcon = networkIcons[id];
 
   return (
-    <div className="flex items-center justify-between py-3 cursor-pointer" onClick={onClick}>
+    <div
+      className="flex items-center justify-between py-3 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+    >
       <div className="flex items-center">
         {NetworkIcon ? (
           <NetworkIcon className="w-6 h-6 mr-3 rounded-full" />

@@ -1,8 +1,8 @@
-import React, { ComponentType, FC, FunctionComponent, SVGProps, useCallback, useMemo, useState } from 'react';
+import React, { FC, FunctionComponent, SVGProps, useCallback, useMemo, useState } from 'react';
 
 import { Modifier } from '@popperjs/core';
 import classNames from 'clsx';
-import { Controller, ControllerProps, EventFunction, FieldError } from 'react-hook-form';
+import { Controller, FieldError, Control } from 'react-hook-form';
 
 import { Money } from 'app/atoms';
 import PlainAssetInput from 'app/atoms/PlainAssetInput';
@@ -56,7 +56,9 @@ export const gasOptions: FeeOption[] = [
   }
 ];
 
-type AdditionalGasInputProps = Pick<ControllerProps<ComponentType>, 'name' | 'control'> & {
+type AdditionalGasInputProps = {
+  name: string;
+  control: Control<any>;
   error?: FieldError;
   id: string;
   extraHeight?: number;
@@ -88,28 +90,34 @@ export const AdditionalGasInput: FC<AdditionalGasInputProps> = props => {
 
   const { trackEvent } = useAnalytics();
 
-  const handleChange: EventFunction = event => {
+  const handleChange = (event: any) => {
     trackEvent(AdditionalFeeInputSelectors.FeeButton, AnalyticsEventCategory.ButtonPress);
-
-    return onChange?.(event as [string]);
+    onChange?.(event as [string]);
   };
 
   return (
     <Controller
-      id={id}
       name={name}
-      as={AdditionalGasFeeInputContent}
       control={control}
-      feeOptions={gasOptions}
-      defaultOption={defaultOption}
-      onChange={handleChange}
-      extraHeight={extraHeight}
-      assetSymbol={assetSymbol}
-      gasFeeError={gasFeeError}
-      valueToShow={valueToShow}
-      onChangeValueToShow={onChangeValueToShow}
-      feeAmount={feeAmount}
-      poperModifiers={poperModifiers}
+      render={({ field }) => (
+        <AdditionalGasFeeInputContent
+          defaultValue={field.value}
+          onChange={(val: any) => {
+            handleChange(val);
+            field.onChange(val);
+          }}
+          id={id}
+          feeOptions={gasOptions}
+          defaultOption={defaultOption}
+          extraHeight={extraHeight}
+          assetSymbol={assetSymbol}
+          gasFeeError={gasFeeError}
+          valueToShow={valueToShow}
+          onChangeValueToShow={onChangeValueToShow}
+          feeAmount={feeAmount}
+          poperModifiers={poperModifiers}
+        />
+      )}
     />
   );
 };

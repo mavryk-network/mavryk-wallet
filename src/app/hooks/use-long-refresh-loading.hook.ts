@@ -1,14 +1,11 @@
-import { useDispatch } from 'react-redux';
+import { useExchangeRatesQuery } from 'app/hooks/use-exchange-rates.query';
+import { useNotificationsQuery } from 'lib/notifications/hooks/use-notifications.query';
 
-import { loadExchangeRates } from 'app/store/currency/actions';
-import { NOTIFICATIONS_SYNC_INTERVAL, RATES_SYNC_INTERVAL } from 'lib/fixed-times';
-import { loadNotificationsAction } from 'lib/notifications';
-import { useInterval } from 'lib/ui/hooks';
-
+/**
+ * Keeps long-refresh data queries active.
+ * TanStack Query handles refetchInterval for both exchange rates and notifications.
+ */
 export const useLongRefreshLoading = () => {
-  const dispatch = useDispatch();
-
-  useInterval(() => dispatch(loadExchangeRates.submit()), RATES_SYNC_INTERVAL, []);
-
-  useInterval(() => dispatch(loadNotificationsAction.submit()), NOTIFICATIONS_SYNC_INTERVAL, []);
+  useExchangeRatesQuery();
+  useNotificationsQuery();
 };

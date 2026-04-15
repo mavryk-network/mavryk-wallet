@@ -12,6 +12,7 @@ import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { loadChainId } from 'lib/temple/helpers';
+import * as Passworder from 'lib/temple/passworder';
 import {
   TempleState,
   TempleMessageType,
@@ -24,6 +25,7 @@ import {
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
 
+import { AUTODECLINE_AFTER } from './constants';
 import {
   getCurrentPermission,
   requestPermission,
@@ -32,7 +34,10 @@ import {
   requestBroadcast,
   getAllDApps,
   removeDApp,
-  removeAllDApps
+  removeAllDApps,
+  setDAppHmacKey,
+  clearDAppHmacKey,
+  migrateLegacyDAppSessions
 } from './dapp';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
@@ -49,12 +54,11 @@ import {
   withUnlocked
 } from './store';
 import { Vault } from './vault';
+import { getPassHash as getSessionPassHash } from './vault/session-store';
 
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
-
-const AUTODECLINE_AFTER = 60_000;
 const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
 let initLocked = false;
 
@@ -106,11 +110,15 @@ export function registerNewWallet(password: string, mnemonic?: string) {
 }
 
 export async function lock() {
-  if (!store.getState().inited) initLocked = true;
-  if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
-  return withInited(() => {
-    locked();
-  });
+  try {
+    if (!store.getState().inited) initLocked = true;
+    if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
+    return withInited(() => {
+      locked();
+    });
+  } finally {
+    clearDAppHmacKey();
+  }
 }
 
 export function unlock(password: string) {
@@ -120,6 +128,9 @@ export function unlock(password: string) {
       const accounts = await vault.fetchAccounts();
       const settings = await vault.fetchSettings();
       unlocked({ vault, accounts, settings });
+      const passHash = await Passworder.generateHash(password);
+      await setDAppHmacKey(passHash);
+      await migrateLegacyDAppSessions();
     })
   );
 }
@@ -131,6 +142,11 @@ export async function unlockFromSession() {
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
+    const passHash = await getSessionPassHash();
+    if (passHash) {
+      await setDAppHmacKey(passHash);
+      await migrateLegacyDAppSessions();
+    }
   });
 }
 
@@ -540,7 +556,7 @@ export async function processBeacon(
           ...Beacon.PAIRING_RESPONSE_BASE,
           publicKey: Beacon.toHex(keyPair.publicKey)
         }),
-        Beacon.fromHex(req.publicKey)
+        new Uint8Array(Beacon.fromHex(req.publicKey))
       )
     };
   }
@@ -561,16 +577,13 @@ export async function processBeacon(
 const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: string): Promise<Beacon.Response> => {
   try {
     try {
-      console.log('req', req);
-      console.log('resBase', resBase);
-      console.log('origin', origin);
       return await formatTempleReq(getTempleReq(req), req, resBase, origin);
     } catch (err: any) {
       if (err instanceof MavrykOperationError) {
         throw err;
       }
 
-      console.log('err', err);
+      console.error('Beacon request error:', err);
 
       // Map Temple DApp error to Beacon error
       const beaconErrorType = (() => {
@@ -714,7 +727,7 @@ function getErrorData(err: any) {
 
 function generateRawPayloadBytes(payload: string) {
   const bytes = char2Bytes(Buffer.from(payload, 'utf8').toString('hex'));
-  // https://tezostaquito.io/docs/signing/
+  // https://webmavryk.mavryk.org/docs/signing/
   return `0501${char2Bytes(String(bytes.length))}${bytes}`;
 }
 

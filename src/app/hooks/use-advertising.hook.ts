@@ -1,12 +1,9 @@
-import { useEffect } from 'react';
+import { useAdvertisingPromotionQuery } from './use-advertising-promotion.query';
 
-import { useDispatch } from 'react-redux';
-
-import { loadAdvertisingPromotionActions } from 'app/store/advertising/actions';
-
+/**
+ * Global loading hook for advertising promotion data.
+ * TanStack Query handles fetching and caching automatically.
+ */
 export const useAdvertisingLoading = () => {
-  const dispatch = useDispatch();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => void dispatch(loadAdvertisingPromotionActions.submit()), []);
+  useAdvertisingPromotionQuery();
 };

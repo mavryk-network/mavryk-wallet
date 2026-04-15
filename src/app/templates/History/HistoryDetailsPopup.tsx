@@ -30,6 +30,7 @@ import {
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from 'lib/temple/history/types';
+import { formatMumavAsTz } from 'lib/utils/amounts';
 
 import { AssetImage } from '../AssetImage';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
@@ -248,7 +249,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">
-            <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
+            <button type="button" className="flex items-center gap-1" onClick={toggleFeesDropdown}>
               <T id="networkFees" />
               <ArrowIcon
                 className={clsx(
@@ -256,7 +257,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                   showFeeDetails && 'transform rotate-180'
                 )}
               />
-            </div>
+            </button>
 
             <div className="flex flex-col items-end">
               <FiatBalance
@@ -269,7 +270,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               />
 
               <div className="text-sm text-secondary-white">
-                <span>-{mumavToTz(fees?.networkFee ?? 0).toFixed()}</span>
+                <span>-{formatMumavAsTz(fees?.networkFee)}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </div>
@@ -288,7 +289,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <T id="gasFee" />
               </span>
               <span className="text-secondary-white flex items-center capitalize">
-                <span>-{mumavToTz(fees?.gasFee ?? 0).toFixed()}</span>
+                <span>-{formatMumavAsTz(fees?.gasFee)}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </span>
@@ -299,7 +300,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               </span>
               <span className="text-secondary-white">
                 <span className="text-secondary-white flex items-center">
-                  <span>-{mumavToTz(fees?.storageFee ?? 0).toFixed()}</span>
+                  <span>-{formatMumavAsTz(fees?.storageFee)}</span>
                   &nbsp;
                   <span>{mainAssetSymbol}</span>
                 </span>

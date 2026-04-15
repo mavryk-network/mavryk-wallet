@@ -50,7 +50,7 @@ const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
   const plusRef = useTippy<HTMLAnchorElement>(plusTippyOptions);
 
   const [searchValue, setSearchValue] = useState('');
-  const [attractSelectedAccount, setAttractSelectedAccount] = useState(true);
+  const [_attractSelectedAccount, setAttractSelectedAccount] = useState(true);
 
   const filteredAccounts = useMemo(() => {
     if (searchValue.length === 0) {

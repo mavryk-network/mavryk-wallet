@@ -24,7 +24,7 @@ export const LockedWalletExists: FC<LockedWalletExistsProps> = ({ locked }) =>
               substitutions={[
                 <T id="backToUnlockPage" key="link">
                   {linkLabel => (
-                    <Link to="/" className="font-semibold hover:underline">
+                    <Link to="/" className="font-medium hover:underline">
                       {linkLabel}
                     </Link>
                   )}

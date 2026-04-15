@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useRef } from 'react';
 
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
@@ -9,15 +9,14 @@ import { useAppEnv } from 'app/env';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useChainId, useNetwork, useTezos, validateContractAddress } from 'lib/temple/front';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
+import { useChainId, useNetwork, useMavryk, useAddressResolution, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { isNumeric } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../../SuccessScreen/SuccessScreen';
-import { signKYCAction } from '../utils/tezosSigner';
+import { signKYCAction } from '../utils/mavrykSigner';
 
 import { VerificationFormSelectors } from './verificationForm.selectors';
 
@@ -31,36 +30,39 @@ const VerificationForm: FC<DelegateFormProps> = () => {
   const formAnalytics = useFormAnalytics('AddressValidationForm');
   const { popup } = useAppEnv();
   const { rpcBaseURL: rpcUrl } = useNetwork();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const chainId = useChainId();
 
   /**
    * Form
    */
 
-  const { watch, handleSubmit, errors, control, formState, reset } = useForm<FormData>({
+  const {
+    watch,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    control,
+    reset
+  } = useForm<FormData>({
     mode: 'onChange'
   });
 
   const toValue = watch('to');
-
-  const { data: resolvedAddress } = useTezosAddressByDomainName(toValue);
+  const { toResolved } = useAddressResolution(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
-
-  const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
 
   // const memoizedValidateAddress = useMemo(() => (value: any) => validateAnyAddress(value), []);
 
   const [submitError, setSubmitError] = useSafeState<{ message: string } | null>(
     null,
-    `${tezos.checksum}_${toResolved}`
+    `${mavryk.checksum}_${toResolved}`
   );
 
   const onSubmit = useCallback(
     async (_: FormData) => {
       const to = toResolved;
-      if (formState.isSubmitting) return;
+      if (isSubmitting) return;
       setSubmitError(null);
 
       const analyticsProperties = { enteredAddress: to };
@@ -85,24 +87,25 @@ const VerificationForm: FC<DelegateFormProps> = () => {
           description: 'veridyAddressSuccessMsg',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail(analyticsProperties);
 
-        if (err.message === 'Declined') {
+        if (err instanceof Error && err.message === 'Declined') {
           return;
         }
 
         // Human delay.
         await delay();
 
-        if (isNumeric(err.message)) {
-          return setSubmitError({ message: getErrorMsgByCode(err.message) });
+        const errMsg = err instanceof Error ? err.message : String(err);
+        if (isNumeric(errMsg)) {
+          return setSubmitError({ message: getErrorMsgByCode(errMsg) });
         }
 
-        setSubmitError(err);
+        setSubmitError({ message: err instanceof Error ? err.message : String(err) });
       }
     },
-    [toResolved, formState.isSubmitting, setSubmitError, formAnalytics, rpcUrl, reset, chainId]
+    [toResolved, isSubmitting, setSubmitError, formAnalytics, rpcUrl, chainId, reset]
   );
 
   return (
@@ -113,28 +116,33 @@ const VerificationForm: FC<DelegateFormProps> = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col justify-between flex-1">
         <Controller
           name="to"
-          as={<NoSpaceField ref={toFieldRef} />}
           control={control}
           // will no allow form submitting is address is invalid
           // rules={{ validate: memoizedValidateAddress }}
-          onChange={([v]) => v}
-          onFocus={() => toFieldRef.current?.focus()}
-          textarea
-          rows={2}
-          id="validate-to"
-          label={t('contractAddress')}
-          placeholder={t('enterContractAddressPlaceholder')}
-          errorCaption={(errors.to?.message && t(errors.to.message.toString() as TID)) || submitError?.message}
-          style={{
-            resize: 'none'
-          }}
-          containerClassName={clsx('mb-4', popup && 'px-4')}
-          testID={VerificationFormSelectors.addressInput}
+          render={({ field }) => (
+            <NoSpaceField
+              ref={toFieldRef}
+              value={field.value}
+              onChange={((v: string) => field.onChange(v)) as any}
+              onFocus={() => toFieldRef.current?.focus()}
+              textarea
+              rows={2}
+              id="validate-to"
+              label={t('contractAddress')}
+              placeholder={t('enterContractAddressPlaceholder')}
+              errorCaption={(errors.to?.message && t(errors.to.message.toString() as TID)) || submitError?.message}
+              style={{
+                resize: 'none'
+              }}
+              containerClassName={clsx('mb-4', popup && 'px-4')}
+              testID={VerificationFormSelectors.addressInput}
+            />
+          )}
         />
         <div className={clsx(popup && 'px-4')}>
           <ButtonRounded
-            isLoading={formState.isSubmitting}
-            disabled={!toResolved || formState.isSubmitting || Boolean(submitError?.message)}
+            isLoading={isSubmitting}
+            disabled={!toResolved || isSubmitting || Boolean(submitError?.message)}
             size="big"
             type="submit"
             className={clsx('w-full', popup ? 'mt-40px' : 'mt-18')}

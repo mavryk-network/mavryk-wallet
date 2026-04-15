@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 
-import { useTezos } from 'lib/temple/front';
+import { useMavryk } from 'lib/temple/front';
 
 export const useBlockLevel = () => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const [blockLevel, setBlockLevel] = useState<number>();
 
   useEffect(() => {
-    const subscription = tezos.stream.subscribeBlock('head');
+    const subscription = mavryk.stream.subscribeBlock('head');
 
     subscription.on('data', block => setBlockLevel(block.header.level));
 
     return () => subscription.close();
-  }, [tezos]);
+  }, [mavryk]);
 
   return blockLevel;
 };

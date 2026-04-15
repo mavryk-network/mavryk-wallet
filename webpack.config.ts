@@ -55,18 +55,6 @@ if (BACKGROUND_IS_WORKER) CONTENT_SCRIPTS.push('keepBackgroundWorkerAlive');
 const mainConfig = (() => {
   const config = buildBaseConfig();
 
-  config.resolve = {
-    ...(config.resolve || {}),
-    alias: {
-      ...(config.resolve?.alias || {}),
-      '@mavrykdynamics/taquito': '@taquito/taquito',
-      '@mavrykdynamics/taquito-michelson-encoder': '@taquito/michelson-encoder',
-      '@mavrykdynamics/taquito-michel-codec': '@taquito/michel-codec',
-      '@mavrykdynamics/taquito-rpc': '@taquito/rpc',
-      '@mavrykdynamics/taquito-tzip16': '@taquito/tzip16'
-    }
-  };
-
   /* Page reloading in development mode */
   const liveReload = DEVELOPMENT_ENV && usePagesLiveReload(RELOADER_PORTS.PAGES);
 

@@ -26,7 +26,9 @@ const useTopUpUpdate = (
         setExchangeData(data);
         timeoutId = setTimeout(repeat, 3000);
       } catch (e) {
-        setIsError(true);
+        if (isAlive.current) {
+          setIsError(true);
+        }
       }
     }, 3000);
     return () => {

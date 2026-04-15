@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -12,13 +13,13 @@ import { useAppEnv } from 'app/env';
 import Balance from 'app/templates/Balance';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import { useFormAnalytics } from 'lib/analytics';
-import { getOneUserContracts, TzktRelatedContract, isKnownChainId } from 'lib/apis/tzkt';
+import { getOneUserContracts, MvktRelatedContract, isKnownChainId } from 'lib/apis/mvkt';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
-import { useRelevantAccounts, useTezos, useTempleClient, useChainId } from 'lib/temple/front';
-import { isAddressValid } from 'lib/temple/helpers';
+import { useRelevantAccounts, useMavryk, useMavrykClient, useChainId } from 'lib/temple/front';
+import { isAddressValid, validateMavrykAddress } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -27,12 +28,12 @@ type ImportKTAccountFormData = {
   contractAddress: string;
 };
 
-const getContractAddress = (contract: TzktRelatedContract) => contract.address;
+const getContractAddress = (contract: MvktRelatedContract) => contract.address;
 
 export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const accounts = useRelevantAccounts();
-  const tezos = useTezos();
-  const { importKTManagedAccount } = useTempleClient();
+  const mavryk = useMavryk();
+  const { importKTManagedAccount } = useMavrykClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.ManagedKT);
   const chainId = useChainId(true);
   const { popup } = useAppEnv();
@@ -47,17 +48,21 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
     ],
     [accounts, chainId]
   );
-  const { data: usersContracts = [] } = useRetryableSWR(queryKey, getUsersContracts, {});
+  const { data: usersContracts = [] } = useQuery({
+    queryKey,
+    queryFn: () => getUsersContracts(queryKey),
+    retry: 2
+  });
 
   const remainingUsersContracts = useMemo(() => {
     return usersContracts.filter(({ address }) => !accounts.some(({ publicKeyHash }) => publicKeyHash === address));
   }, [accounts, usersContracts]);
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } =
-    useForm<ImportKTAccountFormData>({
-      mode: 'onChange',
-      defaultValues: {}
-    });
+  const { watch, handleSubmit, control, formState, setValue, trigger } = useForm<ImportKTAccountFormData>({
+    mode: 'onChange',
+    defaultValues: {}
+  });
+  const { errors } = formState;
 
   const contractAddressFieldRef = useRef<HTMLTextAreaElement>(null);
   const handleContactAddressFocus = useCallback(() => contractAddressFieldRef?.current?.focus(), []);
@@ -68,7 +73,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         case value?.length > 0:
           return true;
 
-        case isAddressValid(value):
+        case validateMavrykAddress(value, true) === null:
           return t('invalidAddress');
 
         case value.startsWith('KT'):
@@ -87,8 +92,8 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
   const contractAddress = watch('contractAddress') ?? '';
   const cleanContractAddressField = useCallback(() => {
     setValue('contractAddress', '');
-    triggerValidation('contractAddress');
-  }, [setValue, triggerValidation]);
+    trigger('contractAddress');
+  }, [setValue, trigger]);
 
   const contractAddressFilled = useMemo(
     () => Boolean(contractAddress && isAddressValid(contractAddress)),
@@ -109,7 +114,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
       formAnalytics.trackSubmit();
       setError(null);
       try {
-        const contract = await tezos.contract.at(address);
+        const contract = await mavryk.contract.at(address);
         const owner = await contract.storage();
         if (typeof owner !== 'string') {
           throw new Error(t('invalidManagedContract'));
@@ -119,29 +124,29 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
           throw new Error(t('youAreNotContractManager'));
         }
 
-        const chain = await tezos.rpc.getChainId();
-        await importKTManagedAccount(address, chain, owner, chainId!);
+        const chain = await mavryk.rpc.getChainId();
+        await importKTManagedAccount(address, chain, owner);
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
     },
-    [formState, tezos, accounts, importKTManagedAccount, formAnalytics, chainId]
+    [formState, mavryk, accounts, importKTManagedAccount, formAnalytics, chainId]
   );
 
   const handleKnownContractSelect = useCallback(
     (address: string) => {
       setValue('contractAddress', address);
-      triggerValidation('contractAddress');
+      trigger('contractAddress');
     },
-    [setValue, triggerValidation]
+    [setValue, trigger]
   );
 
   return (
@@ -153,51 +158,58 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
 
       <Controller
         name="contractAddress"
-        as={<NoSpaceField ref={contractAddressFieldRef} />}
         control={control}
         rules={{
           required: true,
           validate: validateContractAddress
         }}
-        onChange={([v]) => v}
-        onFocus={handleContactAddressFocus}
-        textarea
-        rows={2}
-        cleanable={Boolean(contractAddress)}
-        onClean={cleanContractAddressField}
-        id="contract-address"
-        label={t('managedContract')}
-        labelDescription={
-          filledAccount ? (
-            <div className="flex flex-wrap items-center">
-              <Identicon
-                type="bottts"
-                hash={filledAccount.address}
-                size={14}
-                className="flex-shrink-0 shadow-xs opacity-75"
-              />
-              <div className="ml-1 mr-px font-normal">
-                <T id="contract" />
-              </div>{' '}
-              <Balance assetSlug="mav" address={filledAccount.address}>
-                {bal => (
-                  <span className="text-xs leading-none">
-                    <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
-                  </span>
-                )}
-              </Balance>
-            </div>
-          ) : (
-            t('contractAddressInputDescription')
-          )
-        }
-        placeholder={t('addressContractPlaceholder')}
-        errorCaption={errors.contractAddress?.message}
-        style={{
-          resize: 'none'
-        }}
-        containerClassName="mb-4"
-        testID={ImportAccountSelectors.managedContractInput}
+        render={({ field }) => (
+          <NoSpaceField
+            {...field}
+            ref={(el: HTMLTextAreaElement | null) => {
+              field.ref(el);
+              (contractAddressFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+            }}
+            onFocus={handleContactAddressFocus}
+            textarea
+            rows={2}
+            cleanable={Boolean(contractAddress)}
+            onClean={cleanContractAddressField}
+            id="contract-address"
+            label={t('managedContract')}
+            labelDescription={
+              filledAccount ? (
+                <div className="flex flex-wrap items-center">
+                  <Identicon
+                    type="bottts"
+                    hash={filledAccount.address}
+                    size={14}
+                    className="flex-shrink-0 shadow-xs opacity-75"
+                  />
+                  <div className="ml-1 mr-px font-normal">
+                    <T id="contract" />
+                  </div>{' '}
+                  <Balance assetSlug="mav" address={filledAccount.address}>
+                    {bal => (
+                      <span className="text-xs leading-none">
+                        <Money>{bal}</Money> <span style={{ fontSize: '0.75em' }}>ꝳ</span>
+                      </span>
+                    )}
+                  </Balance>
+                </div>
+              ) : (
+                t('contractAddressInputDescription')
+              )
+            }
+            placeholder={t('addressContractPlaceholder')}
+            errorCaption={errors.contractAddress?.message}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName="mb-4"
+            testID={ImportAccountSelectors.managedContractInput}
+          />
+        )}
       />
 
       <div>
@@ -213,7 +225,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         {remainingUsersContracts.length > 0 && !contractAddressFilled && (
           <div className="mt-8 mb-6 flex flex-col">
             <h2 className="mb-4 leading-tight flex flex-col">
-              <span className="text-base font-semibold text-gray-700">
+              <span className="text-base font-medium text-gray-700">
                 <T id="addKnownManagedContract" />
               </span>
 
@@ -244,7 +256,7 @@ const getUsersContracts = async ([, chainId, ...accounts]: string[]) => {
   }
 
   const contractsChunks = await Promise.all(
-    accounts.map<Promise<TzktRelatedContract[]>>(account => getOneUserContracts(chainId, account).catch(() => []))
+    accounts.map<Promise<MvktRelatedContract[]>>(account => getOneUserContracts(chainId, account).catch(() => []))
   );
   return contractsChunks.reduce(
     (contracts, chunk) => [...contracts, ...chunk.filter(({ kind }) => kind === 'delegator_contract')],
@@ -252,7 +264,7 @@ const getUsersContracts = async ([, chainId, ...accounts]: string[]) => {
   );
 };
 
-type ContractOptionRenderProps = OptionRenderProps<TzktRelatedContract, string>;
+type ContractOptionRenderProps = OptionRenderProps<MvktRelatedContract, string>;
 
 const ContractIcon: FC<ContractOptionRenderProps> = props => {
   return <Identicon type="bottts" hash={props.item.address} size={32} className="flex-shrink-0 shadow-xs" />;

@@ -8,8 +8,9 @@ import { ACCOUNT_NAME_PATTERN_STR } from 'app/defaults';
 import { ReactComponent as EditIcon } from 'app/icons/edit.svg';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useAccount } from 'lib/temple/front';
+import { useMavrykClient, useAccount } from 'lib/temple/front';
 import { useAlert } from 'lib/ui/dialog';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { HomeSelectors } from '../Home.selectors';
 
@@ -24,7 +25,7 @@ const buttonClassNames = [
 ];
 
 const EditableTitle: FC = () => {
-  const { editAccountName } = useTempleClient();
+  const { editAccountName } = useMavrykClient();
   const account = useAccount();
   const customAlert = useAlert();
   const formAnalytics = useFormAnalytics('ChangeAccountName');
@@ -80,14 +81,14 @@ const EditableTitle: FC = () => {
           setEditing(false);
 
           formAnalytics.trackSubmitSuccess();
-        } catch (err: any) {
+        } catch (err: unknown) {
           formAnalytics.trackSubmitFail();
 
           console.error(err);
 
           await customAlert({
             title: t('errorChangingAccountName'),
-            children: err.message
+            children: getErrorMessage(err)
           });
         }
       })();
@@ -141,8 +142,8 @@ const EditableTitle: FC = () => {
       ) : (
         <>
           <Name
-            className="pl-1 text-gray-700 text-center text-gray-910"
-            style={{ maxWidth: '24rem', fontSize: 23 }}
+            className="text-2xl pl-1 text-gray-700 text-center text-gray-910"
+            style={{ maxWidth: '24rem' }}
             testID={HomeSelectors.accountNameText}
           >
             {account.name}

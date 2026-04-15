@@ -1,5 +1,7 @@
 import React, { FC } from 'react';
 
+import clsx from 'clsx';
+
 import { Button } from 'app/atoms/Button';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
@@ -22,19 +24,19 @@ const AttentionPage: FC = () => {
         </>
       }
     >
-      <div style={{ maxWidth: '360px', margin: 'auto' }} className="pb-8 text-center">
+      <div style={{ maxWidth: '360px' }} className="mx-auto pb-8 text-center">
         <p className={styles['title']}>
           <T id={'attention'} />
         </p>
         {!browserVersionIsSafe && (
-          <p className={styles['alert']}>
+          <p className={clsx('font-aeonik text-sm', styles['alert'])}>
             <T id={'browserVersionIsOutOfDate'} />
           </p>
         )}
         <p className={styles['description']} style={browserVersionIsSafe ? {} : { marginTop: 24 }}>
           <T id={'attentionDescription'} />
         </p>
-        <p className={styles['description']} style={{ textAlign: 'start', marginBottom: 20 }}>
+        <p className={clsx(styles['description'], 'mb-5')} style={{ textAlign: 'start' }}>
           <T id={'attentionListTitle1'} />
         </p>
         <ul className={styles['listContainer']}>
@@ -51,7 +53,7 @@ const AttentionPage: FC = () => {
             <T id={'attentionListItem4'} />
           </li>
         </ul>
-        <p className={styles['description']} style={{ textAlign: 'start', marginTop: 20, marginBottom: 20 }}>
+        <p className={clsx(styles['description'], 'my-5')} style={{ textAlign: 'start' }}>
           <T id={'attentionListTitle2'} />
         </p>
         <ul className={styles['listContainer']}>
@@ -68,7 +70,7 @@ const AttentionPage: FC = () => {
             <T id={'attentionListItem8'} />
           </li>
         </ul>
-        <p className={styles['description']} style={{ marginTop: 24, marginBottom: 24 }}>
+        <p className={clsx(styles['description'], 'my-6')}>
           <T id={'takeCare'} />
         </p>
         <p className={styles['description']} style={{ marginTop: 0, marginBottom: 0, color: '#3182CE' }}>
@@ -77,8 +79,7 @@ const AttentionPage: FC = () => {
             href={'https://madfish.crunch.help/temple-wallet/a-note-on-security'}
             target="_blank"
             rel="noreferrer"
-            className={styles['link']}
-            style={{ fontSize: 12 }}
+            className={clsx(styles['link'], 'text-xs')}
           >
             link
           </a>

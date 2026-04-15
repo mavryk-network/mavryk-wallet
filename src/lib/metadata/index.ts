@@ -1,34 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { isString } from 'lodash';
-import { useDispatch } from 'react-redux';
 
-import { loadCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
-import {
-  useCollectiblesMetadataLoadingSelector,
-  useAllCollectiblesMetadataSelector,
-  useCollectibleMetadataSelector
-} from 'app/store/collectibles-metadata/selectors';
-import { loadRwasMetadataAction } from 'app/store/rwas-metadata/actions';
-import {
-  useAllRwasMetadataSelector,
-  useRwaMetadataSelector,
-  useRwasMetadataLoadingSelector
-} from 'app/store/rwas-metadata/selectors';
-import { loadTokensMetadataAction } from 'app/store/tokens-metadata/actions';
-import {
-  useTokenMetadataSelector,
-  useTokensMetadataLoadingSelector,
-  useAllTokensMetadataSelector
-} from 'app/store/tokens-metadata/selectors';
 import { METADATA_API_LOAD_CHUNK_SIZE } from 'lib/apis/temple';
 import { isMavSlug } from 'lib/assets';
+import {
+  metadataStore,
+  useAllCollectiblesMetadataSelector,
+  useAllRwasMetadataSelector,
+  useAllTokensMetadataSelector,
+  useCollectibleMetadataSelector,
+  useCollectiblesMetadataLoadingSelector,
+  useRwaMetadataSelector,
+  useRwasMetadataLoadingSelector,
+  useTokenMetadataSelector,
+  useTokensMetadataLoadingSelector
+} from 'lib/store/zustand/metadata.store';
 import { useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
+import { loadTokensMetadata } from './fetch';
 import { AssetMetadataBase, TokenMetadata } from './types';
-import { mapToRecord } from './utils';
 
 export type { AssetMetadataBase, TokenMetadata } from './types';
 export { MAVEN_METADATA, EMPTY_BASE_METADATA } from './defaults';
@@ -57,17 +50,15 @@ export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] 
   const rwasMetadata = useAllRwasMetadataSelector();
   const gasMetadata = useGasTokenMetadata();
 
-  const metadata = new Map([...collectiblesMetadata, ...rwasMetadata]);
+  const merged = useMemo(() => {
+    const map: Record<string, TokenMetadata> = { ...collectiblesMetadata, ...rwasMetadata, ...tokensMetadata };
+    return map;
+  }, [collectiblesMetadata, rwasMetadata, tokensMetadata]);
 
-  for (const [key, value] of Object.entries(tokensMetadata)) {
-    metadata.set(key, value);
-  }
-
-  /// @ts-expect-error
   return slugs
     .map(s => {
       if (isMavSlug(s)) return gasMetadata;
-      return metadata.get(s);
+      return merged[s];
     })
     .filter(s => Boolean(s));
 };
@@ -76,9 +67,7 @@ export type TokenMetadataGetter = (slug: string) => TokenMetadata | undefined;
 
 export const useGetTokenMetadata = () => {
   const tokensMeta = useAllTokensMetadataSelector();
-  const rwaMetaMap = useAllRwasMetadataSelector();
-
-  const rwaMeta = useMemo(() => mapToRecord(rwaMetaMap), [rwaMetaMap]);
+  const rwaMeta = useAllRwasMetadataSelector();
 
   const allMeta: Record<string, TokenMetadata> = useMemo(() => ({ ...tokensMeta, ...rwaMeta }), [rwaMeta, tokensMeta]);
 
@@ -98,13 +87,13 @@ export const useGetTokenOrGasMetadata = () => {
 export const useGetCollectibleMetadata = () => {
   const allMeta = useAllCollectiblesMetadataSelector();
 
-  return useCallback<TokenMetadataGetter>(slug => allMeta.get(slug), [allMeta]);
+  return useCallback<TokenMetadataGetter>(slug => allMeta[slug], [allMeta]);
 };
 
 export const useGetRwaMetadata = () => {
   const allMeta = useAllRwasMetadataSelector();
 
-  return useCallback<TokenMetadataGetter>(slug => allMeta.get(slug), [allMeta]);
+  return useCallback<TokenMetadataGetter>(slug => allMeta[slug], [allMeta]);
 };
 
 export const useGetAssetMetadata = () => {
@@ -154,7 +143,6 @@ const useAssetsMetadataPresenceCheck = (
   slugsToCheck?: string[]
 ) => {
   const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
 
   const checkedRef = useRef<string[]>([]);
 
@@ -174,18 +162,40 @@ const useAssetsMetadataPresenceCheck = (
     if (missingChunk.length > 0) {
       checkedRef.current = [...checkedRef.current, ...missingChunk];
 
-      dispatch(
-        (ofAssets === 'collectibles'
-          ? loadCollectiblesMetadataAction
-          : ofAssets === 'rwas'
-          ? loadRwasMetadataAction
-          : loadTokensMetadataAction)({
-          rpcUrl,
-          slugs: missingChunk
-        })
+      const store = metadataStore.getState();
+
+      if (ofAssets === 'tokens') {
+        store.setTokensMetadataLoading(true);
+      } else if (ofAssets === 'collectibles') {
+        store.setCollectiblesMetadataLoading(true);
+      } else {
+        store.setRwasMetadataLoading(true);
+      }
+
+      loadTokensMetadata(rpcUrl, missingChunk).then(
+        records => {
+          const store = metadataStore.getState();
+          if (ofAssets === 'tokens') {
+            store.putTokensMetadata(records, true);
+          } else if (ofAssets === 'collectibles') {
+            store.putCollectiblesMetadata(records, true);
+          } else {
+            store.putRwasMetadata(records, true);
+          }
+        },
+        () => {
+          const store = metadataStore.getState();
+          if (ofAssets === 'tokens') {
+            store.setTokensMetadataLoading(false);
+          } else if (ofAssets === 'collectibles') {
+            store.setCollectiblesMetadataLoading(false);
+          } else {
+            store.setRwasMetadataLoading(false);
+          }
+        }
       );
     }
-  }, [ofAssets, slugsToCheck, getMetadata, metadataLoading, dispatch, rpcUrl]);
+  }, [ofAssets, slugsToCheck, getMetadata, metadataLoading, rpcUrl]);
 };
 
 export function getAssetSymbol(metadata: AssetMetadataBase | nullish, short = false) {

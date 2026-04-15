@@ -3,8 +3,7 @@ import { useMemo } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 
-import { useSelector } from 'app/store/root-state.selector';
-import { TzktUserAccount } from 'lib/apis/tzkt/types';
+import { MvktUserAccount } from 'lib/apis/mvkt/types';
 import { isMavSlug, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useEnabledOtherAccountTokensSlugs } from 'lib/assets/hooks/tokens';
@@ -12,6 +11,7 @@ import {
   useGetCurrentAccountTokenOrGasBalanceWithDecimals,
   useGetOtherAccountTokenOrGasBalanceWithDecimals
 } from 'lib/balances/hooks';
+import { useUsdToTokenRates } from 'lib/fiat-currency';
 import { useGasTokenMetadata } from 'lib/metadata';
 import { useAccount, useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -26,7 +26,7 @@ export const useTotalBalance = (isStakingBalanceIncluded = false) => {
   const metadata = useGasTokenMetadata();
 
   const getBalance = useGetCurrentAccountTokenOrGasBalanceWithDecimals();
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useUsdToTokenRates();
 
   const slugs = useMemo(() => [MAV_TOKEN_SLUG, ...tokensSlugs], [tokensSlugs]);
 
@@ -50,12 +50,12 @@ export const useTotalBalance = (isStakingBalanceIncluded = false) => {
 };
 
 export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalanceIncluded = false) => {
-  const { data: accStats } = useDelegate(accountPkh, false);
+  const { data: accStats } = useDelegate(accountPkh);
   const metadata = useGasTokenMetadata();
   const tokensSlugs = useEnabledOtherAccountTokensSlugs(accountPkh);
 
   const getBalance = useGetOtherAccountTokenOrGasBalanceWithDecimals(accountPkh);
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useUsdToTokenRates();
 
   const slugs = useMemo(() => [MAV_TOKEN_SLUG, ...tokensSlugs], [tokensSlugs]);
 
@@ -77,7 +77,7 @@ export const useOtherAccountTotalBalance = (accountPkh: string, isStakingBalance
   }, [slugs, getBalance, isStakingBalanceIncluded, allUsdToTokenRates, accStats, metadata.decimals]);
 };
 
-export const upgradeBalanceWithStakingBalance = (balance?: BigNumber, acc?: TzktUserAccount, decimals = 6) => {
+export const upgradeBalanceWithStakingBalance = (balance?: BigNumber, acc?: MvktUserAccount, decimals = 6) => {
   const stakedBalance = atomsToTokens(acc?.stakedBalance ?? ZERO, decimals);
   const unstakedBalance = atomsToTokens(acc?.unstakedBalance ?? ZERO, decimals);
 

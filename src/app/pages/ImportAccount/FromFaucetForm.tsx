@@ -7,7 +7,7 @@ import { Alert, FileInputProps, FileInput, FormField, FormSubmitButton } from 'a
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { TID, T, t } from 'lib/i18n';
-import { useTempleClient, useSetAccountPkh, useTezos, activateAccount } from 'lib/temple/front';
+import { useMavrykClient, useSetAccountPkh, useMavryk, useChainId, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -31,13 +31,20 @@ interface FaucetTextInputFormData {
 }
 
 export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
-  const { importFundraiserAccount } = useTempleClient();
+  const { importFundraiserAccount } = useMavrykClient();
   const { popup } = useAppEnv();
   const setAccountPkh = useSetAccountPkh();
-  const tezos = useTezos();
+  const mavryk = useMavryk();
+  const chainId = useChainId() ?? '';
   const formAnalytics = useFormAnalytics(ImportAccountFormType.FaucetFile);
 
-  const { control, handleSubmit: handleTextFormSubmit, watch, errors, setValue } = useForm<FaucetTextInputFormData>();
+  const {
+    control,
+    handleSubmit: handleTextFormSubmit,
+    watch,
+    formState: { errors },
+    setValue
+  } = useForm<FaucetTextInputFormData>();
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [processing, setProcessing] = useSafeState(false);
@@ -53,17 +60,17 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
   const importAccount = useCallback(
     async (data: FaucetData) => {
-      const activation = await activateAccount(data.pkh, data.secret ?? data.activation_code, tezos);
+      const activation = await activateAccount(data.pkh, data.secret ?? data.activation_code, mavryk);
 
       if (activation.status === 'SENT') {
         setAlert(`🛫 ${t('requestSent', t('activationOperationType'))}`);
-        await confirmOperation(tezos, activation.operation.hash);
+        await confirmOperation(mavryk, activation.operation.hash);
       }
 
       try {
-        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '));
-      } catch (err: any) {
-        if (/Account already exists/.test(err?.message)) {
+        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '), chainId);
+      } catch (err: unknown) {
+        if (err instanceof Error && /Account already exists/.test(err.message)) {
           setAccountPkh(data.pkh);
           navigate('/');
           return;
@@ -72,7 +79,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         throw err;
       }
     },
-    [importFundraiserAccount, setAccountPkh, setAlert, tezos]
+    [importFundraiserAccount, setAccountPkh, setAlert, mavryk]
   );
 
   const onTextFormSubmit = useCallback(
@@ -89,7 +96,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         await importAccount(toFaucetJSON(formData.text));
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
@@ -97,7 +104,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         // Human delay.
         await delay();
 
-        setAlert(err);
+        setAlert(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setProcessing(false);
       }
@@ -127,7 +134,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
             reader.onload = (readEvt: any) => {
               try {
                 res(toFaucetJSON(readEvt.target.result));
-              } catch (err: any) {
+              } catch (err: unknown) {
                 rej(err);
               }
             };
@@ -139,13 +146,13 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
         }
 
         await importAccount(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         // Human delay.
         await delay();
 
-        setAlert(err);
+        setAlert(err instanceof Error ? err : new Error(String(err)));
       } finally {
         formRef.current?.reset();
         setProcessing(false);
@@ -172,7 +179,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
         <div className="flex flex-col w-full">
           <label className="mb-4 leading-tight flex flex-col">
-            <span className="text-base font-semibold text-gray-700">
+            <span className="text-base font-medium text-gray-700">
               <T id="faucetFile" />
             </span>
 
@@ -204,27 +211,34 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
       >
         <Controller
           name="text"
-          as={<FormField className="font-mono" ref={textFieldRef} />}
           control={control}
           rules={{
             validate: validateFaucetTextInput
           }}
-          onChange={([v]) => v}
-          onFocus={handleTextFieldFocus}
-          textarea
-          rows={5}
-          cleanable={Boolean(textFieldValue)}
-          onClean={cleanTextField}
-          id="faucet-text-input"
-          label={t('faucetJson')}
-          labelDescription={t('faucetJsonDescription')}
-          placeholder={'{ ... }'}
-          errorCaption={errors.text?.message && t(errors.text.message.toString() as TID)}
-          className="text-xs"
-          style={{
-            resize: 'none'
-          }}
-          containerClassName="mb-4"
+          render={({ field }) => (
+            <FormField
+              {...field}
+              ref={(el: HTMLTextAreaElement | null) => {
+                field.ref(el);
+                (textFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+              }}
+              onFocus={handleTextFieldFocus}
+              textarea
+              rows={5}
+              cleanable={Boolean(textFieldValue)}
+              onClean={cleanTextField}
+              id="faucet-text-input"
+              label={t('faucetJson')}
+              labelDescription={t('faucetJsonDescription')}
+              placeholder={'{ ... }'}
+              errorCaption={errors.text?.message && t(errors.text.message.toString() as TID)}
+              className="font-mono text-xs"
+              style={{
+                resize: 'none'
+              }}
+              containerClassName="mb-4"
+            />
+          )}
         />
         <div className="w-full flex flex-col">
           <FormSubmitButton loading={processing}>

@@ -9,6 +9,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T, t } from 'lib/i18n';
 import { useContactsActions } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { PopupModalWithTitle } from '../PopupModalWithTitle';
 
@@ -24,19 +25,17 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
     register,
     reset: resetForm,
     handleSubmit,
-    formState,
-    clearError,
-    setError,
-    errors
+    formState: { errors, isSubmitting: submitting },
+    clearErrors,
+    setError
   } = useForm<{ name: string }>();
-  const submitting = formState.isSubmitting;
 
   const onAddContactSubmit = useCallback(
     async ({ name }: { name: string }) => {
       if (submitting) return;
 
       try {
-        clearError();
+        clearErrors();
 
         await addContact({
           address: address!,
@@ -45,15 +44,15 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
         });
         resetForm();
         onClose();
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('address', 'submit-error', err.message);
+        setError('name', { type: 'submit-error', message: getErrorMessage(err) });
       }
     },
-    [submitting, clearError, addContact, address, resetForm, onClose, setError]
+    [submitting, clearErrors, addContact, address, resetForm, onClose, setError]
   );
 
   return (
@@ -87,13 +86,12 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
           </div>
 
           <FormField
-            ref={register({
+            {...register('name', {
               required: t('required'),
               maxLength: { value: 50, message: t('maximalAmount', '50') }
             })}
             label={t('name')}
             id="name"
-            name="name"
             placeholder={t('newContactPlaceholder')}
             errorCaption={errors.name?.message}
             containerClassName="mb-6"

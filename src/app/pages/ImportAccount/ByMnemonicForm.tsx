@@ -10,8 +10,9 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { isSeedPhraseFilled, SeedPhraseInput } from 'app/templates/SeedPhraseInput';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useChainId, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import { useChainId, useMavrykClient, validateDerivationPath } from 'lib/temple/front';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
@@ -36,8 +37,8 @@ interface ByMnemonicFormData {
 
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { createOrImportWallet } = useTempleClient();
-  const chainId = useChainId();
+  const { createOrImportWallet } = useMavrykClient();
+  useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -45,18 +46,19 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
 
   const [numberOfWords, setNumberOfWords] = useState(defaultNumberOfWords);
 
-  const { register, handleSubmit, errors, formState, reset, control, watch } = useForm<ByMnemonicFormData>({
+  const { register, handleSubmit, formState, reset, control, watch } = useForm<ByMnemonicFormData>({
     defaultValues: {
       customDerivationPath: DEFAULT_DERIVATION_PATH,
       accountNumber: 1
     }
   });
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
 
   const derivationPath = watch('customDerivationPath');
 
   const onSubmit = useCallback(
-    async ({ password, customDerivationPath }: ByMnemonicFormData) => {
+    async (_formData: ByMnemonicFormData) => {
       if (formState.isSubmitting) return;
 
       if (!seedError && isSeedPhraseFilled(seedPhrase)) {
@@ -67,14 +69,14 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
           await createOrImportWallet(formatMnemonic(seedPhrase));
 
           formAnalytics.trackSubmitSuccess();
-        } catch (err: any) {
+        } catch (err: unknown) {
           formAnalytics.trackSubmitFail();
 
           console.error(err);
 
           // Human delay
           await delay();
-          setError(err.message);
+          setError(getErrorMessage(err));
         }
       } else if (seedError === '') {
         setSeedError(t('mnemonicWordsAmountConstraint', [numberOfWords]) as string);
@@ -109,22 +111,25 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       <div className="flex flex-col">
         <div>
           <Controller
-            as={DerivationTypeFieldSelect}
             control={control}
             name="customDerivationPath"
-            options={DERIVATION_PATHS}
-            i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
-            descriptionI18nKey="addDerivationPathPrompt"
+            render={({ field }) => (
+              <DerivationTypeFieldSelect
+                {...field}
+                options={DERIVATION_PATHS}
+                i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
+                descriptionI18nKey="addDerivationPathPrompt"
+              />
+            )}
           />
         </div>
       </div>
 
       {derivationPath === 'custom' && (
         <FormField
-          ref={register({
+          {...register('customDerivationPath', {
             validate: validateDerivationPath
           })}
-          name="customDerivationPath"
           id="importacc-cdp"
           label={t('customDerivationPath')}
           placeholder={t('derivationPathExample2')}
@@ -135,8 +140,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
       )}
 
       <FormField
-        ref={register}
-        name="password"
+        {...register('password')}
         type="password"
         id="importfundacc-password"
         label={

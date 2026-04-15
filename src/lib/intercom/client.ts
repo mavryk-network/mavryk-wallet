@@ -16,13 +16,16 @@ export class IntercomClient {
   /**
    * Makes a request to background process and returns a response promise
    */
-  async request(payload: any): Promise<any> {
+  async request<TReq = any, TRes = any>(payload: TReq): Promise<TRes> {
+    const TIMEOUT_MS = 30_000;
     const reqId = this.reqId++;
 
     this.send({ type: MessageType.Req, data: payload, reqId });
 
-    return new Promise((resolve, reject) => {
-      const listener = (msg: any) => {
+    let listener: ((msg: any) => void) | null = null;
+
+    const responsePromise = new Promise<TRes>((resolve, reject) => {
+      listener = (msg: any) => {
         switch (true) {
           case msg?.reqId !== reqId:
             return;
@@ -36,22 +39,31 @@ export class IntercomClient {
             break;
         }
 
-        this.port.onMessage.removeListener(listener);
+        this.port.onMessage.removeListener(listener!);
+        listener = null;
       };
 
       this.port.onMessage.addListener(listener);
     });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => {
+        if (listener) this.port.onMessage.removeListener(listener);
+        reject(new Error('Intercom request timed out'));
+      }, TIMEOUT_MS)
+    );
+
+    return Promise.race([responsePromise, timeoutPromise]);
   }
 
   /**
    * Allows to subscribe to notifications channel from background process
    */
-  subscribe(callback: (data: any) => void) {
+  subscribe<T = any>(callback: (data: T) => void) {
     this.subscribers.push(callback);
 
     return () => {
-      const index = this.subscribers.findIndex(callback);
-      if (index > -1) this.subscribers.splice(index, 1);
+      this.subscribers = this.subscribers.filter(s => s !== callback);
     };
   }
 

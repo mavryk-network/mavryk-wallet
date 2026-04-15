@@ -1,13 +1,14 @@
 import { useCallback, useMemo } from 'react';
 
 import { DEFAULT_FEE } from '@mavrykdynamics/webmavryk';
+import { useQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defaults';
 import { PENNY, RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { BLOCK_DURATION } from 'lib/fixed-times';
-import { useTypedSWR } from 'lib/swr';
-import { ReactiveTezosToolkit } from 'lib/temple/front';
+import { feeKeys } from 'lib/query-keys';
+import { ReactiveMavrykToolkit } from 'lib/temple/front';
 import { hasManager, mumavToTz } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
@@ -22,7 +23,7 @@ export type FeeValueParams = {
   mode: StakeMode;
   balance: BigNumber; // MAV balance
   acc: TempleAccount;
-  tezos: ReactiveTezosToolkit;
+  tezos: ReactiveMavrykToolkit;
   feeValue?: number; // extra fee user adds
   amount: BigNumber; // stake/unstake amount entered
   decimals?: number; // MAV decimals (default 6)
@@ -76,7 +77,7 @@ export const useMavStakeFeeValue = ({
       }
 
       return { baseFee, est, hasManager: hasMgr };
-    } catch (err: any) {
+    } catch (err: unknown) {
       await delay();
 
       if (err instanceof ArtificialError) return err;
@@ -89,16 +90,14 @@ export const useMavStakeFeeValue = ({
   const {
     data,
     error: estimateBaseFeeError,
-    isValidating: estimating
-  } = useTypedSWR(
-    () => (!balance.isZero() ? ['stake-base-fee', mode, tezos.checksum, accountPkh, amount.toFixed()] : null),
-    estimateBaseFee,
-    {
-      shouldRetryOnError: false,
-      focusThrottleInterval: 10_000,
-      dedupingInterval: BLOCK_DURATION
-    }
-  );
+    isFetching: estimating
+  } = useQuery({
+    queryKey: feeKeys.stakeBase(mode, tezos.checksum, accountPkh, amount.toFixed()),
+    queryFn: estimateBaseFee,
+    enabled: !balance.isZero(),
+    retry: false,
+    staleTime: BLOCK_DURATION
+  });
 
   // keep your existing error mapping
   const baseFee = useMemo(() => {

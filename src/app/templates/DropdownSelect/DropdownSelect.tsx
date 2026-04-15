@@ -119,6 +119,7 @@ export interface SelectOptionsPropsBase<Type> {
   optionsListClassName?: string;
   dropdownWrapperClassName?: string;
   getKey: (option: Type) => string;
+  getDisabled?: (option: Type) => boolean;
   onOptionChange: (newValue: Type) => void;
   renderOptionContent: (option: Type) => ReactNode;
 }
@@ -135,6 +136,7 @@ const SelectOptions = <Type extends unknown>({
   optionsListClassName,
   dropdownWrapperClassName,
   getKey,
+  getDisabled,
   onOptionChange,
   setOpened,
   renderOptionContent
@@ -147,12 +149,11 @@ const SelectOptions = <Type extends unknown>({
   return (
     <DropdownWrapper
       opened={opened}
-      className={classNames('origin-top overflow-x-hidden overflow-y-auto no-scrollbar', dropdownWrapperClassName)}
-      style={{
-        // maxHeight: '15.125rem',
-        backgroundColor: '#010101',
-        borderColor: '#333'
-      }}
+      design="none"
+      className={merge(
+        'bg-primary-bg border-divider origin-top overflow-x-hidden overflow-y-auto no-scrollbar',
+        dropdownWrapperClassName
+      )}
     >
       {(options.length === 0 || isLoading) && (
         <div className="my-8 flex flex-col items-center justify-center text-white">
@@ -172,7 +173,7 @@ const SelectOptions = <Type extends unknown>({
             <button
               type="button"
               className="w-full"
-              disabled={(option as any).disabled}
+              disabled={getDisabled?.(option)}
               onClick={() => handleOptionClick(option)}
             >
               {renderOptionContent(option)}
@@ -234,9 +235,9 @@ const SelectSearch: FC<SelectSearchProps> = ({
               fieldWrapperBottomMargin={false}
               placeholder={t('tokenId')}
               style={{ borderRadius: 0 }}
+              className="text-base-plus border-none bg-opacity-0 focus:shadow-none"
               containerStyle={{ flexDirection: 'row' }}
               containerClassName="items-stretch"
-              className="text-base-plus border-none bg-opacity-0 focus:shadow-none"
               onChange={onTokenIdChange}
             />
           </div>

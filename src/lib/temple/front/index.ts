@@ -1,9 +1,11 @@
 export { useStorage } from './storage';
 
-export { useTempleClient, request, assertResponse } from './client';
+export { request, assertResponse } from './client';
+
+export { useMavrykClient } from './use-mavryk-client';
 
 export {
-  ReactiveTezosToolkit,
+  ReactiveMavrykToolkit,
   useAllNetworks,
   useSetNetworkId,
   useNetwork,
@@ -12,7 +14,7 @@ export {
   useAccount,
   useAccountPkh,
   useSettings,
-  useTezos,
+  useMavryk,
   useChainId,
   useRelevantAccounts,
   useChainIdValue,
@@ -46,6 +48,20 @@ export { validateRecipient } from './validate-recipient';
 
 export { useFilteredContacts } from './use-filtered-contacts.hook';
 
+// Zustand selectors. useAllNetworks is excluded here because ready.ts exports a
+// constate-backed version under the same name (deferred migration).
+export {
+  useWalletIdle,
+  useWalletReady,
+  useWalletLocked,
+  useWalletConfirmation,
+  useWalletsSpecs,
+  useCustomNetworks,
+  useWalletState
+} from 'lib/store/zustand/wallet.store';
+
 export { decryptKukaiSeedPhrase } from './kukai';
 
-export { TzktConnectionProvider, useTzktConnection } from './tzkt-connection';
+export { MvktConnectionProvider, useMvktConnection } from './mvkt-connection';
+
+export { useAddressResolution } from './use-address-resolution';

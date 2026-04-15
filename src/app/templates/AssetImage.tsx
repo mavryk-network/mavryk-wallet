@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 
 import { buildTokenImagesStack, buildCollectibleImagesStack } from 'lib/images-uri';
-import { AssetMetadataBase, isCollectibleTokenMetadata, isRwa } from 'lib/metadata';
+import { AssetMetadataBase, isCollectibleTokenMetadata } from 'lib/metadata';
 import { ImageStacked, ImageStackedProps } from 'lib/ui/ImageStacked';
 
 export interface AssetImageProps
@@ -42,6 +42,7 @@ export const AssetImage: FC<AssetImageProps> = ({
   return (
     <ImageStacked
       sources={sources}
+      loading="lazy"
       loader={loader}
       fallback={fallback}
       alt={metadata?.name}

@@ -1,4 +1,2 @@
-export { loadNotificationsAction } from './store/actions';
-export { notificationsEpics } from './store/epics';
-export { notificationsReducer } from './store/reducers';
-export { mockNotificationsState } from './store/state.mock';
+// Redux store exports removed — notifications now use TanStack Query hooks.
+// See: lib/notifications/hooks/use-notifications.query.ts

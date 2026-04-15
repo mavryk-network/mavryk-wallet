@@ -6,7 +6,7 @@ import DocBg from 'app/a11y/DocBg';
 import Logo from 'app/atoms/Logo';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletLocked } from 'lib/temple/front';
 import { useLocation } from 'lib/woozie';
 
 import styles from './pageWithImageBg.module.css';
@@ -20,7 +20,7 @@ interface PageWithImageBgLayoutProps extends PropsWithChildren {
 
 const PageWithImageBg: FC<PageWithImageBgLayoutProps> = ({ title, children, label }) => {
   const { fullPage } = useAppEnv();
-  const { locked } = useTempleClient();
+  const locked = useWalletLocked();
   const { pathname } = useLocation();
 
   const bagImageSrc = unlockBg;

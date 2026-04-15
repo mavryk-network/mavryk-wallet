@@ -6,11 +6,11 @@ import { TempleContact } from 'lib/temple/types';
 
 import { isAddressValid } from '../helpers';
 
-import { useTempleClient } from './client';
 import { useFilteredContacts } from './use-filtered-contacts.hook';
+import { useMavrykClient } from './use-mavryk-client';
 
 export function useContactsActions() {
-  const { updateSettings } = useTempleClient();
+  const { updateSettings } = useMavrykClient();
   const { contacts, allContacts } = useFilteredContacts();
 
   const addContact = useCallback(

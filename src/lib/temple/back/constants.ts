@@ -1,0 +1,1 @@
+export const AUTODECLINE_AFTER = 120_000;

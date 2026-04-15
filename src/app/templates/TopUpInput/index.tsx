@@ -98,12 +98,12 @@ export const TopUpInput = <C extends CurrencyBase>(_props: TopUpInputPropsGeneri
                   assetDecimals={decimals}
                   readOnly={readOnly}
                   className={classNames(
-                    'appearance-none w-full pl-0 border-2 border-gray-300 bg-gray-100 rounded-md leading-tight',
+                    'appearance-none w-full pl-0 border-2 border-gray-300 bg-gray-100 rounded-none leading-tight',
                     'focus:bg-transparent focus:border-primary-orange focus:outline-none focus:shadow-outline, focus:shadow-none',
                     'text-gray-700 text-2xl text-right placeholder-alphagray border-none bg-opacity-0',
                     'transition ease-in-out duration-200'
                   )}
-                  style={{ padding: 0, borderRadius: 0 }}
+                  style={{ padding: 0 }}
                   placeholder={toLocalFormat(0, { decimalPlaces: 2 })}
                   type="text"
                   min={0}

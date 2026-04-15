@@ -48,9 +48,9 @@ export const SortButton: FC<{ className?: string }> = ({ className }) => {
   const { open } = useSortPopup();
 
   return (
-    <div className={classNames('p-1 cursor-pointer', className)} onClick={open}>
+    <button type="button" className={classNames('p-1 cursor-pointer', className)} onClick={open} aria-label="Sort">
       <SortIcon className="w-6 h-auto" />
-    </div>
+    </button>
   );
 };
 

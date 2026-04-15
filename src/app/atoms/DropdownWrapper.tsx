@@ -12,7 +12,8 @@ type DropdownWrapperProps = HTMLAttributes<HTMLDivElement> & {
 
 const DESIGN_CLASS_NAMES = {
   light: 'bg-white border-gray-300',
-  dark: 'bg-gray-910 border-gray-850'
+  dark: 'bg-gray-910 border-gray-850',
+  none: ''
 };
 
 const ANIMATION_DURATION = 100;

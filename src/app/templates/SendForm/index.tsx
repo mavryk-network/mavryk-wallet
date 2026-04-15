@@ -6,7 +6,7 @@ import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { useTokensSortPredicate } from 'lib/assets/use-sorting';
-import { useTezos } from 'lib/temple/front';
+import { useMavryk } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { HistoryAction, navigate } from 'lib/woozie';
 
@@ -31,8 +31,8 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
   );
   const selectedAsset = useMemo(() => assets.find(a => a === assetSlug) ?? MAV_TOKEN_SLUG, [assets, assetSlug]);
 
-  const tezos = useTezos();
-  const [operation, setOperation] = useSafeState<WalletOperation | null>(null, tezos.checksum);
+  const mavryk = useMavryk();
+  const [operation, setOperation] = useSafeState<WalletOperation | null>(null, mavryk.checksum);
   const [addContactModalAddress, setAddContactModalAddress] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
 
@@ -59,7 +59,7 @@ const SendForm: FC<SendFormProps> = ({ assetSlug = MAV_TOKEN_SLUG }) => {
     <>
       {/* {operation && <OperationStatus typeTitle={t('transaction')} operation={operation} className="mb-8" />} */}
 
-      <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-4 no-scrollbar" />
+      <AssetSelect value={selectedAsset} slugs={assets} onChange={handleAssetChange} className="mb-2 no-scrollbar" />
 
       <Suspense fallback={<SpinnerSection />}>
         <Form

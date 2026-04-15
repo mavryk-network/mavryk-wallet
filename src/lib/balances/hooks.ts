@@ -1,27 +1,30 @@
 import { useCallback, useMemo } from 'react';
 
 import { emptyFn } from '@rnw-community/shared';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
-import { useAllAccountBalancesSelector, useAllBalancesSelector } from 'app/store/balances/selectors';
-import { getKeyForBalancesRecord } from 'app/store/balances/utils';
-import { isKnownChainId } from 'lib/apis/tzkt';
+import { isKnownChainId } from 'lib/apis/mvkt';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
-import { useTypedSWR } from 'lib/swr';
+import { balanceKeys } from 'lib/query-keys';
 import {
-  useTezos,
+  useAllAccountBalancesSelector,
+  useAllBalancesSelector,
+  getKeyForBalancesRecord
+} from 'lib/store/zustand/balances.store';
+import {
+  useMavryk,
   useAccount,
   useChainId,
-  ReactiveTezosToolkit,
+  ReactiveMavrykToolkit,
   useChainIdLoading,
   useOnBlock
 } from 'lib/temple/front';
 import { michelEncoder, loadFastRpcClient, atomsToTokens } from 'lib/temple/helpers';
 
 import { fetchRawBalance as fetchRawBalanceFromBlockchain } from './fetch';
-import { getBalanceSWRKey } from './utils';
 
 export const useCurrentAccountBalances = () => {
   const { publicKeyHash } = useAccount();
@@ -79,8 +82,8 @@ export function useRawBalance(
   refresh: EmptyFn;
 } {
   const { publicKeyHash: currentAccountAddress } = useAccount();
-  const nativeTezos = useTezos();
-  const nativeRpcUrl = useMemo(() => nativeTezos.rpc.getRpcUrl(), [nativeTezos]);
+  const nativeMavryk = useMavryk();
+  const nativeRpcUrl = useMemo(() => nativeMavryk.rpc.getRpcUrl(), [nativeMavryk]);
 
   const rpcUrl = networkRpc ?? nativeRpcUrl;
 
@@ -104,29 +107,33 @@ export function useRawBalance(
    */
   const usingStore = address === currentAccountAddress && isKnownChainId(chainId);
 
-  const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeTezos), [networkRpc, nativeTezos]);
+  const tezos = useMemo(() => (networkRpc ? buildMavrykToolKit(networkRpc) : nativeMavryk), [networkRpc, nativeMavryk]);
+  const queryClient = useQueryClient();
 
-  const onChainBalanceSwrRes = useTypedSWR(
-    getBalanceSWRKey(tezos, assetSlug, address),
-    () => {
-      // if (!chainId || usingStore) return;
-      return fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString());
-    },
-    {
-      revalidateOnFocus: true,
-      dedupingInterval: 20_000
-    }
+  const balanceQueryKey = useMemo(
+    () => balanceKeys.one(tezos.checksum, assetSlug, address),
+    [tezos.checksum, assetSlug, address]
   );
 
-  const refreshChainId = useCallback(() => chainIdSwrRes.mutate(), [chainIdSwrRes.mutate]);
-  const refreshBalanceOnChain = useCallback(() => void onChainBalanceSwrRes.mutate(), [onChainBalanceSwrRes.mutate]);
+  const onChainBalanceRes = useQuery({
+    queryKey: balanceQueryKey,
+    queryFn: () => fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString()),
+    refetchOnWindowFocus: true,
+    staleTime: 20_000
+  });
+
+  const refreshChainId = useCallback(() => void chainIdSwrRes.refetch(), [chainIdSwrRes.refetch]);
+  const refreshBalanceOnChain = useCallback(
+    () => void queryClient.invalidateQueries({ queryKey: balanceQueryKey }),
+    [queryClient, balanceQueryKey]
+  );
 
   useOnBlock(refreshBalanceOnChain, tezos, !chainId || usingStore);
 
   if (!chainId)
     return {
       value: undefined,
-      isSyncing: chainIdSwrRes.isValidating,
+      isSyncing: chainIdSwrRes.isFetching,
       error: chainIdSwrRes.error,
       refresh: refreshChainId
     };
@@ -144,9 +151,9 @@ export function useRawBalance(
     };
 
   return {
-    value: onChainBalanceSwrRes.data,
-    isSyncing: onChainBalanceSwrRes.isValidating,
-    error: onChainBalanceSwrRes.error,
+    value: onChainBalanceRes.data,
+    isSyncing: onChainBalanceRes.isFetching,
+    error: onChainBalanceRes.error,
     refresh: refreshBalanceOnChain
   };
 }
@@ -170,9 +177,9 @@ export function useBalance(assetSlug: string, address: string, networkRpc?: stri
   };
 }
 
-const buildTezosToolkit = memoizee(
+const buildMavrykToolKit = memoizee(
   (rpcUrl: string) => {
-    const t = new ReactiveTezosToolkit(loadFastRpcClient(rpcUrl), rpcUrl);
+    const t = new ReactiveMavrykToolkit(loadFastRpcClient(rpcUrl), rpcUrl);
     t.setPackerProvider(michelEncoder);
     return t;
   },

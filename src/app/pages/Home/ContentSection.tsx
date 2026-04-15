@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, Suspense, useCallback, useMemo, useRef } from 'react';
+import React, { FC, ReactNode, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 
@@ -38,14 +38,18 @@ export const ContentSection: FC<Props> = ({ className }) => {
   const tabSlug = useTabSlug();
 
   const tabBarElemRef = useRef<HTMLUListElement>(null);
+  const hasMountedRef = useRef(false);
 
   const scrollToTheTabsBar = useCallback(() => {
     if (!tabBarElemRef.current) return;
 
     const stickyBarHeight = ToolbarElement?.scrollHeight ?? 0;
+    const tabBarTop = tabBarElemRef.current.getBoundingClientRect().top;
+
+    if (tabBarTop >= stickyBarHeight) return;
 
     window.scrollTo({
-      top: window.pageYOffset + tabBarElemRef.current.getBoundingClientRect().top - stickyBarHeight,
+      top: window.scrollY + tabBarTop - stickyBarHeight,
       behavior: 'smooth'
     });
   }, []);
@@ -61,13 +65,13 @@ export const ContentSection: FC<Props> = ({ className }) => {
       {
         name: 'NFTs',
         titleI18nKey: 'NFTs',
-        Component: () => <CollectiblesTab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        Component: CollectiblesTab,
         testID: HomeSelectors.NFTsTab
       },
       {
         name: 'RWAs',
         titleI18nKey: 'rwas',
-        Component: () => <RWATab scrollToTheTabsBar={scrollToTheTabsBar} />,
+        Component: RWATab,
         testID: HomeSelectors.rwasTab
       },
       {
@@ -78,12 +82,20 @@ export const ContentSection: FC<Props> = ({ className }) => {
         whileMessageI18nKey: 'operationHistoryWhileMessage'
       }
     ];
-  }, [scrollToTheTabsBar]);
+  }, []);
 
   const { name, Component, whileMessageI18nKey } = useMemo(() => {
     const tab = tabSlug ? tabs.find(currentTab => currentTab.name === tabSlug) : null;
     return tab ?? tabs[0];
   }, [tabSlug, tabs]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    scrollToTheTabsBar();
+  }, [name, scrollToTheTabsBar]);
 
   return (
     <div className={clsx('-mx-4 shadow-top-light h-full relative', fullPage && 'rounded-t-md', className)}>

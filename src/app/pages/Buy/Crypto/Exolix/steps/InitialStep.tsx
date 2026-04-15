@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
+import { useQuery } from '@tanstack/react-query';
 import classNames from 'clsx';
 import { useDebounce } from 'use-debounce';
 
@@ -11,7 +12,7 @@ import ErrorComponent from 'app/pages/Buy/Crypto/Exolix/steps/ErrorComponent';
 import WarningComponent from 'app/pages/Buy/Crypto/Exolix/steps/WarningComponent';
 import { TopUpInput } from 'app/templates/TopUpInput';
 import { T, t } from 'lib/i18n';
-import { useTypedSWR } from 'lib/swr';
+import { miscKeys } from 'lib/query-keys';
 import { useAccount } from 'lib/temple/front';
 
 import { EXOLIX_PRIVICY_LINK, EXOLIX_TERMS_LINK, outputTokensList } from '../config';
@@ -43,10 +44,10 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
 
   const [debouncedAmount] = useDebounce(amount, 500);
 
-  const { data: allCurrencies, isValidating: isCurrenciesLoading } = useTypedSWR(
-    ['exolix/api/currencies'],
-    getCurrencies
-  );
+  const { data: allCurrencies, isFetching: isCurrenciesLoading } = useQuery({
+    queryKey: miscKeys.exolixCurrencies,
+    queryFn: getCurrencies
+  });
 
   const { inputCurrencies, outputCurrencies } = useMemo(() => {
     const inputCurrencies: OutputCurrencyInterface[] = [];
@@ -89,15 +90,17 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
     }
   };
 
-  const { data: ratesData } = useTypedSWR(['exolix/api/rate', coinFrom, coinTo, amount], () =>
-    queryExchange({
-      coinFrom: coinFrom.code,
-      coinFromNetwork: coinFrom.network.code,
-      amount: amount ?? 0,
-      coinTo: coinTo.code,
-      coinToNetwork: coinTo.network.code
-    })
-  );
+  const { data: ratesData } = useQuery({
+    queryKey: miscKeys.exolixRate(String(coinFrom), String(coinTo), String(amount)),
+    queryFn: () =>
+      queryExchange({
+        coinFrom: coinFrom.code,
+        coinFromNetwork: coinFrom.network.code,
+        amount: amount ?? 0,
+        coinTo: coinTo.code,
+        coinToNetwork: coinTo.network.code
+      })
+  });
 
   const { rate, toAmount } = ratesData || { rate: null, toAmount: 0 };
 
@@ -140,11 +143,11 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
 
   return (
     <>
-      <p className={styles['title']}>
+      <p className={classNames('font-aeonik text-ulg', styles['title'])}>
         <T id={'exchangeDetails'} />
       </p>
 
-      <p className={styles['description']}>
+      <p className={classNames('font-aeonik text-xs', styles['description'])}>
         <T id={'exchangeDetailsDescription'} substitutions={[currenciesCount]} />
       </p>
 
@@ -187,10 +190,10 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
       <Divider style={{ marginTop: '40px', marginBottom: '20px' }} />
 
       <div className={classNames('flex justify-between', Number(rate) < 0 ? 'text-red-700' : 'text-gray-600')}>
-        <p className={styles['exchangeTitle']}>
+        <p className={'font-aeonik text-xs'}>
           <T id={'exchangeRate'} />
         </p>
-        <p className={styles['exchangeData']}>
+        <p className={'font-aeonik text-xs'}>
           {rate ? `1 ${coinFrom.code} = ${rate} ${coinTo.code}` : VALUE_PLACEHOLDER}
         </p>
       </div>

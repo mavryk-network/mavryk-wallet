@@ -8,12 +8,14 @@ import { URL_PATTERN } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
-import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
+import { useWalletNetworks } from 'lib/store/zustand/wallet.store';
+import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useMavrykClient } from 'lib/temple/front';
 import { loadChainId } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
+import { SUBMIT_ERROR_TYPE, toFieldError } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -26,10 +28,9 @@ interface NetworkFormData {
   rpcBaseURL: string;
 }
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
-
 export const AddNetworkScreen: FC = () => {
-  const { updateSettings, defaultNetworks } = useTempleClient();
+  const defaultNetworks = useWalletNetworks();
+  const { updateSettings } = useMavrykClient();
   const { customNetworks = [] } = useSettings();
   const { setExplorerId } = useBlockExplorer();
   const setNetworkId = useSetNetworkId();
@@ -39,13 +40,11 @@ export const AddNetworkScreen: FC = () => {
     register,
     reset: resetForm,
     handleSubmit,
-    formState,
-    clearError,
+    formState: { isSubmitting: submitting, errors },
+    clearErrors,
     setError,
-    errors,
     watch
   } = useForm<NetworkFormData>();
-  const submitting = formState.isSubmitting;
 
   const [rpcWarning, setRpcWarning] = useState<string>('');
 
@@ -72,7 +71,7 @@ export const AddNetworkScreen: FC = () => {
         setRpcWarning(t('unrecognizedRPC'));
         await delay(5000);
       }
-      clearError();
+      clearErrors();
 
       let chainId: string = '';
       try {
@@ -86,12 +85,12 @@ export const AddNetworkScreen: FC = () => {
         } else {
           setExplorerId('tzkt');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('rpcBaseURL', SUBMIT_ERROR_TYPE, t('invalidRpcCantGetChainId'));
+        setError('rpcBaseURL', { type: SUBMIT_ERROR_TYPE, message: t('invalidRpcCantGetChainId') });
 
         return;
       }
@@ -125,15 +124,15 @@ export const AddNetworkScreen: FC = () => {
           description: 'addNetworkSuccessMsg',
           subHeader: 'success'
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         await delay();
 
-        setError('rpcBaseURL', SUBMIT_ERROR_TYPE, err.message);
+        setError('rpcBaseURL', toFieldError(err));
       }
     },
-    [submitting, clearError, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]
+    [submitting, clearErrors, setExplorerId, setError, setNetworkId, updateSettings, customNetworks, resetForm]
   );
 
   const memoizedContentContainerStyle = useMemo(() => (popup ? { padding: 0 } : {}), [popup]);
@@ -153,10 +152,9 @@ export const AddNetworkScreen: FC = () => {
         className={clsx('h-full flex flex-col flex-1', popup && 'px-4 pt-4')}
       >
         <FormField
-          ref={register({ required: t('required'), maxLength: 35 })}
+          {...register('name', { required: t('required'), maxLength: 35 })}
           label={t('name')}
           id="name"
-          name="name"
           placeholder={t('networkNamePlaceholder')}
           errorCaption={errors.name?.message}
           containerClassName="mb-2"
@@ -168,7 +166,7 @@ export const AddNetworkScreen: FC = () => {
         />
 
         <FormField
-          ref={register({
+          {...register('rpcBaseURL', {
             required: t('required'),
             pattern: {
               value: URL_PATTERN,
@@ -180,12 +178,11 @@ export const AddNetworkScreen: FC = () => {
           })}
           label={t('rpcBaseURL')}
           id="rpc-base-url"
-          name="rpcBaseURL"
           placeholder={t('baseUrlPlaceholder')}
           errorCaption={
             errors.rpcBaseURL?.message || (errors.rpcBaseURL?.type === 'unique' ? t('networkMustBeUnique') : '')
           }
-          containerClassName="mb-2shrink-1"
+          containerClassName="mb-2 shrink"
           testIDs={{
             input: CustomNetworkSettingsSelectors.RPCbaseURLinput,
             inputSection: CustomNetworkSettingsSelectors.RPCbaseURLinputSection

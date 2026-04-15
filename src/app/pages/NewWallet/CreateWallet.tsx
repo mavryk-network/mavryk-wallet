@@ -5,7 +5,7 @@ import { generateMnemonic } from 'bip39';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
 
-import { useTempleClient } from '../../../lib/temple/front';
+import { useWalletLocked } from '../../../lib/temple/front';
 
 import { NewSeedBackup } from './create/NewSeedBackup/NewSeedBackup';
 import { NewSeedVerify } from './create/NewSeedVerify/NewSeedVerify';
@@ -14,7 +14,7 @@ import { SetWalletPassword } from './setWalletPassword/SetWalletPassword';
 import { Template } from './Template';
 
 export const CreateWallet: FC = () => {
-  const { locked } = useTempleClient();
+  const locked = useWalletLocked();
 
   const seedPhrase = useMemo(() => generateMnemonic(128), []);
   const [backupCompleted, setBackupCompleted] = useState(false);

@@ -4,15 +4,17 @@ import clsx from 'clsx';
 
 import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
-import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import { AssetItemImage } from 'app/templates/CollectibleMedia';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { useBalance } from 'lib/balances';
+import { useRwasDetailsLoading, useRwaDetails } from 'lib/rwas/use-rwas-details.query';
+import { useRwaMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
 
-import { RwaItemImage } from './RwaItemImage';
+import { RwaImageFallback } from '../components/CollectibleImageFallback';
+import { renderFiatBalance } from '../components/FiatBalanceDisplay';
 
 interface Props {
   assetSlug: string;
@@ -27,8 +29,8 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
   const { value: balance = ZERO } = useBalance(assetSlug, accountPkh);
   const toDisplayRef = useRef<HTMLDivElement>(null);
 
-  const areDetailsLoading = useAllRwasDetailsLoadingSelector();
-  const details = useRwaDetailsSelector(assetSlug);
+  const areDetailsLoading = useRwasDetailsLoading();
+  const details = useRwaDetails(assetSlug);
 
   const isTzBTC = isTzbtcAsset(assetSlug);
 
@@ -46,13 +48,14 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
           style={{ width: 59, height: 59 }}
           title={details?.name}
         >
-          <RwaItemImage
+          <AssetItemImage
             assetSlug={assetSlug}
             metadata={metadata}
             areDetailsLoading={areDetailsLoading && details === undefined}
             // TODO add adult blur logic
             adultBlur={false}
             containerElemRef={toDisplayRef}
+            fallback={<RwaImageFallback isAudioCollectible={false} symbol={metadata?.symbol} />}
           />
         </div>
 
@@ -82,12 +85,7 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
               label="last sale"
               value={
                 <InFiat assetSlug={assetSlug} volume={1} smallFractionFont={false}>
-                  {({ balance, symbol }) => (
-                    <div className="ml-1 font-normal text-white flex items-center truncate text-right">
-                      <span>{symbol}</span>
-                      {balance}
-                    </div>
-                  )}
+                  {renderFiatBalance}
                 </InFiat>
               }
             />
@@ -95,12 +93,7 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
               label="total value"
               value={
                 <InFiat assetSlug={assetSlug} volume={balance ?? 0} smallFractionFont={false}>
-                  {({ balance, symbol }) => (
-                    <div className="ml-1 font-normal text-white flex items-center truncate text-right">
-                      <span>{symbol}</span>
-                      {balance}
-                    </div>
-                  )}
+                  {renderFiatBalance}
                 </InFiat>
               }
             />

@@ -13,7 +13,6 @@ import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
-import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
 import { deriveStatusColorClassName, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
 
@@ -90,56 +89,62 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={classNames(
-        'py-3 px-4 relative cursor-pointer overflow-hidden',
+        'py-2 px-4 relative cursor-pointer overflow-hidden',
         styles.historyItem,
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
-        <div className="flex items-start gap-3">
-          <HistoryTokenIcon historyItem={historyItem} />
-          <div
-            style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
-            className="flex flex-col gap-1 items-start justify-center  flex-wrap"
-          >
-            <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => handleItemClick(hash)}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleItemClick(hash);
+          }
+        }}
+        className="flex items-start justify-between gap-2"
+      >
+        <div className="flex items-start gap-2 min-w-0">
+          <HistoryTokenIcon historyItem={historyItem} size={24} />
+          <div className="flex flex-col gap-0.5 min-w-0">
+            {base.map((op, i) => (
+              <OpertionStackItem key={i} originalHistoryItem={historyItem} item={op} userAddress={address} />
+            ))}
 
-            <div>
-              <div className="flex items-start gap-x-1">
-                <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
-                {rest.length > 0 && (
-                  <div className={classNames('flex items-center')}>
-                    <button
-                      className={classNames('flex items-center', 'text-accent-blue hover:underline')}
-                      onClick={e => {
-                        e.stopPropagation();
-                        setExpanded(e => !e);
-                      }}
-                    >
-                      <T id={expanded ? 'showLess' : 'showMore'} />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {statusToShow && (
-                <div className={classNames('capitalize text-sm text-secondary-white flex items-center gap-1')}>
-                  <div>Status: </div>
-                  <div className={classNames('px-2 py-[2px] rounded border', statusTextColor, statusBorderColor)}>
-                    {statusToShow}
-                  </div>
-                </div>
+            <div className="flex items-center gap-x-2 flex-wrap">
+              <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+              {rest.length > 0 && (
+                <button
+                  className="text-accent-blue hover:underline text-xs whitespace-nowrap"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setExpanded(e => !e);
+                  }}
+                >
+                  <T id={expanded ? 'showLess' : 'showMore'} />
+                </button>
               )}
             </div>
+
+            {statusToShow && (
+              <div className={classNames('capitalize text-xs text-secondary-white flex items-center gap-1')}>
+                <span>Status: </span>
+                <span className={classNames('px-1.5 py-px rounded border text-xs', statusTextColor, statusBorderColor)}>
+                  {statusToShow}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-end gap-1">
+        <div className="flex flex-col justify-center items-end gap-0.5 shrink-0">
           {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
             return (
               <MoneyDiffView
                 key={i}
-                className="gap-1 flex-col"
+                className="gap-0.5 flex-col"
                 assetId={assetSlug}
                 diff={diff}
                 pending={status === 'pending'}

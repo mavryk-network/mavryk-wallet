@@ -1,41 +1,30 @@
 import React, { FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { getAccountBadgeTitle } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import { usePasswordGateForm } from 'app/hooks/use-password-gate-form';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import { useAccount, useMavrykClient, useWalletsSpecs } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useVanishingState } from 'lib/ui/hooks';
-import { delay } from 'lib/utils';
 
 import { RevealSecretsSelectors } from './RevealSecrets.selectors';
 import { SecretField } from './SecretField';
-
-const SUBMIT_ERROR_TYPE = 'submit-error';
-
-type FormData = {
-  password: string;
-};
 
 type RevealSecretProps = {
   reveal: 'private-key' | 'seed-phrase';
 };
 
 const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
-  const { revealPrivateKey, revealMnemonic, walletsSpecs } = useTempleClient();
+  const walletsSpecs = useWalletsSpecs();
+  const { revealPrivateKey, revealMnemonic } = useMavrykClient();
   const account = useAccount();
   const { popup } = useAppEnv();
   const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];
-
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
-
-  const walletPasswordValue = watch('password') ?? '';
 
   const [secret, setSecret] = useVanishingState();
 
@@ -56,47 +45,33 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     focusPasswordField();
   }, [focusPasswordField]);
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
-    async ({ password }) => {
-      if (submitting) return;
+  const handleAction = useCallback(
+    async (pw: string) => {
+      let scrt: string;
 
-      clearError('password');
-      try {
-        let scrt: string;
+      switch (reveal) {
+        case 'private-key':
+          scrt = await revealPrivateKey(account.publicKeyHash, pw);
+          break;
 
-        switch (reveal) {
-          case 'private-key':
-            scrt = await revealPrivateKey(account.publicKeyHash, password);
-            break;
-
-          case 'seed-phrase':
-            scrt = await revealMnemonic(walletId, password);
-            break;
-        }
-
-        setSecret(scrt);
-      } catch (err: any) {
-        console.error(err);
-
-        // Human delay.
-        await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
-        focusPasswordField();
+        case 'seed-phrase':
+          scrt = await revealMnemonic(walletId, pw);
+          break;
       }
+
+      setSecret(scrt);
     },
-    [
-      walletId,
-      reveal,
-      submitting,
-      clearError,
-      setError,
-      revealPrivateKey,
-      revealMnemonic,
-      account.publicKeyHash,
-      setSecret,
-      focusPasswordField
-    ]
+    [reveal, revealPrivateKey, account.publicKeyHash, revealMnemonic, walletId, setSecret]
   );
+
+  const {
+    registerPassword,
+    handleSubmit,
+    errors,
+    submitting,
+    password: walletPasswordValue,
+    onSubmit
+  } = usePasswordGateForm(handleAction, { onError: focusPasswordField, clearOnChange: true });
 
   const texts = useMemo(() => {
     switch (reveal) {
@@ -107,7 +82,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
           derivationPathBanner: account.derivationPath && (
             <div className="mb-6 flex flex-col">
               <label className="mb-4 flex flex-col">
-                <span className="text-base font-semibold text-white">
+                <span className="text-base font-medium text-white">
                   <T id="derivationPath" />
                 </span>
               </label>
@@ -190,19 +165,17 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     return (
       <form
         ref={formRef}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
       >
         <FormField
-          ref={register({ required: t('required') })}
+          {...registerPassword(t('required'))}
           label={t('password')}
           id="reveal-secret-password"
           type="password"
-          name="password"
           placeholder={t('enterWalletPassword')}
           errorCaption={errors.password?.message}
           containerClassName="mb-4"
-          onChange={() => clearError()}
           testID={RevealSecretsSelectors.RevealPasswordInput}
         />
 
@@ -225,8 +198,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     errors.password?.message,
     walletPasswordValue.length,
     submitting,
-    account,
-    clearError
+    account
   ]);
 
   return (

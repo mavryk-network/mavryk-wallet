@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { getUserTestingGroupNameActions } from '../store/ab-testing/actions';
+import { fetchABGroup, ABTestGroup } from 'lib/apis/temple';
+import { uiStore } from 'lib/store/zustand/ui.store';
 
 export const useABTestingLoading = () => {
-  const dispatch = useDispatch();
+  useEffect(() => {
+    const currentGroup = uiStore.getState().abTestGroupName;
+    if (currentGroup !== ABTestGroup.Unknown) return;
 
-  useEffect(() => void dispatch(getUserTestingGroupNameActions.submit()), []);
+    fetchABGroup().then(group => {
+      uiStore.getState().setAbTestGroupName(group);
+    });
+  }, []);
 };

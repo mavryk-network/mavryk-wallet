@@ -1,10 +1,10 @@
-import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
-import * as TZKT from 'lib/apis/tzkt';
-import { fetchGetAccountOperationByHash, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import type { MvktApiChainId, MvktOperation } from 'lib/apis/mvkt';
+import * as MVKT from 'lib/apis/mvkt';
+import { fetchGetAccountOperationByHash, GetOperationsTransactionsParams } from 'lib/apis/mvkt/api';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { detectTokenStandard } from 'lib/assets/standards';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
-import { ReactiveTezosToolkit } from 'lib/temple/front';
+import { ReactiveMavrykToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { filterUnique } from 'lib/utils';
 
@@ -15,7 +15,7 @@ import { buildStorageKeyForTx, CustomPendingOperation, operationsGroupToHistoryI
 const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
 
 // always will return one operation object
-export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
+export async function fetchUserOperationByHash(chainId: MvktApiChainId, accountAddress: string, hash: string) {
   try {
     const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
 
@@ -31,11 +31,11 @@ export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountA
 }
 
 export default async function fetchUserHistory(
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   account: TempleAccount,
   assetSlug: string | undefined,
   pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
+  tezos: ReactiveMavrykToolkit,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ): Promise<UserHistoryItem[]> {
@@ -67,7 +67,7 @@ export default async function fetchUserHistory(
 
       pendingOperations = filteredPending;
     }
-    const groups = await reduceOperationsGroups([...pendingOperations, ...operations] as TzktOperation[], chainId);
+    const groups = await reduceOperationsGroups([...pendingOperations, ...operations] as MvktOperation[], chainId);
 
     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
     return arr;
@@ -78,7 +78,7 @@ export default async function fetchUserHistory(
 }
 
 // export const fetchPendingTransactions = async (
-//   chainId: TzktApiChainId,
+//   chainId: MvktApiChainId,
 //   account: TempleAccount
 // ): Promise<UserHistoryItem[]> => {
 //   try {
@@ -101,14 +101,14 @@ export default async function fetchUserHistory(
  *  It can also be smaller, even when older items are available (they can be fetched later).
  */
 async function fetchOperations(
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   account: TempleAccount,
   assetSlug: string | undefined,
   pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
+  tezos: ReactiveMavrykToolkit,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
-): Promise<TzktOperation[]> {
+): Promise<MvktOperation[]> {
   const { publicKeyHash: accAddress } = account;
 
   if (assetSlug) {
@@ -150,13 +150,13 @@ async function fetchOperations(
 }
 
 const fetchOperations_TEZ = (
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   pseudoLimit: number,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
+  return MVKT.fetchGetOperationsTransactions(chainId, {
     ...buildOlderThanParam(olderThan),
     ...buildTEZOpParams(accountAddress, operationParams),
     limit: pseudoLimit
@@ -164,12 +164,12 @@ const fetchOperations_TEZ = (
 };
 
 const fetchOperations_Contract = (
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   pseudoLimit: number,
   olderThan?: UserHistoryItem
 ) => {
-  return TZKT.fetchGetAccountOperations(chainId, accountAddress, {
+  return MVKT.fetchGetAccountOperations(chainId, accountAddress, {
     type: 'transaction',
     limit: pseudoLimit,
     initiator: accountAddress,
@@ -180,14 +180,14 @@ const fetchOperations_Contract = (
 };
 
 const fetchOperations_Token_Fa_1_2 = (
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   contractAddress: string,
   pseudoLimit: number,
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
+  return MVKT.fetchGetOperationsTransactions(chainId, {
     ...build_Token_Fa_1_2OpParams(accountAddress, contractAddress, operationParams),
     limit: pseudoLimit,
     'level.lt': olderThan?.oldestOperation?.level
@@ -195,7 +195,7 @@ const fetchOperations_Token_Fa_1_2 = (
 };
 
 const fetchOperations_Token_Fa_2 = (
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   contractAddress: string,
   tokenId = '0',
@@ -203,7 +203,7 @@ const fetchOperations_Token_Fa_2 = (
   olderThan?: UserHistoryItem,
   operationParams?: GetOperationsTransactionsParams
 ) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
+  return MVKT.fetchGetOperationsTransactions(chainId, {
     ...build_Token_Fa_2OpParams(accountAddress, contractAddress, tokenId, operationParams),
     limit: pseudoLimit,
     'level.lt': olderThan?.oldestOperation?.level
@@ -211,7 +211,7 @@ const fetchOperations_Token_Fa_2 = (
 };
 
 async function fetchOperations_Any(
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   pseudoLimit: number,
   olderThan?: UserHistoryItem,
@@ -219,7 +219,7 @@ async function fetchOperations_Any(
 ) {
   const limit = pseudoLimit;
 
-  const accOperations = await TZKT.fetchGetAccountOperations(chainId, accountAddress, {
+  const accOperations = await MVKT.fetchGetAccountOperations(chainId, accountAddress, {
     type: ['delegation', 'origination', 'transaction', 'staking'],
     ...buildOlderThanParam(olderThan),
     ...operationParams,
@@ -231,7 +231,7 @@ async function fetchOperations_Any(
 
   let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
 
-  const fa12OperationsTransactions = await TZKT.refetchOnce429(
+  const fa12OperationsTransactions = await MVKT.refetchOnce429(
     () =>
       fetchIncomingOperTransactions_Fa_1_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
     1000
@@ -241,10 +241,10 @@ async function fetchOperations_Any(
     newerThen = fa12OperationsTransactions[accOperations.length - 1]?.timestamp;
   }
 
-  let fa2OperationsTransactions: TzktOperation[] = [];
+  let fa2OperationsTransactions: MvktOperation[] = [];
 
   if (Object.keys(operationParams ?? {}).length === 0) {
-    fa2OperationsTransactions = await TZKT.refetchOnce429(
+    fa2OperationsTransactions = await MVKT.refetchOnce429(
       () =>
         fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
       1000
@@ -261,14 +261,14 @@ async function fetchOperations_Any(
 // incoming operations fetchers
 
 function fetchIncomingOperTransactions_Fa_1_2(
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   endLimitation: { limit: number } | { newerThen: string },
   olderThan?: UserHistoryItem
 ) {
   const bottomParams = 'limit' in endLimitation ? endLimitation : { 'timestamp.ge': endLimitation.newerThen };
 
-  return TZKT.fetchGetOperationsTransactions(chainId, {
+  return MVKT.fetchGetOperationsTransactions(chainId, {
     'sender.ne': accountAddress,
     'target.ne': accountAddress,
     'initiator.ne': accountAddress,
@@ -281,14 +281,14 @@ function fetchIncomingOperTransactions_Fa_1_2(
 }
 
 function fetchIncomingOperTransactions_Fa_2(
-  chainId: TzktApiChainId,
+  chainId: MvktApiChainId,
   accountAddress: string,
   endLimitation: { limit: number } | { newerThen: string },
   olderThan?: UserHistoryItem
 ) {
   const bottomParams = 'limit' in endLimitation ? endLimitation : { 'timestamp.ge': endLimitation.newerThen };
 
-  return TZKT.fetchGetOperationsTransactions(chainId, {
+  return MVKT.fetchGetOperationsTransactions(chainId, {
     'sender.ne': accountAddress,
     'target.ne': accountAddress,
     'initiator.ne': accountAddress,
@@ -306,8 +306,8 @@ function fetchIncomingOperTransactions_Fa_2(
  * @return groups[number].operations // sorted new-to-old
  */
 async function fetchOperGroupsForOperations(
-  chainId: TzktApiChainId,
-  operations: TzktOperation[],
+  chainId: MvktApiChainId,
+  operations: MvktOperation[],
   olderThan?: UserHistoryItem
 ) {
   const uniqueHashes = filterUnique(operations.map(d => d.hash));
@@ -316,7 +316,7 @@ async function fetchOperGroupsForOperations(
 
   const groups: OperationsGroup[] = [];
   for (const hash of uniqueHashes) {
-    const transactions = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
+    const transactions = await MVKT.refetchOnce429(() => MVKT.fetchGetOperationsByHash(chainId, hash), 1000);
 
     sortTransactionsBasedOnTheOriginalType(transactions);
     groups.push({
@@ -328,9 +328,9 @@ async function fetchOperGroupsForOperations(
   return groups;
 }
 
-const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId, isPending = false) => {
+const reduceOperationsGroups = async (operations: MvktOperation[], chainId: MvktApiChainId, isPending = false) => {
   const groups = Object.values(
-    operations.reduce<StringRecord<{ hash: string; operations: TzktOperation[] }>>((acc, item) => {
+    operations.reduce<StringRecord<{ hash: string; operations: MvktOperation[] }>>((acc, item) => {
       if (!acc[item.hash]) {
         acc[item.hash] = { hash: item.hash, operations: [] };
       }
@@ -353,7 +353,7 @@ const reduceOperationsGroups = async (operations: TzktOperation[], chainId: Tzkt
 /****************** UTILS Fns ********************/
 
 /**
- * > (!) When using `lastId` param, TZKT API might error with:
+ * > (!) When using `lastId` param, MVKT API might error with:
  * > `{"code":400,"errors":{"lastId":"The value '331626822238208' is not valid."}}`
  * > when it's not true!
  */
@@ -366,7 +366,7 @@ const buildOlderThanParam = (olderThan?: UserHistoryItem) => ({
  * @param transactions
  * @returns Mutaded array of sorted transactions
  */
-const sortTransactionsBasedOnTheOriginalType = (transactions: TzktOperation[]) => {
+const sortTransactionsBasedOnTheOriginalType = (transactions: MvktOperation[]) => {
   // usually it returns transactions with type transaction and the original operation with other type
   // so we sort it out to put that operation group to be always in the first place
   return transactions.sort((a, b) => {

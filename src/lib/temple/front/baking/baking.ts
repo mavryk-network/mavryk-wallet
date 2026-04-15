@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import retry from 'async-retry';
 import BigNumber from 'bignumber.js';
-import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
 
 import { BoundaryError } from 'app/ErrorBoundary';
 import {
@@ -12,14 +12,14 @@ import {
   getAllBakersBakingBad,
   getBakerSpace
 } from 'lib/apis/baking-bad';
-import { getAccountStatsFromTzkt, isKnownChainId, TzktRewardsEntry, TzktAccountType } from 'lib/apis/tzkt';
-import { fetchBakerDelegateParameters, TZKT_API_BASE_URLS, TzktApiChainId } from 'lib/apis/tzkt/api';
-import type { TzktUserAccount } from 'lib/apis/tzkt/types';
-import { useRetryableSWR } from 'lib/swr';
-import type { ReactiveTezosToolkit } from 'lib/temple/front';
+import { getAccountStatsFromMvkt, isKnownChainId, MvktRewardsEntry, MvktAccountType } from 'lib/apis/mvkt';
+import { fetchBakerDelegateParameters, MVKT_API_BASE_URLS, MvktApiChainId } from 'lib/apis/mvkt/api';
+import type { MvktUserAccount } from 'lib/apis/mvkt/types';
+import { IS_DEV_ENV } from 'lib/env';
+import { bakingKeys, chainKeys } from 'lib/query-keys';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
-import { useChainId, useNetwork, useTezos } from '../ready';
+import { useChainId, useNetwork, useMavryk } from '../ready';
 
 import {
   DEFAULT_CYCLE_DURATION_MS,
@@ -29,69 +29,55 @@ import {
 } from './const';
 import { getCoStakeWaitTime, getDelegationWaitTime, getOneCycleinMs, getUnlockWaitTime } from './utils/delegateTime';
 
-// serializers
-function getDelegateCacheKey(
-  tezos: ReactiveTezosToolkit,
-  address: string,
-  chainId: string | nullish,
-  shouldPreventErrorPropagation: boolean
-) {
-  return unstable_serialize(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
-}
-
-function getDelegateStatsCacheKey(
-  tezos: ReactiveTezosToolkit,
-  address: string,
-  chainId: string | nullish,
-  shouldPreventErrorPropagation: boolean
-) {
-  return unstable_serialize(['delegate_stats', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
-}
-
 // -----------------------------------------
 
-export function useDelegate<T = TzktUserAccount>(
+export function useDelegate<T = MvktUserAccount>(
   address: string,
   suspense = true,
   shouldPreventErrorPropagation = true
-): SWRResponse<T | undefined> {
-  const tezos = useTezos();
+) {
+  const mavryk = useMavryk();
   const chainId = useChainId(suspense);
-  const { cache: swrCache } = useSWRConfig();
+  const queryClient = useQueryClient();
+
+  const queryKey = useMemo(
+    () => [...chainKeys.delegate(mavryk.checksum, address), chainId, shouldPreventErrorPropagation],
+    [mavryk.checksum, address, chainId, shouldPreventErrorPropagation]
+  );
 
   const resetDelegateCache = useCallback(() => {
-    swrCache.delete(getDelegateCacheKey(tezos, address, chainId, shouldPreventErrorPropagation));
-  }, [address, tezos, chainId, swrCache, shouldPreventErrorPropagation]);
+    queryClient.removeQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
-  const getDelegate = useCallback(async () => {
+  const getDelegate = useCallback(async (): Promise<T | undefined> => {
     try {
       return await retry(
         async () => {
-          const freshChainId = chainId ?? (await tezos.rpc.getChainId());
+          const freshChainId = chainId ?? (await mavryk.rpc.getChainId());
           if (freshChainId && isKnownChainId(freshChainId)) {
             try {
-              const accountStats = await getAccountStatsFromTzkt(address, freshChainId);
+              const accountStats = await getAccountStatsFromMvkt(address, freshChainId);
 
               switch (accountStats.type) {
-                case TzktAccountType.Empty:
-                  return emptyAccountResponse;
-                case TzktAccountType.User:
-                case TzktAccountType.Contract:
-                  return accountStats;
+                case MvktAccountType.Empty:
+                  return emptyAccountResponse as T;
+                case MvktAccountType.User:
+                case MvktAccountType.Contract:
+                  return accountStats as T;
               }
             } catch (e) {
-              console.error(e);
+              if (IS_DEV_ENV) console.error('[baking] getAccountStats error:', e);
             }
           }
 
-          const delegateAddress = await tezos.rpc.getDelegate(address);
-          return { delegate: { address: delegateAddress } };
+          const delegateAddress = await mavryk.rpc.getDelegate(address);
+          return { delegate: { address: delegateAddress } } as T;
         },
         { retries: 3, minTimeout: 3000, maxTimeout: 5000 }
       );
     } catch (e) {
       if (shouldPreventErrorPropagation) {
-        return emptyAccountResponse;
+        return emptyAccountResponse as T;
       }
 
       throw new BoundaryError(
@@ -99,29 +85,36 @@ export function useDelegate<T = TzktUserAccount>(
         resetDelegateCache
       );
     }
-  }, [chainId, tezos, address, shouldPreventErrorPropagation, resetDelegateCache]);
+  }, [chainId, mavryk, address, shouldPreventErrorPropagation, resetDelegateCache]);
 
-  // @ts-expect-error // forced type for delegate address
-  return useSWR(['delegate', tezos.checksum, address, chainId, shouldPreventErrorPropagation], getDelegate, {
-    dedupingInterval: 20_000,
-    refreshInterval: 15_000,
-    suspense
+  return useQuery<T | undefined>({
+    queryKey,
+    queryFn: getDelegate,
+    // 30 s — baking stats change at most once per block; reduce background RPC load
+    staleTime: 30_000,
+    refetchInterval: 30_000
   });
 }
 
-export function useAccountDelegatePeriodStats(
-  accountAddress: string,
-  suspense = true,
-  shouldPreventErrorPropagation = true
-) {
-  const { data: accStats } = useDelegate<TzktUserAccount>(accountAddress);
-  const tezos = useTezos();
+export function useAccountDelegatePeriodStats(accountAddress: string, shouldPreventErrorPropagation = true) {
+  const { data: accStats } = useDelegate<MvktUserAccount>(accountAddress);
+  const mavryk = useMavryk();
   const chainId = useChainId();
-  const { cache: swrCache } = useSWRConfig();
+  const queryClient = useQueryClient();
+
+  const queryKey = useMemo(
+    () => [
+      ...chainKeys.delegateStats(mavryk.checksum, accountAddress),
+      accStats?.delegate?.address ?? null,
+      chainId,
+      shouldPreventErrorPropagation
+    ],
+    [mavryk.checksum, accountAddress, accStats?.delegate?.address, chainId, shouldPreventErrorPropagation]
+  );
 
   const resetDelegateStatsCache = useCallback(() => {
-    swrCache.delete(getDelegateStatsCacheKey(tezos, accountAddress, chainId, shouldPreventErrorPropagation));
-  }, [accountAddress, tezos, chainId, swrCache, shouldPreventErrorPropagation]);
+    queryClient.removeQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   // ----------------------- delegate Stats -----------------------------
 
@@ -132,23 +125,24 @@ export function useAccountDelegatePeriodStats(
           try {
             if (accStats?.delegate?.address) {
               const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
-                tezos.rpc.getBlockMetadata(),
+                mavryk.rpc.getBlockMetadata(),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
-                tezos.rpc.getUnstakeRequests(accountAddress)
+                mavryk.rpc.getUnstakeRequests(accountAddress).catch(() => null)
               ]);
 
               const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
               const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
-              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 0;
+              // Default to 1 (allowed) when baker has not published set_delegate_parameters
+              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 1;
 
               // ~2.8 days for mainnet // get cycle in Ms ------<
               let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
 
               try {
-                const constants = await tezos.rpc.getConstants();
+                const constants = await mavryk.rpc.getConstants();
                 cycleDurationMs = getOneCycleinMs(constants);
               } catch {
-                console.log('Error getting RPC default constants');
+                if (IS_DEV_ENV) console.error('[baking] Error getting RPC default constants');
               }
               // -----------------------------------
 
@@ -195,7 +189,7 @@ export function useAccountDelegatePeriodStats(
               };
             }
           } catch (e) {
-            console.log(e);
+            if (IS_DEV_ENV) console.error('[baking] getDelegateStats inner error:', e);
           }
 
           return emptydelegateStatsResponse;
@@ -217,23 +211,21 @@ export function useAccountDelegatePeriodStats(
     accStats?.delegationTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    tezos.rpc,
+    mavryk.rpc,
     chainId,
     accountAddress,
     shouldPreventErrorPropagation,
     resetDelegateStatsCache
   ]);
 
-  return useSWR(
-    ['delegate_stats', tezos.checksum, accountAddress, chainId, shouldPreventErrorPropagation],
-    getDelegateStats,
-    {
-      dedupingInterval: 20_000,
-      refreshInterval: 15_000,
-      suspense,
-      fallbackData: emptydelegateStatsResponse
-    }
-  );
+  return useQuery({
+    queryKey,
+    queryFn: getDelegateStats,
+    // 30 s — baking stats change at most once per block; reduce background RPC load
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+    placeholderData: emptydelegateStatsResponse
+  });
 }
 
 export type AccDelegatePeriodStats = ReturnType<typeof useAccountDelegatePeriodStats>;
@@ -283,14 +275,14 @@ const defaultRewardConfigHistory = [
   }
 ];
 
-export function useKnownBaker(address: string | null, suspense = true) {
+export function useKnownBaker(address: string | null) {
   const net = useNetwork();
   const chainId = useChainId();
 
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
+      const baseUrlParams = chainId ? { baseURL: MVKT_API_BASE_URLS[chainId as MvktApiChainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
       // @ts-expect-error // predifined validators list
@@ -340,11 +332,14 @@ export function useKnownBaker(address: string | null, suspense = true) {
     } catch (_err) {
       return null;
     }
-  }, [address]);
-  return useRetryableSWR(net.type === 'main' && address ? ['baker', address] : null, fetchBaker, {
-    refreshInterval: 120_000,
-    dedupingInterval: 60_000,
-    suspense
+  }, [address, chainId]);
+  return useQuery({
+    queryKey: bakingKeys.baker(address ?? '', chainId ?? ''),
+    queryFn: fetchBaker,
+    enabled: net.type === 'main' && !!address,
+    refetchInterval: 120_000,
+    staleTime: 60_000,
+    retry: 2
   });
 }
 
@@ -369,16 +364,19 @@ export function useKnownBaker(address: string | null, suspense = true) {
 //   });
 // };
 
-export function useKnownBakers(suspense = true) {
+export function useKnownBakers() {
   const chainId = useChainId();
 
   // eslint-disable-next-line no-type-assertion/no-type-assertion
-  const baseApiUrl = chainId ? TZKT_API_BASE_URLS[chainId as TzktApiChainId] : '';
+  const baseApiUrl = chainId ? MVKT_API_BASE_URLS[chainId as MvktApiChainId] : '';
 
-  const { data: bakers } = useRetryableSWR(baseApiUrl, getAllBakersBakingBad, {
-    refreshInterval: 120_000,
-    dedupingInterval: 60_000,
-    suspense
+  const { data: bakers } = useQuery({
+    queryKey: bakingKeys.bakers(baseApiUrl),
+    queryFn: () => getAllBakersBakingBad(baseApiUrl),
+    enabled: !!baseApiUrl,
+    refetchInterval: 120_000,
+    staleTime: 60_000,
+    retry: 2
   });
 
   return useMemo(
@@ -388,7 +386,7 @@ export function useKnownBakers(suspense = true) {
 }
 
 type RewardsStatsCalculationParams = {
-  rewardsEntry: TzktRewardsEntry;
+  rewardsEntry: MvktRewardsEntry;
   bakerDetails: Baker | null | undefined;
   currentCycle: number | undefined;
 } & Record<

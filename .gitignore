@@ -45,3 +45,14 @@ DerivedData
 
 #e2e
 video-rep
+/.claude/
+/.agent/
+/.agents/
+/CLAUDE.md
+
+# Screenshots
+Screenshot*.png
+Screenshot*.jpg
+
+# Review PDFs / local docs
+*.pdf

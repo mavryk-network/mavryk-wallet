@@ -77,17 +77,16 @@ const processInsertAdAction = async (action: InsertAdAction, ad: AdMetadata) => 
   await processInsertAdActionOnce(action, ad, wrapperElement).catch(error => {
     console.error('Inserting an ad attempt error:', error);
 
-    const nextAd = action.fallbacks.shift();
+    const [nextAd, ...remainingFallbacks] = action.fallbacks;
     if (nextAd) {
-      const { ad, fallbacks, divWrapperStyle, elementStyle, stylesOverrides } = action;
       const newAction: ReplaceElementWithAdAction = {
         type: AdActionType.ReplaceElement,
         element: wrapperElement,
-        ad,
-        fallbacks,
-        divWrapperStyle,
-        elementStyle,
-        stylesOverrides
+        ad: action.ad,
+        fallbacks: remainingFallbacks,
+        divWrapperStyle: action.divWrapperStyle,
+        elementStyle: action.elementStyle,
+        stylesOverrides: action.stylesOverrides
       };
 
       return processInsertAdAction(newAction, nextAd);
@@ -160,11 +159,25 @@ const processInsertAdActionOnce = async (action: InsertAdAction, ad: AdMetadata,
 };
 
 // Prevents the script from running in an Iframe
+let replaceAdsIntervalId: number | undefined;
+
 if (window.frameElement === null) {
   fetchFromStorage<boolean>(WEBSITES_ANALYTICS_ENABLED).then(enabled => {
     if (enabled) {
-      // Replace ads with ours
-      setInterval(() => replaceAds(), 1000);
+      replaceAdsIntervalId = window.setInterval(() => replaceAds(), 5000);
     }
+  });
+
+  // Stop polling if the user revokes analytics consent mid-session
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && WEBSITES_ANALYTICS_ENABLED in changes && !changes[WEBSITES_ANALYTICS_ENABLED].newValue) {
+      clearInterval(replaceAdsIntervalId);
+      replaceAdsIntervalId = undefined;
+    }
+  });
+
+  // Clean up interval when the page unloads
+  window.addEventListener('beforeunload', () => {
+    clearInterval(replaceAdsIntervalId);
   });
 }

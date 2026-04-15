@@ -1,18 +1,14 @@
 import React, { ChangeEvent, FC } from 'react';
 
-import { useDispatch } from 'react-redux';
-
 import { Switcher } from 'app/atoms/Switcher';
-import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
-import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { T, t } from 'lib/i18n';
+import { uiStore, useShouldShowPromotion } from 'lib/store/zustand/ui.store';
 import { useConfirm } from 'lib/ui/dialog';
 
 export const PartnersPromotionSettings: FC = () => {
-  const dispatch = useDispatch();
   const confirm = useConfirm();
 
-  const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
+  const shouldShowPartnersPromo = useShouldShowPromotion();
 
   const handleHidePromotion = async (toChecked: boolean) => {
     const confirmed = await confirm({
@@ -22,7 +18,7 @@ export const PartnersPromotionSettings: FC = () => {
     });
 
     if (confirmed) {
-      dispatch(togglePartnersPromotionAction(toChecked));
+      uiStore.getState().togglePartnersPromotion(toChecked);
     }
   };
 
@@ -34,7 +30,7 @@ export const PartnersPromotionSettings: FC = () => {
     });
 
     if (confirmed) {
-      dispatch(togglePartnersPromotionAction(toChecked));
+      uiStore.getState().togglePartnersPromotion(toChecked);
     }
   };
 

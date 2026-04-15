@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, SyntheticEvent, memo, useMemo, useState } from 'react';
+import React, { FC, ReactNode, memo, useMemo } from 'react';
 
 import classNames from 'clsx';
 
@@ -9,8 +9,6 @@ import { t } from 'lib/i18n';
 import { useTippyById } from 'lib/ui/useTippy';
 
 import styles from './PopupModalWithTitle.module.css';
-
-const SCROLL_INDEX_POS = 35;
 
 const tippyProps = {
   trigger: 'mouseenter',
@@ -29,19 +27,6 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = memo(
   ({ title, children, className, headerComponent, leftSidedComponent, contentPosition = 'bottom', ...restProps }) => {
     const { popup } = useAppEnv();
     const handleMouseEnter = useTippyById('#close-icon', tippyProps);
-    const [animateCloseIcon, setAnimateCloseIcon] = useState(false);
-
-    const scrollEvent = (e: SyntheticEvent) => {
-      const target = e.target as HTMLTextAreaElement;
-
-      if (target.scrollTop > SCROLL_INDEX_POS && !animateCloseIcon) {
-        setAnimateCloseIcon(true);
-      }
-
-      if (target.scrollTop < SCROLL_INDEX_POS && animateCloseIcon) {
-        setAnimateCloseIcon(false);
-      }
-    };
 
     const memoizedContentStyle = useMemo(
       () => (popup ? { maxHeight: 500 } : { maxHeight: 'calc(100vh - 190px' }),
@@ -62,24 +47,15 @@ export const PopupModalWithTitle: FC<PopupModalWithTitlePropsProps> = memo(
       >
         <>
           {headerComponent && <div className={styles.headerComponent}>{headerComponent}</div>}
+          <button onMouseEnter={handleMouseEnter} id="close-icon" className="absolute top-3 right-3 z-20">
+            <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
+          </button>
           <div
             // used for infinite scrol lib to load more stuff while scrolled to the end
             id="popupModalScrollable"
             style={memoizedContentStyle}
-            onScroll={scrollEvent}
             className={classNames('w-full no-scrollbar', styles.container)}
           >
-            <div
-              className={classNames(
-                'absolute top-4 px-4 w-full flex justify-end items-center',
-                'transition duration-300 ease-in-out z-10',
-                animateCloseIcon && 'bg-primary-card pb-4 z-10'
-              )}
-            >
-              <button onMouseEnter={handleMouseEnter} id="close-icon" className=" ">
-                <CloseIcon className="w-6 h-auto cursor-pointer stroke stroke-1" onClick={restProps.onRequestClose} />
-              </button>
-            </div>
             <div
               className={classNames(
                 leftSidedComponent ? styles.headerContent : 'flex items-center justify-center relative',

@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useRef, useState } from 'react';
 
 import clsx from 'clsx';
 import { useForm, Controller } from 'react-hook-form';
@@ -7,11 +7,17 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useTezos, useTezosDomainsClient, validateDelegate } from 'lib/temple/front';
-import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
+import {
+  useMavrykClient,
+  useMavryk,
+  useTezosDomainsClient,
+  useAddressResolution,
+  validateDelegate
+} from 'lib/temple/front';
 import { isAddressValid, isKTAddress } from 'lib/temple/helpers';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -22,37 +28,32 @@ interface WatchOnlyFormData {
 }
 
 export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
-  const { importWatchOnlyAccount } = useTempleClient();
-  const tezos = useTezos();
+  const { importWatchOnlyAccount } = useMavrykClient();
+  const mavryk = useMavryk();
   const domainsClient = useTezosDomainsClient();
   const canUseDomainNames = domainsClient.isSupported;
   const formAnalytics = useFormAnalytics(ImportAccountFormType.WatchOnly);
   const { popup } = useAppEnv();
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<WatchOnlyFormData>({
+  const { watch, handleSubmit, control, formState, setValue, trigger } = useForm<WatchOnlyFormData>({
     mode: 'onChange'
   });
+  const { errors } = formState;
 
   const [error, setError] = useState<ReactNode>(null);
 
   const addressFieldRef = useRef<HTMLTextAreaElement>(null);
 
   const addressValue = watch('address') ?? '';
-
-  const { data: resolvedAddress } = useTezosAddressByDomainName(addressValue);
-
-  const finalAddress = useMemo(
-    () => (resolvedAddress && resolvedAddress !== null ? resolvedAddress : addressValue),
-    [resolvedAddress, addressValue]
-  );
+  const { toResolved: finalAddress } = useAddressResolution(addressValue);
 
   const accName = watch('accName') ?? '';
   const finalAccName = accName?.trim() !== '' ? accName : undefined;
 
   const cleanAddressField = useCallback(() => {
     setValue('address', '');
-    triggerValidation('address');
-  }, [setValue, triggerValidation]);
+    trigger('address');
+  }, [setValue, trigger]);
 
   const onSubmit = useCallback(async () => {
     if (formState.isSubmitting) return;
@@ -69,33 +70,33 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
 
       if (isKTAddress(finalAddress)) {
         try {
-          await tezos.contract.at(finalAddress);
+          await mavryk.contract.at(finalAddress);
         } catch {
           throw new Error(t('contractNotExistOnNetwork'));
         }
 
-        chainId = await tezos.rpc.getChainId();
+        chainId = await mavryk.rpc.getChainId();
       }
 
       await importWatchOnlyAccount(finalAddress, chainId, finalAccName);
 
       formAnalytics.trackSubmitSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       formAnalytics.trackSubmitFail();
 
       console.error(err);
 
       // Human delay
       await delay();
-      setError(err.message);
+      setError(getErrorMessage(err));
     }
   }, [
     formState.isSubmitting,
     formAnalytics,
     finalAddress,
     importWatchOnlyAccount,
-    tezos.rpc,
-    tezos.contract,
+    mavryk.rpc,
+    mavryk.contract,
     finalAccName
   ]);
 
@@ -109,44 +110,55 @@ export const WatchOnlyForm: FC<ImportformProps> = ({ className }) => {
       <Controller
         name="address"
         defaultValue={''}
-        as={<NoSpaceField ref={addressFieldRef} />}
         control={control}
         rules={{
           required: true,
           validate: (value: any) => validateDelegate(value, domainsClient)
         }}
-        onChange={([v]) => v}
-        onFocus={() => addressFieldRef.current?.focus()}
-        textarea
-        rows={popup ? 2 : 1}
-        cleanable={Boolean(addressValue)}
-        onClean={cleanAddressField}
-        id="watch-address"
-        label={t('address')}
-        testID={ImportAccountSelectors.watchOnlyInput}
-        labelDescription={
-          <T id={canUseDomainNames ? 'addressInputDescriptionWithDomain' : 'addressInputDescription'} />
-        }
-        placeholder={t('enterAddress')}
-        errorCaption={errors.address?.message}
-        style={{
-          resize: 'none'
-        }}
-        containerClassName="mb-2"
+        render={({ field }) => (
+          <NoSpaceField
+            {...field}
+            ref={(el: HTMLTextAreaElement | null) => {
+              field.ref(el);
+              (addressFieldRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+            }}
+            onFocus={() => addressFieldRef.current?.focus()}
+            textarea
+            rows={popup ? 2 : 1}
+            cleanable={Boolean(addressValue)}
+            onClean={cleanAddressField}
+            id="watch-address"
+            label={t('address')}
+            testID={ImportAccountSelectors.watchOnlyInput}
+            labelDescription={
+              <T id={canUseDomainNames ? 'addressInputDescriptionWithDomain' : 'addressInputDescription'} />
+            }
+            placeholder={t('enterAddress')}
+            errorCaption={errors.address?.message}
+            style={{
+              resize: 'none'
+            }}
+            containerClassName="mb-2"
+          />
+        )}
       />
 
       <Controller
         name="accName"
-        as={<FormField />}
         control={control}
-        onPaste={clearClipboard}
         defaultValue={''}
-        id="acc-name"
-        label={`${t('accountName')} ${t('optionalComment')}`}
-        labelDescription={<T id="accountNameAlternativeInputDescription" />}
-        placeholder={t('enterAccountName')}
-        errorCaption={errors.accName?.message}
-        containerClassName="mb-4 flex-grow"
+        render={({ field }) => (
+          <FormField
+            {...field}
+            onPaste={clearClipboard}
+            id="acc-name"
+            label={`${t('accountName')} ${t('optionalComment')}`}
+            labelDescription={<T id="accountNameAlternativeInputDescription" />}
+            placeholder={t('enterAccountName')}
+            errorCaption={errors.accName?.message}
+            containerClassName="mb-4 flex-grow"
+          />
+        )}
       />
 
       <div>

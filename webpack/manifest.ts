@@ -8,7 +8,16 @@ import type { Manifest } from 'webextension-polyfill';
 import packageJSON from '../package.json';
 
 import { envFilesData } from './dotenv';
-import { Vendor, ALL_VENDORS, getManifestVersion } from './env';
+import { Vendor, ALL_VENDORS, getManifestVersion, TESTING_BUILD } from './env';
+
+const ICON_DIR = TESTING_BUILD ? 'misc/dev' : 'misc';
+
+const ICONS = {
+  '16': `${ICON_DIR}/icon-16.png`,
+  '19': `${ICON_DIR}/icon-19.png`,
+  '38': `${ICON_DIR}/icon-38.png`,
+  '128': `${ICON_DIR}/icon-128.png`
+};
 import { IFRAMES } from './paths';
 
 const WEB_ACCCESSIBLE_RESOURSES = [
@@ -48,8 +57,7 @@ const buildManifestV3 = (vendor: string): Manifest.WebExtensionManifest => {
     ],
     js: ['scripts/keepBackgroundWorkerAlive.js'],
     run_at: 'document_start',
-    all_frames: true,
-    match_about_blank: true,
+    all_frames: false,
     // @ts-expect-error
     match_origin_as_fallback: true
   });
@@ -94,10 +102,9 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
 
     permissions: [...PERMISSIONS, ...HOST_PERMISSIONS],
 
-    /** `blob:` was added due to 3D-models not working in Firefox otherwise. See:
-     * https://github.com/madfish-solutions/templewallet-extension/commit/7f170d058e9d628709f0da0759cfee44a0667480
-     */
-    content_security_policy: "script-src 'self' 'unsafe-eval' blob:; object-src 'self'",
+    /** `wasm-unsafe-eval` replaces `unsafe-eval` — supported Firefox 102+, Chrome 95+. */
+    // L1: `blob:` removed from script-src — it is not required for 3D model rendering and widens the attack surface.
+    content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
 
     // Required for dynamic imports `import()`
     web_accessible_resources: WEB_ACCCESSIBLE_RESOURSES,
@@ -137,15 +144,10 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
     // Public key to fixate extension ID
     key: envFilesData._MANIFEST_KEY_,
 
-    name: 'Mavryk Wallet',
-    short_name: 'Mavryk Wallet',
+    name: TESTING_BUILD ? 'Mavryk Wallet (Dev)' : 'Mavryk Wallet',
+    short_name: TESTING_BUILD ? 'Mavryk (Dev)' : 'Mavryk Wallet',
 
-    icons: {
-      '16': 'misc/icon-16.png',
-      '19': 'misc/icon-19.png',
-      '38': 'misc/icon-38.png',
-      '128': 'misc/icon-128.png'
-    },
+    icons: ICONS,
 
     description: '__MSG_appDesc__',
 
@@ -193,7 +195,8 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
         all_frames: true
       },
       {
-        matches: ['https://*/*'],
+        // TODO: restrict to specific ad-network domains after product team review (S8)
+        matches: ['https://*.google.com/*', 'https://*.youtube.com/*'],
         js: ['scripts/replaceAds.js'],
         run_at: 'document_start',
         all_frames: false
@@ -208,12 +211,7 @@ const buildBrowserAction = (vendor: string) => {
   return {
     default_title: 'Mavryk Wallet',
     ...withVendors('chrome', 'firefox', 'opera')({ default_popup: 'popup.html' }),
-    default_icon: {
-      '16': 'misc/icon-16.png',
-      '19': 'misc/icon-19.png',
-      '38': 'misc/icon-38.png',
-      '128': 'misc/icon-128.png'
-    },
+    default_icon: ICONS,
     ...withVendors('chrome', 'opera')({ chrome_style: false }),
     ...withVendors('firefox')({ browser_style: false })
   };

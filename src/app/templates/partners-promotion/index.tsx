@@ -1,18 +1,13 @@
 import React, { memo, MouseEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
-import { hidePromotionAction } from 'app/store/partners-promotion/actions';
-import {
-  useShouldShowPartnersPromoSelector,
-  usePromotionHidingTimestampSelector
-} from 'app/store/partners-promotion/selectors';
 import { AdsProviderName, AdsProviderTitle } from 'lib/ads';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { AD_HIDING_TIMEOUT } from 'lib/constants';
+import { uiStore, useShouldShowPromotion, usePromotionHidingTimestamp } from 'lib/store/zustand/ui.store';
 import { useAccountPkh } from 'lib/temple/front';
 
 import { HypelabPromotion } from './components/hypelab-promotion';
@@ -42,9 +37,8 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
   const accountPkh = useAccountPkh();
   const { trackEvent } = useAnalytics();
   const { popup } = useAppEnv();
-  const dispatch = useDispatch();
-  const hiddenAt = usePromotionHidingTimestampSelector(id);
-  const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
+  const hiddenAt = usePromotionHidingTimestamp(id);
+  const shouldShowPartnersPromo = useShouldShowPromotion();
 
   const isAnalyticsSentRef = useRef(false);
 
@@ -85,9 +79,9 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
     e => {
       e.preventDefault();
       e.stopPropagation();
-      dispatch(hidePromotionAction({ timestamp: Date.now(), id }));
+      uiStore.getState().hidePromotion(id, Date.now());
     },
-    [id, dispatch]
+    [id]
   );
 
   const handleOptimalError = useCallback(() => setProviderName('HypeLab'), []);

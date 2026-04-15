@@ -14,9 +14,7 @@ import { AnalyticsEventCategory } from '../analytics-types';
 import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
-import { store, toFront } from './store';
-
-const frontStore = store.map(toFront);
+import { store } from './store';
 
 export const start = async () => {
   intercom.onRequest(processRequestWithErrorsLogged);
@@ -24,8 +22,14 @@ export const start = async () => {
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
 
-  frontStore.watch(() => {
-    intercom.broadcast({ type: TempleMessageType.StateUpdated });
+  let broadcastPending = false;
+  store.subscribe(() => {
+    if (broadcastPending) return;
+    broadcastPending = true;
+    queueMicrotask(() => {
+      broadcastPending = false;
+      intercom.broadcast({ type: TempleMessageType.StateUpdated });
+    });
   });
 };
 
@@ -225,7 +229,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
         if (payload) {
           return;
         }
-        if (!req) {
+        if (!res) {
           return;
         }
 

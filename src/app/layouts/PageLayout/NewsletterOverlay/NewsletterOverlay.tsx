@@ -2,7 +2,6 @@ import React, { FC, useMemo, useState } from 'react';
 
 import classNames from 'clsx';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { object, string } from 'yup';
 
 import { Button } from 'app/atoms';
@@ -11,13 +10,11 @@ import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { useOnboardingProgress } from 'app/pages/Onboarding/hooks/useOnboardingProgress.hook';
-import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
-import { useShouldShowNewsletterModalSelector } from 'app/store/newsletter/newsletter-selectors';
-import { useOnRampPossibilitySelector } from 'app/store/settings/selectors';
 import { setTestID } from 'lib/analytics';
 import { newsletterApi } from 'lib/apis/newsletter';
 import { useYupValidationResolver } from 'lib/form/use-yup-validation-resolver';
 import { T, t } from 'lib/i18n/react';
+import { useShouldShowNewsletterModal, useIsOnRampPossibility, uiStore } from 'lib/store/zustand/ui.store';
 import { useLocation } from 'lib/woozie';
 
 import NewsletterImage from './NewsletterImage.png';
@@ -34,19 +31,23 @@ const validationSchema = object().shape({
 const HOME_PAGE_PATH = '/';
 
 export const NewsletterOverlay: FC = () => {
-  const dispatch = useDispatch();
   const { popup } = useAppEnv();
   const { pathname } = useLocation();
 
   const { onboardingCompleted } = useOnboardingProgress();
-  const shouldShowNewsletterModal = useShouldShowNewsletterModalSelector();
-  const isOnRampPossibility = useOnRampPossibilitySelector();
+  const shouldShowNewsletterModal = useShouldShowNewsletterModal();
+  const isOnRampPossibility = useIsOnRampPossibility();
 
   const validationResolver = useYupValidationResolver<FormValues>(validationSchema);
 
-  const { errors, handleSubmit, watch, register } = useForm<FormValues>({
+  const {
+    formState: { errors },
+    handleSubmit,
+    watch,
+    register
+  } = useForm<FormValues>({
     defaultValues: { email: '' },
-    validationResolver
+    resolver: validationResolver
   });
   const email = watch('email');
   const isValid = Object.keys(errors).length === 0;
@@ -59,7 +60,7 @@ export const NewsletterOverlay: FC = () => {
     [popup]
   );
   const closeButtonClassName = useMemo(() => (popup ? 'top-8 right-8' : 'top-4 right-4'), [popup]);
-  const close = () => void dispatch(shouldShowNewsletterModalAction(false));
+  const close = () => uiStore.getState().setShouldShowNewsletterModal(false);
 
   const onSubmit = () => {
     setIsLoading(true);
@@ -70,7 +71,7 @@ export const NewsletterOverlay: FC = () => {
       })
       .then(() => {
         setSuccessSubscribing(true);
-        dispatch(shouldShowNewsletterModalAction(false));
+        uiStore.getState().setShouldShowNewsletterModal(false);
       })
       .finally(() => setIsLoading(false));
   };
@@ -132,8 +133,7 @@ export const NewsletterOverlay: FC = () => {
               <span className="mb-1 text-xs text-left text-gray-600">{t('keepLatestNews')}</span>
               <div className="w-full mb-4">
                 <input
-                  ref={register()}
-                  name="email"
+                  {...register('email')}
                   className="w-full max-h-13 p-4 rounded-md border text-sm text-gray-910"
                   placeholder="example@mail.com"
                   {...setTestID(NewsletterOverlaySelectors.emailInput)}
@@ -144,7 +144,7 @@ export const NewsletterOverlay: FC = () => {
                 disabled={!isValid}
                 type="submit"
                 className={classNames(
-                  'w-full h-12 flex items-center justify-center font-semibold rounded-md text-base px-16 py-3 text-white',
+                  'w-full h-12 flex items-center justify-center font-medium rounded-md text-base px-16 py-3 text-white',
                   isValid ? 'bg-orange-500' : 'bg-blue-100'
                 )}
                 {...setTestID(NewsletterOverlaySelectors.subscribeButton)}

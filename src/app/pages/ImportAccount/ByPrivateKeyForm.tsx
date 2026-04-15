@@ -7,9 +7,10 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useChainId, useTempleClient } from 'lib/temple/front';
+import { useChainId, useMavrykClient } from 'lib/temple/front';
 import { clearClipboard } from 'lib/ui/utils';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
@@ -21,11 +22,12 @@ interface ByPrivateKeyFormData {
 
 export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { importAccount } = useTempleClient();
+  const { importAccount } = useMavrykClient();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.PrivateKey);
   const chainId = useChainId();
 
-  const { register, handleSubmit, errors, formState, watch } = useForm<ByPrivateKeyFormData>();
+  const { register, handleSubmit, formState, watch } = useForm<ByPrivateKeyFormData>();
+  const { errors } = formState;
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
@@ -38,14 +40,14 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
         await importAccount(privateKey.replace(/\s/g, ''), chainId!, encPassword);
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
     },
     [importAccount, formState.isSubmitting, setError, formAnalytics, chainId]
@@ -63,10 +65,9 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
         {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-4" />}
 
         <FormField
-          ref={register({ required: t('required') })}
+          {...register('privateKey', { required: t('required') })}
           type="password"
           revealForbidden
-          name="privateKey"
           id="importacc-privatekey"
           label={t('privateKey')}
           labelDescription={t('privateKeyInputDescription')}
@@ -82,8 +83,7 @@ export const ByPrivateKeyForm: FC<ImportformProps> = ({ className }) => {
 
         {encrypted && (
           <FormField
-            ref={register}
-            name="encPassword"
+            {...register('encPassword')}
             type="password"
             id="importacc-password"
             label={

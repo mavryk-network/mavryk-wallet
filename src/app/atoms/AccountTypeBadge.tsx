@@ -13,12 +13,7 @@ const AccountTypeBadge = memo<AccountTypeBadgeProps>(({ account }) => {
   const title = getAccountBadgeTitle(account);
 
   return title ? (
-    <span
-      style={{ padding: '2px 4px' }}
-      className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue')}
-    >
-      {title}
-    </span>
+    <span className={clsx('ml-1 rounded border text-xs border-accent-blue text-accent-blue px-1 py-0.5')}>{title}</span>
   ) : null;
 });
 

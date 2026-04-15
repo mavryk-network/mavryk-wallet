@@ -1,23 +1,22 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import classNames from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
 import { USER_ACTION_TIMEOUT } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useMavrykClient } from 'lib/temple/front';
 import { TempleSharedStorageKey } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { delay } from 'lib/utils';
+import { toFieldError } from 'lib/utils/get-error-message';
 import { Link } from 'lib/woozie';
 
-import { ABTestGroup } from '../../../lib/apis/temple';
-import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
-import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
+import { ABTestGroup, fetchABGroup } from '../../../lib/apis/temple';
+import { useAbTestGroupName, uiStore } from '../../../lib/store/zustand/ui.store';
 import PageWithImageBg from '../../templates/PageWithImageBg/PageWithImageBg';
 
 import { UnlockSelectors } from './Unlock.selectors';
@@ -30,7 +29,6 @@ type FormData = {
   password: string;
 };
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
 const LOCK_TIME = 2 * USER_ACTION_TIMEOUT;
 const LAST_ATTEMPT = 3;
 
@@ -45,8 +43,7 @@ const getTimeLeft = (start: number, end: number) => {
 };
 
 const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
-  const { unlock } = useTempleClient();
-  const dispatch = useDispatch();
+  const { unlock } = useMavrykClient();
   const { popup } = useAppEnv();
   const formAnalytics = useFormAnalytics('UnlockWallet');
 
@@ -56,11 +53,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
   const [timeleft, setTimeleft] = useState(getTimeLeft(timelock, lockLevel));
 
-  const testGroupName = useUserTestingGroupNameSelector();
+  const testGroupName = useAbTestGroupName();
 
   useEffect(() => {
     if (testGroupName === ABTestGroup.Unknown) {
-      dispatch(getUserTestingGroupNameActions.submit());
+      fetchABGroup().then(group => uiStore.getState().setAbTestGroupName(group));
     }
   }, [testGroupName]);
 
@@ -70,14 +67,19 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
     formRef.current?.querySelector<HTMLInputElement>("input[name='password']")?.focus();
   }, []);
 
-  const { register, handleSubmit, errors, setError, clearError, formState } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    setError,
+    clearErrors
+  } = useForm<FormData>();
 
-  const onSubmit = useCallback<OnSubmit<FormData>>(
+  const onSubmit = useCallback<SubmitHandler<FormData>>(
     async ({ password }) => {
       if (submitting) return;
 
-      clearError('password');
+      clearErrors('password');
       formAnalytics.trackSubmit();
       try {
         if (attempt > LAST_ATTEMPT) await delay(Math.random() * 2000 + 1000);
@@ -85,7 +87,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         formAnalytics.trackSubmitSuccess();
         setAttempt(1);
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
         if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
         setAttempt(attempt + 1);
@@ -95,11 +97,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', toFieldError(err));
         focusPasswordField();
       }
     },
-    [submitting, clearError, setError, unlock, focusPasswordField, formAnalytics, attempt, setAttempt, setTimeLock]
+    [submitting, clearErrors, setError, unlock, focusPasswordField, formAnalytics, attempt, setAttempt, setTimeLock]
   );
 
   const isDisabled = useMemo(() => Date.now() - timelock <= lockLevel, [timelock, lockLevel]);
@@ -133,12 +135,11 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormField
-          ref={register({ required: t('required') })}
+          {...register('password', { required: t('required') })}
           label={''}
           labelDescription={t('unlockPasswordInputDescription')}
           id="unlock-password"
           type="password"
-          name="password"
           placeholder="Password"
           errorCaption={errors.password && errors.password.message}
           containerClassName="mb-4"
@@ -160,7 +161,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
             <Link
               to="/import-wallet"
               className={classNames(
-                'text-accent-blue font-semibold',
+                'text-accent-blue font-medium',
                 popup ? 'text-sm' : 'text-base-plus',
                 'transition duration-200 ease-in-out',
                 'opacity-75 hover:opacity-100 focus:opacity-100',

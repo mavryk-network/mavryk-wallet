@@ -1,33 +1,31 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Anchor, Button } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { useActivePromotion, useIsNewPromotionAvailable } from 'app/hooks/use-advertising-promotion.query';
 import ContentContainer from 'app/layouts/ContentContainer';
-import { skipAdvertisingPromotionAction } from 'app/store/advertising/actions';
-import { useActivePromotionSelector, useIsNewPromotionAvailableSelector } from 'app/store/advertising/selectors';
 import { T } from 'lib/i18n/react';
-import { useTempleClient } from 'lib/temple/front';
+import { uiStore } from 'lib/store/zustand/ui.store';
+import { useWalletReady } from 'lib/temple/front';
 
 export const AdvertisingOverlay: FC = () => {
   const { popup } = useAppEnv();
-  const { ready } = useTempleClient();
-  const dispatch = useDispatch();
-  const activePromotion = useActivePromotionSelector();
-  const isNewPromotionAvailable = useIsNewPromotionAvailableSelector();
+  const ready = useWalletReady();
+  const activePromotion = useActivePromotion();
+  const isNewPromotionAvailable = useIsNewPromotionAvailable();
 
   const popupClassName = popup ? 'inset-0' : 'top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2';
   const analyticsEventPrefix = `${activePromotion?.name}_${popup ? 'POPUP' : 'FULLPAGE'}`;
 
-  const handleSkipPress = () => {
-    dispatch(skipAdvertisingPromotionAction());
-  };
-  const handleBannerPress = () => {
-    dispatch(skipAdvertisingPromotionAction());
-  };
+  const handleSkipPress = useCallback(() => {
+    uiStore.getState().setLastSeenPromotionName(activePromotion?.name);
+  }, [activePromotion?.name]);
+  const handleBannerPress = useCallback(() => {
+    uiStore.getState().setLastSeenPromotionName(activePromotion?.name);
+  }, [activePromotion?.name]);
 
   return ready && isNewPromotionAvailable && isDefined(activePromotion) ? (
     <>

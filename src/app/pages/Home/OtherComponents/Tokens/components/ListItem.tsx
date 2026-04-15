@@ -10,6 +10,7 @@ import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
+import { usePrivacyMode } from 'lib/store/zustand/ui.store';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { ZERO } from 'lib/utils/numbers';
@@ -30,6 +31,7 @@ interface Props {
 
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
+  const privacyMode = usePrivacyMode();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
   const { data: accStats } = useDelegate(publicKeyHash);
   const myBakerPkh = accStats?.delegate?.address ?? null;
@@ -75,7 +77,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           </div>
         ),
         Column2: (
-          <CryptoBalance value={delegatedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+          <CryptoBalance
+            value={delegatedBalance}
+            cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals}
+            hidden={privacyMode}
+          />
         )
       });
     }
@@ -87,12 +93,18 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             <T id="coStaked" />
           </div>
         ),
-        Column2: <CryptoBalance value={stakedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+        Column2: (
+          <CryptoBalance
+            value={stakedBalance}
+            cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals}
+            hidden={privacyMode}
+          />
+        )
       });
     }
 
     return rows.length > 0 ? rows : null;
-  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken]);
+  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken, privacyMode]);
 
   const balanceToDisplay = useMemo(() => {
     return isMavToken ? upgradeBalanceWithStakingBalance(balance, accStats) : balance;
@@ -101,18 +113,31 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   if (metadata == null) return null;
 
   return (
-    <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>
+    <div
+      className={classNameMemo}
+      {...setAnotherSelector('name', assetName)}
+      role="button"
+      tabIndex={0}
+      onClick={() => onClick(assetSlug)}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(assetSlug);
+        }
+      }}
+    >
       <AssetIcon assetSlug={assetSlug} size={44} className="mr-2 flex-shrink-0 self-start" />
 
       <div className={classNames('w-full')} style={{ maxWidth: popup ? '19rem' : 'auto' }}>
         <div className="flex justify-between w-full mb-1">
           <div className="flex items-center flex-initial">
-            <div className={styles['tokenSymbol']}>{assetSymbol}</div>
+            <div className={classNames('text-sm', styles['tokenSymbol'])}>{assetSymbol}</div>
             {isDelegated && <DelegatePeriodBanner />}
           </div>
           <CryptoBalance
             value={balanceToDisplay ?? ZERO}
             cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
+            hidden={privacyMode}
             testID={AssetsSelectors.assetItemCryptoBalanceButton}
             testIDProperties={{ assetSlug }}
           />
@@ -127,12 +152,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <FiatBalance
-              assetSlug={assetSlug}
-              value={balanceToDisplay ?? ZERO}
-              testID={AssetsSelectors.assetItemFiatBalanceButton}
-              testIDProperties={{ assetSlug }}
-            />
+            <div className={classNames(privacyMode && 'invisible')}>
+              <FiatBalance
+                assetSlug={assetSlug}
+                value={balanceToDisplay ?? ZERO}
+                testID={AssetsSelectors.assetItemFiatBalanceButton}
+                testIDProperties={{ assetSlug }}
+              />
+            </div>
             {additionalDelegateBlock?.map((row, i) => (
               <div key={i} className={classNames(i === 0 && 'mt-1')}>
                 {row.Column2}

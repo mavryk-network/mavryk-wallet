@@ -12,7 +12,7 @@ import { tryParseExpenses } from 'lib/temple/front';
 import { TempleDAppOperationsPayload, TempleDAppSignPayload } from 'lib/temple/types';
 
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
-import TabsSwitcher from './TabsSwicther/TabsSwitcher';
+import TabsSwitcher from './TabsSwitcher/TabsSwitcher';
 
 const MIN_GAS_FEE = 0;
 const bytesStyle = { height: 112, background: '#171717', border: 'none' };
@@ -102,6 +102,7 @@ const OperationView: FC<OperationViewProps> = ({
 
   const [spFormat, setSpFormat] = useState(signPayloadFormats[0]);
 
+  // derived state for confirm_operations data
   const isOperationPayload = payload.type === 'confirm_operations';
   const estimates = isOperationPayload ? payload.estimates : undefined;
   const gasFeeError = useMemo(
@@ -160,7 +161,7 @@ const OperationView: FC<OperationViewProps> = ({
       )}
 
       {isOperationPayload && (
-        <div style={{ marginBottom: 12 }}>
+        <div className="mb-3">
           <ModifyFeeAndLimitComponent
             id="external-modified-fees-id"
             name="external-modified-fees"

@@ -7,9 +7,10 @@ import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useTezos, useAccount, activateAccount } from 'lib/temple/front';
+import { useMavryk, useAccount, activateAccount } from 'lib/temple/front';
 import { confirmOperation } from 'lib/temple/operation';
 import { useSafeState } from 'lib/ui/hooks';
+import { SUBMIT_ERROR_TYPE } from 'lib/utils/get-error-message';
 
 import { ActivateAccountSelectors } from './ActivateAccount.selectors';
 
@@ -17,28 +18,32 @@ type FormData = {
   secret: string;
 };
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
-
 const ActivateAccount = memo(() => {
-  const tezos = useTezos();
+  const mavryk = useMavryk();
   const account = useAccount();
   const { popup } = useAppEnv();
 
   const [success, setSuccess] = useSafeState<ReactNode>(null);
 
-  const { register, handleSubmit, formState, clearError, setError, errors, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: submitting },
+    clearErrors,
+    setError,
+    watch
+  } = useForm<FormData>();
   const secret = watch('secret') ?? '';
 
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (submitting) return;
 
-      clearError('secret');
+      clearErrors('secret');
       setSuccess(null);
 
       try {
-        const activation = await activateAccount(account.publicKeyHash, data.secret.replace(/\s/g, ''), tezos);
+        const activation = await activateAccount(account.publicKeyHash, data.secret.replace(/\s/g, ''), mavryk);
         switch (activation.status) {
           case 'ALREADY_ACTIVATED':
             setSuccess(`🏁 ${t('accountAlreadyActivated')}`);
@@ -46,19 +51,19 @@ const ActivateAccount = memo(() => {
 
           case 'SENT':
             setSuccess(`🛫 ${t('requestSent', t('activationOperationType'))}`);
-            confirmOperation(tezos, activation.operation.hash).then(() => {
+            confirmOperation(mavryk, activation.operation.hash).then(() => {
               setSuccess(`✅ ${t('accountActivated')}`);
             });
             break;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
 
         const mes = t('failureSecretMayBeInvalid');
-        setError('secret', SUBMIT_ERROR_TYPE, mes);
+        setError('secret', { type: SUBMIT_ERROR_TYPE, message: mes });
       }
     },
-    [clearError, submitting, setError, setSuccess, account.publicKeyHash, tezos]
+    [clearErrors, submitting, setError, setSuccess, account.publicKeyHash, mavryk]
   );
 
   const submit = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -95,8 +100,7 @@ const ActivateAccount = memo(() => {
       <FormField
         textarea
         rows={1}
-        ref={register({ required: t('required') })}
-        name="secret"
+        {...register('secret', { required: t('required') })}
         id="activateaccount-secret"
         label={t('activateAccountSecret')}
         labelDescription={t('activateAccountSecretDescription')}

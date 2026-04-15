@@ -1,7 +1,6 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 
 import { PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import {
@@ -13,13 +12,11 @@ import {
 } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
-import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
-import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
-import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
-import { useTempleClient } from 'lib/temple/front';
+import { uiStore } from 'lib/store/zustand/ui.store';
+import { useMavrykClient } from 'lib/temple/front';
 import { PasswordValidation } from 'lib/ui/PasswordStrengthIndicator';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -36,6 +33,7 @@ export interface FormData extends TestIDProps {
   analytics?: boolean;
   viewAds: boolean;
   skipOnboarding?: boolean;
+  shouldUseKeystorePassword?: boolean;
   testID?: string;
 }
 
@@ -44,29 +42,18 @@ export const useCreareOrRestorePassword = (
   seedPhrase: string,
   keystorePassword: string | undefined = undefined
 ) => {
-  const { registerWallet } = useTempleClient();
+  const { registerWallet } = useMavrykClient();
   const { popup } = useAppEnv();
   const { trackEvent } = useAnalytics();
 
-  const dispatch = useDispatch();
-
   const setAnalyticsEnabled = useCallback(
-    (analyticsEnabled: boolean) => dispatch(setIsAnalyticsEnabledAction(analyticsEnabled)),
-    [dispatch]
+    (analyticsEnabled: boolean) => uiStore.getState().setAnalyticsEnabled(analyticsEnabled),
+    []
   );
 
-  const setAdsViewEnabled = useCallback(
-    (adsViewEnabled: boolean) => {
-      if (adsViewEnabled) {
-        // dispatch(setAdsBannerVisibilityAction(false));
-        dispatch(togglePartnersPromotionAction(true));
-      } else {
-        // dispatch(setAdsBannerVisibilityAction(true));
-        dispatch(togglePartnersPromotionAction(false));
-      }
-    },
-    [dispatch]
-  );
+  const setAdsViewEnabled = useCallback((adsViewEnabled: boolean) => {
+    uiStore.getState().togglePartnersPromotion(adsViewEnabled);
+  }, []);
 
   const { setOnboardingCompleted } = useOnboardingProgress();
 
@@ -74,7 +61,15 @@ export const useCreareOrRestorePassword = (
 
   const isKeystorePasswordWeak = isImportFromKeystoreFile && !PASSWORD_PATTERN.test(keystorePassword!);
 
-  const { control, watch, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
+  const {
+    control,
+    watch,
+    register,
+    handleSubmit,
+    trigger,
+    getValues,
+    formState: { errors, isSubmitting, dirtyFields }
+  } = useForm<FormData>({
     defaultValues: {
       analytics: true,
       viewAds: false,
@@ -83,14 +78,14 @@ export const useCreareOrRestorePassword = (
     mode: 'onChange'
   });
 
-  const submitting = formState.isSubmitting;
+  const submitting = isSubmitting;
 
   const shouldUseKeystorePassword = watch('shouldUseKeystorePassword');
 
   const passwordValue = watch('password');
 
-  const isTermsAccepted: boolean = control.getValues()?.termsAccepted;
-  const isBetaAccepted: boolean = control.getValues()?.betaAgreement;
+  const isTermsAccepted: boolean = getValues()?.termsAccepted;
+  const isBetaAccepted: boolean = getValues()?.betaAgreement;
 
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
@@ -102,10 +97,10 @@ export const useCreareOrRestorePassword = (
   });
 
   useLayoutEffect(() => {
-    if (formState.dirtyFields.has('repeatPassword')) {
-      triggerValidation('repeatPassword');
+    if (dirtyFields.repeatPassword) {
+      trigger('repeatPassword');
     }
-  }, [triggerValidation, formState.dirtyFields, passwordValue]);
+  }, [trigger, dirtyFields, passwordValue]);
 
   const handlePasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -157,12 +152,10 @@ export const useCreareOrRestorePassword = (
         } else {
           navigate('/loading');
         }
-        !ownMnemonic && dispatch(setOnRampPossibilityAction(true));
-        dispatch(shouldShowNewsletterModalAction(true));
-      } catch (err: any) {
+        !ownMnemonic && uiStore.getState().setOnRampPossibility(true);
+        uiStore.getState().setShouldShowNewsletterModal(true);
+      } catch (err: unknown) {
         console.error(err);
-
-        alert(err.message);
       }
     },
     [
@@ -178,8 +171,7 @@ export const useCreareOrRestorePassword = (
       registerWallet,
       seedPhrase,
       trackEvent,
-      popup,
-      dispatch
+      popup
     ]
   );
 

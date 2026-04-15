@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
 import { AlertWithCollapse } from 'app/atoms/Alert';
@@ -15,7 +15,6 @@ import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import { ContentPaper, Toolbar } from 'app/layouts/PageLayout';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
-import { setOnRampPossibilityAction } from 'app/store/settings/actions';
 import AccountBanner from 'app/templates/AccountBanner';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import NetworkBanner from 'app/templates/NetworkBanner';
@@ -25,7 +24,8 @@ import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitche
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
+import { miscKeys } from 'lib/query-keys';
+import { uiStore } from 'lib/store/zustand/ui.store';
 import { useChainIdValue, useNetwork, useRelevantAccounts, tryParseExpenses } from 'lib/temple/front';
 import { MAV_RPC_NETWORK } from 'lib/temple/networks';
 import { TempleAccountType, TempleChainId, TempleConfirmationPayload } from 'lib/temple/types';
@@ -34,7 +34,7 @@ import { isTruthy } from 'lib/utils';
 
 import { InternalConfirmationSelectors } from './InternalConfirmation.selectors';
 import { ModifyFeeAndLimitComponent } from './ModifyFeeAndLimit';
-import TabsSwitcher from './TabsSwicther/TabsSwitcher';
+import TabsSwitcher from './TabsSwitcher/TabsSwitcher';
 
 type InternalConfiramtionProps = {
   payload: TempleConfirmationPayload;
@@ -57,7 +57,6 @@ const feePoperModifiers = [
 const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfirm, error: payloadError }) => {
   const { rpcBaseURL: currentNetworkRpc } = useNetwork();
   const { popup } = useAppEnv();
-  const dispatch = useDispatch();
 
   const getContentToParse = useCallback(async () => {
     switch (payload.type) {
@@ -67,7 +66,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         const unsignedBytes = payload.bytes.substr(0, payload.bytes.length - 128);
         try {
           return (await localForger.parse(unsignedBytes)) || [];
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error(err);
           return [];
         }
@@ -75,7 +74,13 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         return [];
     }
   }, [payload]);
-  const { data: contentToParse } = useRetryableSWR(['content-to-parse'], getContentToParse, { suspense: true });
+  const { data: contentToParse } = useSuspenseQuery({
+    queryKey: miscKeys.contentToParse(payload.type, payload.type === 'sign' ? payload.bytes : null),
+    queryFn: getContentToParse,
+    retry: 2,
+    staleTime: 0,
+    gcTime: 0
+  });
 
   const networkRpc = payload.type === 'operations' ? payload.networkRpc : currentNetworkRpc;
 
@@ -101,8 +106,8 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     }));
   }, [rawExpensesData]);
 
-  const estimates = payload.type === 'operations' ? payload.estimates : undefined;
   const isOperationPayload = payload.type === 'operations';
+  const estimates = isOperationPayload ? payload.estimates : undefined;
 
   const { value: tezBalanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const tezBalance = tezBalanceData!;
@@ -120,9 +125,9 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
 
   useEffect(() => {
     if (tezBalance && new BigNumber(tezBalance).isLessThanOrEqualTo(totalTransactionCost)) {
-      dispatch(setOnRampPossibilityAction(true));
+      uiStore.getState().setOnRampPossibility(true);
     }
-  }, [dispatch, tezBalance, totalTransactionCost]);
+  }, [tezBalance, totalTransactionCost]);
 
   const isStorageDataHidden = useMemo(
     () =>
@@ -316,7 +321,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     />
                   </div>
 
-                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
+                  <div className="h-px bg-divider my-4 w-full" />
 
                   {payloadError && (
                     <AlertWithCollapse
@@ -392,7 +397,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   )}
 
                   {isOperationPayload && (
-                    <div style={{ marginBottom: 12 }}>
+                    <div className="mb-3">
                       <ModifyFeeAndLimitComponent
                         id="internal-modified-fees-id"
                         name="internal-modified-fees"

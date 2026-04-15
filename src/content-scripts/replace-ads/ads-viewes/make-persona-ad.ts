@@ -16,6 +16,7 @@ export const makePersonaAdView = (
   element.src = browser.runtime.getURL(`iframes/persona-ad.html?id=${id}&shape=${shape}`);
   element.id = id;
 
+  element.sandbox.add('allow-scripts');
   element.style.width = `${width}px`;
   element.style.height = `${height}px`;
   element.style.border = 'none';

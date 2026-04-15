@@ -1,5 +1,6 @@
 import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
@@ -17,8 +18,8 @@ import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
 import OperationView from 'app/templates/OperationView';
 import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
-import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
+import { dAppKeys } from 'lib/query-keys';
+import { useMavrykClient, useWalletReady, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
 import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
@@ -38,7 +39,7 @@ const DEFAULT_TOTAL_FEE_WHEN_NO_ESTIMATES = 30000;
 const DEFAULT_STORAGE_WHEN_NO_ESTIMATES = 500;
 
 const ConfirmPage: FC = () => {
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
 
   if (ready)
     return (
@@ -107,7 +108,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
 export default ConfirmPage;
 
 const ConfirmDAppForm: FC = () => {
-  const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useTempleClient();
+  const { getDAppPayload, confirmDAppPermission, confirmDAppOperation, confirmDAppSign } = useMavrykClient();
   const allAccounts = useRelevantAccounts(false);
   const account = useAccount();
 
@@ -116,20 +117,25 @@ const ConfirmDAppForm: FC = () => {
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
   const loc = useLocation();
-  const id = useMemo(() => {
+  const { id, token } = useMemo(() => {
     const usp = new URLSearchParams(loc.search);
     const pageId = usp.get('id');
+    const pageToken = usp.get('token');
     if (!pageId) {
       throw new Error(t('notIdentified'));
     }
-    return pageId;
+    if (!pageToken) {
+      throw new Error(t('notIdentified'));
+    }
+    return { id: pageId, token: pageToken };
   }, [loc.search]);
 
-  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  const { data } = useSuspenseQuery<TempleDAppPayload>({
+    queryKey: dAppKeys.payload(id),
+    queryFn: () => getDAppPayload(id, token),
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
 
   const payload = data!;
@@ -188,9 +194,7 @@ const ConfirmDAppForm: FC = () => {
       setError(null);
       try {
         await onConfirm(confirmed, modifiedTotalFeeValue - revealFee, modifiedStorageLimitValue);
-      } catch (err: any) {
-        console.error(err);
-
+      } catch (err: unknown) {
         // Human delay.
         await delay();
         setError(err);
@@ -363,7 +367,7 @@ const ConfirmDAppForm: FC = () => {
                     />
                   </div>
 
-                  <div style={{ height: 1 }} className=" bg-divider my-4 w-full" />
+                  <div className="h-px bg-divider my-4 w-full" />
                 </>
               )}
 

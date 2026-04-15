@@ -21,14 +21,12 @@ import { ReactComponent as ChevronLeftIcon } from 'app/icons/chevron-left.svg';
 import ContentContainer from 'app/layouts/ContentContainer';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { T } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletConfirmation } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { goBack, HistoryAction, navigate, useLocation } from 'lib/woozie';
 
 import { useOnboardingProgress } from '../pages/Onboarding/hooks/useOnboardingProgress.hook';
 
-import { ChangelogOverlay } from './PageLayout/ChangelogOverlay/ChangelogOverlay';
-import ConfirmationOverlay from './PageLayout/ConfirmationOverlay';
 import Header from './PageLayout/Header';
 import styles from './pageLayout.module.css';
 import { PageLayoutSelectors } from './PageLayout.selectors';
@@ -69,8 +67,8 @@ const PageLayout: FC<PageLayoutProps> = ({
       )}
 
       <div className={classNames(fullPage && 'pb-16', 'relative')}>
-        {isTopbarVisible && <Header />}
         <ContentPaper style={contentPaperStyle} customContainerMinHeight={customContainerMinHeight}>
+          {isTopbarVisible && <Header />}
           <Toolbar {...toolbarProps} />
 
           <div
@@ -87,9 +85,6 @@ const PageLayout: FC<PageLayoutProps> = ({
         </ContentPaper>
       </div>
 
-      {/* <AdvertisingOverlay /> */}
-      <ConfirmationOverlay />
-      <ChangelogOverlay />
       {/* <OnRampOverlay /> */}
       {/* <NewsletterOverlay /> */}
     </div>
@@ -120,7 +115,7 @@ export const ContentPaper: FC<ContentPaparProps> = ({
   return appEnv.fullPage ? (
     <ContentContainer>
       <div
-        className={classNames('bg-primary-bg rounded-md shadow-lg h-full flex flex-col', className)}
+        className={classNames('bg-primary-bg rounded-2xl shadow-lg h-full flex flex-col overflow-hidden', className)}
         style={{
           minHeight: isMainPage
             ? fullPageMinHeightScreenWithHeader
@@ -172,7 +167,7 @@ export const Toolbar: FC<ToolbarProps> = ({
   const { fullPage } = useAppEnv();
   const { setOnboardingCompleted } = useOnboardingProgress();
   // hide back icon on the confirm operation screen
-  const { confirmation } = useTempleClient();
+  const confirmation = useWalletConfirmation();
   const displayed = Boolean(confirmation);
 
   const onStepBack = () => {

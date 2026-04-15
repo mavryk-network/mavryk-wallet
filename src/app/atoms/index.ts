@@ -49,3 +49,7 @@ export { DataPlaceholder } from './DataPlaceholder';
 export { default as ABContainer } from './ABContainer';
 
 export { PageTitle } from './PageTitle';
+
+export { BakerLogo } from './BakerLogo';
+
+export { PrivacyAmount } from './PrivacyAmount';

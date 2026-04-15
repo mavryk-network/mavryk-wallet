@@ -18,6 +18,6 @@ export const BuyPageOption: FC<BuyPageOptionProps> = ({ Icon, title, to, ...test
   >
     <Icon />
     <Divider style={{ height: 0.5 }} />
-    <span className="font-semibold text-gray-700 text-base leading-tight">{title}</span>
+    <span className="font-medium text-gray-700 text-base leading-tight">{title}</span>
   </Link>
 );

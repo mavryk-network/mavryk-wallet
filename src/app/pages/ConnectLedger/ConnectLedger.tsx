@@ -16,12 +16,12 @@ import {
   useAllAccounts,
   useChainId,
   useSetAccountPkh,
-  useTempleClient,
+  useMavrykClient,
   validateDerivationPath
 } from 'lib/temple/front';
-import { fetchNewAccountName } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
+import { getErrorMessage } from 'lib/utils/get-error-message';
 import { navigate } from 'lib/woozie';
 
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
@@ -67,7 +67,7 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { accounts, createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount } = useMavrykClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
@@ -88,7 +88,13 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch
+  } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
@@ -97,13 +103,13 @@ const ConnectLedger: FC = () => {
       derivationPath: DERIVATION_PATHS[0].type
     }
   });
-  const submitting = formState.isSubmitting;
+  const submitting = isSubmitting;
   const derivationPathType = watch('derivationPath');
 
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
-    async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
+    async (_formData: FormData) => {
       if (submitting) return;
 
       setError(null);
@@ -126,19 +132,19 @@ const ConnectLedger: FC = () => {
             }
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
 
       try {
-        const account = knownLedgerAccounts[activeAccountIndex];
-        const { chain, derivationPath, address, publicKey } = account;
+        // const account = knownLedgerAccounts[activeAccountIndex];
+        // const { chain, derivationPath, address, publicKey } = account;
         // await createLedgerAccount({
         //   chain,
         //   derivationPath,
@@ -149,14 +155,14 @@ const ConnectLedger: FC = () => {
         // });
 
         formAnalytics.trackSubmitSuccess();
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail();
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError(err.message);
+        setError(getErrorMessage(err));
       }
     },
     [submitting, formAnalytics, createLedgerAccount, chainId]
@@ -175,7 +181,7 @@ const ConnectLedger: FC = () => {
               <T id="connectLedgerDesc" />
             </div>
             <FormField
-              ref={register({
+              {...register('name', {
                 pattern: {
                   value: /^.{0,16}$/,
                   message: t('ledgerNameConstraint')
@@ -185,7 +191,6 @@ const ConnectLedger: FC = () => {
               // labelDescription={t('ledgerNameInputDescription')}
               id="create-ledger-name"
               type="text"
-              name="name"
               placeholder={defaultName}
               errorCaption={errors.name?.message}
               containerClassName="mb-2"
@@ -194,33 +199,42 @@ const ConnectLedger: FC = () => {
 
             <div className="flex flex-col">
               <Controller
-                as={DerivationTypeFieldSelect}
                 control={control}
                 name="derivationType"
-                options={DERIVATION_TYPES}
-                i18nKey={t('derivationType')}
+                render={({ field }) => (
+                  <DerivationTypeFieldSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={DERIVATION_TYPES}
+                    i18nKey={t('derivationType')}
+                  />
+                )}
               />
             </div>
 
             <div className="flex flex-col">
               <Controller
-                as={DerivationTypeFieldSelect}
                 control={control}
                 name="derivationPath"
-                options={DERIVATION_PATHS}
-                i18nKey={t('derivationPath')}
+                render={({ field }) => (
+                  <DerivationTypeFieldSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={DERIVATION_PATHS}
+                    i18nKey={t('derivationPath')}
+                  />
+                )}
               />
             </div>
 
             {derivationPathType === 'another' && (
               <FormField
-                ref={register({
+                {...register('accountNumber', {
                   min: { value: 1, message: t('positiveIntMessage') },
                   required: t('required')
                 })}
                 min={0}
                 type="number"
-                name="accountNumber"
                 id="importacc-acc-number"
                 label={t('accountNumber')}
                 placeholder="1"
@@ -230,11 +244,10 @@ const ConnectLedger: FC = () => {
 
             {derivationPathType === 'custom' && (
               <FormField
-                ref={register({
+                {...register('customDerivationPath', {
                   required: t('required'),
                   validate: validateDerivationPath
                 })}
-                name="customDerivationPath"
                 id="importacc-cdp"
                 label={t('customDerivationPath')}
                 placeholder={t('derivationPathExample2')}

@@ -7,6 +7,9 @@ import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
 import { getIntercom } from './intercom-client';
 
+// H1: Only run in the top frame — prevents duplicate message handling in iframes.
+if (window !== window.top) throw new Error('contentScript: skipping iframe frame');
+
 const TRACK_URL_CHANGE_INTERVAL = 5000;
 
 enum BeaconMessageTarget {
@@ -73,6 +76,7 @@ window.addEventListener(
   'message',
   evt => {
     if (evt.source !== window) return;
+    if (evt.origin !== window.location.origin) return;
 
     const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
     const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;

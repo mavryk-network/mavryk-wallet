@@ -1,14 +1,14 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ChainIds } from '@mavrykdynamics/webmavryk';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import clsx from 'clsx';
 
 import { SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
+import { useSortAssetsOptions } from 'app/hooks/use-sort-assets-options';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,
@@ -17,7 +17,7 @@ import {
   SearchExplorerFinder,
   SearchExplorerCloseBtn
 } from 'app/templates/SearchExplorer';
-import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
+import { SortButton, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { setTestID } from 'lib/analytics';
 import { OptimalPromoVariantEnum } from 'lib/apis/optimal';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
@@ -25,7 +25,8 @@ import { useEnabledAccountTokensSlugs } from 'lib/assets/hooks';
 import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
-import { useAccount, useChainId } from 'lib/temple/front';
+import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'lib/store/zustand/assets.store';
+import { useAccount } from 'lib/temple/front';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -41,8 +42,6 @@ import { toExploreAssetLink } from './utils';
 const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
 export const TokensTab: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const chainId = useChainId(true)!;
   const balances = useCurrentAccountBalances();
   const { publicKeyHash } = useAccount();
 
@@ -68,10 +67,9 @@ export const TokensTab: FC = () => {
     [setIsZeroBalancesHidden]
   );
 
-  // const slugs = useMemoWithCompare(() => tokens.map(({ tokenSlug }) => tokenSlug).sort(), [tokens], isEqual);
   const mainnetTokensScamSlugsRecord = useMainnetTokensScamlistSelector();
 
-  const leadingAssets = useMemo(() => (chainId === ChainIds.MAINNET ? [MAV_TOKEN_SLUG] : [MAV_TOKEN_SLUG]), [chainId]);
+  const leadingAssets = useMemo(() => [MAV_TOKEN_SLUG], []);
 
   const { filteredAssets, searchValue, setSearchValue } = useTokensListingLogic(
     slugs,
@@ -82,31 +80,7 @@ export const TokensTab: FC = () => {
 
   const sortedSlugs = useSortededAssetsSlugs(sortOption, filteredAssets, balances);
 
-  const memoizedSortAssetsOptions: SortListItemType[] = useMemo(
-    () => [
-      {
-        id: SortOptions.HIGH_TO_LOW,
-        selected: sortOption === SortOptions.HIGH_TO_LOW,
-        onClick: () => {
-          setSortOption(SortOptions.HIGH_TO_LOW);
-        },
-        nameI18nKey: 'highToLow'
-      },
-      {
-        id: SortOptions.LOW_TO_HIGH,
-        selected: sortOption === SortOptions.LOW_TO_HIGH,
-        onClick: () => setSortOption(SortOptions.LOW_TO_HIGH),
-        nameI18nKey: 'lowToHigh'
-      },
-      {
-        id: SortOptions.BY_NAME,
-        selected: sortOption === SortOptions.BY_NAME,
-        onClick: () => setSortOption(SortOptions.BY_NAME),
-        nameI18nKey: 'byName'
-      }
-    ],
-    [sortOption]
-  );
+  const memoizedSortAssetsOptions = useSortAssetsOptions(sortOption, setSortOption);
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -116,28 +90,13 @@ export const TokensTab: FC = () => {
     return searchFocused && searchValueExist && sortedSlugs[activeIndex] ? sortedSlugs[activeIndex] : null;
   }, [sortedSlugs, searchFocused, searchValueExist, activeIndex]);
 
-  const tokensView = useMemo<Array<JSX.Element>>(() => {
-    const tokensJsx = sortedSlugs.map(assetSlug => (
-      <ListItem
-        key={assetSlug}
-        publicKeyHash={publicKeyHash}
-        assetSlug={assetSlug}
-        scam={mainnetTokensScamSlugsRecord[assetSlug]}
-        active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
-        onClick={handleAssetOpen}
-      />
-    ));
-
-    // if (sortedSlugs.length < 5) {
-    //   tokensJsx.push(<PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
-    // } else {
-    //   tokensJsx.splice(1, 0, <PartnersPromotion key="promo-token-item" variant={PartnersPromotionVariant.Text} />);
-    // }
-
-    return tokensJsx;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedSlugs, activeAssetSlug, balances, sortOption]);
-
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: sortedSlugs.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 76,
+    overscan: 5
+  });
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 
   useEffect(() => {
@@ -163,18 +122,26 @@ export const TokensTab: FC = () => {
           break;
 
         case 'ArrowDown':
-          setActiveIndex(i => i + 1);
+          setActiveIndex(i => {
+            const next = Math.min(i + 1, sortedSlugs.length - 1);
+            virtualizer.scrollToIndex(next, { align: 'auto' });
+            return next;
+          });
           break;
 
         case 'ArrowUp':
-          setActiveIndex(i => (i > 0 ? i - 1 : 0));
+          setActiveIndex(i => {
+            const prev = i > 0 ? i - 1 : 0;
+            virtualizer.scrollToIndex(prev, { align: 'auto' });
+            return prev;
+          });
           break;
       }
     };
 
     window.addEventListener('keyup', handleKeyup);
     return () => window.removeEventListener('keyup', handleKeyup);
-  }, [activeAssetSlug, setActiveIndex]);
+  }, [activeAssetSlug, setActiveIndex, sortedSlugs.length]);
 
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
@@ -182,7 +149,7 @@ export const TokensTab: FC = () => {
         <SearchExplorer>
           <>
             <SearchExplorerOpened>
-              <div className={clsx('w-full flex justify-end', popup && 'px-4', styles.searchWrapper)}>
+              <div className={clsx('w-full flex justify-end bg-primary-bg', popup && 'px-4', styles.searchWrapper)}>
                 <SearchExplorerFinder
                   value={searchValue}
                   onValueChange={setSearchValue}
@@ -236,15 +203,47 @@ export const TokensTab: FC = () => {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col w-full overflow-hidden rounded-md text-white text-sm leading-tight">
-          {tokensView}
+        <>
+          <div
+            ref={scrollContainerRef}
+            className="w-full overflow-y-auto rounded-md text-white text-sm leading-tight"
+            style={{ maxHeight: popup ? '60vh' : '70vh' }}
+          >
+            <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+              {virtualizer.getVirtualItems().map(virtualRow => {
+                const slug = sortedSlugs[virtualRow.index];
+                return (
+                  <div
+                    key={slug}
+                    data-index={virtualRow.index}
+                    ref={virtualizer.measureElement}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualRow.start}px)`
+                    }}
+                  >
+                    <ListItem
+                      publicKeyHash={publicKeyHash}
+                      assetSlug={slug}
+                      scam={mainnetTokensScamSlugsRecord[slug]}
+                      active={activeAssetSlug ? slug === activeAssetSlug : false}
+                      onClick={handleAssetOpen}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           <TokenDetailsPopup
             publicKeyHash={publicKeyHash}
             assetSlug={assetSlug}
             isOpen={assetSlug.length > 0}
             onRequestClose={handleAssetClose}
           />
-        </div>
+        </>
       )}
 
       {isSyncing && <SyncSpinner className="mt-4" />}

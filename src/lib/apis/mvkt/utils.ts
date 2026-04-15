@@ -1,0 +1,101 @@
+import { MvktAccount } from './types';
+
+export const calcMvktAccountSpendableTezBalance = ({ balance, stakedBalance, unstakedBalance }: MvktAccount) =>
+  ((balance ?? 0) - (stakedBalance ?? 0) - (unstakedBalance ?? 0)).toFixed();
+
+type ParameterFa12 = {
+  entrypoint: string;
+  value: {
+    to: string;
+    from: string;
+    value: string;
+  };
+};
+
+interface Fa2Transaction {
+  to_: string;
+  amount: string;
+  token_id: string;
+}
+
+interface Fa2OpParams {
+  txs: Fa2Transaction[];
+  from_: string;
+}
+
+export type ParameterFa2 = {
+  entrypoint: string;
+  value: Fa2OpParams[];
+};
+type ParameterLiquidityBaking = {
+  entrypoint: string;
+  value: {
+    target: string;
+    quantity: string; // can be 'number' or '-number
+  };
+};
+
+export function isMvktOperParam(param: any): param is {
+  entrypoint: string;
+  value: any;
+} {
+  if (param == null) return false;
+  if (typeof param.entrypoint !== 'string') return false;
+  return 'value' in param;
+}
+
+export function isMvktOperParam_Fa12(param: any): param is ParameterFa12 {
+  if (!isMvktOperParam(param)) return false;
+  if (param.value == null) return false;
+  if (typeof param.value.to !== 'string') return false;
+  if (typeof param.value.from !== 'string') return false;
+  if (typeof param.value.value !== 'string') return false;
+
+  return true;
+}
+
+/**
+ * (!) Might only refer to `param.entrypoint === 'transfer'` case
+ * (?) So, would this check be enough?
+ */
+export function isMvktOperParam_Fa2(param: any): param is ParameterFa2 {
+  if (!isMvktOperParam(param)) return false;
+  if (!Array.isArray(param.value)) return false;
+  let item = param.value[0];
+  if (item == null) return true;
+  if (typeof item.from_ !== 'string') return false;
+  if (!Array.isArray(item.txs)) return false;
+  item = item.txs[0];
+  if (item == null) return true;
+  if (typeof item.to_ !== 'string') return false;
+  if (typeof item.amount !== 'string') return false;
+  if (typeof item.token_id !== 'string') return false;
+
+  return true;
+}
+
+export function isMvktOperParam_LiquidityBaking(param: any): param is ParameterLiquidityBaking {
+  if (!isMvktOperParam(param)) return false;
+  if (param.value == null) return false;
+  if (typeof param.value.target !== 'string') return false;
+  if (typeof param.value.quantity !== 'string') return false;
+
+  return true;
+}
+
+export async function fetchWithTimeout(url: string, params: RequestInit = {}, timeout = 20000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal, ...params });
+
+    if (!res.ok) {
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    return res;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}

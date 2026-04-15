@@ -1,6 +1,6 @@
 /**
  * (!) Apply this method in conjunction with `stringToArrayBuffer`
- * @return 'utf-8' encoded string
+ * @return Latin-1 decoded string (one byte per char via charCodeAt)
  */
 export const arrayBufferToString = (buf: ArrayBuffer) =>
   String.fromCharCode.apply(
@@ -10,9 +10,11 @@ export const arrayBufferToString = (buf: ArrayBuffer) =>
   );
 
 /**
- * See: https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string
+ * @deprecated Use `new TextEncoder().encode(str)` for UTF-8 strings.
+ * This function uses Latin-1/charCodeAt encoding and is retained only
+ * for the legacy session-store read path. Do not use in new code.
  *
- * @param str // 'utf-8' encoded string
+ * See: https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string
  */
 export const stringToArrayBuffer = (str: string) => {
   const buf = new ArrayBuffer(str.length); // 1 byte for each char

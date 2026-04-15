@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
 
 import { Name } from 'app/atoms';
@@ -9,8 +10,8 @@ import { ReactComponent as LoadingSvg } from 'app/icons/loading.svg';
 import CustomSelect, { OptionRenderProps } from 'app/templates/CustomSelect';
 import DAppLogo from 'app/templates/DAppLogo';
 import { TID, T, t } from 'lib/i18n';
-import { useRetryableSWR } from 'lib/swr';
-import { useRelevantAccounts, useTempleClient } from 'lib/temple/front';
+import { dAppKeys } from 'lib/query-keys';
+import { useRelevantAccounts, useMavrykClient } from 'lib/temple/front';
 import { TempleDAppSession, TempleDAppSessions } from 'lib/temple/types';
 
 import { areUrlsContainSameHost, getActiveTabUrl } from './utils/activeTab';
@@ -27,27 +28,29 @@ type DappsContextType = {
 const dappsContext = createContext<DappsContextType>(undefined!);
 
 export const DappsContext: FC<{ children: ReactNode }> = ({ children }) => {
-  const { getAllDAppSessions, removeDAppSession } = useTempleClient();
+  const { getAllDAppSessions, removeDAppSession } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
+  const queryClient = useQueryClient();
 
   // NOTE  connected - all, active - if current acc === connected site acc
-  const { data, mutate, isLoading } = useRetryableSWR<TempleDAppSessions>(['getAllDAppSessions'], getAllDAppSessions, {
-    suspense: false,
-    shouldRetryOnError: true,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  const { data, isLoading } = useQuery<TempleDAppSessions>({
+    queryKey: dAppKeys.sessions,
+    queryFn: getAllDAppSessions,
+    retry: 2,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
 
-  const dAppSessions = data! ?? {};
+  const dAppSessions = data ?? {};
 
   const [activeUrl, setActiveUrl] = useState<string | undefined>('');
 
   const handleRemoveClick = useCallback(
     async (origin: string) => {
       await removeDAppSession(origin);
-      mutate();
+      queryClient.invalidateQueries({ queryKey: dAppKeys.sessions });
     },
-    [removeDAppSession, mutate]
+    [removeDAppSession, queryClient]
   );
 
   const dAppEntries = useMemo(() => Object.entries(dAppSessions), [dAppSessions]);

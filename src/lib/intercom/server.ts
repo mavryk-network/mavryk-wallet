@@ -3,7 +3,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 import { serealizeError } from './helpers';
 import { MessageType, RequestMessage, ResponseMessage, ErrorMessage, SubscriptionMessage } from './types';
 
-type ReqHandler = (payload: any, port: Runtime.Port) => Promise<any>;
+type ReqHandler<TReq = any, TRes = any> = (payload: TReq, port: Runtime.Port) => Promise<TRes>;
 
 export class IntercomServer {
   private ports = new Set<Runtime.Port>();
@@ -27,14 +27,14 @@ export class IntercomServer {
     return this.ports.has(port);
   }
 
-  onRequest(handler: ReqHandler) {
+  onRequest<TReq = any, TRes = any>(handler: ReqHandler<TReq, TRes>) {
     this.addReqHandler(handler);
     return () => {
       this.removeReqHandler(handler);
     };
   }
 
-  broadcast(data: any) {
+  broadcast<T = any>(data: T) {
     const msg: SubscriptionMessage = { type: MessageType.Sub, data };
     this.ports.forEach(port => {
       port.postMessage(msg);

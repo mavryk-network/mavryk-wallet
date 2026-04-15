@@ -2,7 +2,6 @@ import React, { FC, useEffect } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { Button } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -11,8 +10,7 @@ import { T } from 'lib/i18n';
 import { BellIcon } from 'lib/icons';
 import { goBack, navigate } from 'lib/woozie';
 
-import { readNotificationsItemAction } from '../../store/actions';
-import { useNotificationsItemSelector } from '../../store/selectors';
+import { useNotificationItem, useReadNotificationItem } from '../../hooks/use-notifications.query';
 import { formatDateOutput } from '../../utils/date.utils';
 
 import { NotificationsItemContent } from './content';
@@ -23,9 +21,10 @@ interface Props {
 
 export const NotificationsItem: FC<Props> = ({ id }) => {
   const { popup } = useAppEnv();
-  const dispatch = useDispatch();
-  const notification = useNotificationsItemSelector(id);
-  useEffect(() => void dispatch(readNotificationsItemAction(notification?.id ?? 0)), [notification?.id]);
+  const notification = useNotificationItem(id);
+  const readItem = useReadNotificationItem();
+
+  useEffect(() => void readItem(notification?.id ?? 0), [notification?.id, readItem]);
 
   useEffect(() => {
     navigate('/');
@@ -51,11 +50,9 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
           alt="Notification"
           className="w-full items-center rounded-md overflow-hidden bg-orange-10 mb-6"
         />
-        <p className="font-aeonik text-gray-900 font-semibold mb-4" style={{ fontSize: 19 }}>
-          {notification.title}
-        </p>
+        <p className="font-aeonik text-gray-900 font-medium mb-4 text-xl">{notification.title}</p>
         <NotificationsItemContent content={notification.content} />
-        <div className="font-aeonik mt-4" style={{ fontSize: 10 }}>
+        <div className="font-aeonik mt-4 text-[10px]">
           <p className="text-gray-500 font-normal">{formatDateOutput(notification.createdAt)}</p>
           {isDefined(notification.sourceUrl) && (
             <>
@@ -79,15 +76,15 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
             'bg-primary-orange border-primary-orange',
             'flex justify-center items-center',
             'text-primary-orange-lighter',
-            'font-aeonik font-semibold',
+            'font-aeonik font-medium',
             'transition duration-200 ease-in-out',
             'opacity-90 hover:opacity-100 focus:opacity-100',
-            'shadow-sm hover:shadow focus:shadow'
+            'shadow-sm hover:shadow focus:shadow',
+            'text-ulg'
           )}
           style={{
             paddingTop: '0.6rem',
-            paddingBottom: '0.6rem',
-            fontSize: 17
+            paddingBottom: '0.6rem'
           }}
           onClick={goBack}
         >

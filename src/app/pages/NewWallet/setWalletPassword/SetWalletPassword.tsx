@@ -6,7 +6,7 @@ import { FormField, FormSubmitButton, PASSWORD_ERROR_CAPTION } from 'app/atoms';
 import { PASSWORD_PATTERN } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { T, t } from 'lib/i18n';
-import { useTempleClient } from 'lib/temple/front';
+import { useWalletReady } from 'lib/temple/front';
 import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
 import { ImportPartialFormCheckboxes } from '../import/importPartialFormCheckboxes/ImportPartialFormCheckboxes';
@@ -29,7 +29,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
   submitBtnLabel
 }) => {
   const { fullPage } = useAppEnv();
-  const { ready } = useTempleClient();
+  const ready = useWalletReady();
   const [focused, setFocused] = useState(false);
   const {
     control,
@@ -58,7 +58,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
       {(!shouldUseKeystorePassword || !isImportFromKeystoreFile) && (
         <>
           <FormField
-            ref={register({
+            {...register('password', {
               required: PASSWORD_ERROR_CAPTION,
               pattern: {
                 value: PASSWORD_PATTERN,
@@ -70,7 +70,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             labelClassname={classNames(fullPage && 'mb-2')}
             id="newwallet-password"
             type="password"
-            name="password"
             placeholder={t('createWalletPassword')}
             errorCaption={errors.password?.message}
             onFocus={() => setFocused(true)}
@@ -90,7 +89,7 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
           )}
 
           <FormField
-            ref={register({
+            {...register('repeatPassword', {
               required: t('required'),
               validate: val => val === passwordValue || t('mustBeEqualToPasswordAbove')
             })}
@@ -100,7 +99,6 @@ export const SetWalletPassword: FC<SetWalletPasswordProps> = ({
             fieldWrapperBottomMargin={!fullPage}
             id="newwallet-repassword"
             type="password"
-            name="repeatPassword"
             placeholder={t('confirmWalletPassword')}
             errorCaption={errors.repeatPassword?.message}
             containerClassName={classNames(fullPage ? 'mt-4 mb-6' : 'mt-6 mb-1')}

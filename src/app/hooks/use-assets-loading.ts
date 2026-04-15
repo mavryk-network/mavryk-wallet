@@ -1,50 +1,7 @@
-import { useEffect } from 'react';
-
-import { dispatch } from 'app/store';
-import {
-  loadAccountTokensActions,
-  loadTokensWhitelistActions,
-  loadAccountCollectiblesActions,
-  loadAccountRwasActions
-} from 'app/store/assets/actions';
-import { useAreAssetsLoading } from 'app/store/assets/selectors';
-import { isKnownChainId } from 'lib/apis/tzkt';
-import { ASSETS_SYNC_INTERVAL } from 'lib/fixed-times';
-import { useAccount, useChainId } from 'lib/temple/front';
-import { TempleChainId } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
-
-export const useAssetsLoading = () => {
-  const chainId = useChainId()!;
-  const { publicKeyHash } = useAccount();
-
-  useEffect(() => {
-    if (chainId === TempleChainId.Mainnet) dispatch(loadTokensWhitelistActions.submit());
-  }, [chainId]);
-
-  const tokensAreLoading = useAreAssetsLoading('tokens');
-
-  useInterval(
-    () => {
-      if (!tokensAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountTokensActions.submit({ account: publicKeyHash, chainId }));
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
-
-  const collectiblesAreLoading = useAreAssetsLoading('collectibles');
-  const rwasAreLoading = useAreAssetsLoading('rwas');
-
-  useInterval(
-    () => {
-      if (!collectiblesAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountCollectiblesActions.submit({ account: publicKeyHash, chainId }));
-
-      if (!rwasAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountRwasActions.submit({ account: publicKeyHash, chainId }));
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
-};
+/**
+ * Re-exports the Zustand/TanStack Query-based assets loading hook.
+ *
+ * The old Redux epic-based implementation has been replaced.
+ * This file is kept as a thin re-export so existing imports continue to work.
+ */
+export { useAssetsLoading } from 'lib/assets/use-assets-query';

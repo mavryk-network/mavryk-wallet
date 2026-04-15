@@ -1,8 +1,9 @@
 import React, { FC } from 'react';
 
+import { useSuspenseQuery } from '@tanstack/react-query';
 import FontFaceObserver from 'fontfaceobserver';
 
-import { useTypedSWR } from 'lib/swr';
+import { miscKeys } from 'lib/query-keys';
 
 interface AwaitFontsProps extends PropsWithChildren {
   name: string;
@@ -11,11 +12,12 @@ interface AwaitFontsProps extends PropsWithChildren {
 }
 
 const AwaitFonts: FC<AwaitFontsProps> = ({ name, weights, className, children }) => {
-  useTypedSWR([name, weights, className], awaitFonts, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  useSuspenseQuery({
+    queryKey: miscKeys.awaitFonts(name, weights, className),
+    queryFn: () => awaitFonts([name, weights, className]),
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
 
   return <>{children}</>;
@@ -28,7 +30,7 @@ async function awaitFonts([name, weights, className]: [string, number[], string]
     const fonts = weights.map(weight => new FontFaceObserver(name, { weight }));
     await Promise.all(fonts.map(font => font.load()));
     document.body.classList.add(...className.split(' '));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
   }
   return null;

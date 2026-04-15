@@ -56,7 +56,7 @@ const Welcome: FC = () => {
       <div
         className={classNames(
           'w-full max-w-screen-sm mx-auto',
-          'px-20 pt-11 pb-21 bg-primary-bg',
+          'px-20 pt-11 pb-21 bg-primary-bg rounded-2xl',
           'flex flex-col items-center justify-center'
         )}
         style={{ maxWidth: 600 }}

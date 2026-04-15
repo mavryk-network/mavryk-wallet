@@ -1,12 +1,9 @@
 import { useEffect, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { refreshTokensMetadataAction } from 'app/store/tokens-metadata/actions';
-import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { fetchTokensMetadata } from 'lib/apis/temple';
 import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
 import { reduceToMetadataRecord } from 'lib/metadata/fetch';
+import { metadataStore, useAllTokensMetadataSelector } from 'lib/store/zustand/metadata.store';
 import { useChainId } from 'lib/temple/front';
 import { TempleChainId } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
@@ -19,13 +16,12 @@ const REFRESH_VERSION = 1;
 
 export const useMetadataRefresh = () => {
   const chainId = useChainId()!;
-  const dispatch = useDispatch();
 
   const [records, setRecords] = useLocalStorage<RefreshRecords>(STORAGE_KEY, {});
 
   const tokensMetadata = useAllTokensMetadataSelector();
   const slugsOnAppLoad = useMemo(
-    () => Object.keys(tokensMetadata).filter(slug => !ALL_PREDEFINED_METADATAS_RECORD[slug]),
+    () => Object.keys(tokensMetadata ?? {}).filter(slug => !ALL_PREDEFINED_METADATAS_RECORD[slug]),
     []
   );
 
@@ -46,7 +42,7 @@ export const useMetadataRefresh = () => {
     fetchTokensMetadata(chainId, slugsOnAppLoad).then(
       data => {
         const record = reduceToMetadataRecord(slugsOnAppLoad, data);
-        dispatch(refreshTokensMetadataAction(record));
+        metadataStore.getState().refreshTokensMetadata(record);
         setLastVersion();
       },
       error => console.error(error)

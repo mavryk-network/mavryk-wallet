@@ -1,23 +1,22 @@
 import React, { FC, Suspense, useEffect } from 'react';
 
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
-import { resetSwapParamsAction } from 'app/store/swap/actions';
 import { SwapForm } from 'app/templates/SwapForm/SwapForm';
 import { t, T } from 'lib/i18n';
+import { useResetSwapParams } from 'lib/swap/use-swap.query';
 import { useNetwork } from 'lib/temple/front';
 
 export const Swap: FC = () => {
   const { popup } = useAppEnv();
-  const dispatch = useDispatch();
 
   const network = useNetwork();
+  const resetSwapParams = useResetSwapParams();
 
   useEffect(() => {
-    dispatch(resetSwapParamsAction());
+    resetSwapParams();
   }, []);
 
   return (

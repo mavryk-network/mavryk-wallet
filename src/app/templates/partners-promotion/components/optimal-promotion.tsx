@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAdTimeout } from 'app/hooks/ads/use-ad-timeout';
-import { usePartnersPromoSelector } from 'app/store/partners-promotion/selectors';
+import { usePartnersPromoData } from 'app/hooks/use-partners-promo.query';
 import { AdsProviderTitle } from 'lib/ads';
 import { isEmptyPromotion } from 'lib/apis/optimal';
 import { useTimeout } from 'lib/ui/hooks';
@@ -16,7 +16,7 @@ export const OptimalPromotion = memo<SingleProviderPromotionProps>(
     const [isImageBroken, setIsImageBroken] = useState(false);
     const [wasLoading, setWasLoading] = useState(false);
     const [shouldPreventShowingPrevAd, setShouldPreventShowingPrevAd] = useState(true);
-    const { data: promo, error: errorFromStore, isLoading } = usePartnersPromoSelector();
+    const { data: promo, error: errorFromStore, isLoading } = usePartnersPromoData();
     const prevIsLoadingRef = useRef(isLoading);
     const promotionIsEmpty = isEmptyPromotion(promo);
     const apiQueryFailed = (errorFromStore || promotionIsEmpty) && wasLoading;

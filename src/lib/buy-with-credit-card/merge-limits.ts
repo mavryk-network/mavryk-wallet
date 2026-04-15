@@ -1,11 +1,11 @@
 import { isDefined } from '@rnw-community/shared';
 
-import { PairLimits } from 'app/store/buy-with-credit-card/state';
+import type { PairLimitsResult } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { isTruthy } from 'lib/utils';
 
 import { TopUpProviderPairLimits } from './topup.interface';
 
-export const mergeProvidersLimits = (limits: PairLimits | undefined) => {
+export const mergeProvidersLimits = (limits: PairLimitsResult | undefined) => {
   if (!isDefined(limits)) return {};
 
   const limitsArray = Object.values(limits)

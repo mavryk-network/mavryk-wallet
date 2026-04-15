@@ -34,16 +34,33 @@ import {
   TempleNotification
 } from 'lib/temple/types';
 
+import { AUTODECLINE_AFTER } from './constants';
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
 
 const CONFIRM_WINDOW_WIDTH = 400;
+let corruptionAlertSent = false;
 const CONFIRM_WINDOW_HEIGHT = 604;
-const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
 const HEX_PATTERN = /^[0-9a-fA-F]+$/;
 const TEZ_MSG_SIGN_PATTERN = /^0501[a-f0-9]{8}54657a6f73205369676e6564204d6573736167653a20[a-f0-9]*$/;
+
+// Security note: HMAC key is derived from passHash (SHA-256 of password), not a stretched key.
+// Security is bounded by password entropy — acceptable for tamper detection against passive
+// local storage readers. Not a substitute for full encryption.
+let hmacKey: CryptoKey | null = null;
+
+export async function setDAppHmacKey(passHash: ArrayBuffer) {
+  hmacKey = await crypto.subtle.importKey('raw', passHash, { name: 'HMAC', hash: 'SHA-256' }, false, [
+    'sign',
+    'verify'
+  ]);
+}
+
+export function clearDAppHmacKey() {
+  hmacKey = null;
+}
 
 export async function getCurrentPermission(origin: string): Promise<MavrykWalletDAppGetCurrentPermissionResponse> {
   const dApp = await getDApp(origin);
@@ -354,9 +371,39 @@ export async function requestBroadcast(
   }
 }
 
-export async function getAllDApps() {
-  const dAppsSessions: TempleDAppSessions = (await browser.storage.local.get([STORAGE_KEY]))[STORAGE_KEY] || {};
-  return dAppsSessions;
+export async function getAllDApps(): Promise<TempleDAppSessions> {
+  const stored = (await browser.storage.local.get([STORAGE_KEY]))[STORAGE_KEY];
+  if (!stored) return {};
+
+  if (stored.data && stored.hmac && hmacKey) {
+    const sigBytes = new Uint8Array((stored.hmac as string).match(/.{2}/g)!.map((b: string) => parseInt(b, 16)));
+    const valid = await crypto.subtle.verify('HMAC', hmacKey, sigBytes, new TextEncoder().encode(stored.data));
+    if (!valid) {
+      console.error('dApp session integrity check failed');
+      await browser.storage.local.remove(STORAGE_KEY);
+      if (!corruptionAlertSent) {
+        corruptionAlertSent = true;
+        intercom.broadcast({ type: TempleMessageType.DAppSessionsCorrupted });
+      }
+      return {};
+    }
+    return JSON.parse(stored.data);
+  }
+
+  // Legacy plain-object path
+  if (typeof stored === 'object' && !stored.data) {
+    // After migration has run, a plain-object here means tampered storage — reject
+    const migrationResult = await browser.storage.local.get('dapp_sessions_migrated_v2');
+    if (migrationResult['dapp_sessions_migrated_v2']) {
+      console.error('dApp session data appears tampered — rejecting and clearing');
+      await browser.storage.local.remove(STORAGE_KEY);
+      return {};
+    }
+    // Pre-migration: validate and accept (migration will re-sign on next unlock)
+    return validateDAppSessions(stored) ? (stored as TempleDAppSessions) : {};
+  }
+
+  return {};
 }
 
 async function getDApp(origin: string): Promise<TempleDAppSession | undefined> {
@@ -391,8 +438,57 @@ export async function removeAllDApps(origins: string[]) {
   };
 }
 
-function setDApps(newDApps: TempleDAppSessions) {
-  return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
+async function setDApps(newDApps: TempleDAppSessions) {
+  // NOTE: hmacKey is derived from SHA-256(passHash) — key derivation strength is a separate deferred concern.
+  if (!hmacKey) {
+    throw new Error('Cannot write dApp session: HMAC key unavailable — wallet is locked');
+  }
+  const data = JSON.stringify(newDApps);
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode(data));
+  const hmac = Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  await browser.storage.local.set({ [STORAGE_KEY]: { data, hmac } });
+}
+
+export async function migrateLegacyDAppSessions(): Promise<void> {
+  // Guard: hmacKey must be available (wallet unlocked)
+  if (!hmacKey) return;
+
+  const result = await browser.storage.local.get('dapp_sessions_migrated_v2');
+  if (result['dapp_sessions_migrated_v2']) return;
+
+  const stored = await browser.storage.local.get(STORAGE_KEY);
+  const raw = stored[STORAGE_KEY];
+
+  // Only migrate plain-object format (no data/hmac envelope)
+  if (raw && typeof raw === 'object' && !raw.data && !raw.hmac) {
+    if (validateDAppSessions(raw)) {
+      try {
+        await setDApps(raw as TempleDAppSessions);
+        // Flag only written on success — transient failures allow retry on next unlock
+        await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+      } catch (err) {
+        console.error('Failed to migrate legacy dApp sessions — clearing', err);
+        await browser.storage.local.remove(STORAGE_KEY);
+        // Flag NOT written — will retry next unlock
+      }
+    } else {
+      // Invalid structure — remove and flag done
+      await browser.storage.local.remove(STORAGE_KEY);
+      await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+    }
+  } else {
+    // Already HMAC-envelope format or empty — flag done
+    await browser.storage.local.set({ dapp_sessions_migrated_v2: true });
+  }
+}
+
+function validateDAppSessions(obj: unknown): obj is TempleDAppSessions {
+  if (typeof obj !== 'object' || obj === null) return false;
+  return Object.values(obj as Record<string, unknown>).every(
+    v => typeof v === 'object' && v !== null && 'pkh' in v && 'network' in v && 'appMeta' in v
+  );
 }
 
 type RequestConfirmParams = {
@@ -403,6 +499,13 @@ type RequestConfirmParams = {
 };
 
 async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }: RequestConfirmParams) {
+  // Defensive: declare closeWindow before registering the listener so the handler
+  // always has a defined reference. The real implementation is assigned after
+  // createConfirmationWindow resolves. (Note: the temporal dead zone race this
+  // guards against does not exist in practice due to JS closure semantics, but
+  // this makes the intent explicit.)
+  let closeWindow: () => Promise<void> = async () => {};
+
   let closing = false;
   const close = async () => {
     if (closing) return;
@@ -422,9 +525,20 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     close();
   };
 
+  // One-time token: binds the confirm window that opened with this id to the port
+  // that first sends a matching DAppGetPayloadRequest. Prevents a second window
+  // (double-click, malicious iframe) from hijacking knownPort before the legitimate
+  // window registers.
+  let confirmToken: string | null = crypto.randomUUID();
+
   let knownPort: Runtime.Port | undefined;
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port) => {
     if (req?.type === TempleMessageType.DAppGetPayloadRequest && req.id === id) {
+      // Token must be present, match, and not already consumed.
+      if (!confirmToken || req.token !== confirmToken) return;
+      // Consume the token — cannot be reused by a second window.
+      confirmToken = null;
+
       knownPort = port;
 
       if (payload.type === 'confirm_operations') {
@@ -458,9 +572,9 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     }
   });
 
-  const confirmWin = await createConfirmationWindow(id);
+  const confirmWin = await createConfirmationWindow(id, confirmToken!);
 
-  const closeWindow = async () => {
+  closeWindow = async () => {
     if (confirmWin.id) {
       const win = await browser.windows.get(confirmWin.id);
       if (win.id) {
@@ -525,7 +639,7 @@ function removeLastSlash(str: string) {
   return str.endsWith('/') ? str.slice(0, -1) : str;
 }
 
-async function createConfirmationWindow(confirmationId: string) {
+async function createConfirmationWindow(confirmationId: string, token: string) {
   const isWin = (await browser.runtime.getPlatformInfo()).os === 'win';
 
   const height = isWin ? CONFIRM_WINDOW_HEIGHT + 17 : CONFIRM_WINDOW_HEIGHT;
@@ -535,7 +649,7 @@ async function createConfirmationWindow(confirmationId: string) {
 
   const options: browser.Windows.CreateCreateDataType = {
     type: 'popup',
-    url: browser.runtime.getURL(`confirm.html#?id=${confirmationId}`),
+    url: browser.runtime.getURL(`confirm.html#?id=${confirmationId}&token=${token}`),
     width,
     height
   };

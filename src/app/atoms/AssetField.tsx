@@ -4,6 +4,13 @@ import BigNumber from 'bignumber.js';
 
 import { FormField } from 'app/atoms';
 
+const addThousandSeps = (raw: string): string => {
+  if (!raw) return raw;
+  const parts = raw.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+};
+
 interface AssetFieldProps extends Omit<ComponentProps<typeof FormField>, 'onChange'> {
   value?: number | string;
   min?: number;
@@ -31,12 +38,12 @@ const AssetField = forwardRef<HTMLInputElement, AssetFieldProps>(
   ) => {
     const valueStr = useMemo(() => (value === undefined ? '' : new BigNumber(value).toFixed()), [value]);
 
-    const [localValue, setLocalValue] = useState(valueStr);
+    const [localValue, setLocalValue] = useState(() => addThousandSeps(valueStr));
     const [focused, setFocused] = useState(false);
 
     useEffect(() => {
       if (!focused) {
-        setLocalValue(valueStr);
+        setLocalValue(addThousandSeps(valueStr));
       }
     }, [setLocalValue, focused, valueStr]);
 
@@ -63,6 +70,7 @@ const AssetField = forwardRef<HTMLInputElement, AssetFieldProps>(
     const handleFocus = useCallback(
       (evt: React.FocusEvent<HTMLInputElement> & React.FocusEvent<HTMLTextAreaElement>) => {
         setFocused(true);
+        setLocalValue(v => v.replace(/,/g, ''));
         if (onFocus) {
           onFocus(evt);
           if (evt.defaultPrevented) {
@@ -70,12 +78,13 @@ const AssetField = forwardRef<HTMLInputElement, AssetFieldProps>(
           }
         }
       },
-      [setFocused, onFocus]
+      [setFocused, setLocalValue, onFocus]
     );
 
     const handleBlur = useCallback(
       (evt: React.FocusEvent<HTMLInputElement> & React.FocusEvent<HTMLTextAreaElement>) => {
         setFocused(false);
+        setLocalValue(v => addThousandSeps(v));
         if (onBlur) {
           onBlur(evt);
           if (evt.defaultPrevented) {
@@ -83,7 +92,7 @@ const AssetField = forwardRef<HTMLInputElement, AssetFieldProps>(
           }
         }
       },
-      [setFocused, onBlur]
+      [setFocused, setLocalValue, onBlur]
     );
 
     return (

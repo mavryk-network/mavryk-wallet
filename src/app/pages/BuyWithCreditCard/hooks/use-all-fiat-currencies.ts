@@ -2,27 +2,24 @@ import { useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 
-import { useAllPairsLimitsSelector, useFiatCurrenciesSelector } from 'app/store/buy-with-credit-card/selectors';
+import { useFiatCurrencies, usePairLimitsData } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 import { mergeProvidersLimits } from 'lib/buy-with-credit-card/merge-limits';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
 import { TopUpInputInterface } from 'lib/buy-with-credit-card/topup.interface';
 
 export const useAllFiatCurrencies = (inputCurrencySymbol: string, outputTokenSymbol: string) => {
-  const moonpayFiatCurrencies = useFiatCurrenciesSelector(TopUpProviderId.MoonPay);
-  const utorgFiatCurrencies = useFiatCurrenciesSelector(TopUpProviderId.Utorg);
-  const aliceBobFiatCurrencies = useFiatCurrenciesSelector(TopUpProviderId.AliceBob);
+  const moonpayFiatCurrencies = useFiatCurrencies(TopUpProviderId.MoonPay);
+  const utorgFiatCurrencies = useFiatCurrencies(TopUpProviderId.Utorg);
+  const aliceBobFiatCurrencies = useFiatCurrencies(TopUpProviderId.AliceBob);
 
-  const allPairsLimits = useAllPairsLimitsSelector();
+  const pairLimitsData = usePairLimitsData(inputCurrencySymbol, outputTokenSymbol);
 
   const allNonUniqueFiatCurrencies = useMemo(
     () => [...moonpayFiatCurrencies, ...utorgFiatCurrencies, ...aliceBobFiatCurrencies],
     [moonpayFiatCurrencies, utorgFiatCurrencies, aliceBobFiatCurrencies]
   );
 
-  const pairLimits = useMemo(
-    () => mergeProvidersLimits(allPairsLimits[inputCurrencySymbol]?.[outputTokenSymbol]),
-    [allPairsLimits, inputCurrencySymbol, outputTokenSymbol]
-  );
+  const pairLimits = useMemo(() => mergeProvidersLimits(pairLimitsData), [pairLimitsData]);
 
   const noPairLimitsFiatCurrencies = useMemo(
     () =>

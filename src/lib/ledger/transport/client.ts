@@ -1,6 +1,8 @@
 import { TransportError } from '@ledgerhq/errors';
 import Transport from '@ledgerhq/hw-transport';
 
+import { getErrorMessage } from 'lib/utils/get-error-message';
+
 import type { TransportBridge } from './bridge';
 import { BridgeExchangeRequest, TransportType } from './types';
 
@@ -43,9 +45,9 @@ export class TempleLedgerTransport extends Transport {
     let result: string;
     try {
       result = await bridge.requestExchange(msg);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`TempleLedgerTransport.exchange() error:`, error);
-      throw new TransportError(error.message, 'id');
+      throw new TransportError(getErrorMessage(error), 'id');
     }
 
     return Buffer.from(result, 'hex');

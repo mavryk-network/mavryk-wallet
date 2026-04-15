@@ -4,10 +4,10 @@ import { HomeSelectors } from 'app/pages/Home/Home.selectors';
 import { BellIcon, NotificationDotIcon } from 'lib/icons';
 import { Link } from 'lib/woozie';
 
-import { useNewNotificationsAmountSelector } from '../store/selectors';
+import { useNewNotificationsAmount } from '../hooks/use-notifications.query';
 
 export const NotificationsBell = () => {
-  const newNotificationsAmount = useNewNotificationsAmountSelector();
+  const newNotificationsAmount = useNewNotificationsAmount();
   const isNewNotificationsAvailable = newNotificationsAmount > 0;
 
   return (

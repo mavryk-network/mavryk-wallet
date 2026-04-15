@@ -19,7 +19,7 @@ import { useBalance } from 'lib/balances';
 import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useMavryk } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -39,15 +39,14 @@ export const CoStake: FC = () => {
   const { unfamiliarWithDelegation } = useBakingHistory();
   const { fullPage, popup } = useAppEnv();
   const account = useAccount();
-  const {
-    data: { myBakerPkh, canCostake }
-  } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const { myBakerPkh, canCostake } = data ?? {};
 
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const balance = balanceData!;
   const assetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
-  const tezos = useTezos();
+  const mavryk = useMavryk();
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
@@ -57,11 +56,18 @@ export const CoStake: FC = () => {
     }
   });
 
-  const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
+  const {
+    watch,
+    handleSubmit,
+    formState: { errors, ...formState },
+    control,
+    setValue,
+    trigger
+  } = useForm<FormData>({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
-  const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+  const [operation, setOperation] = useSafeState<any>(null, mavryk.checksum);
 
   useEffect(() => {
     if (account.type === TempleAccountType.WatchOnly) {
@@ -74,7 +80,7 @@ export const CoStake: FC = () => {
   const amountValue = watch('amount');
 
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
       const hash = operation.hash || operation.opHash;
 
       navigate<SuccessStateType>('/success', undefined, {
@@ -101,8 +107,8 @@ export const CoStake: FC = () => {
   );
 
   const validateAmount = useCallback(
-    (v?: number) => {
-      if (v === undefined) return t('required');
+    (v?: string) => {
+      if (v === undefined || v === '') return t('required');
 
       if (!maxAmount) return true;
       const vBN = new BigNumber(v);
@@ -114,9 +120,9 @@ export const CoStake: FC = () => {
   const handleSetMaxAmount = useCallback(() => {
     if (maxAmount) {
       setValue('amount', maxAmount.toString());
-      triggerValidation('amount');
+      trigger('amount');
     }
-  }, [setValue, maxAmount, triggerValidation]);
+  }, [setValue, maxAmount, trigger]);
 
   const handleAmountFieldFocus = useCallback<FocusEventHandler>(evt => {
     evt.preventDefault();
@@ -130,7 +136,7 @@ export const CoStake: FC = () => {
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
-        const op = await tezos.wallet
+        const op = await mavryk.wallet
           .stake({
             amount: Number(amount)
           })
@@ -140,7 +146,7 @@ export const CoStake: FC = () => {
         formAnalytics.trackSubmitSuccess({
           amount
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         formAnalytics.trackSubmitFail({ amount });
 
         console.error(err);
@@ -150,7 +156,7 @@ export const CoStake: FC = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
+    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, mavryk.wallet]
   );
 
   return (
@@ -164,26 +170,31 @@ export const CoStake: FC = () => {
           <div className="flex-1">
             <Controller
               name="amount"
-              as={<AssetField ref={amountFieldRef} onFocus={handleAmountFieldFocus} />}
               control={control}
               rules={{
                 validate: validateAmount
               }}
-              onChange={([v]) => v}
-              onFocus={() => amountFieldRef.current?.focus()}
-              id="co-stake-amount"
-              assetDecimals={assetMetadata?.decimals ?? 0}
-              label={'Co-stake Amount'}
-              placeholder={'Enter amount'}
-              errorCaption={errors.amount?.message || submitError?.message}
-              containerClassName="mb-1"
-              autoFocus={Boolean(maxAmount)}
-              extraInnerWrapper="unset"
-              extraInner={
-                <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
-                  <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
-                </div>
-              }
+              render={({ field: { ref: _ref, ...field } }) => (
+                <AssetField
+                  ref={amountFieldRef}
+                  {...field}
+                  onChange={(v: any) => field.onChange(v)}
+                  onFocus={handleAmountFieldFocus}
+                  id="co-stake-amount"
+                  assetDecimals={assetMetadata?.decimals ?? 0}
+                  label={'Co-stake Amount'}
+                  placeholder={'Enter amount'}
+                  errorCaption={errors.amount?.message || submitError?.message}
+                  containerClassName="mb-1"
+                  autoFocus={Boolean(maxAmount)}
+                  extraInnerWrapper="unset"
+                  extraInner={
+                    <div className="absolute flex items-center justify-end inset-y-0 right-4 w-32">
+                      <MaxButton type="button" onClick={handleSetMaxAmount} fill={false} className="relative z-10" />
+                    </div>
+                  }
+                />
+              )}
             />
             <div className="flex text-sm gap-1 items-center">
               <p className="text-secondary-white">

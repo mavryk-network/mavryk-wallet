@@ -1,27 +1,20 @@
-import React, { FC, useCallback, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
-import { OnSubmit, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { usePasswordGateForm } from 'app/hooks/use-password-gate-form';
 import AccountBanner from 'app/templates/AccountBanner';
 import { T, t } from 'lib/i18n';
-import { useTempleClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
+import { useMavrykClient, useRelevantAccounts, useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
-import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { RemoveAccountSelectors } from './RemoveAccount.selectors';
 
-const SUBMIT_ERROR_TYPE = 'submit-error';
-
-type FormData = {
-  password: string;
-};
-
 const RemoveAccount: FC = () => {
-  const { removeAccount } = useTempleClient();
+  const { removeAccount } = useMavrykClient();
   const allAccounts = useRelevantAccounts();
   const account = useAccount();
   const { popup } = useAppEnv();
@@ -35,26 +28,8 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
-  const submitting = formState.isSubmitting;
-  const password = watch('password') ?? '';
-
-  const onSubmit = useCallback<OnSubmit<FormData>>(
-    async ({ password }) => {
-      if (submitting) return;
-
-      clearError('password');
-      try {
-        await removeAccount(account.id, password);
-      } catch (err: any) {
-        console.error(err);
-
-        // Human delay.
-        await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
-      }
-    },
-    [submitting, clearError, setError, removeAccount, account.id]
+  const { registerPassword, handleSubmit, errors, submitting, password, onSubmit, disabled } = usePasswordGateForm(pw =>
+    removeAccount(account.id, pw)
   );
 
   return (
@@ -87,13 +62,12 @@ const RemoveAccount: FC = () => {
       ) : (
         <>
           <Alert title={t('attention')} description={t('removeAccountMessage')} className="mb-4" />
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col">
+          <form onSubmit={onSubmit} className="flex-grow flex flex-col">
             <FormField
-              ref={register({ required: t('required') })}
+              {...registerPassword(t('required'))}
               label={t('password')}
               id="removeacc-secret-password"
               type="password"
-              name="password"
               placeholder={t('enterWalletPassword')}
               errorCaption={errors.password?.message}
               containerClassName="flex-grow"
@@ -102,7 +76,7 @@ const RemoveAccount: FC = () => {
 
             <FormSubmitButton
               loading={submitting}
-              disabled={submitting || !password.length}
+              disabled={disabled}
               testID={RemoveAccountSelectors.removeButton}
               testIDProperties={{ accountTypeEnum: account.type }}
               className="mt-8"

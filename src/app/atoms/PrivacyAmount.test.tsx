@@ -32,14 +32,14 @@ describe('PrivacyAmount', () => {
 
   it('applies className when privacyMode is false', () => {
     mockUsePrivacyMode.mockReturnValue(false);
-    render(<PrivacyAmount className="test-class">$1</PrivacyAmount>);
-    expect(document.querySelector('.test-class')).not.toBeNull();
+    const { container } = render(<PrivacyAmount className="test-class">$1</PrivacyAmount>);
+    expect(container.firstChild).toHaveClass('test-class');
   });
 
   it('applies className when privacyMode is true', () => {
     mockUsePrivacyMode.mockReturnValue(true);
-    render(<PrivacyAmount className="test-class">$1</PrivacyAmount>);
-    expect(document.querySelector('.test-class')).not.toBeNull();
+    const { container } = render(<PrivacyAmount className="test-class">$1</PrivacyAmount>);
+    expect(container.firstChild).toHaveClass('test-class');
   });
 
   it('has aria-label="Hidden balance" when masked', () => {

@@ -47,6 +47,9 @@ export interface UIState {
 
   // Notifications
   isNewsEnabled: boolean;
+
+  // Privacy
+  privacyMode: boolean;
 }
 
 interface UIActions {
@@ -60,6 +63,7 @@ interface UIActions {
   togglePartnersPromotion: (show: boolean) => void;
   hidePromotion: (id: string, timestamp: number) => void;
   setIsNewsEnabled: (enabled: boolean) => void;
+  togglePrivacyMode: () => void;
 }
 
 export type UIStore = UIState & UIActions;
@@ -89,6 +93,9 @@ export const uiStore = createStore<UIStore>()(
       // Notifications
       isNewsEnabled: true,
 
+      // Privacy
+      privacyMode: false,
+
       // Actions
       setShouldShowNewsletterModal: show => set({ shouldShowNewsletterModal: show }),
       setUserId: id => set({ userId: id }),
@@ -109,7 +116,8 @@ export const uiStore = createStore<UIStore>()(
           cleaned[id] = timestamp;
           return { promotionHidingTimestamps: cleaned };
         }),
-      setIsNewsEnabled: enabled => set({ isNewsEnabled: enabled })
+      setIsNewsEnabled: enabled => set({ isNewsEnabled: enabled }),
+      togglePrivacyMode: () => set(s => ({ privacyMode: !s.privacyMode }))
     }),
     {
       name: 'zustand-ui',
@@ -137,7 +145,8 @@ export const uiStore = createStore<UIStore>()(
           lastSeenPromotionName: state.lastSeenPromotionName,
           shouldShowPromotion: state.shouldShowPromotion,
           promotionHidingTimestamps: state.promotionHidingTimestamps,
-          isNewsEnabled: state.isNewsEnabled
+          isNewsEnabled: state.isNewsEnabled,
+          privacyMode: state.privacyMode
         } as unknown as UIStore)
     }
   )
@@ -157,3 +166,4 @@ export const useLastSeenPromotionName = () => useUIStore(s => s.lastSeenPromotio
 export const useShouldShowPromotion = () => useUIStore(s => s.shouldShowPromotion);
 export const usePromotionHidingTimestamp = (id: string) => useUIStore(s => s.promotionHidingTimestamps[id] ?? 0);
 export const useIsNewsEnabled = () => useUIStore(s => s.isNewsEnabled);
+export const usePrivacyMode = () => useUIStore(s => s.privacyMode);

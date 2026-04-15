@@ -149,12 +149,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <FiatBalance
-              assetSlug={assetSlug}
-              value={balanceToDisplay ?? ZERO}
-              testID={AssetsSelectors.assetItemFiatBalanceButton}
-              testIDProperties={{ assetSlug }}
-            />
+            <PrivacyAmount className="contents">
+              <FiatBalance
+                assetSlug={assetSlug}
+                value={balanceToDisplay ?? ZERO}
+                testID={AssetsSelectors.assetItemFiatBalanceButton}
+                testIDProperties={{ assetSlug }}
+              />
+            </PrivacyAmount>
             {additionalDelegateBlock?.map((row, i) => (
               <div key={i} className={classNames(i === 0 && 'mt-1')}>
                 {row.Column2}

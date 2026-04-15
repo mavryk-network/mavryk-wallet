@@ -4,7 +4,6 @@ import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import Money from 'app/atoms/Money';
-import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
 import InFiat from 'app/templates/InFiat';
 import { TestIDProps } from 'lib/analytics';
 import { merge } from 'lib/utils/merge';
@@ -61,14 +60,10 @@ export const FiatBalance = memo<FiatBalanceProps>(
         <div
           className={merge('ml-1 font-normal text-current flex items-center truncate text-right text-xs', className)}
         >
-          <PrivacyAmount>
-            <>
-              {showEqualSymbol && <span className="mr-1">≈</span>}
-              {customSymbol && <span>{customSymbol}</span>}
-              <span>{symbol}</span>
-              {balance}
-            </>
-          </PrivacyAmount>
+          {showEqualSymbol && <span className="mr-1">≈</span>}
+          {customSymbol && <span>{customSymbol}</span>}
+          <span>{symbol}</span>
+          {balance}
         </div>
       )}
     </InFiat>

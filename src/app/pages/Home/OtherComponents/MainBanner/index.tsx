@@ -6,7 +6,6 @@ import classNames from 'clsx';
 import { ReactComponent as EyeClosedBoldIcon } from 'app/icons/eye-closed-bold.svg';
 import { ReactComponent as EyeOpenBoldIcon } from 'app/icons/eye-open-bold.svg';
 import Money from 'app/atoms/Money';
-import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
 import { useAppEnv } from 'app/env';
 import AddressChip from 'app/templates/AddressChip';
 import { useFiatCurrency } from 'lib/fiat-currency';
@@ -84,14 +83,25 @@ interface BalanceProps {
   currency: string;
 }
 
-export const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => (
-  <>
-    <span className="mr-1">≈</span>
-    <span className="ml-1">{currency}</span>
-    <PrivacyAmount>
+export const BalanceFiat: FC<BalanceProps> = ({ volume, currency }) => {
+  const privacyMode = usePrivacyMode();
+
+  if (privacyMode) {
+    return (
+      <span aria-label="Hidden balance">
+        {currency}
+        ••••
+      </span>
+    );
+  }
+
+  return (
+    <>
+      <span className="mr-1">≈</span>
+      <span className="ml-1">{currency}</span>
       <Money smallFractionFont={false} fiat>
         {volume}
       </Money>
-    </PrivacyAmount>
-  </>
-);
+    </>
+  );
+};

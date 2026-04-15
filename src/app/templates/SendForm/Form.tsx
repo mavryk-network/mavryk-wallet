@@ -130,7 +130,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const {
     watch,
     handleSubmit,
-    formState: { errors, ...formState },
+    formState: { errors, isSubmitting, dirtyFields },
     control,
     setValue,
     trigger,
@@ -338,10 +338,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const maxAmountStr = maxAmount?.toString();
   useEffect(() => {
-    if (formState.dirtyFields?.amount) {
+    if (dirtyFields?.amount) {
       trigger('amount');
     }
-  }, [formState.dirtyFields, trigger, maxAmountStr]);
+  }, [dirtyFields, trigger, maxAmountStr]);
 
   const handleSetMaxAmount = useCallback(() => {
     if (maxAmount) {
@@ -369,7 +369,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const onSubmit = useCallback(
     async ({ amount, fee: feeVal }: FormData) => {
-      if (formState.isSubmitting) return;
+      if (isSubmitting) return;
       setSubmitError(null);
       setOperation(null);
 
@@ -432,7 +432,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
     },
     [
       acc,
-      formState.isSubmitting,
+      isSubmitting,
       mavryk,
       assetSlug,
       assetMetadata,
@@ -639,13 +639,13 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
           handleFeeFieldChange={handleFeeFieldChange}
           baseFee={baseFee}
           error={errors.fee}
-          isSubmitting={formState.isSubmitting}
+          isSubmitting={isSubmitting}
         />
       )}
       <div className="flex-1" />
 
       <FormSubmitButton
-        loading={formState.isSubmitting}
+        loading={isSubmitting}
         disabled={Boolean(estimationError) || estimateFallbackDisplayed || !toResolved || Boolean(errors?.to)}
         testID={SendFormSelectors.sendButton}
         className="mt-2"

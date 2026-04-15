@@ -67,12 +67,11 @@ export const OnRampOverlay: FC = () => {
             <T id="close" />
             <CloseIcon className="ml-2 h-4 w-auto stroke-current stroke-2" />
           </Button>
-          <h1 className="font-aeonik font-normal text-gray-910 mt-25" style={{ fontSize: '1.438rem' }}>
+          <h1 className="font-aeonik font-normal text-gray-910 mt-25 text-2xl">
             <T id="jumpInMaven" />
           </h1>
           <p
-            className={classNames('font-aeonik font-normal text-gray-700 mt-4', !popup && 'px-10')}
-            style={{ fontSize: '1.063rem' }}
+            className={classNames('font-aeonik font-normal text-gray-700 mt-4 text-ulg', !popup && 'px-10')}
           >
             <T
               id="onRampDesription"

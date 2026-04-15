@@ -87,11 +87,11 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
   return (
     <>
       <div className="font-aeonik text-gray-700 text-center">
-        <p style={{ fontSize: 19 }} className="mt-6 mb-2">
+        <p className="text-xl mt-6 mb-2">
           <T id={'transactionId'} />
         </p>
         <span className="flex flex-row justify-center">
-          <p className="text-gray-910" style={{ fontSize: 17 }}>
+          <p className="text-gray-910 text-ulg">
             {truncatedOrderId}
           </p>
           <CopyButton text={orderId} type="link">

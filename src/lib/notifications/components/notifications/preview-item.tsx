@@ -73,7 +73,7 @@ export const NotificationPreviewItem: FC<Props> = ({ notification }) => {
         </div>
 
         <div className="flex row justify-between items-center">
-          <p className="text-gray-500 font-normal" style={{ fontSize: 10 }}>
+          <p className="text-gray-500 font-normal text-[10px]">
             {formatDateOutput(notification.createdAt)}
           </p>
 

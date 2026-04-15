@@ -58,7 +58,7 @@ export const AliceBobWithdraw: FC = () => {
         />
 
         {isApiError && (
-          <div className="flex w-full justify-center my-6 text-red-600" style={{ fontSize: 17 }}>
+          <div className="flex w-full justify-center my-6 text-red-600 text-ulg">
             <AttentionRedIcon />
             <h3 className="ml-1">
               <T id="serviceIsUnavailable" />

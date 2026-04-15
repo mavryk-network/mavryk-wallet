@@ -24,7 +24,7 @@ const DAppItem: FC<DAppItemProps> = ({ dappUrl, name, logo, categories }) => (
 
     <div className="flex-1 flex justify-between items-start">
       <div className="text-gray-600 text-xs leading-tight">
-        <p className="text-gray-900" style={{ fontSize: '0.8125rem' }}>
+        <p className="text-gray-900 text-2xs">
           {name}
         </p>
 

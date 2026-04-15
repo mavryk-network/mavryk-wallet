@@ -140,7 +140,7 @@ export const DelegationOperation: FC<DelegationOperationProps> = props => {
           showIcon={false}
           key="hash"
           className="ml-2 mr-1 bg-primary-card px-1 rounded text-xs"
-          style={{ paddingBlock: 3, fontSize: 12 }}
+          style={{ paddingBlock: 3 }}
         />
         <OpenInExplorerChip hash={hash} small />
       </div>

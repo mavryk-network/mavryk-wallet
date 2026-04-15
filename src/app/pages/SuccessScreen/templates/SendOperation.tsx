@@ -67,7 +67,7 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
           showIcon={false}
           key="hash"
           className="ml-2 mr-1 bg-primary-card px-1 rounded text-xs"
-          style={{ paddingBlock: 3, fontSize: 12 }}
+          style={{ paddingBlock: 3 }}
         />
         <OpenInExplorerChip hash={hash} small />
       </div>

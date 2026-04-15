@@ -25,7 +25,7 @@ export const HashChip: FC<HashChipProps> = ({
   <CopyButton
     text={hash}
     type={type}
-    className={classNames(className, showIcon && 'flex text-sm items-center text-blue-200')}
+    className={classNames('font-mono', className, showIcon && 'flex text-sm items-center text-blue-200')}
     {...rest}
   >
     <HashShortView

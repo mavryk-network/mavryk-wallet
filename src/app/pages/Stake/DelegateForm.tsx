@@ -435,7 +435,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
           {resolvedAddress && (
             <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
               <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
-              <span className="font-normal">{resolvedAddress}</span>
+              <span className="font-mono font-normal">{resolvedAddress}</span>
             </div>
           )}
 

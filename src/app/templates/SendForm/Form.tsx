@@ -549,7 +549,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       {resolvedAddress && (
         <div className="mb-4 -mt-3 text-xs font-light text-white flex flex-wrap items-center">
           <span className="mr-1 whitespace-nowrap">{t('resolvedAddress')}:</span>
-          <span className="font-normal">{resolvedAddress}</span>
+          <span className="font-mono font-normal">{resolvedAddress}</span>
         </div>
       )}
 

@@ -5,11 +5,13 @@
   "scripts": {
     "start-run": "cross-env TS_NODE_PROJECT=\"webpack/tsconfig.json\" webpack --watch --stats errors-warnings",
     "start": "cross-env NODE_ENV=development run-s start-run",
+    "start:testing": "cross-env NODE_ENV=development BUILD_VARIANT=testing run-s start-run",
     "start:firefox": "cross-env TARGET_BROWSER=firefox run-s start",
     "build-run": "cross-env TS_NODE_PROJECT=\"webpack/tsconfig.json\" webpack && ts-node webpack/check-script.ts && ts-node webpack/zip-script.ts",
     "build-run-without-check": "cross-env TS_NODE_PROJECT=\"webpack/tsconfig.json\" ts-node webpack/zip-script.ts",
     "build": "cross-env NODE_ENV=production run-s build-run",
     "build:dev": "cross-env NODE_ENV=production run-s build-run-without-check",
+    "build:testing": "cross-env NODE_ENV=production BUILD_VARIANT=testing run-s build-run",
     "build-all": "run-s build:*",
     "build:chrome": "cross-env TARGET_BROWSER=chrome run-s build",
     "build:firefox": "cross-env TARGET_BROWSER=firefox run-s build",

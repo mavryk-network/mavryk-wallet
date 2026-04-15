@@ -8,7 +8,16 @@ import type { Manifest } from 'webextension-polyfill';
 import packageJSON from '../package.json';
 
 import { envFilesData } from './dotenv';
-import { Vendor, ALL_VENDORS, getManifestVersion } from './env';
+import { Vendor, ALL_VENDORS, getManifestVersion, TESTING_BUILD } from './env';
+
+const ICON_DIR = TESTING_BUILD ? 'misc/dev' : 'misc';
+
+const ICONS = {
+  '16': `${ICON_DIR}/icon-16.png`,
+  '19': `${ICON_DIR}/icon-19.png`,
+  '38': `${ICON_DIR}/icon-38.png`,
+  '128': `${ICON_DIR}/icon-128.png`
+};
 import { IFRAMES } from './paths';
 
 const WEB_ACCCESSIBLE_RESOURSES = [
@@ -135,15 +144,10 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
     // Public key to fixate extension ID
     key: envFilesData._MANIFEST_KEY_,
 
-    name: 'Mavryk Wallet',
-    short_name: 'Mavryk Wallet',
+    name: TESTING_BUILD ? 'Mavryk Wallet (Dev)' : 'Mavryk Wallet',
+    short_name: TESTING_BUILD ? 'Mavryk (Dev)' : 'Mavryk Wallet',
 
-    icons: {
-      '16': 'misc/icon-16.png',
-      '19': 'misc/icon-19.png',
-      '38': 'misc/icon-38.png',
-      '128': 'misc/icon-128.png'
-    },
+    icons: ICONS,
 
     description: '__MSG_appDesc__',
 
@@ -207,12 +211,7 @@ const buildBrowserAction = (vendor: string) => {
   return {
     default_title: 'Mavryk Wallet',
     ...withVendors('chrome', 'firefox', 'opera')({ default_popup: 'popup.html' }),
-    default_icon: {
-      '16': 'misc/icon-16.png',
-      '19': 'misc/icon-19.png',
-      '38': 'misc/icon-38.png',
-      '128': 'misc/icon-128.png'
-    },
+    default_icon: ICONS,
     ...withVendors('chrome', 'opera')({ chrome_style: false }),
     ...withVendors('firefox')({ browser_style: false })
   };

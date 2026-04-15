@@ -529,7 +529,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
               }
               extraInnerWrapper="unset"
               textarea
-              rows={2}
+              rows={1}
               cleanable={Boolean(toValue)}
               onClean={cleanToField}
               id="send-to"
@@ -537,7 +537,8 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
               placeholder={t('enterAddress')}
               errorCaption={!toFieldFocused ? errors.to?.message : null}
               style={{
-                resize: 'none'
+                resize: 'none',
+                fontSize: '0.75rem' // 12px — fits 36-char Mavryk addresses on one line at popup width
               }}
               containerClassName="mb-2"
               testID={SendFormSelectors.recipientInput}

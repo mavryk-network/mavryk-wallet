@@ -50,9 +50,7 @@ export const NotificationsItem: FC<Props> = ({ id }) => {
           alt="Notification"
           className="w-full items-center rounded-md overflow-hidden bg-orange-10 mb-6"
         />
-        <p className="font-aeonik text-gray-900 font-medium mb-4 text-xl">
-          {notification.title}
-        </p>
+        <p className="font-aeonik text-gray-900 font-medium mb-4 text-xl">{notification.title}</p>
         <NotificationsItemContent content={notification.content} />
         <div className="font-aeonik mt-4 text-[10px]">
           <p className="text-gray-500 font-normal">{formatDateOutput(notification.createdAt)}</p>

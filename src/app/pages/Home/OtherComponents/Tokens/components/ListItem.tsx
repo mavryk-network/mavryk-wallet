@@ -13,6 +13,7 @@ import { T } from 'lib/i18n';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
+import { usePrivacyMode } from 'lib/store/zustand/ui.store';
 import { ZERO } from 'lib/utils/numbers';
 
 import { AssetsSelectors } from '../../Assets.selectors';
@@ -31,6 +32,7 @@ interface Props {
 
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
+  const privacyMode = usePrivacyMode();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
   const { data: accStats } = useDelegate(publicKeyHash);
   const myBakerPkh = accStats?.delegate?.address ?? null;
@@ -148,14 +150,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <PrivacyAmount>
+            {!privacyMode && (
               <FiatBalance
                 assetSlug={assetSlug}
                 value={balanceToDisplay ?? ZERO}
                 testID={AssetsSelectors.assetItemFiatBalanceButton}
                 testIDProperties={{ assetSlug }}
               />
-            </PrivacyAmount>
+            )}
             {additionalDelegateBlock?.map((row, i) => (
               <div key={i} className={classNames(i === 0 && 'mt-1')}>
                 {row.Column2}

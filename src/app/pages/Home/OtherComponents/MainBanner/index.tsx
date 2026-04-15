@@ -63,7 +63,7 @@ const BalanceInfo: FC = () => {
 
   return (
     <div className="flex justify-between items-center w-full">
-      <div className="flex items-center text-3xl-plus">
+      <div className="flex items-center text-2xl-plus">
         <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
       </div>
       <button
@@ -73,9 +73,9 @@ const BalanceInfo: FC = () => {
         title={privacyMode ? 'Show balances on home screen' : 'Hide balances on home screen'}
       >
         {privacyMode ? (
-          <EyeOpenIcon className="w-8 h-8 fill-white" />
+          <EyeOpenIcon className="w-6 h-6 fill-white" />
         ) : (
-          <EyeClosedIcon className="w-8 h-8 fill-white" />
+          <EyeClosedIcon className="w-6 h-6 fill-white" />
         )}
       </button>
     </div>

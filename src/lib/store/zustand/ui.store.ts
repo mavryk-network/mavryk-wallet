@@ -147,6 +147,8 @@ export const uiStore = createStore<UIStore>()(
           promotionHidingTimestamps: state.promotionHidingTimestamps,
           isNewsEnabled: state.isNewsEnabled,
           privacyMode: state.privacyMode
+        // Cast required: Zustand persist types partialize as (S) => S, but we intentionally
+        // return only state fields (no actions). This is the correct pattern.
         } as unknown as UIStore)
     }
   )

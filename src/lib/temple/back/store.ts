@@ -41,12 +41,11 @@ export const store = createStore<StoreState>(() => ({
  */
 
 export function inited(vaultExist: boolean) {
-  store.setState(state => ({
-    ...state,
+  store.setState({
     inited: true,
     status: vaultExist ? TempleStatus.Locked : TempleStatus.Idle,
     networks: NETWORKS
-  }));
+  });
 }
 
 export function locked() {
@@ -69,27 +68,20 @@ export function locked() {
 }
 
 export function unlocked(payload: { vault: Vault; accounts: TempleAccount[]; settings: TempleSettings }) {
-  store.setState(state => ({
-    ...state,
+  store.setState({
     vault: payload.vault,
     status: TempleStatus.Ready,
     accounts: payload.accounts,
     settings: payload.settings
-  }));
+  });
 }
 
 export function accountsUpdated(accounts: TempleAccount[]) {
-  store.setState(state => ({
-    ...state,
-    accounts
-  }));
+  store.setState({ accounts });
 }
 
 export function settingsUpdated(settings: TempleSettings) {
-  store.setState(state => ({
-    ...state,
-    settings
-  }));
+  store.setState({ settings });
 }
 
 /**

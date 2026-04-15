@@ -29,7 +29,7 @@ const AttentionPage: FC = () => {
           <T id={'attention'} />
         </p>
         {!browserVersionIsSafe && (
-          <p className={styles['alert']}>
+          <p className={clsx('font-aeonik text-sm', styles['alert'])}>
             <T id={'browserVersionIsOutOfDate'} />
           </p>
         )}

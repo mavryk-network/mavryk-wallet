@@ -190,10 +190,10 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
       <Divider style={{ marginTop: '40px', marginBottom: '20px' }} />
 
       <div className={classNames('flex justify-between', Number(rate) < 0 ? 'text-red-700' : 'text-gray-600')}>
-        <p className={classNames('font-aeonik text-xs', styles['exchangeTitle'])}>
+        <p className={'font-aeonik text-xs'}>
           <T id={'exchangeRate'} />
         </p>
-        <p className={classNames('font-aeonik text-xs', styles['exchangeData'])}>
+        <p className={'font-aeonik text-xs'}>
           {rate ? `1 ${coinFrom.code} = ${rate} ${coinTo.code}` : VALUE_PLACEHOLDER}
         </p>
       </div>

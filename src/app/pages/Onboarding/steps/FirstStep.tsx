@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import classNames from 'clsx';
+import clsx from 'clsx';
 
 import { Anchor } from 'app/atoms';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
@@ -18,16 +18,16 @@ interface Props {
 const FirstStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
-      <p className={classNames('font-aeonik text-xl', styles['title'])} {...setTestID(OnboardingSelectors.firstStepText)}>
+      <p className={clsx('font-aeonik text-xl', styles['title'])} {...setTestID(OnboardingSelectors.firstStepText)}>
         <T id={'addressBalanceDetails'} />
       </p>
-      <p className={classNames('font-aeonik text-sm', styles['description'])}>
+      <p className={clsx('font-aeonik text-sm', styles['description'])}>
         <T id={'addressBalanceDescription'} />
       </p>
       <div style={{ height: 324 }} className="my-8">
         {image}
       </div>
-      <p className={classNames('font-aeonik text-sm', styles['description'])}>
+      <p className={clsx('font-aeonik text-sm', styles['description'])}>
         <T
           id={'addressBalanceHint'}
           substitutions={[

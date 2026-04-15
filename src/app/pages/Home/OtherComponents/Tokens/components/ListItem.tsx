@@ -11,9 +11,9 @@ import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
+import { usePrivacyMode } from 'lib/store/zustand/ui.store';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
-import { usePrivacyMode } from 'lib/store/zustand/ui.store';
 import { ZERO } from 'lib/utils/numbers';
 
 import { AssetsSelectors } from '../../Assets.selectors';

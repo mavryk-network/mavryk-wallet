@@ -3,7 +3,6 @@ import React, { memo, useMemo } from 'react';
 import classNames from 'clsx';
 
 import { DelegatePeriodBanner } from 'app/atoms/AddBanner';
-import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
 import { useAppEnv } from 'app/env';
 import { AssetIcon } from 'app/templates/AssetIcon';
 import { setAnotherSelector } from 'lib/analytics';
@@ -78,9 +77,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           </div>
         ),
         Column2: (
-          <PrivacyAmount>
-            <CryptoBalance value={delegatedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
-          </PrivacyAmount>
+          <CryptoBalance
+            value={delegatedBalance}
+            cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals}
+            hidden={privacyMode}
+          />
         )
       });
     }
@@ -93,15 +94,17 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           </div>
         ),
         Column2: (
-          <PrivacyAmount>
-            <CryptoBalance value={stakedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
-          </PrivacyAmount>
+          <CryptoBalance
+            value={stakedBalance}
+            cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals}
+            hidden={privacyMode}
+          />
         )
       });
     }
 
     return rows.length > 0 ? rows : null;
-  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken]);
+  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken, privacyMode]);
 
   const balanceToDisplay = useMemo(() => {
     return isMavToken ? upgradeBalanceWithStakingBalance(balance, accStats) : balance;
@@ -131,14 +134,13 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             <div className={classNames('text-sm', styles['tokenSymbol'])}>{assetSymbol}</div>
             {isDelegated && <DelegatePeriodBanner />}
           </div>
-          <PrivacyAmount>
-            <CryptoBalance
-              value={balanceToDisplay ?? ZERO}
-              cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
-              testID={AssetsSelectors.assetItemCryptoBalanceButton}
-              testIDProperties={{ assetSlug }}
-            />
-          </PrivacyAmount>
+          <CryptoBalance
+            value={balanceToDisplay ?? ZERO}
+            cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
+            hidden={privacyMode}
+            testID={AssetsSelectors.assetItemCryptoBalanceButton}
+            testIDProperties={{ assetSlug }}
+          />
         </div>
         <div className="flex justify-between w-full mb-1">
           <div className="flex flex-col items-start gap-1">

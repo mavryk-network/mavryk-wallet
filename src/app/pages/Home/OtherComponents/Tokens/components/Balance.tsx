@@ -11,18 +11,23 @@ import { merge } from 'lib/utils/merge';
 interface CryptoBalanceProps extends TestIDProps {
   value: BigNumber;
   cryptoDecimals?: number;
+  hidden?: boolean;
 }
 
-export const CryptoBalance = memo<CryptoBalanceProps>(({ value, cryptoDecimals, testID, testIDProperties }) => (
+export const CryptoBalance = memo<CryptoBalanceProps>(({ value, cryptoDecimals, hidden, testID, testIDProperties }) => (
   <div className={clsx('truncate text-base-plus text-white text-right ml-4 flex-1 flex justify-end')}>
-    <Money
-      smallFractionFont={false}
-      cryptoDecimals={cryptoDecimals}
-      testID={testID}
-      testIDProperties={testIDProperties}
-    >
-      {value}
-    </Money>
+    {hidden ? (
+      <span aria-label="Hidden balance">••••</span>
+    ) : (
+      <Money
+        smallFractionFont={false}
+        cryptoDecimals={cryptoDecimals}
+        testID={testID}
+        testIDProperties={testIDProperties}
+      >
+        {value}
+      </Money>
+    )}
   </div>
 ));
 

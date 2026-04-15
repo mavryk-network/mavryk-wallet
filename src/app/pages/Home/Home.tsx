@@ -7,6 +7,7 @@ import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
+import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
@@ -101,6 +102,14 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             disabled={!canSend}
             tippyProps={tippyPropsMock}
             testID={HomeSelectors.sendButton}
+          />
+          <ActionButton
+            label={<T id="swap" />}
+            Icon={SwapIcon}
+            to="/swap"
+            disabled
+            tippyProps={{ content: 'Coming Soon' }}
+            testID={HomeSelectors.swapButton}
           />
           <ActionButton
             label={<T id="receive" />}

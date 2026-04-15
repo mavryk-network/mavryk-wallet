@@ -44,7 +44,7 @@ export const OnRampSmileButton: FC<OnRumpSmileButtonProps> = ({
     >
       <SmileIcon className="w-7 h-auto" />
       <p
-        className={classNames('font-aeonik font-medium text-orange-500 mt-1 text-ulg', titleClassName)}
+        className={classNames('font-aeonik font-medium text-orange-500 mt-1 text-xl', titleClassName)}
       >
         {amount}$
       </p>

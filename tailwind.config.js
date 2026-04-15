@@ -637,6 +637,18 @@ module.exports = {
             fontWeight: '400'
           }
         ],
+        xl: [
+          '1.25rem',
+          {
+            lineHeight: '1.75rem'
+          }
+        ],
+        '2xl': [
+          '1.5rem',
+          {
+            lineHeight: '2rem'
+          }
+        ],
         '2xl-plus': '1.75rem',
 
         '3xl-plus': [

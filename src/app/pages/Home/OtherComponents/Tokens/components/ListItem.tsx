@@ -18,6 +18,8 @@ import { AssetsSelectors } from '../../Assets.selectors';
 import { upgradeBalanceWithStakingBalance } from '../../MainBanner/use-total-balance';
 import styles from '../Tokens.module.css';
 
+import { PrivacyAmount } from 'app/atoms/PrivacyAmount';
+
 import { CryptoBalance, FiatBalance } from './Balance';
 
 interface Props {
@@ -75,7 +77,9 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           </div>
         ),
         Column2: (
-          <CryptoBalance value={delegatedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+          <PrivacyAmount>
+            <CryptoBalance value={delegatedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+          </PrivacyAmount>
         )
       });
     }
@@ -87,7 +91,11 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             <T id="coStaked" />
           </div>
         ),
-        Column2: <CryptoBalance value={stakedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+        Column2: (
+          <PrivacyAmount>
+            <CryptoBalance value={stakedBalance} cryptoDecimals={metadata?.decimals ?? MAVEN_METADATA.decimals} />
+          </PrivacyAmount>
+        )
       });
     }
 
@@ -122,12 +130,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             <div className={classNames('text-sm', styles['tokenSymbol'])}>{assetSymbol}</div>
             {isDelegated && <DelegatePeriodBanner />}
           </div>
-          <CryptoBalance
-            value={balanceToDisplay ?? ZERO}
-            cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
-            testID={AssetsSelectors.assetItemCryptoBalanceButton}
-            testIDProperties={{ assetSlug }}
-          />
+          <PrivacyAmount>
+            <CryptoBalance
+              value={balanceToDisplay ?? ZERO}
+              cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
+              testID={AssetsSelectors.assetItemCryptoBalanceButton}
+              testIDProperties={{ assetSlug }}
+            />
+          </PrivacyAmount>
         </div>
         <div className="flex justify-between w-full mb-1">
           <div className="flex flex-col items-start gap-1">
@@ -139,12 +149,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             ))}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <FiatBalance
-              assetSlug={assetSlug}
-              value={balanceToDisplay ?? ZERO}
-              testID={AssetsSelectors.assetItemFiatBalanceButton}
-              testIDProperties={{ assetSlug }}
-            />
+            <PrivacyAmount className="contents">
+              <FiatBalance
+                assetSlug={assetSlug}
+                value={balanceToDisplay ?? ZERO}
+                testID={AssetsSelectors.assetItemFiatBalanceButton}
+                testIDProperties={{ assetSlug }}
+              />
+            </PrivacyAmount>
             {additionalDelegateBlock?.map((row, i) => (
               <div key={i} className={classNames(i === 0 && 'mt-1')}>
                 {row.Column2}

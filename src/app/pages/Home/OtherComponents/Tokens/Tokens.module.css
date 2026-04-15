@@ -3,7 +3,6 @@
   border-radius: 4px;
   font-style: normal;
   font-weight: 500;
-  font-size: 0.75rem;
   line-height: 12px;
   color: #ffffff;
 }
@@ -19,7 +18,6 @@
 .tokenSymbol {
   font-style: normal;
   font-weight: 500;
-  font-size: 0.875rem;
   line-height: 16px;
   color: #f4f4f4;
 }

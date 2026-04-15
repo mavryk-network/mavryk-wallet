@@ -21,16 +21,16 @@ interface Props {
 const SecondStep: FC<Props> = ({ setStep, image }) => {
   return (
     <>
-      <p className={styles['title']} {...setTestID(OnboardingSelectors.secondStepText)}>
+      <p className={clsx('font-aeonik text-xl', styles['title'])} {...setTestID(OnboardingSelectors.secondStepText)}>
         <T id={'tokensRwasNFTs'} />
       </p>
-      <p className={clsx(styles['description'], 'mb-4')}>
+      <p className={clsx('font-aeonik text-sm', styles['description'], 'mb-4')}>
         <T id={'tokensDescPart1'} />
       </p>
       <div className="my-8" style={style}>
         {image}
       </div>
-      <p className={styles['description']}>
+      <p className={clsx('font-aeonik text-sm', styles['description'])}>
         <T id={'tokensHint'} />
       </p>
 

@@ -143,11 +143,11 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
 
   return (
     <>
-      <p className={styles['title']}>
+      <p className={classNames('font-aeonik text-ulg', styles['title'])}>
         <T id={'exchangeDetails'} />
       </p>
 
-      <p className={styles['description']}>
+      <p className={classNames('font-aeonik text-xs', styles['description'])}>
         <T id={'exchangeDetailsDescription'} substitutions={[currenciesCount]} />
       </p>
 
@@ -190,10 +190,10 @@ const InitialStep: FC<Props> = ({ exchangeData, setExchangeData, setStep, isErro
       <Divider style={{ marginTop: '40px', marginBottom: '20px' }} />
 
       <div className={classNames('flex justify-between', Number(rate) < 0 ? 'text-red-700' : 'text-gray-600')}>
-        <p className={styles['exchangeTitle']}>
+        <p className={classNames('font-aeonik text-xs', styles['exchangeTitle'])}>
           <T id={'exchangeRate'} />
         </p>
-        <p className={styles['exchangeData']}>
+        <p className={classNames('font-aeonik text-xs', styles['exchangeData'])}>
           {rate ? `1 ${coinFrom.code} = ${rate} ${coinTo.code}` : VALUE_PLACEHOLDER}
         </p>
       </div>

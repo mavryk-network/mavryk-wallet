@@ -48,7 +48,7 @@ export const DelegateTezosTag: FC = () => {
     () => (
       <Button
         onClick={handleTagClick}
-        className={classNames('inline-flex items-center px-1.5 ml-2 py-1', modStyles['apyTag'])}
+        className={classNames('text-xs inline-flex items-center px-1.5 ml-2 py-1', modStyles['apyTag'])}
         testID={AssetsSelectors.assetItemApyButton}
       >
         APY: 5.6%

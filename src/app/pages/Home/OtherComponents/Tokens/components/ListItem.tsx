@@ -119,7 +119,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
       <div className={classNames('w-full')} style={{ maxWidth: popup ? '19rem' : 'auto' }}>
         <div className="flex justify-between w-full mb-1">
           <div className="flex items-center flex-initial">
-            <div className={styles['tokenSymbol']}>{assetSymbol}</div>
+            <div className={classNames('text-sm', styles['tokenSymbol'])}>{assetSymbol}</div>
             {isDelegated && <DelegatePeriodBanner />}
           </div>
           <CryptoBalance

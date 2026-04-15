@@ -1,15 +1,11 @@
 .title {
-  font-family: 'Aeonik', sans-serif;
   font-weight: 400;
-  font-size: 17px;
   text-align: center;
   margin-top: 16px;
   color: #4a5568;
 }
 .description {
-  font-family: 'Aeonik', sans-serif;
   font-weight: 400;
-  font-size: 12px;
   text-align: center;
   max-width: 358px;
   margin: auto;
@@ -21,12 +17,8 @@
   color: #718096;
 }
 .exchangeTitle {
-  font-family: 'Aeonik', sans-serif;
-  font-size: 12px;
 }
 .exchangeData {
-  font-family: 'Aeonik', sans-serif;
-  font-size: 12px;
 }
 .privacyAndPolicy {
   margin-top: 24px;

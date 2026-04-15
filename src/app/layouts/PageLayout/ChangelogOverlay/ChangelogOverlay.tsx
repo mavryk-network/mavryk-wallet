@@ -80,7 +80,7 @@ export const ChangelogOverlay: FC = () => {
             >
               <Button
                 className={classNames(
-                  'mx-auto py-2 text-white font-aeonik rounded font-medium uppercase',
+                  'text-2xs mx-auto py-2 text-white font-aeonik rounded font-medium uppercase',
                   s.overlay_ok_button
                 )}
                 onClick={handleContinue}

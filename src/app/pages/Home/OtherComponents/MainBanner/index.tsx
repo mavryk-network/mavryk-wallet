@@ -62,22 +62,22 @@ const BalanceInfo: FC = () => {
   const togglePrivacyMode = useUIStore(s => s.togglePrivacyMode);
 
   return (
-    <div className="flex flex-col justify-between items-start">
+    <div className="flex justify-between items-center w-full">
       <div className="flex items-center text-3xl-plus">
         <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
-        <button
-          type="button"
-          onClick={togglePrivacyMode}
-          className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
-          title={privacyMode ? 'Show balances on home screen' : 'Hide balances on home screen'}
-        >
-          {privacyMode ? (
-            <EyeOpenIcon className="w-8 h-8 fill-white" />
-          ) : (
-            <EyeClosedIcon className="w-8 h-8 fill-white" />
-          )}
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={togglePrivacyMode}
+        className="opacity-60 hover:opacity-100 transition-opacity"
+        title={privacyMode ? 'Show balances on home screen' : 'Hide balances on home screen'}
+      >
+        {privacyMode ? (
+          <EyeOpenIcon className="w-8 h-8 fill-white" />
+        ) : (
+          <EyeClosedIcon className="w-8 h-8 fill-white" />
+        )}
+      </button>
     </div>
   );
 };

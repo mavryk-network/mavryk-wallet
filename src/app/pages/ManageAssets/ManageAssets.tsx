@@ -382,10 +382,7 @@ const ListItem = memo<ListItemProps>(({ assetSlug, last, checked, balance, hidde
       </div>
       <div className={classNames('flex items-center', styles.tokenInfoWidth)}>
         <div className="flex flex-col items-start w-full">
-          <div
-            className="text-sm text-white truncate w-full"
-            style={{ marginBottom: '0.125rem', lineHeight: '19px' }}
-          >
+          <div className="text-sm text-white truncate w-full" style={{ marginBottom: '0.125rem', lineHeight: '19px' }}>
             {getAssetName(metadata)}
           </div>
 

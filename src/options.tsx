@@ -37,7 +37,7 @@ const Options: FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="mb-2 text-xl font-semibold text-white">
+      <h1 className="mb-2 text-xl font-medium text-white">
         <T id="templeWalletOptions" />
       </h1>
 
@@ -49,7 +49,7 @@ const Options: FC = () => {
             'bg-accent-blue rounded',
             'flex items-center',
             'text-white',
-            'text-sm font-semibold',
+            'text-sm font-medium',
             'transition duration-200 ease-in-out',
             'opacity-90 hover:opacity-100 focus:opacity-100',
             'shadow-sm hover:shadow focus:shadow'

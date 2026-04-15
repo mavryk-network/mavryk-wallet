@@ -24,7 +24,7 @@ const ConnectBanner: FC<ConnectBannerProps> = ({ type, origin, appMeta, classNam
       <div className={classNames('w-32', 'border border-gray-200 rounded', 'flex flex-col items-center', 'p-2')}>
         <DAppLogo icon={appMeta.icon} origin={origin} size={32} className="flex-shrink-0 mb-1" />
 
-        <span className="text-xs font-semibold text-gray-700">
+        <span className="text-xs font-medium text-gray-700">
           <Name style={{ maxWidth: '7.5rem' }}>{appMeta.name}</Name>
         </span>
       </div>
@@ -48,7 +48,7 @@ const ConnectBanner: FC<ConnectBannerProps> = ({ type, origin, appMeta, classNam
       <div className={classNames('w-32', 'border border-gray-200 rounded', 'flex flex-col items-center', 'p-2')}>
         <Logo className="mb-1" style={{ height: 32, margin: 'auto' }} />
 
-        <span className="text-xs font-semibold text-gray-700">Temple</span>
+        <span className="text-xs font-medium text-gray-700">Temple</span>
       </div>
     </div>
   );

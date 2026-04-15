@@ -82,7 +82,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
           derivationPathBanner: account.derivationPath && (
             <div className="mb-6 flex flex-col">
               <label className="mb-4 flex flex-col">
-                <span className="text-base font-semibold text-white">
+                <span className="text-base font-medium text-white">
                   <T id="derivationPath" />
                 </span>
               </label>

@@ -192,7 +192,7 @@ const LocaleOptionContent: FC<LocaleOptionContentProps> = ({ option, isSelected 
 
         {option.disabled && (
           <div className="absolute top-0 bottom-0 right-0 flex items-center">
-            <div className="mr-2 px-1 bg-accent-blue rounded-sm shadow-md text-white text-xs font-semibold uppercase">
+            <div className="mr-2 px-1 bg-accent-blue rounded-sm shadow-md text-white text-xs font-medium uppercase">
               <T id="soon" />
             </div>
           </div>

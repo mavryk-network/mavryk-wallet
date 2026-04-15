@@ -179,7 +179,7 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
 
         <div className="flex flex-col w-full">
           <label className="mb-4 leading-tight flex flex-col">
-            <span className="text-base font-semibold text-gray-700">
+            <span className="text-base font-medium text-gray-700">
               <T id="faucetFile" />
             </span>
 

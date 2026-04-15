@@ -144,7 +144,7 @@ export const NewsletterOverlay: FC = () => {
                 disabled={!isValid}
                 type="submit"
                 className={classNames(
-                  'w-full h-12 flex items-center justify-center font-semibold rounded-md text-base px-16 py-3 text-white',
+                  'w-full h-12 flex items-center justify-center font-medium rounded-md text-base px-16 py-3 text-white',
                   isValid ? 'bg-orange-500' : 'bg-blue-100'
                 )}
                 {...setTestID(NewsletterOverlaySelectors.subscribeButton)}

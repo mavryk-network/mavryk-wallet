@@ -225,7 +225,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         {remainingUsersContracts.length > 0 && !contractAddressFilled && (
           <div className="mt-8 mb-6 flex flex-col">
             <h2 className="mb-4 leading-tight flex flex-col">
-              <span className="text-base font-semibold text-gray-700">
+              <span className="text-base font-medium text-gray-700">
                 <T id="addKnownManagedContract" />
               </span>
 

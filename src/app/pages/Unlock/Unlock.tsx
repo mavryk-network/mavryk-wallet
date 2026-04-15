@@ -161,7 +161,7 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
             <Link
               to="/import-wallet"
               className={classNames(
-                'text-accent-blue font-semibold',
+                'text-accent-blue font-medium',
                 popup ? 'text-sm' : 'text-base-plus',
                 'transition duration-200 ease-in-out',
                 'opacity-75 hover:opacity-100 focus:opacity-100',

@@ -45,7 +45,7 @@ function tReact(messageName: TID, substitutions?: Substitutions | ReactSubstitut
                     .split(BOLD_PATTERN)
                     .map((partK, k) => (
                       <Fragment key={`k_${k}`}>
-                        {k % 2 === 0 ? partK : <span className="font-semibold">{partK}</span>}
+                        {k % 2 === 0 ? partK : <span className="font-medium">{partK}</span>}
                       </Fragment>
                     ))
                 : partJ}

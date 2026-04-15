@@ -98,7 +98,7 @@ export const ErrorBoundaryContent = memo<ErrorBoundaryContentProps>(({ errorMess
           'border border-black border-opacity-5',
           'flex items-center',
           'text-white text-shadow-black',
-          'text-sm font-semibold',
+          'text-sm font-medium',
           'transition duration-300 ease-in-out',
           'opacity-90 hover:opacity-100',
           'shadow-sm hover:shadow'

@@ -77,7 +77,7 @@ export const OnRampOverlay: FC = () => {
             <T
               id="onRampDesription"
               substitutions={[
-                <span className="font-semibold">
+                <span className="font-medium">
                   <T id="creditCard" />
                 </span>
               ]}

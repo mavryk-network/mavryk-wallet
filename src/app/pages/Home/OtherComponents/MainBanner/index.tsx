@@ -3,8 +3,8 @@ import React, { memo, FC } from 'react';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
 
-import { ReactComponent as EyeClosedBoldIcon } from 'app/icons/eye-closed-bold.svg';
-import { ReactComponent as EyeOpenBoldIcon } from 'app/icons/eye-open-bold.svg';
+import { ReactComponent as EyeClosedIcon } from 'app/icons/eye-closed-thin.svg';
+import { ReactComponent as EyeOpenIcon } from 'app/icons/eye-open-secondary.svg';
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import AddressChip from 'app/templates/AddressChip';
@@ -71,7 +71,7 @@ const BalanceInfo: FC = () => {
           className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
           title={privacyMode ? 'Show balances on home screen' : 'Hide balances on home screen'}
         >
-          {privacyMode ? <EyeClosedBoldIcon className="w-4 h-auto" /> : <EyeOpenBoldIcon className="w-4 h-auto" />}
+          {privacyMode ? <EyeOpenIcon className="w-8 h-8 fill-white" /> : <EyeClosedIcon className="w-8 h-8 fill-white" />}
         </button>
       </div>
     </div>

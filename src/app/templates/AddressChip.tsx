@@ -26,7 +26,7 @@ const AddressChip: FC<Props> = ({ pkh, className, small, modeSwitch, ...rest }) 
       {tzdnsName && domainDisplayed ? (
         <HashChip hash={tzdnsName} firstCharsCount={7} lastCharsCount={10} small={small} {...rest} />
       ) : (
-        <HashChip hash={pkh} small={small} {...rest} />
+        <HashChip hash={pkh} small={small} trim={false} {...rest} />
       )}
     </div>
   );

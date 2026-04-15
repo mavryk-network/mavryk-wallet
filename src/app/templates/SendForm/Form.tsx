@@ -80,7 +80,6 @@ interface FormData {
 
 const amountStyle: React.CSSProperties = {
   resize: 'none',
-  height: 48,
   position: 'relative'
 };
 

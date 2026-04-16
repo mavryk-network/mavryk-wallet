@@ -17,7 +17,6 @@ import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
-import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
@@ -383,10 +382,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
 
         setOperation({ ...op, to });
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
-
-        if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {
-          submitDelegation(opHash);
-        }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
       } catch (err: any) {

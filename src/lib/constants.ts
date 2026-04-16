@@ -56,8 +56,6 @@ export const AD_HIDING_TIMEOUT = 12 * 3600 * 1000;
 
 export const AD_SEEN_THRESHOLD = 0.5;
 
-export const HYPELAB_STUB_CAMPAIGN_SLUG = 'e55d2795d2';
-
 export const TERMS_OF_USE_URL = 'https://www.templewallet.com/terms';
 
 export const PRIVACY_POLICY_URL = 'https://www.templewallet.com/privacy';

@@ -1,7 +1,5 @@
 export enum AdsProviderTitle {
   Optimal = 'Optimal',
-  HypeLab = 'HypeLab',
-  Persona = 'Persona',
   Temple = 'Mavryk Wallet'
 }
 

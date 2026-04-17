@@ -12,7 +12,7 @@ import { PublicError } from '../PublicError';
 import { fetchMessage } from './helpers';
 import { accPrivKeyStrgKey, accPubKeyStrgKey } from './storage-keys';
 
-const TEZOS_BIP44_COINTYPE = 1729;
+const MAVRYK_BIP44_COINTYPE = 1969;
 
 type NewAccountName = 'defaultAccountName' | 'defaultManagedKTAccountName' | 'defaultWatchOnlyAccountName';
 
@@ -61,7 +61,7 @@ export function seedToHDPrivateKey(seed: Buffer, hdAccIndex: number) {
 }
 
 export function getMainDerivationPath(accIndex: number) {
-  return `m/44'/${TEZOS_BIP44_COINTYPE}'/${accIndex}'/0'`;
+  return `m/44'/${MAVRYK_BIP44_COINTYPE}'/${accIndex}'/0'`;
 }
 
 export function seedToPrivateKey(seed: Buffer) {

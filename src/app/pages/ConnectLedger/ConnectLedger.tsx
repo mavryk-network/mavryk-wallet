@@ -11,16 +11,10 @@ import { useAppEnv } from 'app/env';
 import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
+import { createLedgerSigner } from 'lib/ledger';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
-import {
-  useAllAccounts,
-  useChainId,
-  useSetAccountPkh,
-  useTempleClient,
-  validateDerivationPath
-} from 'lib/temple/front';
-import { fetchNewAccountName } from 'lib/temple/helpers';
-import { TempleAccountType } from 'lib/temple/types';
+import { useAllAccounts, useSetAccountPkh, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import { TempleAccountType, TempleChainKind } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
@@ -67,12 +61,11 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { accounts, createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount } = useTempleClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
   const { popup } = useAppEnv();
-  const chainId = useChainId();
 
   const allLedgers = useMemo(() => allAccounts.filter(acc => acc.type === TempleAccountType.Ledger), [allAccounts]);
 
@@ -103,7 +96,7 @@ const ConnectLedger: FC = () => {
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
-    async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
+    async ({ name, customDerivationPath, derivationType }: FormData) => {
       if (submitting) return;
 
       setError(null);
@@ -137,16 +130,26 @@ const ConnectLedger: FC = () => {
       }
 
       try {
-        const account = knownLedgerAccounts[activeAccountIndex];
-        const { chain, derivationPath, address, publicKey } = account;
-        // await createLedgerAccount({
-        //   chain,
-        //   derivationPath,
-        //   address,
-        //   publicKey,
-        //   derivationType: 'derivationType' in account ? account.derivationType : undefined,
-        //   name: await fetchNewAccountName(accounts, TempleAccountType.Ledger, i => t('defaultLedgerName', String(i)))
-        // });
+        const derivationPath = derivationPathType === 'custom' ? customDerivationPath : DEFAULT_DERIVATION_PATH;
+
+        const { signer, cleanup } = await createLedgerSigner(getLedgerTransportType(), derivationPath, derivationType);
+
+        try {
+          const publicKey = await signer.publicKey();
+          const publicKeyHash = await signer.publicKeyHash();
+
+          await createLedgerAccount({
+            name,
+            chain: TempleChainKind.Tezos,
+            derivationPath,
+            derivationType,
+            isKYC: undefined,
+            publicKey,
+            publicKeyHash
+          });
+        } finally {
+          cleanup();
+        }
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -159,7 +162,7 @@ const ConnectLedger: FC = () => {
         setError(err.message);
       }
     },
-    [submitting, formAnalytics, createLedgerAccount, chainId]
+    [submitting, formAnalytics, createLedgerAccount, derivationPathType]
   );
 
   return (

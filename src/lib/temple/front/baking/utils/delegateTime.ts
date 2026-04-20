@@ -7,6 +7,8 @@ import { DEFAULT_BLOCK_DELAY } from '../const';
 
 dayjs.extend(duration);
 
+const UNLOCK_WAIT_CYCLES = 3;
+
 function formatTimeLeft(ms: number): string {
   if (ms <= 0) return 'allowed';
 
@@ -21,6 +23,13 @@ function formatTimeLeft(ms: number): string {
   if (hours > 0) return `${hours}h`;
   if (minutes > 0) return `${minutes}m`;
   return `${seconds}s`;
+}
+
+function getUnlockWaitDurationMs(cycleDurationMs: number, currentCycle: number, unstakeCycle: number) {
+  const unlockCycle = unstakeCycle + UNLOCK_WAIT_CYCLES;
+  const cyclesLeft = unlockCycle - currentCycle;
+
+  return cyclesLeft * cycleDurationMs;
 }
 
 export function getOneCycleinMs(constants: ConstantsResponse) {
@@ -83,14 +92,18 @@ export function getUnlockWaitTime(
   const unstakeCycle = requests.reduce((max, r) => Math.max(max, Number(r.cycle)), -Infinity);
   if (!isFinite(unstakeCycle) || unstakeCycle < 0) return null;
 
-  const unlockCycle = unstakeCycle + 3; // unlock after 3 full cycles
-  const cyclesLeft = unlockCycle - currentCycle;
+  const diffMs = getUnlockWaitDurationMs(cycleDurationMs, currentCycle, unstakeCycle);
 
   // If cycles passed but RPC hasn't yet reported finalizable
-  if (cyclesLeft <= 0) return 'pending';
+  if (diffMs <= 0) return 'pending';
 
-  const diffMs = cyclesLeft * cycleDurationMs;
   return formatTimeLeft(diffMs);
+}
+
+export function getUnlockWaitDays(cycleDurationMs: number, currentCycle: number, unstakeCycle: number) {
+  const diffMs = getUnlockWaitDurationMs(cycleDurationMs, currentCycle, unstakeCycle);
+
+  return Math.max(0, Math.ceil(dayjs.duration(diffMs).asDays()));
 }
 
 // 3) Co-stake lock period ~ (6 days = 2 cycles)

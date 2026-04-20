@@ -41,14 +41,7 @@ import {
   validateDelegate
 } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import {
-  CO_STAKE,
-  FINALIZE_UNLOCK,
-  MANAGE_STAKE,
-  SORTED_PREDEFINED_SPONSORED_BAKERS,
-  UNLOCK_STAKE,
-  UNLOCKING
-} from 'lib/temple/front/baking/const';
+import { CO_STAKE, FINALIZE_UNLOCK, MANAGE_STAKE, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
@@ -669,8 +662,11 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const chainId = useChainId();
   const tezos = useTezos();
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
+
+  console.log(data, 'data');
   const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance, myBakerPkh } = data;
   const delegateLabel = getDelegateLabel(data);
+
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
   const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;

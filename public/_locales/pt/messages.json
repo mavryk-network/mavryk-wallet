@@ -1154,10 +1154,10 @@
     "description": "HD = Hierarchical Deterministic"
   },
   "derivationPathExample": {
-    "message": "m/44'/1729'/<account_index>'/0'"
+    "message": "m/44'/1969'/<account_index>'/0'"
   },
   "derivationPathExample2": {
-    "message": "por exemplo, m/44'/1729'/..."
+    "message": "por exemplo, m/44'/1969'/..."
   },
   "keepSeedPhraseSecret": {
     "message": "Mantenha-a em segredo."

@@ -7,6 +7,7 @@ import { ReactComponent as AddAccountIcon } from 'app/icons/account-card-add.svg
 import { ReactComponent as ImportAccountIcon } from 'app/icons/account-card-import.svg';
 import { ReactComponent as RestoreAccountIcon } from 'app/icons/account-card-restore.svg';
 import PageLayout from 'app/layouts/PageLayout';
+import { ReactComponent as LedgerIcon } from 'app/misc/ledger.svg';
 import { T, TID } from 'lib/i18n';
 import { useRelevantAccounts } from 'lib/temple/front';
 import { useAccount, useHDGroups } from 'lib/temple/front/ready';
@@ -105,6 +106,19 @@ export const AddOrImportAccount: FC = () => {
           accentColor: '#58BFFF',
           borderColor: 'rgba(88, 191, 255, 0.5)',
           hoverColor: 'rgba(88, 191, 255, 0.75)'
+        }
+      },
+      {
+        key: 'connect-ledger',
+        i18nKey: 'connectLedger',
+        description: 'Connect a Ledger hardware wallet and keep transaction signing on your device.',
+        linkTo: '/connect-ledger',
+        tags: ['ledger'],
+        Icon: LedgerIcon,
+        theme: {
+          accentColor: '#4B5567',
+          borderColor: 'rgba(148, 163, 184, 0.35)',
+          hoverColor: 'rgba(148, 163, 184, 0.6)'
         }
       }
     ],

@@ -12,7 +12,7 @@ import { PublicError } from '../PublicError';
 import { fetchMessage } from './helpers';
 import { accPrivKeyStrgKey, accPubKeyStrgKey } from './storage-keys';
 
-const TEZOS_BIP44_COINTYPE = 1729;
+const TEZOS_BIP44_COINTYPE = 1969;
 
 type NewAccountName = 'defaultAccountName' | 'defaultManagedKTAccountName' | 'defaultWatchOnlyAccountName';
 

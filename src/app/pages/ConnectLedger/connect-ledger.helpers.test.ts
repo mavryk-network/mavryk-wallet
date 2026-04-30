@@ -7,12 +7,12 @@ import { buildLedgerAccountPayload, resolveLedgerDerivationPath } from './connec
 
 describe('connect-ledger.helpers', () => {
   it('resolves the default Ledger derivation path', () => {
-    expect(resolveLedgerDerivationPath('default', "m/44'/1729'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
-    expect(resolveLedgerDerivationPath(undefined, "m/44'/1729'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
+    expect(resolveLedgerDerivationPath('default', "m/44'/1969'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
+    expect(resolveLedgerDerivationPath(undefined, "m/44'/1969'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
   });
 
   it('resolves a custom Ledger derivation path', () => {
-    const customDerivationPath = "m/44'/1729'/5'/0'";
+    const customDerivationPath = "m/44'/1969'/5'/0'";
 
     expect(resolveLedgerDerivationPath('custom', customDerivationPath)).toBe(customDerivationPath);
   });
@@ -21,7 +21,7 @@ describe('connect-ledger.helpers', () => {
     const payload = buildLedgerAccountPayload({
       name: '   ',
       defaultName: 'Ledger 2',
-      derivationPath: "m/44'/1729'/5'/0'",
+      derivationPath: "m/44'/1969'/5'/0'",
       derivationType: DerivationType.ED25519,
       publicKey: 'edpkvBYQLaemWxY8k6R5nYmdWhUQmBNgMW81mo9kMovfeWpD71kTSL'
     });
@@ -29,7 +29,7 @@ describe('connect-ledger.helpers', () => {
     expect(payload).toEqual({
       name: 'Ledger 2',
       chain: TempleChainKind.Tezos,
-      derivationPath: "m/44'/1729'/5'/0'",
+      derivationPath: "m/44'/1969'/5'/0'",
       derivationType: DerivationType.ED25519,
       publicKey: 'edpkvBYQLaemWxY8k6R5nYmdWhUQmBNgMW81mo9kMovfeWpD71kTSL',
       publicKeyHash: 'mv1VBAULLAGMCbF7FRHNtoUqiFJv1csUwqmE',

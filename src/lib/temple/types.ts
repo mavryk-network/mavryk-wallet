@@ -47,7 +47,7 @@ export interface TempleState {
 
 export enum TempleChainId {
   Mainnet = 'NetXXAAR1wWQhhe',
-  Basenet = 'NetXJMfAoC7pZSW',
+  Basenet = 'NetXRp4kyGKJTuB',
   Weekly = 'NetXRp4kyGKJTuB',
   Atlas = 'NetXUrNc8uioxP8'
 }

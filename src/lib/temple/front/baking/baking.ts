@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import retry from 'async-retry';
+import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
 
@@ -107,6 +108,10 @@ export function useDelegate<T = TzktUserAccount>(
                   return accountStats;
               }
             } catch (e) {
+              if (axios.isAxiosError(e) && e.response?.status === 404) {
+                return emptyAccountResponse;
+              }
+
               console.error(e);
             }
           }
@@ -322,7 +327,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
+      const baseUrlParams = chainId && isKnownChainId(chainId) ? { baseURL: TZKT_API_BASE_URLS[chainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
       // @ts-expect-error // predifined validators list
@@ -372,7 +377,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
     } catch (_err) {
       return null;
     }
-  }, [address]);
+  }, [address, chainId]);
   return useRetryableSWR(net.type === 'main' && address ? ['baker', address] : null, fetchBaker, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,

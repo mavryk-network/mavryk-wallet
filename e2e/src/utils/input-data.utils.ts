@@ -31,12 +31,12 @@ export const iEnterValues = {
   bakerAddress: '',
 
   // Derivation paths
-  basicDerivationPath: `m/44'/1969'/0'/0'`, // first account in HD (main)
-  customDerivationPath: `m/44'/1969'/10'/0'`, // eleventh account in HD
-  invalidDerivationPath: `m/broken44'/1969'/0'/0'`,
+  basicDerivationPath: `m/44'/1729'/0'/0'`, // first account in HD (main)
+  customDerivationPath: `m/44'/1729'/10'/0'`, // eleventh account in HD
+  invalidDerivationPath: `m/broken44'/1729'/0'/0'`,
   secondInvalidDerivationPath: `m/44'/17broken29'/0'/0'`,
-  thirdInvalidDerivationPath: `m/44'/1969'/0broken'/0'`,
-  fourthInvalidDerivationPath: `m/44'/1969'/0'/0broken'`,
+  thirdInvalidDerivationPath: `m/44'/1729'/0broken'/0'`,
+  fourthInvalidDerivationPath: `m/44'/1729'/0'/0broken'`,
 
   // For testing mnemonic inputs
   defaultSeedPhrase: envVars.DEFAULT_HD_ACCOUNT_SEED_PHRASE,

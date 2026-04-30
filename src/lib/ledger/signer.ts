@@ -18,7 +18,7 @@ import { toLedgerError } from './helpers';
 export class TempleLedgerSigner extends LedgerSigner {
   constructor(
     transport: LedgerTransport,
-    path: string = "44'/1969'/0'/0'",
+    path: string = "44'/1729'/0'/0'",
     prompt: boolean = true,
     derivationType: DerivationType = DerivationType.ED25519,
     private accPublicKey?: string,

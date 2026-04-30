@@ -1498,10 +1498,10 @@
     "message": "It's for HD accounts. This is the thing you use to recover all your accounts from your seed phrase."
   },
   "derivationPathExample": {
-    "message": "m/44'/1969'/<account_index>'/0'"
+    "message": "m/44'/1729'/<account_index>'/0'"
   },
   "derivationPathExample2": {
-    "message": "e.g. m/44'/1969'/..."
+    "message": "e.g. m/44'/1729'/..."
   },
   "keepSeedPhraseSecret": {
     "message": "Keep it in secret."

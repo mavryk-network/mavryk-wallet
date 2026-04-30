@@ -96,8 +96,8 @@ describe('Helpers', () => {
   });
 
   it('validateDerivationPath', async () => {
-    expect(FrontHelpers.validateDerivationPath("44'/1969'/0'/0'")).toBe('Translated<derivationPathMustStartWithM>');
-    expect(FrontHelpers.validateDerivationPath("m44'/1969'/0'/0'")).toBe('Translated<derivationSeparatorMustBeSlash>');
+    expect(FrontHelpers.validateDerivationPath("44'/1729'/0'/0'")).toBe('Translated<derivationPathMustStartWithM>');
+    expect(FrontHelpers.validateDerivationPath("m44'/1729'/0'/0'")).toBe('Translated<derivationSeparatorMustBeSlash>');
     expect(FrontHelpers.validateDerivationPath("m/44'/asd'/0'/0'")).toBe('Translated<invalidPath>');
     expect(FrontHelpers.validateDerivationPath(DEFAULT_DERIVATION_PATH)).toBeTruthy();
   });

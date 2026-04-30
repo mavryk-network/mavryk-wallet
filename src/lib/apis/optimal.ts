@@ -45,7 +45,7 @@ export const getOptimalPromotionImage$ = (variant: OptimalPromoVariantEnum, acco
           publisher: 'templewallet', // your-publisher-slug
           ad_types: variant,
           div_ids: 'ad',
-          wallets: `1969:${accountAddress}`
+          wallets: `1729:${accountAddress}`
         }
       })
       .then(response => {

@@ -1,6 +1,6 @@
 import { stringify } from 'qs';
 
-import { MOONPAY_API_KEY, MOONPAY_DOMAIN } from 'lib/apis/moonpay';
+import { MOONPAY_DOMAIN } from 'lib/apis/moonpay';
 
 import { templeWalletApi } from './templewallet.api';
 
@@ -16,7 +16,6 @@ export const getMoonpaySign = async (
   baseCurrencyCode?: string
 ) => {
   const queryParams = stringify({
-    apiKey: MOONPAY_API_KEY,
     currencyCode,
     colorCode,
     walletAddress,

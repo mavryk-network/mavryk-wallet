@@ -17,7 +17,6 @@ import BakerBanner from 'app/templates/BakerBanner';
 import OperationStatus from 'app/templates/OperationStatus';
 import { SortButton, SortListItemType, SortPopup, SortPopupContent } from 'app/templates/SortPopup';
 import { useFormAnalytics } from 'lib/analytics';
-import { submitDelegation } from 'lib/apis/everstake';
 import { ABTestGroup } from 'lib/apis/temple';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
@@ -42,14 +41,7 @@ import {
   validateDelegate
 } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import {
-  CO_STAKE,
-  FINALIZE_UNLOCK,
-  MANAGE_STAKE,
-  SORTED_PREDEFINED_SPONSORED_BAKERS,
-  UNLOCK_STAKE,
-  UNLOCKING
-} from 'lib/temple/front/baking/const';
+import { CO_STAKE, FINALIZE_UNLOCK, MANAGE_STAKE, UNLOCK_STAKE, UNLOCKING } from 'lib/temple/front/baking/const';
 import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { getDelegateLabel } from 'lib/temple/front/baking/utils/label';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
@@ -384,10 +376,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
         setOperation({ ...op, to });
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
-        if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {
-          submitDelegation(opHash);
-        }
-
         formAnalytics.trackSubmitSuccess(analyticsProperties);
       } catch (err: any) {
         formAnalytics.trackSubmitFail(analyticsProperties);
@@ -674,8 +662,11 @@ export const DelegateActionsComponent: FC<{ avtivateReDelegation: () => void }> 
   const chainId = useChainId();
   const tezos = useTezos();
   const { data } = useAccountDelegatePeriodStats(account.publicKeyHash);
+
+  console.log(data, 'data');
   const { canRedelegate, canCostake, canUnlock, stakedBalance, unstakedBalance, myBakerPkh } = data;
   const delegateLabel = getDelegateLabel(data);
+
   const hasZeroStakingBalance = stakedBalance === 0 && unstakedBalance === 0;
 
   const isWatchOnlyAccount = account.type === TempleAccountType.WatchOnly;

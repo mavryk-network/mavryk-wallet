@@ -3972,7 +3972,10 @@
     "message": "You can choose to unlock a portion of your co-staked MVRK, or all of it."
   },
   "unlockYourStakeFirstDesc": {
-    "message": "Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
+    "message": "Before re-delegating, you need to unlock your assets first. After the $1-day unlock period, you can choose a new validator.",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
   },
   "finalizeUnstake": {
     "message": "Finalize unstake"

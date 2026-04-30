@@ -32,6 +32,7 @@ import { useRetryableSWR } from 'lib/swr';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
   TempleConfirmationPayload,
+  DerivationType,
   TempleMessageType,
   TempleStatus,
   TempleRequest,
@@ -299,6 +300,17 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.ImportWatchOnlyAccountResponse);
   }, []);
 
+  const getLedgerTezosPk = useCallback(async (derivationType?: DerivationType, derivationPath?: string) => {
+    const res = await request({
+      type: TempleMessageType.GetLedgerTezosPkRequest,
+      derivationPath,
+      derivationType
+    });
+    assertResponse(res.type === TempleMessageType.GetLedgerTezosPkResponse);
+
+    return res.publicKey;
+  }, []);
+
   const createLedgerAccount = useCallback(async (input: SaveLedgerAccountInput) => {
     const res = await request({
       type: TempleMessageType.CreateLedgerAccountRequest,
@@ -495,6 +507,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     importFundraiserAccount,
     importKTManagedAccount,
     importWatchOnlyAccount,
+    getLedgerTezosPk,
     createLedgerAccount,
     updateSettings,
     removeHdGroup,

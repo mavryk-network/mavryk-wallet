@@ -23,6 +23,7 @@ import {
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
 import {
+  DerivationType,
   SaveLedgerAccountInput,
   TempleAccount,
   TempleAccountType,
@@ -43,6 +44,7 @@ import {
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
+  getMainDerivationPath,
   concatAccount,
   createMemorySigner,
   withError,
@@ -686,6 +688,23 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAllAccounts]], this.passKey);
 
       return newAllAccounts;
+    });
+  }
+
+  async getLedgerTezosPk(derivationPath = getMainDerivationPath(0), derivationType?: DerivationType) {
+    return withError('Failed to connect get Ledger account public key hash', async () => {
+      let cleanup: EmptyFn | undefined;
+
+      try {
+        const { signer, cleanup: cleanSigner } = await createLedgerSigner(derivationPath, derivationType);
+        cleanup = cleanSigner;
+
+        return await signer.publicKey();
+      } catch (e: any) {
+        throw new PublicError(e.message);
+      } finally {
+        cleanup?.();
+      }
     });
   }
 

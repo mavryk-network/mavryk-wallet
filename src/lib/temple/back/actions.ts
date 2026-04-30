@@ -15,6 +15,7 @@ import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
 import {
+  DerivationType,
   TempleState,
   TempleMessageType,
   TempleRequest,
@@ -364,6 +365,10 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
       await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
     }
   });
+}
+
+export function getLedgerTezosPk(derivationPath?: string, derivationType?: DerivationType) {
+  return withUnlocked(async ({ vault }) => await vault.getLedgerTezosPk(derivationPath, derivationType));
 }
 
 export function createLedgerAccount(input: SaveLedgerAccountInput) {

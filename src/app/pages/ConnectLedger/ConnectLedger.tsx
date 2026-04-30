@@ -12,26 +12,23 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
-import {
-  useAllAccounts,
-  useChainId,
-  useSetAccountPkh,
-  useTempleClient,
-  validateDerivationPath
-} from 'lib/temple/front';
-import { fetchNewAccountName } from 'lib/temple/helpers';
+import { useAllAccounts, useSetAccountPkh, useTempleClient, validateDerivationPath } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
+import {
+  LedgerDerivationPathType,
+  buildLedgerAccountPayload,
+  resolveLedgerDerivationPath
+} from './connect-ledger.helpers';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
 export type FormData = {
   name: string;
   customDerivationPath: string;
   derivationType?: DerivationType;
-  derivationPath?: string;
-  accountNumber?: number;
+  derivationPath: LedgerDerivationPathType;
 };
 
 const DERIVATION_PATHS = [
@@ -67,18 +64,20 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { accounts, createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount, getLedgerTezosPk } = useTempleClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
   const { popup } = useAppEnv();
-  const chainId = useChainId();
 
   const allLedgers = useMemo(() => allAccounts.filter(acc => acc.type === TempleAccountType.Ledger), [allAccounts]);
 
   const defaultName = useMemo(() => t('defaultLedgerName', String(allLedgers.length + 1)), [allLedgers.length]);
 
   const prevAccLengthRef = useRef(allAccounts.length);
+
+  // Select the newly added Ledger account and redirect after the account list changes.
+  // No cleanup is needed because this only syncs local selection and navigation state.
   useEffect(() => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current < accLength) {
@@ -92,7 +91,6 @@ const ConnectLedger: FC = () => {
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
-      accountNumber: 1,
       derivationType: DerivationType.ED25519,
       derivationPath: DERIVATION_PATHS[0].type
     }
@@ -103,7 +101,7 @@ const ConnectLedger: FC = () => {
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
-    async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
+    async ({ name, customDerivationPath, derivationType, derivationPath: derivationPathType }: FormData) => {
       if (submitting) return;
 
       setError(null);
@@ -134,19 +132,22 @@ const ConnectLedger: FC = () => {
         // Human delay.
         await delay();
         setError(err.message);
+        return;
       }
 
       try {
-        const account = knownLedgerAccounts[activeAccountIndex];
-        const { chain, derivationPath, address, publicKey } = account;
-        // await createLedgerAccount({
-        //   chain,
-        //   derivationPath,
-        //   address,
-        //   publicKey,
-        //   derivationType: 'derivationType' in account ? account.derivationType : undefined,
-        //   name: await fetchNewAccountName(accounts, TempleAccountType.Ledger, i => t('defaultLedgerName', String(i)))
-        // });
+        const derivationPath = resolveLedgerDerivationPath(derivationPathType, customDerivationPath);
+        const publicKey = await getLedgerTezosPk(derivationType, derivationPath);
+
+        await createLedgerAccount(
+          buildLedgerAccountPayload({
+            name,
+            defaultName,
+            publicKey,
+            derivationType,
+            derivationPath
+          })
+        );
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -159,7 +160,7 @@ const ConnectLedger: FC = () => {
         setError(err.message);
       }
     },
-    [submitting, formAnalytics, createLedgerAccount, chainId]
+    [submitting, formAnalytics, getLedgerTezosPk, createLedgerAccount, defaultName]
   );
 
   return (
@@ -211,22 +212,6 @@ const ConnectLedger: FC = () => {
                 i18nKey={t('derivationPath')}
               />
             </div>
-
-            {derivationPathType === 'another' && (
-              <FormField
-                ref={register({
-                  min: { value: 1, message: t('positiveIntMessage') },
-                  required: t('required')
-                })}
-                min={0}
-                type="number"
-                name="accountNumber"
-                id="importacc-acc-number"
-                label={t('accountNumber')}
-                placeholder="1"
-                errorCaption={errors.accountNumber?.message}
-              />
-            )}
 
             {derivationPathType === 'custom' && (
               <FormField

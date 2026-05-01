@@ -1,14 +1,14 @@
 import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 
-import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { DEFAULT_LEDGER_DERIVATION_PATH } from 'app/defaults';
 import { TempleChainKind } from 'lib/temple/types';
 
 import { buildLedgerAccountPayload, resolveLedgerDerivationPath } from './connect-ledger.helpers';
 
 describe('connect-ledger.helpers', () => {
   it('resolves the default Ledger derivation path', () => {
-    expect(resolveLedgerDerivationPath('default', "m/44'/1729'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
-    expect(resolveLedgerDerivationPath(undefined, "m/44'/1729'/5'/0'")).toBe(DEFAULT_DERIVATION_PATH);
+    expect(resolveLedgerDerivationPath('default', "m/44'/1729'/5'/0'")).toBe(DEFAULT_LEDGER_DERIVATION_PATH);
+    expect(resolveLedgerDerivationPath(undefined, "m/44'/1729'/5'/0'")).toBe(DEFAULT_LEDGER_DERIVATION_PATH);
   });
 
   it('resolves a custom Ledger derivation path', () => {

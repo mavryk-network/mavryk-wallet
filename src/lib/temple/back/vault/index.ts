@@ -11,6 +11,7 @@ import {
   ACCOUNT_ALREADY_EXISTS_ERR_MSG,
   ACCOUNT_NAME_COLLISION_ERR_MSG,
   AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG,
+  DEFAULT_LEDGER_TEZOS_DERIVATION_PATH,
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
 import {
@@ -691,7 +692,7 @@ export class Vault {
     });
   }
 
-  async getLedgerTezosPk(derivationPath = getMainDerivationPath(0), derivationType?: DerivationType) {
+  async getLedgerTezosPk(derivationPath = DEFAULT_LEDGER_TEZOS_DERIVATION_PATH, derivationType?: DerivationType) {
     return withError('Failed to connect get Ledger account public key hash', async () => {
       let cleanup: EmptyFn | undefined;
 

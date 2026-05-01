@@ -1,7 +1,7 @@
 import type { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import { getPkhfromPk } from '@mavrykdynamics/webmavryk-utils';
 
-import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { DEFAULT_LEDGER_DERIVATION_PATH } from 'app/defaults';
 import { SaveLedgerAccountInput, TempleChainKind } from 'lib/temple/types';
 
 export type LedgerDerivationPathType = 'default' | 'custom';
@@ -17,7 +17,7 @@ interface BuildLedgerAccountPayloadParams {
 export const resolveLedgerDerivationPath = (
   derivationPathType?: LedgerDerivationPathType,
   customDerivationPath?: string
-) => (derivationPathType === 'custom' ? customDerivationPath ?? '' : DEFAULT_DERIVATION_PATH);
+) => (derivationPathType === 'custom' ? customDerivationPath ?? '' : DEFAULT_LEDGER_DERIVATION_PATH);
 
 export const buildLedgerAccountPayload = ({
   name,

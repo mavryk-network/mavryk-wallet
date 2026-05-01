@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
-import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { DEFAULT_LEDGER_DERIVATION_PATH } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
@@ -93,7 +93,7 @@ const ConnectLedger: FC = () => {
   const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
-      customDerivationPath: DEFAULT_DERIVATION_PATH,
+      customDerivationPath: DEFAULT_LEDGER_DERIVATION_PATH,
       derivationType: DerivationType.ED25519,
       derivationPath: DERIVATION_PATHS[0].type
     }

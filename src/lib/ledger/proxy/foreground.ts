@@ -65,7 +65,7 @@ const buildSignerCallResponse = async (
     }
   } catch (error: any) {
     console.error(error);
-    return { type: 'error', message: `Error, when creating a signer` };
+    return { type: 'error', message: error?.message || 'Error, when creating a signer' };
   }
 };
 

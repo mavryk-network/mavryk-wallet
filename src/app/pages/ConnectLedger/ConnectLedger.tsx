@@ -13,7 +13,7 @@ import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSele
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
-import { useAllAccounts, useSetAccountPkh, useTempleClient, validateDerivationPath } from 'lib/temple/front';
+import { useAllAccounts, useSetAccountPkh, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate, useLocation } from 'lib/woozie';
@@ -21,7 +21,8 @@ import { navigate, useLocation } from 'lib/woozie';
 import {
   LedgerDerivationPathType,
   buildLedgerAccountPayload,
-  resolveLedgerDerivationPath
+  resolveLedgerDerivationPath,
+  validateLedgerDerivationPath
 } from './connect-ledger.helpers';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
@@ -220,7 +221,7 @@ const ConnectLedger: FC = () => {
               <FormField
                 ref={register({
                   required: t('required'),
-                  validate: validateDerivationPath
+                  validate: validateLedgerDerivationPath
                 })}
                 name="customDerivationPath"
                 id="importacc-cdp"

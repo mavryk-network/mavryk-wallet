@@ -1918,78 +1918,78 @@
   dependencies:
     nanoid "^3.1.30"
 
-"@mavrykdynamics/webmavryk-core@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-core/-/webmavryk-core-2.0.0.tgz#7b5401e47031f1170a3b999945ac8cbcf8e9736c"
-  integrity sha512-oV9xdlre67+Vo7kTiHriY61Z7RtQezwW5dDi4+XNzCl66F/kh+5cE9zLFJ4WdNUx4Szx4e1qt/PXbRnKZb9FrQ==
+"@mavrykdynamics/webmavryk-core@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-core/-/webmavryk-core-2.0.1.tgz#b35cf01474658bb3a6867f6b3740cc6673db6d8c"
+  integrity sha512-WmpTp3qXG9Nn1LxPDp4EdVyvU2n7dwu+2XM9q9xsY0XgYdMDqgOl7/Hnwttba0JY5pBhgRTocDzWaHIlsvwpNA==
   dependencies:
     json-stringify-safe "^5.0.1"
 
-"@mavrykdynamics/webmavryk-http-utils@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-http-utils/-/webmavryk-http-utils-2.0.0.tgz#035380909c20823dc76cf4d1617300329ad0f2b8"
-  integrity sha512-xoIP4bUynpi732BIittGOnrd+YoUArJZyS4lpLsT1l1g+FDMhnCe9OuR0ZcG3fqpnGq055+Du2HXhah14PyD3g==
+"@mavrykdynamics/webmavryk-http-utils@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-http-utils/-/webmavryk-http-utils-2.0.1.tgz#60d7f57e303620ef108a1121f92469f467771114"
+  integrity sha512-5JSrt1RMCQRxmysnAvWqwfbC6387iEOG0SWQc8lLkoCW9LLZ+r96YhbZC8vOx8R4vraYH2sspJA2IAPOOoeRPQ==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
     node-fetch "^2.7.0"
 
-"@mavrykdynamics/webmavryk-ledger-signer@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-ledger-signer/-/webmavryk-ledger-signer-2.0.0.tgz#a68d45462b5ba81dc119af2f84b6852bac547754"
-  integrity sha512-AGhUw/huukUL63cc9QbyWNF/Ii/ZDZuJlf1ODgXiagDISc5aW9ceTPv6ubksCH1ME9//WfYGbUHGxVC99H7o2w==
+"@mavrykdynamics/webmavryk-ledger-signer@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-ledger-signer/-/webmavryk-ledger-signer-2.0.1.tgz#6801e0249207a07100e6b270353cccf3d5489f58"
+  integrity sha512-4zv6uzrrKvn9RytzJhkv9mB9irOOXQ5qlw7brrM526rTRDplZqRAVGIaHm10VRbl+ZXNgBuyYQAVLHH1sMofqQ==
   dependencies:
     "@ledgerhq/hw-transport" "^6.30.5"
-    "@mavrykdynamics/webmavryk" "^2.0.0"
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk" "^2.0.1"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     "@stablelib/blake2b" "^1.0.1"
     buffer "^6.0.3"
 
-"@mavrykdynamics/webmavryk-local-forging@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-local-forging/-/webmavryk-local-forging-2.0.0.tgz#725c3336a993cdc506d2f9b5fac7c259a425d24f"
-  integrity sha512-P/7BKdGcjR8OkmvEr0dQKh64cW7jRJp6Pyn8RFC4EnsimMQRgxiOVPJPadSKKmSsCg1iu7Ry9PwlXN3vReENhg==
+"@mavrykdynamics/webmavryk-local-forging@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-local-forging/-/webmavryk-local-forging-2.0.1.tgz#abe9f1acafa1d1315367c1a3b1c6843380901f76"
+  integrity sha512-9VvaiPyq0QpSIwyw2bn4WAOGsK9HYUKxW3HYMPYYkMyJz4m0mlW0RnoLJS1FBaejXgXdSTPGODbqFCJoVjwHeQ==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     bignumber.js "^9.1.2"
 
-"@mavrykdynamics/webmavryk-michel-codec@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michel-codec/-/webmavryk-michel-codec-2.0.0.tgz#bedefc23b1a50591ffd2943628d8a6f7f14ea763"
-  integrity sha512-/RLlLbBBE5fTd91atwxhyKWSctnRbxD/oDRuQaNygnSqxAXWDLXHwKkVUVmUQCTBZvGt6WzgGxmNfhwQx0TGiw==
+"@mavrykdynamics/webmavryk-michel-codec@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michel-codec/-/webmavryk-michel-codec-2.0.1.tgz#28a11637986c6c676786f907ef36cca3be4544da"
+  integrity sha512-syItZ+3x0gPhFpO3783Y00EttiOzE8D9jC7o/buaiheLa/kXny5g3uBcxAnPu5QefHRJGh9ZLxCbq0SDgZ7bEA==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
 
-"@mavrykdynamics/webmavryk-michelson-encoder@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michelson-encoder/-/webmavryk-michelson-encoder-2.0.0.tgz#18dac13b67f42357835479a2be5e39d83004ccaa"
-  integrity sha512-AohxHepYelNa973a3xmjg5aVzAQSZBZkoroteA5Q6f49pM7tT+N/UczwpIbNPpDOhiyo3/e0/DdliKMQRpI/Xg==
+"@mavrykdynamics/webmavryk-michelson-encoder@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-michelson-encoder/-/webmavryk-michelson-encoder-2.0.1.tgz#83701fd89518e2a86ca9553435371ecda78d9cdc"
+  integrity sha512-qDwJSiEB+vW7wtAabdJEcSDqfVa6u7QKoRWJ3ThM23rOMhTGFaR9aX5r0OTKXqSCR6lRyFZalSoi1xRgF7CS0w==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     bignumber.js "^9.1.2"
     fast-json-stable-stringify "^2.1.0"
 
-"@mavrykdynamics/webmavryk-rpc@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-rpc/-/webmavryk-rpc-2.0.0.tgz#766a5739c216819dd49bd7ce951cb58cc8f06106"
-  integrity sha512-cqjHTi/JInXgPvQ1IWtRdgZH7CKTS+m4CcD4++aeUxvuuEqHrDqd2kLs6W+zyFNAr03Mhy1oWsfdNHu6gC/COw==
+"@mavrykdynamics/webmavryk-rpc@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-rpc/-/webmavryk-rpc-2.0.1.tgz#a10ff41b33b9be746045bf4b03257bc844d3ee56"
+  integrity sha512-wqFTdSCSkM+uz/5K69b1ihACNywW5TKq+3Xo/vz7/JbhddeWvjRSMTok9wvscqJZKEyiNWqI5112rRn82oPHlQ==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     bignumber.js "^9.1.2"
 
-"@mavrykdynamics/webmavryk-signer@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-signer/-/webmavryk-signer-2.0.0.tgz#28f31f1b19df8d7ecb1f2a76792199bbd5ec40eb"
-  integrity sha512-6gsIRT8yJ/buzfOWDAE4888tKOcphNMz40X4exQ9EV4cGhVRqFViBEI8MxTCIqH1xInSsWvGMsL/WLuNqWS1Ng==
+"@mavrykdynamics/webmavryk-signer@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-signer/-/webmavryk-signer-2.0.1.tgz#c3504121ad7365fce359336d7e2fda421712f90d"
+  integrity sha512-rJs/nKZMpukrJGXgIaF1AVzVVBV5Oi+S02MycVy5pPxkBs32NDt5eGMW+NmqywqvKGGm9mg4L8ZtRYUuLRL4DA==
   dependencies:
-    "@mavrykdynamics/webmavryk" "^2.0.0"
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk" "^2.0.1"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     "@stablelib/blake2b" "^1.0.1"
     "@stablelib/ed25519" "^1.0.3"
     "@stablelib/hmac" "^1.0.1"
@@ -2002,36 +2002,36 @@
     pbkdf2 "^3.1.2"
     typedarray-to-buffer "^4.0.0"
 
-"@mavrykdynamics/webmavryk-tzip12@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip12/-/webmavryk-tzip12-2.0.0.tgz#4535a823392cd5773b4d603ba579e7ad63091a50"
-  integrity sha512-YANEMJ2Y+g6Ap1SEMUcqLqIMC4ZzIqix8jdZamyQaG54+YfZSqV/oA9Aewzn9d2K0SGTyJC89w8AmCyGoYIBSQ==
+"@mavrykdynamics/webmavryk-tzip12@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip12/-/webmavryk-tzip12-2.0.1.tgz#1758f7d9de0eece3e7e97995ac0afd4b94a9ab32"
+  integrity sha512-3VjcflMDKiHUT9fJUumbIJQdX1uXRT8pEtt+uWzW/GqUdPfdjEb9Egqmd9tN5bvurkKeYB+fxQnTjASvgLOfMw==
   dependencies:
-    "@mavrykdynamics/webmavryk" "^2.0.0"
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
-    "@mavrykdynamics/webmavryk-tzip16" "^2.0.0"
+    "@mavrykdynamics/webmavryk" "^2.0.1"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.1"
+    "@mavrykdynamics/webmavryk-tzip16" "^2.0.1"
 
-"@mavrykdynamics/webmavryk-tzip16@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip16/-/webmavryk-tzip16-2.0.0.tgz#99ec45a650aaa4c6739bd2bfa335cbc2d0ab37d5"
-  integrity sha512-9jcPZ+QQ9yiBNIvnF+xGfy8fidaIh8ONFLZ56Jm8sk/5p2bwKqmdVPwhVpdrWr116faw5l1FFDGVL+FAF7OIMw==
+"@mavrykdynamics/webmavryk-tzip16@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-tzip16/-/webmavryk-tzip16-2.0.1.tgz#72155833239f8c8854c0c72bf0411ba444cd215a"
+  integrity sha512-1NbL1wpzANeqA7WsFLoslCLLAf4+0m8rI8qoFnJyt2ZvS7G9hI/miy/tzGHzGxoJhM2LbUDX7f6eZ4a0ktELJA==
   dependencies:
-    "@mavrykdynamics/webmavryk" "^2.0.0"
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
-    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
-    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk" "^2.0.1"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.1"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.1"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     bignumber.js "^9.1.2"
     crypto-js "^4.2.0"
 
-"@mavrykdynamics/webmavryk-utils@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-utils/-/webmavryk-utils-2.0.0.tgz#2dca8f088c1e3af0d8cdcd6e58c904ac84a9c7ab"
-  integrity sha512-AAd+RieOBwPniNDmQd9vMnKmf9dOjSpcy7EdWqO4Gk8Dbpu6n/TxjxiHP/ossUt/mMO71BfeXobGivk7ESQ2Ng==
+"@mavrykdynamics/webmavryk-utils@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk-utils/-/webmavryk-utils-2.0.1.tgz#ca4a04c26478a12b1d7804cda5457adb06744934"
+  integrity sha512-q5oeuwPjnI9uFBjlEpM89Zpv3ckqAOKcUAWguOqjsut5NMfteQVsWcSPHoihhUDDiTlIRNFW9Ie9gUYNUCxpgQ==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
     "@stablelib/blake2b" "^1.0.1"
     "@stablelib/ed25519" "^1.0.3"
     "@types/bs58check" "^2.1.0"
@@ -2042,18 +2042,18 @@
     elliptic "^6.5.4"
     typedarray-to-buffer "^4.0.0"
 
-"@mavrykdynamics/webmavryk@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk/-/webmavryk-2.0.0.tgz#c52cfe2b273348e5089fd5c9d89b595add077301"
-  integrity sha512-h6u6PhjVrSg+/XF3SKnXh5nP5WO23OMIOeP/Z3rKK4Wc+KdcaY2I4KFMyRyml891LyENt2kkUoy11TGRPGwf5w==
+"@mavrykdynamics/webmavryk@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@mavrykdynamics/webmavryk/-/webmavryk-2.0.1.tgz#49ec4f18dd0221af61be7457426250fe998a0370"
+  integrity sha512-t0Hw1sascRo6ID5ONwmDIyEVUY5FL3+w+801IG4UYfe87OEAARAbVAGFd2spumYw4QTP6STpDCyLF3zQnr6msA==
   dependencies:
-    "@mavrykdynamics/webmavryk-core" "^2.0.0"
-    "@mavrykdynamics/webmavryk-http-utils" "^2.0.0"
-    "@mavrykdynamics/webmavryk-local-forging" "^2.0.0"
-    "@mavrykdynamics/webmavryk-michel-codec" "^2.0.0"
-    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.0"
-    "@mavrykdynamics/webmavryk-rpc" "^2.0.0"
-    "@mavrykdynamics/webmavryk-utils" "^2.0.0"
+    "@mavrykdynamics/webmavryk-core" "^2.0.1"
+    "@mavrykdynamics/webmavryk-http-utils" "^2.0.1"
+    "@mavrykdynamics/webmavryk-local-forging" "^2.0.1"
+    "@mavrykdynamics/webmavryk-michel-codec" "^2.0.1"
+    "@mavrykdynamics/webmavryk-michelson-encoder" "^2.0.1"
+    "@mavrykdynamics/webmavryk-rpc" "^2.0.1"
+    "@mavrykdynamics/webmavryk-utils" "^2.0.1"
     bignumber.js "^9.1.2"
     rxjs "^7.8.1"
 

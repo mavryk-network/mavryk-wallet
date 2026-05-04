@@ -1,9 +1,19 @@
+import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import { b58cdecode, hex2buf } from '@mavrykdynamics/webmavryk-utils';
 import { crypto_generichash, ready } from 'libsodium-wrappers';
 import toBuffer from 'typedarray-to-buffer';
 
 import { toLedgerError } from './helpers';
-import { curves, getSig, pref, safeSignEdData, safeSignP2Data, safeSignSpData, verifySignature } from './signer';
+import {
+  curves,
+  getSig,
+  pref,
+  safeSignEdData,
+  safeSignP2Data,
+  safeSignSpData,
+  TempleLedgerSigner,
+  verifySignature
+} from './signer';
 
 const PAYLOAD =
   '0501313230363136653739323037333734373236393665363732303734363836313734323037373639366336633230363236353230373336393637366536353634';
@@ -35,10 +45,87 @@ const PUBLIC_KEY_HASHES = {
   p2: ['mv3DjKu7AWyQTrr2VNhBi4q2PHB3LEdJbTwU']
 };
 
+const MOCK_LEDGER_PUBLIC_KEY_RESPONSE = Buffer.from(
+  '21026760ff228c2c16cbca18bb782a106e51c43a131776f5dfad30ecb5d5e43eccbd9000',
+  'hex'
+);
+
+const createMockLedgerTransport = () => ({
+  send: jest.fn().mockResolvedValue(MOCK_LEDGER_PUBLIC_KEY_RESPONSE),
+  decorateAppAPIMethods: jest.fn(),
+  setScrambleKey: jest.fn()
+});
+
+const buildLedgerPathBuffer = (path: string) => {
+  const pathParts = path.split('/').reduce<number[]>((result, pathPart) => {
+    const parsedPart = parseInt(pathPart, 10);
+
+    if (Number.isNaN(parsedPart)) {
+      return result;
+    }
+
+    result.push(pathPart.endsWith("'") ? parsedPart + 0x80000000 : parsedPart);
+
+    return result;
+  }, []);
+
+  const buffer = Buffer.alloc(1 + pathParts.length * 4);
+  buffer[0] = pathParts.length;
+
+  pathParts.forEach((pathPart, index) => {
+    buffer.writeUInt32BE(pathPart, 1 + 4 * index);
+  });
+
+  return buffer;
+};
+
 describe('Ledger Signer tests', () => {
   beforeEach(async () => {
     await ready;
   });
+
+  describe('TempleLedgerSigner derivation paths', () => {
+    it('uses the 1969 default Ledger path', async () => {
+      const transport = createMockLedgerTransport();
+      const signer = new TempleLedgerSigner(transport as any);
+
+      await signer.publicKey();
+      expect(transport.send).toHaveBeenCalledWith(
+        0x80,
+        0x03,
+        0x00,
+        DerivationType.ED25519,
+        buildLedgerPathBuffer("44'/1969'/0'/0'")
+      );
+    });
+
+    it('uses the requested custom 1729 Ledger path for APDU calls', async () => {
+      const transport = createMockLedgerTransport();
+      const signer = new TempleLedgerSigner(transport as any, "44'/1729'/1'/0'");
+
+      await signer.publicKey();
+      expect(transport.send).toHaveBeenCalledWith(
+        0x80,
+        0x03,
+        0x00,
+        DerivationType.ED25519,
+        buildLedgerPathBuffer("44'/1729'/1'/0'")
+      );
+    });
+
+    it('rejects unsupported Ledger derivation path prefixes', () => {
+      const transport = createMockLedgerTransport();
+
+      expect(() => new TempleLedgerSigner(transport as any, "44'/60'/0'/0'")).toThrow(
+        "Unsupported Ledger derivation path prefix"
+      );
+      expect(() => new TempleLedgerSigner(transport as any, "44'/17290'/0'/0'")).toThrow(
+        "Unsupported Ledger derivation path prefix"
+      );
+      expect(transport.send).not.toHaveBeenCalled();
+    });
+  });
+
   describe('verifySignature', () => {
     const assertSignatureRecognized = (curveCode: curves, accountIndex: number) => {
       const publicKey = PUBLIC_KEYS[curveCode][accountIndex];

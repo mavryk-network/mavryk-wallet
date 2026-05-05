@@ -72,7 +72,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       return { type: TempleMessageType.UnlockResponse };
 
     case TempleMessageType.EnsureAuthorizedRequest:
-      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId);
+      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId, req.interactive);
       return { type: TempleMessageType.EnsureAuthorizedResponse };
 
     case TempleMessageType.LockRequest:

@@ -122,7 +122,7 @@ function useReadyTemple() {
   // Ensure the selected account/network has a valid auth token before protected Mavryk API reads run.
   // No cleanup is needed because this is an idempotent one-shot sync with background auth state.
   useLayoutEffect(() => {
-    ensureAuthorized(account.publicKeyHash, network.id).catch(error => console.error(error));
+    ensureAuthorized(account.publicKeyHash, network.id, false).catch(error => console.error(error));
   }, [account.publicKeyHash, ensureAuthorized, network.id]);
 
   useContactsSync(account, allAccounts, network.id, settings);

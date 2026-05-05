@@ -117,10 +117,10 @@ describe('Ledger Signer tests', () => {
       const transport = createMockLedgerTransport();
 
       expect(() => new TempleLedgerSigner(transport as any, "44'/60'/0'/0'")).toThrow(
-        "Unsupported Ledger derivation path prefix"
+        'Unsupported Ledger derivation path prefix'
       );
       expect(() => new TempleLedgerSigner(transport as any, "44'/17290'/0'/0'")).toThrow(
-        "Unsupported Ledger derivation path prefix"
+        'Unsupported Ledger derivation path prefix'
       );
       expect(transport.send).not.toHaveBeenCalled();
     });

@@ -499,6 +499,7 @@ interface TempleEnsureAuthorizedRequest extends TempleMessageBase {
   type: TempleMessageType.EnsureAuthorizedRequest;
   accountPublicKeyHash?: string;
   networkId?: string;
+  interactive?: boolean;
 }
 
 interface TempleEnsureAuthorizedResponse extends TempleMessageBase {

@@ -58,7 +58,7 @@ export function useContactsSync(
 
     void (async () => {
       try {
-        await ensureAuthorized(contactsOwnerAddress, networkId);
+        await ensureAuthorized(contactsOwnerAddress, networkId, false);
         if (cancelled) return;
 
         const publicKey = await revealPublicKey(contactsOwnerAddress);

@@ -141,14 +141,18 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UnlockResponse);
   }, []);
 
-  const ensureAuthorized = useCallback(async (accountPublicKeyHash?: string, networkId?: string) => {
-    const res = await request({
-      type: TempleMessageType.EnsureAuthorizedRequest,
-      accountPublicKeyHash,
-      networkId
-    });
-    assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
-  }, []);
+  const ensureAuthorized = useCallback(
+    async (accountPublicKeyHash?: string, networkId?: string, interactive = true) => {
+      const res = await request({
+        type: TempleMessageType.EnsureAuthorizedRequest,
+        accountPublicKeyHash,
+        networkId,
+        interactive
+      });
+      assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
+    },
+    []
+  );
 
   const lock = useCallback(async () => {
     const res = await request({

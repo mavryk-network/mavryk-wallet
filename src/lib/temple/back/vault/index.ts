@@ -88,6 +88,8 @@ interface RemoveAccountEventPayload {
   publicKeyhash?: string;
 }
 
+type SignerCleanup = () => void | Promise<void>;
+
 export class Vault {
   static removeAccountsListeners: SyncFn<RemoveAccountEventPayload[]>[] = [];
   static async isExist() {
@@ -694,7 +696,7 @@ export class Vault {
 
   async getLedgerTezosPk(derivationPath = DEFAULT_LEDGER_TEZOS_DERIVATION_PATH, derivationType?: DerivationType) {
     return withError('Failed to connect get Ledger account public key hash', async () => {
-      let cleanup: EmptyFn | undefined;
+      let cleanup: SignerCleanup | undefined;
 
       try {
         const { signer, cleanup: cleanSigner } = await createLedgerSigner(derivationPath, derivationType);
@@ -704,7 +706,7 @@ export class Vault {
       } catch (e: any) {
         throw new PublicError(e.message);
       } finally {
-        cleanup?.();
+        await cleanup?.();
       }
     });
   }
@@ -855,11 +857,11 @@ export class Vault {
     try {
       return await factory(signer);
     } finally {
-      cleanup();
+      await cleanup();
     }
   }
 
-  private async getSigner(accPublicKeyHash: string): Promise<{ signer: Signer; cleanup: () => void }> {
+  private async getSigner(accPublicKeyHash: string): Promise<{ signer: Signer; cleanup: SignerCleanup }> {
     const allAccounts = await this.fetchAccounts();
     const acc = allAccounts.find(a => a.publicKeyHash === accPublicKeyHash);
     if (!acc) {

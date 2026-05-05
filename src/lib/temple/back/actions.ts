@@ -39,6 +39,7 @@ import {
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
+import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
 import {
   getCurrentPermission,
   requestPermission,
@@ -118,7 +119,8 @@ const ensureAuthorizedForAccount = async (
   vault: Vault,
   accountPkh?: string,
   networkId?: string,
-  accounts?: TempleAccount[]
+  accounts?: TempleAccount[],
+  interactive = true
 ) => {
   const allAccounts = accounts ?? (await vault.fetchAccounts());
   const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
@@ -137,6 +139,10 @@ const ensureAuthorizedForAccount = async (
     await refreshAuthTokens({ networkId, walletAddress: authWalletAddress });
     return;
   } catch {
+    if (!shouldPerformInteractiveAuthChallenge(allAccounts, authWalletAddress, interactive)) {
+      return;
+    }
+
     await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId);
   }
 };
@@ -417,11 +423,11 @@ export function createOrImportWallet(mnemonic?: string) {
   });
 }
 
-export function ensureAuthorized(accountPkh?: string, networkId?: string) {
+export function ensureAuthorized(accountPkh?: string, networkId?: string, interactive = true) {
   return withUnlocked(async ({ vault }) => {
     const accounts = await vault.fetchAccounts();
 
-    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts);
+    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts, interactive);
   });
 }
 

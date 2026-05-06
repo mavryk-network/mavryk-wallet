@@ -91,6 +91,14 @@ const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
   await syncAuthWalletAddresses(accounts);
 };
 
+const setupUnlockedVaultState = async (password: string) => {
+  const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
+  const [accounts, settings] = await Promise.all([vault.fetchAccounts(), vault.fetchSettings()]);
+  await syncAuthWalletAddresses(accounts);
+
+  return { vault, accounts, settings };
+};
+
 const getStoredSelectedAccountPkh = async () => {
   const { [ACCOUNT_PKH_STORAGE_KEY]: selectedAccountPkh } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
 
@@ -190,14 +198,16 @@ export async function isDAppEnabled() {
 }
 
 export function registerNewWallet(password: string, mnemonic?: string) {
-  return withInited(async () => {
-    const accountPkh = await Vault.spawn(password, mnemonic);
-    await unlock(password);
+  return withInited(() =>
+    enqueueUnlock(async () => {
+      const accountPkh = await Vault.spawn(password, mnemonic);
+      const unlockedState = await setupUnlockedVaultState(password);
+      await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
+      unlocked(unlockedState);
 
-    await withUnlocked(({ vault }) => performAuthForAccount(vault, accountPkh));
-
-    return accountPkh;
-  });
+      return accountPkh;
+    })
+  );
 }
 
 export async function lock() {
@@ -216,11 +226,9 @@ export async function lock() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
-      const accounts = await vault.fetchAccounts();
-      const settings = await vault.fetchSettings();
-      unlocked({ vault, accounts, settings });
-      await syncAuthWalletAddresses(accounts);
+      const unlockedState = await setupUnlockedVaultState(password);
+      const { vault, accounts } = unlockedState;
+      unlocked(unlockedState);
 
       const [selectedAccountPkh, networkId] = await Promise.all([
         getStoredSelectedAccountPkh(),

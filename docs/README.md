@@ -19,6 +19,7 @@ All the communications in the application work through the internal `Intercom` m
 
 - Top-level function set.
 - Work with Store, browser API and can call the methods of the current Vault instance.
+- New-wallet bootstrap authenticates the spawned account before broadcasting `unlocked`; the regular unlock path still broadcasts first and refreshes auth in the background on a best-effort basis.
 
 ### Store
 

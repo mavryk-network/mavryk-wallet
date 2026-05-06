@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 import { CurrencyToken } from 'app/templates/TopUpInput';
-import { EnvVars } from 'lib/env';
 import { MAVEN_METADATA } from 'lib/metadata';
 
 import {
@@ -13,18 +12,13 @@ import {
   GetRateResponseWithAmountTooLow
 } from './exolix.interface';
 
-const API_KEY = EnvVars.TEMPLE_WALLET_EXOLIX_API_KEY;
-
 /** Due to legal restrictions */
 const MAX_DOLLAR_VALUE = 10000;
 const MIN_ASSET_AMOUNT = 0.00001;
 const AVG_COMISSION = 300;
 
 const api = axios.create({
-  baseURL: 'https://exolix.com/api/v2',
-  headers: {
-    Authorization: API_KEY
-  }
+  baseURL: 'https://exolix.com/api/v2'
 });
 
 const currenciesLimit = 100;

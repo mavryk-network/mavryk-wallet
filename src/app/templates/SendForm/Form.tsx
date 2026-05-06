@@ -408,8 +408,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
             type: 'transaction',
             sender: acc.publicKeyHash,
             estimation: estmtn,
-            amount: tokensToAtoms(actualAmount, assetMetadata?.decimals).toString(),
-            to: toResolved
+            amount: actualAmount,
+            to: toResolved,
+            assetSlug,
+            feeMumav: fee
           });
           if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }

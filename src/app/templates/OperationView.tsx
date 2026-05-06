@@ -5,6 +5,7 @@ import { ReactComponent as EyeIcon } from 'app/icons/eye.svg';
 import { ReactComponent as HashIcon } from 'app/icons/hash.svg';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
+import { hasDisplayableRawPayload } from 'app/templates/raw-payload.helpers';
 import RawPayloadView from 'app/templates/RawPayloadView';
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { T, t } from 'lib/i18n';
@@ -42,6 +43,17 @@ const OperationView: FC<OperationViewProps> = ({
     }
   }, [payload]);
 
+  const rawPayload = useMemo(() => {
+    switch (payload.type) {
+      case 'confirm_operations':
+        return payload.rawToSign ?? payload.opParams;
+      case 'sign':
+        return payload.preview;
+      default:
+        return null;
+    }
+  }, [payload]);
+
   const rawExpensesData = useMemo(
     () => tryParseExpenses(contentToParse, payload.sourcePkh),
     [contentToParse, payload.sourcePkh]
@@ -58,6 +70,8 @@ const OperationView: FC<OperationViewProps> = ({
       ...restRaw
     }));
   }, [rawExpensesData]);
+
+  const hasRawPayload = useMemo(() => hasDisplayableRawPayload(rawPayload), [rawPayload]);
 
   const signPayloadFormats = useMemo(() => {
     const rawFormat = {
@@ -76,7 +90,7 @@ const OperationView: FC<OperationViewProps> = ({
     if (payload.type === 'confirm_operations') {
       return [
         ...prettyViewFormats,
-        rawFormat,
+        ...(hasRawPayload ? [rawFormat] : []),
         ...(payload.bytesToSign
           ? [
               {
@@ -91,14 +105,14 @@ const OperationView: FC<OperationViewProps> = ({
 
     return [
       ...(rawExpensesData.length > 0 ? prettyViewFormats : []),
-      rawFormat,
+      ...(hasRawPayload ? [rawFormat] : []),
       {
         key: 'bytes',
         name: t('bytes'),
         Icon: HashIcon
       }
     ];
-  }, [payload, rawExpensesData]);
+  }, [hasRawPayload, payload, rawExpensesData]);
 
   const [spFormat, setSpFormat] = useState(signPayloadFormats[0]);
 
@@ -123,12 +137,12 @@ const OperationView: FC<OperationViewProps> = ({
         </div>
       )}
 
-      {payload.type === 'confirm_operations' && spFormat.key === 'raw' && (
+      {spFormat.key === 'raw' && hasRawPayload && (
         <OperationsBanner
-          opParams={payload.rawToSign ?? payload.opParams}
+          opParams={rawPayload}
           jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
-          modifiedTotalFee={modifyFeeAndLimit?.totalFee}
-          modifiedStorageLimit={modifyFeeAndLimit?.storageLimit ?? 0}
+          modifiedTotalFee={isOperationPayload ? modifyFeeAndLimit?.totalFee : undefined}
+          modifiedStorageLimit={isOperationPayload ? modifyFeeAndLimit?.storageLimit ?? 0 : undefined}
         />
       )}
 

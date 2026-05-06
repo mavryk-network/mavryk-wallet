@@ -19,7 +19,7 @@ import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
 import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
-import { atomsToTokens, tokensToAtoms } from 'lib/temple/helpers';
+import { atomsToTokens } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -169,7 +169,7 @@ export const IncreaseStake = () => {
           operation: op,
           type: 'staking',
           sender: account.publicKeyHash,
-          amount: tokensToAtoms(amount, assetMetadata?.decimals ?? MAVEN_METADATA.decimals).toString(),
+          amount: amtBN.toNumber(),
           estimation: estimation,
           baker: myBakerPkh,
           kind: 'stake'

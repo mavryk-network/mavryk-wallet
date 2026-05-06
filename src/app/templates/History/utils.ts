@@ -5,10 +5,15 @@ import { t } from 'lib/i18n';
 import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import {
+  HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
+  HistoryItemOriginationOp,
+  HistoryItemOtherOp,
   HistoryItemStatus,
+  HistoryItemStakingOp,
   HistoryItemTransactionOp,
   StakingActions,
+  IndividualHistoryItem,
   UserHistoryItem
 } from 'lib/temple/history/types';
 
@@ -74,6 +79,71 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
 
   return slugs;
 }
+
+const getTransactionTargetAddress = (operation?: Partial<HistoryItemTransactionOp>) =>
+  operation?.destination?.address ?? operation?.tokenTransfers?.recipients?.[0]?.to.address;
+
+export const getHistoryOperationAddress = (
+  item: IndividualHistoryItem | null | undefined,
+  originalHistoryItem?: UserHistoryItem
+) => {
+  if (!item) return '';
+
+  switch (item.type) {
+    case HistoryItemOpTypeEnum.Delegation: {
+      const delegationOp = item as HistoryItemDelegationOp;
+
+      return (
+        delegationOp.newDelegate?.address ??
+        delegationOp.prevDelegate?.address ??
+        delegationOp.source.address ??
+        delegationOp.hash
+      );
+    }
+
+    case HistoryItemOpTypeEnum.Staking: {
+      const stakingOp = item as HistoryItemStakingOp;
+
+      return stakingOp.baker?.address ?? stakingOp.sender?.address ?? stakingOp.source.address ?? stakingOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Origination: {
+      const originationOp = item as HistoryItemOriginationOp;
+
+      return originationOp.originatedContract?.address ?? originationOp.source.address ?? originationOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.TransferFrom:
+      return item.source.address ?? getTransactionTargetAddress(item as HistoryItemTransactionOp) ?? item.hash;
+
+    case HistoryItemOpTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Swap: {
+      const txOp = item as HistoryItemTransactionOp;
+
+      return getTransactionTargetAddress(txOp) ?? txOp.source.address ?? txOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Multiple: {
+      const groupedOperation =
+        originalHistoryItem?.operations.find(operation =>
+          getTransactionTargetAddress(operation as HistoryItemTransactionOp)
+        ) ?? originalHistoryItem?.operations[0];
+
+      return getHistoryOperationAddress(groupedOperation, undefined) || item.source.address || item.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Reveal:
+      return item.source.address ?? item.hash;
+
+    case HistoryItemOpTypeEnum.Other:
+    default: {
+      const otherOp = item as HistoryItemOtherOp;
+
+      return otherOp.destination?.address ?? otherOp.source.address ?? otherOp.hash;
+    }
+  }
+};
 
 export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   const diff = [...moneyDiffs.filter(m => !new BigNumber(m.diff).isZero())];

@@ -16,7 +16,6 @@ import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { getPredefinedBaker } from 'lib/temple/front/baking/utils';
-import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
@@ -42,6 +41,7 @@ import {
   alterIpfsUrl,
   deriveStatusColorClassName,
   getAssetsFromOperations,
+  getHistoryOperationAddress,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
 } from './utils';
@@ -87,25 +87,22 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
         gasFee: number;
         storageFee: number;
         networkFee: number;
-        gasUsed: number;
-        storageUsed: number;
+        burnedFromFees: number;
       }>(
         (acc, item) => {
-          acc.gasFee += item.bakerFee;
-          acc.storageFee += item.storageFee;
-          acc.gasUsed += item.gasUsed;
-          acc.storageUsed += item.storageUsed;
-
-          acc.networkFee = acc.gasFee + acc.storageFee;
+          acc.gasFee += item.networkFees?.gasFee ?? 0;
+          acc.storageFee += item.networkFees?.storageFee ?? 0;
+          acc.networkFee += item.networkFees?.totalFee ?? 0;
+          acc.burnedFromFees += item.networkFees?.burnedFromFees ?? 0;
 
           return acc;
         },
-        { gasFee: 0, storageFee: 0, networkFee: 0, gasUsed: 0, storageUsed: 0 }
+        { gasFee: 0, storageFee: 0, networkFee: 0, burnedFromFees: 0 }
       ),
     [historyItem?.operations]
   );
 
-  const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.storageFee) * 0.5 : 0), [fees]);
+  const burnedFee = useMemo(() => fees?.burnedFromFees ?? 0, [fees]);
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 
@@ -261,7 +258,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={MAV_TOKEN_SLUG}
-                value={`${mumavToTz(fees?.networkFee ?? 0)}`}
+                value={`${fees?.networkFee ?? 0}`}
                 showEqualSymbol={false}
                 className="text-base-plus"
                 roundingMode={BigNumber.ROUND_CEIL}
@@ -269,7 +266,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               />
 
               <div className="text-sm text-secondary-white">
-                <span>-{mumavToTz(fees?.networkFee ?? 0).toFixed()}</span>
+                <span>-{new BigNumber(fees?.networkFee ?? 0).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </div>
@@ -288,7 +285,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <T id="gasFee" />
               </span>
               <span className="text-secondary-white flex items-center capitalize">
-                <span>-{mumavToTz(fees?.gasFee ?? 0).toFixed()}</span>
+                <span>-{new BigNumber(fees?.gasFee ?? 0).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </span>
@@ -299,7 +296,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               </span>
               <span className="text-secondary-white">
                 <span className="text-secondary-white flex items-center">
-                  <span>-{mumavToTz(fees?.storageFee ?? 0).toFixed()}</span>
+                  <span>-{new BigNumber(fees?.storageFee ?? 0).toFixed()}</span>
                   &nbsp;
                   <span>{mainAssetSymbol}</span>
                 </span>
@@ -310,7 +307,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 <T id="burnedFromFees" />
               </span>
               <span className="text-secondary-white">
-                <span>-{mumavToTz(burnedFee).toFixed()}</span>
+                <span>-{new BigNumber(burnedFee).toFixed()}</span>
                 &nbsp;
                 <span>{mainAssetSymbol}</span>
               </span>
@@ -379,7 +376,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.Delegation:
         const opDelegate = item as HistoryItemDelegationOp;
 
-        const delegateAddress = opDelegate.newDelegate?.address || opDelegate.source.address;
+        const delegateAddress = getHistoryOperationAddress(opDelegate, historyItem);
         const delegateBaker = getPredefinedBaker(delegateAddress);
 
         return {
@@ -390,7 +387,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.Staking:
         const opStaking = item as HistoryItemStakingOp;
 
-        const stakingAddress = opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address;
+        const stakingAddress = getHistoryOperationAddress(opStaking, historyItem);
         const stakingBaker = getPredefinedBaker(stakingAddress);
 
         return {
@@ -403,13 +400,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opOriginate = item as HistoryItemOriginationOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opOriginate.originatedContract?.address
+          address: getHistoryOperationAddress(opOriginate, historyItem)
         };
 
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = item as HistoryItemTransactionOp;
 
-        const interactionAddress = opInteract.destination.address;
+        const interactionAddress = getHistoryOperationAddress(opInteract, historyItem);
         const interactionBaker = getPredefinedBaker(interactionAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -421,13 +418,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
 
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opSwap.destination.address
+          address: getHistoryOperationAddress(opSwap, historyItem)
         };
 
       case HistoryItemOpTypeEnum.TransferFrom:
         const opFrom = item as HistoryItemTransactionOp;
 
-        const transferFromAddress = opFrom.source.address;
+        const transferFromAddress = getHistoryOperationAddress(opFrom, historyItem);
         const transferFromBaker = getPredefinedBaker(transferFromAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -438,7 +435,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = item as HistoryItemTransactionOp;
 
-        const transferToAddress = opTo.destination.address;
+        const transferToAddress = getHistoryOperationAddress(opTo, historyItem);
         const transferToBaker = getPredefinedBaker(transferToAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -449,14 +446,14 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opReveal = item as HistoryItemTransactionOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opReveal.destination.address
+          address: getHistoryOperationAddress(opReveal, historyItem)
         };
 
       // Other
       default:
         const opOther = item as HistoryItemOtherOp;
 
-        const otherAddress = opOther.destination?.address || opOther.source.address || opOther.hash;
+        const otherAddress = getHistoryOperationAddress(opOther, historyItem);
         const otherBaker = getPredefinedBaker(otherAddress);
 
         return {

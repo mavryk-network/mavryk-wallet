@@ -44,7 +44,9 @@ const ContactsDropdownItem: FC<ContactsDropdownItemProps> = ({ contact, active, 
 
       <div className="ml-2 flex flex-1 w-full">
         <div className="flex flex-col justify-between flex-1">
-          <Name className="text-base-plus text-white text-left">{contact.name}</Name>
+          <Name tooltipContent={contact.name} className="text-base-plus text-white text-left">
+            {contact.name}
+          </Name>
 
           <span
             className={classNames('text-sm font-light text-white')}
@@ -96,7 +98,9 @@ export const ContactsDropdownItemSecondary: FC<ContactsDropdownItemProps> = ({ c
       <div className="ml-2 flex flex-1 w-full relative">
         <div className="flex flex-col justify-between flex-1">
           <div className="flex items-center gap-1">
-            <Name className="text-base-plus text-white text-left">{contact.name}</Name>
+            <Name tooltipContent={contact.name} className="text-base-plus text-white text-left">
+              {contact.name}
+            </Name>
 
             {contact.accountInWallet ? (
               <div className="flex items-center">

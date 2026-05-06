@@ -1,5 +1,3 @@
-import BigNumber from 'bignumber.js';
-
 export enum ContentScriptType {
   ExternalLinksActivity = 'ExternalLinksActivity',
   ExternalPageLocation = 'ExternalPageLocation',
@@ -56,8 +54,6 @@ export const AD_HIDING_TIMEOUT = 12 * 3600 * 1000;
 
 export const AD_SEEN_THRESHOLD = 0.5;
 
-export const HYPELAB_STUB_CAMPAIGN_SLUG = 'e55d2795d2';
-
 export const TERMS_OF_USE_URL = 'https://www.templewallet.com/terms';
 
 export const PRIVACY_POLICY_URL = 'https://www.templewallet.com/privacy';
@@ -72,6 +68,7 @@ export const AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG = 'At least one HD account should r
 export const ACCOUNT_NAME_COLLISION_ERR_MSG = 'An account with the same name already exists in the group';
 
 export const DEFAULT_TEZOS_DERIVATION_PATH = "m/44'/1729'/0'/0'";
+export const DEFAULT_LEDGER_TEZOS_DERIVATION_PATH = "m/44'/1969'/0'/0'";
 
 export const DEFAULT_EVM_DERIVATION_PATH = "m/44'/60'/0'/0/0";
 

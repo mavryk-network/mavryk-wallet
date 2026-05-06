@@ -18,9 +18,7 @@ import {
   overrideElementStyles,
   observeIntersection,
   subscribeToIframeLoadIfNecessary,
-  makeTKeyAdView,
-  makeHypelabAdView,
-  makePersonaAdView
+  makeTKeyAdView
 } from './content-scripts/replace-ads';
 import type { ReplaceElementWithAdAction } from './content-scripts/replace-ads/ads-actions/types';
 
@@ -113,12 +111,7 @@ const processInsertAdActionOnce = async (action: InsertAdAction, ad: AdMetadata,
 
   const { providerName } = source;
 
-  const { element: adElement, postAppend } =
-    providerName === 'Temple'
-      ? makeTKeyAdView(dimensions.width, dimensions.height, elementStyle)
-      : providerName === 'HypeLab'
-      ? makeHypelabAdView(source, dimensions, elementStyle)
-      : makePersonaAdView(source.shape, dimensions, elementStyle);
+  const { element: adElement, postAppend } = makeTKeyAdView(dimensions.width, dimensions.height, elementStyle);
 
   adElement.setAttribute(TEMPLE_WALLET_AD_ATTRIBUTE_NAME, 'true');
   wrapperElement.appendChild(adElement);

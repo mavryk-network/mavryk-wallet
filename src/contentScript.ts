@@ -2,6 +2,7 @@ import { MavrykWalletPageMessage, MavrykWalletPageMessageType } from '@mavrykdyn
 import browser from 'webextension-polyfill';
 
 import { ContentScriptType, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
+import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
@@ -64,7 +65,7 @@ if (window.frameElement === null) {
 }
 
 const SENDER = {
-  id: browser.runtime.id,
+  id: PUBLIC_EXTENSION_ID,
   name: 'Mavryk Wallet',
   iconUrl: 'https://mavryk.org/logo.png'
 };

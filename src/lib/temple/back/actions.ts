@@ -8,11 +8,14 @@ import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
 import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
+import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
+import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
-import { loadChainId } from 'lib/temple/helpers';
+import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
 import {
+  DerivationType,
   TempleState,
   TempleMessageType,
   TempleRequest,
@@ -20,10 +23,23 @@ import {
   TempleSharedStorageKey,
   TempleChainKind,
   SaveLedgerAccountInput,
-  TempleAccountType
+  TempleAccountType,
+  TempleAccount
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
+import {
+  getAuthTokensFromStorage,
+  getSelectedNetworkIdFromStorage,
+  isJwtExpiringSoon,
+  logoutAuth,
+  refreshAuthTokens,
+  requestAuthChallenge,
+  verifyAuthSignature
+} from 'mavryk/api';
+import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
+import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
+import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
 import {
   getCurrentPermission,
   requestPermission,
@@ -50,16 +66,101 @@ import {
 } from './store';
 import { Vault } from './vault';
 
-export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
+export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,100}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
 const AUTODECLINE_AFTER = 60_000;
-const BEACON_ID = `temple_wallet_${browser.runtime.id}`;
+const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
+const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
 
 const enqueueDApp = createQueue();
 const enqueueUnlock = createQueue();
+
+const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
+  const prevIds = new Set(prev.map(acc => acc.id));
+  return next.find(acc => !prevIds.has(acc.id));
+};
+
+const syncAuthWalletAddresses = (accounts: TempleAccount[]) =>
+  setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts));
+
+const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
+  accountsUpdated(accounts);
+  await syncAuthWalletAddresses(accounts);
+};
+
+const setupUnlockedVaultState = async (password: string) => {
+  const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
+  const [accounts, settings] = await Promise.all([vault.fetchAccounts(), vault.fetchSettings()]);
+  await syncAuthWalletAddresses(accounts);
+
+  return { vault, accounts, settings };
+};
+
+const getStoredSelectedAccountPkh = async () => {
+  const { [ACCOUNT_PKH_STORAGE_KEY]: selectedAccountPkh } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
+
+  return typeof selectedAccountPkh === 'string' ? selectedAccountPkh : undefined;
+};
+
+const performAuthForAccount = async (
+  vault: Vault,
+  accountPkh: string,
+  accounts?: TempleAccount[],
+  networkId?: string
+) => {
+  const allAccounts = accounts ?? (await vault.fetchAccounts());
+  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+
+  if (!authWalletAddress) {
+    return;
+  }
+
+  const { nonce, challenge } = await requestAuthChallenge({ walletAddress: authWalletAddress, networkId });
+  const signature = await signAuthChallengeWithVault(vault, authWalletAddress, challenge);
+  await verifyAuthSignature({ nonce, signature, walletAddress: authWalletAddress, networkId });
+};
+
+const ensureAuthorizedForAccount = async (
+  vault: Vault,
+  accountPkh?: string,
+  networkId?: string,
+  accounts?: TempleAccount[],
+  interactive = true
+) => {
+  const allAccounts = accounts ?? (await vault.fetchAccounts());
+  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+
+  if (!authWalletAddress) {
+    return;
+  }
+
+  const { accessToken } = await getAuthTokensFromStorage({ walletAddress: authWalletAddress, networkId });
+
+  if (accessToken && !isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS)) {
+    return;
+  }
+
+  try {
+    await refreshAuthTokens({ networkId, walletAddress: authWalletAddress });
+    return;
+  } catch {
+    if (!shouldPerformInteractiveAuthChallenge(allAccounts, authWalletAddress, interactive)) {
+      return;
+    }
+
+    await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId);
+  }
+};
+
+const shouldLockOnSessionRecovery = async () => {
+  const { accessToken } = await getAuthTokensFromStorage();
+  if (!accessToken) return true;
+
+  return isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS);
+};
 
 export async function init() {
   const vaultExist = await Vault.isExist();
@@ -97,16 +198,25 @@ export async function isDAppEnabled() {
 }
 
 export function registerNewWallet(password: string, mnemonic?: string) {
-  return withInited(async () => {
-    const accountPkh = await Vault.spawn(password, mnemonic);
-    await unlock(password);
+  return withInited(() =>
+    enqueueUnlock(async () => {
+      const accountPkh = await Vault.spawn(password, mnemonic);
+      const unlockedState = await setupUnlockedVaultState(password);
+      await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
+      unlocked(unlockedState);
 
-    return accountPkh;
-  });
+      return accountPkh;
+    })
+  );
 }
 
 export async function lock() {
   if (!store.getState().inited) initLocked = true;
+  try {
+    await logoutAuth();
+  } catch (err) {
+    console.error(err);
+  }
   if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
   return withInited(() => {
     locked();
@@ -116,10 +226,20 @@ export async function lock() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
-      const accounts = await vault.fetchAccounts();
-      const settings = await vault.fetchSettings();
-      unlocked({ vault, accounts, settings });
+      const unlockedState = await setupUnlockedVaultState(password);
+      const { vault, accounts } = unlockedState;
+      unlocked(unlockedState);
+
+      const [selectedAccountPkh, networkId] = await Promise.all([
+        getStoredSelectedAccountPkh(),
+        getSelectedNetworkIdFromStorage()
+      ]);
+
+      try {
+        await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
+      } catch (error) {
+        console.error(error);
+      }
     })
   );
 }
@@ -128,9 +248,16 @@ export async function unlockFromSession() {
   await enqueueUnlock(async () => {
     const vault = await Vault.recoverFromSession();
     if (vault == null) return;
+
+    if (await shouldLockOnSessionRecovery()) {
+      await lock();
+      return;
+    }
+
     const accounts = await vault.fetchAccounts();
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
+    await syncAuthWalletAddresses(accounts);
   });
 }
 
@@ -147,10 +274,16 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
       }
     }
 
+    const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.createHDAccount(walletId, name, hdIndex);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
+    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
+    if (newAccount) {
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
+    }
   });
 }
+
 export function revealMnemonic(walletId: string, password: string) {
   return withUnlocked(() => Vault.revealMnemonic(walletId, password));
 }
@@ -169,8 +302,13 @@ export function revealPublicKey(accPublicKeyHash: string) {
 
 export function removeAccount(id: string, password: string) {
   return withUnlocked(async () => {
+    try {
+      await logoutAuth();
+    } catch (err) {
+      console.error(err);
+    }
     const { newAccounts } = await Vault.removeAccount(id, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
@@ -189,49 +327,68 @@ export function editAccount(accPublicKeyHash: string, name: string) {
 export function updateAccountKYC(accPublicKeyHash: string, isKYC: boolean) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.updateAccountKYCStatus(accPublicKeyHash, isKYC);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
 export function importAccount(chainId: string, chain: TempleChainKind, privateKey: string, encPassword?: string) {
   return withUnlocked(async ({ vault }) => {
+    const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importAccount(chain, chainId, privateKey, encPassword);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
+    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
+    if (newAccount) {
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
+    }
   });
 }
 
 export function importMnemonicAccount(mnemonic: string, chainId: string, password?: string, derivationPath?: string) {
   return withUnlocked(async ({ vault }) => {
+    const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importMnemonicAccount(mnemonic, chainId, password, derivationPath);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
+    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
+    if (newAccount) {
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
+    }
   });
 }
 
 export function importFundraiserAccount(email: string, password: string, mnemonic: string, chainId: string) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.importFundraiserAccount(email, password, mnemonic, chainId);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
 export function importManagedKTAccount(address: string, chainId: string, owner: string) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.importManagedKTAccount(address, chainId, owner);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
 export function importWatchOnlyAccount(address: string, chain: TempleChainKind, chainId?: string, name?: string) {
   return withUnlocked(async ({ vault }) => {
+    const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importWatchOnlyAccount(chain, address, chainId, name);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
+    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
+    if (newAccount) {
+      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
+    }
   });
+}
+
+export function getLedgerTezosPk(derivationPath?: string, derivationType?: DerivationType) {
+  return withUnlocked(async ({ vault }) => await vault.getLedgerTezosPk(derivationPath, derivationType));
 }
 
 export function createLedgerAccount(input: SaveLedgerAccountInput) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.createLedgerAccount(input);
-    accountsUpdated(updatedAccounts);
+    await updateAccountsAndSyncAuth(updatedAccounts);
   });
 }
 
@@ -245,22 +402,40 @@ export function updateSettings(settings: Partial<TempleSettings>) {
 
 export function removeHdWallet(id: string, password: string) {
   return withUnlocked(async () => {
+    try {
+      await logoutAuth();
+    } catch (err) {
+      console.error(err);
+    }
     const { newAccounts } = await Vault.removeHdWallet(id, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
 export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
   return withUnlocked(async () => {
     const newAccounts = await Vault.removeAccountsByType(type, password);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
   });
 }
 
 export function createOrImportWallet(mnemonic?: string) {
   return withUnlocked(async ({ vault }) => {
+    const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await vault.createOrImportWallet(mnemonic);
-    accountsUpdated(newAccounts);
+    await updateAccountsAndSyncAuth(newAccounts);
+    const newAccount = findNewAccount(prevAccounts, newAccounts);
+    if (newAccount) {
+      await performAuthForAccount(vault, newAccount.publicKeyHash, newAccounts);
+    }
+  });
+}
+
+export function ensureAuthorized(accountPkh?: string, networkId?: string, interactive = true) {
+  return withUnlocked(async ({ vault }) => {
+    const accounts = await vault.fetchAccounts();
+
+    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts, interactive);
   });
 }
 

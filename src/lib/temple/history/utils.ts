@@ -14,7 +14,11 @@ import {
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { isTruthy } from 'lib/utils';
-import type { MavrykHistoryNetworkFees, MavrykHistoryOperation, MavrykHistoryOperationDetails } from 'mavryk/api/history';
+import type {
+  MavrykHistoryNetworkFees,
+  MavrykHistoryOperation,
+  MavrykHistoryOperationDetails
+} from 'mavryk/api/history';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import type { AssetMetadataBase } from '../../metadata';
@@ -632,7 +636,9 @@ export function mavrykHistoryGroupToHistoryItem(
     type,
     hash: group.hash,
     addedAt:
-      mainOperation?.addedAt ?? firstOperation?.addedAt ?? (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
+      mainOperation?.addedAt ??
+      firstOperation?.addedAt ??
+      (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
     status,
     operations: historyItemOperations,
     mainOperation,

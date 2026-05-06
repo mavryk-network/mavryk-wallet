@@ -163,7 +163,9 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
   if (!historyItem) return [];
 
   if (historyItem.displayMoneyDiffs?.length) {
-    return allowZero ? historyItem.displayMoneyDiffs : historyItem.displayMoneyDiffs.filter(({ diff }) => !isZero(diff));
+    return allowZero
+      ? historyItem.displayMoneyDiffs
+      : historyItem.displayMoneyDiffs.filter(({ diff }) => !isZero(diff));
   }
 
   const diffs: MoneyDiff[] = [];

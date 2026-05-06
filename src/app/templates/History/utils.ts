@@ -160,7 +160,8 @@ export const getHistoryOperationAddress = (
         getMainHistoryOperation(originalHistoryItem) ??
         originalHistoryItem?.operations.find(operation =>
           getTransactionTargetAddress(operation as HistoryItemTransactionOp)
-        ) ?? originalHistoryItem?.operations[0];
+        ) ??
+        originalHistoryItem?.operations[0];
 
       return getHistoryOperationAddress(groupedOperation, undefined) || item.source.address || item.hash;
     }

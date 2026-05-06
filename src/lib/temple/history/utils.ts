@@ -2,7 +2,8 @@ import { Estimate, TransactionOperation, WalletOperation } from '@mavrykdynamics
 import { BigNumber } from 'bignumber.js';
 import dayjs from 'dayjs';
 
-import { isKnownChainId, TzktAlias, TzktApiChainId, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
+import { isKnownChainId } from 'lib/apis/tzkt';
+import type { TzktAlias, TzktApiChainId, TzktOperation, TzktTransactionOperation } from 'lib/apis/tzkt';
 import {
   isTzktOperParam,
   isTzktOperParam_Fa12,
@@ -13,14 +14,15 @@ import {
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { isTruthy } from 'lib/utils';
-import { MavrykHistoryNetworkFees, MavrykHistoryOperation, MavrykHistoryOperationDetails } from 'mavryk/api/history';
+import type { MavrykHistoryNetworkFees, MavrykHistoryOperation, MavrykHistoryOperationDetails } from 'mavryk/api/history';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
-import { AssetMetadataBase } from '../../metadata';
+import type { AssetMetadataBase } from '../../metadata';
 
 import { getMoneyDiff, isZero } from './helpers';
 import {
   Fa2TransferSummaryArray,
+  HistoryDisplayMoneyDiff,
   HistoryItemDelegationOp,
   HistoryItemOperationBase,
   HistoryItemOpReveal,
@@ -52,6 +54,12 @@ type MavrykHistoryOperationsGroup = {
 };
 
 const MVRK_CURRENCY = 'MVRK';
+const BACKEND_SUMMARY_DIFF_TYPES = new Set<HistoryItemOpTypeEnum>([
+  HistoryItemOpTypeEnum.Interaction,
+  HistoryItemOpTypeEnum.Multiple,
+  HistoryItemOpTypeEnum.TransferTo,
+  HistoryItemOpTypeEnum.TransferFrom
+]);
 
 const backendNumberToMumav = (value?: number) => tzToMumav(value ?? 0).toNumber();
 const getBackendOperationTimestamp = (operation: MavrykHistoryOperation) =>
@@ -159,21 +167,11 @@ const buildBackendOperationBase = (
   index: number
 ): HistoryItemOperationBase => {
   const networkFees = normalizeBackendFees(operation.networkFees);
-  const operationType = getBackendOperationType(operation);
   const reducedOperation: HistoryItemOperationBase = {
     id: getBackendOperationId(operation, index),
     level: operation.level ?? 0,
     source,
-    amountSigned: getAmountSigned(
-      {
-        type: operationType as TzktOperation['type'],
-        sender: source,
-        baker: undefined
-      } as TzktOperation,
-      address,
-      amount,
-      source
-    ),
+    amountSigned: getBackendAmountSigned(operation, address, amount, source),
     status: stringToHistoryItemStatus(operation.status),
     addedAt: getBackendOperationTimestamp(operation),
     block: operation.block ?? '',
@@ -201,6 +199,56 @@ const getBackendTokenContext = (assetSlug?: string) => {
     contractAddress,
     tokenId: Number(tokenIdRaw ?? '0')
   };
+};
+
+const getBackendHistoryMember = (operation: MavrykHistoryOperation) =>
+  transformToHistoryMember(operation.details?.from ?? operation.parameter?.from ?? operation.sender ?? '');
+
+const getBackendAmountSigned = (
+  operation: MavrykHistoryOperation,
+  address: string,
+  amount: number,
+  source: HistoryMember
+) =>
+  getAmountSigned(
+    {
+      type: getBackendOperationType(operation) as TzktOperation['type'],
+      sender: source,
+      baker: undefined
+    } as TzktOperation,
+    address,
+    amount,
+    source
+  );
+
+const buildBackendSummaryDisplayMoneyDiffs = (
+  group: MavrykHistoryOperationsGroup,
+  type: HistoryItemOpTypeEnum,
+  context: BackendHistoryNormalizationContext
+): HistoryDisplayMoneyDiff[] | undefined => {
+  const summaryOperation = group.summaryOperation;
+  if (!summaryOperation || !BACKEND_SUMMARY_DIFF_TYPES.has(type)) return undefined;
+
+  const tokenContext = getBackendTokenContext(context.assetSlug);
+  const details = summaryOperation.details ?? undefined;
+  const amount = details?.amount ?? summaryOperation.amount;
+
+  if (amount == null) return undefined;
+
+  // API history amounts are already normalized display units. Never recompute them from nested raw operations.
+  const contractAddress = normalizeBackendContractAddress(
+    details?.tokenAddress ?? tokenContext?.contractAddress,
+    details?.currency
+  );
+
+  if (!contractAddress) return undefined;
+
+  const tokenId = details?.tokenId ?? tokenContext?.tokenId ?? 0;
+  const assetSlug = contractAddress === MAV_TOKEN_SLUG ? MAV_TOKEN_SLUG : toTokenSlug(contractAddress, tokenId);
+  const source = getBackendHistoryMember(summaryOperation);
+  const diff = getMoneyDiff(getBackendAmountSigned(summaryOperation, context.address, amount, source));
+
+  return [{ assetSlug, diff }];
 };
 
 const buildBackendTokenTransfer = (
@@ -551,6 +599,7 @@ export function mavrykHistoryGroupToHistoryItem(
       : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
   );
   const type = deriveBackendItemType(group, historyItemOperations, context.address);
+  const displayMoneyDiffs = buildBackendSummaryDisplayMoneyDiffs(group, type, context);
   const firstOperation = historyItemOperations[0];
   const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
 
@@ -560,8 +609,10 @@ export function mavrykHistoryGroupToHistoryItem(
     addedAt: firstOperation?.addedAt ?? (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
     status,
     operations: historyItemOperations,
+    displayMoneyDiffs,
+    hideOperationMoneyDiffs: displayMoneyDiffs ? true : undefined,
     highlightedOperationIndex: 0,
-    isGroupedOp: historyItemOperations.length > 1,
+    isGroupedOp: Boolean(group.summaryOperation) || historyItemOperations.length > 1,
     firstOperation,
     oldestOperation
   };

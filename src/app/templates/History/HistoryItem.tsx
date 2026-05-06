@@ -38,6 +38,10 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
+  const operationMoneyDiffs = useMemo(
+    () => (historyItem.hideOperationMoneyDiffs ? [] : moneyDiffs),
+    [historyItem.hideOperationMoneyDiffs, moneyDiffs]
+  );
 
   const base = useMemo(
     () =>
@@ -67,8 +71,8 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   // 0 to show all operations
   const moneyDiffsRest = useMemo(
-    () => (isSwapOperation ? moneyDiffs : moneyDiffs.slice(1)),
-    [moneyDiffs, isSwapOperation]
+    () => (isSwapOperation ? operationMoneyDiffs : operationMoneyDiffs.slice(1)),
+    [operationMoneyDiffs, isSwapOperation]
   );
 
   const filteredMoneyDiffBase = useMemo(

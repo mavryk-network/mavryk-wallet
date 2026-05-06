@@ -69,6 +69,10 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const tokensMetadata = useMultipleAssetsMetadata(slugsForMultiple);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
+  const operationMoneyDiffs = useMemo(
+    () => (historyItem?.hideOperationMoneyDiffs ? [] : moneyDiffs),
+    [historyItem?.hideOperationMoneyDiffs, moneyDiffs]
+  );
 
   const [showFeeDetails, setShowFeedetails] = useState(true);
   const [expandedTxHistory, setExpandedtxHistory] = useState(false);
@@ -327,7 +331,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                   <div key={i} className={clsx(i === 0 && '-mt-2')}>
                     <OpertionStackItem
                       item={item}
-                      moneyDiff={moneyDiffs[i]}
+                      moneyDiff={operationMoneyDiffs[i]}
                       userAddress={publicKeyHash}
                       isTiny
                       last={arr.length > 2 && i === arr.length - 1}

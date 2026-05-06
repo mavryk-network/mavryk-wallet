@@ -18,6 +18,10 @@ import {
 } from 'lib/temple/history/types';
 
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
+  if (historyItem?.displayMoneyDiffs?.length) {
+    return slug ?? historyItem.displayMoneyDiffs[0].assetSlug;
+  }
+
   if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
 
   return slug || !historyItem.operations[0]?.contractAddress
@@ -57,6 +61,10 @@ export const getOperationTypeI18nKeyVerb = (type: HistoryItemOpTypeEnum) => {
 };
 
 export function getAssetsFromOperations(item: UserHistoryItem | null | undefined) {
+  if (item?.displayMoneyDiffs?.length) {
+    return [...new Set(item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug).filter(Boolean))];
+  }
+
   if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {

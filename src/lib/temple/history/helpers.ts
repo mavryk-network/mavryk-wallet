@@ -6,6 +6,7 @@ import type { UserHistoryItem } from 'lib/temple/history';
 import { useAssetMetadata } from '../../metadata';
 
 import {
+  HistoryDisplayMoneyDiff,
   HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
   HistoryItemOperationBase,
@@ -156,15 +157,16 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   return opStack;
 }
 
-export interface MoneyDiff {
-  assetSlug: string;
-  diff: string;
-}
+export type MoneyDiff = HistoryDisplayMoneyDiff;
 
 export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allowZero = false) {
-  const diffs: MoneyDiff[] = [];
+  if (!historyItem) return [];
 
-  if (!historyItem) return diffs;
+  if (historyItem.displayMoneyDiffs?.length) {
+    return allowZero ? historyItem.displayMoneyDiffs : historyItem.displayMoneyDiffs.filter(({ diff }) => !isZero(diff));
+  }
+
+  const diffs: MoneyDiff[] = [];
 
   for (const oper of historyItem.operations) {
     // TODO check why Origination type returns another token diff when called with Interaction or Multiple op

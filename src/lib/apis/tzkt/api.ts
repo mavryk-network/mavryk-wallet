@@ -86,7 +86,7 @@ type GetOperationsBaseParams = {
 
 export const fetchGetAccountOperationByHash = async (
   chainId: TzktApiChainId,
-  accountAddress: string,
+  _accountAddress: string,
   hash: string | undefined
 ) => {
   try {

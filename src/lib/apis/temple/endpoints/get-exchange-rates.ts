@@ -24,24 +24,32 @@ export const fetchUsdToTokenRates = async () => {
 
 export const COINGECKO_MVRK_ID = 'mavryk-network';
 
+/**
+ * Fetches CoinGecko quote values for a single asset across multiple fiat currencies.
+ */
+export async function fetchCoingeckoRates(id: string, currencies: string[]) {
+  const url = `${coingecko_api}/simple/price?vs_currencies=${currencies.join(',')}&ids=${id}`;
+  const headers = coingecko_api_key ? { 'x-cg-pro-api-key': coingecko_api_key } : undefined;
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    throw new Error(`CoinGecko request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as CMCResponse;
+
+  return data[id] ?? {};
+}
+
 export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD') {
-  const url = `${coingecko_api}/simple/price?vs_currencies=${currency}&ids=${id}`;
+  const normalizedCurrency = currency.toLowerCase();
 
   try {
-    const res = await fetch(url, {
-      // @ts-expect-error // api key
-      headers: {
-        'x-cg-pro-api-key': coingecko_api_key
-      }
-    });
-
-    const {
-      [COINGECKO_MVRK_ID]: { usd: tokenPrice }
-    } = (await res.json()) as CMCResponse;
+    const tokenPrice = (await fetchCoingeckoRates(id, [normalizedCurrency]))[normalizedCurrency] ?? 0;
 
     await putToStorage(MVRK_PRICE, tokenPrice);
 
-    return tokenPrice || 0;
+    return tokenPrice;
   } catch (err) {
     console.error('Error fetching price:', err);
     const cachedPrice = await fetchFromStorage<string>(MVRK_PRICE);

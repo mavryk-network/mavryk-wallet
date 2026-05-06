@@ -10,7 +10,6 @@ import { buyWithCreditCardReducer } from './buy-with-credit-card/reducers';
 import { collectiblesPersistedReducer } from './collectibles/reducer';
 import { collectiblesMetadataPersistedReducer } from './collectibles-metadata/reducer';
 import { currencyReducer } from './currency/reducers';
-import { dAppsReducer } from './d-apps/reducers';
 import { newsletterReducers } from './newsletter/newsletter-reducers';
 import { partnersPromotionPersistedReducer } from './partners-promotion/reducers';
 import { rwasPersistedReducer } from './rwas/reducer';
@@ -24,7 +23,6 @@ const rootStateReducersMap = {
   advertising: advertisingReducer,
   currency: currencyReducer,
   notifications: notificationsReducer,
-  dApps: dAppsReducer,
   swap: swapReducer,
   partnersPromotion: partnersPromotionPersistedReducer,
   balances: balancesReducer,

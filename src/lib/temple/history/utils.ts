@@ -351,9 +351,29 @@ const buildBackendTransactionOperation = (
 const deriveBackendItemType = (
   group: MavrykHistoryOperationsGroup,
   items: IndividualHistoryItem[],
-  address: string
+  address: string,
+  mainOperation?: IndividualHistoryItem
 ): HistoryItemOpTypeEnum => {
-  const firstOperation = group.summaryOperation ?? group.operations[0];
+  const summaryOperation = group.summaryOperation;
+  const summaryType = summaryOperation?.details?.type;
+  const summaryEntrypoint = summaryOperation?.details?.entrypoint;
+  const summaryTransferType = summaryOperation?.details?.transferType;
+
+  if (summaryType === 'other') return HistoryItemOpTypeEnum.Other;
+  if (summaryType === 'delegation') return HistoryItemOpTypeEnum.Delegation;
+  if (summaryType === 'staking') return HistoryItemOpTypeEnum.Staking;
+  if (summaryType === 'origination') return HistoryItemOpTypeEnum.Origination;
+  if (summaryType === 'reveal') return HistoryItemOpTypeEnum.Reveal;
+
+  if (summaryEntrypoint?.toLowerCase() === 'swap') return HistoryItemOpTypeEnum.Swap;
+  if (summaryEntrypoint === 'placeSellOrder' || summaryEntrypoint === 'placeBuyOrder') {
+    return HistoryItemOpTypeEnum.Multiple;
+  }
+  if (summaryTransferType === 'sent') return HistoryItemOpTypeEnum.TransferTo;
+  if (summaryTransferType === 'received') return HistoryItemOpTypeEnum.TransferFrom;
+  if (summaryEntrypoint && summaryEntrypoint !== 'transfer') return HistoryItemOpTypeEnum.Interaction;
+
+  const firstOperation = group.operations[0] ?? summaryOperation;
   const firstItem = items[0];
 
   if (!firstOperation) return HistoryItemOpTypeEnum.Other;
@@ -369,7 +389,7 @@ const deriveBackendItemType = (
     return HistoryItemOpTypeEnum.Multiple;
   }
 
-  if (!firstItem) return HistoryItemOpTypeEnum.Other;
+  if (!firstItem) return mainOperation?.type ?? HistoryItemOpTypeEnum.Other;
 
   if (firstOperation.details?.transferType === 'sent' && items.length === 1) {
     return HistoryItemOpTypeEnum.TransferTo;
@@ -589,6 +609,11 @@ export function mavrykHistoryGroupToHistoryItem(
 ): UserHistoryItem {
   const operations = [...group.operations];
   const primaryOperation = group.summaryOperation ?? operations[0];
+  // API parent operations carry the main details for top-level history UI; nested child ops are low-level stack entries.
+  const mainOperation =
+    group.summaryOperation?.details != null
+      ? reduceOneBackendOperation(group.summaryOperation, 0, context) ?? undefined
+      : undefined;
   const historyItemOperations = operations
     .map((operation, index) => reduceOneBackendOperation(operation, index, context))
     .filter(isTruthy);
@@ -598,7 +623,7 @@ export function mavrykHistoryGroupToHistoryItem(
       ? historyItemOperations
       : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
   );
-  const type = deriveBackendItemType(group, historyItemOperations, context.address);
+  const type = deriveBackendItemType(group, historyItemOperations, context.address, mainOperation);
   const displayMoneyDiffs = buildBackendSummaryDisplayMoneyDiffs(group, type, context);
   const firstOperation = historyItemOperations[0];
   const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
@@ -606,9 +631,11 @@ export function mavrykHistoryGroupToHistoryItem(
   return {
     type,
     hash: group.hash,
-    addedAt: firstOperation?.addedAt ?? (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
+    addedAt:
+      mainOperation?.addedAt ?? firstOperation?.addedAt ?? (primaryOperation ? getBackendOperationTimestamp(primaryOperation) : ''),
     status,
     operations: historyItemOperations,
+    mainOperation,
     displayMoneyDiffs,
     hideOperationMoneyDiffs: displayMoneyDiffs ? true : undefined,
     highlightedOperationIndex: 0,

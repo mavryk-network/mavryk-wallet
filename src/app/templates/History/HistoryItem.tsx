@@ -15,7 +15,14 @@ import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
 import { OperationStack } from './OperStack';
 import { OpertionStackItem } from './OperStackItem';
-import { deriveStatusColorClassName, getMoneyDiffForMultiple, getMoneyDiffsForSwap } from './utils';
+import {
+  buildHistoryPreviewOperations,
+  deriveStatusColorClassName,
+  getHistoryPreviewStackOffset,
+  getMainHistoryOperation,
+  getMoneyDiffForMultiple,
+  getMoneyDiffsForSwap
+} from './utils';
 
 interface Props {
   historyItem: UserHistoryItem;
@@ -36,6 +43,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     historyItem.type === HistoryItemOpTypeEnum.Multiple || historyItem.type === HistoryItemOpTypeEnum.Interaction;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
+  const mainOperation = useMemo(() => getMainHistoryOperation(historyItem), [historyItem]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
   const operationMoneyDiffs = useMemo(
@@ -44,19 +52,17 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   );
 
   const base = useMemo(
-    () =>
-      operStack
-        .filter((_, i) => i < OP_STACK_PREVIEW_SIZE)
-        .map(op => ({
-          ...op,
-          type: Number(historyItem.type)
-        })),
-    [historyItem.type, operStack]
+    () => buildHistoryPreviewOperations(historyItem, operStack, OP_STACK_PREVIEW_SIZE),
+    [historyItem, operStack]
+  );
+  const previewStackOffset = useMemo(
+    () => getHistoryPreviewStackOffset(historyItem, OP_STACK_PREVIEW_SIZE),
+    [historyItem]
   );
 
   const rest = useMemo(
-    () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= OP_STACK_PREVIEW_SIZE)),
-    [isSwapOperation, operStack]
+    () => (isSwapOperation ? operStack : operStack.filter((_, i) => i >= previewStackOffset)),
+    [isSwapOperation, operStack, previewStackOffset]
   );
 
   const moneyDiffsBase = useMemo(
@@ -71,8 +77,8 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   // 0 to show all operations
   const moneyDiffsRest = useMemo(
-    () => (isSwapOperation ? operationMoneyDiffs : operationMoneyDiffs.slice(1)),
-    [operationMoneyDiffs, isSwapOperation]
+    () => (isSwapOperation ? operationMoneyDiffs : operationMoneyDiffs.slice(previewStackOffset)),
+    [operationMoneyDiffs, isSwapOperation, previewStackOffset]
   );
 
   const filteredMoneyDiffBase = useMemo(
@@ -110,7 +116,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
             <div>
               <div className="flex items-start gap-x-1">
-                <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+                <HistoryTime addedAt={addedAt || mainOperation?.addedAt} />
                 {rest.length > 0 && (
                   <div className={classNames('flex items-center')}>
                     <button

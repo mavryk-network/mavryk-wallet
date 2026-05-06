@@ -16,6 +16,7 @@ export interface UserHistoryItem {
   addedAt: string;
   status: HistoryItemStatus;
   operations: IndividualHistoryItem[];
+  mainOperation?: IndividualHistoryItem;
   displayMoneyDiffs?: HistoryDisplayMoneyDiff[];
   hideOperationMoneyDiffs?: boolean;
   highlightedOperationIndex: number; // Index of the highlighted operation within the group

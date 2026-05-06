@@ -41,6 +41,7 @@ import {
   alterIpfsUrl,
   deriveStatusColorClassName,
   getAssetsFromOperations,
+  getMainHistoryOperation,
   getHistoryOperationAddress,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
@@ -67,6 +68,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   );
 
   const tokensMetadata = useMultipleAssetsMetadata(slugsForMultiple);
+  const mainOperation = useMemo(() => getMainHistoryOperation(historyItem), [historyItem]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
   const operationMoneyDiffs = useMemo(
@@ -113,6 +115,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const isSwapOperation = historyItem?.type === HistoryItemOpTypeEnum.Swap;
   const isMultipleOperation = historyItem?.type === HistoryItemOpTypeEnum.Multiple;
   const isInteractionOperation = historyItem?.type === HistoryItemOpTypeEnum.Interaction;
+  const entrypointToShow =
+    (isInteractionOperation || isMultipleOperation) && mainOperation?.entrypoint ? mainOperation.entrypoint : undefined;
   const showDiffs =
     historyItem?.type === HistoryItemOpTypeEnum.TransferTo || historyItem?.type === HistoryItemOpTypeEnum.TransferFrom;
 
@@ -161,8 +165,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             )}
           >
             {HistoryItemOpTypeTexts[historyItem.type]}{' '}
-            {isInteractionOperation ? (
-              <span className="text-accent-blue">{historyItem.operations[0].entrypoint}</span>
+            {entrypointToShow ? (
+              <span className="text-accent-blue">{entrypointToShow}</span>
             ) : (
               ''
             )}
@@ -183,7 +187,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </div>
           )}
 
-          <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} showFullDate />
+          <HistoryTime addedAt={addedAt || mainOperation?.addedAt} showFullDate />
         </div>
       }
       portalClassName="history-details-popup"
@@ -372,10 +376,12 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
 
 // helper components
 const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {
-  const item = historyItem.operations[0];
-  const swappedOpItem = historyItem.operations[historyItem.operations.length - 1];
+  const item = getMainHistoryOperation(historyItem);
+  const swappedOpItem = historyItem.operations[historyItem.operations.length - 1] ?? item;
 
   const getTxOpDisplayData = useMemo(() => {
+    if (!item) return null;
+
     switch (historyItem.type) {
       case HistoryItemOpTypeEnum.Delegation:
         const opDelegate = item as HistoryItemDelegationOp;
@@ -467,6 +473,8 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         };
     }
   }, [historyItem.type, item, swappedOpItem]);
+
+  if (!getTxOpDisplayData) return null;
 
   return (
     <CardContainer className="mb-6 text-base-plus text-white">

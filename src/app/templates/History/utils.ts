@@ -17,20 +17,43 @@ import {
   UserHistoryItem
 } from 'lib/temple/history/types';
 
+export const getMainHistoryOperation = (historyItem: UserHistoryItem | null | undefined) =>
+  historyItem?.mainOperation ?? historyItem?.operations[0];
+
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
+  const mainOperation = getMainHistoryOperation(historyItem);
+
   if (historyItem?.displayMoneyDiffs?.length) {
     return slug ?? historyItem.displayMoneyDiffs[0].assetSlug;
   }
 
-  if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
+  if (!historyItem || mainOperation?.contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
 
-  return slug || !historyItem.operations[0]?.contractAddress
+  return slug || !mainOperation?.contractAddress
     ? MAV_TOKEN_SLUG
     : toTokenSlug(
-        historyItem.operations[0].contractAddress ?? '',
-        (historyItem.operations[0] as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
+        mainOperation.contractAddress ?? '',
+        (mainOperation as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
       );
 };
+
+export const buildHistoryPreviewOperations = (
+  historyItem: UserHistoryItem,
+  operStack: IndividualHistoryItem[],
+  previewSize: number
+) => {
+  if (!historyItem.mainOperation) {
+    return operStack.filter((_, i) => i < previewSize).map(op => ({ ...op, type: historyItem.type }));
+  }
+
+  const mainOperation = getMainHistoryOperation(historyItem);
+  if (!mainOperation) return [];
+
+  return [{ ...mainOperation, type: historyItem.type }, ...operStack.slice(0, Math.max(previewSize - 1, 0))];
+};
+
+export const getHistoryPreviewStackOffset = (historyItem: UserHistoryItem, previewSize: number) =>
+  historyItem.mainOperation ? Math.max(previewSize - 1, 0) : previewSize;
 
 export const alterIpfsUrl = (url?: string) => {
   if (!url || url?.split('//')?.shift() !== 'ipfs:') return url;
@@ -65,7 +88,7 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
     return [...new Set(item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug).filter(Boolean))];
   }
 
-  if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
+  if (!item || item.operations.length <= 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
@@ -94,7 +117,7 @@ const getTransactionTargetAddress = (operation?: Partial<HistoryItemTransactionO
 export const getHistoryOperationAddress = (
   item: IndividualHistoryItem | null | undefined,
   originalHistoryItem?: UserHistoryItem
-) => {
+): string => {
   if (!item) return '';
 
   switch (item.type) {
@@ -134,6 +157,7 @@ export const getHistoryOperationAddress = (
 
     case HistoryItemOpTypeEnum.Multiple: {
       const groupedOperation =
+        getMainHistoryOperation(originalHistoryItem) ??
         originalHistoryItem?.operations.find(operation =>
           getTransactionTargetAddress(operation as HistoryItemTransactionOp)
         ) ?? originalHistoryItem?.operations[0];
@@ -151,6 +175,19 @@ export const getHistoryOperationAddress = (
       return otherOp.destination?.address ?? otherOp.source.address ?? otherOp.hash;
     }
   }
+};
+
+export const getMultipleInteractionMessageData = (
+  item: HistoryItemTransactionOp,
+  originalHistoryItem?: UserHistoryItem
+) => {
+  const entrypoint = item.entrypoint?.trim() || undefined;
+
+  return {
+    entrypoint,
+    contractAddress: getHistoryOperationAddress(item, originalHistoryItem),
+    countLabel: `${originalHistoryItem ? originalHistoryItem.operations.length - 1 : 1} more`
+  } as const;
 };
 
 export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {

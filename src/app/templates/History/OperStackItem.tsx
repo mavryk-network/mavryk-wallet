@@ -20,7 +20,12 @@ import {
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from './MoneyDiffView';
-import { getAssetsFromOperations, getHistoryOperationAddress, getStakingMessage } from './utils';
+import {
+  getAssetsFromOperations,
+  getHistoryOperationAddress,
+  getMultipleInteractionMessageData,
+  getStakingMessage
+} from './utils';
 
 interface Props {
   item: IndividualHistoryItem;
@@ -139,7 +144,16 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
       );
     case HistoryItemOpTypeEnum.Multiple:
       const opMultiple = item as HistoryItemTransactionOp;
-      const multipleAddress = getHistoryOperationAddress(opMultiple, originalHistoryItem);
+      const { contractAddress, countLabel, entrypoint } = getMultipleInteractionMessageData(opMultiple, originalHistoryItem);
+      const contractLabel = entrypoint ? (
+        <StackItemArgs
+          i18nKey="interactionOnContract"
+          args={[<span className="text-accent-blue">{entrypoint}</span>, contractAddress]}
+        />
+      ) : (
+        contractAddress
+      );
+
       return (
         <Component
           {...componentBaseProps}
@@ -147,10 +161,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           argsNode={
             <StackItemArgs
               i18nKey="multipleInteractionOnContract"
-              args={[
-                multipleAddress,
-                <span>{originalHistoryItem ? originalHistoryItem?.operations.length - 1 : 1} more</span>
-              ]}
+              args={[contractLabel, <span>{countLabel}</span>]}
             />
           }
         />

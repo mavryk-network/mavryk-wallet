@@ -7,6 +7,7 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
+- `@mavrykdynamics/webmavryk*` family `^2.0.1`
 
 ## Architecture and Boundaries
 

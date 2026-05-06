@@ -29,6 +29,7 @@ const DERIVATION_PATHS = [
 ];
 
 interface ByMnemonicFormData {
+  derivationPath: 'default' | 'custom';
   password?: string;
   customDerivationPath: string;
   accountNumber?: number;
@@ -36,7 +37,7 @@ interface ByMnemonicFormData {
 
 export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
   const { popup } = useAppEnv();
-  const { createOrImportWallet } = useTempleClient();
+  const { createOrImportWallet, importMnemonicAccount } = useTempleClient();
   const chainId = useChainId();
   const formAnalytics = useFormAnalytics(ImportAccountFormType.Mnemonic);
 
@@ -47,16 +48,18 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
 
   const { register, handleSubmit, errors, formState, reset, control, watch } = useForm<ByMnemonicFormData>({
     defaultValues: {
+      derivationPath: DERIVATION_PATHS[0].type,
       customDerivationPath: DEFAULT_DERIVATION_PATH,
       accountNumber: 1
     }
   });
+
   const [error, setError] = useState<ReactNode>(null);
 
-  const derivationPath = watch('customDerivationPath');
+  const derivationPathType = watch('derivationPath');
 
   const onSubmit = useCallback(
-    async ({ password, customDerivationPath }: ByMnemonicFormData) => {
+    async ({ password, customDerivationPath, derivationPath: derivationPathType }: ByMnemonicFormData) => {
       if (formState.isSubmitting) return;
 
       if (!seedError && isSeedPhraseFilled(seedPhrase)) {
@@ -65,6 +68,14 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
 
         try {
           await createOrImportWallet(formatMnemonic(seedPhrase));
+
+          if (derivationPathType === 'custom') {
+            if (!chainId) {
+              throw new Error('Chain ID is not available');
+            }
+
+            await importMnemonicAccount(formatMnemonic(seedPhrase), chainId, password, customDerivationPath);
+          }
 
           formAnalytics.trackSubmitSuccess();
         } catch (err: any) {
@@ -77,10 +88,19 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
           setError(err.message);
         }
       } else if (seedError === '') {
-        setSeedError(t('mnemonicWordsAmountConstraint', [numberOfWords]) as string);
+        setSeedError(String(t('mnemonicWordsAmountConstraint', [numberOfWords])));
       }
     },
-    [seedPhrase, seedError, formState.isSubmitting, setError, createOrImportWallet, formAnalytics, numberOfWords]
+    [
+      formState.isSubmitting,
+      seedError,
+      seedPhrase,
+      formAnalytics,
+      createOrImportWallet,
+      importMnemonicAccount,
+      chainId,
+      numberOfWords
+    ]
   );
 
   return (
@@ -111,7 +131,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
           <Controller
             as={DerivationTypeFieldSelect}
             control={control}
-            name="customDerivationPath"
+            name="derivationPath"
             options={DERIVATION_PATHS}
             i18nKey={`${t('derivationPath')} ${t('optionalComment')}`}
             descriptionI18nKey="addDerivationPathPrompt"
@@ -119,7 +139,7 @@ export const ByMnemonicForm: FC<ImportformProps> = ({ className }) => {
         </div>
       </div>
 
-      {derivationPath === 'custom' && (
+      {derivationPathType === 'custom' && (
         <FormField
           ref={register({
             validate: validateDerivationPath

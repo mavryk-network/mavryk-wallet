@@ -1,5 +1,5 @@
 import { MichelCodecPacker } from '@mavrykdynamics/webmavryk';
-import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
+import { ManagerKeyResponse, RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-utils';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
@@ -20,6 +20,12 @@ export function loadChainId(rpcUrl: string) {
   } catch (e) {
     throw e;
   }
+}
+
+export function loadChainIdStrict(rpcUrl: string) {
+  const rpc = new RpcClient(rpcUrl);
+
+  return rpc.getChainId();
 }
 
 export function hasManager(manager: ManagerKeyResponse) {

@@ -72,7 +72,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       return { type: TempleMessageType.UnlockResponse };
 
     case TempleMessageType.EnsureAuthorizedRequest:
-      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId);
+      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId, req.interactive);
       return { type: TempleMessageType.EnsureAuthorizedResponse };
 
     case TempleMessageType.LockRequest:
@@ -163,6 +163,12 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       await Actions.importWatchOnlyAccount(req.address, req.chain, req.chainId, req.name);
       return {
         type: TempleMessageType.ImportWatchOnlyAccountResponse
+      };
+
+    case TempleMessageType.GetLedgerTezosPkRequest:
+      return {
+        type: TempleMessageType.GetLedgerTezosPkResponse,
+        publicKey: await Actions.getLedgerTezosPk(req.derivationPath, req.derivationType)
       };
 
     case TempleMessageType.CreateLedgerAccountRequest:

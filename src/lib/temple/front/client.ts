@@ -32,6 +32,7 @@ import { useRetryableSWR } from 'lib/swr';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
   TempleConfirmationPayload,
+  DerivationType,
   TempleMessageType,
   TempleStatus,
   TempleRequest,
@@ -140,14 +141,18 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     assertResponse(res.type === TempleMessageType.UnlockResponse);
   }, []);
 
-  const ensureAuthorized = useCallback(async (accountPublicKeyHash?: string, networkId?: string) => {
-    const res = await request({
-      type: TempleMessageType.EnsureAuthorizedRequest,
-      accountPublicKeyHash,
-      networkId
-    });
-    assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
-  }, []);
+  const ensureAuthorized = useCallback(
+    async (accountPublicKeyHash?: string, networkId?: string, interactive = true) => {
+      const res = await request({
+        type: TempleMessageType.EnsureAuthorizedRequest,
+        accountPublicKeyHash,
+        networkId,
+        interactive
+      });
+      assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
+    },
+    []
+  );
 
   const lock = useCallback(async () => {
     const res = await request({
@@ -297,6 +302,17 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
       chain: TempleChainKind.Tezos
     });
     assertResponse(res.type === TempleMessageType.ImportWatchOnlyAccountResponse);
+  }, []);
+
+  const getLedgerTezosPk = useCallback(async (derivationType?: DerivationType, derivationPath?: string) => {
+    const res = await request({
+      type: TempleMessageType.GetLedgerTezosPkRequest,
+      derivationPath,
+      derivationType
+    });
+    assertResponse(res.type === TempleMessageType.GetLedgerTezosPkResponse);
+
+    return res.publicKey;
   }, []);
 
   const createLedgerAccount = useCallback(async (input: SaveLedgerAccountInput) => {
@@ -495,6 +511,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     importFundraiserAccount,
     importKTManagedAccount,
     importWatchOnlyAccount,
+    getLedgerTezosPk,
     createLedgerAccount,
     updateSettings,
     removeHdGroup,

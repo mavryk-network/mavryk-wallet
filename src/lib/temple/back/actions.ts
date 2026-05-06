@@ -15,6 +15,7 @@ import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
 import {
+  DerivationType,
   TempleState,
   TempleMessageType,
   TempleRequest,
@@ -38,6 +39,7 @@ import {
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
+import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
 import {
   getCurrentPermission,
   requestPermission,
@@ -89,6 +91,14 @@ const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
   await syncAuthWalletAddresses(accounts);
 };
 
+const setupUnlockedVaultState = async (password: string) => {
+  const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
+  const [accounts, settings] = await Promise.all([vault.fetchAccounts(), vault.fetchSettings()]);
+  await syncAuthWalletAddresses(accounts);
+
+  return { vault, accounts, settings };
+};
+
 const getStoredSelectedAccountPkh = async () => {
   const { [ACCOUNT_PKH_STORAGE_KEY]: selectedAccountPkh } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
 
@@ -117,7 +127,8 @@ const ensureAuthorizedForAccount = async (
   vault: Vault,
   accountPkh?: string,
   networkId?: string,
-  accounts?: TempleAccount[]
+  accounts?: TempleAccount[],
+  interactive = true
 ) => {
   const allAccounts = accounts ?? (await vault.fetchAccounts());
   const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
@@ -136,6 +147,10 @@ const ensureAuthorizedForAccount = async (
     await refreshAuthTokens({ networkId, walletAddress: authWalletAddress });
     return;
   } catch {
+    if (!shouldPerformInteractiveAuthChallenge(allAccounts, authWalletAddress, interactive)) {
+      return;
+    }
+
     await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId);
   }
 };
@@ -183,14 +198,16 @@ export async function isDAppEnabled() {
 }
 
 export function registerNewWallet(password: string, mnemonic?: string) {
-  return withInited(async () => {
-    const accountPkh = await Vault.spawn(password, mnemonic);
-    await unlock(password);
+  return withInited(() =>
+    enqueueUnlock(async () => {
+      const accountPkh = await Vault.spawn(password, mnemonic);
+      const unlockedState = await setupUnlockedVaultState(password);
+      await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
+      unlocked(unlockedState);
 
-    await withUnlocked(({ vault }) => performAuthForAccount(vault, accountPkh));
-
-    return accountPkh;
-  });
+      return accountPkh;
+    })
+  );
 }
 
 export async function lock() {
@@ -209,11 +226,9 @@ export async function lock() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
-      const accounts = await vault.fetchAccounts();
-      const settings = await vault.fetchSettings();
-      unlocked({ vault, accounts, settings });
-      await syncAuthWalletAddresses(accounts);
+      const unlockedState = await setupUnlockedVaultState(password);
+      const { vault, accounts } = unlockedState;
+      unlocked(unlockedState);
 
       const [selectedAccountPkh, networkId] = await Promise.all([
         getStoredSelectedAccountPkh(),
@@ -366,6 +381,10 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
   });
 }
 
+export function getLedgerTezosPk(derivationPath?: string, derivationType?: DerivationType) {
+  return withUnlocked(async ({ vault }) => await vault.getLedgerTezosPk(derivationPath, derivationType));
+}
+
 export function createLedgerAccount(input: SaveLedgerAccountInput) {
   return withUnlocked(async ({ vault }) => {
     const updatedAccounts = await vault.createLedgerAccount(input);
@@ -412,11 +431,11 @@ export function createOrImportWallet(mnemonic?: string) {
   });
 }
 
-export function ensureAuthorized(accountPkh?: string, networkId?: string) {
+export function ensureAuthorized(accountPkh?: string, networkId?: string, interactive = true) {
   return withUnlocked(async ({ vault }) => {
     const accounts = await vault.fetchAccounts();
 
-    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts);
+    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts, interactive);
   });
 }
 

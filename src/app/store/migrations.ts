@@ -70,5 +70,14 @@ export const MIGRATIONS: MigrationManifest = {
       ...typedPersistedState,
       tokensMetadata: { ...typedPersistedState.tokensMetadata, metadataRecord: allTokensMetadata }
     };
+  },
+  '3': (persistedState: PersistedState) => {
+    if (!persistedState) return persistedState;
+
+    const typedPersistedState = persistedState as TypedPersistedRootState & { dApps?: unknown };
+
+    delete typedPersistedState.dApps;
+
+    return typedPersistedState;
   }
 };

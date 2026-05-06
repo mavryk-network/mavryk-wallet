@@ -3,19 +3,26 @@ import U2FTransport from '@ledgerhq/hw-transport-u2f';
 import WebAuthnTransport from '@ledgerhq/hw-transport-webauthn';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 
+import { createQueue } from 'lib/utils';
+
 import { TransportType, BridgeExchangeRequest } from './types';
 
 export class TransportBridge {
   private transport?: Transport | U2FTransport;
+  private transportType?: TransportType;
+  private readonly exchangeQueue = createQueue();
 
   async requestExchange(data: BridgeExchangeRequest) {
-    try {
-      return await this.exchange(data.apdu, data.transportType, data.scrambleKey, data.exchangeTimeout);
-    } catch (error) {
-      console.error(`TransportBridge.requestExchange() error:`, error);
-      if (error && error instanceof Error) throw new Error(error.message ?? 'Unexpected error');
-    }
-    throw new Error('Unknown error');
+    return this.exchangeQueue(async () => {
+      try {
+        return await this.exchange(data.apdu, data.transportType, data.scrambleKey, data.exchangeTimeout);
+      } catch (error) {
+        console.error(`TransportBridge.requestExchange() error:`, error);
+        await this.close();
+        if (error && error instanceof Error) throw new Error(error.message ?? 'Unexpected error');
+        throw new Error('Unknown error');
+      }
+    });
   }
 
   async close() {
@@ -25,7 +32,8 @@ export class TransportBridge {
     } catch (error) {
       console.error(`TransportBridge.close() error:`, error);
     }
-    delete this.transport;
+    this.transport = undefined;
+    this.transportType = undefined;
   }
 
   private async exchange(apdu: string, transportType: TransportType, scrambleKey?: string, exchangeTimeout?: number) {
@@ -41,6 +49,11 @@ export class TransportBridge {
 
     if (transport == null) return await this.createTransport(transportType);
 
+    if (this.transportType !== transportType) {
+      await this.close();
+      return await this.createTransport(transportType);
+    }
+
     if (transportType === TransportType.WEBHID && transport instanceof TransportWebHID) {
       const device = transport.device;
       const nameOfDeviceType = device && device.constructor.name;
@@ -49,12 +62,18 @@ export class TransportBridge {
 
       const bufferTransport = await TransportWebHID.openConnected();
       if (bufferTransport) this.transport = bufferTransport;
+      else {
+        await this.close();
+        return await this.createTransport(transportType);
+      }
     }
 
     return this.transport!;
   }
 
   private async createTransport(transportType: TransportType) {
+    this.transportType = transportType;
+
     switch (transportType) {
       case TransportType.WEBHID:
         this.transport = await TransportWebHID.create();

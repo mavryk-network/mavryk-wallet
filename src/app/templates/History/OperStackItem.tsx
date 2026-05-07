@@ -144,7 +144,10 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
       );
     case HistoryItemOpTypeEnum.Multiple:
       const opMultiple = item as HistoryItemTransactionOp;
-      const { contractAddress, countLabel, entrypoint } = getMultipleInteractionMessageData(opMultiple, originalHistoryItem);
+      const { contractAddress, countLabel, entrypoint } = getMultipleInteractionMessageData(
+        opMultiple,
+        originalHistoryItem
+      );
       const contractLabel = entrypoint ? (
         <StackItemArgs
           i18nKey="interactionOnContract"
@@ -159,10 +162,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           {...componentBaseProps}
           titleNode={'Called'}
           argsNode={
-            <StackItemArgs
-              i18nKey="multipleInteractionOnContract"
-              args={[contractLabel, <span>{countLabel}</span>]}
-            />
+            <StackItemArgs i18nKey="multipleInteractionOnContract" args={[contractLabel, <span>{countLabel}</span>]} />
           }
         />
       );

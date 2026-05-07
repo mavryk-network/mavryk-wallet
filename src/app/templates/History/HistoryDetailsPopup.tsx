@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { Divider, HashChip, Identicon } from 'app/atoms';
+import { Divider, HashChip, Identicon, Money } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE } from 'app/defaults';
 import { useAppEnv } from 'app/env';
@@ -48,6 +48,21 @@ import {
 } from './utils';
 
 const TX_HISTORY_PREVIEW_IDX = 2;
+const DEFAULT_FEE_DECIMALS = 6;
+
+interface HistoryFeeTotals {
+  gasFee: BigNumber;
+  storageFee: BigNumber;
+  networkFee: BigNumber;
+  burnedFromFees: BigNumber;
+}
+
+const createEmptyHistoryFeeTotals = (): HistoryFeeTotals => ({
+  gasFee: new BigNumber(0),
+  storageFee: new BigNumber(0),
+  networkFee: new BigNumber(0),
+  burnedFromFees: new BigNumber(0)
+});
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
@@ -59,6 +74,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const { publicKeyHash } = useAccount();
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
+  const mainAssetDecimals = mainAssetMetadata?.decimals ?? DEFAULT_FEE_DECIMALS;
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
   const slugs = getAssetsFromOperations(historyItem);
@@ -89,26 +105,16 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      historyItem?.operations.reduce<{
-        gasFee: number;
-        storageFee: number;
-        networkFee: number;
-        burnedFromFees: number;
-      }>(
-        (acc, item) => {
-          acc.gasFee += item.networkFees?.gasFee ?? 0;
-          acc.storageFee += item.networkFees?.storageFee ?? 0;
-          acc.networkFee += item.networkFees?.totalFee ?? 0;
-          acc.burnedFromFees += item.networkFees?.burnedFromFees ?? 0;
+      historyItem?.operations.reduce<HistoryFeeTotals>((acc, item) => {
+        acc.gasFee = acc.gasFee.plus(item.networkFees?.gasFee ?? 0);
+        acc.storageFee = acc.storageFee.plus(item.networkFees?.storageFee ?? 0);
+        acc.networkFee = acc.networkFee.plus(item.networkFees?.totalFee ?? 0);
+        acc.burnedFromFees = acc.burnedFromFees.plus(item.networkFees?.burnedFromFees ?? 0);
 
-          return acc;
-        },
-        { gasFee: 0, storageFee: 0, networkFee: 0, burnedFromFees: 0 }
-      ),
+        return acc;
+      }, createEmptyHistoryFeeTotals()) ?? createEmptyHistoryFeeTotals(),
     [historyItem?.operations]
   );
-
-  const burnedFee = useMemo(() => fees?.burnedFromFees ?? 0, [fees]);
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 
@@ -165,11 +171,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             )}
           >
             {HistoryItemOpTypeTexts[historyItem.type]}{' '}
-            {entrypointToShow ? (
-              <span className="text-accent-blue">{entrypointToShow}</span>
-            ) : (
-              ''
-            )}
+            {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
           </div>
           {showDiffs && (
             <div className="flex flex-col">
@@ -266,7 +268,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={MAV_TOKEN_SLUG}
-                value={`${fees?.networkFee ?? 0}`}
+                value={fees.networkFee}
                 showEqualSymbol={false}
                 className="text-base-plus"
                 roundingMode={BigNumber.ROUND_CEIL}
@@ -274,9 +276,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               />
 
               <div className="text-sm text-secondary-white">
-                <span>-{new BigNumber(fees?.networkFee ?? 0).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
+                <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
               </div>
             </div>
           </div>
@@ -292,33 +292,34 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <span>
                 <T id="gasFee" />
               </span>
-              <span className="text-secondary-white flex items-center capitalize">
-                <span>-{new BigNumber(fees?.gasFee ?? 0).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
-              </span>
+              <FeeAmount
+                value={fees.gasFee}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white flex items-center capitalize"
+              />
             </div>
             <div className="flex justify-between items-center capitalize">
               <span>
                 <T id="storageFee" />
               </span>
-              <span className="text-secondary-white">
-                <span className="text-secondary-white flex items-center">
-                  <span>-{new BigNumber(fees?.storageFee ?? 0).toFixed()}</span>
-                  &nbsp;
-                  <span>{mainAssetSymbol}</span>
-                </span>
-              </span>
+              <FeeAmount
+                value={fees.storageFee}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white flex items-center"
+              />
             </div>
             <div className="flex justify-between items-center">
               <span>
                 <T id="burnedFromFees" />
               </span>
-              <span className="text-secondary-white">
-                <span>-{new BigNumber(burnedFee).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
-              </span>
+              <FeeAmount
+                value={fees.burnedFromFees}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white"
+              />
             </div>
           </div>
         </CardContainer>
@@ -373,6 +374,22 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
 
   return operStack;
 }
+
+const FeeAmount: FC<{
+  value: BigNumber;
+  symbol: string;
+  decimals: number;
+  className?: string;
+}> = ({ value, symbol, decimals, className }) => (
+  <span className={clsx('flex items-center', className)}>
+    <span>-</span>
+    <Money smallFractionFont={false} cryptoDecimals={decimals} tooltip={false}>
+      {value}
+    </Money>
+    &nbsp;
+    <span>{symbol}</span>
+  </span>
+);
 
 // helper components
 const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {

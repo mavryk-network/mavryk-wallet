@@ -17,13 +17,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.11.0
           cache: yarn
-      - name: Debug dist
-        run: |
-          pwd
-          ls -la
-          ls -la dist || true
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -67,6 +62,12 @@ jobs:
 
       - name: Build extension
         run: yarn build
+
+      - name: Debug dist
+        run: |
+          pwd
+          ls -la
+          ls -la dist || true
 
       - name: Check zip has manifest at root
         run: |

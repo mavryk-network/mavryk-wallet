@@ -1,5 +1,5 @@
 import { MichelCodecPacker } from '@mavrykdynamics/webmavryk';
-import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
+import { ManagerKeyResponse, RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-utils';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
@@ -20,6 +20,12 @@ export function loadChainId(rpcUrl: string) {
   } catch (e) {
     throw e;
   }
+}
+
+export function loadChainIdStrict(rpcUrl: string) {
+  const rpc = new RpcClient(rpcUrl);
+
+  return rpc.getChainId();
 }
 
 export function hasManager(manager: ManagerKeyResponse) {
@@ -83,6 +89,59 @@ export function getSameGroupAccounts(allAccounts: TempleAccount[], accountType: 
     acc => acc.type === accountType && (acc.type !== TempleAccountType.HD || acc.walletId === groupId)
   );
 }
+
+export function canAccountSignAuth(account: TempleAccount) {
+  return account.type !== TempleAccountType.WatchOnly && account.type !== TempleAccountType.ManagedKT;
+}
+
+/**
+ * Resolves the canonical auth wallet address for the provided account.
+ * HD sub-accounts share the index-0 address of the same wallet.
+ */
+export function getAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash: string) {
+  const account = allAccounts.find(acc => acc.publicKeyHash === accountPublicKeyHash);
+
+  if (!account || account.type !== TempleAccountType.HD) {
+    return accountPublicKeyHash;
+  }
+
+  const mainHdAccount = allAccounts.find(
+    acc => acc.type === TempleAccountType.HD && acc.walletId === account.walletId && acc.hdIndex === 0
+  );
+
+  return mainHdAccount?.publicKeyHash ?? account.publicKeyHash;
+}
+
+/**
+ * Resolves the wallet address that should own Mavryk API auth for the provided account.
+ * Non-signable accounts reuse the first signable wallet available in the vault.
+ */
+export function resolveAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash?: string | null) {
+  if (accountPublicKeyHash) {
+    const selectedAccount = allAccounts.find(account => account.publicKeyHash === accountPublicKeyHash);
+
+    if (selectedAccount && canAccountSignAuth(selectedAccount)) {
+      return getAuthWalletAddress(allAccounts, selectedAccount.publicKeyHash);
+    }
+  }
+
+  const fallbackAccount = allAccounts.find(canAccountSignAuth);
+
+  return fallbackAccount ? getAuthWalletAddress(allAccounts, fallbackAccount.publicKeyHash) : null;
+}
+
+/**
+ * Builds a lookup from each account address to the auth wallet address used for Mavryk auth storage.
+ */
+export function buildAuthWalletAddressesMap(allAccounts: TempleAccount[]) {
+  return allAccounts.reduce<Record<string, string>>((result, account) => {
+    result[account.publicKeyHash] =
+      resolveAuthWalletAddress(allAccounts, account.publicKeyHash) ?? account.publicKeyHash;
+
+    return result;
+  }, {});
+}
+
 async function pickUniqueName(
   startIndex: number,
   getNameCandidate: (i: number) => string | Promise<string>,

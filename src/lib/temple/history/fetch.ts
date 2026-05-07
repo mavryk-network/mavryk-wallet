@@ -1,32 +1,140 @@
 import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
-import * as TZKT from 'lib/apis/tzkt';
-import { fetchGetAccountOperationByHash, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
-import { detectTokenStandard } from 'lib/assets/standards';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
-import { filterUnique } from 'lib/utils';
+import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
+import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
-import { build_Token_Fa_1_2OpParams, build_Token_Fa_2OpParams, buildTEZOpParams } from './filterParams';
+import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
 import type { UserHistoryItem, OperationsGroup } from './types';
-import { buildStorageKeyForTx, CustomPendingOperation, operationsGroupToHistoryItem } from './utils';
+import { HistoryItemOpTypeEnum } from './types';
+import {
+  buildStorageKeyForTx,
+  CustomPendingOperation,
+  groupMavrykHistoryOperations,
+  mavrykHistoryGroupToHistoryItem,
+  operationsGroupToHistoryItem
+} from './utils';
 
-const LIQUIDITY_BAKING_DEX_ADDRESS = 'KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5';
+export type FetchUserHistoryResult = {
+  items: UserHistoryItem[];
+  cursor?: number;
+  hasMore: boolean;
+};
 
-// always will return one operation object
-export async function fetchUserOperationByHash(chainId: TzktApiChainId, accountAddress: string, hash: string) {
+type PendingOperationGroupable = {
+  hash: string;
+  id?: number;
+};
+
+type LegacyPendingOperation = TzktOperation;
+
+function groupPendingOperations<T extends PendingOperationGroupable>(operations: T[]) {
+  return Object.values(
+    operations.reduce<StringRecord<{ hash: string; operations: T[] }>>((acc, item) => {
+      if (!acc[item.hash]) {
+        acc[item.hash] = { hash: item.hash, operations: [] };
+      }
+
+      acc[item.hash].operations.push(item);
+      acc[item.hash].operations.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+      return acc;
+    }, {})
+  );
+}
+
+function isLegacyPendingOperation(
+  operation: CustomPendingOperation | LegacyPendingOperation
+): operation is LegacyPendingOperation {
+  return typeof (operation as LegacyPendingOperation).sender !== 'string';
+}
+
+function applyLocalTypeFilter(items: UserHistoryItem[], requestedTypes: HistoryItemOpTypeEnum[]) {
+  if (!requestedTypes.length) return items;
+
+  const allowedTypes = new Set(requestedTypes);
+  return items.filter(item => allowedTypes.has(item.type));
+}
+
+function getTokenAddressFromSlug(assetSlug?: string) {
+  if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) return undefined;
+
+  return assetSlug.split('_')[0];
+}
+
+function normalizeBackendHistoryItems(
+  operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
+  accountAddress: string,
+  requestedTypes: HistoryItemOpTypeEnum[],
+  assetSlug?: string
+) {
+  return applyLocalTypeFilter(
+    groupMavrykHistoryOperations(operations).map(group =>
+      mavrykHistoryGroupToHistoryItem(group, {
+        address: accountAddress,
+        assetSlug
+      })
+    ),
+    requestedTypes
+  );
+}
+
+async function fetchPendingHistoryItems(chainId: TzktApiChainId, account: TempleAccount) {
+  const storageKey = buildStorageKeyForTx(account.publicKeyHash, chainId);
+  const pendingOperations =
+    (await fetchFromStorage<(CustomPendingOperation | LegacyPendingOperation)[]>(storageKey)) ?? [];
+  const legacyPendingOperations = pendingOperations.filter(isLegacyPendingOperation);
+  const backendPendingOperations = pendingOperations.filter(
+    (operation): operation is MavrykHistoryOperation => !isLegacyPendingOperation(operation)
+  );
+  const pendingItems = [
+    ...groupPendingOperations(backendPendingOperations).flatMap(group => {
+      const historyGroup = groupMavrykHistoryOperations(group.operations)[0];
+
+      return historyGroup ? [mavrykHistoryGroupToHistoryItem(historyGroup, { address: account.publicKeyHash })] : [];
+    }),
+    ...groupPendingOperations(legacyPendingOperations).map(group => {
+      const operationsGroup: OperationsGroup = {
+        hash: group.hash,
+        operations: group.operations
+      };
+
+      return operationsGroupToHistoryItem(operationsGroup, account.publicKeyHash);
+    })
+  ].sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+
+  return {
+    storageKey,
+    pendingOperations,
+    pendingItems
+  };
+}
+
+export async function fetchUserOperationByHash(
+  chainId: TzktApiChainId,
+  accountAddress: string,
+  hash: string,
+  assetSlug?: string
+) {
   try {
-    const operations = await fetchGetAccountOperationByHash(chainId, accountAddress, hash);
+    const tokenAddress = getTokenAddressFromSlug(assetSlug);
+    const response = tokenAddress
+      ? await fetchTokenHistory(tokenAddress, {
+          walletAddress: accountAddress,
+          search: hash
+        })
+      : await fetchWalletHistory({
+          walletAddress: accountAddress,
+          search: hash
+        });
 
-    if (!operations.length) return [];
-
-    const groups = await fetchOperGroupsForOperations(chainId, operations);
-
-    const arr = groups.map(group => operationsGroupToHistoryItem(group, accountAddress));
-    return arr;
-  } catch (e) {
-    throw e;
+    return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug);
+  } catch (error) {
+    console.error('Error while fetching user operation by hash:', error);
+    return [];
   }
 }
 
@@ -35,343 +143,82 @@ export default async function fetchUserHistory(
   account: TempleAccount,
   assetSlug: string | undefined,
   pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
-  olderThan?: UserHistoryItem,
+  _tezos: ReactiveTezosToolkit,
+  cursor?: number,
   operationParams?: GetOperationsTransactionsParams
-): Promise<UserHistoryItem[]> {
+): Promise<FetchUserHistoryResult> {
+  const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
+  const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
+  const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
+  const tokenAddress = getTokenAddressFromSlug(assetSlug);
+  const isFirstPage = cursor == null;
+
   try {
-    let pendingOperations =
-      (await fetchFromStorage<CustomPendingOperation[]>(buildStorageKeyForTx(account.publicKeyHash, chainId))) ?? [];
+    const response = tokenAddress
+      ? await fetchTokenHistory(tokenAddress, {
+          walletAddress: account.publicKeyHash,
+          cursor,
+          filter: backendFilter
+        })
+      : await fetchWalletHistory({
+          walletAddress: account.publicKeyHash,
+          cursor,
+          filter: backendFilter
+        });
 
-    const operations = await fetchOperations(
-      chainId,
-      account,
-      assetSlug,
-      pseudoLimit,
-      tezos,
-      olderThan,
-      operationParams
+    const normalizedItems = normalizeBackendHistoryItems(
+      response.operations,
+      account.publicKeyHash,
+      localRequestedTypes,
+      assetSlug
+    );
+    const visibleCollected = normalizedItems.slice(0, pseudoLimit);
+    const nextCursor = response.cursor;
+    const hasMore = response.hasMore;
+
+    if (!isFirstPage) {
+      return {
+        items: visibleCollected,
+        cursor: nextCursor,
+        hasMore
+      };
+    }
+
+    const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
+    if (!pendingItems.length) {
+      return {
+        items: visibleCollected,
+        cursor: nextCursor,
+        hasMore
+      };
+    }
+
+    const confirmedHashes = new Set(visibleCollected.map(item => item.hash));
+    const filteredPendingOperations = pendingOperations.filter(
+      operation => !confirmedHashes.has(operation?.hash ?? '')
     );
 
-    if (!operations.length && !pendingOperations.length) return [];
-
-    if (operations.length && pendingOperations.length) {
-      const confirmedHashes = new Set(operations.map(op => op.hash));
-      const filteredPending = pendingOperations.filter(op => !confirmedHashes.has(op?.hash ?? ''));
-
-      // If any pending ops were confirmed, update storage
-      if (filteredPending.length !== pendingOperations.length) {
-        const storageKey = buildStorageKeyForTx(account.publicKeyHash, chainId);
-        await putToStorage(storageKey, filteredPending);
-      }
-
-      pendingOperations = filteredPending;
+    if (filteredPendingOperations.length !== pendingOperations.length) {
+      await putToStorage(storageKey, filteredPendingOperations);
     }
-    const groups = await reduceOperationsGroups([...pendingOperations, ...operations] as TzktOperation[], chainId);
 
-    const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
-    return arr;
-  } catch (e) {
-    console.error('Error while fetching user history:', e);
-    return [];
-  }
-}
-
-// export const fetchPendingTransactions = async (
-//   chainId: TzktApiChainId,
-//   account: TempleAccount
-// ): Promise<UserHistoryItem[]> => {
-//   try {
-//     const operations = (await fetchFromStorage(buildStorageKeyForTx(account.publicKeyHash, chainId))) ?? [];
-//     if (!operations.length) return [];
-
-//     const groups = await reduceOperationsGroups(operations, chainId, true);
-//     const arr = groups.map(group => operationsGroupToHistoryItem(group, account.publicKeyHash));
-//     return arr;
-//   } catch (e) {
-//     console.error('Error while fetching user history:', e);
-//     return [];
-//   }
-// };
-
-/**
- * Returned items are sorted new-to-old.
- *
- * @arg pseudoLimit // Is pseudo, because, number of returned activities is not guarantied to equal to it.
- *  It can also be smaller, even when older items are available (they can be fetched later).
- */
-async function fetchOperations(
-  chainId: TzktApiChainId,
-  account: TempleAccount,
-  assetSlug: string | undefined,
-  pseudoLimit: number,
-  tezos: ReactiveTezosToolkit,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
-): Promise<TzktOperation[]> {
-  const { publicKeyHash: accAddress } = account;
-
-  if (assetSlug) {
-    const [contractAddress, tokenId] = (assetSlug ?? '').split('_');
-
-    if (assetSlug === MAV_TOKEN_SLUG) {
-      // filter by anyof only for TEZ
-      return await fetchOperations_TEZ(chainId, accAddress, pseudoLimit, olderThan, operationParams);
-      // do not filter
-    } else if (assetSlug === LIQUIDITY_BAKING_DEX_ADDRESS) {
-      return await fetchOperations_Contract(chainId, accAddress, pseudoLimit, olderThan);
-    } else {
-      const tokenType = await detectTokenStandard(tezos, contractAddress);
-
-      if (tokenType === 'fa1.2') {
-        return await fetchOperations_Token_Fa_1_2(
-          chainId,
-          accAddress,
-          contractAddress,
-          pseudoLimit,
-          olderThan,
-          operationParams
-        );
-      } else if (tokenType === 'fa2') {
-        return await fetchOperations_Token_Fa_2(
-          chainId,
-          accAddress,
-          contractAddress,
-          tokenId,
-          pseudoLimit,
-          olderThan,
-          operationParams
-        );
-      }
-    }
-  }
-
-  return await fetchOperations_Any(chainId, accAddress, pseudoLimit, olderThan, operationParams);
-}
-
-const fetchOperations_TEZ = (
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  pseudoLimit: number,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
-) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
-    ...buildOlderThanParam(olderThan),
-    ...buildTEZOpParams(accountAddress, operationParams),
-    limit: pseudoLimit
-  });
-};
-
-const fetchOperations_Contract = (
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  pseudoLimit: number,
-  olderThan?: UserHistoryItem
-) => {
-  return TZKT.fetchGetAccountOperations(chainId, accountAddress, {
-    type: 'transaction',
-    limit: pseudoLimit,
-    initiator: accountAddress,
-    entrypoint: 'mintOrBurn',
-    'level.lt': olderThan?.oldestOperation?.level,
-    sort: 1
-  });
-};
-
-const fetchOperations_Token_Fa_1_2 = (
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  contractAddress: string,
-  pseudoLimit: number,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
-) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
-    ...build_Token_Fa_1_2OpParams(accountAddress, contractAddress, operationParams),
-    limit: pseudoLimit,
-    'level.lt': olderThan?.oldestOperation?.level
-  });
-};
-
-const fetchOperations_Token_Fa_2 = (
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  contractAddress: string,
-  tokenId = '0',
-  pseudoLimit: number,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
-) => {
-  return TZKT.fetchGetOperationsTransactions(chainId, {
-    ...build_Token_Fa_2OpParams(accountAddress, contractAddress, tokenId, operationParams),
-    limit: pseudoLimit,
-    'level.lt': olderThan?.oldestOperation?.level
-  });
-};
-
-async function fetchOperations_Any(
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  pseudoLimit: number,
-  olderThan?: UserHistoryItem,
-  operationParams?: GetOperationsTransactionsParams
-) {
-  const limit = pseudoLimit;
-
-  const accOperations = await TZKT.fetchGetAccountOperations(chainId, accountAddress, {
-    type: ['delegation', 'origination', 'transaction', 'staking'],
-    ...buildOlderThanParam(olderThan),
-    ...operationParams,
-    limit,
-    sort: 1
-  });
-
-  if (!accOperations.length) return [];
-
-  let newerThen: string | undefined = accOperations[accOperations.length - 1]?.timestamp;
-
-  const fa12OperationsTransactions = await TZKT.refetchOnce429(
-    () =>
-      fetchIncomingOperTransactions_Fa_1_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
-    1000
-  );
-
-  if (newerThen == null) {
-    newerThen = fa12OperationsTransactions[accOperations.length - 1]?.timestamp;
-  }
-
-  let fa2OperationsTransactions: TzktOperation[] = [];
-
-  if (Object.keys(operationParams ?? {}).length === 0) {
-    fa2OperationsTransactions = await TZKT.refetchOnce429(
-      () =>
-        fetchIncomingOperTransactions_Fa_2(chainId, accountAddress, newerThen ? { newerThen } : { limit }, olderThan),
-      1000
+    const filteredPendingItems = applyLocalTypeFilter(
+      pendingItems.filter(item => !confirmedHashes.has(item.hash)),
+      requestedTypes
     );
+
+    return {
+      items: [...filteredPendingItems, ...visibleCollected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
+      cursor: nextCursor,
+      hasMore
+    };
+  } catch (error) {
+    console.error('Error while fetching user history:', extractMavrykApiErrorMessage(error));
+
+    return {
+      items: [],
+      cursor,
+      hasMore: false
+    };
   }
-
-  const allOperations = accOperations
-    .concat(fa12OperationsTransactions, fa2OperationsTransactions)
-    .sort((b, a) => a.id - b.id);
-
-  return allOperations;
 }
-
-// incoming operations fetchers
-
-function fetchIncomingOperTransactions_Fa_1_2(
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  endLimitation: { limit: number } | { newerThen: string },
-  olderThan?: UserHistoryItem
-) {
-  const bottomParams = 'limit' in endLimitation ? endLimitation : { 'timestamp.ge': endLimitation.newerThen };
-
-  return TZKT.fetchGetOperationsTransactions(chainId, {
-    'sender.ne': accountAddress,
-    'target.ne': accountAddress,
-    'initiator.ne': accountAddress,
-    'parameter.to': accountAddress,
-    entrypoint: 'transfer',
-    ...buildOlderThanParam(olderThan),
-    ...bottomParams,
-    'sort.desc': 'id'
-  });
-}
-
-function fetchIncomingOperTransactions_Fa_2(
-  chainId: TzktApiChainId,
-  accountAddress: string,
-  endLimitation: { limit: number } | { newerThen: string },
-  olderThan?: UserHistoryItem
-) {
-  const bottomParams = 'limit' in endLimitation ? endLimitation : { 'timestamp.ge': endLimitation.newerThen };
-
-  return TZKT.fetchGetOperationsTransactions(chainId, {
-    'sender.ne': accountAddress,
-    'target.ne': accountAddress,
-    'initiator.ne': accountAddress,
-    'parameter.[*].txs.[*].to_': accountAddress,
-    entrypoint: 'transfer',
-    ...buildOlderThanParam(olderThan),
-    ...bottomParams,
-    'sort.desc': 'id'
-  });
-}
-
-//// PRIVATE
-
-/**
- * @return groups[number].operations // sorted new-to-old
- */
-async function fetchOperGroupsForOperations(
-  chainId: TzktApiChainId,
-  operations: TzktOperation[],
-  olderThan?: UserHistoryItem
-) {
-  const uniqueHashes = filterUnique(operations.map(d => d.hash));
-
-  if (olderThan && uniqueHashes[0] === olderThan.hash) uniqueHashes.splice(1);
-
-  const groups: OperationsGroup[] = [];
-  for (const hash of uniqueHashes) {
-    const transactions = await TZKT.refetchOnce429(() => TZKT.fetchGetOperationsByHash(chainId, hash), 1000);
-
-    sortTransactionsBasedOnTheOriginalType(transactions);
-    groups.push({
-      hash,
-      operations: transactions
-    });
-  }
-
-  return groups;
-}
-
-const reduceOperationsGroups = async (operations: TzktOperation[], chainId: TzktApiChainId, isPending = false) => {
-  const groups = Object.values(
-    operations.reduce<StringRecord<{ hash: string; operations: TzktOperation[] }>>((acc, item) => {
-      if (!acc[item.hash]) {
-        acc[item.hash] = { hash: item.hash, operations: [] };
-      }
-
-      acc[item.hash].operations.push(item);
-
-      sortTransactionsBasedOnTheOriginalType(acc[item.hash].operations);
-
-      return acc;
-    }, {})
-  );
-  if (groups.length > 0 && !isPending) {
-    const lastGroup = await fetchOperGroupsForOperations(chainId, [groups[groups.length - 1].operations[0]]);
-    groups[groups.length - 1] = lastGroup[0];
-  }
-
-  return groups;
-};
-
-/****************** UTILS Fns ********************/
-
-/**
- * > (!) When using `lastId` param, TZKT API might error with:
- * > `{"code":400,"errors":{"lastId":"The value '331626822238208' is not valid."}}`
- * > when it's not true!
- */
-const buildOlderThanParam = (olderThan?: UserHistoryItem) => ({
-  'timestamp.lt': olderThan?.oldestOperation?.addedAt
-});
-
-/**
- *
- * @param transactions
- * @returns Mutaded array of sorted transactions
- */
-const sortTransactionsBasedOnTheOriginalType = (transactions: TzktOperation[]) => {
-  // usually it returns transactions with type transaction and the original operation with other type
-  // so we sort it out to put that operation group to be always in the first place
-  return transactions.sort((a, b) => {
-    if (a.type !== 'transaction' && b.type === 'transaction') return -1;
-    if (a.type === 'transaction' && b.type !== 'transaction') return 1;
-    return b.id - a.id; // Default sort by ID in descending order
-  });
-};

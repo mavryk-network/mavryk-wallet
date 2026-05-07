@@ -48,15 +48,49 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
 
   const tezos = altTezos || currentTezos;
 
+  // Keep a head-block subscription alive for the active RPC.
+  // Cleanup closes the current subscription and cancels pending retries on network changes or unmount.
   useEffect(() => {
     if (pause) return;
 
-    let sub: Subscription<string>;
+    let sub: Subscription<string> | null = null;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
     spawnSub();
-    return () => sub.close();
+    return () => {
+      cancelled = true;
+
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
+
+      sub?.close();
+    };
+
+    function scheduleRespawn() {
+      if (cancelled || retryTimeout) {
+        return;
+      }
+
+      retryTimeout = setTimeout(() => {
+        retryTimeout = null;
+        spawnSub();
+      }, 1000);
+    }
 
     function spawnSub() {
-      sub = tezos.stream.subscribe('head');
+      if (cancelled) {
+        return;
+      }
+
+      try {
+        sub = tezos.stream.subscribe('head');
+      } catch (err) {
+        console.error(err);
+        scheduleRespawn();
+        return;
+      }
 
       sub.on('data', hash => {
         if (blockHashRef.current && blockHashRef.current !== hash) {
@@ -66,9 +100,9 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
       });
       sub.on('error', err => {
         console.error(err);
-        sub.close();
-        spawnSub();
+        sub?.close();
+        scheduleRespawn();
       });
     }
-  }, [pause, tezos]);
+  }, [callbackRef, pause, tezos]);
 }

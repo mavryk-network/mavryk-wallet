@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
-import { Divider, HashChip, Identicon } from 'app/atoms';
+import { Divider, HashChip, Identicon, Money } from 'app/atoms';
 import { CardContainer } from 'app/atoms/CardContainer';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE } from 'app/defaults';
 import { useAppEnv } from 'app/env';
@@ -16,7 +16,6 @@ import { T } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsMetadata } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { getPredefinedBaker } from 'lib/temple/front/baking/utils';
-import { mumavToTz } from 'lib/temple/helpers';
 import { UserHistoryItem } from 'lib/temple/history';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
@@ -42,11 +41,28 @@ import {
   alterIpfsUrl,
   deriveStatusColorClassName,
   getAssetsFromOperations,
+  getMainHistoryOperation,
+  getHistoryOperationAddress,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
 } from './utils';
 
 const TX_HISTORY_PREVIEW_IDX = 2;
+const DEFAULT_FEE_DECIMALS = 6;
+
+interface HistoryFeeTotals {
+  gasFee: BigNumber;
+  storageFee: BigNumber;
+  networkFee: BigNumber;
+  burnedFromFees: BigNumber;
+}
+
+const createEmptyHistoryFeeTotals = (): HistoryFeeTotals => ({
+  gasFee: new BigNumber(0),
+  storageFee: new BigNumber(0),
+  networkFee: new BigNumber(0),
+  burnedFromFees: new BigNumber(0)
+});
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
@@ -58,6 +74,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const { publicKeyHash } = useAccount();
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
+  const mainAssetDecimals = mainAssetMetadata?.decimals ?? DEFAULT_FEE_DECIMALS;
   const mainAssetSymbol = getAssetSymbol(mainAssetMetadata);
 
   const slugs = getAssetsFromOperations(historyItem);
@@ -67,8 +84,13 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   );
 
   const tokensMetadata = useMultipleAssetsMetadata(slugsForMultiple);
+  const mainOperation = useMemo(() => getMainHistoryOperation(historyItem), [historyItem]);
 
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
+  const operationMoneyDiffs = useMemo(
+    () => (historyItem?.hideOperationMoneyDiffs ? [] : moneyDiffs),
+    [historyItem?.hideOperationMoneyDiffs, moneyDiffs]
+  );
 
   const [showFeeDetails, setShowFeedetails] = useState(true);
   const [expandedTxHistory, setExpandedtxHistory] = useState(false);
@@ -83,35 +105,24 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      historyItem?.operations.reduce<{
-        gasFee: number;
-        storageFee: number;
-        networkFee: number;
-        gasUsed: number;
-        storageUsed: number;
-      }>(
-        (acc, item) => {
-          acc.gasFee += item.bakerFee;
-          acc.storageFee += item.storageFee;
-          acc.gasUsed += item.gasUsed;
-          acc.storageUsed += item.storageUsed;
+      historyItem?.operations.reduce<HistoryFeeTotals>((acc, item) => {
+        acc.gasFee = acc.gasFee.plus(item.networkFees?.gasFee ?? 0);
+        acc.storageFee = acc.storageFee.plus(item.networkFees?.storageFee ?? 0);
+        acc.networkFee = acc.networkFee.plus(item.networkFees?.totalFee ?? 0);
+        acc.burnedFromFees = acc.burnedFromFees.plus(item.networkFees?.burnedFromFees ?? 0);
 
-          acc.networkFee = acc.gasFee + acc.storageFee;
-
-          return acc;
-        },
-        { gasFee: 0, storageFee: 0, networkFee: 0, gasUsed: 0, storageUsed: 0 }
-      ),
+        return acc;
+      }, createEmptyHistoryFeeTotals()) ?? createEmptyHistoryFeeTotals(),
     [historyItem?.operations]
   );
-
-  const burnedFee = useMemo(() => (fees ? (fees?.gasFee + fees?.storageFee) * 0.5 : 0), [fees]);
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
 
   const isSwapOperation = historyItem?.type === HistoryItemOpTypeEnum.Swap;
   const isMultipleOperation = historyItem?.type === HistoryItemOpTypeEnum.Multiple;
   const isInteractionOperation = historyItem?.type === HistoryItemOpTypeEnum.Interaction;
+  const entrypointToShow =
+    (isInteractionOperation || isMultipleOperation) && mainOperation?.entrypoint ? mainOperation.entrypoint : undefined;
   const showDiffs =
     historyItem?.type === HistoryItemOpTypeEnum.TransferTo || historyItem?.type === HistoryItemOpTypeEnum.TransferFrom;
 
@@ -160,11 +171,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             )}
           >
             {HistoryItemOpTypeTexts[historyItem.type]}{' '}
-            {isInteractionOperation ? (
-              <span className="text-accent-blue">{historyItem.operations[0].entrypoint}</span>
-            ) : (
-              ''
-            )}
+            {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
           </div>
           {showDiffs && (
             <div className="flex flex-col">
@@ -182,7 +189,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             </div>
           )}
 
-          <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} showFullDate />
+          <HistoryTime addedAt={addedAt || mainOperation?.addedAt} showFullDate />
         </div>
       }
       portalClassName="history-details-popup"
@@ -261,7 +268,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             <div className="flex flex-col items-end">
               <FiatBalance
                 assetSlug={MAV_TOKEN_SLUG}
-                value={`${mumavToTz(fees?.networkFee ?? 0)}`}
+                value={fees.networkFee}
                 showEqualSymbol={false}
                 className="text-base-plus"
                 roundingMode={BigNumber.ROUND_CEIL}
@@ -269,9 +276,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               />
 
               <div className="text-sm text-secondary-white">
-                <span>-{mumavToTz(fees?.networkFee ?? 0).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
+                <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
               </div>
             </div>
           </div>
@@ -287,33 +292,34 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               <span>
                 <T id="gasFee" />
               </span>
-              <span className="text-secondary-white flex items-center capitalize">
-                <span>-{mumavToTz(fees?.gasFee ?? 0).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
-              </span>
+              <FeeAmount
+                value={fees.gasFee}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white flex items-center capitalize"
+              />
             </div>
             <div className="flex justify-between items-center capitalize">
               <span>
                 <T id="storageFee" />
               </span>
-              <span className="text-secondary-white">
-                <span className="text-secondary-white flex items-center">
-                  <span>-{mumavToTz(fees?.storageFee ?? 0).toFixed()}</span>
-                  &nbsp;
-                  <span>{mainAssetSymbol}</span>
-                </span>
-              </span>
+              <FeeAmount
+                value={fees.storageFee}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white flex items-center"
+              />
             </div>
             <div className="flex justify-between items-center">
               <span>
                 <T id="burnedFromFees" />
               </span>
-              <span className="text-secondary-white">
-                <span>-{mumavToTz(burnedFee).toFixed()}</span>
-                &nbsp;
-                <span>{mainAssetSymbol}</span>
-              </span>
+              <FeeAmount
+                value={fees.burnedFromFees}
+                symbol={mainAssetSymbol}
+                decimals={mainAssetDecimals}
+                className="text-secondary-white"
+              />
             </div>
           </div>
         </CardContainer>
@@ -330,7 +336,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                   <div key={i} className={clsx(i === 0 && '-mt-2')}>
                     <OpertionStackItem
                       item={item}
-                      moneyDiff={moneyDiffs[i]}
+                      moneyDiff={operationMoneyDiffs[i]}
                       userAddress={publicKeyHash}
                       isTiny
                       last={arr.length > 2 && i === arr.length - 1}
@@ -369,17 +375,35 @@ function renderTxHistoryDetails(operStack: IndividualHistoryItem[], previewOnly:
   return operStack;
 }
 
+const FeeAmount: FC<{
+  value: BigNumber;
+  symbol: string;
+  decimals: number;
+  className?: string;
+}> = ({ value, symbol, decimals, className }) => (
+  <span className={clsx('flex items-center', className)}>
+    <span>-</span>
+    <Money smallFractionFont={false} cryptoDecimals={decimals} tooltip={false}>
+      {value}
+    </Money>
+    &nbsp;
+    <span>{symbol}</span>
+  </span>
+);
+
 // helper components
 const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) => {
-  const item = historyItem.operations[0];
-  const swappedOpItem = historyItem.operations[historyItem.operations.length - 1];
+  const item = getMainHistoryOperation(historyItem);
+  const swappedOpItem = historyItem.operations[historyItem.operations.length - 1] ?? item;
 
   const getTxOpDisplayData = useMemo(() => {
+    if (!item) return null;
+
     switch (historyItem.type) {
       case HistoryItemOpTypeEnum.Delegation:
         const opDelegate = item as HistoryItemDelegationOp;
 
-        const delegateAddress = opDelegate.newDelegate?.address || opDelegate.source.address;
+        const delegateAddress = getHistoryOperationAddress(opDelegate, historyItem);
         const delegateBaker = getPredefinedBaker(delegateAddress);
 
         return {
@@ -390,7 +414,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.Staking:
         const opStaking = item as HistoryItemStakingOp;
 
-        const stakingAddress = opStaking.baker?.address || opStaking.sender?.address || opStaking.source.address;
+        const stakingAddress = getHistoryOperationAddress(opStaking, historyItem);
         const stakingBaker = getPredefinedBaker(stakingAddress);
 
         return {
@@ -403,13 +427,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opOriginate = item as HistoryItemOriginationOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opOriginate.originatedContract?.address
+          address: getHistoryOperationAddress(opOriginate, historyItem)
         };
 
       case HistoryItemOpTypeEnum.Interaction:
         const opInteract = item as HistoryItemTransactionOp;
 
-        const interactionAddress = opInteract.destination.address;
+        const interactionAddress = getHistoryOperationAddress(opInteract, historyItem);
         const interactionBaker = getPredefinedBaker(interactionAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -421,13 +445,13 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
 
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opSwap.destination.address
+          address: getHistoryOperationAddress(opSwap, historyItem)
         };
 
       case HistoryItemOpTypeEnum.TransferFrom:
         const opFrom = item as HistoryItemTransactionOp;
 
-        const transferFromAddress = opFrom.source.address;
+        const transferFromAddress = getHistoryOperationAddress(opFrom, historyItem);
         const transferFromBaker = getPredefinedBaker(transferFromAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -438,7 +462,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
       case HistoryItemOpTypeEnum.TransferTo:
         const opTo = item as HistoryItemTransactionOp;
 
-        const transferToAddress = opTo.destination.address;
+        const transferToAddress = getHistoryOperationAddress(opTo, historyItem);
         const transferToBaker = getPredefinedBaker(transferToAddress);
         return {
           label: HistoryItemTypeLabels[historyItem.type],
@@ -449,14 +473,14 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         const opReveal = item as HistoryItemTransactionOp;
         return {
           label: HistoryItemTypeLabels[historyItem.type],
-          address: opReveal.destination.address
+          address: getHistoryOperationAddress(opReveal, historyItem)
         };
 
       // Other
       default:
         const opOther = item as HistoryItemOtherOp;
 
-        const otherAddress = opOther.destination?.address || opOther.source.address || opOther.hash;
+        const otherAddress = getHistoryOperationAddress(opOther, historyItem);
         const otherBaker = getPredefinedBaker(otherAddress);
 
         return {
@@ -466,6 +490,8 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
         };
     }
   }, [historyItem.type, item, swappedOpItem]);
+
+  if (!getTxOpDisplayData) return null;
 
   return (
     <CardContainer className="mb-6 text-base-plus text-white">

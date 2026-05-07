@@ -20,7 +20,12 @@ import {
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from './MoneyDiffView';
-import { getAssetsFromOperations, getStakingMessage } from './utils';
+import {
+  getAssetsFromOperations,
+  getHistoryOperationAddress,
+  getMultipleInteractionMessageData,
+  getStakingMessage
+} from './utils';
 
 interface Props {
   item: IndividualHistoryItem;
@@ -123,6 +128,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
+      const interactionAddress = getHistoryOperationAddress(opInteract, originalHistoryItem);
 
       return (
         <Component
@@ -131,28 +137,32 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
           argsNode={
             <StackItemArgs
               i18nKey="interactionOnContract"
-              args={[
-                <span className="text-accent-blue">{opInteract.entrypoint}</span>,
-                (opInteract.destination?.address ?? opInteract.source?.address) || opInteract.hash
-              ]}
+              args={[<span className="text-accent-blue">{opInteract.entrypoint}</span>, interactionAddress]}
             />
           }
         />
       );
     case HistoryItemOpTypeEnum.Multiple:
       const opMultiple = item as HistoryItemTransactionOp;
+      const { contractAddress, countLabel, entrypoint } = getMultipleInteractionMessageData(
+        opMultiple,
+        originalHistoryItem
+      );
+      const contractLabel = entrypoint ? (
+        <StackItemArgs
+          i18nKey="interactionOnContract"
+          args={[<span className="text-accent-blue">{entrypoint}</span>, contractAddress]}
+        />
+      ) : (
+        contractAddress
+      );
+
       return (
         <Component
           {...componentBaseProps}
           titleNode={'Called'}
           argsNode={
-            <StackItemArgs
-              i18nKey="multipleInteractionOnContract"
-              args={[
-                opMultiple.destination.address,
-                <span>{originalHistoryItem ? originalHistoryItem?.operations.length - 1 : 1} more</span>
-              ]}
-            />
+            <StackItemArgs i18nKey="multipleInteractionOnContract" args={[contractLabel, <span>{countLabel}</span>]} />
           }
         />
       );
@@ -177,30 +187,33 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
     case HistoryItemOpTypeEnum.TransferFrom:
       const opFrom = item as HistoryItemTransactionOp;
+      const transferFromAddress = getHistoryOperationAddress(opFrom, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
+          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[transferFromAddress]} />}
         />
       );
 
     case HistoryItemOpTypeEnum.TransferTo:
       const opTo = item as HistoryItemTransactionOp;
+      const transferToAddress = getHistoryOperationAddress(opTo, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination?.address ?? 'unkwonn']} />}
+          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[transferToAddress]} />}
         />
       );
     case HistoryItemOpTypeEnum.Reveal:
       const opReveal = item as HistoryItemTransactionOp;
+      const revealAddress = getHistoryOperationAddress(opReveal, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="revealOperationType" args={[opReveal.source.address]} />}
+          argsNode={<StackItemArgs i18nKey="revealOperationType" args={[revealAddress]} />}
         />
       );
     // Other
@@ -225,7 +238,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
             <StackItemArgs
               // using reveal i18n to get empty string
               i18nKey="revealOperationType"
-              args={[opOther.destination?.address || opOther.source.address || opOther.hash]}
+              args={[getHistoryOperationAddress(opOther, originalHistoryItem)]}
             />
           }
         />

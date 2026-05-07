@@ -1,6 +1,6 @@
-import { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
+import type { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
 
-import { AssetMetadataBase } from '../../metadata';
+import type { AssetMetadataBase } from '../../metadata';
 
 export type HistoryItemStatus = TzktOperation['status'] | 'pending';
 export type HistoryMember = TzktAlias;
@@ -16,10 +16,26 @@ export interface UserHistoryItem {
   addedAt: string;
   status: HistoryItemStatus;
   operations: IndividualHistoryItem[];
+  mainOperation?: IndividualHistoryItem;
+  displayMoneyDiffs?: HistoryDisplayMoneyDiff[];
+  hideOperationMoneyDiffs?: boolean;
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
   firstOperation?: IndividualHistoryItem;
   oldestOperation?: IndividualHistoryItem;
+}
+
+export interface HistoryDisplayMoneyDiff {
+  assetSlug: string;
+  diff: string;
+}
+
+export interface HistoryOperationNetworkFees {
+  totalFee: number;
+  gasFee: number;
+  storageFee: number;
+  burnedFromFees: number;
+  usdAmount?: number;
 }
 
 type PickedPropsFromTzktOperation = Pick<TzktOperation, 'id' | 'level' | 'hash' | 'block'>;
@@ -63,6 +79,7 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   gasUsed: number;
   storageUsed: number;
   entrypoint?: string;
+  networkFees?: HistoryOperationNetworkFees;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {

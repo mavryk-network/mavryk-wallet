@@ -126,7 +126,9 @@ const ContactContent: React.FC<
       >
         <div className="flex flex-col justify-between flex-1">
           <div className="flex items-center">
-            <Name className="mb-px text-base-plus text-white text-left">{item.name}</Name>
+            <Name tooltipContent={item.name} className="mb-px text-base-plus text-white text-left">
+              {item.name}
+            </Name>
             <ContactsBadge own={item.accountInWallet} isCurrent={account.publicKeyHash === item.address} />
           </div>
 

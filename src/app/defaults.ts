@@ -9,7 +9,7 @@ export class NotEnoughFundsError extends ArtificialError {}
 export class ZeroBalanceError extends NotEnoughFundsError {}
 export class ZeroTEZBalanceError extends NotEnoughFundsError {}
 
-export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N} ]{1,16}(?<! )$';
+export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,100}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 
 export const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
@@ -32,6 +32,7 @@ export const URL_PATTERN =
   /(^(https:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$)|(^http(s)?:\/\/localhost:[0-9]+$)/;
 
 export const DEFAULT_DERIVATION_PATH = "m/44'/1729'/0'/0'";
+export const DEFAULT_LEDGER_DERIVATION_PATH = "m/44'/1969'/0'/0'";
 
 export function formatMnemonic(m: string) {
   return m.replace(/\n/g, ' ').trim();

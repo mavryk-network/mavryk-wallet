@@ -2,7 +2,9 @@ import type { Signer } from '@mavrykdynamics/webmavryk';
 import browser from 'webextension-polyfill';
 
 import { PublicError } from 'lib/temple/back/PublicError';
-import { uInt8ArrayToString } from 'lib/utils';
+import { createQueue, uInt8ArrayToString } from 'lib/utils';
+
+import { TransportType } from '../types';
 
 import type {
   ProxiedMethodName,
@@ -13,33 +15,66 @@ import type {
   ForegroundResponse
 } from './types';
 
+let nextProxyInstanceId = 0;
+
 export class TempleLedgerSignerProxy implements Signer {
   private creatorArgs: CreatorArguments;
   private id: number;
   private signer?: Signer;
+  private signerPromise?: Promise<Signer>;
+  private cleanedUp = false;
+  private readonly requestQueue = createQueue();
+
   constructor(creatorArgs: CreatorArguments) {
     this.creatorArgs = creatorArgs;
-    this.id = Date.now();
+    this.id = ++nextProxyInstanceId;
   }
 
-  publicKey = () => this.requestMethodCall({ name: 'publicKey' }, signer => signer.publicKey());
+  publicKey = () =>
+    this.requestQueue(() => this.requestMethodCall({ name: 'publicKey' }, signer => signer.publicKey()));
 
-  publicKeyHash = () => this.requestMethodCall({ name: 'publicKeyHash' }, signer => signer.publicKeyHash());
+  publicKeyHash = () =>
+    this.requestQueue(() => this.requestMethodCall({ name: 'publicKeyHash' }, signer => signer.publicKeyHash()));
 
   sign = (op: string, magicByte?: Uint8Array) =>
-    this.requestMethodCall(
-      {
-        name: 'sign',
-        args: {
-          op,
-          magicByte: magicByte && uInt8ArrayToString(magicByte)
-        }
-      },
-      signer => signer.sign(op, magicByte)
+    this.requestQueue(() =>
+      this.requestMethodCall(
+        {
+          name: 'sign',
+          args: {
+            op,
+            magicByte: magicByte && uInt8ArrayToString(magicByte)
+          }
+        },
+        signer => signer.sign(op, magicByte)
+      )
     );
 
   async secretKey(): Promise<string | undefined> {
     throw new Error('Secret key cannot be exposed');
+  }
+
+  async cleanup() {
+    if (this.cleanedUp) return;
+
+    const shouldReleaseForegroundSigner = !this.signer;
+
+    this.cleanedUp = true;
+    this.signer = undefined;
+    this.signerPromise = undefined;
+
+    if (!shouldReleaseForegroundSigner) {
+      return;
+    }
+
+    try {
+      await browser.runtime.sendMessage({
+        type: 'LEDGER_PROXY_RELEASE',
+        instanceId: this.id
+      });
+    } catch (error) {
+      console.error('Failed to release Ledger proxy signer', error);
+    }
   }
 
   private async requestMethodCall<N extends ProxiedMethodName, FallbackReturn = any>(
@@ -62,20 +97,39 @@ export class TempleLedgerSignerProxy implements Signer {
 
     if (response.type === 'refusal') {
       /* Foreground proactively refused to handle request */
-      const createLedgerSigner = (await import('../index')).createLedgerSigner;
-      const { derivationPath, derivationType, publicKey, publicKeyHash } = this.creatorArgs;
-      const { signer } = await createLedgerSigner(
-        response.transportType,
-        derivationPath,
-        derivationType,
-        publicKey,
-        publicKeyHash
-      );
-      this.signer = signer;
+      const signer = await this.getOrCreateFallbackSigner(response.transportType);
 
       return fallback(signer);
     }
 
     throw new PublicError(response.message);
+  }
+
+  private async getOrCreateFallbackSigner(transportType: TransportType) {
+    if (this.signer) return this.signer;
+
+    if (!this.signerPromise) {
+      this.signerPromise = (async () => {
+        const createLedgerSigner = (await import('../index')).createLedgerSigner;
+        const { derivationPath, derivationType, publicKey, publicKeyHash } = this.creatorArgs;
+        const { signer } = await createLedgerSigner(
+          transportType,
+          derivationPath,
+          derivationType,
+          publicKey,
+          publicKeyHash
+        );
+
+        this.signer = signer;
+
+        return signer;
+      })();
+    }
+
+    try {
+      return await this.signerPromise;
+    } finally {
+      this.signerPromise = undefined;
+    }
   }
 }

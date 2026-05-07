@@ -9,11 +9,21 @@ export function getActiveTabUrl(cb: (url?: string) => void) {
   });
 }
 
-export function areUrlsContainSameHost(url1?: string, url2?: string) {
-  if (!url1 || !url2) return false;
+const getUrlHost = (url?: string) => {
+  if (!url) return null;
 
-  const host1 = url1.split('/')[2].trim();
-  const host2 = url2.split('/')[2].trim();
+  try {
+    return new URL(url).host.trim();
+  } catch {
+    return null;
+  }
+};
+
+export function areUrlsContainSameHost(url1?: string, url2?: string) {
+  const host1 = getUrlHost(url1);
+  const host2 = getUrlHost(url2);
+
+  if (!host1 || !host2) return false;
 
   return host1 === host2;
 }

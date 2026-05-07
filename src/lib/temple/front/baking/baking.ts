@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import retry from 'async-retry';
+import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import useSWR, { SWRResponse, unstable_serialize, useSWRConfig } from 'swr';
 
@@ -27,7 +28,13 @@ import {
   emptydelegateStatsResponse,
   PREDEFINED_BAKERS_NAMES_MAINNET
 } from './const';
-import { getCoStakeWaitTime, getDelegationWaitTime, getOneCycleinMs, getUnlockWaitTime } from './utils/delegateTime';
+import {
+  getCoStakeWaitTime,
+  getDelegationWaitTime,
+  getOneCycleinMs,
+  getUnlockWaitDays,
+  getUnlockWaitTime
+} from './utils/delegateTime';
 
 // serializers
 function getDelegateCacheKey(
@@ -46,6 +53,27 @@ function getDelegateStatsCacheKey(
   shouldPreventErrorPropagation: boolean
 ) {
   return unstable_serialize(['delegate_stats', tezos.checksum, address, chainId, shouldPreventErrorPropagation]);
+}
+
+async function getCycleDurationMs(tezos: ReactiveTezosToolkit) {
+  try {
+    const constants = await tezos.rpc.getConstants();
+
+    return getOneCycleinMs(constants);
+  } catch (error) {
+    console.error('Failed to get RPC constants for cycle duration', error);
+
+    return DEFAULT_CYCLE_DURATION_MS.toNumber();
+  }
+}
+
+async function getCurrentCycleData(tezos: ReactiveTezosToolkit) {
+  const [blockMetadata, cycleDurationMs] = await Promise.all([tezos.rpc.getBlockMetadata(), getCycleDurationMs(tezos)]);
+
+  return {
+    currentCycle: blockMetadata?.level_info?.cycle ?? 0,
+    cycleDurationMs
+  };
 }
 
 // -----------------------------------------
@@ -80,6 +108,10 @@ export function useDelegate<T = TzktUserAccount>(
                   return accountStats;
               }
             } catch (e) {
+              if (axios.isAxiosError(e) && e.response?.status === 404) {
+                return emptyAccountResponse;
+              }
+
               console.error(e);
             }
           }
@@ -131,26 +163,14 @@ export function useAccountDelegatePeriodStats(
         async () => {
           try {
             if (accStats?.delegate?.address) {
-              const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
-                tezos.rpc.getBlockMetadata(),
+              const [{ currentCycle, cycleDurationMs }, setDelegateParameters, unstakeRequests] = await Promise.all([
+                getCurrentCycleData(tezos),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
                 tezos.rpc.getUnstakeRequests(accountAddress)
               ]);
 
-              const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
               const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
               const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 0;
-
-              // ~2.8 days for mainnet // get cycle in Ms ------<
-              let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
-
-              try {
-                const constants = await tezos.rpc.getConstants();
-                cycleDurationMs = getOneCycleinMs(constants);
-              } catch {
-                console.log('Error getting RPC default constants');
-              }
-              // -----------------------------------
 
               const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
               const costakeWaitTime = getCoStakeWaitTime(
@@ -217,7 +237,7 @@ export function useAccountDelegatePeriodStats(
     accStats?.delegationTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    tezos.rpc,
+    tezos,
     chainId,
     accountAddress,
     shouldPreventErrorPropagation,
@@ -234,6 +254,23 @@ export function useAccountDelegatePeriodStats(
       fallbackData: emptydelegateStatsResponse
     }
   );
+}
+
+export function useUnlockStakePeriodDays() {
+  const tezos = useTezos();
+  const chainId = useChainId();
+  const fallbackData = getUnlockWaitDays(DEFAULT_CYCLE_DURATION_MS.toNumber(), 0, 0);
+
+  const fetchUnlockStakePeriodDays = useCallback(async () => {
+    const { currentCycle, cycleDurationMs } = await getCurrentCycleData(tezos);
+
+    return getUnlockWaitDays(cycleDurationMs, currentCycle, currentCycle);
+  }, [tezos]);
+
+  return useRetryableSWR(['unlock-stake-period-days', tezos.checksum, chainId], fetchUnlockStakePeriodDays, {
+    fallbackData,
+    revalidateOnFocus: false
+  });
 }
 
 export type AccDelegatePeriodStats = ReturnType<typeof useAccountDelegatePeriodStats>;
@@ -290,7 +327,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const baseUrlParams = chainId ? { baseURL: TZKT_API_BASE_URLS[chainId as TzktApiChainId] } : {};
+      const baseUrlParams = chainId && isKnownChainId(chainId) ? { baseURL: TZKT_API_BASE_URLS[chainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
       // @ts-expect-error // predifined validators list
@@ -340,7 +377,7 @@ export function useKnownBaker(address: string | null, suspense = true) {
     } catch (_err) {
       return null;
     }
-  }, [address]);
+  }, [address, chainId]);
   return useRetryableSWR(net.type === 'main' && address ? ['baker', address] : null, fetchBaker, {
     refreshInterval: 120_000,
     dedupingInterval: 60_000,

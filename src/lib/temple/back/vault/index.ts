@@ -11,6 +11,7 @@ import {
   ACCOUNT_ALREADY_EXISTS_ERR_MSG,
   ACCOUNT_NAME_COLLISION_ERR_MSG,
   AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG,
+  DEFAULT_LEDGER_TEZOS_DERIVATION_PATH,
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
 import {
@@ -23,6 +24,7 @@ import {
 import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
 import {
+  DerivationType,
   SaveLedgerAccountInput,
   TempleAccount,
   TempleAccountType,
@@ -43,6 +45,7 @@ import {
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
+  getMainDerivationPath,
   concatAccount,
   createMemorySigner,
   withError,
@@ -84,6 +87,8 @@ const libthemisWasmSrc = '/wasm/libthemis.wasm';
 interface RemoveAccountEventPayload {
   publicKeyhash?: string;
 }
+
+type SignerCleanup = () => void | Promise<void>;
 
 export class Vault {
   static removeAccountsListeners: SyncFn<RemoveAccountEventPayload[]>[] = [];
@@ -689,6 +694,23 @@ export class Vault {
     });
   }
 
+  async getLedgerTezosPk(derivationPath = DEFAULT_LEDGER_TEZOS_DERIVATION_PATH, derivationType?: DerivationType) {
+    return withError('Failed to connect get Ledger account public key hash', async () => {
+      let cleanup: SignerCleanup | undefined;
+
+      try {
+        const { signer, cleanup: cleanSigner } = await createLedgerSigner(derivationPath, derivationType);
+        cleanup = cleanSigner;
+
+        return await signer.publicKey();
+      } catch (e: any) {
+        throw new PublicError(e.message);
+      } finally {
+        await cleanup?.();
+      }
+    });
+  }
+
   async createLedgerAccount(input: SaveLedgerAccountInput) {
     return withError('Failed to create Ledger account', async () => {
       try {
@@ -835,11 +857,11 @@ export class Vault {
     try {
       return await factory(signer);
     } finally {
-      cleanup();
+      await cleanup();
     }
   }
 
-  private async getSigner(accPublicKeyHash: string): Promise<{ signer: Signer; cleanup: () => void }> {
+  private async getSigner(accPublicKeyHash: string): Promise<{ signer: Signer; cleanup: SignerCleanup }> {
     const allAccounts = await this.fetchAccounts();
     const acc = allAccounts.find(a => a.publicKeyHash === accPublicKeyHash);
     if (!acc) {

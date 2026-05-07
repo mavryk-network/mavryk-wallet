@@ -20,6 +20,7 @@ import AccountBanner from 'app/templates/AccountBanner';
 import ExpensesView, { ModifyFeeAndLimit } from 'app/templates/ExpensesView/ExpensesView';
 import NetworkBanner from 'app/templates/NetworkBanner';
 import OperationsBanner from 'app/templates/OperationsBanner/OperationsBanner';
+import { hasDisplayableRawPayload } from 'app/templates/raw-payload.helpers';
 import RawPayloadView from 'app/templates/RawPayloadView';
 import { ViewsSwitcherItemProps } from 'app/templates/ViewsSwitcher/ViewsSwitcherItem';
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
@@ -91,6 +92,10 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     () => tryParseExpenses(contentToParse!, account.publicKeyHash),
     [contentToParse, account.publicKeyHash]
   );
+  const rawPayload = useMemo(
+    () => (payload.type === 'operations' ? payload.rawToSign ?? payload.opParams : undefined),
+    [payload]
+  );
   const expensesData = useMemo(() => {
     return rawExpensesData.map(({ expenses, ...restProps }) => ({
       expenses: expenses.map(({ tokenAddress, tokenId, ...restProps }) => ({
@@ -100,8 +105,10 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
       ...restProps
     }));
   }, [rawExpensesData]);
+  const hasRawPayload = useMemo(() => hasDisplayableRawPayload(rawPayload), [rawPayload]);
 
   const estimates = payload.type === 'operations' ? payload.estimates : undefined;
+  const isOperationPayload = payload.type === 'operations';
 
   const { value: tezBalanceData } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
   const tezBalance = tezBalanceData!;
@@ -145,12 +152,16 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
       }
       return [
         previewItem,
-        {
-          key: 'raw',
-          name: t('raw'),
-          Icon: CodeAltIcon,
-          testID: InternalConfirmationSelectors.rawTab
-        },
+        ...(hasRawPayload
+          ? [
+              {
+                key: 'raw',
+                name: t('raw'),
+                Icon: CodeAltIcon,
+                testID: InternalConfirmationSelectors.rawTab
+              }
+            ]
+          : []),
         payload.bytesToSign && {
           key: 'bytes',
           name: t('bytes'),
@@ -174,7 +185,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
         testID: InternalConfirmationSelectors.bytesTab
       }
     ];
-  }, [payload]);
+  }, [hasRawPayload, isStorageDataHidden, payload]);
 
   const [spFormat, setSpFormat] = useSafeState(signPayloadFormats[0]);
   const [error, setError] = useSafeState<any>(null);
@@ -203,7 +214,10 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
     (payload.type === 'operations' && payload.opParams && payload.opParams[0].storageLimit) || 0
   );
 
-  const gasFeeError = useMemo(() => modifiedTotalFeeValue <= MIN_GAS_FEE, [modifiedTotalFeeValue]);
+  const gasFeeError = useMemo(
+    () => (isOperationPayload ? modifiedTotalFeeValue <= MIN_GAS_FEE : false),
+    [isOperationPayload, modifiedTotalFeeValue]
+  );
 
   const confirm = useCallback(
     async (confirmed: boolean) => {
@@ -351,9 +365,9 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                     )}
                   </div>
 
-                  {payload.type === 'operations' && spFormat.key === 'raw' && (
+                  {payload.type === 'operations' && spFormat.key === 'raw' && hasRawPayload && (
                     <OperationsBanner
-                      opParams={payload.rawToSign ?? payload.opParams}
+                      opParams={rawPayload}
                       jsonViewStyle={signPayloadFormats.length > 1 ? { height: 'auto' } : undefined}
                       modifiedTotalFee={modifiedTotalFeeValue}
                       modifiedStorageLimit={modifiedStorageLimitValue}
@@ -380,27 +394,29 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                   {spFormat.key === 'preview' && (
                     <ExpensesView
                       expenses={expensesData}
-                      estimates={payload.type === 'operations' ? payload.estimates : undefined}
-                      modifyFeeAndLimit={modifyFeeAndLimit}
+                      estimates={isOperationPayload ? payload.estimates : undefined}
+                      modifyFeeAndLimit={isOperationPayload ? modifyFeeAndLimit : undefined}
                       mainnet={mainnet}
                       gasFeeError={gasFeeError}
                     />
                   )}
 
-                  <div style={{ marginBottom: 12 }}>
-                    <ModifyFeeAndLimitComponent
-                      id="internal-modified-fees-id"
-                      name="internal-modified-fees"
-                      expenses={expensesData}
-                      estimates={estimates}
-                      modifyFeeAndLimit={modifyFeeAndLimit}
-                      mainnet={mainnet}
-                      gasFeeError={gasFeeError}
-                      includeStorageData={!isStorageDataHidden}
-                      includeBurnedFee
-                      poperModifiers={popup ? feePoperModifiers : undefined}
-                    />
-                  </div>
+                  {isOperationPayload && (
+                    <div style={{ marginBottom: 12 }}>
+                      <ModifyFeeAndLimitComponent
+                        id="internal-modified-fees-id"
+                        name="internal-modified-fees"
+                        expenses={expensesData}
+                        estimates={estimates}
+                        modifyFeeAndLimit={modifyFeeAndLimit}
+                        mainnet={mainnet}
+                        gasFeeError={gasFeeError}
+                        includeStorageData={!isStorageDataHidden}
+                        includeBurnedFee
+                        poperModifiers={popup ? feePoperModifiers : undefined}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -434,7 +450,7 @@ const InternalConfirmation: FC<InternalConfiramtionProps> = ({ payload, onConfir
                 <FormSubmitButton
                   type="button"
                   className="justify-center w-full"
-                  disabled={gasFeeError}
+                  disabled={isOperationPayload && gasFeeError}
                   loading={confirming}
                   onClick={handleConfirmClick}
                   testID={

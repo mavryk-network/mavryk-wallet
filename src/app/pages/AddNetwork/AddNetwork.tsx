@@ -9,9 +9,9 @@ import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
 import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useTempleClient } from 'lib/temple/front';
-import { loadChainId } from 'lib/temple/helpers';
+import { loadChainIdStrict } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
-import { TempleChainId } from 'lib/temple/types';
+import { isKnownChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -76,11 +76,10 @@ export const AddNetworkScreen: FC = () => {
 
       let chainId: string = '';
       try {
-        chainId = (await loadChainId(rpcBaseURL)) as string;
+        chainId = await loadChainIdStrict(rpcBaseURL);
 
-        if (chainId) {
-          const currentBlockExplorerId =
-            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId as TempleChainId))?.id ?? 'tzkt';
+        if (isKnownChainId(chainId)) {
+          const currentBlockExplorerId = BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId))?.id ?? 'tzkt';
 
           setExplorerId(currentBlockExplorerId);
         } else {

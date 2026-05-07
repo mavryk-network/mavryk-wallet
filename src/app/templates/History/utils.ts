@@ -5,23 +5,55 @@ import { t } from 'lib/i18n';
 import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import {
+  HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
+  HistoryItemOriginationOp,
+  HistoryItemOtherOp,
   HistoryItemStatus,
+  HistoryItemStakingOp,
   HistoryItemTransactionOp,
   StakingActions,
+  IndividualHistoryItem,
   UserHistoryItem
 } from 'lib/temple/history/types';
 
-export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
-  if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
+export const getMainHistoryOperation = (historyItem: UserHistoryItem | null | undefined) =>
+  historyItem?.mainOperation ?? historyItem?.operations[0];
 
-  return slug || !historyItem.operations[0]?.contractAddress
+export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
+  const mainOperation = getMainHistoryOperation(historyItem);
+
+  if (historyItem?.displayMoneyDiffs?.length) {
+    return slug ?? historyItem.displayMoneyDiffs[0].assetSlug;
+  }
+
+  if (!historyItem || mainOperation?.contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
+
+  return slug || !mainOperation?.contractAddress
     ? MAV_TOKEN_SLUG
     : toTokenSlug(
-        historyItem.operations[0].contractAddress ?? '',
-        (historyItem.operations[0] as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
+        mainOperation.contractAddress ?? '',
+        (mainOperation as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
       );
 };
+
+export const buildHistoryPreviewOperations = (
+  historyItem: UserHistoryItem,
+  operStack: IndividualHistoryItem[],
+  previewSize: number
+) => {
+  if (!historyItem.mainOperation) {
+    return operStack.filter((_, i) => i < previewSize).map(op => ({ ...op, type: historyItem.type }));
+  }
+
+  const mainOperation = getMainHistoryOperation(historyItem);
+  if (!mainOperation) return [];
+
+  return [{ ...mainOperation, type: historyItem.type }, ...operStack.slice(0, Math.max(previewSize - 1, 0))];
+};
+
+export const getHistoryPreviewStackOffset = (historyItem: UserHistoryItem, previewSize: number) =>
+  historyItem.mainOperation ? Math.max(previewSize - 1, 0) : previewSize;
 
 export const alterIpfsUrl = (url?: string) => {
   if (!url || url?.split('//')?.shift() !== 'ipfs:') return url;
@@ -52,7 +84,11 @@ export const getOperationTypeI18nKeyVerb = (type: HistoryItemOpTypeEnum) => {
 };
 
 export function getAssetsFromOperations(item: UserHistoryItem | null | undefined) {
-  if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
+  if (item?.displayMoneyDiffs?.length) {
+    return [...new Set(item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug).filter(Boolean))];
+  }
+
+  if (!item || item.operations.length <= 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
@@ -74,6 +110,86 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
 
   return slugs;
 }
+
+const getTransactionTargetAddress = (operation?: Partial<HistoryItemTransactionOp>) =>
+  operation?.destination?.address ?? operation?.tokenTransfers?.recipients?.[0]?.to.address;
+
+export const getHistoryOperationAddress = (
+  item: IndividualHistoryItem | null | undefined,
+  originalHistoryItem?: UserHistoryItem
+): string => {
+  if (!item) return '';
+
+  switch (item.type) {
+    case HistoryItemOpTypeEnum.Delegation: {
+      const delegationOp = item as HistoryItemDelegationOp;
+
+      return (
+        delegationOp.newDelegate?.address ??
+        delegationOp.prevDelegate?.address ??
+        delegationOp.source.address ??
+        delegationOp.hash
+      );
+    }
+
+    case HistoryItemOpTypeEnum.Staking: {
+      const stakingOp = item as HistoryItemStakingOp;
+
+      return stakingOp.baker?.address ?? stakingOp.sender?.address ?? stakingOp.source.address ?? stakingOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Origination: {
+      const originationOp = item as HistoryItemOriginationOp;
+
+      return originationOp.originatedContract?.address ?? originationOp.source.address ?? originationOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.TransferFrom:
+      return item.source.address ?? getTransactionTargetAddress(item as HistoryItemTransactionOp) ?? item.hash;
+
+    case HistoryItemOpTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Swap: {
+      const txOp = item as HistoryItemTransactionOp;
+
+      return getTransactionTargetAddress(txOp) ?? txOp.source.address ?? txOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Multiple: {
+      const groupedOperation =
+        getMainHistoryOperation(originalHistoryItem) ??
+        originalHistoryItem?.operations.find(operation =>
+          getTransactionTargetAddress(operation as HistoryItemTransactionOp)
+        ) ??
+        originalHistoryItem?.operations[0];
+
+      return getHistoryOperationAddress(groupedOperation, undefined) || item.source.address || item.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Reveal:
+      return item.source.address ?? item.hash;
+
+    case HistoryItemOpTypeEnum.Other:
+    default: {
+      const otherOp = item as HistoryItemOtherOp;
+
+      return otherOp.destination?.address ?? otherOp.source.address ?? otherOp.hash;
+    }
+  }
+};
+
+export const getMultipleInteractionMessageData = (
+  item: HistoryItemTransactionOp,
+  originalHistoryItem?: UserHistoryItem
+) => {
+  const entrypoint = item.entrypoint?.trim() || undefined;
+
+  return {
+    entrypoint,
+    contractAddress: getHistoryOperationAddress(item, originalHistoryItem),
+    countLabel: `${originalHistoryItem ? originalHistoryItem.operations.length - 1 : 1} more`
+  } as const;
+};
 
 export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   const diff = [...moneyDiffs.filter(m => !new BigNumber(m.diff).isZero())];

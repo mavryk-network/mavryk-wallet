@@ -70,9 +70,7 @@ export const OnRampOverlay: FC = () => {
           <h1 className="font-aeonik font-normal text-gray-910 mt-25 text-2xl">
             <T id="jumpInMaven" />
           </h1>
-          <p
-            className={classNames('font-aeonik font-normal text-gray-700 mt-4 text-ulg', !popup && 'px-10')}
-          >
+          <p className={classNames('font-aeonik font-normal text-gray-700 mt-4 text-ulg', !popup && 'px-10')}>
             <T
               id="onRampDesription"
               substitutions={[

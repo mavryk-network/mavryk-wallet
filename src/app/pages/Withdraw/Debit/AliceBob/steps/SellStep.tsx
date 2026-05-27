@@ -91,9 +91,7 @@ export const SellStep: FC<StepProps> = ({ orderInfo, isApiError, setStep, setOrd
           <T id={'transactionId'} />
         </p>
         <span className="flex flex-row justify-center">
-          <p className="text-gray-910 text-ulg">
-            {truncatedOrderId}
-          </p>
+          <p className="text-gray-910 text-ulg">{truncatedOrderId}</p>
           <CopyButton text={orderId} type="link">
             <CopyIcon className="h-4 ml-1 w-auto text-blue-200 fill-current" onClick={copy} />
           </CopyButton>

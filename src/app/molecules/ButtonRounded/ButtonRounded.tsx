@@ -82,7 +82,7 @@ export const ButtonRounded = React.forwardRef<HTMLButtonElement, ButtonRoundedPr
           size === 'big' && 'rounded-xl',
           size === 'xs' && 'rounded-md',
           'transition ease-in-out duration-200',
-          disabled ? 'border-transparent' : `border-${borderColor}`, // border color
+          disabled ? (fill ? 'border-transparent' : 'border-gray-40') : `border-${borderColor}`, // border color
           !disabled &&
             (fill
               ? `${bgColor} hover:${bgColorHover} border`

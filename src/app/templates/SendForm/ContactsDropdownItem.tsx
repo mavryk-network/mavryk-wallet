@@ -5,8 +5,8 @@ import classNames from 'clsx';
 import { Button } from 'app/atoms/Button';
 import CleanButton from 'app/atoms/CleanButton';
 import HashShortView from 'app/atoms/HashShortView';
-import Identicon from 'app/atoms/Identicon';
 import Name from 'app/atoms/Name';
+import { ContactAvatar } from 'app/molecules/ContactAvatar';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { T } from 'lib/i18n';
 import { TempleContact } from 'lib/temple/types';
@@ -35,12 +35,7 @@ const ContactsDropdownItem: FC<ContactsDropdownItemProps> = ({ contact, active, 
       tabIndex={-1}
       {...rest}
     >
-      <Identicon
-        type="bottts"
-        hash={contact.address}
-        size={24}
-        className="flex-shrink-0 rounded-full overflow-hidden"
-      />
+      <ContactAvatar contact={contact} size={24} />
 
       <div className="ml-2 flex flex-1 w-full">
         <div className="flex flex-col justify-between flex-1">
@@ -88,12 +83,7 @@ export const ContactsDropdownItemSecondary: FC<ContactsDropdownItemProps> = ({ c
       tabIndex={-1}
       {...rest}
     >
-      <Identicon
-        type="bottts"
-        hash={contact.address}
-        size={24}
-        className="flex-shrink-0 rounded-full overflow-hidden"
-      />
+      <ContactAvatar contact={contact} size={24} />
 
       <div className="ml-2 flex flex-1 w-full relative">
         <div className="flex flex-col justify-between flex-1">

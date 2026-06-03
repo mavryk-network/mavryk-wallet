@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -27,6 +27,8 @@ import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
 import RevealSecret from 'app/templates/RevealSecrets/RevealSecret';
 import GeneralSettings from 'app/templates/SettingsGeneral';
 import { T } from 'lib/i18n';
+import { canAccountUseContacts, useAccount } from 'lib/temple/front';
+import { navigate } from 'lib/woozie';
 
 import ConnectLedger from '../ConnectLedger/ConnectLedger';
 
@@ -44,6 +46,7 @@ export type TabComponentProps = {
 
 const RevealPrivateKey: FC = () => <RevealSecret reveal="private-key" />;
 const RevealSeedPhrase: FC = () => <RevealSecret reveal="seed-phrase" />;
+const CONTACTS_TAB_LINKS = new Set(['contacts', 'add-contact', 'import-contacts']);
 
 type Tab = ListItemWithNavigateprops & {
   Component: React.FC<TabComponentProps>;
@@ -159,8 +162,27 @@ const TABS: Tab[] = [
 
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {
   const { popup } = useAppEnv();
-  const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
+  const account = useAccount();
+  const canUseContacts = canAccountUseContacts(account);
+  const isContactsRoute = tabSlug ? CONTACTS_TAB_LINKS.has(tabSlug) : false;
+  const activeTab = useMemo(() => {
+    const tab = TABS.find(t => t.linkTo === tabSlug) || null;
+
+    if (tab?.linkTo && CONTACTS_TAB_LINKS.has(tab.linkTo) && !canUseContacts) {
+      return null;
+    }
+
+    return tab;
+  }, [canUseContacts, tabSlug]);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
+
+  // Redirect watch-only accounts away from contacts routes because they cannot own encrypted contacts.
+  // This manages in-app navigation only; no cleanup is needed because navigation is a one-shot side effect.
+  useEffect(() => {
+    if (isContactsRoute && !canUseContacts) {
+      navigate('/settings');
+    }
+  }, [canUseContacts, isContactsRoute]);
 
   let tId = activeTab?.i18nKey ?? 'settings';
   tId = activeTab?.i18nKey === 'connectWithLedger' ? 'connectLedger' : tId;
@@ -187,7 +209,12 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
             ) : (
               <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
                 {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                  <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
+                  <ListItemWithNavigate
+                    key={linkTo}
+                    {...tab}
+                    linkTo={'/settings/'.concat(linkTo ?? '')}
+                    disabled={linkTo === 'contacts' && !canUseContacts}
+                  />
                 ))}
               </ul>
             )}

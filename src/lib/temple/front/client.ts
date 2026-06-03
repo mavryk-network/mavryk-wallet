@@ -142,10 +142,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
   }, []);
 
   const ensureAuthorized = useCallback(
-    async (accountPublicKeyHash?: string, networkId?: string, interactive = true) => {
+    async (accountPublicKeyHash?: string, networkId?: string, interactive = true, authWalletAddress?: string) => {
       const res = await request({
         type: TempleMessageType.EnsureAuthorizedRequest,
         accountPublicKeyHash,
+        authWalletAddress,
         networkId,
         interactive
       });

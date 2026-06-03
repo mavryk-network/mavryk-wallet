@@ -13,7 +13,12 @@ import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
-import { buildAuthWalletAddressesMap, loadChainId, resolveAuthWalletAddress } from 'lib/temple/helpers';
+import {
+  buildAuthWalletAddressesMap,
+  canAccountSignAuth,
+  loadChainId,
+  resolveAuthWalletAddress
+} from 'lib/temple/helpers';
 import {
   DerivationType,
   TempleState,
@@ -105,14 +110,29 @@ const getStoredSelectedAccountPkh = async () => {
   return typeof selectedAccountPkh === 'string' ? selectedAccountPkh : undefined;
 };
 
+const resolveAuthWalletAddressForRequest = (
+  allAccounts: TempleAccount[],
+  accountPkh?: string | null,
+  explicitAuthWalletAddress?: string | null
+) => {
+  if (!explicitAuthWalletAddress) {
+    return resolveAuthWalletAddress(allAccounts, accountPkh);
+  }
+
+  const authAccount = allAccounts.find(account => account.publicKeyHash === explicitAuthWalletAddress);
+
+  return authAccount && canAccountSignAuth(authAccount) ? explicitAuthWalletAddress : null;
+};
+
 const performAuthForAccount = async (
   vault: Vault,
   accountPkh: string,
   accounts?: TempleAccount[],
-  networkId?: string
+  networkId?: string,
+  explicitAuthWalletAddress?: string
 ) => {
   const allAccounts = accounts ?? (await vault.fetchAccounts());
-  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+  const authWalletAddress = resolveAuthWalletAddressForRequest(allAccounts, accountPkh, explicitAuthWalletAddress);
 
   if (!authWalletAddress) {
     return;
@@ -128,10 +148,11 @@ const ensureAuthorizedForAccount = async (
   accountPkh?: string,
   networkId?: string,
   accounts?: TempleAccount[],
-  interactive = true
+  interactive = true,
+  explicitAuthWalletAddress?: string
 ) => {
   const allAccounts = accounts ?? (await vault.fetchAccounts());
-  const authWalletAddress = resolveAuthWalletAddress(allAccounts, accountPkh);
+  const authWalletAddress = resolveAuthWalletAddressForRequest(allAccounts, accountPkh, explicitAuthWalletAddress);
 
   if (!authWalletAddress) {
     return;
@@ -151,7 +172,7 @@ const ensureAuthorizedForAccount = async (
       return;
     }
 
-    await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId);
+    await performAuthForAccount(vault, authWalletAddress, allAccounts, networkId, explicitAuthWalletAddress);
   }
 };
 
@@ -431,11 +452,16 @@ export function createOrImportWallet(mnemonic?: string) {
   });
 }
 
-export function ensureAuthorized(accountPkh?: string, networkId?: string, interactive = true) {
+export function ensureAuthorized(
+  accountPkh?: string,
+  networkId?: string,
+  interactive = true,
+  explicitAuthWalletAddress?: string
+) {
   return withUnlocked(async ({ vault }) => {
     const accounts = await vault.fetchAccounts();
 
-    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts, interactive);
+    await ensureAuthorizedForAccount(vault, accountPkh, networkId, accounts, interactive, explicitAuthWalletAddress);
   });
 }
 

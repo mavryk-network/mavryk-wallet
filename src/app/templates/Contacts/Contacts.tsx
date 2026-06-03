@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 
 import clsx from 'clsx';
 
-import { Name, Identicon, HashChip } from 'app/atoms';
+import { Name, HashChip } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as ChevronRightIcon } from 'app/icons/chevron-right.svg';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
+import { ContactAvatar } from 'app/molecules/ContactAvatar';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
@@ -111,7 +112,7 @@ export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComp
 };
 
 const ContactIcon: React.FC<OptionRenderProps<TempleContact, string, ContactActions>> = ({ item }) => (
-  <Identicon type="bottts" hash={item.address} size={32} className="flex-shrink-0 shadow-xs rounded-full" />
+  <ContactAvatar contact={item} size={32} className="shadow-xs" />
 );
 
 const ContactContent: React.FC<

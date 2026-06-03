@@ -45,6 +45,7 @@ export { validateDelegate } from './validate-delegate';
 export { validateRecipient } from './validate-recipient';
 
 export { useFilteredContacts } from './use-filtered-contacts.hook';
+export { canAccountUseContacts } from './contacts-settings';
 
 export { decryptKukaiSeedPhrase } from './kukai';
 

@@ -1,13 +1,26 @@
 import { isEqual } from 'lodash';
 
-import { resolveAuthWalletAddress } from 'lib/temple/helpers';
+import { canAccountSignAuth } from 'lib/temple/helpers';
 import {
   TempleAccount,
+  TempleAccountType,
   TempleContact,
   TempleContactApiType,
   TempleContactsAccountState,
   TempleSettings
 } from 'lib/temple/types';
+
+export type ContactsAccountScope = {
+  storageAddress: string;
+  authAddress: string;
+};
+
+export type ContactsSettingsAccountPatch = {
+  contactsStorageKey: string;
+  contacts: TempleContact[];
+  recordId?: string | null;
+  typesByAddress?: Record<string, TempleContactApiType>;
+};
 
 function normalizeContact(contact: TempleContact): TempleContact | null {
   const name = contact.name.trim();
@@ -34,8 +47,28 @@ export function normalizeContacts(contacts: TempleContact[]) {
   return Array.from(uniqueContacts.values());
 }
 
-export function getContactsOwnerAddress(allAccounts: TempleAccount[], accountPkh: string) {
-  return resolveAuthWalletAddress(allAccounts, accountPkh);
+export function canAccountUseContacts(account: TempleAccount) {
+  return account.type !== TempleAccountType.WatchOnly;
+}
+
+export function getContactsAccountScope(allAccounts: TempleAccount[], accountPkh: string): ContactsAccountScope | null {
+  const account = allAccounts.find(acc => acc.publicKeyHash === accountPkh);
+
+  if (!account || !canAccountUseContacts(account)) {
+    return null;
+  }
+
+  if (account.type === TempleAccountType.ManagedKT) {
+    const ownerAccount = allAccounts.find(acc => acc.publicKeyHash === account.owner);
+
+    return ownerAccount && canAccountSignAuth(ownerAccount)
+      ? { storageAddress: account.publicKeyHash, authAddress: ownerAccount.publicKeyHash }
+      : null;
+  }
+
+  return canAccountSignAuth(account)
+    ? { storageAddress: account.publicKeyHash, authAddress: account.publicKeyHash }
+    : null;
 }
 
 export function buildContactsStorageKey(walletAddress: string, networkId: string) {
@@ -81,15 +114,12 @@ export function getCurrentAccountStoredContacts(settings: TempleSettings, contac
   return normalizeContacts(settings.contacts ?? []);
 }
 
-export function buildContactsSettingsPatch(
-  settings: TempleSettings,
-  contactsStorageKey: string,
+function buildContactsAccountState(
   contacts: TempleContact[],
-  recordId = getStoredContactsRecordId(settings, contactsStorageKey),
-  typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey)
-): Partial<TempleSettings> {
+  recordId?: string | null,
+  typesByAddress?: Record<string, TempleContactApiType>
+): TempleContactsAccountState {
   const normalizedContacts = normalizeContacts(contacts);
-  const nextAccounts = { ...(settings.contactsApi?.accounts ?? {}) };
   const normalizedTypesByAddress =
     typesByAddress && Object.keys(typesByAddress).length > 0
       ? Object.entries(typesByAddress).reduce<Record<string, TempleContactApiType>>((acc, [address, type]) => {
@@ -101,16 +131,52 @@ export function buildContactsSettingsPatch(
         }, {})
       : undefined;
 
-  nextAccounts[contactsStorageKey] = {
+  return {
     contacts: normalizedContacts,
     ...(recordId ? { recordId } : {}),
     ...(normalizedTypesByAddress && Object.keys(normalizedTypesByAddress).length > 0
       ? { typesByAddress: normalizedTypesByAddress }
       : {})
   };
+}
+
+function hasContactsAccountStateContent(state: TempleContactsAccountState) {
+  return Boolean(
+    state.contacts.length || state.recordId || (state.typesByAddress && Object.keys(state.typesByAddress).length > 0)
+  );
+}
+
+export function hasContactsSettingsAccountPatchMismatch(
+  settings: TempleSettings,
+  { contactsStorageKey, contacts, recordId, typesByAddress }: ContactsSettingsAccountPatch
+) {
+  const currentState = getCachedContactsState(settings, contactsStorageKey);
+  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress);
+
+  if (!currentState) {
+    return hasContactsAccountStateContent(nextState);
+  }
+
+  return !isEqual(
+    buildContactsAccountState(currentState.contacts, currentState.recordId, currentState.typesByAddress),
+    nextState
+  );
+}
+
+export function buildContactsSettingsPatch(
+  settings: TempleSettings,
+  contactsStorageKey: string,
+  contacts: TempleContact[],
+  recordId = getStoredContactsRecordId(settings, contactsStorageKey),
+  typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey)
+): Partial<TempleSettings> {
+  const nextAccounts = { ...(settings.contactsApi?.accounts ?? {}) };
+  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress);
+
+  nextAccounts[contactsStorageKey] = nextAccountState;
 
   return {
-    contacts: normalizedContacts,
+    contacts: nextAccountState.contacts,
     contactsApi: Object.keys(nextAccounts).length > 0 ? { accounts: nextAccounts } : undefined
   };
 }
@@ -128,6 +194,8 @@ export function hasContactsSettingsMismatch(
   );
 }
 
-export function canUseEncryptedContacts(contactsOwnerAddress: string | null) {
-  return Boolean(contactsOwnerAddress);
+export function canUseEncryptedContacts(
+  contactsAccountScope: ContactsAccountScope | null
+): contactsAccountScope is ContactsAccountScope {
+  return Boolean(contactsAccountScope);
 }

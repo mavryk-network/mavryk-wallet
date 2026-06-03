@@ -4,7 +4,9 @@ import { z } from 'zod';
 import type { TempleContact, TempleContactApiType } from 'lib/temple/types';
 
 import { mavrykApi } from './client';
+import type { MavrykApiRequestConfig } from './client';
 import { extractMavrykApiErrorMessage } from './errors';
+import type { MavrykAuthStorageContext } from './storage';
 
 const CONTACTS_DATA_KEY = 'contacts';
 const CONTACTS_DATA_TYPE = 'contacts';
@@ -184,18 +186,23 @@ async function parseContactsResponse(
   return { contacts, record, typesByAddress };
 }
 
-export async function fetchContactsRecord(publicKey: string): Promise<{
+export async function fetchContactsRecord(
+  publicKey: string,
+  authContext?: Required<MavrykAuthStorageContext>
+): Promise<{
   contacts: TempleContact[];
   recordId: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
 }> {
   try {
     const key = await deriveAccountDataKey(publicKey);
-    const { data } = await mavrykApi.get(`/account/data/${CONTACTS_DATA_TYPE}/${CONTACTS_DATA_KEY}`, {
+    const requestConfig: MavrykApiRequestConfig = {
       params: {
         limit: 100
-      }
-    });
+      },
+      ...(authContext ? { _authContext: authContext } : {})
+    };
+    const { data } = await mavrykApi.get(`/account/data/${CONTACTS_DATA_TYPE}/${CONTACTS_DATA_KEY}`, requestConfig);
 
     const parsed = await parseContactsResponse(data, key);
 
@@ -217,6 +224,7 @@ export async function saveContactsRecord(params: {
   publicKey: string;
   recordId?: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
+  authContext?: Required<MavrykAuthStorageContext>;
 }): Promise<{
   contacts: TempleContact[];
   recordId: string;
@@ -228,13 +236,18 @@ export async function saveContactsRecord(params: {
       buildGroupedPayload(params.contacts, params.typesByAddress),
       key
     );
+    const requestConfig: MavrykApiRequestConfig = params.authContext ? { _authContext: params.authContext } : {};
     const response = params.recordId
-      ? await mavrykApi.put(`/account/data/${params.recordId}`, { encryptedValue })
-      : await mavrykApi.post('/account/data', {
-          dataType: CONTACTS_DATA_TYPE,
-          dataKey: CONTACTS_DATA_KEY,
-          encryptedValue
-        });
+      ? await mavrykApi.put(`/account/data/${params.recordId}`, { encryptedValue }, requestConfig)
+      : await mavrykApi.post(
+          '/account/data',
+          {
+            dataType: CONTACTS_DATA_TYPE,
+            dataKey: CONTACTS_DATA_KEY,
+            encryptedValue
+          },
+          requestConfig
+        );
 
     const parsed = await parseContactsResponse(response.data, key);
 

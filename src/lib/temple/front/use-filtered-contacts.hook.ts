@@ -10,8 +10,9 @@ import { useTempleClient } from './client';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
-  getContactsOwnerAddress,
+  getContactsAccountScope,
   getCurrentAccountStoredContacts,
+  getStoredContactsTypesByAddress,
   hasContactsSettingsMismatch
 } from './contacts-settings';
 import { useAccount, useAllAccounts, useNetwork, useRelevantAccounts, useSettings } from './ready';
@@ -21,18 +22,27 @@ export function useFilteredContacts() {
   const account = useAccount();
   const allAccounts = useAllAccounts();
   const network = useNetwork();
-  const contactsOwnerAddress = useMemo(
-    () => getContactsOwnerAddress(allAccounts, account.publicKeyHash),
+  const contactsAccountScope = useMemo(
+    () => getContactsAccountScope(allAccounts, account.publicKeyHash),
     [account.publicKeyHash, allAccounts]
   );
   const contactsStorageKey = useMemo(
-    () => (contactsOwnerAddress ? buildContactsStorageKey(contactsOwnerAddress, network.id) : null),
-    [contactsOwnerAddress, network.id]
+    () => (contactsAccountScope ? buildContactsStorageKey(contactsAccountScope.storageAddress, network.id) : null),
+    [contactsAccountScope, network.id]
   );
-  const contacts = useMemo(
-    () => (contactsStorageKey ? getCurrentAccountStoredContacts(settings, contactsStorageKey) : []),
-    [contactsStorageKey, settings]
-  );
+  const contacts = useMemo(() => {
+    if (!contactsStorageKey) {
+      return [];
+    }
+
+    const storedContacts = getCurrentAccountStoredContacts(settings, contactsStorageKey);
+    const typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey);
+
+    return storedContacts.map(contact => ({
+      ...contact,
+      type: typesByAddress?.[contact.address]
+    }));
+  }, [contactsStorageKey, settings]);
 
   const accounts = useRelevantAccounts();
   const accountContacts = useMemo<TempleContact[]>(

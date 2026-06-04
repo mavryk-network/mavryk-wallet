@@ -4,7 +4,6 @@ import { fetchContactsRecord } from 'mavryk/api/contacts';
 
 import { TempleAccount, TempleSettings } from '../types';
 
-import { useTempleClient } from './client';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
@@ -12,6 +11,7 @@ import {
   getCachedContactsState,
   getContactsOwnerAddress
 } from './contacts-settings';
+import { useMavrykClient } from './use-mavryk-client';
 
 export function useContactsSync(
   account: TempleAccount,
@@ -19,7 +19,7 @@ export function useContactsSync(
   networkId: string,
   settings: TempleSettings
 ) {
-  const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
+  const { ensureAuthorized, revealPublicKey, updateSettings } = useMavrykClient();
 
   const previousNetworkIdRef = useRef<string>();
   const settingsRef = useRef(settings);

@@ -1,4 +1,3 @@
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import axios, { AxiosRequestConfig } from 'axios';
 
 import {
@@ -37,7 +36,7 @@ export const getMavrykApiBaseUrl = (networkId?: string | null) => new URL('/api/
 
 export const mavrykApi = axios.create({
   baseURL: getMavrykApiBaseUrl(DEFAULT_NETWORK_ID),
-  adapter: axiosFetchAdapter
+  adapter: 'fetch'
 });
 
 const refreshAccessTokenPromises = new Map<string, Promise<string>>();

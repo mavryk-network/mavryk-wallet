@@ -207,7 +207,6 @@ export const MIGRATIONS = [
     /* CLEAN-UP */
 
     removeFromStorage(['network_id', 'tokens_base_metadata', 'block_explorer', CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY]);
-
   },
 
   // [6] Prepare to extend public accounts data

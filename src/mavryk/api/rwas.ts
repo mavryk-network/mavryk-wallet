@@ -1,7 +1,7 @@
+import type { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
 import { z } from 'zod';
 
 import type { TokenMetadataResponse } from 'lib/apis/temple';
-import type { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
 import { toTokenSlug } from 'lib/assets';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import { tokensToAtoms } from 'lib/temple/helpers';

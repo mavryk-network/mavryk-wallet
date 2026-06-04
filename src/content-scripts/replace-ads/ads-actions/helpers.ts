@@ -1,6 +1,6 @@
 import { TEMPLE_WALLET_AD_ATTRIBUTE_NAME } from 'lib/constants';
 
-import { AdMetadata, BANNER_ADS_META, buildHypeLabNativeMeta } from '../ads-meta';
+import { AdMetadata, BANNER_ADS_META } from '../ads-meta';
 
 import type { HideElementAction, InsertAdActionWithoutMeta, RemoveElementAction } from './types';
 
@@ -83,7 +83,7 @@ export const pickAdsToDisplay = (
   }
 
   if (adIsNative) {
-    return [buildHypeLabNativeMeta(containerWidth, containerHeight)];
+    return [];
   }
 
   return BANNER_ADS_META.filter(({ source, dimensions }) => {

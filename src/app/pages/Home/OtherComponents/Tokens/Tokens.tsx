@@ -26,7 +26,8 @@ import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'lib/store/zustand/assets.store';
-import { useAccount } from 'lib/temple/front';
+import { useAccount, useChainId } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -43,7 +44,7 @@ const LOCAL_STORAGE_TOGGLE_KEY = 'tokens-list:hide-zero-balances';
 
 export const TokensTab: FC = () => {
   const balances = useCurrentAccountBalances();
-  const { publicKeyHash } = useAccount();
+  const { publicKeyHash, type } = useAccount();
 
   const isSyncing = useAreAssetsLoading('tokens');
   const { popup } = useAppEnv();
@@ -188,11 +189,12 @@ export const TokensTab: FC = () => {
           </>
         </SearchExplorer>
       </div>
-
       {/* {isEnabledAdsBanner && <AcceptAdsBanner />} */}
-      <div className={clsx('mb-4', popup && 'px-4')}>
-        <StakeTezosTag />
-      </div>
+      {type !== TempleAccountType.WatchOnly && (
+        <div className={clsx('mb-4', popup && 'px-4')}>
+          <StakeTezosTag />
+        </div>
+      )}
 
       {sortedSlugs.length === 0 ? (
         <div className="pt-20 pb-8 flex flex-col items-center justify-center text-white">
@@ -245,7 +247,6 @@ export const TokensTab: FC = () => {
           />
         </>
       )}
-
       {isSyncing && <SyncSpinner className="mt-4" />}
     </div>
   );

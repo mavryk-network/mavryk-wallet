@@ -1,6 +1,6 @@
-import { MvktAlias, MvktOperation, MvktTokenTransfer } from 'lib/apis/mvkt';
+import type { MvktAlias, MvktOperation, MvktTokenTransfer } from 'lib/apis/mvkt';
 
-import { AssetMetadataBase } from '../../metadata';
+import type { AssetMetadataBase } from '../../metadata';
 
 export type HistoryItemStatus = MvktOperation['status'] | 'pending';
 export type HistoryMember = MvktAlias;
@@ -16,10 +16,26 @@ export interface UserHistoryItem {
   addedAt: string;
   status: HistoryItemStatus;
   operations: IndividualHistoryItem[];
+  mainOperation?: IndividualHistoryItem;
+  displayMoneyDiffs?: HistoryDisplayMoneyDiff[];
+  hideOperationMoneyDiffs?: boolean;
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
   firstOperation?: IndividualHistoryItem;
   oldestOperation?: IndividualHistoryItem;
+}
+
+export interface HistoryDisplayMoneyDiff {
+  assetSlug: string;
+  diff: string;
+}
+
+export interface HistoryOperationNetworkFees {
+  totalFee: number;
+  gasFee: number;
+  storageFee: number;
+  burnedFromFees: number;
+  usdAmount?: number;
 }
 
 type PickedPropsFromMvktOperation = Pick<MvktOperation, 'id' | 'level' | 'hash' | 'block'>;
@@ -63,6 +79,7 @@ export interface HistoryItemOperationBase extends PickedPropsFromMvktOperation {
   gasUsed: number;
   storageUsed: number;
   entrypoint?: string;
+  networkFees?: HistoryOperationNetworkFees;
 }
 
 export interface HistoryItemTransactionOp extends HistoryItemOperationBase {

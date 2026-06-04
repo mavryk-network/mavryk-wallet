@@ -1,7 +1,6 @@
-import React, { FC, ReactNode, useState } from 'react';
+import React, { FC, ReactNode } from 'react';
 
 import classNames from 'clsx';
-import { isEqual } from 'lodash';
 
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { InputContainer } from 'app/templates/InputContainer/InputContainer';
@@ -28,21 +27,21 @@ const DerivationFieldTitle: FC<{ i18nKey: ReactNode; descriptionI18nKey?: TID }>
   i18nKey,
   descriptionI18nKey
 }) => (
-  <h2 className="leading-tight flex flex-col mb-3">
+  <div className="mb-3 flex flex-col leading-tight">
     <span className="text-base-plus text-white">{i18nKey}</span>
     {descriptionI18nKey && (
       <span className="text-sm text-secondary-white mt-1 block">
         <T id={descriptionI18nKey} />
       </span>
     )}
-  </h2>
+  </div>
 );
 
 const DerivationFieldContent = <T extends string | number>({ name }: TypeSelectOption<T>) => {
   return (
-    <div className="flex items-center">
-      <span className="text-base-plus text-white">{name}</span>
-    </div>
+    <section className="flex items-center justify-between w-full text-base-plus text-white">
+      <span>{name}</span>
+    </section>
   );
 };
 
@@ -55,12 +54,11 @@ const DerivationOptionContent = <T extends string | number>({ option, isSelected
   return (
     <div
       className={classNames(
-        'w-full flex items-center py-3 px-2 rounded',
-        isSelected ? 'bg-primary-card' : 'hover:bg-primary-card',
-        isSelected ? 'text-white' : 'text-secondary-white'
+        'p-4 flex items-center justify-between w-full',
+        isSelected ? 'bg-gray-710' : 'bg-primary-card hover:bg-gray-710'
       )}
     >
-      <div className="w-full text-left text-base-plus">{option.name}</div>
+      <div className="text-base-plus text-white text-left">{option.name}</div>
     </div>
   );
 };
@@ -69,14 +67,13 @@ export const DerivationTypeFieldSelect = <T extends string | number>(props: Type
   const { options, value, onChange, i18nKey, descriptionI18nKey } = props;
   const selectedDerivationOption = options.find(op => op.type === value) ?? options[0];
 
-  const [searchValue, setSearchValue] = useState<string>('');
-
   return (
     <div className="mb-4">
       <InputContainer header={<DerivationFieldTitle i18nKey={i18nKey} descriptionI18nKey={descriptionI18nKey} />}>
         <DropdownSelect
-          optionsListClassName="p-2"
+          optionsListClassName="p-0"
           dropdownButtonClassName="px-4 py-14px"
+          dropdownWrapperClassName="border-none rounded-2xl-plus"
           DropdownFaceContent={<DerivationFieldContent {...selectedDerivationOption} />}
           optionsProps={{
             options,
@@ -84,12 +81,8 @@ export const DerivationTypeFieldSelect = <T extends string | number>(props: Type
             getKey: ({ type }) => {
               return type.toString();
             },
-            renderOptionContent: option => renderOptionContent(option, isEqual(option.type, value)),
+            renderOptionContent: option => renderOptionContent(option, option.type === value),
             onOptionChange: ({ type }) => onChange(type)
-          }}
-          searchProps={{
-            searchValue,
-            onSearchChange: event => setSearchValue(event?.target.value)
           }}
         />
       </InputContainer>

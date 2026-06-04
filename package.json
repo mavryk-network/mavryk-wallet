@@ -1,6 +1,6 @@
 {
   "name": "mavryk-wallet",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start-run": "cross-env TS_NODE_PROJECT=\"webpack/tsconfig.json\" webpack --watch --stats errors-warnings",
@@ -39,8 +39,6 @@
     "@dicebear/avatars-bottts-sprites": "4.2.5",
     "@dicebear/avatars-jdenticon-sprites": "4.2.5",
     "@google/model-viewer": "3.1.1",
-    "@hypelab/sdk-react": "^1.0.3",
-    "@jitsu/sdk-js": "madfish-solutions/jitsu-js#87c49de334f5747952f7beda573b95ceb5d86903",
     "@ledgerhq/errors": "^6",
     "@ledgerhq/hw-transport": "6.31.0",
     "@ledgerhq/hw-transport-u2f": "5.36.0-deprecated",
@@ -64,7 +62,6 @@
     "@mavrykdynamics/webmavryk-utils": "^2.0.0",
     "@microsoft/signalr": "^8.0.0",
     "@peculiar/webcrypto": "1.1.6",
-    "@personaxyz/ad-sdk": "^0.0.19",
     "@popperjs/core": "2.4.4",
     "@rnw-community/shared": "^0.48.0",
     "@svgr/webpack": "6.4.0",

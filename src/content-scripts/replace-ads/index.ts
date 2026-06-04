@@ -5,7 +5,7 @@ export { getRulesFromContentScript, clearRulesCache } from './ads-rules';
 export { getAdsActions, AdActionType } from './ads-actions';
 export type { InsertAdAction } from './ads-actions/types';
 
-export { makeTKeyAdView, makeHypelabAdView, makePersonaAdView } from './ads-viewes';
+export { makeTKeyAdView } from './ads-viewes';
 
 export { observeIntersection, subscribeToIframeLoadIfNecessary } from './observing';
 

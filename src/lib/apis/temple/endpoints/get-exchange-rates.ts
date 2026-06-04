@@ -25,33 +25,32 @@ export const fetchUsdToTokenRates = async () => {
 
 export const COINGECKO_MVRK_ID = 'mavryk-network';
 
-export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD') {
-  if (!coingecko_api) return 0;
+/**
+ * Fetches CoinGecko quote values for a single asset across multiple fiat currencies.
+ */
+export async function fetchCoingeckoRates(id: string, currencies: string[]) {
+  const url = `${coingecko_api}/simple/price?vs_currencies=${currencies.join(',')}&ids=${id}`;
+  const headers = coingecko_api_key ? { 'x-cg-pro-api-key': coingecko_api_key } : undefined;
+  const response = await fetch(url, { headers });
 
-  const endpoint = new URL('/simple/price', coingecko_api);
-  endpoint.searchParams.set('vs_currencies', currency.toLowerCase());
-  endpoint.searchParams.set('ids', id);
-  const url = endpoint.toString();
+  if (!response.ok) {
+    throw new Error(`CoinGecko request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as CMCResponse;
+
+  return data[id] ?? {};
+}
+
+export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD') {
+  const normalizedCurrency = currency.toLowerCase();
 
   try {
-    const res = await fetch(url, {
-      headers: {
-        ...(coingecko_api_key ? { 'x-cg-pro-api-key': coingecko_api_key } : {})
-      }
-    });
-
-    if (!res.ok) {
-      throw new Error(`Coingecko request failed: ${res.status}`);
-    }
-
-    const json = (await res.json()) as CMCResponse;
-    const tokenPrice = json[COINGECKO_MVRK_ID]?.[currency.toLowerCase()];
-
-    if (tokenPrice == null) return 0;
+    const tokenPrice = (await fetchCoingeckoRates(id, [normalizedCurrency]))[normalizedCurrency] ?? 0;
 
     await putToStorage(MVRK_PRICE, tokenPrice);
 
-    return tokenPrice || 0;
+    return tokenPrice;
   } catch (err) {
     if (IS_DEV_ENV) console.error('[coingecko] Error fetching price:', err);
     const cachedPrice = await fetchFromStorage<string>(MVRK_PRICE);

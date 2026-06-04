@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import retry from 'async-retry';
+import axios from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { BoundaryError } from 'app/ErrorBoundary';
@@ -27,7 +28,37 @@ import {
   emptydelegateStatsResponse,
   PREDEFINED_BAKERS_NAMES_MAINNET
 } from './const';
-import { getCoStakeWaitTime, getDelegationWaitTime, getOneCycleinMs, getUnlockWaitTime } from './utils/delegateTime';
+import {
+  getCoStakeWaitTime,
+  getDelegationWaitTime,
+  getOneCycleinMs,
+  getUnlockWaitDays,
+  getUnlockWaitTime
+} from './utils/delegateTime';
+
+async function getCycleDurationMs(mavryk: ReactiveMavrykToolkit) {
+  try {
+    const constants = await mavryk.rpc.getConstants();
+
+    return getOneCycleinMs(constants);
+  } catch (error) {
+    if (IS_DEV_ENV) console.error('[baking] Failed to get RPC constants for cycle duration', error);
+
+    return DEFAULT_CYCLE_DURATION_MS.toNumber();
+  }
+}
+
+async function getCurrentCycleData(mavryk: ReactiveMavrykToolkit) {
+  const [blockMetadata, cycleDurationMs] = await Promise.all([
+    mavryk.rpc.getBlockMetadata(),
+    getCycleDurationMs(mavryk)
+  ]);
+
+  return {
+    currentCycle: blockMetadata?.level_info?.cycle ?? 0,
+    cycleDurationMs
+  };
+}
 
 // -----------------------------------------
 
@@ -66,6 +97,10 @@ export function useDelegate<T = MvktUserAccount>(
                   return accountStats as T;
               }
             } catch (e) {
+              if (axios.isAxiosError(e) && e.response?.status === 404) {
+                return emptyAccountResponse;
+              }
+
               if (IS_DEV_ENV) console.error('[baking] getAccountStats error:', e);
             }
           }
@@ -124,27 +159,15 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
         async () => {
           try {
             if (accStats?.delegate?.address) {
-              const [blockMetadata, setDelegateParameters, unstakeRequests] = await Promise.all([
-                mavryk.rpc.getBlockMetadata(),
+              const [{ currentCycle, cycleDurationMs }, setDelegateParameters, unstakeRequests] = await Promise.all([
+                getCurrentCycleData(mavryk),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
                 mavryk.rpc.getUnstakeRequests(accountAddress).catch(() => null)
               ]);
 
-              const currentCycle = blockMetadata?.level_info?.cycle ?? 0;
               const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
               // Default to 1 (allowed) when baker has not published set_delegate_parameters
               const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 1;
-
-              // ~2.8 days for mainnet // get cycle in Ms ------<
-              let cycleDurationMs = DEFAULT_CYCLE_DURATION_MS.toNumber();
-
-              try {
-                const constants = await mavryk.rpc.getConstants();
-                cycleDurationMs = getOneCycleinMs(constants);
-              } catch {
-                if (IS_DEV_ENV) console.error('[baking] Error getting RPC default constants');
-              }
-              // -----------------------------------
 
               const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
               const costakeWaitTime = getCoStakeWaitTime(
@@ -211,7 +234,7 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
     accStats?.delegationTime,
     accStats?.stakedBalance,
     accStats?.unstakedBalance,
-    mavryk.rpc,
+    mavryk,
     chainId,
     accountAddress,
     shouldPreventErrorPropagation,
@@ -225,6 +248,25 @@ export function useAccountDelegatePeriodStats(accountAddress: string, shouldPrev
     staleTime: 30_000,
     refetchInterval: 30_000,
     placeholderData: emptydelegateStatsResponse
+  });
+}
+
+export function useUnlockStakePeriodDays() {
+  const mavryk = useMavryk();
+  const chainId = useChainId();
+  const fallbackData = getUnlockWaitDays(DEFAULT_CYCLE_DURATION_MS.toNumber(), 0, 0);
+
+  const fetchUnlockStakePeriodDays = useCallback(async () => {
+    const { currentCycle, cycleDurationMs } = await getCurrentCycleData(mavryk);
+
+    return getUnlockWaitDays(cycleDurationMs, currentCycle, currentCycle);
+  }, [mavryk]);
+
+  return useQuery({
+    queryKey: ['unlock-stake-period-days', mavryk.checksum, chainId],
+    queryFn: fetchUnlockStakePeriodDays,
+    placeholderData: fallbackData,
+    refetchOnWindowFocus: false
   });
 }
 
@@ -282,7 +324,7 @@ export function useKnownBaker(address: string | null) {
   const fetchBaker = useCallback(async (): Promise<Baker | null> => {
     if (!address) return null;
     try {
-      const baseUrlParams = chainId ? { baseURL: MVKT_API_BASE_URLS[chainId as MvktApiChainId] } : {};
+      const baseUrlParams = chainId && isKnownChainId(chainId) ? { baseURL: MVKT_API_BASE_URLS[chainId] } : {};
       const bakingBadBaker = await bakingBadGetBaker({ address, configs: true, ...baseUrlParams });
 
       // @ts-expect-error // predifined validators list

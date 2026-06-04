@@ -34,6 +34,11 @@ export interface RequestMessageGeneral {
   args?: { [key in string]?: string };
 }
 
+export interface ReleaseMessage {
+  type: 'LEDGER_PROXY_RELEASE';
+  instanceId: number;
+}
+
 interface RequestMessageEmptyMethodCall extends RequestMessageGeneral {
   method: 'publicKey' | 'publicKeyHash';
 }
@@ -44,6 +49,8 @@ interface RequestMessageSignMethodCall extends RequestMessageGeneral {
 }
 
 export type RequestMessage = RequestMessageEmptyMethodCall | RequestMessageSignMethodCall;
+
+export type ProxyMessage = RequestMessage | ReleaseMessage;
 
 export type ForegroundResponse<T extends JSONifiable | unknown = unknown> =
   | {

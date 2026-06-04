@@ -5,9 +5,11 @@ import { ACCOUNT_PKH_STORAGE_KEY, ANALYTICS_USER_ID_STORAGE_KEY, ContentScriptTy
 import { E2eMessageType } from 'lib/e2e/types';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
+import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { clearAsyncStorages } from 'lib/temple/reset';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
 import { getTrackedCashbackServiceDomain, getTrackedUrl } from 'lib/utils/url-track/url-track.utils';
+import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import { AnalyticsEventCategory } from '../analytics-types';
 
@@ -22,8 +24,20 @@ export const start = async () => {
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
 
+  const syncAuthWalletAddresses = (accounts = store.getState().accounts) => {
+    setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts)).catch(error => console.error(error));
+  };
+
+  syncAuthWalletAddresses();
+
   let broadcastPending = false;
-  store.subscribe(() => {
+  let lastAccounts = store.getState().accounts;
+  store.subscribe(state => {
+    if (state.accounts !== lastAccounts) {
+      lastAccounts = state.accounts;
+      syncAuthWalletAddresses(state.accounts);
+    }
+
     if (broadcastPending) return;
     broadcastPending = true;
     queueMicrotask(() => {
@@ -63,6 +77,10 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
     case TempleMessageType.UnlockRequest:
       await Actions.unlock(req.password);
       return { type: TempleMessageType.UnlockResponse };
+
+    case TempleMessageType.EnsureAuthorizedRequest:
+      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId, req.interactive);
+      return { type: TempleMessageType.EnsureAuthorizedResponse };
 
     case TempleMessageType.LockRequest:
       await Actions.lock();
@@ -152,6 +170,12 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       await Actions.importWatchOnlyAccount(req.address, req.chain, req.chainId, req.name);
       return {
         type: TempleMessageType.ImportWatchOnlyAccountResponse
+      };
+
+    case TempleMessageType.GetLedgerTezosPkRequest:
+      return {
+        type: TempleMessageType.GetLedgerTezosPkResponse,
+        publicKey: await Actions.getLedgerTezosPk(req.derivationPath, req.derivationType)
       };
 
     case TempleMessageType.CreateLedgerAccountRequest:

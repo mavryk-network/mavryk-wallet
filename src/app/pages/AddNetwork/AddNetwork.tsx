@@ -10,9 +10,9 @@ import PageLayout from 'app/layouts/PageLayout';
 import { T, t } from 'lib/i18n';
 import { useWalletNetworks } from 'lib/store/zustand/wallet.store';
 import { BLOCK_EXPLORERS, useBlockExplorer, useSetNetworkId, useSettings, useMavrykClient } from 'lib/temple/front';
-import { loadChainId } from 'lib/temple/helpers';
+import { loadChainIdStrict } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
-import { TempleChainId } from 'lib/temple/types';
+import { isKnownChainId } from 'lib/temple/types';
 import { COLORS } from 'lib/ui/colors';
 import { delay } from 'lib/utils';
 import { SUBMIT_ERROR_TYPE, toFieldError } from 'lib/utils/get-error-message';
@@ -75,11 +75,10 @@ export const AddNetworkScreen: FC = () => {
 
       let chainId: string = '';
       try {
-        chainId = (await loadChainId(rpcBaseURL)) as string;
+        chainId = await loadChainIdStrict(rpcBaseURL);
 
-        if (chainId) {
-          const currentBlockExplorerId =
-            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId as TempleChainId))?.id ?? 'tzkt';
+        if (isKnownChainId(chainId)) {
+          const currentBlockExplorerId = BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId))?.id ?? 'tzkt';
 
           setExplorerId(currentBlockExplorerId);
         } else {

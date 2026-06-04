@@ -1,4 +1,10 @@
-import { LedgerSigner, LedgerTransport, DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
+import type { Signer } from '@mavrykdynamics/webmavryk';
+import {
+  LedgerSigner,
+  LedgerTransport,
+  DerivationType,
+  InvalidDerivationPathError
+} from '@mavrykdynamics/webmavryk-ledger-signer';
 import {
   b58cdecode,
   b58cencode,
@@ -13,24 +19,107 @@ import * as sodium from 'libsodium-wrappers';
 import { crypto_sign_verify_detached, crypto_generichash } from 'libsodium-wrappers';
 import toBuffer from 'typedarray-to-buffer';
 
-import { toLedgerError } from './helpers';
+import {
+  getMatchingLedgerDerivationPathPrefix,
+  isAllowedLedgerDerivationPath,
+  LEDGER_DERIVATION_PATH_PREFIXES,
+  toLedgerError
+} from './helpers';
 
-export class TempleLedgerSigner extends LedgerSigner {
+const DEFAULT_LEDGER_SIGNER_PATH = "44'/1969'/0'/0'";
+const SUPPORTED_LEDGER_DERIVATION_PATH_INPUTS = LEDGER_DERIVATION_PATH_PREFIXES.map(prefix => `m/${prefix}`);
+
+const isInvalidDerivationPathError = (error: unknown) =>
+  error instanceof InvalidDerivationPathError ||
+  (error instanceof Error && error.name === 'InvalidDerivationPathError');
+
+const getLedgerPathSuffix = (path: string) => {
+  const matchedPrefix = getMatchingLedgerDerivationPathPrefix(path);
+
+  return matchedPrefix ? path.slice(matchedPrefix.length) : null;
+};
+
+const getLedgerBootstrapPaths = (path: string) => {
+  const suffix = getLedgerPathSuffix(path);
+
+  return suffix === null ? [] : LEDGER_DERIVATION_PATH_PREFIXES.map(prefix => `${prefix}${suffix}`);
+};
+
+const assertSupportedLedgerDerivationPath = (path: string) => {
+  if (isAllowedLedgerDerivationPath(path)) return;
+
+  throw new Error(
+    `Unsupported Ledger derivation path prefix. Use ${SUPPORTED_LEDGER_DERIVATION_PATH_INPUTS.join(' or ')}.`
+  );
+};
+
+const setLedgerSignerPath = (signer: LedgerSigner, path: string) => {
+  Reflect.set(signer as object, 'path', path);
+};
+
+const createCompatibleLedgerSigner = (
+  transport: LedgerTransport,
+  path: string,
+  prompt: boolean,
+  derivationType: DerivationType
+) => {
+  assertSupportedLedgerDerivationPath(path);
+
+  try {
+    return new LedgerSigner(transport, path, prompt, derivationType);
+  } catch (error) {
+    if (!isInvalidDerivationPathError(error)) {
+      throw error;
+    }
+
+    let fallbackError: unknown = error;
+
+    for (const bootstrapPath of getLedgerBootstrapPaths(path)) {
+      if (bootstrapPath === path) continue;
+
+      try {
+        const signer = new LedgerSigner(transport, bootstrapPath, prompt, derivationType);
+
+        // The upstream package validates only one network prefix per version.
+        // Preserve the requested path so subsequent APDU calls target the correct Ledger account.
+        setLedgerSignerPath(signer, path);
+
+        return signer;
+      } catch (nextError) {
+        if (!isInvalidDerivationPathError(nextError)) {
+          throw nextError;
+        }
+
+        fallbackError = nextError;
+      }
+    }
+
+    throw fallbackError;
+  }
+};
+
+export class TempleLedgerSigner implements Signer {
+  private ledgerSigner: LedgerSigner;
+
   constructor(
     transport: LedgerTransport,
-    path: string = "44'/1729'/0'/0'",
+    path: string = DEFAULT_LEDGER_SIGNER_PATH,
     prompt: boolean = true,
     derivationType: DerivationType = DerivationType.ED25519,
     private accPublicKey?: string,
     private accPublicKeyHash?: string
   ) {
-    super(transport, path, prompt, derivationType);
+    this.ledgerSigner = createCompatibleLedgerSigner(transport, path, prompt, derivationType);
+  }
+
+  async secretKey() {
+    return this.ledgerSigner.secretKey();
   }
 
   async publicKey() {
     return (
       this.accPublicKey ??
-      super.publicKey().catch(err => {
+      this.ledgerSigner.publicKey().catch(err => {
         throw toLedgerError(err);
       })
     );
@@ -39,14 +128,14 @@ export class TempleLedgerSigner extends LedgerSigner {
   async publicKeyHash() {
     return (
       this.accPublicKeyHash ??
-      super.publicKeyHash().catch(err => {
+      this.ledgerSigner.publicKeyHash().catch(err => {
         throw toLedgerError(err);
       })
     );
   }
 
   async sign(bytes: string, watermark?: Uint8Array) {
-    const result = await super.sign(bytes, watermark).catch(err => {
+    const result = await this.ledgerSigner.sign(bytes, watermark).catch(err => {
       throw toLedgerError(err);
     });
 

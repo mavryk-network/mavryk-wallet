@@ -102,3 +102,8 @@ redux-devtools --open --port=8000
 > Other UI options like `--open=browser` are available.
 
 Go to settings to specify port one more time.
+
+## Ledger Runtime Notes
+
+- Ledger transport is reused as a singleton across operations instead of reopening the device per signer instance.
+- Passive state changes such as network switching do not trigger Ledger signing prompts. Ledger interaction is limited to explicit Ledger actions like connect, sign, and send.

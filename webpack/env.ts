@@ -4,6 +4,7 @@ type ProcessDotEnv = {
   SOURCE_MAP?: 'true' | 'false';
   IMAGE_INLINE_SIZE_LIMIT?: string;
   BUILD_VARIANT?: 'production' | 'testing';
+  PRODUCTION_EXTENSION_ID?: string;
 };
 
 const {
@@ -11,7 +12,8 @@ const {
   TARGET_BROWSER = 'chrome',
   SOURCE_MAP: SOURCE_MAP_ENV,
   IMAGE_INLINE_SIZE_LIMIT: IMAGE_INLINE_SIZE_LIMIT_ENV = '10000',
-  BUILD_VARIANT = 'production'
+  BUILD_VARIANT = 'production',
+  PRODUCTION_EXTENSION_ID: PRODUCTION_EXTENSION_ID_ENV
 } = process.env as ProcessDotEnv;
 
 export const WEBPACK_MODE = NODE_ENV === 'test' ? 'none' : NODE_ENV;
@@ -45,6 +47,7 @@ export const getManifestVersion = (vendor: string) => MANIFEST_VERSION_BY_VENDOR
 
 export const MANIFEST_VERSION = getManifestVersion(TARGET_BROWSER);
 export const BACKGROUND_IS_WORKER = MANIFEST_VERSION === 3;
+export const PRODUCTION_EXTENSION_ID = PRODUCTION_EXTENSION_ID_ENV?.trim();
 
 /** Firefox limitation of 4MB per chunk */
 export const MAX_JS_CHUNK_SIZE_IN_BYTES = 4_000_000;

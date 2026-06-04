@@ -4,8 +4,8 @@ export enum DelegateFormSelectors {
   sortBakerBySpaceTab = 'Delegate Form/Sort Baker By Space Tab',
   sortBakerByStakingTab = 'Delegate Form/Sort Baker By Staking Tab',
   knownBakerItemButton = 'Delegate Form/Known Baker Item Button',
-  knownBakerItemAButton = 'Delegate Form/Known Baker Item Everstake A Button',
-  knownBakerItemBButton = 'Delegate Form/Known Baker Item Everstake B Button',
+  knownBakerItemAButton = 'Delegate Form/Known Baker Item Featured A Button',
+  knownBakerItemBButton = 'Delegate Form/Known Baker Item Featured B Button',
   bakerDelegateButton = 'Delegate Form/Baker Item Delegate Button',
   bakerInput = 'Delegate Form/Baker Input'
 }

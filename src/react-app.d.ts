@@ -2,12 +2,22 @@
 /// <reference types="react" />
 /// <reference types="react-dom" />
 
+import 'axios';
+
 declare type ImportedSVGComponent = React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
 
 declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: 'development' | 'production' | 'test';
     readonly PUBLIC_URL: string;
+    readonly PRODUCTION_EXTENSION_ID?: string;
+  }
+}
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    _retry?: boolean;
+    skipAuthRefresh?: boolean;
   }
 }
 

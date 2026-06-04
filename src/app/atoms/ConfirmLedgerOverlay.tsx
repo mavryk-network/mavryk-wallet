@@ -22,22 +22,17 @@ const ConfirmLedgerOverlay: FC<ConfirmLedgerOverlayProps> = ({ displayed }) => (
     unmountOnExit
   >
     <div
-      className={classNames(
-        'absolute inset-0',
-        'bg-white bg-opacity-90',
-        'p-8',
-        'flex flex-col items-center justify-center'
-      )}
+      className={classNames('absolute inset-0', 'bg-primary-bg', 'p-8', 'flex flex-col items-center justify-center')}
     >
-      <h1 className={classNames('mb-8', 'text-center', 'text-xl font-medium tracking-tight text-gray-600')}>
-        <span className="text-base font-normal">
+      <h1 className={classNames('mb-8', 'text-center', 'text-xl font-medium tracking-tight text-primary-white')}>
+        <span className="text-base font-normal text-secondary-white">
           <T id="confirmActionOnDevice" />
         </span>
         <br />
         <T
           id="deviceName"
           substitutions={[
-            <span key="ledgerNano" className="text-gray-700">
+            <span key="ledgerNano" className="text-cleanWhite">
               <T id="ledgerNano" />
             </span>
           ]}
@@ -46,7 +41,7 @@ const ConfirmLedgerOverlay: FC<ConfirmLedgerOverlayProps> = ({ displayed }) => (
 
       <LedgerNanoIcon className="animate-pulse" style={{ width: '10rem', height: 'auto' }} />
 
-      <p className={classNames('mt-8', 'text-center', 'text-sm text-gray-600', 'max-w-xs')}>
+      <p className={classNames('mt-8', 'text-center', 'text-sm text-secondary-white', 'max-w-xs')}>
         <T id="ledgerBridgeGuide" />
       </p>
     </div>

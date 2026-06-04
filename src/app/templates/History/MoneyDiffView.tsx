@@ -32,7 +32,7 @@ export const MoneyDiffView = memo<Props>(
   }) => {
     const metadata = useAssetMetadata(assetSlug);
 
-    const diffBN = useMemo(() => new BigNumber(diff).div(metadata ? 10 ** metadata.decimals : 1), [diff, metadata]);
+    const diffBN = useMemo(() => new BigNumber(diff), [diff]);
 
     const conditionalPopupClassName = moneyClassname ? moneyClassname : 'text-sm';
     const conditionalDiffClassName = isColored

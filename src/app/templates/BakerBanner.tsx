@@ -17,9 +17,6 @@ import { TempleAccount } from 'lib/temple/types';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
 
-// ---------------------------------------------------------------------------
-// Internal hook — avoids duplicating the atomsToTokens call across sub-components
-// ---------------------------------------------------------------------------
 function useBakerSpace(freeSpace: number | undefined) {
   return useMemo(() => atomsToTokens(freeSpace ?? 0, MAVEN_METADATA.decimals), [freeSpace]);
 }

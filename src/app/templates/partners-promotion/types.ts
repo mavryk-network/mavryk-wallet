@@ -14,17 +14,3 @@ export interface SingleProviderPromotionProps {
   onError: EmptyFn;
   onAdRectSeen: EmptyFn;
 }
-
-interface HypelabBannerCreativeSet {
-  image: {
-    url: string;
-    height: number;
-    width: number;
-  };
-}
-
-export interface HypelabBannerAd {
-  cta_url: string;
-  campaign_slug: string;
-  creative_set: HypelabBannerCreativeSet;
-}

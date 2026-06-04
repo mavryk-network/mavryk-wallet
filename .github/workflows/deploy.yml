@@ -8,10 +8,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.11.0
+          cache: yarn
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -55,6 +62,12 @@ jobs:
 
       - name: Build extension
         run: yarn build
+
+      - name: Debug dist
+        run: |
+          pwd
+          ls -la
+          ls -la dist || true
 
       - name: Check zip has manifest at root
         run: |

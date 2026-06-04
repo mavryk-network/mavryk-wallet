@@ -22,6 +22,7 @@ import { TempleAccountType, TempleStatus, TempleNotification, TempleMessageType 
 
 import { intercom } from './client';
 import { usePassiveStorage } from './storage';
+import { useContactsSync } from './use-contacts-sync.hook';
 import { useMavrykClient } from './use-mavryk-client';
 
 // Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
@@ -59,7 +60,7 @@ function useReadyTemple() {
   const allAccounts = useWalletAccounts();
   const settings = useWalletSettings();
   const walletsSpecs = useWalletsSpecs();
-  const { createWebMavrykSigner, createWebMavrykWallet, updateAccountKYCStatus } = useMavrykClient();
+  const { createWebMavrykSigner, createWebMavrykWallet, updateAccountKYCStatus, ensureAuthorized } = useMavrykClient();
 
   // Provider tree guarantees this only mounts when ready, but keep explicit
   // check so the remaining hook calls don't run on stale/empty state.
@@ -139,6 +140,14 @@ function useReadyTemple() {
     () => allAccounts.find(a => a.publicKeyHash === accountPkh) ?? defaultAcc,
     [allAccounts, accountPkh, defaultAcc]
   );
+
+  // Ensure the selected account/network has a valid auth token before protected Mavryk API reads run.
+  // No cleanup is needed because this is an idempotent one-shot sync with background auth state.
+  useLayoutEffect(() => {
+    ensureAuthorized(account.publicKeyHash, network.id, false).catch(error => console.error(error));
+  }, [account.publicKeyHash, ensureAuthorized, network.id]);
+
+  useContactsSync(account, allAccounts, network.id, settings);
 
   /**
    * Error boundary reset

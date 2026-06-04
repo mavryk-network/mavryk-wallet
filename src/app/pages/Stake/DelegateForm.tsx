@@ -11,7 +11,6 @@ import { ArtificialError, NotEnoughFundsError, ZeroBalanceError } from 'app/defa
 import { useAppEnv } from 'app/env';
 import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
-import { submitDelegation } from 'lib/apis/everstake';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useGasToken } from 'lib/assets/hooks';
 import { useBalance } from 'lib/balances';
@@ -342,17 +341,14 @@ const DelegateForm: FC<DelegateFormProps> = ({
           to,
           newDelegate: to,
           prevDelegate: myBakerPkh,
-          estimation: estmtn
+          estimation: estmtn,
+          feeMumav: acc.type === TempleAccountType.ManagedKT ? undefined : fee
         });
         if (pendingOpObject) await putOperationIntoStorage(chainId, accountPkh, pendingOpObject);
 
         estimationRef.current = null;
         setOperation({ ...op, to });
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
-
-        if (to === RECOMMENDED_BAKER_ADDRESS && opHash) {
-          submitDelegation(opHash);
-        }
 
         formAnalytics.trackSubmitSuccess(analyticsProperties);
       } catch (err: unknown) {

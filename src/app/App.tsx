@@ -23,8 +23,6 @@ import { MvktConnectionProvider } from 'lib/temple/front/mvkt-connection';
 import { DialogsProvider } from 'lib/ui/dialog';
 import * as Woozie from 'lib/woozie';
 
-// import { LoadHypelabScript } from './load-hypelab-script';
-
 interface Props extends React.PropsWithChildren {
   env: ComponentProps<typeof AppEnvProvider>;
 }

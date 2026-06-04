@@ -10,9 +10,7 @@ import { AD_HIDING_TIMEOUT } from 'lib/constants';
 import { uiStore, useShouldShowPromotion, usePromotionHidingTimestamp } from 'lib/store/zustand/ui.store';
 import { useAccountPkh } from 'lib/temple/front';
 
-import { HypelabPromotion } from './components/hypelab-promotion';
 import { OptimalPromotion } from './components/optimal-promotion';
-import { PersonaPromotion } from './components/persona-promotion';
 import styles from './partners-promotion.module.css';
 import { PartnersPromotionVariant } from './types';
 
@@ -23,16 +21,13 @@ interface PartnersPromotionProps {
   /** For distinguishing the ads that should be hidden temporarily */
   id: string;
   pageName: string;
-  withPersonaProvider?: boolean;
 }
-
-type AdsProviderLocalName = Exclude<AdsProviderName, 'Temple'>;
 
 const shouldBeHiddenTemporarily = (hiddenAt: number) => {
   return Date.now() - hiddenAt < AD_HIDING_TIMEOUT;
 };
 
-export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pageName, withPersonaProvider }) => {
+export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pageName }) => {
   const isImageAd = variant === PartnersPromotionVariant.Image;
   const accountPkh = useAccountPkh();
   const { trackEvent } = useAnalytics();
@@ -43,7 +38,6 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
   const isAnalyticsSentRef = useRef(false);
 
   const [isHiddenTemporarily, setIsHiddenTemporarily] = useState(shouldBeHiddenTemporarily(hiddenAt));
-  const [providerName, setProviderName] = useState<AdsProviderLocalName>('Optimal');
   const [adError, setAdError] = useState(false);
   const [adIsReady, setAdIsReady] = useState(false);
 
@@ -67,13 +61,13 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
     if (isAnalyticsSentRef.current) return;
 
     trackEvent('Internal Ads Activity', AnalyticsEventCategory.General, {
-      variant: providerName === 'Persona' ? PartnersPromotionVariant.Image : variant,
+      variant,
       page: pageName,
-      provider: AdsProviderTitle[providerName],
+      provider: AdsProviderTitle.Optimal,
       accountPkh
     });
     isAnalyticsSentRef.current = true;
-  }, [providerName, pageName, accountPkh, variant, trackEvent]);
+  }, [pageName, accountPkh, variant, trackEvent]);
 
   const handleClosePartnersPromoClick = useCallback<MouseEventHandler<HTMLButtonElement>>(
     e => {
@@ -84,12 +78,7 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
     [id]
   );
 
-  const handleOptimalError = useCallback(() => setProviderName('HypeLab'), []);
-  const handleHypelabError = useCallback(
-    () => (withPersonaProvider ? setProviderName('Persona') : setAdError(true)),
-    [withPersonaProvider]
-  );
-  const handlePersonaError = useCallback(() => setAdError(true), []);
+  const handleOptimalError = useCallback(() => setAdError(true), []);
 
   const handleAdReady = useCallback(() => setAdIsReady(true), []);
 
@@ -104,46 +93,15 @@ export const PartnersPromotion = memo<PartnersPromotionProps>(({ variant, id, pa
         !adIsReady && (isImageAd ? styles.imageAdLoading : styles.textAdLoading)
       )}
     >
-      {(() => {
-        switch (providerName) {
-          case 'Optimal':
-            return (
-              <OptimalPromotion
-                variant={variant}
-                isVisible={adIsReady}
-                pageName={pageName}
-                onAdRectSeen={handleAdRectSeen}
-                onClose={handleClosePartnersPromoClick}
-                onReady={handleAdReady}
-                onError={handleOptimalError}
-              />
-            );
-          case 'HypeLab':
-            return (
-              <HypelabPromotion
-                variant={variant}
-                isVisible={adIsReady}
-                pageName={pageName}
-                onAdRectSeen={handleAdRectSeen}
-                onClose={handleClosePartnersPromoClick}
-                onReady={handleAdReady}
-                onError={handleHypelabError}
-              />
-            );
-          case 'Persona':
-            return (
-              <PersonaPromotion
-                id={id}
-                isVisible={adIsReady}
-                pageName={pageName}
-                onAdRectSeen={handleAdRectSeen}
-                onClose={handleClosePartnersPromoClick}
-                onReady={handleAdReady}
-                onError={handlePersonaError}
-              />
-            );
-        }
-      })()}
+      <OptimalPromotion
+        variant={variant}
+        isVisible={adIsReady}
+        pageName={pageName}
+        onAdRectSeen={handleAdRectSeen}
+        onClose={handleClosePartnersPromoClick}
+        onReady={handleAdReady}
+        onError={handleOptimalError}
+      />
 
       {!adIsReady && (
         <div

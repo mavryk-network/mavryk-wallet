@@ -321,6 +321,21 @@ export function useMavrykClient() {
     return res.payload;
   }, []);
 
+  const revealPublicKey = useCallback((accountPublicKeyHash: string) => getPublicKey(accountPublicKeyHash), []);
+
+  const ensureAuthorized = useCallback(
+    async (accountPublicKeyHash?: string, networkId?: string, interactive = true) => {
+      const res = await request({
+        type: TempleMessageType.EnsureAuthorizedRequest,
+        accountPublicKeyHash,
+        networkId,
+        interactive
+      });
+      assertResponse(res.type === TempleMessageType.EnsureAuthorizedResponse);
+    },
+    []
+  );
+
   // ---- Import ----
 
   const importAccount = useCallback(async (privateKey: string, chainId: string, encPassword?: string) => {
@@ -606,7 +621,9 @@ export function useMavrykClient() {
     updateAccountKYCStatus,
     revealPrivateKey,
     revealMnemonic,
+    revealPublicKey,
     generateSyncPayload,
+    ensureAuthorized,
 
     // Import
     importAccount,

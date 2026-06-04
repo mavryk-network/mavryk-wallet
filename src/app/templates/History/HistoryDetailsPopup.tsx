@@ -29,7 +29,6 @@ import {
   HistoryItemTransactionOp,
   IndividualHistoryItem
 } from 'lib/temple/history/types';
-import { formatMumavAsTz } from 'lib/utils/amounts';
 
 import { AssetImage } from '../AssetImage';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
@@ -221,7 +220,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                           fallback={<AssetIconPlaceholder size={32} metadata={slugsMetadataRecord[slug]} />}
                         />
                       </div>
-                      <span className="text-base text-white">{slugsMetadataRecord[slug].symbol}</span>
+                      <span className="text-base text-white">{slugsMetadataRecord[slug]?.symbol}</span>
                     </div>
                     <MoneyDiffView
                       assetId={slug}

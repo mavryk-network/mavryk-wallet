@@ -18,7 +18,6 @@ import {
   buildHistoryPreviewOperations,
   deriveStatusColorClassName,
   getHistoryPreviewStackOffset,
-  getMainHistoryOperation,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap
 } from './utils';
@@ -42,8 +41,6 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     historyItem.type === HistoryItemOpTypeEnum.Multiple || historyItem.type === HistoryItemOpTypeEnum.Interaction;
 
   const operStack = useMemo(() => buildHistoryOperStack(historyItem), [historyItem]);
-  const mainOperation = useMemo(() => getMainHistoryOperation(historyItem), [historyItem]);
-
   const moneyDiffs = useMemo(() => buildHistoryMoneyDiffs(historyItem, true), [historyItem]);
   const operationMoneyDiffs = useMemo(
     () => (historyItem.hideOperationMoneyDiffs ? [] : moneyDiffs),
@@ -124,7 +121,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
             ))}
 
             <div className="flex items-center gap-x-2 flex-wrap">
-              <HistoryTime addedAt={addedAt || historyItem.operations[0].addedAt} />
+              <HistoryTime addedAt={addedAt || historyItem.operations[0]?.addedAt} />
               {rest.length > 0 && (
                 <button
                   className="text-accent-blue hover:underline text-xs whitespace-nowrap"

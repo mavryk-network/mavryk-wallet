@@ -134,7 +134,10 @@ mavrykApi.interceptors.response.use(
     } catch (refreshError) {
       await clearAuthTokensFromStorage(requestConfig._authContext);
 
-      return Promise.reject(refreshError);
+      // If refresh failed because there were no tokens at all (unauthenticated),
+      // re-throw the original 401 so callers can detect and handle it (e.g. MVKT fallback).
+      const noTokens = refreshError instanceof Error && refreshError.message === 'No refresh token in storage';
+      return Promise.reject(noTokens ? error : refreshError);
     }
   }
 );

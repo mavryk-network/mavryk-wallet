@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/mvkt/api';
-import { useAccount, useChainId, useMavryk } from 'lib/temple/front';
+import { useAccount, useChainId, useIsApiReady, useMavryk } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
 
 import { TempleAccount } from '../types';
@@ -33,13 +33,15 @@ export default function useHistory(
 ) {
   const mavryk = useMavryk();
   const chainId = useChainId(true);
+  const isApiReady = useIsApiReady();
   const originalAccount = useAccount();
 
   const account = differentAccount ? differentAccount : originalAccount;
 
   const accountAddress = account.publicKeyHash;
 
-  const [loading, setLoading] = useSafeState<TLoading>(isKnownChainId(chainId) && 'init');
+  const canFetch = isKnownChainId(chainId) && isApiReady;
+  const [loading, setLoading] = useSafeState<TLoading>(canFetch && 'init');
   const [userHistory, setUserHistory] = useSafeState<UserHistoryItem[]>([]);
   const [reachedTheEnd, setReachedTheEnd] = useSafeState(false);
   const [cursor, setCursor] = useSafeState<number | undefined>(undefined);
@@ -125,9 +127,11 @@ export default function useHistory(
 
     // reset state immediately so UI doesn't show old account history
     setUserHistory([]);
-    setLoading(isKnownChainId(chainId) ? 'init' : false);
+    setLoading(canFetch ? 'init' : false);
     setReachedTheEnd(false);
     setCursor(undefined);
+
+    if (!canFetch) return stopLoading;
 
     // fetch fresh
     loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
@@ -136,8 +140,21 @@ export default function useHistory(
     return stopLoading;
   }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit]);
 
+  // When auth completes (isApiReady flips true), trigger the first fetch.
+  useDidUpdate(() => {
+    if (!canFetch) return;
+    const shouldStop = stopAndBuildChecker();
+    setUserHistory([]);
+    setLoading('init');
+    setReachedTheEnd(false);
+    setCursor(undefined);
+    loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
+    return stopLoading;
+  }, [isApiReady]);
+
   // If you want initial mount to also fetch, keep this:
   useDidMount(() => {
+    if (!canFetch) return;
     const shouldStop = stopAndBuildChecker();
     loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
     return stopLoading;

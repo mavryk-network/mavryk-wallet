@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
@@ -39,7 +39,8 @@ export const [
   useAccountPkh,
   useSettings,
   useHDGroups,
-  useMavryk
+  useMavryk,
+  useIsApiReady
 ] = constate(
   useReadyTemple,
   v => v.allNetworks,
@@ -51,7 +52,8 @@ export const [
   v => v.accountPkh,
   v => v.settings,
   v => v.hdGroups,
-  v => v.tezos
+  v => v.tezos,
+  v => v.isApiReady
 );
 
 function useReadyTemple() {
@@ -141,10 +143,15 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
-  // Ensure the selected account/network has a valid auth token before protected Mavryk API reads run.
-  // No cleanup is needed because this is an idempotent one-shot sync with background auth state.
+  // Tracks whether the auth attempt for the current account/network has settled.
+  // History and other protected reads wait for this before fetching.
+  const [isApiReady, setIsApiReady] = useState(false);
+
   useLayoutEffect(() => {
-    ensureAuthorized(account.publicKeyHash, network.id, false).catch(error => console.error(error));
+    setIsApiReady(false);
+    ensureAuthorized(account.publicKeyHash, network.id, false)
+      .catch(error => console.error(error))
+      .finally(() => setIsApiReady(true));
   }, [account.publicKeyHash, ensureAuthorized, network.id]);
 
   useContactsSync(account, allAccounts, network.id, settings);
@@ -214,7 +221,8 @@ function useReadyTemple() {
 
     settings,
     hdGroups,
-    tezos
+    tezos,
+    isApiReady
   };
 }
 

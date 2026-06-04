@@ -15,6 +15,7 @@ export {
   useAccountPkh,
   useSettings,
   useMavryk,
+  useIsApiReady,
   useChainId,
   useRelevantAccounts,
   useChainIdValue,

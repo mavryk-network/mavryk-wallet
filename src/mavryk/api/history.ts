@@ -126,15 +126,11 @@ function buildHistoryParams(params: FetchHistoryRequest) {
 }
 
 async function fetchHistory(path: string, params: FetchHistoryRequest = {}) {
-  try {
-    const { data } = await mavrykApi.get<MavrykHistoryResponse>(path, {
-      params: buildHistoryParams(params)
-    });
+  const { data } = await mavrykApi.get<MavrykHistoryResponse>(path, {
+    params: buildHistoryParams(params)
+  });
 
-    return HistoryResponseSchema.parse(data) as MavrykHistoryResponse;
-  } catch (error) {
-    throw new Error(extractMavrykApiErrorMessage(error));
-  }
+  return HistoryResponseSchema.parse(data) as MavrykHistoryResponse;
 }
 
 export async function fetchWalletHistory(params: FetchHistoryRequest = {}) {

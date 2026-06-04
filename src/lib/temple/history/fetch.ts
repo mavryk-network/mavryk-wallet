@@ -1,5 +1,7 @@
+import axios from 'axios';
+
 import type { MvktApiChainId, MvktOperation } from 'lib/apis/mvkt';
-import { GetOperationsTransactionsParams } from 'lib/apis/mvkt/api';
+import { fetchAccountOperations, GetOperationsTransactionsParams } from 'lib/apis/mvkt/api';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveMavrykToolkit } from 'lib/temple/front';
@@ -213,12 +215,37 @@ export default async function fetchUserHistory(
       hasMore
     };
   } catch (error) {
-    console.error('Error while fetching user history:', extractMavrykApiErrorMessage(error));
+    const is401 = axios.isAxiosError(error) && error.response?.status === 401;
 
-    return {
-      items: [],
-      cursor,
-      hasMore: false
-    };
+    if (!is401 || tokenAddress) {
+      console.error('Error while fetching user history:', extractMavrykApiErrorMessage(error));
+      return { items: [], cursor, hasMore: false };
+    }
+
+    // Mavryk API requires auth — watch-only accounts can't sign the JWT challenge.
+    // Fall back to the public MVKT indexer which has no auth requirement.
+    try {
+      const MVKT_PAGE = 20;
+      const ops = await fetchAccountOperations(chainId, account.publicKeyHash, {
+        limit: MVKT_PAGE + 1,
+        lastId: cursor
+      });
+
+      const hasMore = ops.length > MVKT_PAGE;
+      const pageOps = ops.slice(0, MVKT_PAGE);
+      const nextCursor = pageOps.length > 0 ? pageOps[pageOps.length - 1].id : cursor;
+
+      const items = applyLocalTypeFilter(
+        groupPendingOperations(pageOps).map(group =>
+          operationsGroupToHistoryItem({ hash: group.hash, operations: group.operations }, account.publicKeyHash)
+        ),
+        localRequestedTypes
+      );
+
+      return { items, cursor: nextCursor, hasMore };
+    } catch (mvktError) {
+      console.error('Error while fetching user history (MVKT fallback):', mvktError);
+      return { items: [], cursor, hasMore: false };
+    }
   }
 }

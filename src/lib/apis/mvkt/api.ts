@@ -151,6 +151,12 @@ export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransact
 export const fetchGetOperationsTransactions = (chainId: MvktApiChainId, params: GetOperationsTransactionsParams) =>
   fetchGet<MvktOperation[]>(chainId, `/operations/transactions`, params);
 
+export const fetchAccountOperations = (
+  chainId: MvktApiChainId,
+  accountAddress: string,
+  params: { limit?: number; lastId?: number } = {}
+) => fetchGet<MvktOperation[]>(chainId, `/accounts/${accountAddress}/operations`, params);
+
 export const getOneUserContracts = (chainId: MvktApiChainId, accountAddress: string) =>
   fetchGet<MvktRelatedContract[]>(chainId, `/accounts/${accountAddress}/contracts`);
 

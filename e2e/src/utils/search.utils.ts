@@ -1,5 +1,5 @@
 import retry from 'async-retry';
-import { ElementHandle } from 'puppeteer';
+import { ElementHandle } from 'puppeteer-core';
 
 import { BrowserContext } from '../classes/browser-context.class';
 

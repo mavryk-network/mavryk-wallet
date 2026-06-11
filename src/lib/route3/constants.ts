@@ -11,7 +11,7 @@ export const ROUTING_FEE_ADDRESS = 'tz1UbRzhYjQKTtWYvGUWcRtVT4fN3NESDVYT';
 
 export const KYC_CONTRACTS = new Map<string, string>([
   [TempleChainId.Mainnet, ''],
-  [TempleChainId.Atlas, process.env.KYC_CONTRACT ?? '']
+  [TempleChainId.Basenet, process.env.KYC_CONTRACT ?? '']
 ]);
 
 const ROUTING_FEE_PERCENT = 0.35;

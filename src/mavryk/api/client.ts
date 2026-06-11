@@ -12,11 +12,11 @@ import {
 
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = ['/auth/challenge', '/auth/verify', '/auth/refresh', '/auth/logout'] as const;
 const MAINNET_MAVRYK_API_URL = 'https://wallet.mavryk.network';
-const ATLASNET_MAVRYK_API_URL = 'https://atlasnet.wallet.mavryk.network';
+const BASENET_MAVRYK_API_URL = 'https://basenet.wallet.mavryk.network';
 
 export const MAVRYK_API_URLS: Record<string, string> = {
   mainnet: MAINNET_MAVRYK_API_URL,
-  atlasnet: ATLASNET_MAVRYK_API_URL
+  basenet: BASENET_MAVRYK_API_URL
 };
 
 export type MavrykApiRequestConfig = AxiosRequestConfig & {

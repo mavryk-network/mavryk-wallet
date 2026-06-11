@@ -37,18 +37,10 @@ export const BLOCK_EXPLORERS: BlockExplorer[] = [
       [
         TempleChainId.Basenet,
         {
-          account: 'https://tzkt.io',
-          transaction: 'https://tzkt.io',
-          api: 'https://api.mavryk.network/basenet'
-        }
-      ],
-      [
-        TempleChainId.Atlas,
-        {
-          account: 'https://atlasnet.nexus.mavryk.org/explorer/account/',
-          transaction: 'https://atlasnet.nexus.mavryk.org/explorer/operation/',
-          contract: 'https://atlasnet.nexus.mavryk.org/explorer/contract/',
-          api: 'https://atlasnet.api.mavryk.network/v1'
+          account: 'https://basenet.nexus.mavryk.org/explorer/account/',
+          transaction: 'https://basenet.nexus.mavryk.org/explorer/operation/',
+          contract: 'https://basenet.nexus.mavryk.org/explorer/contract/',
+          api: 'https://basenet.api.mavryk.network/v1'
         }
       ],
       [

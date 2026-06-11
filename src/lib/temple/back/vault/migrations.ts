@@ -8,6 +8,11 @@ import {
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
 import { moveValueInStorage, putToStorage, removeFromStorage } from 'lib/storage';
+import {
+  migrateLegacyAtlasnetStorage,
+  normalizeLegacyAtlasnetContactsSettings,
+  normalizeNetworkId
+} from 'lib/temple/network-storage';
 import * as Passworder from 'lib/temple/passworder';
 import {
   TempleAccount,
@@ -234,6 +239,24 @@ export const MIGRATIONS = [
     const migratedSettings = migrateContactsSettings(settings, accounts, selectedAccountPkh, selectedNetworkId);
 
     await encryptAndSaveMany([[settingsStrgKey, migratedSettings]], passKey);
+  },
+
+  // [8] Rename Atlasnet-scoped persisted data to Basenet
+  async (password: string) => {
+    await migrateLegacyAtlasnetStorage();
+
+    const passKey = await Passworder.generateKey(password);
+    const settings = await fetchAndDecryptOne<TempleSettings>(settingsStrgKey, passKey).catch(() => undefined);
+
+    if (!settings) {
+      return;
+    }
+
+    const migratedSettings = normalizeLegacyAtlasnetContactsSettings(settings);
+
+    if (migratedSettings !== settings) {
+      await encryptAndSaveMany([[settingsStrgKey, migratedSettings]], passKey);
+    }
   }
 ];
 
@@ -347,7 +370,7 @@ function resolveContactsStorageKey(
   const ownerAddress = resolveContactsOwnerAddress(accounts, selectedAccountPkh);
 
   return ownerAddress
-    ? buildScopedContactsStorageKey(ownerAddress, selectedNetworkId ?? DEFAULT_CONTACTS_NETWORK_ID)
+    ? buildScopedContactsStorageKey(ownerAddress, normalizeNetworkId(selectedNetworkId) ?? DEFAULT_CONTACTS_NETWORK_ID)
     : null;
 }
 

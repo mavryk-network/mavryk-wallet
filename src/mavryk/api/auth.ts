@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { normalizeNetworkId } from 'lib/temple/network-storage';
+
 import { getMavrykApiBaseUrl, MavrykApiRequestConfig, mavrykApi, MAVRYK_API_URLS } from './client';
 import { isJwtExpiringSoon } from './jwt';
 import {
@@ -163,7 +165,7 @@ export async function logoutAuth(params: AuthRefreshRequest = {}) {
 async function getAuthContext(params: AuthRefreshRequest): Promise<Required<MavrykAuthStorageContext>> {
   const [walletAddress, networkId] = await Promise.all([
     getWalletAddressOrThrow(params.walletAddress),
-    params.networkId ? Promise.resolve(params.networkId) : getSelectedNetworkIdFromStorage()
+    params.networkId ? Promise.resolve(normalizeNetworkId(params.networkId)) : getSelectedNetworkIdFromStorage()
   ]);
 
   return { walletAddress, networkId };

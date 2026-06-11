@@ -1,6 +1,8 @@
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import axios, { AxiosRequestConfig } from 'axios';
 
+import { normalizeNetworkId } from 'lib/temple/network-storage';
+
 import {
   clearAuthTokensFromStorage,
   getAuthTokensFromStorage,
@@ -26,11 +28,13 @@ export type MavrykApiRequestConfig = AxiosRequestConfig & {
 };
 
 export const getMavrykApiUrl = (networkId?: string | null) => {
-  if (!networkId) {
+  const normalizedNetworkId = normalizeNetworkId(networkId);
+
+  if (!normalizedNetworkId) {
     return MAINNET_MAVRYK_API_URL;
   }
 
-  return MAVRYK_API_URLS[networkId] ?? MAINNET_MAVRYK_API_URL;
+  return MAVRYK_API_URLS[normalizedNetworkId] ?? MAINNET_MAVRYK_API_URL;
 };
 
 export const getMavrykApiBaseUrl = (networkId?: string | null) => new URL('/api/v1', getMavrykApiUrl(networkId)).href;

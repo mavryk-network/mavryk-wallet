@@ -1,7 +1,9 @@
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { fetchFromStorage, putToStorage, removeFromStorage } from 'lib/storage';
+import { migrateLegacyAtlasnetStorage, NETWORK_ID_STORAGE_KEY, normalizeNetworkId } from 'lib/temple/network-storage';
 
-export const NETWORK_ID_STORAGE_KEY = 'network_id';
+export { NETWORK_ID_STORAGE_KEY };
+
 export const DEFAULT_NETWORK_ID = 'mainnet';
 export const MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY = 'mavryk_api_access_token';
 export const MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY = 'mavryk_api_refresh_token';
@@ -53,9 +55,13 @@ export async function setAuthWalletAddressesMapToStorage(authWalletByAccount: Re
 export async function getCurrentAuthStorageContext(
   context: MavrykAuthStorageContext = {}
 ): Promise<Required<MavrykAuthStorageContext>> {
+  await migrateLegacyAtlasnetStorage();
+
   const [walletAddress, networkId] = await Promise.all([
     context.walletAddress === undefined ? getAuthWalletAddressFromStorage() : Promise.resolve(context.walletAddress),
-    context.networkId === undefined ? getSelectedNetworkIdFromStorage() : Promise.resolve(context.networkId ?? null)
+    context.networkId === undefined
+      ? getSelectedNetworkIdFromStorage()
+      : Promise.resolve(normalizeNetworkId(context.networkId) ?? null)
   ]);
 
   return {
@@ -65,7 +71,9 @@ export async function getCurrentAuthStorageContext(
 }
 
 export async function getSelectedNetworkIdFromStorage(): Promise<string> {
-  return (await fetchFromStorage<string>(NETWORK_ID_STORAGE_KEY)) ?? DEFAULT_NETWORK_ID;
+  await migrateLegacyAtlasnetStorage();
+
+  return normalizeNetworkId(await fetchFromStorage<string>(NETWORK_ID_STORAGE_KEY)) ?? DEFAULT_NETWORK_ID;
 }
 
 export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext = {}): Promise<MavrykAuthTokens> {

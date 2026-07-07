@@ -6,7 +6,7 @@ import type { TempleContact, TempleContactApiType } from 'lib/temple/types';
 import { mavrykApi } from './client';
 import type { MavrykApiRequestConfig } from './client';
 import { extractMavrykApiErrorMessage } from './errors';
-import type { MavrykAuthStorageContext } from './storage';
+import type { ResolvedMavrykAuthStorageContext } from './storage';
 
 const CONTACTS_DATA_KEY = 'contacts';
 const CONTACTS_DATA_TYPE = 'contacts';
@@ -188,7 +188,7 @@ async function parseContactsResponse(
 
 export async function fetchContactsRecord(
   publicKey: string,
-  authContext?: Required<MavrykAuthStorageContext>
+  authContext?: ResolvedMavrykAuthStorageContext
 ): Promise<{
   contacts: TempleContact[];
   recordId: string | null;
@@ -224,7 +224,7 @@ export async function saveContactsRecord(params: {
   publicKey: string;
   recordId?: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
-  authContext?: Required<MavrykAuthStorageContext>;
+  authContext?: ResolvedMavrykAuthStorageContext;
 }): Promise<{
   contacts: TempleContact[];
   recordId: string;

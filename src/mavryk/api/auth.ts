@@ -1,38 +1,30 @@
-import { z } from 'zod';
-
 import { normalizeNetworkId } from 'lib/temple/network-storage';
 
-import { getMavrykApiBaseUrl, MavrykApiRequestConfig, mavrykApi, MAVRYK_API_URLS } from './client';
-import { isJwtExpiringSoon } from './jwt';
+import {
+  AuthChallengeResponseSchema,
+  type AuthChallengeResponse,
+  AuthVerifyResponseSchema,
+  type AuthVerifyResponse
+} from './auth.schema';
+import {
+  getMavrykApiBaseUrl,
+  mavrykApi,
+  MAVRYK_API_URLS,
+  type MavrykApiRequestConfig,
+  refreshStoredAuthTokensOrThrow
+} from './client';
 import {
   clearAuthTokensFromStorage,
   getAuthWalletAddressFromStorage,
   getAuthTokensFromStorage,
   getLastNonceFromStorage,
   getSelectedNetworkIdFromStorage,
-  MavrykAuthStorageContext,
   setAuthTokensToStorage,
-  setLastChallengeToStorage
+  setLastChallengeToStorage,
+  type ResolvedMavrykAuthStorageContext
 } from './storage';
 
-const AuthChallengeResponseSchema = z.object({
-  challenge: z.string(),
-  expiresAt: z.string(),
-  nonce: z.string()
-});
-
-const AuthVerifyResponseSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string()
-});
-
-const AuthRefreshResponseSchema = z.object({
-  accessToken: z.string()
-});
-
-export type AuthChallengeResponse = z.infer<typeof AuthChallengeResponseSchema>;
-export type AuthVerifyResponse = z.infer<typeof AuthVerifyResponseSchema>;
-export type AuthRefreshResponse = z.infer<typeof AuthRefreshResponseSchema>;
+export type { AuthChallengeResponse, AuthRefreshResponse, AuthVerifyResponse } from './auth.schema';
 
 export type AuthChallengeRequest = {
   networkId?: string;
@@ -52,8 +44,6 @@ export type AuthRefreshRequest = {
   refreshToken?: string;
   walletAddress?: string;
 };
-
-const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
 
 async function getWalletAddressOrThrow(walletAddress?: string) {
   const stored = walletAddress ?? (await getAuthWalletAddressFromStorage());
@@ -115,25 +105,8 @@ export async function verifyAuthSignature(payload: AuthVerifyRequest) {
 
 export async function refreshAuthTokens(params: AuthRefreshRequest = {}) {
   const context = await getAuthContext(params);
-  const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = await getAuthTokensFromStorage(context);
 
-  if (storedAccessToken && !isJwtExpiringSoon(storedAccessToken, ACCESS_TOKEN_REFRESH_THRESHOLD_MS)) {
-    return { accessToken: storedAccessToken };
-  }
-
-  const refreshToken = params.refreshToken ?? storedRefreshToken;
-  if (!refreshToken) throw new Error('No refresh token in storage');
-
-  const refreshRequestConfig: MavrykApiRequestConfig = {
-    _authContext: context,
-    skipAuthRefresh: true
-  };
-  const { data } = await mavrykApi.post<AuthRefreshResponse>('/auth/refresh', { refreshToken }, refreshRequestConfig);
-
-  const parsed = AuthRefreshResponseSchema.parse(data);
-  await setAuthTokensToStorage({ accessToken: parsed.accessToken }, context);
-
-  return parsed;
+  return refreshStoredAuthTokensOrThrow({ context, refreshToken: params.refreshToken });
 }
 
 export async function logoutAuth(params: AuthRefreshRequest = {}) {
@@ -162,7 +135,9 @@ export async function logoutAuth(params: AuthRefreshRequest = {}) {
   );
 }
 
-async function getAuthContext(params: AuthRefreshRequest): Promise<Required<MavrykAuthStorageContext>> {
+async function getAuthContext(
+  params: AuthRefreshRequest
+): Promise<ResolvedMavrykAuthStorageContext & { walletAddress: string }> {
   const [walletAddress, networkId] = await Promise.all([
     getWalletAddressOrThrow(params.walletAddress),
     params.networkId ? Promise.resolve(normalizeNetworkId(params.networkId)) : getSelectedNetworkIdFromStorage()

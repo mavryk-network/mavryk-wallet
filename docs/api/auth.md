@@ -8,6 +8,44 @@
 
 The Mavryk Wallet Backend uses the Taquito/Mavryk standard message signing format, which conforms to the Micheline encoding standard for data serialization. Signatures are created using Ed25519 (or other supported curves: Secp256k1, P-256).
 
+## Authentication Endpoints
+
+- `POST /auth/challenge` returns the challenge text, nonce, and expiration used for wallet signing.
+- `POST /auth/verify` verifies the signed challenge and returns an `accessToken` plus `refreshToken`.
+- `POST /auth/refresh` rotates the refresh token and returns a new `accessToken` plus `refreshToken`.
+- `POST /auth/logout` invalidates the provided refresh token.
+
+Tokens are returned only in JSON response bodies. The client is responsible for storing both tokens and sending the access token in protected requests.
+
+## Refresh Token Rotation
+
+Refresh tokens use rotation. Every successful `POST /auth/refresh` response returns a new token pair:
+
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "..."
+}
+```
+
+The previous refresh token is invalid immediately after rotation. The client must replace the stored access token and refresh token together after every successful refresh.
+
+The refresh token lifetime uses a sliding window. Each successful rotation extends refresh expiration to `now + 720h`.
+
+## Refresh Reuse Detection
+
+If a previously rotated refresh token is used again, the API returns `401 REFRESH_TOKEN_REUSE` and revokes the refresh token family for the account.
+
+The client must treat `REFRESH_TOKEN_REUSE` as a terminal authentication failure:
+
+- clear stored auth tokens for that wallet;
+- do not attempt another refresh with the same token family;
+- require the user to authenticate again.
+
+Protected endpoints may also return `401 Token has been revoked`. This is also terminal and should clear stored auth tokens instead of attempting refresh.
+
+Because refresh tokens rotate, clients must serialize refresh calls for each wallet/network auth scope. Multiple simultaneous refresh calls with the same refresh token can trigger reuse detection. Browser contexts that can run at the same time should coordinate refresh and read the latest stored token pair before refreshing.
+
 ---
 
 ## Signature Creation Process (Client-Side)

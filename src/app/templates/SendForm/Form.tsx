@@ -631,6 +631,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
           restFormDisplayed={restFormDisplayed}
           submitError={submitError}
           estimationError={estimationError}
+          assetMetadata={assetMetadata}
           toResolved={toResolved}
           toFilledWithKTAddress={toFilledWithKTAddress}
           control={control}

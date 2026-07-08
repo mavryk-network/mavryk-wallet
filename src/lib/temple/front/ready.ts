@@ -10,6 +10,7 @@ import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { migrateLegacyAtlasnetStorage, NETWORK_ID_STORAGE_KEY, normalizeNetworkId } from 'lib/temple/network-storage';
 import {
   ReadyTempleState,
   TempleAccountType,
@@ -78,8 +79,17 @@ function useReadyTemple() {
 
   const defaultNet = allNetworks[0];
 
-  const [networkId, setNetworkId] = usePassiveStorage('network_id', defaultNet.id);
+  const [storedNetworkId, setNetworkId] = usePassiveStorage(NETWORK_ID_STORAGE_KEY, defaultNet.id);
+  const networkId = normalizeNetworkId(storedNetworkId);
 
+  // Migrates legacy network-scoped browser storage before fallback logic can reset the selected network.
+  // No cleanup is needed because this is a one-shot idempotent storage migration.
+  useEffect(() => {
+    void migrateLegacyAtlasnetStorage();
+  }, []);
+
+  // Keep the selected network valid after network list changes.
+  // No cleanup is needed because this only reconciles browser storage state.
   useEffect(() => {
     if (allNetworks.every(a => a.id !== networkId)) {
       setNetworkId(defaultNet.id);

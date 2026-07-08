@@ -24,6 +24,11 @@ import browser, { Runtime } from 'webextension-polyfill';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { loadChainId, isAddressValid } from 'lib/temple/helpers';
+import {
+  migrateLegacyAtlasnetStorage,
+  normalizeLegacyAtlasnetNetworkSnapshot,
+  normalizeNetworkId
+} from 'lib/temple/network-storage';
 import { NETWORKS } from 'lib/temple/networks';
 import {
   TempleMessageType,
@@ -483,9 +488,11 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
 }
 
 async function getNetworkRPC(net: MavrykWalletDAppNetwork) {
-  const targetRpc = typeof net === 'string' ? NETWORKS.find(n => n.id === net)!.rpcBaseURL : removeLastSlash(net.rpc);
+  const networkId = typeof net === 'string' ? normalizeNetworkId(net) : net;
+  const targetRpc =
+    typeof networkId === 'string' ? NETWORKS.find(n => n.id === networkId)!.rpcBaseURL : removeLastSlash(networkId.rpc);
 
-  if (typeof net === 'string') {
+  if (typeof networkId === 'string') {
     try {
       const current = await getCurrentTempleNetwork();
       const [currentChainId, targetChainId] = await Promise.all([
@@ -503,22 +510,32 @@ async function getNetworkRPC(net: MavrykWalletDAppNetwork) {
 }
 
 async function getCurrentTempleNetwork() {
+  await migrateLegacyAtlasnetStorage();
+
   const { network_id: networkId, custom_networks_snapshot: customNetworksSnapshot } = await browser.storage.local.get([
     'network_id',
     'custom_networks_snapshot'
   ]);
+  const normalizedNetworkId = normalizeNetworkId(networkId);
+  const normalizedCustomNetworksSnapshot = normalizeLegacyAtlasnetNetworkSnapshot(customNetworksSnapshot);
 
-  return [...NETWORKS, ...(customNetworksSnapshot ?? [])].find(n => n.id === networkId) ?? NETWORKS[0];
+  return [...NETWORKS, ...normalizedCustomNetworksSnapshot].find(n => n.id === normalizedNetworkId) ?? NETWORKS[0];
 }
 
 function isAllowedNetwork(net: MavrykWalletDAppNetwork) {
-  return typeof net === 'string' ? NETWORKS.some(n => !n.disabled && n.id === net) : Boolean(net?.rpc);
+  return typeof net === 'string'
+    ? NETWORKS.some(n => !n.disabled && n.id === normalizeNetworkId(net))
+    : Boolean(net?.rpc);
 }
 
 function isNetworkEquals(fNet: MavrykWalletDAppNetwork, sNet: MavrykWalletDAppNetwork) {
+  if (typeof fNet === 'string' && typeof sNet === 'string') {
+    return normalizeNetworkId(fNet) === normalizeNetworkId(sNet);
+  }
+
   return typeof fNet !== 'string' && typeof sNet !== 'string'
     ? removeLastSlash(fNet.rpc) === removeLastSlash(sNet.rpc)
-    : fNet === sNet;
+    : false;
 }
 
 function removeLastSlash(str: string) {

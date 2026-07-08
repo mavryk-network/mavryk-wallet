@@ -2,7 +2,7 @@ import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState 
 
 import clsx from 'clsx';
 
-import { Anchor, HashChip, Identicon, Name, SyncSpinner } from 'app/atoms';
+import { Anchor, HashChip, Name, SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
@@ -10,6 +10,7 @@ import { ReactComponent as KeyIcon } from 'app/icons/key.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ReactComponent as EllipsePurple } from 'app/misc/Ellipse-purple.svg';
 import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
+import { ContactAvatar } from 'app/molecules/ContactAvatar';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
 import { HistoryDetailsPopup } from 'app/templates/History/HistoryDetailsPopup';
@@ -215,7 +216,11 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             <EllipsePurple className="absolute left-0 top-0 z-0" />
             {/* ------------------- */}
             <div className="z-10 flex flex-col items-center">
-              <Identicon type="bottts" hash={accountHash} size={64} className="shadow-xs rounded-full flex-shrink-0" />
+              <ContactAvatar
+                contact={accToChange ?? { address: accountHash, name: accountName }}
+                size={64}
+                className="shadow-xs"
+              />
               <div className="text-white flex items-center gap-1 mb-2 mt-3">
                 <Name tooltipContent={accToChange?.name} className="text-primary-white text-xl">
                   {accountName}

@@ -14,11 +14,10 @@ import { TempleChainId, TempleChainKind, TempleNetwork } from 'lib/temple/types'
 export const NETWORK_IDS = new Map<string, string>([
   [TempleChainId.Mainnet, 'mainnet'],
   [TempleChainId.Basenet, 'basenet'],
-  [TempleChainId.Atlas, 'atlasnet'],
   [TempleChainId.Weekly, 'weeklynet']
 ]);
 
-export const MAV_RPC_NETWORK = 'https://atlasnet.rpc.mavryk.network';
+export const MAV_RPC_NETWORK = 'https://basenet.rpc.mavryk.network';
 
 // const DCP_NETWORKS: TempleNetwork[] = [
 //   {
@@ -52,9 +51,9 @@ export const NETWORKS: TempleNetwork[] = [
     disabled: false
   },
   {
-    id: 'atlasnet',
-    name: 'Mavryk Atlasnet',
-    description: 'Mavryk Atlasnet',
+    id: 'basenet',
+    name: 'Mavryk Basenet',
+    description: 'Mavryk Basenet',
     type: 'main',
     rpcBaseURL: MAV_RPC_NETWORK,
     color: '#F86412',
@@ -66,7 +65,7 @@ export const NETWORKS: TempleNetwork[] = [
   //   nameI18nKey: 'marigoldMainnet',
   //   description: 'Marigold mainnet',
   //   type: 'main',
-  //   rpcBaseURL: 'https://atlasnet.mavryk.network',
+  //   rpcBaseURL: 'https://basenet.rpc.mavryk.network',
   //   color: '#48bb78',
   //   disabled: false
   // },

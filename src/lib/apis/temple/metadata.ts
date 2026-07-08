@@ -12,7 +12,6 @@ if (LOCAL_METADATA_API_URL) console.warn(`process.env.LOCAL_METADATA_API_URL fou
 const API_CHAIN_NAMES = {
   [TempleChainId.Mainnet]: 'mainnet',
   [TempleChainId.Basenet]: 'basenet',
-  [TempleChainId.Atlas]: 'atlasnet',
   [TempleChainId.Weekly]: 'weeklynet'
 };
 

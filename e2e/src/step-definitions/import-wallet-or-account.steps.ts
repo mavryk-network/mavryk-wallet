@@ -4,6 +4,7 @@ import { iEnterValues } from 'e2e/src/utils/input-data.utils';
 import { MEDIUM_TIMEOUT } from 'e2e/src/utils/timing.utils';
 
 import { Pages } from '../page-objects';
+import { requireE2eValue } from '../utils/env.utils';
 
 type mnemonicPage = 'ImportAccountMnemonic' | 'ImportExistingWallet';
 
@@ -14,7 +15,7 @@ Given(
     const wrongMnemonic = iEnterValues[mnemonic];
     if (wrongMnemonic === undefined) throw new Error(`${mnemonic} key doesn't exist in the 'iEnterValues' object`);
 
-    await Pages[page].enterSeedPhrase(wrongMnemonic);
+    await Pages[page].enterSeedPhrase(requireE2eValue(mnemonic, wrongMnemonic));
   }
 );
 

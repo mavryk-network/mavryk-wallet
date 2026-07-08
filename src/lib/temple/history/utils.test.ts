@@ -29,7 +29,8 @@ jest.mock('../../metadata', () => ({
 
 const { buildHistoryMoneyDiffs } = require('./helpers') as typeof import('./helpers');
 const { HistoryItemOpTypeEnum } = require('./types') as typeof import('./types');
-const { groupMavrykHistoryOperations, mavrykHistoryGroupToHistoryItem } = require('./utils') as typeof import('./utils');
+const { groupMavrykHistoryOperations, mavrykHistoryGroupToHistoryItem } =
+  require('./utils') as typeof import('./utils');
 const {
   buildHistoryPreviewOperations,
   getHistoryOperationAddress,

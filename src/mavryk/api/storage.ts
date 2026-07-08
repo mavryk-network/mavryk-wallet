@@ -1,7 +1,11 @@
+import browser from 'webextension-polyfill';
+
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { fetchFromStorage, putToStorage, removeFromStorage } from 'lib/storage';
+import { migrateLegacyAtlasnetStorage, NETWORK_ID_STORAGE_KEY, normalizeNetworkId } from 'lib/temple/network-storage';
 
-export const NETWORK_ID_STORAGE_KEY = 'network_id';
+export { NETWORK_ID_STORAGE_KEY };
+
 export const DEFAULT_NETWORK_ID = 'mainnet';
 export const MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY = 'mavryk_api_access_token';
 export const MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY = 'mavryk_api_refresh_token';
@@ -19,6 +23,13 @@ export type MavrykAuthStorageContext = {
   networkId?: string | null;
   walletAddress?: string | null;
 };
+
+export type ResolvedMavrykAuthStorageContext = {
+  networkId: string;
+  walletAddress: string | null;
+};
+
+const AUTH_TOKEN_STORAGE_KEY_PATTERN = /^\[([^\]]+)\]\[([^\]]+)\](\[refresh\])?$/;
 
 export async function getWalletAddressFromStorage(): Promise<string | null> {
   return fetchFromStorage<string>(ACCOUNT_PKH_STORAGE_KEY);
@@ -52,10 +63,14 @@ export async function setAuthWalletAddressesMapToStorage(authWalletByAccount: Re
  */
 export async function getCurrentAuthStorageContext(
   context: MavrykAuthStorageContext = {}
-): Promise<Required<MavrykAuthStorageContext>> {
+): Promise<ResolvedMavrykAuthStorageContext> {
+  await migrateLegacyAtlasnetStorage();
+
   const [walletAddress, networkId] = await Promise.all([
     context.walletAddress === undefined ? getAuthWalletAddressFromStorage() : Promise.resolve(context.walletAddress),
-    context.networkId === undefined ? getSelectedNetworkIdFromStorage() : Promise.resolve(context.networkId ?? null)
+    context.networkId === undefined
+      ? getSelectedNetworkIdFromStorage()
+      : Promise.resolve(normalizeNetworkId(context.networkId) ?? null)
   ]);
 
   return {
@@ -65,7 +80,9 @@ export async function getCurrentAuthStorageContext(
 }
 
 export async function getSelectedNetworkIdFromStorage(): Promise<string> {
-  return (await fetchFromStorage<string>(NETWORK_ID_STORAGE_KEY)) ?? DEFAULT_NETWORK_ID;
+  await migrateLegacyAtlasnetStorage();
+
+  return normalizeNetworkId(await fetchFromStorage<string>(NETWORK_ID_STORAGE_KEY)) ?? DEFAULT_NETWORK_ID;
 }
 
 export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext = {}): Promise<MavrykAuthTokens> {
@@ -75,19 +92,23 @@ export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext
     return { accessToken: null, refreshToken: null };
   }
 
-  const [accessToken, refreshToken] = await Promise.all([
+  const [storedAccessToken, storedRefreshToken] = await Promise.all([
     fetchFromStorage<string>(buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId)),
     fetchFromStorage<string>(buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId))
   ]);
+  const accessToken = storedAccessToken ?? null;
+  const refreshToken = storedRefreshToken ?? null;
 
   if (accessToken !== null || refreshToken !== null) {
     return { accessToken, refreshToken };
   }
 
-  const [legacyAccessToken, legacyRefreshToken] = await Promise.all([
+  const [storedLegacyAccessToken, storedLegacyRefreshToken] = await Promise.all([
     fetchFromStorage<string>(MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY),
     fetchFromStorage<string>(MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY)
   ]);
+  const legacyAccessToken = storedLegacyAccessToken ?? null;
+  const legacyRefreshToken = storedLegacyRefreshToken ?? null;
 
   if (legacyAccessToken === null && legacyRefreshToken === null) {
     return { accessToken, refreshToken };
@@ -112,27 +133,21 @@ export async function setAuthTokensToStorage(tokens: MavrykAuthTokens, context: 
     throw new Error('No auth wallet address in storage');
   }
 
-  const ops: Promise<unknown>[] = [];
+  const valuesToSet: Record<string, string | null> = {};
 
   if (tokens.accessToken !== undefined) {
-    ops.push(
-      putToStorage(
-        buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId),
-        tokens.accessToken ?? null
-      )
-    );
+    valuesToSet[buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId)] =
+      tokens.accessToken ?? null;
   }
 
   if (tokens.refreshToken !== undefined) {
-    ops.push(
-      putToStorage(
-        buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId),
-        tokens.refreshToken ?? null
-      )
-    );
+    valuesToSet[buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId)] =
+      tokens.refreshToken ?? null;
   }
 
-  await Promise.all(ops);
+  if (Object.keys(valuesToSet).length > 0) {
+    await browser.storage.local.set(valuesToSet);
+  }
 }
 
 export async function clearAuthTokensFromStorage(context: MavrykAuthStorageContext = {}) {
@@ -143,6 +158,21 @@ export async function clearAuthTokensFromStorage(context: MavrykAuthStorageConte
     keysToRemove.push(
       buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId),
       buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId)
+    );
+  }
+
+  await removeFromStorage(keysToRemove);
+}
+
+export async function clearAllAuthTokensFromStorage(context: MavrykAuthStorageContext = {}) {
+  const authContext = await getCurrentAuthStorageContext(context);
+  const keysToRemove = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
+
+  if (authContext.walletAddress) {
+    const walletAddress = authContext.walletAddress;
+    const storageItems = await browser.storage.local.get(null);
+    keysToRemove.push(
+      ...Object.keys(storageItems).filter(storageKey => isAuthTokenStorageKeyForWallet(storageKey, walletAddress))
     );
   }
 
@@ -185,4 +215,10 @@ function buildAccessTokenStorageKey(walletAddress: string, networkId: string) {
 
 function buildRefreshTokenStorageKey(walletAddress: string, networkId: string) {
   return `[${walletAddress}][${networkId}][refresh]`;
+}
+
+function isAuthTokenStorageKeyForWallet(storageKey: string, walletAddress: string) {
+  const match = AUTH_TOKEN_STORAGE_KEY_PATTERN.exec(storageKey);
+
+  return match?.[1] === walletAddress;
 }

@@ -35,9 +35,16 @@ export const signKYCAction = async (rpcUrl: string, address: string, chainId: st
 
       const contract = await loadContract(tezos, kycAddress);
 
-      const setMemberAction = 'addMember';
+      const setMemberKycAction = 'addMemberKyc';
 
-      const memberList = [
+      const memberLedgerList = [
+        {
+          updateType: 'update',
+          memberAddress: address,
+          membershipTier: 'Starter'
+        }
+      ];
+      const memberKycList = [
         {
           memberAddress: address,
           country: 'NIL',
@@ -45,7 +52,9 @@ export const signKYCAction = async (rpcUrl: string, address: string, chainId: st
           investorType: 'NIL'
         }
       ];
-      await contract.methods.setMember(setMemberAction, memberList).send();
+
+      await contract.methods.setMember(memberLedgerList).send();
+      await contract.methods.setMemberKyc(setMemberKycAction, memberKycList).send();
     } else {
       throw new Error('Unkown chain Id');
     }

@@ -1,17 +1,32 @@
 import { useEffect, useMemo, useRef } from 'react';
 
 import { fetchContactsRecord } from 'mavryk/api/contacts';
+import { getAuthTokensFromStorage } from 'mavryk/api/storage';
 
 import { TempleAccount, TempleSettings } from '../types';
 
 import { useTempleClient } from './client';
+import type { ContactsAccountScope } from './contacts-settings';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
-  canUseEncryptedContacts,
-  getCachedContactsState,
-  getContactsOwnerAddress
+  getContactsAccountScope,
+  hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
+
+type ContactsSyncContext = {
+  accountPkh: string;
+  networkId: string;
+  scopeKey: string;
+};
+
+function buildContactsScopeKey(scope: ContactsAccountScope | null) {
+  if (!scope) {
+    return '';
+  }
+
+  return `${scope.storageAddress}:${scope.authAddress}`;
+}
 
 export function useContactsSync(
   account: TempleAccount,
@@ -21,16 +36,16 @@ export function useContactsSync(
 ) {
   const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
 
-  const previousNetworkIdRef = useRef<string>();
   const settingsRef = useRef(settings);
-  const contactsOwnerAddress = useMemo(
-    () => getContactsOwnerAddress(allAccounts, account.publicKeyHash),
+  const activeContactsAccountScopeRef = useRef<ContactsAccountScope | null>(null);
+  const previousSyncContextRef = useRef<ContactsSyncContext | null>(null);
+  const activeContactsAccountScope = useMemo(
+    () => getContactsAccountScope(allAccounts, account.publicKeyHash),
     [account.publicKeyHash, allAccounts]
   );
-  const contactsStorageKey = useMemo(
-    () => (contactsOwnerAddress ? buildContactsStorageKey(contactsOwnerAddress, networkId) : null),
-    [contactsOwnerAddress, networkId]
-  );
+  const activeContactsScopeKey = buildContactsScopeKey(activeContactsAccountScope);
+
+  activeContactsAccountScopeRef.current = activeContactsAccountScope;
 
   // Keep the latest settings available for async sync work without retriggering the fetch logic.
   // No cleanup is needed because this only updates an in-memory ref.
@@ -38,42 +53,71 @@ export function useContactsSync(
     settingsRef.current = settings;
   }, [settings]);
 
-  // Sync contacts for the selected auth wallet and network.
-  // This manages remote contacts fetches; cleanup only cancels applying stale async results.
+  // Sync remote contacts on deterministic account/network triggers.
+  // This manages protected account-data requests; cleanup only cancels applying stale async results.
   useEffect(() => {
-    if (!canUseEncryptedContacts(contactsOwnerAddress) || !contactsStorageKey) {
-      previousNetworkIdRef.current = networkId;
+    const previousSyncContext = previousSyncContextRef.current;
+    const syncContext: ContactsSyncContext = {
+      accountPkh: account.publicKeyHash,
+      networkId,
+      scopeKey: activeContactsScopeKey
+    };
+    const isInitialSync = previousSyncContext === null;
+    const hasNetworkChanged = previousSyncContext?.networkId !== networkId;
+    const hasAccountChanged = previousSyncContext?.accountPkh !== account.publicKeyHash;
+    const hasScopeChanged = previousSyncContext?.scopeKey !== activeContactsScopeKey;
+
+    previousSyncContextRef.current = syncContext;
+
+    if (!activeContactsScopeKey) {
       return;
     }
 
-    const shouldRefetchOnNetworkSwitch =
-      previousNetworkIdRef.current !== undefined && previousNetworkIdRef.current !== networkId;
-    previousNetworkIdRef.current = networkId;
+    const activeScope = activeContactsAccountScopeRef.current;
 
-    if (getCachedContactsState(settingsRef.current, contactsStorageKey) && !shouldRefetchOnNetworkSwitch) {
+    if (!activeScope || (!isInitialSync && !hasNetworkChanged && !hasAccountChanged && !hasScopeChanged)) {
       return;
     }
 
     let cancelled = false;
 
     void (async () => {
+      const contactsStorageKey = buildContactsStorageKey(activeScope.storageAddress, networkId);
+      const authContext = { walletAddress: activeScope.authAddress, networkId };
+
       try {
-        await ensureAuthorized(contactsOwnerAddress, networkId, false);
+        await ensureAuthorized(activeScope.authAddress, networkId, true, activeScope.authAddress);
         if (cancelled) return;
 
-        const publicKey = await revealPublicKey(contactsOwnerAddress);
+        const { accessToken } = await getAuthTokensFromStorage(authContext);
+
+        if (!accessToken) {
+          return;
+        }
+
+        const publicKey = await revealPublicKey(activeScope.authAddress);
         if (cancelled) return;
 
-        const { contacts, recordId, typesByAddress } = await fetchContactsRecord(publicKey);
-
+        const { contacts, recordId, typesByAddress } = await fetchContactsRecord(publicKey, authContext);
         if (cancelled) return;
+
+        const contactsPatch = {
+          contactsStorageKey,
+          contacts,
+          recordId,
+          typesByAddress
+        };
+
+        if (!hasContactsSettingsAccountPatchMismatch(settingsRef.current, contactsPatch)) {
+          return;
+        }
 
         await updateSettings(
           buildContactsSettingsPatch(settingsRef.current, contactsStorageKey, contacts, recordId, typesByAddress)
         );
       } catch (error) {
         if (!cancelled) {
-          console.error('Failed to sync contacts', error);
+          console.error(`Failed to sync contacts for ${activeScope.storageAddress}`, error);
         }
       }
     })();
@@ -81,5 +125,5 @@ export function useContactsSync(
     return () => {
       cancelled = true;
     };
-  }, [contactsOwnerAddress, contactsStorageKey, ensureAuthorized, networkId, revealPublicKey, updateSettings]);
+  }, [account.publicKeyHash, activeContactsScopeKey, ensureAuthorized, networkId, revealPublicKey, updateSettings]);
 }

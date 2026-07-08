@@ -1558,6 +1558,12 @@
   "tryingToTransferToContract": {
     "message": "You're trying to transfer funds to contract.\nPlease, ensure that it's exactly what you want."
   },
+  "rwaSenderMustBeProToSend": {
+    "message": "You must upgrade to a Pro account before you can send RWA tokens to other accounts."
+  },
+  "rwaRecipientMustBeProToReceive": {
+    "message": "This recipient is not a Pro account. RWA tokens can only be sent between Pro accounts."
+  },
   "amount": {
     "message": "Amount"
   },

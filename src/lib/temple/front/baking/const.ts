@@ -9,6 +9,8 @@ import { ReactComponent as SimplyStakingLogo } from 'app/icons/simplyStaking.svg
 import { ReactComponent as ValidatorsLogo } from 'app/icons/validatorsLogo.svg';
 import KryptstarLogo from 'app/misc/bakers/krypstar.png';
 
+export const DEFAULT_VALIDATOR_LOGO = ValidatorsLogo;
+
 export const DEFAULT_CYCLE_DURATION_MS = new BigNumber(245721600); // ~ 2.8 days as default value if RPC call fails
 export const DEFAULT_BLOCK_DELAY = 10; // ~ 2.8 days as default value if RPC call fails
 
@@ -205,6 +207,33 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     name: 'Kingnodes',
     fee: 0.1,
     links: [{ link: 'https://kingnodes.com', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1LarY54YeFBqPuz4Drwx9nEQMNwpKKNP16: {
+    logo: 'https://raw.githubusercontent.com/CertiKProject/brand-assets/main/circle_red_bg_logo.png',
+    name: 'Certik',
+    fee: 0.15,
+    links: [{ link: 'https://www.certik.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1PyBXFwSuRWezsLKjpuXDdSuNzcZAB47Nx: {
+    logo: 'https://insights.tienthuattoan.com/assets/logo/TTT-1024.png',
+    name: 'TTT',
+    fee: 0.1,
+    links: [{ link: 'https://tienthuattoan.com', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1RQgCd3cKSwocSbEWx6tJSogr2NQRJW4Mh: {
+    logo: 'https://dl-eu.cros-nest.com/assets/logo-nest.png',
+    name: 'Crosnest',
+    fee: 0.1,
+    links: [{ link: 'https://www.cros-nest.com/', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

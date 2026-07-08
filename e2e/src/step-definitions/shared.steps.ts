@@ -5,7 +5,7 @@ import { OperationStatusSelectors } from 'src/app/templates/OperationStatus.sele
 
 import { BrowserContext } from '../classes/browser-context.class';
 import { Pages } from '../page-objects';
-import { envVars } from '../utils/env.utils';
+import { envVars, requireE2eValue } from '../utils/env.utils';
 import { iComparePrivateKeys } from '../utils/input-data.utils';
 import { createPageElement, findElement, getElementText } from '../utils/search.utils';
 import { LONG_TIMEOUT, MEDIUM_TIMEOUT, VERY_SHORT_TIMEOUT, sleep } from '../utils/timing.utils';
@@ -27,8 +27,9 @@ Given(
     await Pages.RevealSecrets.revealSecretsProtectedMask.click();
 
     const revealedText = await Pages.RevealSecrets.revealSecretsValue.getText();
+    const expectedPrivateKey = requireE2eValue(key, iComparePrivateKeys[key]);
 
-    expect(revealedText).eql(iComparePrivateKeys[key]);
+    expect(revealedText).eql(expectedPrivateKey);
   }
 );
 
@@ -53,7 +54,7 @@ Given(
   { timeout: MEDIUM_TIMEOUT },
   async (hashType: keyof typeof hashObjectShortForm) => {
     const pkhFromUI = await Pages.Home.PublicAddressButton.getText();
-    const targetPkh = hashObjectShortForm[hashType];
+    const targetPkh = requireE2eValue(hashType, hashObjectShortForm[hashType]);
 
     expect(pkhFromUI).eql(targetPkh);
   }

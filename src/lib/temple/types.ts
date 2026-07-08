@@ -47,9 +47,8 @@ export interface TempleState {
 
 export enum TempleChainId {
   Mainnet = 'NetXXAAR1wWQhhe',
-  Basenet = 'NetXRp4kyGKJTuB',
-  Weekly = 'NetXRp4kyGKJTuB',
-  Atlas = 'NetXUrNc8uioxP8'
+  Basenet = 'NetXmtMsNf69w1w',
+  Weekly = 'NetXRp4kyGKJTuB'
 }
 
 export function isKnownChainId(chainId: string): chainId is TempleChainId {
@@ -172,6 +171,7 @@ export interface TempleContact {
   name: string;
   addedAt?: number;
   accountInWallet?: boolean;
+  type?: TempleContactApiType;
 }
 
 export type TempleContactApiType = 'user' | 'validator' | 'contract';
@@ -498,6 +498,7 @@ interface TempleUnlockResponse extends TempleMessageBase {
 interface TempleEnsureAuthorizedRequest extends TempleMessageBase {
   type: TempleMessageType.EnsureAuthorizedRequest;
   accountPublicKeyHash?: string;
+  authWalletAddress?: string;
   networkId?: string;
   interactive?: boolean;
 }

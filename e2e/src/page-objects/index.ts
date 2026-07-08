@@ -3,14 +3,10 @@ import { AddressBookPage } from 'e2e/src/page-objects/pages/address-book.page';
 import { CollectiblePage } from 'e2e/src/page-objects/pages/collectible.page';
 import { CollectiblesTabPage } from 'e2e/src/page-objects/pages/CollectiblesTab.page';
 import { ConfirmationModalPage } from 'e2e/src/page-objects/pages/confirmation-modal.page';
-import { NetworksDropDown } from 'e2e/src/page-objects/pages/drop-down-lists/networks.drop-down';
 // eslint-disable-next-line import/namespace
 import { GeneralSettingsPage } from 'e2e/src/page-objects/pages/general-settings.page';
 import { ManageAssetsTokensPage } from 'e2e/src/page-objects/pages/manage-assets-tokens.page';
-import { NetworksPage } from 'e2e/src/page-objects/pages/networks.page';
 import { NewsletterModalPage } from 'e2e/src/page-objects/pages/newsletter-modal.page';
-import { NotificationContentPage } from 'e2e/src/page-objects/pages/notification-content.page';
-import { NotificationsListPage } from 'e2e/src/page-objects/pages/notifications-list.page';
 import { OnRumModalPage } from 'e2e/src/page-objects/pages/on-rum-modal.page';
 import {
   OnboardingCongratsPage,
@@ -20,13 +16,10 @@ import {
   OnboardingThirdStepPage
 } from 'e2e/src/page-objects/pages/onboarding.page';
 import { RemoveAccountPage } from 'e2e/src/page-objects/pages/remove-account.page';
-import { SwapPage } from 'e2e/src/page-objects/pages/swap.page';
 import { TokenPage } from 'e2e/src/page-objects/pages/token.page';
 
 import { OperationStatusAlert } from './pages/alerts/operation-status.alert';
 import { CreateOrRestoreAnAccountPage } from './pages/create-or-restore-an-account.page';
-import { DelegateFormPage } from './pages/delegate-form.page';
-import { DelegateTab } from './pages/delegate-tab.page';
 import { AccountsDropdown } from './pages/drop-down-lists/accounts.drop-down';
 import { HeaderPage } from './pages/header.page';
 import { HomePage } from './pages/home.page';
@@ -63,19 +56,14 @@ export const Pages = {
   Home: new HomePage(),
   CreateOrRestoreAnAccount: new CreateOrRestoreAnAccountPage(),
   UnlockScreen: new UnlockScreenPage(),
-  DelegateTab: new DelegateTab(),
-  DelegateForm: new DelegateFormPage(),
   InternalConfirmation: new InternalConfirmationPage(),
   OperationStatusAlert: new OperationStatusAlert(),
   Send: new SendPage(),
-  NetworksDropDown: new NetworksDropDown(),
   OnRumpModal: new OnRumModalPage(),
   NewsletterModal: new NewsletterModalPage(),
-  Swap: new SwapPage(),
   RemoveAccount: new RemoveAccountPage(),
   AddressBook: new AddressBookPage(),
   ConfirmationModal: new ConfirmationModalPage(),
-  Networks: new NetworksPage(),
   ManageAssetsTokens: new ManageAssetsTokensPage(),
   AddAsset: new AddAssetPage(),
   Token: new TokenPage(),
@@ -86,7 +74,5 @@ export const Pages = {
   OnboardingThirdStep: new OnboardingThirdStepPage(),
   OnboardingFourthStep: new OnboardingFourthStepPage(),
   OnboardingCongrats: new OnboardingCongratsPage(),
-  NotificationsList: new NotificationsListPage(),
-  NotificationContent: new NotificationContentPage(),
   GeneralSettings: new GeneralSettingsPage()
 };

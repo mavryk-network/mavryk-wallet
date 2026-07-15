@@ -5,18 +5,51 @@ import { EnvVars } from 'lib/env';
 import { KYC_CONTRACTS } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
 import { isKnownChainId } from 'lib/temple/types';
+import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-params';
 
 const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
-export const signerTezos = (rpcUrl: string) => {
+const MEMBER_KYC_ACTION = 'addMemberKyc';
+const DEFAULT_MEMBERSHIP_TIER = 'Starter';
+const DEFAULT_KYC_FIELD_VALUE = 'NIL';
+const CONFIRMATIONS_COUNT = 1;
+
+type BigMapLookup = {
+  get: (key: string) => Promise<unknown>;
+};
+
+type KYCContractStorage = {
+  memberLedger: BigMapLookup;
+  memberKycLedger: BigMapLookup;
+};
+
+const createTezosToolkit = (rpcUrl: string) => {
   if (!rpcUrl) {
     throw new Error('No RPC_URL defined.');
   }
 
-  const TezToolkit = new MavrykToolkit(rpcUrl);
+  return new MavrykToolkit(rpcUrl);
+};
+
+const getKYCContractAddress = (chainId: string | null | undefined) => {
+  if (!chainId || !isKnownChainId(chainId)) {
+    throw new Error('Unknown chain Id');
+  }
+
+  const kycAddress = KYC_CONTRACTS.get(chainId);
+
+  if (!kycAddress) {
+    throw new Error('No KYC_CONTRACT defined.');
+  }
+
+  return kycAddress;
+};
+
+export const signerTezos = (rpcUrl: string) => {
+  const TezToolkit = createTezosToolkit(rpcUrl);
 
   if (!SUPER_ADMIN_PRIVATE_KEY) {
-    throw new Error('No FAUCET_PRIVATE_KEY defined.');
+    throw new Error('No SUPER_ADMIN_PRIVATE_KEY defined.');
   }
 
   // Create signer
@@ -27,38 +60,50 @@ export const signerTezos = (rpcUrl: string) => {
   return TezToolkit;
 };
 
+export const getKYCStatusFromContract = async (rpcUrl: string, address: string, chainId: string | null | undefined) => {
+  const tezos = createTezosToolkit(rpcUrl);
+  const kycAddress = getKYCContractAddress(chainId);
+  const contract = await loadContract(tezos, kycAddress, false);
+  const storage = await contract.storage<KYCContractStorage>();
+  const [memberData, memberKycData] = await Promise.all([
+    storage.memberLedger.get(address),
+    storage.memberKycLedger.get(address)
+  ]);
+
+  return Boolean(memberData && memberKycData);
+};
+
 export const signKYCAction = async (rpcUrl: string, address: string, chainId: string | null | undefined) => {
-  try {
-    if (chainId && isKnownChainId(chainId)) {
-      const tezos = signerTezos(rpcUrl);
-      const kycAddress = KYC_CONTRACTS.get(chainId) ?? '';
+  const tezos = signerTezos(rpcUrl);
+  const kycAddress = getKYCContractAddress(chainId);
+  const contract = await loadContract(tezos, kycAddress);
 
-      const contract = await loadContract(tezos, kycAddress);
-
-      const setMemberKycAction = 'addMemberKyc';
-
-      const memberLedgerList = [
-        {
-          updateType: 'update',
-          memberAddress: address,
-          membershipTier: 'Starter'
-        }
-      ];
-      const memberKycList = [
-        {
-          memberAddress: address,
-          country: 'NIL',
-          region: 'NIL',
-          investorType: 'NIL'
-        }
-      ];
-
-      await contract.methods.setMember(memberLedgerList).send();
-      await contract.methods.setMemberKyc(setMemberKycAction, memberKycList).send();
-    } else {
-      throw new Error('Unkown chain Id');
+  const memberLedgerList = [
+    {
+      updateType: 'update',
+      memberAddress: address,
+      membershipTier: DEFAULT_MEMBERSHIP_TIER
     }
-  } catch (e) {
-    throw e;
-  }
+  ];
+  const memberKycList = [
+    {
+      memberAddress: address,
+      country: DEFAULT_KYC_FIELD_VALUE,
+      region: DEFAULT_KYC_FIELD_VALUE,
+      investorType: DEFAULT_KYC_FIELD_VALUE
+    }
+  ];
+
+  const operation = await tezos.wallet
+    .batch([
+      parseTransferParamsToParamsWithKind(contract.methods.setMember(memberLedgerList).toTransferParams()),
+      parseTransferParamsToParamsWithKind(
+        contract.methods.setMemberKyc(MEMBER_KYC_ACTION, memberKycList).toTransferParams()
+      )
+    ])
+    .send();
+
+  await operation.confirmation(CONFIRMATIONS_COUNT);
+
+  return operation;
 };

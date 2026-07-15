@@ -334,28 +334,33 @@ const fetchAssetsBalancesFromTzktOnce = (account: string, chainId: TzktApiChainI
 export const getAccountStatsFromTzkt = async (account: string, chainId: TzktApiChainId) =>
   fetchGet<TzktAccount>(chainId, `/accounts/${account}`);
 
+type KYCContractStorage = {
+  memberLedger?: number;
+  memberKycLedger?: number;
+};
+
 export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string | null | undefined) => {
   try {
     if (chainId && isKnownChainId(chainId)) {
-      const kycAdress = KYC_CONTRACTS.get(chainId);
+      const kycAddress = KYC_CONTRACTS.get(chainId);
 
-      if (!kycAdress) return false;
-      const storageRes = await fetchGet<any>(chainId, `/contracts/${kycAdress}/storage/`);
-      const bigMapId = storageRes.memberLedger;
+      if (!kycAddress) return false;
+      const storageRes = await fetchGet<KYCContractStorage>(chainId, `/contracts/${kycAddress}/storage/`);
+      const memberLedgerBigMapId = storageRes.memberLedger;
+      const memberKycLedgerBigMapId = storageRes.memberKycLedger;
 
-      const contractData = await fetchGet<any>(chainId, `/bigmaps/${bigMapId}/keys/${pkh}`);
+      if (!memberLedgerBigMapId || !memberKycLedgerBigMapId) return false;
 
-      // if no data than no KYCed user
-      if (!contractData) return false;
+      const [memberData, memberKycData] = await Promise.all([
+        fetchGet<unknown>(chainId, `/bigmaps/${memberLedgerBigMapId}/keys/${pkh}`),
+        fetchGet<unknown>(chainId, `/bigmaps/${memberKycLedgerBigMapId}/keys/${pkh}`)
+      ]);
 
-      const isKYCAddress = contractData;
-
-      return Boolean(isKYCAddress);
+      return Boolean(memberData && memberKycData);
     }
 
     return false;
-  } catch (e) {
-    console.log(e);
+  } catch {
     return false;
   }
 };

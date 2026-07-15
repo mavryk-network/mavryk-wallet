@@ -15,7 +15,7 @@ import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
-import { signKYCAction } from './utils/tezosSigner';
+import { getKYCStatusFromContract, signKYCAction } from './utils/tezosSigner';
 import VerificationForm from './VerificationForm/VerificationForm';
 
 export const ProVersion: FC = () => {
@@ -23,6 +23,7 @@ export const ProVersion: FC = () => {
   const [navigateToForm, setNavigateToForm] = useState(isKYC);
   const { fullPage, popup } = useAppEnv();
 
+  // Redirect watch-only accounts because they cannot submit KYC contract writes; no cleanup is needed.
   useEffect(() => {
     if (type === TempleAccountType.WatchOnly) {
       navigate('/');
@@ -98,16 +99,23 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
   });
 
   const handleBtnClick = useCallback(async () => {
+    if (formState.submitting) return;
+
     try {
-      setFormState({ ...formState, submitting: true });
+      setFormState({ submitting: true, error: null });
 
       // make account a KYC account
       await signKYCAction(rpcUrl, publicKeyHash, chainId);
 
-      setFormState({ ...formState, submitting: false });
-      setNavigateToForm(false);
+      const isConfirmedKYC = await getKYCStatusFromContract(rpcUrl, publicKeyHash, chainId);
+      await updateAccountKYCStatus(publicKeyHash, isConfirmedKYC);
 
-      await updateAccountKYCStatus(publicKeyHash, true);
+      if (!isConfirmedKYC) {
+        throw new Error(t('smthWentWrong'));
+      }
+
+      setFormState({ submitting: false, error: null });
+      setNavigateToForm(true);
 
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'proVersion',
@@ -119,11 +127,13 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
         contentId: 'verifySuccess',
         secondaryBtnText: 'continueToVerifyAddressesMsg'
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       // show err on ui
-      setFormState({ ...formState, error: getErrorMsgByCode(e.message) });
+      const errorMessage = e instanceof Error ? e.message : String(e);
+
+      setFormState({ submitting: false, error: getErrorMsgByCode(errorMessage) });
     }
-  }, [formState, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus, chainId]);
+  }, [formState.submitting, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus, chainId]);
 
   return (
     <div className={clsx(popup && 'px-4 py-4', popup && formState?.error && 'overflow-y-scroll')}>

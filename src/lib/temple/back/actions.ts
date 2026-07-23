@@ -5,7 +5,6 @@ import {
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
-import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
@@ -41,6 +40,7 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
+import { buildMavrykSignedMessagePayloadHex } from 'mavryk/api/auth-payload.helpers';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
@@ -914,9 +914,7 @@ function getErrorData(err: any) {
 }
 
 function generateRawPayloadBytes(payload: string) {
-  const bytes = char2Bytes(Buffer.from(payload, 'utf8').toString('hex'));
-  // https://tezostaquito.io/docs/signing/
-  return `0501${char2Bytes(String(bytes.length))}${bytes}`;
+  return buildMavrykSignedMessagePayloadHex(payload);
 }
 
 const close = (

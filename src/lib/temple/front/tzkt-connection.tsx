@@ -1,14 +1,4 @@
-import React, {
-  createContext,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-  PropsWithChildren
-} from 'react';
+import React, { createContext, FC, useContext, useEffect, useMemo, useState, PropsWithChildren } from 'react';
 
 import { noop } from 'lodash';
 
@@ -31,59 +21,85 @@ const TzktConnectionContext = createContext<TzktConnectionContextValue>(DEFAULT_
 
 export const useTzktConnection = () => useContext(TzktConnectionContext);
 
+const TZKT_RECONNECT_DELAY_MS = 1000;
+
 const NotReadyClientTzktConnectionProvider: FC<PropsWithChildren> = ({ children }) => (
   <TzktConnectionContext.Provider value={DEFAULT_VALUE}>{children}</TzktConnectionContext.Provider>
 );
 
 const ReadyClientTzktConnectionProvider: FC<PropsWithChildren> = ({ children }) => {
   const chainId = useChainId();
-  const [connectionReady, setConnectionReadyState] = useState(false);
-  const connectionReadyRef = useRef(connectionReady);
-  const shouldShutdownConnection = useRef(false);
-
-  const setConnectionReady = useCallback((newState: boolean) => {
-    connectionReadyRef.current = newState;
-    setConnectionReadyState(newState);
-  }, []);
+  const [readyConnection, setReadyConnection] = useState<TzktHubConnection>();
 
   const connection = useMemo(() => (chainId ? createWsConnection(chainId) : undefined), [chainId]);
+  const connectionReady = readyConnection === connection;
 
-  const initConnection = useCallback(async () => {
-    if (!connection) {
-      return;
-    }
-
-    setConnectionReady(false);
-    try {
-      await connection.start();
-      shouldShutdownConnection.current = false;
-      connection.onclose(e => {
-        if (!shouldShutdownConnection.current) {
-          console.error(e);
-          setConnectionReady(false);
-          setTimeout(() => initConnection(), 1000);
-        }
-      });
-      setConnectionReady(true);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [connection, setConnectionReady]);
-
+  // Owns the external SignalR socket for the selected chain; cleanup clears retries and closes the socket.
   useEffect(() => {
-    if (connection) {
-      initConnection();
+    if (!connection) return noop;
 
-      return () => {
-        if (connectionReadyRef.current) {
-          shouldShutdownConnection.current = true;
-          connection.stop().catch(e => console.error(e));
+    let isDisposed = false;
+    let isStarting = false;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const markConnectionNotReady = () => {
+      setReadyConnection(currentConnection => (currentConnection === connection ? undefined : currentConnection));
+    };
+
+    const scheduleReconnect = () => {
+      if (isDisposed || reconnectTimeout !== undefined) return;
+
+      reconnectTimeout = setTimeout(() => {
+        reconnectTimeout = undefined;
+        void startConnection();
+      }, TZKT_RECONNECT_DELAY_MS);
+    };
+
+    async function startConnection() {
+      if (isDisposed || isStarting) return;
+
+      isStarting = true;
+      markConnectionNotReady();
+
+      try {
+        await connection.start();
+
+        if (isDisposed) {
+          void connection.stop().catch(e => console.error(e));
+          return;
         }
-      };
+
+        setReadyConnection(connection);
+      } catch (e) {
+        if (!isDisposed) {
+          console.error(e);
+          scheduleReconnect();
+        }
+      } finally {
+        isStarting = false;
+      }
     }
 
-    return noop;
-  }, [connection, initConnection]);
+    connection.onclose(e => {
+      if (isDisposed) return;
+
+      markConnectionNotReady();
+      if (e) console.error(e);
+      scheduleReconnect();
+    });
+
+    void startConnection();
+
+    return () => {
+      isDisposed = true;
+
+      if (reconnectTimeout !== undefined) {
+        clearTimeout(reconnectTimeout);
+      }
+
+      void connection.stop().catch(e => console.error(e));
+    };
+  }, [connection]);
 
   const contextValue = useMemo(
     () => ({

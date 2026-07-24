@@ -1,4 +1,4 @@
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
 import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
 
@@ -40,7 +40,13 @@ export function isKnownChainId(chainId?: string | null): chainId is TzktApiChain
 
 export const createWsConnection = (chainId: string): TzktHubConnection | undefined => {
   if (isKnownChainId(chainId)) {
-    return new HubConnectionBuilder().withUrl(`${TZKT_API_BASE_URLS[chainId]}/ws`).build();
+    // Mavryk hubs accept direct WebSockets; the negotiated connection-token path returns transport 404s.
+    return new HubConnectionBuilder()
+      .withUrl(`${TZKT_API_BASE_URLS[chainId]}/ws`, {
+        skipNegotiation: true,
+        transport: HttpTransportType.WebSockets
+      })
+      .build();
   }
 
   return undefined;

@@ -24,8 +24,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# AI
+/.codex
+AGENTS.md
+CONTEXT.md
+
 # Xcode
-#
 build/
 *.pbxuser
 !default.pbxuser
@@ -46,5 +50,4 @@ DerivedData
 #e2e
 video-rep
 
-# docs
-CONTEXT.md
+

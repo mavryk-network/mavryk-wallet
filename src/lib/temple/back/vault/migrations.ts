@@ -427,11 +427,12 @@ function normalizeContactsAccountState(
   const contacts = normalizeContacts(state.contacts);
   const typesByAddress = normalizeTypesByAddress(state.typesByAddress, contacts);
 
-  if (contacts.length === 0 && !state.recordId && !typesByAddress) {
+  if (contacts.length === 0 && !state.recordId && !typesByAddress && !state.accountDataKey) {
     return null;
   }
 
   return {
+    ...(state.accountDataKey ? { accountDataKey: state.accountDataKey } : {}),
     contacts,
     ...(state.recordId ? { recordId: state.recordId } : {}),
     ...(typesByAddress ? { typesByAddress } : {})
@@ -448,9 +449,11 @@ function mergeContactsAccountStates(
     { ...(currentState?.typesByAddress ?? {}), ...(incomingState.typesByAddress ?? {}) },
     contacts
   );
+  const accountDataKey = currentState?.accountDataKey ?? incomingState.accountDataKey;
   const recordId = currentState?.recordId ?? (canPreserveRecordId ? incomingState.recordId : undefined);
 
   return {
+    ...(accountDataKey ? { accountDataKey } : {}),
     contacts,
     ...(recordId ? { recordId } : {}),
     ...(typesByAddress ? { typesByAddress } : {})

@@ -16,6 +16,7 @@ import {
   canUseEncryptedContacts,
   getCachedContactsState,
   getContactsAccountScope,
+  getStoredContactsAccountDataKey,
   getStoredContactsRecordId,
   getStoredContactsTypesByAddress,
   normalizeContacts
@@ -125,17 +126,19 @@ export function useContactsActions() {
     }
 
     const authContext = { walletAddress: contactsAccountScope.authAddress, networkId: network.id };
+    const accountDataKey = getStoredContactsAccountDataKey(currentSettings, contactsStorageKey);
 
     await ensureAuthorized(contactsAccountScope.authAddress, network.id, true, contactsAccountScope.authAddress);
     const publicKey = await revealPublicKey(contactsAccountScope.authAddress);
-    return fetchContactsRecord(publicKey, authContext);
+    return fetchContactsRecord({ accountDataKey, publicKey, authContext });
   }, [contactsAccountScope, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
 
   const persistContacts = useCallback(
     async (
       nextContacts: TempleContact[],
       recordId?: string | null,
-      typesByAddress?: Record<string, TempleContactApiType>
+      typesByAddress?: Record<string, TempleContactApiType>,
+      accountDataKey?: string | null
     ) => {
       if (!canUseEncryptedContacts(contactsAccountScope) || !contactsStorageKey) {
         throw new Error('Encrypted contacts are unavailable for this account');
@@ -147,21 +150,25 @@ export function useContactsActions() {
         typesByAddress === undefined
           ? getStoredContactsTypesByAddress(settingsRef.current, contactsStorageKey)
           : typesByAddress;
+      const currentAccountDataKey =
+        accountDataKey === undefined
+          ? getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey)
+          : accountDataKey;
       const { contacts: normalizedContacts, typesByAddress: resolvedTypesByAddress } = prepareContactsForPersistence(
         nextContacts,
         currentTypesByAddress
       );
       let nextRecordId = currentRecordId;
       let nextTypesByAddress = resolvedTypesByAddress;
+      let nextAccountDataKey = currentAccountDataKey;
 
       if (normalizedContacts.length > 0 || currentRecordId) {
         const authContext = { walletAddress: contactsAccountScope.authAddress, networkId: network.id };
 
         await ensureAuthorized(contactsAccountScope.authAddress, network.id, true, contactsAccountScope.authAddress);
-        const publicKey = await revealPublicKey(contactsAccountScope.authAddress);
         const saved = await saveContactsRecord({
+          accountDataKey: currentAccountDataKey,
           contacts: normalizedContacts,
-          publicKey,
           recordId: currentRecordId,
           typesByAddress: resolvedTypesByAddress,
           authContext
@@ -169,9 +176,11 @@ export function useContactsActions() {
 
         nextRecordId = saved.recordId;
         nextTypesByAddress = saved.typesByAddress;
+        nextAccountDataKey = saved.accountDataKey;
       } else {
         nextRecordId = null;
         nextTypesByAddress = undefined;
+        nextAccountDataKey = null;
       }
 
       await updateSettings(
@@ -180,7 +189,8 @@ export function useContactsActions() {
           contactsStorageKey,
           normalizedContacts,
           nextRecordId,
-          nextTypesByAddress
+          nextTypesByAddress,
+          nextAccountDataKey
         )
       );
     },
@@ -190,15 +200,14 @@ export function useContactsActions() {
       ensureAuthorized,
       network.id,
       prepareContactsForPersistence,
-      revealPublicKey,
       updateSettings
     ]
   );
 
   const mutateContacts = useCallback(
     async (mutator: (sourceContacts: TempleContact[]) => TempleContact[]) => {
-      const { contacts: sourceContacts, recordId, typesByAddress } = await loadCurrentContactsState();
-      await persistContacts(mutator(sourceContacts), recordId, typesByAddress);
+      const { accountDataKey, contacts: sourceContacts, recordId, typesByAddress } = await loadCurrentContactsState();
+      await persistContacts(mutator(sourceContacts), recordId, typesByAddress, accountDataKey);
     },
     [loadCurrentContactsState, persistContacts]
   );

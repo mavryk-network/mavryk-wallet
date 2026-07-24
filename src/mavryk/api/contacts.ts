@@ -11,6 +11,11 @@ import type { ResolvedMavrykAuthStorageContext } from './storage';
 const CONTACTS_DATA_KEY = 'contacts';
 const CONTACTS_DATA_TYPE = 'contacts';
 const CONTACTS_API_TYPES = ['user', 'validator', 'contract'] as const;
+const CONTACTS_LEGACY_ENCRYPTION_VERSION = 'AES-256-CBC-1';
+const CONTACTS_ENCRYPTION_VERSION = 'AES-256-GCM-2';
+const ACCOUNT_DATA_KEY_BYTES = 32;
+const AES_GCM_IV_BYTES = 12;
+const BASE64_CHUNK_SIZE = 0x8000;
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
 
 const EncryptedValueSchema = z.object({
@@ -56,7 +61,38 @@ type ContactsPayloadItem = z.infer<typeof ContactsPayloadItemSchema>;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-async function deriveAccountDataKey(publicKey: string): Promise<CryptoKey> {
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += BASE64_CHUNK_SIZE) {
+    binary += String.fromCharCode(...Array.from(bytes.subarray(offset, offset + BASE64_CHUNK_SIZE)));
+  }
+
+  return btoa(binary);
+}
+
+function base64ToBytes(value: string) {
+  return Uint8Array.from(atob(value), char => char.charCodeAt(0));
+}
+
+async function generateAccountDataKey() {
+  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  const rawKey = await crypto.subtle.exportKey('raw', key);
+
+  return bytesToBase64(new Uint8Array(rawKey));
+}
+
+async function importAccountDataKey(accountDataKey: string): Promise<CryptoKey> {
+  const rawKey = base64ToBytes(accountDataKey);
+
+  if (rawKey.length !== ACCOUNT_DATA_KEY_BYTES) {
+    throw new Error('Invalid contacts encryption key');
+  }
+
+  return crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function deriveLegacyAccountDataKey(publicKey: string): Promise<CryptoKey> {
   const baseKey = await crypto.subtle.importKey('raw', encoder.encode(publicKey), 'PBKDF2', false, ['deriveKey']);
 
   return crypto.subtle.deriveKey(
@@ -141,24 +177,32 @@ function buildGroupedPayload(
 }
 
 async function encryptValueForBackend(data: GroupedContactsPayload, key: CryptoKey): Promise<EncryptedValue> {
-  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTES));
   const encryptedBuffer = await crypto.subtle.encrypt(
-    { name: 'AES-CBC', iv },
+    { name: 'AES-GCM', iv },
     key,
     encoder.encode(JSON.stringify(data))
   );
 
   return {
-    ciphertext: btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer))),
-    iv: btoa(String.fromCharCode(...iv)),
+    ciphertext: bytesToBase64(new Uint8Array(encryptedBuffer)),
+    iv: bytesToBase64(iv),
     timestamp: Date.now(),
-    version: 'AES-256-CBC-1'
+    version: CONTACTS_ENCRYPTION_VERSION
   };
 }
 
-async function decryptValueFromBackend(encrypted: EncryptedValue, key: CryptoKey): Promise<string> {
-  const iv = Uint8Array.from(atob(encrypted.iv), char => char.charCodeAt(0));
-  const ciphertext = Uint8Array.from(atob(encrypted.ciphertext), char => char.charCodeAt(0));
+async function decryptCurrentValueFromBackend(encrypted: EncryptedValue, key: CryptoKey): Promise<string> {
+  const iv = base64ToBytes(encrypted.iv);
+  const ciphertext = base64ToBytes(encrypted.ciphertext);
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+
+  return decoder.decode(decrypted);
+}
+
+async function decryptLegacyValueFromBackend(encrypted: EncryptedValue, key: CryptoKey): Promise<string> {
+  const iv = base64ToBytes(encrypted.iv);
+  const ciphertext = base64ToBytes(encrypted.ciphertext);
   const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
 
   return decoder.decode(decrypted);
@@ -166,72 +210,107 @@ async function decryptValueFromBackend(encrypted: EncryptedValue, key: CryptoKey
 
 async function decryptContactsRecord(
   record: AccountDataRecord,
-  key: CryptoKey
+  params: { accountDataKey?: string | null; publicKey?: string }
 ): Promise<{ contacts: TempleContact[]; typesByAddress: Record<string, TempleContactApiType> }> {
-  const decrypted = await decryptValueFromBackend(record.encryptedValue, key);
+  let decrypted: string;
+
+  if (record.encryptedValue.version === CONTACTS_ENCRYPTION_VERSION) {
+    if (!params.accountDataKey) {
+      throw new Error('Missing local contacts encryption key');
+    }
+
+    decrypted = await decryptCurrentValueFromBackend(
+      record.encryptedValue,
+      await importAccountDataKey(params.accountDataKey)
+    );
+  } else if (record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION) {
+    if (!params.publicKey) {
+      throw new Error('Missing public key for legacy contacts decryption');
+    }
+
+    decrypted = await decryptLegacyValueFromBackend(
+      record.encryptedValue,
+      await deriveLegacyAccountDataKey(params.publicKey)
+    );
+  } else {
+    throw new Error(`Unsupported contacts encryption version: ${record.encryptedValue.version}`);
+  }
+
   return normalizeDecryptedPayload(ContactsPayloadSchema.parse(JSON.parse(decrypted)));
 }
 
 async function parseContactsResponse(
   data: unknown,
-  key: CryptoKey
+  params: { accountDataKey?: string | null; publicKey?: string }
 ): Promise<{
   contacts: TempleContact[];
   record: AccountDataRecord;
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   const record = AccountDataRecordSchema.parse(data);
-  const { contacts, typesByAddress } = await decryptContactsRecord(record, key);
+  const { contacts, typesByAddress } = await decryptContactsRecord(record, params);
 
   return { contacts, record, typesByAddress };
 }
 
-export async function fetchContactsRecord(
-  publicKey: string,
-  authContext?: ResolvedMavrykAuthStorageContext
-): Promise<{
+export async function fetchContactsRecord(params: {
+  accountDataKey?: string | null;
+  publicKey?: string;
+  authContext?: ResolvedMavrykAuthStorageContext;
+}): Promise<{
+  accountDataKey?: string;
   contacts: TempleContact[];
   recordId: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
 }> {
   try {
-    const key = await deriveAccountDataKey(publicKey);
     const requestConfig: MavrykApiRequestConfig = {
       params: {
         limit: 100
       },
-      ...(authContext ? { _authContext: authContext } : {})
+      ...(params.authContext ? { _authContext: params.authContext } : {})
     };
     const { data } = await mavrykApi.get(`/account/data/${CONTACTS_DATA_TYPE}/${CONTACTS_DATA_KEY}`, requestConfig);
 
-    const parsed = await parseContactsResponse(data, key);
+    const parsed = await parseContactsResponse(data, params);
+    const accountDataKey =
+      parsed.record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION
+        ? params.accountDataKey ?? (await generateAccountDataKey())
+        : params.accountDataKey ?? undefined;
 
     return {
+      ...(accountDataKey ? { accountDataKey } : {}),
       contacts: parsed.contacts,
       recordId: parsed.record.id,
       typesByAddress: parsed.typesByAddress
     };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return { contacts: [], recordId: null };
+      return {
+        ...(params.accountDataKey ? { accountDataKey: params.accountDataKey } : {}),
+        contacts: [],
+        recordId: null
+      };
     }
     throw new Error(extractMavrykApiErrorMessage(error));
   }
 }
 
 export async function saveContactsRecord(params: {
+  accountDataKey?: string | null;
   contacts: TempleContact[];
-  publicKey: string;
   recordId?: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
   authContext?: ResolvedMavrykAuthStorageContext;
 }): Promise<{
+  accountDataKey: string;
   contacts: TempleContact[];
   recordId: string;
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   try {
-    const key = await deriveAccountDataKey(params.publicKey);
+    const accountDataKey = params.accountDataKey ?? (await generateAccountDataKey());
+    const key = await importAccountDataKey(accountDataKey);
     const encryptedValue = await encryptValueForBackend(
       buildGroupedPayload(params.contacts, params.typesByAddress),
       key
@@ -249,9 +328,10 @@ export async function saveContactsRecord(params: {
           requestConfig
         );
 
-    const parsed = await parseContactsResponse(response.data, key);
+    const parsed = await parseContactsResponse(response.data, { accountDataKey });
 
     return {
+      accountDataKey,
       contacts: parsed.contacts,
       recordId: parsed.record.id,
       typesByAddress: parsed.typesByAddress

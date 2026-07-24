@@ -151,8 +151,10 @@ function mergeContactsAccountState(
     ...(incomingState.typesByAddress ?? {}),
     ...(currentState?.typesByAddress ?? {})
   };
+  const accountDataKey = currentState?.accountDataKey ?? incomingState.accountDataKey;
 
   return {
+    ...(accountDataKey ? { accountDataKey } : {}),
     contacts,
     ...(currentState?.recordId || incomingState.recordId
       ? { recordId: currentState?.recordId ?? incomingState.recordId }

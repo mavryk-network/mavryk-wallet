@@ -24,9 +24,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# AI
-/.codex
+# Local AI agent context
+/.codex/
+/codex/
 AGENTS.md
+agents.md
 CONTEXT.md
 
 # Xcode
@@ -49,5 +51,4 @@ DerivedData
 
 #e2e
 video-rep
-
 

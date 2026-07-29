@@ -88,7 +88,7 @@ export function useContactsSync(
       const accountDataKey = getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey);
 
       try {
-        await ensureAuthorized(activeScope.authAddress, networkId, true, activeScope.authAddress);
+        await ensureAuthorized(activeScope.authAddress, networkId, false, activeScope.authAddress);
         if (cancelled) return;
 
         const { accessToken } = await getAuthTokensFromStorage(authContext);

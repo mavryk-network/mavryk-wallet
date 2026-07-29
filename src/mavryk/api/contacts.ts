@@ -61,6 +61,17 @@ type ContactsPayloadItem = z.infer<typeof ContactsPayloadItemSchema>;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+class CurrentContactsRecordDecryptionError extends Error {
+  shouldGenerateAccountDataKey: boolean;
+
+  constructor(message: string, shouldGenerateAccountDataKey: boolean) {
+    super(message);
+    this.name = 'CurrentContactsRecordDecryptionError';
+    this.shouldGenerateAccountDataKey = shouldGenerateAccountDataKey;
+    Object.setPrototypeOf(this, CurrentContactsRecordDecryptionError.prototype);
+  }
+}
+
 function bytesToBase64(bytes: Uint8Array) {
   let binary = '';
 
@@ -216,13 +227,20 @@ async function decryptContactsRecord(
 
   if (record.encryptedValue.version === CONTACTS_ENCRYPTION_VERSION) {
     if (!params.accountDataKey) {
-      throw new Error('Missing local contacts encryption key');
+      throw new CurrentContactsRecordDecryptionError('Missing local contacts encryption key', true);
     }
 
-    decrypted = await decryptCurrentValueFromBackend(
-      record.encryptedValue,
-      await importAccountDataKey(params.accountDataKey)
-    );
+    try {
+      decrypted = await decryptCurrentValueFromBackend(
+        record.encryptedValue,
+        await importAccountDataKey(params.accountDataKey)
+      );
+    } catch (error) {
+      const shouldGenerateAccountDataKey =
+        error instanceof Error && error.message === 'Invalid contacts encryption key';
+
+      throw new CurrentContactsRecordDecryptionError(extractMavrykApiErrorMessage(error), shouldGenerateAccountDataKey);
+    }
   } else if (record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION) {
     if (!params.publicKey) {
       throw new Error('Missing public key for legacy contacts decryption');
@@ -253,10 +271,72 @@ async function parseContactsResponse(
   return { contacts, record, typesByAddress };
 }
 
+async function buildUnreadableCurrentContactsRecovery(
+  record: AccountDataRecord,
+  error: CurrentContactsRecordDecryptionError,
+  accountDataKey?: string | null
+) {
+  const canReuseAccountDataKey = accountDataKey ? await isValidAccountDataKey(accountDataKey) : false;
+  const shouldGenerateAccountDataKey = error.shouldGenerateAccountDataKey || !canReuseAccountDataKey;
+  const nextAccountDataKey = shouldGenerateAccountDataKey ? await generateAccountDataKey() : accountDataKey!;
+
+  return {
+    accountDataKey: nextAccountDataKey,
+    contacts: [],
+    recordId: record.id
+  };
+}
+
+async function isValidAccountDataKey(accountDataKey: string) {
+  try {
+    await importAccountDataKey(accountDataKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isNotFoundError(error: unknown) {
+  return axios.isAxiosError(error) && error.response?.status === 404;
+}
+
+function buildContactsRecordRequest(encryptedValue: EncryptedValue) {
+  return {
+    dataType: CONTACTS_DATA_TYPE,
+    dataKey: CONTACTS_DATA_KEY,
+    encryptedValue
+  };
+}
+
+async function createContactsRecord(encryptedValue: EncryptedValue, requestConfig: MavrykApiRequestConfig) {
+  return mavrykApi.post('/account/data', buildContactsRecordRequest(encryptedValue), requestConfig);
+}
+
+async function saveEncryptedContactsRecord(
+  encryptedValue: EncryptedValue,
+  recordId: string | null | undefined,
+  requestConfig: MavrykApiRequestConfig
+) {
+  if (!recordId) {
+    return createContactsRecord(encryptedValue, requestConfig);
+  }
+
+  try {
+    return await mavrykApi.put(`/account/data/${recordId}`, { encryptedValue }, requestConfig);
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return createContactsRecord(encryptedValue, requestConfig);
+    }
+
+    throw error;
+  }
+}
+
 export async function fetchContactsRecord(params: {
   accountDataKey?: string | null;
   publicKey?: string;
   authContext?: ResolvedMavrykAuthStorageContext;
+  recoverUnreadableCurrentRecord?: boolean;
 }): Promise<{
   accountDataKey?: string;
   contacts: TempleContact[];
@@ -272,20 +352,32 @@ export async function fetchContactsRecord(params: {
     };
     const { data } = await mavrykApi.get(`/account/data/${CONTACTS_DATA_TYPE}/${CONTACTS_DATA_KEY}`, requestConfig);
 
-    const parsed = await parseContactsResponse(data, params);
+    const record = AccountDataRecordSchema.parse(data);
+    let decrypted: Awaited<ReturnType<typeof decryptContactsRecord>>;
+
+    try {
+      decrypted = await decryptContactsRecord(record, params);
+    } catch (error) {
+      if (params.recoverUnreadableCurrentRecord && error instanceof CurrentContactsRecordDecryptionError) {
+        return buildUnreadableCurrentContactsRecovery(record, error, params.accountDataKey);
+      }
+
+      throw error;
+    }
+
     const accountDataKey =
-      parsed.record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION
+      record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION
         ? params.accountDataKey ?? (await generateAccountDataKey())
         : params.accountDataKey ?? undefined;
 
     return {
       ...(accountDataKey ? { accountDataKey } : {}),
-      contacts: parsed.contacts,
-      recordId: parsed.record.id,
-      typesByAddress: parsed.typesByAddress
+      contacts: decrypted.contacts,
+      recordId: record.id,
+      typesByAddress: decrypted.typesByAddress
     };
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
+    if (isNotFoundError(error)) {
       return {
         ...(params.accountDataKey ? { accountDataKey: params.accountDataKey } : {}),
         contacts: [],
@@ -316,17 +408,7 @@ export async function saveContactsRecord(params: {
       key
     );
     const requestConfig: MavrykApiRequestConfig = params.authContext ? { _authContext: params.authContext } : {};
-    const response = params.recordId
-      ? await mavrykApi.put(`/account/data/${params.recordId}`, { encryptedValue }, requestConfig)
-      : await mavrykApi.post(
-          '/account/data',
-          {
-            dataType: CONTACTS_DATA_TYPE,
-            dataKey: CONTACTS_DATA_KEY,
-            encryptedValue
-          },
-          requestConfig
-        );
+    const response = await saveEncryptedContactsRecord(encryptedValue, params.recordId, requestConfig);
 
     const parsed = await parseContactsResponse(response.data, { accountDataKey });
 

@@ -130,7 +130,7 @@ export function useContactsActions() {
 
     await ensureAuthorized(contactsAccountScope.authAddress, network.id, true, contactsAccountScope.authAddress);
     const publicKey = await revealPublicKey(contactsAccountScope.authAddress);
-    return fetchContactsRecord({ accountDataKey, publicKey, authContext });
+    return fetchContactsRecord({ accountDataKey, publicKey, authContext, recoverUnreadableCurrentRecord: true });
   }, [contactsAccountScope, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
 
   const persistContacts = useCallback(

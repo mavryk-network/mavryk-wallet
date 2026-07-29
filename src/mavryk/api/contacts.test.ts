@@ -54,6 +54,20 @@ function createResponse(config: AxiosRequestConfig, data: unknown): AxiosRespons
   };
 }
 
+function createAxiosError(config: AxiosRequestConfig, status: number, data: unknown) {
+  return {
+    config,
+    isAxiosError: true,
+    response: {
+      config,
+      data,
+      headers: {},
+      status,
+      statusText: status === 404 ? 'Not Found' : 'Error'
+    }
+  };
+}
+
 function buildRecord(encryptedValue: EncryptedValue) {
   return {
     accountId: 'account-id',
@@ -171,6 +185,42 @@ describe('contacts account data encryption', () => {
     });
   });
 
+  it('creates a contacts record when the cached record id no longer exists', async () => {
+    const calls: MavrykApiRequestConfig[] = [];
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      const requestConfig = config as MavrykApiRequestConfig;
+      calls.push(requestConfig);
+
+      if (requestConfig.url === '/account/data/stale-record-id') {
+        throw createAxiosError(config, 404, { error: 'Data not found', code: 'not_found' });
+      }
+
+      const body = parseAdapterData(requestConfig.data) as {
+        encryptedValue: EncryptedValue;
+      };
+
+      return createResponse(config, buildRecord(body.encryptedValue));
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+
+    const saved = await saveContactsRecord({
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      recordId: 'stale-record-id',
+      typesByAddress: {
+        'mv1-alice': 'user'
+      },
+      authContext: AUTH_CONTEXT
+    });
+
+    expect(calls.map(({ method, url }) => `${method}:${url}`)).toEqual([
+      'put:/account/data/stale-record-id',
+      'post:/account/data'
+    ]);
+    expect(saved.recordId).toBe('record-id');
+    expect(saved.contacts).toEqual([{ address: 'mv1-alice', name: 'Alice' }]);
+  });
+
   it('fetches v2 contacts only when the local account data key is available', async () => {
     const accountDataKey = await generateAccountDataKey();
     const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
@@ -196,6 +246,24 @@ describe('contacts account data encryption', () => {
         'mv1-alice': 'user'
       }
     });
+  });
+
+  it('recovers an unreadable v2 contacts record when mutations need to continue', async () => {
+    const accountDataKey = await generateAccountDataKey();
+    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    const fetched = await fetchContactsRecord({
+      publicKey: PUBLIC_KEY,
+      authContext: AUTH_CONTEXT,
+      recoverUnreadableCurrentRecord: true
+    });
+
+    expect(fetched.contacts).toEqual([]);
+    expect(fetched.recordId).toBe('record-id');
+    expect(base64ToBytes(fetched.accountDataKey ?? '')).toHaveLength(32);
   });
 
   it('keeps legacy v1 public-key encrypted contacts readable and returns a new local key', async () => {

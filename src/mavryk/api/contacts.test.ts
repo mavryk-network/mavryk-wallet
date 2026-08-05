@@ -68,14 +68,14 @@ function createAxiosError(config: AxiosRequestConfig, status: number, data: unkn
   };
 }
 
-function buildRecord(encryptedValue: EncryptedValue) {
+function buildRecord(encryptedValue: EncryptedValue, id = 'record-id') {
   return {
     accountId: 'account-id',
     createdAt: '2026-07-24T00:00:00.000Z',
     dataKey: 'contacts',
     dataType: 'contacts',
     encryptedValue,
-    id: 'record-id',
+    id,
     updatedAt: '2026-07-24T00:00:00.000Z'
   };
 }
@@ -221,6 +221,63 @@ describe('contacts account data encryption', () => {
     expect(saved.contacts).toEqual([{ address: 'mv1-alice', name: 'Alice' }]);
   });
 
+  it('updates the existing contacts record when a first v2 create conflicts with a legacy row', async () => {
+    const encryptedLegacyValue = await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY);
+    const calls: MavrykApiRequestConfig[] = [];
+    const savedEncryptedValues: EncryptedValue[] = [];
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      const requestConfig = config as MavrykApiRequestConfig;
+      calls.push(requestConfig);
+
+      if (requestConfig.method === 'post' && requestConfig.url === '/account/data') {
+        throw createAxiosError(config, 409, { error: 'Data already exists', code: 'conflict' });
+      }
+
+      if (requestConfig.method === 'get' && requestConfig.url === '/account/data/contacts/contacts') {
+        return createResponse(config, buildRecord(encryptedLegacyValue, 'legacy-record-id'));
+      }
+
+      if (requestConfig.method === 'put' && requestConfig.url === '/account/data/legacy-record-id') {
+        const body = parseAdapterData(requestConfig.data) as {
+          encryptedValue: EncryptedValue;
+        };
+
+        savedEncryptedValues.push(body.encryptedValue);
+
+        return createResponse(config, buildRecord(body.encryptedValue, 'legacy-record-id'));
+      }
+
+      throw new Error(`Unexpected request: ${requestConfig.method} ${requestConfig.url}`);
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+
+    const saved = await saveContactsRecord({
+      contacts: [
+        { address: 'mv1-bob', name: 'Bob' },
+        { address: 'mv1-alice', name: 'Alice' }
+      ],
+      typesByAddress: {
+        'mv1-alice': 'user',
+        'mv1-bob': 'user'
+      },
+      authContext: AUTH_CONTEXT
+    });
+
+    expect(calls.map(({ method, url }) => `${method}:${url}`)).toEqual([
+      'post:/account/data',
+      'get:/account/data/contacts/contacts',
+      'put:/account/data/legacy-record-id'
+    ]);
+    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
+    expect(saved.recordId).toBe('legacy-record-id');
+    expect(base64ToBytes(saved.accountDataKey)).toHaveLength(32);
+    expect(saved.contacts).toEqual([
+      { address: 'mv1-bob', name: 'Bob' },
+      { address: 'mv1-alice', name: 'Alice' }
+    ]);
+  });
+
   it('fetches v2 contacts only when the local account data key is available', async () => {
     const accountDataKey = await generateAccountDataKey();
     const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
@@ -283,5 +340,54 @@ describe('contacts account data encryption', () => {
       'mv1-alice': 'user'
     });
     expect(base64ToBytes(fetched.accountDataKey ?? '')).toHaveLength(32);
+  });
+
+  it('rewrites a fetched legacy v1 contacts record as v2 AES-GCM on save', async () => {
+    const encryptedLegacyValue = await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY);
+    const savedEncryptedValues: EncryptedValue[] = [];
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      const requestConfig = config as MavrykApiRequestConfig;
+
+      if (requestConfig.method === 'get') {
+        return createResponse(config, buildRecord(encryptedLegacyValue));
+      }
+
+      if (requestConfig.method === 'put' && requestConfig.url === '/account/data/record-id') {
+        const body = parseAdapterData(requestConfig.data) as {
+          encryptedValue: EncryptedValue;
+        };
+
+        savedEncryptedValues.push(body.encryptedValue);
+
+        return createResponse(config, buildRecord(body.encryptedValue));
+      }
+
+      throw new Error(`Unexpected request: ${requestConfig.method} ${requestConfig.url}`);
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+
+    const fetched = await fetchContactsRecord({
+      publicKey: PUBLIC_KEY,
+      authContext: AUTH_CONTEXT
+    });
+    const saved = await saveContactsRecord({
+      accountDataKey: fetched.accountDataKey,
+      contacts: [{ address: 'mv1-bob', name: 'Bob' }, ...fetched.contacts],
+      recordId: fetched.recordId,
+      typesByAddress: fetched.typesByAddress,
+      authContext: AUTH_CONTEXT
+    });
+
+    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
+    expect(base64ToBytes(savedEncryptedValues[0]?.iv ?? '')).toHaveLength(12);
+    expect(saved).toMatchObject({
+      accountDataKey: fetched.accountDataKey,
+      contacts: [
+        { address: 'mv1-bob', name: 'Bob' },
+        { address: 'mv1-alice', name: 'Alice' }
+      ],
+      recordId: 'record-id'
+    });
   });
 });

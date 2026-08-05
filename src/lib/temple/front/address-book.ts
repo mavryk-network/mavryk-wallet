@@ -28,6 +28,29 @@ function isPredefinedValidatorAddress(address: string) {
   return PREDEFINED_BAKERS_NAMES_MAINNET[address] !== undefined;
 }
 
+type ContactsRecordState = Awaited<ReturnType<typeof fetchContactsRecord>>;
+type CachedContactsState = ReturnType<typeof getCachedContactsState>;
+
+function hasContactsServerBinding(cachedState: CachedContactsState) {
+  return Boolean(cachedState?.recordId || cachedState?.accountDataKey);
+}
+
+function mergeCachedAndRemoteContactsState(
+  cachedState: NonNullable<CachedContactsState>,
+  remoteState: ContactsRecordState
+): ContactsRecordState {
+  const typesByAddress = {
+    ...(remoteState.typesByAddress ?? {}),
+    ...(cachedState.typesByAddress ?? {})
+  };
+
+  return {
+    ...remoteState,
+    contacts: normalizeContacts([...cachedState.contacts, ...remoteState.contacts]),
+    ...(Object.keys(typesByAddress).length > 0 ? { typesByAddress } : {})
+  };
+}
+
 export function useContactsActions() {
   const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
   const account = useAccount();
@@ -117,7 +140,7 @@ export function useContactsActions() {
     const currentSettings = settingsRef.current;
     const cachedState = contactsStorageKey ? getCachedContactsState(currentSettings, contactsStorageKey) : null;
 
-    if (cachedState) {
+    if (hasContactsServerBinding(cachedState)) {
       return cachedState;
     }
 
@@ -130,7 +153,14 @@ export function useContactsActions() {
 
     await ensureAuthorized(contactsAccountScope.authAddress, network.id, true, contactsAccountScope.authAddress);
     const publicKey = await revealPublicKey(contactsAccountScope.authAddress);
-    return fetchContactsRecord({ accountDataKey, publicKey, authContext, recoverUnreadableCurrentRecord: true });
+    const remoteState = await fetchContactsRecord({
+      accountDataKey,
+      publicKey,
+      authContext,
+      recoverUnreadableCurrentRecord: true
+    });
+
+    return cachedState ? mergeCachedAndRemoteContactsState(cachedState, remoteState) : remoteState;
   }, [contactsAccountScope, contactsStorageKey, ensureAuthorized, network.id, revealPublicKey]);
 
   const persistContacts = useCallback(

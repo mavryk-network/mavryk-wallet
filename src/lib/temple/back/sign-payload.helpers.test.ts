@@ -11,7 +11,19 @@ import { prepareDAppSignPayload } from './sign-payload.helpers';
 describe('prepareDAppSignPayload', () => {
   const backendAuthChallenge =
     'Mavryk Wallet Authentication\n\nPlease sign this message to authenticate.\n\nWallet Address: mv1-test';
-  const nexusOrigins = ['https://basenet.nexus.mavryk.org', 'https://nexus.mavryk.org'];
+  const trustedAuthChallengeOrigins = [
+    'https://basenet.nexus.mavryk.org',
+    'https://nexus.mavryk.org',
+    'http://localhost:3000',
+    'https://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://[::1]:3000',
+    'https://app.equiteez.com',
+    'https://app.equiteez.com/path',
+    'https://equiteez-app.pages.dev',
+    'https://preview.equiteez-app.pages.dev',
+    'https://branch.preview.equiteez-app.pages.dev'
+  ];
 
   it.each(['01abcdef', '02abcdef', '03abcdef'])('rejects forbidden payload prefix %s', payload => {
     expect(() => prepareDAppSignPayload(payload)).toThrow('must not be signed through sign_payload');
@@ -43,7 +55,7 @@ describe('prepareDAppSignPayload', () => {
     ).toThrow('Auth challenge payloads cannot be signed by dApps');
   });
 
-  it.each(nexusOrigins)('allows wallet auth challenge payloads from trusted Nexus origin %s', origin => {
+  it.each(trustedAuthChallengeOrigins)('allows wallet auth challenge payloads from trusted origin %s', origin => {
     const payload = buildMichelineStringPayloadHex(backendAuthChallenge);
 
     expect(prepareDAppSignPayload(payload, origin)).toEqual({
@@ -52,6 +64,21 @@ describe('prepareDAppSignPayload', () => {
       bytesToSign: payload.slice(MICHELINE_WATERMARK.length),
       watermark: MICHELINE_WATERMARK
     });
+  });
+
+  it.each([
+    'http://app.equiteez.com',
+    'https://app.equiteez.com:444',
+    'https://app.equiteez.com.evil.com',
+    'https://preview.equiteez-app.pages.dev:444',
+    'https://malicious-equiteez-app.pages.dev',
+    'https://equiteez-app.pages.dev.evil.com',
+    'https://localhost.evil.com',
+    'http://127.0.0.2:3000'
+  ])('rejects wallet auth challenge payloads from untrusted near-match origin %s', origin => {
+    expect(() => prepareDAppSignPayload(buildMichelineStringPayloadHex(backendAuthChallenge), origin)).toThrow(
+      'Auth challenge payloads cannot be signed by dApps'
+    );
   });
 
   it('rejects legacy Tezos signed message framing', () => {

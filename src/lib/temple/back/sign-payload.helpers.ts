@@ -11,7 +11,14 @@ import {
 const HEX_BYTES_PATTERN = /^(?:[0-9a-fA-F]{2})+$/;
 const FORBIDDEN_SIGN_PAYLOAD_PREFIXES = new Set(['01', '02', '03']);
 const TEZOS_SIGNED_MESSAGE_PREFIX = 'Tezos Signed Message: ';
-const TRUSTED_AUTH_CHALLENGE_SIGNER_ORIGINS = new Set(['https://basenet.nexus.mavryk.org', 'https://nexus.mavryk.org']);
+const TRUSTED_AUTH_CHALLENGE_SIGNER_HOSTS = new Set([
+  'basenet.nexus.mavryk.org',
+  'nexus.mavryk.org',
+  'app.equiteez.com',
+  'equiteez-app.pages.dev'
+]);
+const TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES = ['.equiteez-app.pages.dev'];
+const LOCAL_AUTH_CHALLENGE_SIGNER_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 type MichelinePreview = {
   preview: string;
@@ -78,7 +85,24 @@ function isTrustedAuthChallengeSignerOrigin(origin?: string) {
   }
 
   try {
-    return TRUSTED_AUTH_CHALLENGE_SIGNER_ORIGINS.has(new URL(origin).origin);
+    const { hostname, port, protocol } = new URL(origin);
+
+    if ((protocol === 'http:' || protocol === 'https:') && LOCAL_AUTH_CHALLENGE_SIGNER_HOSTS.has(hostname)) {
+      return true;
+    }
+
+    if (protocol !== 'https:') {
+      return false;
+    }
+
+    if (port) {
+      return false;
+    }
+
+    return (
+      TRUSTED_AUTH_CHALLENGE_SIGNER_HOSTS.has(hostname) ||
+      TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES.some(hostSuffix => hostname.endsWith(hostSuffix))
+    );
   } catch {
     return false;
   }

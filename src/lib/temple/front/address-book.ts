@@ -196,9 +196,11 @@ export function useContactsActions() {
         const authContext = { walletAddress: contactsAccountScope.authAddress, networkId: network.id };
 
         await ensureAuthorized(contactsAccountScope.authAddress, network.id, true, contactsAccountScope.authAddress);
+        const publicKey = await revealPublicKey(contactsAccountScope.authAddress);
         const saved = await saveContactsRecord({
           accountDataKey: currentAccountDataKey,
           contacts: normalizedContacts,
+          publicKey,
           recordId: currentRecordId,
           typesByAddress: resolvedTypesByAddress,
           authContext
@@ -230,6 +232,7 @@ export function useContactsActions() {
       ensureAuthorized,
       network.id,
       prepareContactsForPersistence,
+      revealPublicKey,
       updateSettings
     ]
   );

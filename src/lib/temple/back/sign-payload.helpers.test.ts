@@ -22,7 +22,8 @@ describe('prepareDAppSignPayload', () => {
     'https://app.equiteez.com/path',
     'https://equiteez-app.pages.dev',
     'https://preview.equiteez-app.pages.dev',
-    'https://branch.preview.equiteez-app.pages.dev'
+    'https://branch.preview.equiteez-app.pages.dev',
+    'https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev/'
   ];
 
   it.each(['01abcdef', '02abcdef', '03abcdef'])('rejects forbidden payload prefix %s', payload => {
@@ -73,6 +74,9 @@ describe('prepareDAppSignPayload', () => {
     'https://preview.equiteez-app.pages.dev:444',
     'https://malicious-equiteez-app.pages.dev',
     'https://equiteez-app.pages.dev.evil.com',
+    'https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev:444',
+    'https://malicious-mavryk-nexus.pages.dev',
+    'https://mavryk-nexus.pages.dev.evil.com',
     'https://localhost.evil.com',
     'http://127.0.0.2:3000'
   ])('rejects wallet auth challenge payloads from untrusted near-match origin %s', origin => {

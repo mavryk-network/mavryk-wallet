@@ -17,7 +17,7 @@ const TRUSTED_AUTH_CHALLENGE_SIGNER_HOSTS = new Set([
   'app.equiteez.com',
   'equiteez-app.pages.dev'
 ]);
-const TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES = ['.equiteez-app.pages.dev'];
+const TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES = ['.equiteez-app.pages.dev', '.mavryk-nexus.pages.dev'];
 const LOCAL_AUTH_CHALLENGE_SIGNER_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 type MichelinePreview = {

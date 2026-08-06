@@ -15,7 +15,7 @@ const CONTACTS_LEGACY_ENCRYPTION_VERSION = 'AES-256-CBC-1';
 const CONTACTS_ENCRYPTION_VERSION = 'AES-256-GCM-2';
 // Version -> cipher/key source:
 // AES-256-CBC-1 -> AES-CBC with the legacy PBKDF2(publicKey) key. Read only.
-// AES-256-GCM-2 -> AES-GCM with accountDataKey. Used for every new write.
+// AES-256-GCM-2 -> AES-GCM with accountDataKey. New writes use the shared public-key-derived key when available.
 const ACCOUNT_DATA_KEY_BYTES = 32;
 const AES_GCM_IV_BYTES = 12;
 const BASE64_CHUNK_SIZE = 0x8000;
@@ -60,6 +60,11 @@ type EncryptedValue = z.infer<typeof EncryptedValueSchema>;
 type GroupedContactsPayload = z.infer<typeof GroupedContactsPayloadSchema>;
 type AccountDataRecord = z.infer<typeof AccountDataRecordSchema>;
 type ContactsPayloadItem = z.infer<typeof ContactsPayloadItemSchema>;
+type DecryptedContactsRecord = {
+  accountDataKey?: string;
+  contacts: TempleContact[];
+  typesByAddress: Record<string, TempleContactApiType>;
+};
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -121,6 +126,22 @@ async function deriveLegacyCbcKey(publicKey: string): Promise<CryptoKey> {
     false,
     ['encrypt', 'decrypt']
   );
+}
+
+async function deriveSharedAccountDataKey(publicKey: string) {
+  const baseKey = await crypto.subtle.importKey('raw', encoder.encode(publicKey), 'PBKDF2', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode('mavryk-wallet'),
+      iterations: 100_000,
+      hash: 'SHA-256'
+    },
+    baseKey,
+    ACCOUNT_DATA_KEY_BYTES * 8
+  );
+
+  return bytesToBase64(new Uint8Array(derivedBits));
 }
 
 function toTempleContact(item: ContactsPayloadItem): TempleContact {
@@ -224,25 +245,44 @@ async function decryptLegacyValueFromBackend(encrypted: EncryptedValue, key: Cry
 
 async function decryptContactsRecord(
   record: AccountDataRecord,
-  params: { accountDataKey?: string | null; publicKey?: string }
-): Promise<{ contacts: TempleContact[]; typesByAddress: Record<string, TempleContactApiType> }> {
-  let decrypted: string;
+  params: { accountDataKey?: string | null; publicKey?: string | null }
+): Promise<DecryptedContactsRecord> {
+  let decrypted: string | null = null;
+  let accountDataKey: string | undefined;
 
   if (record.encryptedValue.version === CONTACTS_ENCRYPTION_VERSION) {
-    if (!params.accountDataKey) {
+    const sharedAccountDataKey = params.publicKey ? await deriveSharedAccountDataKey(params.publicKey) : null;
+    const accountDataKeyCandidates = [params.accountDataKey, sharedAccountDataKey].filter(
+      (value, index, values): value is string => Boolean(value) && values.indexOf(value) === index
+    );
+
+    if (accountDataKeyCandidates.length === 0) {
       throw new CurrentContactsRecordDecryptionError('Missing local contacts encryption key', true);
     }
 
-    try {
-      decrypted = await decryptCurrentValueFromBackend(
-        record.encryptedValue,
-        await importAccountDataKey(params.accountDataKey)
-      );
-    } catch (error) {
-      const shouldGenerateAccountDataKey =
-        error instanceof Error && error.message === 'Invalid contacts encryption key';
+    let decryptError: unknown;
 
-      throw new CurrentContactsRecordDecryptionError(extractMavrykApiErrorMessage(error), shouldGenerateAccountDataKey);
+    for (const candidate of accountDataKeyCandidates) {
+      try {
+        decrypted = await decryptCurrentValueFromBackend(record.encryptedValue, await importAccountDataKey(candidate));
+        accountDataKey = candidate;
+        break;
+      } catch (error) {
+        decryptError = error;
+      }
+    }
+
+    if (!decrypted) {
+      const shouldGenerateAccountDataKey =
+        !sharedAccountDataKey &&
+        decryptError instanceof Error &&
+        decryptError.message === 'Invalid contacts encryption key';
+      const errorMessage = extractMavrykApiErrorMessage(decryptError);
+
+      throw new CurrentContactsRecordDecryptionError(
+        errorMessage === 'Mavryk API request failed' ? 'Unable to decrypt current contacts record' : errorMessage,
+        shouldGenerateAccountDataKey
+      );
     }
   } else if (record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION) {
     if (!params.publicKey) {
@@ -250,35 +290,49 @@ async function decryptContactsRecord(
     }
 
     decrypted = await decryptLegacyValueFromBackend(record.encryptedValue, await deriveLegacyCbcKey(params.publicKey));
+    accountDataKey = await deriveSharedAccountDataKey(params.publicKey);
   } else {
     throw new Error(`Unsupported contacts encryption version: ${record.encryptedValue.version}`);
   }
 
-  return normalizeDecryptedPayload(ContactsPayloadSchema.parse(JSON.parse(decrypted)));
+  if (!decrypted) {
+    throw new Error('Failed to decrypt contacts record');
+  }
+
+  return {
+    ...(accountDataKey ? { accountDataKey } : {}),
+    ...normalizeDecryptedPayload(ContactsPayloadSchema.parse(JSON.parse(decrypted)))
+  };
 }
 
 async function parseContactsResponse(
   data: unknown,
-  params: { accountDataKey?: string | null; publicKey?: string }
+  params: { accountDataKey?: string | null; publicKey?: string | null }
 ): Promise<{
+  accountDataKey?: string;
   contacts: TempleContact[];
   record: AccountDataRecord;
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   const record = AccountDataRecordSchema.parse(data);
-  const { contacts, typesByAddress } = await decryptContactsRecord(record, params);
+  const decrypted = await decryptContactsRecord(record, params);
 
-  return { contacts, record, typesByAddress };
+  return { ...decrypted, record };
 }
 
 async function buildUnreadableCurrentContactsRecovery(
   record: AccountDataRecord,
   error: CurrentContactsRecordDecryptionError,
-  accountDataKey?: string | null
+  accountDataKey?: string | null,
+  publicKey?: string | null
 ) {
+  const sharedAccountDataKey = publicKey ? await deriveSharedAccountDataKey(publicKey) : null;
   const canReuseAccountDataKey = accountDataKey ? await isValidAccountDataKey(accountDataKey) : false;
-  const shouldGenerateAccountDataKey = error.shouldGenerateAccountDataKey || !canReuseAccountDataKey;
-  const nextAccountDataKey = shouldGenerateAccountDataKey ? await generateAccountDataKey() : accountDataKey!;
+  const shouldGenerateAccountDataKey =
+    !sharedAccountDataKey && (error.shouldGenerateAccountDataKey || !canReuseAccountDataKey);
+  const nextAccountDataKey = shouldGenerateAccountDataKey
+    ? await generateAccountDataKey()
+    : sharedAccountDataKey ?? accountDataKey!;
 
   return {
     accountDataKey: nextAccountDataKey,
@@ -398,7 +452,7 @@ export async function fetchContactsRecord(params: {
       decrypted = await decryptContactsRecord(record, params);
     } catch (error) {
       if (params.recoverUnreadableCurrentRecord && error instanceof CurrentContactsRecordDecryptionError) {
-        return buildUnreadableCurrentContactsRecovery(record, error, params.accountDataKey);
+        return buildUnreadableCurrentContactsRecovery(record, error, params.accountDataKey, params.publicKey);
       }
 
       throw error;
@@ -406,8 +460,8 @@ export async function fetchContactsRecord(params: {
 
     const accountDataKey =
       record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION
-        ? params.accountDataKey ?? (await generateAccountDataKey())
-        : params.accountDataKey ?? undefined;
+        ? decrypted.accountDataKey ?? params.accountDataKey ?? (await generateAccountDataKey())
+        : decrypted.accountDataKey ?? params.accountDataKey ?? undefined;
 
     return {
       ...(accountDataKey ? { accountDataKey } : {}),
@@ -430,6 +484,7 @@ export async function fetchContactsRecord(params: {
 export async function saveContactsRecord(params: {
   accountDataKey?: string | null;
   contacts: TempleContact[];
+  publicKey?: string | null;
   recordId?: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
   authContext?: ResolvedMavrykAuthStorageContext;
@@ -440,7 +495,9 @@ export async function saveContactsRecord(params: {
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   try {
-    const accountDataKey = params.accountDataKey ?? (await generateAccountDataKey());
+    const accountDataKey = params.publicKey
+      ? await deriveSharedAccountDataKey(params.publicKey)
+      : params.accountDataKey ?? (await generateAccountDataKey());
     const key = await importAccountDataKey(accountDataKey);
     const encryptedValue = await encryptValueForBackend(
       buildGroupedPayload(params.contacts, params.typesByAddress),
@@ -449,10 +506,10 @@ export async function saveContactsRecord(params: {
     const requestConfig: MavrykApiRequestConfig = params.authContext ? { _authContext: params.authContext } : {};
     const response = await saveEncryptedContactsRecord(encryptedValue, params.recordId, requestConfig);
 
-    const parsed = await parseContactsResponse(response.data, { accountDataKey });
+    const parsed = await parseContactsResponse(response.data, { accountDataKey, publicKey: params.publicKey });
 
     return {
-      accountDataKey,
+      accountDataKey: parsed.accountDataKey ?? accountDataKey,
       contacts: parsed.contacts,
       recordId: parsed.record.id,
       typesByAddress: parsed.typesByAddress

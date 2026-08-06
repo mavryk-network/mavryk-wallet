@@ -97,6 +97,22 @@ async function deriveLegacyAccountDataKey(publicKey: string) {
   );
 }
 
+async function deriveSharedAccountDataKey(publicKey: string) {
+  const baseKey = await crypto.subtle.importKey('raw', encoder.encode(publicKey), 'PBKDF2', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode('mavryk-wallet'),
+      iterations: 100_000,
+      hash: 'SHA-256'
+    },
+    baseKey,
+    256
+  );
+
+  return bytesToBase64(new Uint8Array(derivedBits));
+}
+
 async function generateAccountDataKey() {
   const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   const rawKey = await crypto.subtle.exportKey('raw', key);
@@ -183,6 +199,34 @@ describe('contacts account data encryption', () => {
     expect(saved.typesByAddress).toEqual({
       'mv1-alice': 'user'
     });
+  });
+
+  it('saves contacts with the shared v2 key when a public key is available', async () => {
+    const savedEncryptedValues: EncryptedValue[] = [];
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      const body = parseAdapterData((config as MavrykApiRequestConfig).data) as {
+        encryptedValue: EncryptedValue;
+      };
+
+      savedEncryptedValues.push(body.encryptedValue);
+
+      return createResponse(config, buildRecord(body.encryptedValue));
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+
+    const expectedAccountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
+    const saved = await saveContactsRecord({
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      publicKey: PUBLIC_KEY,
+      typesByAddress: {
+        'mv1-alice': 'user'
+      },
+      authContext: AUTH_CONTEXT
+    });
+
+    expect(saved.accountDataKey).toBe(expectedAccountDataKey);
+    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
   });
 
   it('creates a contacts record when the cached record id no longer exists', async () => {
@@ -278,7 +322,7 @@ describe('contacts account data encryption', () => {
     ]);
   });
 
-  it('fetches v2 contacts only when the local account data key is available', async () => {
+  it('rejects random v2 contacts without a matching local or shared key', async () => {
     const accountDataKey = await generateAccountDataKey();
     const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
@@ -286,7 +330,7 @@ describe('contacts account data encryption', () => {
     mavrykApi.defaults.adapter = adapter;
 
     await expect(fetchContactsRecord({ publicKey: PUBLIC_KEY, authContext: AUTH_CONTEXT })).rejects.toThrow(
-      'Missing local contacts encryption key'
+      'Unable to decrypt current contacts record'
     );
 
     await expect(
@@ -302,6 +346,25 @@ describe('contacts account data encryption', () => {
       typesByAddress: {
         'mv1-alice': 'user'
       }
+    });
+  });
+
+  it('fetches shared v2 contacts without a cached local key', async () => {
+    const accountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
+    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        publicKey: PUBLIC_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).resolves.toMatchObject({
+      accountDataKey,
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      recordId: 'record-id'
     });
   });
 

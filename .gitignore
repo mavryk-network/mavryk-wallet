@@ -30,6 +30,7 @@ yarn-error.log*
 AGENTS.md
 agents.md
 CONTEXT.md
+security-tickets/
 
 # Xcode
 build/
@@ -51,4 +52,3 @@ DerivedData
 
 #e2e
 video-rep
-

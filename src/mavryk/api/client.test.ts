@@ -178,4 +178,24 @@ describe('mavrykApi auth interceptor', () => {
       refreshToken: null
     });
   });
+
+  it('does not attach Authorization to auth endpoints', async () => {
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, { ok: true }));
+
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage(
+      {
+        accessToken: buildJwt(Date.now() + 60_000),
+        refreshToken: 'refresh-token'
+      },
+      authContext
+    );
+
+    await mavrykApi.post('/auth/challenge', { walletAddress: authContext.walletAddress }, {
+      _authContext: authContext,
+      skipAuthRefresh: true
+    } as MavrykApiRequestConfig);
+
+    expect((adapter.mock.calls[0][0].headers as Record<string, string> | undefined)?.Authorization).toBeUndefined();
+  });
 });

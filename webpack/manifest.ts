@@ -18,8 +18,6 @@ const WEB_ACCCESSIBLE_RESOURSES = [
   'scripts/*.embed.js',
   // For triggering extension page open from scripts
   'fullpage.html',
-  // For ads' images
-  'misc/ad-banners/*',
   // For iFrames access
   ...Object.keys(IFRAMES).map(name => `iframes/${name}.html`)
 ];
@@ -189,12 +187,6 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
           'https://*/*'
         ],
         js: ['scripts/contentScript.js'],
-        run_at: 'document_start',
-        all_frames: true
-      },
-      {
-        matches: ['https://*/*'],
-        js: ['scripts/replaceAds.js'],
         run_at: 'document_start',
         all_frames: false
       }

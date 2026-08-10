@@ -58,6 +58,7 @@ import {
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
+import { assertExtensionUiPortInfo } from './intercom-permissions';
 import {
   toFront,
   store,
@@ -484,6 +485,8 @@ export function sendOperations(
   networkRpc: string,
   opParams: any[]
 ): Promise<{ opHash: string }> {
+  assertExtensionUiPortInfo(intercom.getPortInfo(port));
+
   return withUnlocked(async () => {
     const sourcePublicKey = await revealPublicKey(sourcePkh);
     const dryRunResult = await dryRunOpParams({
@@ -537,6 +540,8 @@ const promisableUnlock = async (
 
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
     if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
+      assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+
       if (req.confirmed) {
         try {
           const op = await withUnlocked(({ vault }) =>
@@ -586,6 +591,8 @@ const safeAddLocalOperation = async (networkRpc: string, op: any) => {
 };
 
 export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: string, watermark?: string) {
+  assertExtensionUiPortInfo(intercom.getPortInfo(port));
+
   return withUnlocked(
     () =>
       new Promise(async (resolve, reject) => {
@@ -612,6 +619,8 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
 
         const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
           if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
+            assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+
             if (req.confirmed) {
               const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
               resolve(result);

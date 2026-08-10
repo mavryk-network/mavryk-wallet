@@ -37,6 +37,7 @@ import {
 
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
+import { assertConfirmUiPortInfo } from './intercom-permissions';
 import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
 import { withUnlocked } from './store';
 
@@ -406,8 +407,10 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
   };
 
   let knownPort: Runtime.Port | undefined;
-  const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port) => {
+  const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port, portInfo) => {
     if (req?.type === TempleMessageType.DAppGetPayloadRequest && req.id === id) {
+      assertConfirmUiPortInfo(portInfo);
+
       knownPort = port;
 
       if (payload.type === 'confirm_operations') {
@@ -432,6 +435,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
       };
     } else {
       if (knownPort !== port) return;
+      assertConfirmUiPortInfo(portInfo);
 
       const result = await handleIntercomRequest(req, onDecline);
       if (result) {

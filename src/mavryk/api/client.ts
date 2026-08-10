@@ -196,7 +196,7 @@ mavrykApi.interceptors.request.use(async rawConfig => {
   }
   config._authContext = authContext;
 
-  if (accessToken) {
+  if (accessToken && isAuthRefreshCandidate(config.url)) {
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${accessToken}`

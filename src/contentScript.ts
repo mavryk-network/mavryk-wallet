@@ -38,8 +38,10 @@ type BeaconMessage =
     };
 type BeaconPageMessage = BeaconMessage | { message: BeaconMessage; sender: { id: string } };
 
-// Prevents the script from running in an Iframe
-if (window.frameElement === null) {
+const isTopFrame = () => window.top === window;
+
+// Prevents analytics from running in an iframe
+if (isTopFrame()) {
   browser.storage.local.get(WEBSITES_ANALYTICS_ENABLED).then(storage => {
     if (storage[WEBSITES_ANALYTICS_ENABLED]) {
       let oldHref = '';
@@ -70,26 +72,28 @@ const SENDER = {
   iconUrl: 'https://mavryk.org/logo.png'
 };
 
-window.addEventListener(
-  'message',
-  evt => {
-    if (evt.source !== window) return;
+if (isTopFrame()) {
+  window.addEventListener(
+    'message',
+    evt => {
+      if (evt.source !== window) return;
 
-    const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
-    const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;
-    const isBeaconRequest =
-      evt.data?.target === BeaconMessageTarget.Extension && (evt.data?.targetId === SENDER.id || !evt.data?.targetId);
+      const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
+      const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;
+      const isBeaconRequest =
+        evt.data?.target === BeaconMessageTarget.Extension && (evt.data?.targetId === SENDER.id || !evt.data?.targetId);
 
-    if (isTempleRequest) {
-      templeRequest(evt, legacyRequest);
-    } else if (isBeaconRequest) {
-      beaconRequest(evt);
-    } else {
-      return;
-    }
-  },
-  false
-);
+      if (isTempleRequest) {
+        templeRequest(evt, legacyRequest);
+      } else if (isBeaconRequest) {
+        beaconRequest(evt);
+      } else {
+        return;
+      }
+    },
+    false
+  );
+}
 
 function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
   const { payload, reqId } = evt.data as MavrykWalletPageMessage;

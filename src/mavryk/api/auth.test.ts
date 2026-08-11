@@ -3,6 +3,7 @@ import browser from 'webextension-polyfill';
 
 import { logoutAuth, refreshAuthTokens, requestAuthChallenge, verifyAuthSignature } from './auth';
 import { buildStructuredAuthChallengeMessage } from './auth-payload.helpers';
+import { buildCurrentBackendAuthChallengeMessage } from './auth-test.helpers';
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
 import {
   getLastChallengeFromStorage,
@@ -61,6 +62,37 @@ describe('auth refresh', () => {
       networkId: authContext.networkId,
       nonce,
       expiresAt
+    });
+    const adapter = jest.fn(async (config: AxiosRequestConfig) =>
+      createResponse(config, {
+        challenge,
+        expiresAt,
+        nonce
+      })
+    );
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(requestAuthChallenge(authContext)).resolves.toEqual({
+      challenge,
+      expiresAt,
+      nonce
+    });
+    await expect(getLastChallengeFromStorage()).resolves.toBe(challenge);
+    await expect(getLastNonceFromStorage()).resolves.toBe(nonce);
+    await expect(getLastChallengeExpiresAtFromStorage()).resolves.toBe(expiresAt);
+  });
+
+  it('stores current backend structured auth challenges', async () => {
+    const timestamp = new Date(Date.now()).toISOString().replace('.000Z', 'Z');
+    const expiresAt = new Date(Date.now() + 5 * 60_000).toISOString();
+    const challengeExpiresAt = expiresAt.replace('.000Z', 'Z');
+    const nonce = 'nonce-1234567890';
+    const challenge = buildCurrentBackendAuthChallengeMessage({
+      walletAddress: authContext.walletAddress,
+      nonce,
+      timestamp,
+      expiresAt: challengeExpiresAt
     });
     const adapter = jest.fn(async (config: AxiosRequestConfig) =>
       createResponse(config, {

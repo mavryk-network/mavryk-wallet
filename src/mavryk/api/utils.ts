@@ -1,7 +1,7 @@
 import { Vault } from 'lib/temple/back/vault';
 
 import {
-  buildMichelineStringPayloadHex,
+  buildLegacyAuthChallengePayloadHex,
   getMichelinePayloadBytes,
   isStructuredAuthChallengeMessage,
   MICHELINE_WATERMARK
@@ -14,7 +14,7 @@ export async function signAuthChallengeWithVault(vault: Vault, accountPkh: strin
     throw new Error('Auth challenge must use the structured Mavryk Wallet authentication format');
   }
 
-  const payloadHex = buildMichelineStringPayloadHex(challenge);
+  const payloadHex = buildLegacyAuthChallengePayloadHex(challenge);
 
   const { prefixSig } = await vault.sign(accountPkh, getMichelinePayloadBytes(payloadHex), MICHELINE_WATERMARK);
 

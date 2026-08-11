@@ -19,7 +19,7 @@ Tokens are returned only in JSON response bodies. The client is responsible for 
 
 ## Auth Challenge Contract
 
-The backend must return a challenge that exactly matches the client-constructed structured message:
+The preferred backend challenge should exactly match the client-constructed structured message:
 
 ```text
 Mavryk Wallet Authentication
@@ -41,6 +41,30 @@ Client validation before signing:
 - `Wallet Address`, `Network`, `Nonce`, `Expires At`, and `Audience` must exactly match the request context and response fields.
 
 Malformed or legacy free-form challenges are rejected before storage and are never signed silently.
+
+Until the backend is migrated to include `Network` and `Audience`, the client also accepts the current backend structured
+message:
+
+```text
+Mavryk Wallet Authentication
+
+Please sign this message to authenticate.
+
+Wallet Address: <mv1...>
+Nonce: <16-256 char nonce>
+Timestamp: <ISO timestamp>
+Expires: <ISO timestamp>
+
+This request will not trigger a blockchain transaction or cost any gas fees.
+```
+
+Compatibility validation still rejects arbitrary text. The wallet address and nonce must match the challenge response,
+the response `expiresAt` must pass the normal expiry checks, and the challenge `Expires` timestamp must match the
+response expiry within one second.
+
+For `/auth/verify`, accepted auth challenge messages are signed with the verifier-compatible auth challenge payload
+encoding described below. This preserves the deployed backend contract while still preventing arbitrary challenge text
+from being signed.
 
 ## Refresh Token Rotation
 

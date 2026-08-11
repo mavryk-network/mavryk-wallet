@@ -10,6 +10,9 @@ export const AUTH_CHALLENGE_MAX_TTL_MS = 10 * 60 * 1000;
 export const AUTH_CHALLENGE_NONCE_PATTERN = /^[A-Za-z0-9._~-]{16,256}$/;
 const LEGACY_MAVRYK_AUTH_CHALLENGE_MESSAGE_PREFIX = `${MAVRYK_AUTH_CHALLENGE_MESSAGE_PREFIX}: `;
 const MAVRYK_AUTH_CHALLENGE_BODY_MARKER = 'Please sign this message to authenticate.';
+const MAVRYK_AUTH_CHALLENGE_TRANSACTION_NOTICE =
+  'This request will not trigger a blockchain transaction or cost any gas fees.';
+const AUTH_CHALLENGE_TIMESTAMP_TOLERANCE_MS = 1_000;
 const HEX_BYTES_PATTERN = /^(?:[0-9a-fA-F]{2})+$/;
 
 export type AuthChallengeMessageParams = {
@@ -124,7 +127,11 @@ export function validateAuthChallengeForSigning(
     nonce: response.nonce
   });
 
-  if (response.challenge !== expectedChallenge) {
+  if (response.challenge === expectedChallenge) {
+    return response;
+  }
+
+  if (!isCurrentBackendAuthChallengeValid(response, params)) {
     throw new Error('Auth challenge does not match the expected structured message');
   }
 
@@ -132,7 +139,9 @@ export function validateAuthChallengeForSigning(
 }
 
 export function isStructuredAuthChallengeMessage(message: string) {
-  return parseStructuredAuthChallengeMessage(message) !== null;
+  return (
+    parseStructuredAuthChallengeMessage(message) !== null || parseCurrentBackendAuthChallengeMessage(message) !== null
+  );
 }
 
 export function isAuthChallengeMessage(message: string) {
@@ -197,6 +206,62 @@ function parseStructuredAuthChallengeMessage(message: string) {
     expiresAt,
     audience
   };
+}
+
+function parseCurrentBackendAuthChallengeMessage(message: string) {
+  const lines = message.split('\n');
+
+  if (
+    lines.length !== 10 ||
+    lines[0] !== MAVRYK_AUTH_CHALLENGE_MESSAGE_PREFIX ||
+    lines[1] !== '' ||
+    lines[2] !== MAVRYK_AUTH_CHALLENGE_BODY_MARKER ||
+    lines[3] !== '' ||
+    lines[8] !== '' ||
+    lines[9] !== MAVRYK_AUTH_CHALLENGE_TRANSACTION_NOTICE
+  ) {
+    return null;
+  }
+
+  const walletAddress = readStructuredField(lines[4], 'Wallet Address');
+  const nonce = readStructuredField(lines[5], 'Nonce');
+  const timestamp = readStructuredField(lines[6], 'Timestamp');
+  const expiresAt = readStructuredField(lines[7], 'Expires');
+
+  if (!walletAddress || !nonce || !timestamp || !expiresAt) {
+    return null;
+  }
+
+  return {
+    walletAddress,
+    nonce,
+    timestamp,
+    expiresAt
+  };
+}
+
+function isCurrentBackendAuthChallengeValid(
+  response: AuthChallengeResponseForSigning,
+  params: Pick<AuthChallengeMessageParams, 'walletAddress'>
+) {
+  const parsed = parseCurrentBackendAuthChallengeMessage(response.challenge);
+
+  if (!parsed) {
+    return false;
+  }
+
+  const responseExpiresAtMs = Date.parse(response.expiresAt);
+  const challengeExpiresAtMs = Date.parse(parsed.expiresAt);
+  const challengeTimestampMs = Date.parse(parsed.timestamp);
+
+  return (
+    parsed.walletAddress === params.walletAddress &&
+    parsed.nonce === response.nonce &&
+    Number.isFinite(challengeTimestampMs) &&
+    Number.isFinite(challengeExpiresAtMs) &&
+    challengeTimestampMs < challengeExpiresAtMs &&
+    Math.abs(challengeExpiresAtMs - responseExpiresAtMs) <= AUTH_CHALLENGE_TIMESTAMP_TOLERANCE_MS
+  );
 }
 
 function readStructuredField(line: string, fieldName: string) {

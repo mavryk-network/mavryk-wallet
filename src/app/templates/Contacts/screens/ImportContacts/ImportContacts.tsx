@@ -14,7 +14,7 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { TabsBar } from 'app/templates/TabBar';
 import { t, T, TID } from 'lib/i18n';
-import { useContactsActions } from 'lib/temple/front';
+import { getContactsUnavailableMessage, useContactsActions, useFilteredContacts } from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 import { useLoading } from 'lib/ui/hooks/useLoading';
@@ -73,6 +73,9 @@ type ImportFileViewProps = {
 };
 const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView, setFilesContacts }) => {
   const tabSlug = useTabSlug();
+  const { availability, canMutateContacts } = useFilteredContacts();
+  const unavailableMessage =
+    availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
 
   const tabs = useMemo<TabData[]>(() => {
     return [
@@ -119,28 +122,45 @@ const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView, setFilesCon
 
       <div className="px-4 py-3 bg-gray-900 rounded-2xl overflow-hidden mb-3">{Component && <Component />}</div>
 
-      <FileImportWrapper<TempleContact> onImported={onContactsImported} onImportStart={onImportStart}>
-        <section className="px-4 py-6 flex items justify-center border border-dashed border-blue-200 rounded-lg">
-          <div className="flex flex-col gap-4 items-center">
-            <UploadCloudSvg className="text-white w-9 h-9 stroke-current" />
-            <div className="text-center">
-              <p className="mb-1 text-sm">
-                <T id="selectFIleOrDrag" />
-              </p>
-              <p className="text-xs text-secondary-white">
-                <T id="fileImportLimitationDescr" />
-              </p>
-            </div>
+      {unavailableMessage && (
+        <Alert type="warning" title={t('contactsUnavailable')} description={unavailableMessage} className="mb-3" />
+      )}
 
-            <ButtonRounded size="small" fill={false}>
-              <T id="selectFile" />
-            </ButtonRounded>
-          </div>
-        </section>
-      </FileImportWrapper>
+      {canMutateContacts ? (
+        <FileImportWrapper<TempleContact> onImported={onContactsImported} onImportStart={onImportStart}>
+          <ImportDropzone disabled={false} />
+        </FileImportWrapper>
+      ) : (
+        <ImportDropzone disabled />
+      )}
     </>
   );
 };
+
+const ImportDropzone: FC<{ disabled: boolean }> = ({ disabled }) => (
+  <section
+    className={clsx(
+      'px-4 py-6 flex items justify-center border border-dashed border-blue-200 rounded-lg',
+      disabled && 'opacity-50'
+    )}
+  >
+    <div className="flex flex-col gap-4 items-center">
+      <UploadCloudSvg className="text-white w-9 h-9 stroke-current" />
+      <div className="text-center">
+        <p className="mb-1 text-sm">
+          <T id="selectFIleOrDrag" />
+        </p>
+        <p className="text-xs text-secondary-white">
+          <T id="fileImportLimitationDescr" />
+        </p>
+      </div>
+
+      <ButtonRounded size="small" fill={false} disabled={disabled}>
+        <T id="selectFile" />
+      </ButtonRounded>
+    </div>
+  </section>
+);
 
 const JSONImportInfo = () => {
   return (
@@ -182,11 +202,18 @@ type ImportFileInProgressProps = {
 const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveView, fileContacts }) => {
   const { importProgress } = useFileImportState();
   const { addMultipleContacts } = useContactsActions();
+  const { availability, canMutateContacts } = useFilteredContacts();
   const customAlert = useAlert();
   const loader = useLoading();
+  const unavailableMessage =
+    availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
 
   const handleImportContacts = useCallback(async () => {
     try {
+      if (unavailableMessage) {
+        throw new Error(unavailableMessage);
+      }
+
       if (fileContacts !== null) {
         loader.start();
         await addMultipleContacts(fileContacts.data);
@@ -209,7 +236,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
         children: e.message
       });
     }
-  }, [addMultipleContacts, customAlert, fileContacts, loader]);
+  }, [addMultipleContacts, customAlert, fileContacts, loader, unavailableMessage]);
 
   const onClosehandler = useCallback(() => {
     changeActiveView(SELECT_FILE_VIEW);
@@ -249,6 +276,10 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
         />
       )}
 
+      {unavailableMessage && (
+        <Alert type="warning" title={t('contactsUnavailable')} description={unavailableMessage} className="my-4" />
+      )}
+
       <div className="flex-1" />
 
       <div className="w-full">
@@ -258,7 +289,7 @@ const ImportFileInProgressView: FC<ImportFileInProgressProps> = ({ changeActiveV
           className="w-full"
           fill
           isLoading={loader.status === 'loading'}
-          disabled={importProgress.percent !== 100 || !fileContacts}
+          disabled={!canMutateContacts || importProgress.percent !== 100 || !fileContacts}
         >
           <T id="import" />
         </ButtonRounded>

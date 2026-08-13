@@ -104,6 +104,12 @@ const processRequest = async (
         publicKey
       };
 
+    case TempleMessageType.DeriveContactsKeyRequest:
+      return {
+        type: TempleMessageType.DeriveContactsKeyResponse,
+        result: await Actions.deriveContactsKey(req.accountPublicKeyHash)
+      };
+
     case TempleMessageType.RevealPrivateKeyRequest:
       const privateKey = await Actions.revealPrivateKey(req.accountPublicKeyHash, req.password);
       return {

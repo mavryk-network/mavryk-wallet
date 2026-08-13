@@ -4,7 +4,7 @@ import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
   canAccountUseContacts,
-  getContactsAccountScope,
+  getContactsBookScope,
   getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
@@ -70,35 +70,41 @@ const watchOnlyAccount: TempleAccount = {
 const accounts = [mainAccount, derivedAccount, importedAccount, ledgerAccount, managedKTAccount, watchOnlyAccount];
 
 describe('contacts-settings', () => {
-  it('scopes contacts to each supported account address', () => {
-    expect(getContactsAccountScope(accounts, mainAccount.publicKeyHash)).toEqual({
-      storageAddress: mainAccount.publicKeyHash,
-      authAddress: mainAccount.publicKeyHash
+  it('scopes contacts to the SEC-02 book address', () => {
+    expect(getContactsBookScope(accounts, mainAccount.publicKeyHash)).toEqual({
+      status: 'available',
+      bookAddr: mainAccount.publicKeyHash
     });
-    expect(getContactsAccountScope(accounts, derivedAccount.publicKeyHash)).toEqual({
-      storageAddress: derivedAccount.publicKeyHash,
-      authAddress: derivedAccount.publicKeyHash
+    expect(getContactsBookScope(accounts, derivedAccount.publicKeyHash)).toEqual({
+      status: 'available',
+      bookAddr: mainAccount.publicKeyHash
     });
-    expect(getContactsAccountScope(accounts, importedAccount.publicKeyHash)).toEqual({
-      storageAddress: importedAccount.publicKeyHash,
-      authAddress: importedAccount.publicKeyHash
+    expect(getContactsBookScope(accounts, importedAccount.publicKeyHash)).toEqual({
+      status: 'available',
+      bookAddr: importedAccount.publicKeyHash
     });
-    expect(getContactsAccountScope(accounts, ledgerAccount.publicKeyHash)).toEqual({
-      storageAddress: ledgerAccount.publicKeyHash,
-      authAddress: ledgerAccount.publicKeyHash
-    });
-  });
-
-  it('stores managed KT contacts under the KT address and authenticates through its owner', () => {
-    expect(getContactsAccountScope(accounts, managedKTAccount.publicKeyHash)).toEqual({
-      storageAddress: managedKTAccount.publicKeyHash,
-      authAddress: derivedAccount.publicKeyHash
+    expect(getContactsBookScope(accounts, ledgerAccount.publicKeyHash)).toEqual({
+      status: 'unavailable',
+      bookAddr: ledgerAccount.publicKeyHash,
+      reason: 'ledger'
     });
   });
 
-  it('disables contacts for watch-only accounts', () => {
+  it('stores managed KT contacts under the owner book address', () => {
+    expect(getContactsBookScope(accounts, managedKTAccount.publicKeyHash)).toEqual({
+      status: 'available',
+      bookAddr: mainAccount.publicKeyHash
+    });
+  });
+
+  it('disables contacts for watch-only and Ledger accounts', () => {
     expect(canAccountUseContacts(watchOnlyAccount)).toBe(false);
-    expect(getContactsAccountScope(accounts, watchOnlyAccount.publicKeyHash)).toBeNull();
+    expect(canAccountUseContacts(ledgerAccount)).toBe(false);
+    expect(getContactsBookScope(accounts, watchOnlyAccount.publicKeyHash)).toEqual({
+      status: 'unavailable',
+      bookAddr: watchOnlyAccount.publicKeyHash,
+      reason: 'watch-only'
+    });
   });
 
   it('builds account-address keyed contacts settings and preserves inactive account states', () => {
@@ -125,8 +131,7 @@ describe('contacts-settings', () => {
       {
         'mv1-derived-contact': 'user',
         'mv1-removed-contact': 'validator'
-      },
-      'derived-key'
+      }
     );
 
     expect(patch.contacts).toEqual([{ name: 'Derived Contact', address: 'mv1-derived-contact' }]);
@@ -136,14 +141,13 @@ describe('contacts-settings', () => {
       recordId: 'main-record'
     });
     expect(patch.contactsApi?.accounts?.[derivedStorageKey]).toEqual({
-      accountDataKey: 'derived-key',
       contacts: [{ name: 'Derived Contact', address: 'mv1-derived-contact' }],
       recordId: 'derived-record',
       typesByAddress: {
         'mv1-derived-contact': 'user'
       }
     });
-    expect(getStoredContactsAccountDataKey(patch as TempleSettings, derivedStorageKey)).toBe('derived-key');
+    expect(getStoredContactsAccountDataKey(patch as TempleSettings, derivedStorageKey)).toBeNull();
   });
 
   it('does not treat missing empty contacts state as a settings change', () => {
@@ -185,23 +189,23 @@ describe('contacts-settings', () => {
     ).toBe(true);
   });
 
-  it('treats a generated account data key as a settings change', () => {
+  it('treats a contacts sync error as a settings change', () => {
     const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
 
     expect(
       hasContactsSettingsAccountPatchMismatch(
         {},
         {
-          accountDataKey: 'generated-key',
           contactsStorageKey: storageKey,
           contacts: [],
-          recordId: null
+          recordId: null,
+          syncError: 'decrypt-failed'
         }
       )
     ).toBe(true);
   });
 
-  it('preserves the stored account data key when building a default contacts patch', () => {
+  it('drops the stored account data key when building a new contacts patch', () => {
     const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
     const patch = buildContactsSettingsPatch(
       {
@@ -220,7 +224,6 @@ describe('contacts-settings', () => {
     );
 
     expect(patch.contactsApi?.accounts?.[storageKey]).toEqual({
-      accountDataKey: 'stored-key',
       contacts: [{ name: 'Next', address: 'mv1-next' }],
       recordId: 'record-id'
     });

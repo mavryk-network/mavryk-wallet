@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 
-import { canAccountSignAuth } from 'lib/temple/helpers';
 import {
+  ContactsUnavailableReason,
   TempleAccount,
   TempleAccountType,
   TempleContact,
@@ -10,16 +10,27 @@ import {
   TempleSettings
 } from 'lib/temple/types';
 
-export type ContactsAccountScope = {
-  storageAddress: string;
-  authAddress: string;
-};
+export type ContactsBookScope =
+  | {
+      status: 'available';
+      bookAddr: string;
+    }
+  | {
+      status: 'unavailable';
+      bookAddr?: string;
+      reason: Exclude<ContactsUnavailableReason, 'auth-unavailable' | 'decrypt-failed'>;
+    };
+
+export type ContactsAvailability =
+  | { status: 'ready' }
+  | { status: 'loading' }
+  | { status: 'unavailable'; reason: ContactsUnavailableReason };
 
 export type ContactsSettingsAccountPatch = {
-  accountDataKey?: string | null;
   contactsStorageKey: string;
   contacts: TempleContact[];
   recordId?: string | null;
+  syncError?: TempleContactsAccountState['syncError'];
   typesByAddress?: Record<string, TempleContactApiType>;
 };
 
@@ -49,27 +60,45 @@ export function normalizeContacts(contacts: TempleContact[]) {
 }
 
 export function canAccountUseContacts(account: TempleAccount) {
-  return account.type !== TempleAccountType.WatchOnly;
+  return account.type !== TempleAccountType.WatchOnly && account.type !== TempleAccountType.Ledger;
 }
 
-export function getContactsAccountScope(allAccounts: TempleAccount[], accountPkh: string): ContactsAccountScope | null {
+export function getContactsBookScope(allAccounts: TempleAccount[], accountPkh: string): ContactsBookScope {
   const account = allAccounts.find(acc => acc.publicKeyHash === accountPkh);
 
-  if (!account || !canAccountUseContacts(account)) {
-    return null;
+  if (!account) {
+    return { status: 'unavailable', reason: 'missing-account' };
   }
 
-  if (account.type === TempleAccountType.ManagedKT) {
-    const ownerAccount = allAccounts.find(acc => acc.publicKeyHash === account.owner);
+  switch (account.type) {
+    case TempleAccountType.HD: {
+      const bookAccount = allAccounts.find(
+        candidate =>
+          candidate.type === TempleAccountType.HD && candidate.walletId === account.walletId && candidate.hdIndex === 0
+      );
 
-    return ownerAccount && canAccountSignAuth(ownerAccount)
-      ? { storageAddress: account.publicKeyHash, authAddress: ownerAccount.publicKeyHash }
-      : null;
+      return bookAccount
+        ? { status: 'available', bookAddr: bookAccount.publicKeyHash }
+        : { status: 'unavailable', reason: 'missing-account' };
+    }
+
+    case TempleAccountType.Imported:
+      return { status: 'available', bookAddr: account.publicKeyHash };
+
+    case TempleAccountType.ManagedKT: {
+      const ownerAccount = allAccounts.find(acc => acc.publicKeyHash === account.owner);
+
+      return ownerAccount
+        ? getContactsBookScope(allAccounts, ownerAccount.publicKeyHash)
+        : { status: 'unavailable', reason: 'missing-owner' };
+    }
+
+    case TempleAccountType.Ledger:
+      return { status: 'unavailable', bookAddr: account.publicKeyHash, reason: 'ledger' };
+
+    case TempleAccountType.WatchOnly:
+      return { status: 'unavailable', bookAddr: account.publicKeyHash, reason: 'watch-only' };
   }
-
-  return canAccountSignAuth(account)
-    ? { storageAddress: account.publicKeyHash, authAddress: account.publicKeyHash }
-    : null;
 }
 
 export function buildContactsStorageKey(walletAddress: string, networkId: string) {
@@ -123,7 +152,7 @@ function buildContactsAccountState(
   contacts: TempleContact[],
   recordId?: string | null,
   typesByAddress?: Record<string, TempleContactApiType>,
-  accountDataKey?: string | null
+  syncError?: TempleContactsAccountState['syncError']
 ): TempleContactsAccountState {
   const normalizedContacts = normalizeContacts(contacts);
   const normalizedTypesByAddress =
@@ -138,9 +167,9 @@ function buildContactsAccountState(
       : undefined;
 
   return {
-    ...(accountDataKey ? { accountDataKey } : {}),
     contacts: normalizedContacts,
     ...(recordId ? { recordId } : {}),
+    ...(syncError ? { syncError } : {}),
     ...(normalizedTypesByAddress && Object.keys(normalizedTypesByAddress).length > 0
       ? { typesByAddress: normalizedTypesByAddress }
       : {})
@@ -149,19 +178,19 @@ function buildContactsAccountState(
 
 function hasContactsAccountStateContent(state: TempleContactsAccountState) {
   return Boolean(
-    state.accountDataKey ||
-      state.contacts.length ||
+    state.contacts.length ||
       state.recordId ||
+      state.syncError ||
       (state.typesByAddress && Object.keys(state.typesByAddress).length > 0)
   );
 }
 
 export function hasContactsSettingsAccountPatchMismatch(
   settings: TempleSettings,
-  { accountDataKey, contactsStorageKey, contacts, recordId, typesByAddress }: ContactsSettingsAccountPatch
+  { contactsStorageKey, contacts, recordId, syncError, typesByAddress }: ContactsSettingsAccountPatch
 ) {
   const currentState = getCachedContactsState(settings, contactsStorageKey);
-  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress, accountDataKey);
+  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError);
 
   if (!currentState) {
     return hasContactsAccountStateContent(nextState);
@@ -172,7 +201,7 @@ export function hasContactsSettingsAccountPatchMismatch(
       currentState.contacts,
       currentState.recordId,
       currentState.typesByAddress,
-      currentState.accountDataKey
+      currentState.syncError
     ),
     nextState
   );
@@ -184,10 +213,10 @@ export function buildContactsSettingsPatch(
   contacts: TempleContact[],
   recordId = getStoredContactsRecordId(settings, contactsStorageKey),
   typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey),
-  accountDataKey = getStoredContactsAccountDataKey(settings, contactsStorageKey)
+  syncError?: TempleContactsAccountState['syncError']
 ): Partial<TempleSettings> {
   const nextAccounts = { ...(settings.contactsApi?.accounts ?? {}) };
-  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress, accountDataKey);
+  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError);
 
   nextAccounts[contactsStorageKey] = nextAccountState;
 
@@ -211,7 +240,7 @@ export function hasContactsSettingsMismatch(
 }
 
 export function canUseEncryptedContacts(
-  contactsAccountScope: ContactsAccountScope | null
-): contactsAccountScope is ContactsAccountScope {
-  return Boolean(contactsAccountScope);
+  contactsBookScope: ContactsBookScope
+): contactsBookScope is Extract<ContactsBookScope, { status: 'available' }> {
+  return contactsBookScope.status === 'available';
 }

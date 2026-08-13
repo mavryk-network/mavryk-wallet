@@ -14,6 +14,7 @@ import {
   DEFAULT_LEDGER_TEZOS_DERIVATION_PATH,
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
+import { CONTACTS_ENCRYPTION_INFO, CONTACTS_KEY_BYTES, bytesToBase64 } from 'lib/temple/contacts-crypto';
 import {
   formatOpParamsBeforeSend,
   getSameGroupAccounts,
@@ -25,6 +26,7 @@ import * as Passworder from 'lib/temple/passworder';
 import { clearAsyncStorages } from 'lib/temple/reset';
 import {
   DerivationType,
+  DerivedContactsKey,
   SaveLedgerAccountInput,
   TempleAccount,
   TempleAccountType,
@@ -83,12 +85,40 @@ import {
 const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
 const libthemisWasmSrc = '/wasm/libthemis.wasm';
+const contactsKeyEncoder = new TextEncoder();
 
 interface RemoveAccountEventPayload {
   publicKeyhash?: string;
 }
 
 type SignerCleanup = () => void | Promise<void>;
+
+async function deriveRawContactsKey(ikm: BufferSource, bookAddr: string) {
+  const baseKey = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt: contactsKeyEncoder.encode(bookAddr),
+      info: contactsKeyEncoder.encode(CONTACTS_ENCRYPTION_INFO)
+    },
+    baseKey,
+    CONTACTS_KEY_BYTES * 8
+  );
+
+  return bytesToBase64(new Uint8Array(derivedBits));
+}
+
+function buildUnavailableContactsKey(
+  reason: Extract<DerivedContactsKey, { status: 'unavailable' }>['reason'],
+  bookAddr?: string
+): DerivedContactsKey {
+  return {
+    status: 'unavailable',
+    ...(bookAddr ? { bookAddr } : {}),
+    reason
+  };
+}
 
 export class Vault {
   static removeAccountsListeners: SyncFn<RemoveAccountEventPayload[]>[] = [];
@@ -318,6 +348,19 @@ export class Vault {
         throw new PublicError(AT_LEAST_ONE_HD_ACCOUNT_ERR_MSG);
       }
 
+      if (
+        acc.type === TempleAccountType.HD &&
+        acc.hdIndex === 0 &&
+        allAccounts.some(
+          account =>
+            account.type === TempleAccountType.HD &&
+            account.walletId === acc.walletId &&
+            account.publicKeyHash !== acc.publicKeyHash
+        )
+      ) {
+        throw new PublicError('Cannot remove the main account while this HD group has other accounts');
+      }
+
       const newAccounts = allAccounts.filter(currentAccount => currentAccount.id !== id);
       const allHdWalletsEntries = Object.entries(
         (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {}
@@ -423,6 +466,70 @@ export class Vault {
     return withError('Failed to reveal public key', () =>
       fetchAndDecryptOne<string>(accPubKeyStrgKey(accPublicKeyHash), this.passKey)
     );
+  }
+
+  async deriveContactsKey(accPublicKeyHash: string): Promise<DerivedContactsKey> {
+    return withError('Failed to derive contacts key', async () => {
+      const allAccounts = await this.fetchAccounts();
+      const deriveForAccount = async (account: TempleAccount): Promise<DerivedContactsKey> => {
+        switch (account.type) {
+          case TempleAccountType.HD: {
+            const bookAccount = allAccounts.find(
+              candidate =>
+                candidate.type === TempleAccountType.HD &&
+                candidate.walletId === account.walletId &&
+                candidate.hdIndex === 0
+            );
+
+            if (!bookAccount) {
+              return buildUnavailableContactsKey('missing-account');
+            }
+
+            const mnemonic = await fetchAndDecryptOne<string>(walletMnemonicStrgKey(account.walletId), this.passKey);
+            const seed = Bip39.mnemonicToSeedSync(mnemonic);
+            const { address: bookAddr } = await mnemonicToTezosAccountCreds(mnemonic, 0);
+
+            if (bookAccount.publicKeyHash !== bookAddr) {
+              return buildUnavailableContactsKey('missing-account', bookAddr);
+            }
+
+            return {
+              status: 'available',
+              key: await deriveRawContactsKey(seed, bookAddr),
+              bookAddr,
+              identityKind: 'hd'
+            };
+          }
+
+          case TempleAccountType.Imported: {
+            const privateKey = await fetchAndDecryptOne<string>(accPrivKeyStrgKey(account.publicKeyHash), this.passKey);
+
+            return {
+              status: 'available',
+              key: await deriveRawContactsKey(contactsKeyEncoder.encode(privateKey), account.publicKeyHash),
+              bookAddr: account.publicKeyHash,
+              identityKind: 'imported'
+            };
+          }
+
+          case TempleAccountType.ManagedKT: {
+            const ownerAccount = allAccounts.find(candidate => candidate.publicKeyHash === account.owner);
+
+            return ownerAccount ? deriveForAccount(ownerAccount) : buildUnavailableContactsKey('missing-owner');
+          }
+
+          case TempleAccountType.Ledger:
+            return buildUnavailableContactsKey('ledger', account.publicKeyHash);
+
+          case TempleAccountType.WatchOnly:
+            return buildUnavailableContactsKey('watch-only', account.publicKeyHash);
+        }
+      };
+
+      const account = allAccounts.find(candidate => candidate.publicKeyHash === accPublicKeyHash);
+
+      return account ? deriveForAccount(account) : buildUnavailableContactsKey('missing-account');
+    });
   }
 
   fetchAccounts() {

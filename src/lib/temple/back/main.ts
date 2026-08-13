@@ -18,6 +18,7 @@ import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
+const isE2eResetEnabled = process.env.NODE_ENV !== 'production';
 
 export const start = async () => {
   intercom.onRequest(processRequestWithErrorsLogged);
@@ -328,6 +329,8 @@ browser.runtime.onMessage.addListener(async msg => {
   try {
     switch (msg?.type) {
       case E2eMessageType.ResetRequest:
+        if (!isE2eResetEnabled) return;
+
         return clearAsyncStorages().then(() => ({ type: E2eMessageType.ResetResponse }));
     }
 

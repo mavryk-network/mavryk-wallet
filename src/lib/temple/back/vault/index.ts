@@ -45,7 +45,6 @@ import {
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
-  getMainDerivationPath,
   concatAccount,
   createMemorySigner,
   withError,
@@ -112,9 +111,9 @@ export class Vault {
   }
 
   static async recoverFromSession() {
-    const passHash = await SessionStore.getSessionPassHash();
-    if (!passHash) return null;
-    const passKey = await Passworder.importKey(passHash);
+    const passKey = await SessionStore.getSessionPassKey();
+    if (!passKey) return null;
+
     try {
       await fetchAndDecryptOne<any>(checkStrgKey, passKey);
     } catch (error) {

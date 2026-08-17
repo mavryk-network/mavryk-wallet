@@ -111,6 +111,7 @@ export async function refreshAuthTokens(params: AuthRefreshRequest = {}) {
 export async function logoutAuth(params: AuthRefreshRequest = {}) {
   const hasExplicitScope = params.walletAddress !== undefined || params.networkId !== undefined;
   const context = hasExplicitScope ? await getAuthContext(params) : undefined;
+  // Lock/logout without an explicit scope must revoke every stored refresh token across wallets and networks.
   const storedRefreshTokens = await collectStoredRefreshTokens(context);
   const refreshTokens = params.refreshToken
     ? [

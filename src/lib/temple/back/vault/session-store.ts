@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { browser } from 'lib/browser';
 
 import {
+  clearExpiredSessionWrappingKeys,
   clearSessionWrappingKeys,
   deleteSessionWrappingKey,
   getSessionWrappingKey,
@@ -70,6 +71,7 @@ export const getSessionPassKey = async () => {
 
   try {
     await restrictSessionAccess(storage);
+    await clearExpiredSessionWrappingKeys();
 
     const {
       [LEGACY_PASS_HASH_STORE_KEY]: legacyPassHash,

@@ -1,4 +1,4 @@
-import { IntercomPortInfo, IntercomPortKind, isTrustedUiPortInfo } from 'lib/intercom';
+import { IntercomPortInfo, IntercomPortKind } from 'lib/intercom';
 import { TempleMessageType, TempleRequest } from 'lib/temple/types';
 
 const RELAY_ALLOWED_REQUEST_TYPES = new Set<TempleMessageType>([
@@ -9,7 +9,7 @@ const RELAY_ALLOWED_REQUEST_TYPES = new Set<TempleMessageType>([
 export const isTempleRequestAllowedForPortInfo = (req: TempleRequest, portInfo: IntercomPortInfo) => {
   switch (portInfo.kind) {
     case IntercomPortKind.ContentScriptRelay:
-      return RELAY_ALLOWED_REQUEST_TYPES.has(req.type) && (portInfo.frameId == null || portInfo.frameId === 0);
+      return RELAY_ALLOWED_REQUEST_TYPES.has(req.type) && portInfo.frameId === 0;
 
     case IntercomPortKind.ExtensionUi:
     case IntercomPortKind.ConfirmUi:
@@ -23,12 +23,6 @@ export const isTempleRequestAllowedForPortInfo = (req: TempleRequest, portInfo: 
 export const assertTempleRequestAllowedForPortInfo = (req: TempleRequest, portInfo: IntercomPortInfo) => {
   if (!isTempleRequestAllowedForPortInfo(req, portInfo)) {
     throw new Error('Unauthorized intercom request source');
-  }
-};
-
-export const assertTrustedUiPortInfo = (portInfo?: IntercomPortInfo) => {
-  if (!isTrustedUiPortInfo(portInfo)) {
-    throw new Error('Unauthorized intercom confirmation source');
   }
 };
 

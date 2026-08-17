@@ -179,7 +179,7 @@ describe('mavrykApi auth interceptor', () => {
     });
   });
 
-  it('does not attach Authorization to auth endpoints', async () => {
+  it('does not attach Authorization to exact auth endpoints', async () => {
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, { ok: true }));
 
     mavrykApi.defaults.adapter = adapter;
@@ -195,7 +195,32 @@ describe('mavrykApi auth interceptor', () => {
       _authContext: authContext,
       skipAuthRefresh: true
     } as MavrykApiRequestConfig);
+    await mavrykApi.post('/api/v1/auth/refresh?source=test', {}, {
+      _authContext: authContext,
+      skipAuthRefresh: true
+    } as MavrykApiRequestConfig);
 
     expect((adapter.mock.calls[0][0].headers as Record<string, string> | undefined)?.Authorization).toBeUndefined();
+    expect((adapter.mock.calls[1][0].headers as Record<string, string> | undefined)?.Authorization).toBeUndefined();
+  });
+
+  it('attaches Authorization to protected endpoints whose path contains an auth endpoint substring', async () => {
+    const accessToken = buildJwt(Date.now() + 60_000);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, { ok: true }));
+
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage(
+      {
+        accessToken,
+        refreshToken: 'refresh-token'
+      },
+      authContext
+    );
+
+    await mavrykApi.get('/account/data/auth/refresh/status', { _authContext: authContext } as MavrykApiRequestConfig);
+
+    expect((adapter.mock.calls[0][0].headers as Record<string, string> | undefined)?.Authorization).toBe(
+      `Bearer ${accessToken}`
+    );
   });
 });

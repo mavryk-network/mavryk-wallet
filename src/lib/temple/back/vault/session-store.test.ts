@@ -2,12 +2,13 @@ import { browser } from 'lib/browser';
 import { generateHash, importKey } from 'lib/temple/passworder';
 
 import { encryptAndSaveMany, fetchAndDecryptOne } from './safe-storage';
+import { getSessionPassKey, removeSession, saveSessionPassHash } from './session-store';
 import {
   clearSessionWrappingKeys,
   getSessionWrappingKey,
+  saveSessionWrappingKey,
   type VaultSessionWrappingKeyRecord
 } from './session-wrapping-key-store';
-import { getSessionPassKey, removeSession, saveSessionPassHash } from './session-store';
 import { checkStrgKey } from './storage-keys';
 
 const LEGACY_PASS_HASH_STORE_KEY = '@Vault:session.passHash';
@@ -150,6 +151,29 @@ describe('vault session store', () => {
     await expect(getSessionWrappingKey(payload.keyId)).resolves.toBeUndefined();
   });
 
+  it('garbage-collects expired orphan wrapping keys during recovery', async () => {
+    const passHash = await generateHash('password');
+    await saveSessionPassHash(passHash);
+
+    const payload = await getStoredPayload();
+    const expiredKeyId = 'expired-orphan-key';
+    const expiredKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
+      'encrypt',
+      'unwrapKey'
+    ]);
+    await saveSessionWrappingKey({
+      id: expiredKeyId,
+      createdAt: Date.now() - 2000,
+      expiresAt: Date.now() - 1000,
+      key: expiredKey
+    });
+
+    await expect(getSessionWrappingKey(expiredKeyId)).resolves.toBeInstanceOf(CryptoKey);
+    await expect(getSessionPassKey()).resolves.toBeInstanceOf(CryptoKey);
+    await expect(getSessionWrappingKey(expiredKeyId)).resolves.toBeUndefined();
+    await expect(getSessionWrappingKey(payload.keyId)).resolves.toBeInstanceOf(CryptoKey);
+  });
+
   it('clears the session when the wrapping key is missing', async () => {
     const passHash = await generateHash('password');
     await saveSessionPassHash(passHash);
@@ -243,5 +267,29 @@ describe('vault session store', () => {
     expect(localGetSpy).not.toHaveBeenCalled();
     expect(localSetSpy).not.toHaveBeenCalled();
     expect(localRemoveSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not use the in-memory wrapping-key fallback outside the test environment', async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const processEnv = process.env as Record<string, string | undefined>;
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'unwrapKey']);
+
+    await clearSessionWrappingKeys();
+    delete processEnv.NODE_ENV;
+
+    try {
+      await expect(
+        saveSessionWrappingKey({
+          id: 'non-test-key',
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 1000,
+          key
+        })
+      ).rejects.toThrow('IndexedDB is unavailable for vault session wrapping keys');
+      await expect(getSessionWrappingKey('non-test-key')).resolves.toBeUndefined();
+    } finally {
+      processEnv.NODE_ENV = originalNodeEnv;
+      await clearSessionWrappingKeys();
+    }
   });
 });

@@ -18,7 +18,7 @@ import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
-const isE2eResetEnabled = process.env.NODE_ENV !== 'production';
+const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
 export const start = async () => {
   intercom.onRequest(processRequestWithErrorsLogged);

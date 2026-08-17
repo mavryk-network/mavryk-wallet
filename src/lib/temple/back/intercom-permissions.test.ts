@@ -35,6 +35,15 @@ describe('intercom Temple request permissions', () => {
     expect(isTempleRequestAllowedForPortInfo(request(TempleMessageType.Acknowledge), iframeRelayPortInfo)).toBe(false);
   });
 
+  it('rejects relay requests when the frame id is missing', () => {
+    const relayPortInfo: IntercomPortInfo = {
+      kind: IntercomPortKind.ContentScriptRelay
+    };
+
+    expect(isTempleRequestAllowedForPortInfo(request(TempleMessageType.PageRequest), relayPortInfo)).toBe(false);
+    expect(isTempleRequestAllowedForPortInfo(request(TempleMessageType.Acknowledge), relayPortInfo)).toBe(false);
+  });
+
   it('allows trusted UI ports and rejects unknown ports', () => {
     expect(
       isTempleRequestAllowedForPortInfo(request(TempleMessageType.SignRequest), {

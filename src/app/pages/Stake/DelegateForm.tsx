@@ -17,7 +17,6 @@ import { useBalance } from 'lib/balances';
 import { IS_DEV_ENV } from 'lib/env';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T, t, TID } from 'lib/i18n';
-import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { setDelegate } from 'lib/michelson';
 import { feeKeys } from 'lib/query-keys';
@@ -317,7 +316,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav ?? 0).toNumber();
         let op: WalletOperation | TransactionOperation;
-        let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
           const contract = await loadContract(mavryk, acc.publicKeyHash);
           op = await contract.methods.do(setDelegate(to)).send({ amount: 0 });
@@ -329,8 +327,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
               fee
             } as any)
             .send();
-
-          opHash = op.opHash;
         }
 
         // create pending delegate operation

@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
-import { AdsProviderName, AdsProviderTitle } from 'lib/ads';
+import { AdsProviderTitle } from 'lib/ads';
 import { AnalyticsEventCategory, useAnalytics } from 'lib/analytics';
 import { AD_HIDING_TIMEOUT } from 'lib/constants';
 import { uiStore, useShouldShowPromotion, usePromotionHidingTimestamp } from 'lib/store/zustand/ui.store';

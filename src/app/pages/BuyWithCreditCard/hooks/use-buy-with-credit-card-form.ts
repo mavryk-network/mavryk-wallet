@@ -141,6 +141,13 @@ export const useBuyWithCreditCardForm = () => {
             return assertUnreachable(topUpProvider.id);
         }
 
+        // QW5/D3: on-ramp providers (notably AliceBob/Utorg, whose pay URL is an unvalidated
+        // string from the API response) must only ever open an https:// URL. This blocks
+        // javascript:/data:/http: payloads a compromised or MITM'd provider could return.
+        if (!/^https:\/\//i.test(url)) {
+          throw new Error('Refusing to open an unexpected payment URL from the on-ramp provider');
+        }
+
         await browser.tabs.create({ url });
       } catch (error: unknown) {
         setPurchaseLinkError(error instanceof Error ? error : new Error(String(error)));

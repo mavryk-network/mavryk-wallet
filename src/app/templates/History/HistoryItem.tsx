@@ -7,7 +7,7 @@ import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defau
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
-import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
+import { HistoryItemOpTypeEnum, IndividualHistoryItem } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
 import { HistoryTime } from './HistoryTime';
@@ -47,8 +47,10 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
     [historyItem.hideOperationMoneyDiffs, moneyDiffs]
   );
 
-  const base = useMemo(
-    () => buildHistoryPreviewOperations(historyItem, operStack, OP_STACK_PREVIEW_SIZE),
+  // buildHistoryPreviewOperations intentionally overrides each op's `type` with the group-level
+  // type for display, which widens the union discriminant; normalize back to IndividualHistoryItem
+  const base = useMemo<IndividualHistoryItem[]>(
+    () => buildHistoryPreviewOperations(historyItem, operStack, OP_STACK_PREVIEW_SIZE) as IndividualHistoryItem[],
     [historyItem, operStack]
   );
   const previewStackOffset = useMemo(

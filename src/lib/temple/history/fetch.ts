@@ -116,7 +116,7 @@ async function fetchPendingHistoryItems(chainId: MvktApiChainId, account: Temple
 }
 
 export async function fetchUserOperationByHash(
-  chainId: MvktApiChainId,
+  _chainId: MvktApiChainId,
   accountAddress: string,
   hash: string,
   assetSlug?: string
@@ -175,7 +175,7 @@ export default async function fetchUserHistory(
       assetSlug
     );
     const visibleCollected = normalizedItems.slice(0, pseudoLimit);
-    const nextCursor = response.cursor;
+    const nextCursor = response.cursor ?? undefined;
     const hasMore = response.hasMore;
 
     if (!isFirstPage) {

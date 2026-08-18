@@ -18,7 +18,13 @@ import {
   useWalletStatus
 } from 'lib/store/zustand/wallet.store';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
-import { TempleAccountType, TempleStatus, TempleNotification, TempleMessageType } from 'lib/temple/types';
+import {
+  TempleAccountType,
+  TempleStatus,
+  TempleNotification,
+  TempleMessageType,
+  TempleSettings
+} from 'lib/temple/types';
 
 import { intercom } from './client';
 import { usePassiveStorage } from './storage';
@@ -27,6 +33,10 @@ import { useMavrykClient } from './use-mavryk-client';
 
 // Chain IDs are immutable blockchain constants set at genesis — safe to cache for the full session.
 const CHAIN_ID_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// Stable fallback for useContactsSync while wallet settings are not hydrated yet (null).
+// All TempleSettings fields are optional, and the hook treats an empty object the same as null.
+const EMPTY_SETTINGS: TempleSettings = {};
 
 export const [
   ReadyTempleProvider,
@@ -58,7 +68,7 @@ export const [
 
 function useReadyTemple() {
   const status = useWalletStatus();
-  const allNetworks = useWalletNetworks();
+  const baseNetworks = useWalletNetworks();
   const allAccounts = useWalletAccounts();
   const settings = useWalletSettings();
   const walletsSpecs = useWalletsSpecs();
@@ -69,6 +79,12 @@ function useReadyTemple() {
   if (status !== TempleStatus.Ready) throw new Error('Mavryk not ready');
 
   const queryClient = useQueryClient();
+
+  // B-NET-1: merge user-added custom networks with the built-in list. This `allNetworks`
+  // is the source the constate provider exposes, so the network switcher, selected-network
+  // resolution below, fee estimation, and tx submission all see custom RPCs. Previously this
+  // used only the built-in NETWORKS, which silently reset a saved custom network_id to mainnet.
+  const allNetworks = useMemo(() => [...baseNetworks, ...(settings?.customNetworks ?? [])], [baseNetworks, settings]);
 
   // Stable primitive array — avoids re-running the effect when allNetworks gets a new reference
   // but the actual RPC URLs haven't changed.
@@ -154,7 +170,7 @@ function useReadyTemple() {
       .finally(() => setIsApiReady(true));
   }, [account.publicKeyHash, ensureAuthorized, network.id]);
 
-  useContactsSync(account, allAccounts, network.id, settings);
+  useContactsSync(account, allAccounts, network.id, settings ?? EMPTY_SETTINGS);
 
   /**
    * Error boundary reset

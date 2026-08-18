@@ -1,0 +1,41 @@
+name: CI
+
+# B-CI-1: quality gate for PRs targeting the production branch (`dev`) and for the active
+# feature branch. Blocks merges on type errors and failing tests so regressions (like the
+# 67 type errors that accumulated during the architecture migration) cannot reach `dev`
+# unnoticed. See .claude/plans/repo-audit-2026-06.md.
+
+on:
+  pull_request:
+    branches: [dev, dev-architecture-update]
+  push:
+    branches: [dev-architecture-update]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.11.0
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type-check (blocking)
+        run: yarn ts
+
+      - name: Tests (blocking)
+        run: yarn test
+
+      # Lint currently carries a backlog of ~50 auto-fixable formatting issues (import-order,
+      # prettier). Kept advisory until a dedicated `yarn lint:fix` cleanup lands; then remove
+      # `continue-on-error` to make it blocking. TODO(B-CI-1).
+      - name: Lint (advisory)
+        run: yarn lint
+        continue-on-error: true

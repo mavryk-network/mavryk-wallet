@@ -214,10 +214,10 @@ const getBackendAmountSigned = (
 ) =>
   getAmountSigned(
     {
-      type: getBackendOperationType(operation) as TzktOperation['type'],
+      type: getBackendOperationType(operation) as MvktOperation['type'],
       sender: source,
       baker: undefined
-    } as TzktOperation,
+    } as MvktOperation,
     address,
     amount,
     source
@@ -278,7 +278,7 @@ const buildBackendFa2TokenTransfer = (
   address: string
 ): HistoryItemTokenTransfer | null => {
   const parameter = operation.parameter;
-  if (!isTzktOperParam_Fa2(parameter)) return null;
+  if (!isMvktOperParam_Fa2(parameter)) return null;
 
   const values = reduceParameterFa2Values(parameter.value, address);
   const firstValue = values[0];
@@ -527,7 +527,7 @@ const reduceOneBackendOperation = (
 
       const parameter = operation.parameter;
 
-      if (isTzktOperParam_Fa2(parameter)) {
+      if (isMvktOperParam_Fa2(parameter)) {
         const contractAddress = normalizeBackendContractAddress(operation.target ?? tokenContext?.contractAddress);
         if (!contractAddress) return null;
 
@@ -546,7 +546,7 @@ const reduceOneBackendOperation = (
         });
       }
 
-      if (isTzktOperParam_Fa12(parameter)) {
+      if (isMvktOperParam_Fa12(parameter)) {
         if (parameter.entrypoint === 'approve') return null;
 
         const contractAddress = normalizeBackendContractAddress(operation.target ?? tokenContext?.contractAddress);

@@ -1,7 +1,7 @@
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
-jest.mock('lib/apis/tzkt', () => ({
+jest.mock('lib/apis/mvkt', () => ({
   isKnownChainId: jest.fn()
 }));
 

@@ -33,7 +33,7 @@ export type FormData = {
   derivationPath: LedgerDerivationPathType;
 };
 
-const DERIVATION_PATHS = [
+const DERIVATION_PATHS: { type: LedgerDerivationPathType; name: string }[] = [
   {
     type: 'default',
     name: t('defaultAccount')
@@ -91,7 +91,7 @@ const ConnectLedger: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts, setAccountPkh]);
 
-  const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
+  const { control, register, handleSubmit, formState, watch } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
       customDerivationPath: DEFAULT_LEDGER_DERIVATION_PATH,
@@ -99,6 +99,7 @@ const ConnectLedger: FC = () => {
       derivationPath: DERIVATION_PATHS[0].type
     }
   });
+  const { errors } = formState;
   const submitting = formState.isSubmitting;
   const derivationPathType = watch('derivationPath');
 
@@ -184,7 +185,7 @@ const ConnectLedger: FC = () => {
             </p>
 
             <FormField
-              ref={register({
+              {...register('name', {
                 pattern: {
                   value: /^.{0,16}$/,
                   message: t('ledgerNameConstraint')
@@ -194,7 +195,6 @@ const ConnectLedger: FC = () => {
               labelDescription={t('ledgerNameInputDescription')}
               id="create-ledger-name"
               type="text"
-              name="name"
               placeholder={defaultName}
               errorCaption={errors.name?.message}
               containerClassName="mb-4"
@@ -202,28 +202,27 @@ const ConnectLedger: FC = () => {
             />
 
             <Controller
-              as={DerivationTypeFieldSelect}
               control={control}
               name="derivationType"
-              options={DERIVATION_TYPES}
-              i18nKey={t('derivationType')}
+              render={({ field }) => (
+                <DerivationTypeFieldSelect {...field} options={DERIVATION_TYPES} i18nKey={t('derivationType')} />
+              )}
             />
 
             <Controller
-              as={DerivationTypeFieldSelect}
               control={control}
               name="derivationPath"
-              options={DERIVATION_PATHS}
-              i18nKey={t('derivationPath')}
+              render={({ field }) => (
+                <DerivationTypeFieldSelect {...field} options={DERIVATION_PATHS} i18nKey={t('derivationPath')} />
+              )}
             />
 
             {derivationPathType === 'custom' && (
               <FormField
-                ref={register({
+                {...register('customDerivationPath', {
                   required: t('required'),
                   validate: validateLedgerDerivationPath
                 })}
-                name="customDerivationPath"
                 id="importacc-cdp"
                 label={t('customDerivationPath')}
                 placeholder={t('derivationPathExample2')}

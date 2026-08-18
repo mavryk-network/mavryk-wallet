@@ -194,7 +194,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
     reveal,
     handleSubmit,
     onSubmit,
-    register,
+    registerPassword,
     errors.password?.message,
     walletPasswordValue.length,
     submitting,

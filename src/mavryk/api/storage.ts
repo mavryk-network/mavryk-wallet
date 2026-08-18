@@ -20,6 +20,15 @@ export type MavrykAuthStorageContext = {
   walletAddress?: string | null;
 };
 
+/**
+ * Fully resolved auth storage scope: `networkId` always falls back to `DEFAULT_NETWORK_ID`,
+ * while `walletAddress` stays nullable and MUST be guarded before building token storage keys.
+ */
+export type ResolvedMavrykAuthStorageContext = {
+  networkId: string;
+  walletAddress: string | null;
+};
+
 export async function getWalletAddressFromStorage(): Promise<string | null> {
   return fetchFromStorage<string>(ACCOUNT_PKH_STORAGE_KEY);
 }
@@ -52,7 +61,7 @@ export async function setAuthWalletAddressesMapToStorage(authWalletByAccount: Re
  */
 export async function getCurrentAuthStorageContext(
   context: MavrykAuthStorageContext = {}
-): Promise<Required<MavrykAuthStorageContext>> {
+): Promise<ResolvedMavrykAuthStorageContext> {
   const [walletAddress, networkId] = await Promise.all([
     context.walletAddress === undefined ? getAuthWalletAddressFromStorage() : Promise.resolve(context.walletAddress),
     context.networkId === undefined ? getSelectedNetworkIdFromStorage() : Promise.resolve(context.networkId ?? null)

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { mavrykApi } from './client';
-import { extractMavrykApiErrorMessage } from './errors';
 import { getWalletAddressFromStorage } from './storage';
 
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());

@@ -31,7 +31,8 @@ import {
   TempleChainKind,
   TempleAccountType,
   SaveLedgerAccountInput,
-  WalletSpecs
+  WalletSpecs,
+  DerivationType
 } from 'lib/temple/types';
 
 import { intercom, request, assertResponse } from './client';
@@ -406,6 +407,17 @@ export function useMavrykClient() {
     assertResponse(res.type === TempleMessageType.CreateLedgerAccountResponse);
   }, []);
 
+  const getLedgerTezosPk = useCallback(async (derivationType?: DerivationType, derivationPath?: string) => {
+    const res = await request({
+      type: TempleMessageType.GetLedgerTezosPkRequest,
+      derivationPath,
+      derivationType
+    });
+    assertResponse(res.type === TempleMessageType.GetLedgerTezosPkResponse);
+
+    return res.publicKey;
+  }, []);
+
   const createOrImportWallet = useCallback(async (mnemonic?: string) => {
     const res = await request({
       type: TempleMessageType.CreateOrImportWalletRequest,
@@ -632,6 +644,7 @@ export function useMavrykClient() {
     importKTManagedAccount,
     importWatchOnlyAccount,
     createLedgerAccount,
+    getLedgerTezosPk,
     createOrImportWallet,
 
     // Settings & groups

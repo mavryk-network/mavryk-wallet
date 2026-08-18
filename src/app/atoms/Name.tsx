@@ -24,7 +24,11 @@ const Name: FC<NameProps> = ({ className, style = {}, testID, tooltipContent, ..
       onShow(instance) {
         const reference = instance.reference;
 
-        return Boolean(tooltipContent) && reference instanceof HTMLElement && isTextTruncated(reference);
+        const shouldShow = Boolean(tooltipContent) && reference instanceof HTMLElement && isTextTruncated(reference);
+
+        // tippy's onShow returns `void | false`: false suppresses the tooltip, undefined allows it.
+        // (Previously returned a raw boolean — a type error.)
+        return shouldShow ? undefined : false;
       }
     }),
     [tooltipContent]

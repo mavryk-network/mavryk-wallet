@@ -2,7 +2,9 @@
 /// <reference types="react" />
 /// <reference types="react-dom" />
 
-import 'axios';
+// NOTE: this file must remain a GLOBAL declaration script (no top-level import/export),
+// or its ambient `*.svg`/`*.css`/`ImportedSVGComponent` declarations stop applying
+// project-wide. The axios module augmentation lives in src/axios.d.ts for this reason.
 
 declare type ImportedSVGComponent = React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
 
@@ -11,13 +13,6 @@ declare namespace NodeJS {
     readonly NODE_ENV: 'development' | 'production' | 'test';
     readonly PUBLIC_URL: string;
     readonly PRODUCTION_EXTENSION_ID?: string;
-  }
-}
-
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    _retry?: boolean;
-    skipAuthRefresh?: boolean;
   }
 }
 

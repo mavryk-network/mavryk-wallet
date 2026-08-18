@@ -31,7 +31,7 @@ interface NetworkFormData {
 export const AddNetworkScreen: FC = () => {
   const defaultNetworks = useWalletNetworks();
   const { updateSettings } = useMavrykClient();
-  const { customNetworks = [] } = useSettings();
+  const { customNetworks = [] } = useSettings() ?? {};
   const { setExplorerId } = useBlockExplorer();
   const setNetworkId = useSetNetworkId();
   const { popup } = useAppEnv();
@@ -78,7 +78,11 @@ export const AddNetworkScreen: FC = () => {
         chainId = await loadChainIdStrict(rpcBaseURL);
 
         if (isKnownChainId(chainId)) {
-          const currentBlockExplorerId = BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId))?.id ?? 'tzkt';
+          // Capture the narrowed chain id in a const: narrowing of the mutable `chainId`
+          // does not survive into the `find` callback below.
+          const knownChainId = chainId;
+          const currentBlockExplorerId =
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(knownChainId))?.id ?? 'tzkt';
 
           setExplorerId(currentBlockExplorerId);
         } else {

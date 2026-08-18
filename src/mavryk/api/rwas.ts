@@ -1,4 +1,4 @@
-import type { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
+import type { MvktRWAAssetMetadata } from 'lib/apis/mvkt/types';
 import { z } from 'zod';
 
 import type { TokenMetadataResponse } from 'lib/apis/temple';
@@ -109,7 +109,7 @@ export function mapWalletRwaAssetsToFetchedMetadataRecord(assets: WalletRwaAsset
   }, {});
 }
 
-export function walletRwaAssetToDetails(asset: WalletRwaAsset): TzktRWAAssetMetadata {
+export function walletRwaAssetToDetails(asset: WalletRwaAsset): MvktRWAAssetMetadata {
   const metadata = asset.metadata ?? {};
   const slug = walletRwaAssetToSlug(asset);
 

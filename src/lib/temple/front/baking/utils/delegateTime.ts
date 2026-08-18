@@ -5,6 +5,7 @@ import { addMilliseconds, differenceInMilliseconds } from 'date-fns';
 import { DEFAULT_BLOCK_DELAY } from '../const';
 
 const UNLOCK_WAIT_CYCLES = 3;
+const MS_PER_DAY = 86_400_000;
 
 function formatTimeLeft(ms: number): string {
   if (ms <= 0) return 'allowed';
@@ -102,7 +103,8 @@ export function getUnlockWaitTime(
 export function getUnlockWaitDays(cycleDurationMs: number, currentCycle: number, unstakeCycle: number) {
   const diffMs = getUnlockWaitDurationMs(cycleDurationMs, currentCycle, unstakeCycle);
 
-  return Math.max(0, Math.ceil(dayjs.duration(diffMs).asDays()));
+  // Equivalent of the removed `dayjs.duration(diffMs).asDays()`: milliseconds -> whole days, rounded up
+  return Math.max(0, Math.ceil(diffMs / MS_PER_DAY));
 }
 
 // 3) Co-stake lock period ~ (6 days = 2 cycles)

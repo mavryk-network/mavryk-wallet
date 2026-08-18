@@ -18,7 +18,7 @@ import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
 
-const DERIVATION_PATHS = [
+const DERIVATION_PATHS: { type: 'default' | 'custom'; name: string }[] = [
   {
     type: 'default',
     name: t('defaultAccount')

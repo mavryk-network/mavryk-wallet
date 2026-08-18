@@ -40,8 +40,11 @@ export const NetworkDropdown = memo<Props>(({ opened, setOpened, currentNetwork 
         currentChainId = await loadChainIdStrict(rpcUrl);
 
         if (currentChainId && isKnownChainId(currentChainId)) {
+          // Capture the narrowed chain id in a const: narrowing of the mutable `currentChainId`
+          // does not survive into the `find` callback below.
+          const knownChainId = currentChainId;
           const currentBlockExplorerId =
-            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(currentChainId))?.id ?? 'tzkt';
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(knownChainId))?.id ?? 'tzkt';
 
           if (currentChainId !== chainId) {
             setExplorerId(currentBlockExplorerId);

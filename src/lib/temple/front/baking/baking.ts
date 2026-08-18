@@ -20,7 +20,7 @@ import { IS_DEV_ENV } from 'lib/env';
 import { bakingKeys, chainKeys } from 'lib/query-keys';
 import { getOnlineStatus } from 'lib/ui/get-online-status';
 
-import { useChainId, useNetwork, useMavryk } from '../ready';
+import { ReactiveMavrykToolkit, useChainId, useNetwork, useMavryk } from '../ready';
 
 import {
   DEFAULT_CYCLE_DURATION_MS,
@@ -98,7 +98,7 @@ export function useDelegate<T = MvktUserAccount>(
               }
             } catch (e) {
               if (axios.isAxiosError(e) && e.response?.status === 404) {
-                return emptyAccountResponse;
+                return emptyAccountResponse as T;
               }
 
               if (IS_DEV_ENV) console.error('[baking] getAccountStats error:', e);
@@ -406,8 +406,8 @@ export function useKnownBaker(address: string | null) {
 //   });
 // };
 
-export function useKnownBakers() {
-  const chainId = useChainId();
+export function useKnownBakers(suspense = false) {
+  const chainId = useChainId(suspense);
 
   // eslint-disable-next-line no-type-assertion/no-type-assertion
   const baseApiUrl = chainId ? MVKT_API_BASE_URLS[chainId as MvktApiChainId] : '';

@@ -49,7 +49,7 @@ import {
   validateRecipient,
   useChainId
 } from 'lib/temple/front';
-import { hasManager, isAddressValid, isKTAddress, mumavToTz, tokensToAtoms, tzToMumav } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';

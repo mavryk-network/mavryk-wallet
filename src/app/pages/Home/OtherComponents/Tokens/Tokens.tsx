@@ -26,7 +26,7 @@ import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'lib/store/zustand/assets.store';
-import { useAccount, useChainId } from 'lib/temple/front';
+import { useAccount } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';

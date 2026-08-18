@@ -28,7 +28,7 @@ const RemoveAccount: FC = () => {
     prevAccLengthRef.current = accLength;
   }, [allAccounts]);
 
-  const { registerPassword, handleSubmit, errors, submitting, password, onSubmit, disabled } = usePasswordGateForm(pw =>
+  const { registerPassword, errors, submitting, onSubmit, disabled } = usePasswordGateForm(pw =>
     removeAccount(account.id, pw)
   );
 

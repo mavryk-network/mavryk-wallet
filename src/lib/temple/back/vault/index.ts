@@ -45,7 +45,6 @@ import {
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
-  getMainDerivationPath,
   concatAccount,
   createMemorySigner,
   withError,

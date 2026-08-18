@@ -108,8 +108,6 @@ const processInsertAdActionOnce = async (action: InsertAdAction, ad: AdMetadata,
 
   let stylesOverridesCurrentElement: HTMLElement | null;
 
-  const { providerName } = source;
-
   const { element: adElement, postAppend } = makeTKeyAdView(dimensions.width, dimensions.height, elementStyle);
 
   adElement.setAttribute(TEMPLE_WALLET_AD_ATTRIBUTE_NAME, 'true');

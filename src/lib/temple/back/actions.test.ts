@@ -13,7 +13,7 @@ import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
 
 import { registerNewWallet, unlock } from './actions';
-import { inited, locked, store, unlocked } from './store';
+import { inited, locked, store } from './store';
 import { Vault } from './vault';
 
 jest.mock(
@@ -115,8 +115,14 @@ describe('actions auth sequencing', () => {
     mockedSignAuthChallengeWithVault.mockResolvedValue('signature');
     mockedVerifyAuthSignature.mockReturnValue(verifyDeferred.promise);
 
+    // `unlocked` is now a plain Zustand dispatch (no Effector `.watch`); observe the
+    // store transition into Ready, which `unlocked()` performs, to assert the same thing.
     const unlockedPayloads: unknown[] = [];
-    const unsubscribe = unlocked.watch(payload => unlockedPayloads.push(payload));
+    const unsubscribe = store.subscribe((state, prevState) => {
+      if (state.status === TempleStatus.Ready && prevState.status !== TempleStatus.Ready) {
+        unlockedPayloads.push(state);
+      }
+    });
 
     const registerPromise = registerNewWallet('password', 'seed phrase');
     await flushPromises();

@@ -144,7 +144,7 @@ export const MIGRATIONS = [
 
     const accountValuesToSave: [string, unknown][] = accountsStrgKeys.map((key, i) => [key, accountsStrgValues[i]]);
 
-    const toSave: [string, unknown][] = [
+    const entriesToSave: [string, unknown][] = [
       [checkStrgKey, generateCheck()],
       [mnemonicStrgKey, mnemonic],
       [accountsStrgKey, accounts],
@@ -153,7 +153,9 @@ export const MIGRATIONS = [
         migrateLegacyContactsSettings(settings, accounts, contacts, selectedAccountPkh, selectedNetworkId)
       ],
       ...accountValuesToSave
-    ].filter(([_key, value]) => value !== undefined);
+    ];
+
+    const toSave = entriesToSave.filter(([_key, value]) => value !== undefined);
 
     // Save new storage items
     const passKey = await Passworder.generateKey(password);

@@ -229,7 +229,7 @@ const createQuery = (accountAddress: string, tokenId: number, isFrom: boolean | 
 
 export const getHistoryItemTypesFromParams = (
   accountAddress: string,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: ExtendedGetOperationsTransactionsParams
 ): HistoryItemOpTypeEnum[] => {
   if (!operationParams || !Object.keys(operationParams).length) return [];
 
@@ -255,7 +255,7 @@ export const getHistoryItemTypesFromParams = (
 
 export const getBackendHistoryFilters = (
   accountAddress: string,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: ExtendedGetOperationsTransactionsParams
 ): WalletHistoryFilter | undefined => {
   if (!operationParams || !Object.keys(operationParams).length) return undefined;
 

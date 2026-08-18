@@ -1,7 +1,6 @@
 import memoizee from 'memoizee';
 
 import { fetchMvktAccountAssets } from 'lib/apis/mvkt';
-import { fetchMvktAccountRWAAssets } from 'lib/apis/mvkt/api';
 import type { MvktAccountAsset } from 'lib/apis/mvkt/types';
 import { fetchTokensMetadata, isKnownChainId } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';

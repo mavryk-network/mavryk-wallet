@@ -25,7 +25,7 @@ export const IncreaseStake = () => {
 
   const amountValue = '0'; // Initial value for fee estimation; the form manages its own state
   const mavFeeProps: FeeValueParams = useMemo(
-    () => ({ balance, acc: account, mavryk, mode: STAKE_MODE, amount: new BigNumber(amountValue) }),
+    () => ({ balance, acc: account, tezos: mavryk, mode: STAKE_MODE, amount: new BigNumber(amountValue) }),
     [account, balance, mavryk]
   );
   const { estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);

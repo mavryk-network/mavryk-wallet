@@ -8,6 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # B-CI-1: gate the Chrome Web Store deploy behind a protected environment. Without this,
+    # any `v*` tag pushed to ANY ref ships to the live store. The `production` environment must
+    # be configured in repo Settings → Environments with REQUIRED REVIEWERS (manual approval)
+    # and, ideally, a deployment-branch rule limiting it to `dev`. Also recommended: protect the
+    # `dev` branch and restrict who may create `v*` tags.
+    environment: production
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -54,7 +60,6 @@ jobs:
           NODES_URL=${{ secrets.NODES_URL }}
           EXTERNAL_API=${{ secrets.EXTERNAL_API }}
           REDUX_DEVTOOLS_PORT=${{ secrets.REDUX_DEVTOOLS_PORT }}
-          SUPER_ADMIN_PRIVATE_KEY=${{ secrets.SUPER_ADMIN_PRIVATE_KEY }}
           KYC_CONTRACT=${{ secrets.KYC_CONTRACT }}
           COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
           COINGECKO_API=${{ secrets.COINGECKO_API }}

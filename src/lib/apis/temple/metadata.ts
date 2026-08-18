@@ -11,7 +11,9 @@ if (LOCAL_METADATA_API_URL) console.warn(`process.env.LOCAL_METADATA_API_URL fou
 
 const API_CHAIN_NAMES = {
   [TempleChainId.Mainnet]: 'mainnet',
-  [TempleChainId.Basenet]: 'basenet',
+  // TODO(audit B-BUILD-1): duplicate chain key — TempleChainId.Basenet and TempleChainId.Weekly share the value
+  // 'NetXRp4kyGKJTuB'; Weekly (below) overwrote Basenet at runtime before this change. Confirm correct endpoint.
+  // [TempleChainId.Basenet]: 'basenet',
   [TempleChainId.Atlas]: 'atlasnet',
   [TempleChainId.Weekly]: 'weeklynet'
 };

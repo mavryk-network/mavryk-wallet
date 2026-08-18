@@ -1,22 +1,17 @@
 import { normalizeNetworkId } from 'lib/temple/network-storage';
 
+import { validateAuthChallengeForSigning } from './auth-payload.helpers';
 import {
   AuthChallengeResponseSchema,
   type AuthChallengeResponse,
   AuthVerifyResponseSchema,
   type AuthVerifyResponse
 } from './auth.schema';
+import { getMavrykApiBaseUrl, mavrykApi, type MavrykApiRequestConfig, refreshStoredAuthTokensOrThrow } from './client';
 import {
-  getMavrykApiBaseUrl,
-  mavrykApi,
-  MAVRYK_API_URLS,
-  type MavrykApiRequestConfig,
-  refreshStoredAuthTokensOrThrow
-} from './client';
-import {
-  clearAuthTokensFromStorage,
+  clearStoredAuthTokens,
+  collectStoredRefreshTokens,
   getAuthWalletAddressFromStorage,
-  getAuthTokensFromStorage,
   getLastNonceFromStorage,
   getSelectedNetworkIdFromStorage,
   setAuthTokensToStorage,
@@ -67,7 +62,11 @@ export async function requestAuthChallenge(params: AuthChallengeRequest = {}) {
     challengeRequestConfig
   );
 
-  const parsed = AuthChallengeResponseSchema.parse(data);
+  const parsed = validateAuthChallengeForSigning(AuthChallengeResponseSchema.parse(data), {
+    walletAddress: address,
+    networkId: context.networkId
+  });
+
   await setLastChallengeToStorage({
     challenge: parsed.challenge,
     nonce: parsed.nonce,
@@ -110,27 +109,36 @@ export async function refreshAuthTokens(params: AuthRefreshRequest = {}) {
 }
 
 export async function logoutAuth(params: AuthRefreshRequest = {}) {
-  const context = await getAuthContext(params);
-  const networkIds = params.networkId ? [params.networkId] : Object.keys(MAVRYK_API_URLS);
+  const hasExplicitScope = params.walletAddress !== undefined || params.networkId !== undefined;
+  const context = hasExplicitScope ? await getAuthContext(params) : undefined;
+  // Lock/logout without an explicit scope must revoke every stored refresh token across wallets and networks.
+  const storedRefreshTokens = await collectStoredRefreshTokens(context);
+  const refreshTokens = params.refreshToken
+    ? [
+        ...storedRefreshTokens,
+        {
+          refreshToken: params.refreshToken,
+          walletAddress: context?.walletAddress ?? null,
+          networkId: context?.networkId ?? getSelectedNetworkIdOrDefault(params.networkId)
+        }
+      ]
+    : storedRefreshTokens;
+
+  await clearStoredAuthTokens(context);
 
   await Promise.all(
-    networkIds.map(async networkId => {
-      const refreshToken =
-        networkId === params.networkId && params.refreshToken
-          ? params.refreshToken
-          : (await getAuthTokensFromStorage({ ...context, networkId })).refreshToken;
+    refreshTokens.map(async ({ refreshToken, networkId, walletAddress }) => {
+      const logoutRequestConfig: MavrykApiRequestConfig = {
+        baseURL: getMavrykApiBaseUrl(networkId),
+        _authContext: { walletAddress, networkId },
+        skipAuthRefresh: true
+      };
 
-      if (refreshToken) {
-        const logoutRequestConfig: MavrykApiRequestConfig = {
-          baseURL: getMavrykApiBaseUrl(networkId),
-          _authContext: { ...context, networkId },
-          skipAuthRefresh: true
-        };
-
+      try {
         await mavrykApi.post('/auth/logout', { refreshToken }, logoutRequestConfig);
+      } catch (error) {
+        console.error(error);
       }
-
-      await clearAuthTokensFromStorage({ ...context, networkId });
     })
   );
 }
@@ -140,8 +148,14 @@ async function getAuthContext(
 ): Promise<ResolvedMavrykAuthStorageContext & { walletAddress: string }> {
   const [walletAddress, networkId] = await Promise.all([
     getWalletAddressOrThrow(params.walletAddress),
-    params.networkId ? Promise.resolve(normalizeNetworkId(params.networkId)) : getSelectedNetworkIdFromStorage()
+    params.networkId
+      ? Promise.resolve(getSelectedNetworkIdOrDefault(params.networkId))
+      : getSelectedNetworkIdFromStorage()
   ]);
 
   return { walletAddress, networkId };
+}
+
+function getSelectedNetworkIdOrDefault(networkId?: string) {
+  return normalizeNetworkId(networkId) ?? 'mainnet';
 }

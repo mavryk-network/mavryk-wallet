@@ -1,8 +1,6 @@
 export enum ContentScriptType {
   ExternalLinksActivity = 'ExternalLinksActivity',
   ExternalPageLocation = 'ExternalPageLocation',
-  ExternalAdsActivity = 'ExternalAdsActivity',
-  UpdateAdsRules = 'UpdateAdsRules',
   FetchReferralsRules = 'FetchReferralsRules',
   FetchTakeAdsReferrals = 'FetchTakeAdsReferrals',
   ReferralClick = 'ReferralClick',
@@ -45,10 +43,6 @@ export const EVM_CHAINS_SPECS_STORAGE_KEY = 'EVM_CHAINS_SPECS';
 export const BLOCKCHAIN_EXPLORERS_OVERRIDES_STORAGE_KEY = 'BLOCKCHAIN_EXPLORERS_OVERRIDES';
 
 export const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics_user_id';
-
-export const ALL_ADS_RULES_STORAGE_KEY = 'ALL_ADS_RULES';
-
-export const ADS_RULES_UPDATE_INTERVAL = 5 * 60 * 1000;
 
 export const AD_HIDING_TIMEOUT = 12 * 3600 * 1000;
 
@@ -156,7 +150,6 @@ export const ETHERLINK_USDC_SLUG = '0x796Ea11Fa2dD751eD01b53C372fFDB4AAa8f00F9_0
 export const APPLEFARM_REFERRAL_LINK = 'https://app.applefarm.xyz/referral?code=APPLE-FARM-880788';
 
 export const RWA_ASSET_PRICES = 'RWA_ASSET_PRICES';
-export const TEMPLE_WALLET_AD_ATTRIBUTE_NAME = 'twa';
 export const VERIFIED_USER_KEY = 'isAddressVerified';
 export const MVRK_PRICE = 'MVRK_PRICE';
 export const RECOMMENDED_ADD_FEE = 0.0001;

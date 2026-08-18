@@ -45,7 +45,6 @@ import {
   deriveSeed,
   generateCheck,
   fetchNewAccountName,
-  getMainDerivationPath,
   concatAccount,
   createMemorySigner,
   withError,
@@ -105,21 +104,29 @@ export class Vault {
 
       const { passHash, passKey } = await Vault.toValidPassKey(password);
 
-      if (saveSession) await SessionStore.savePassHash(passHash);
+      if (saveSession) await SessionStore.saveSessionPassHash(passHash);
 
       return new Vault(passKey);
     });
   }
 
   static async recoverFromSession() {
-    const passHash = await SessionStore.getPassHash();
-    if (!passHash) return null;
-    const passKey = await Passworder.importKey(passHash);
+    const passKey = await SessionStore.getSessionPassKey();
+    if (!passKey) return null;
+
+    try {
+      await fetchAndDecryptOne<any>(checkStrgKey, passKey);
+    } catch (error) {
+      console.error(error);
+      await SessionStore.removeSession();
+      return null;
+    }
+
     return new Vault(passKey);
   }
 
   static forgetSession() {
-    return SessionStore.removePassHash();
+    return SessionStore.removeSession();
   }
 
   /**
@@ -153,7 +160,7 @@ export class Vault {
 
       const passKey = await Passworder.generateKey(password);
 
-      await SessionStore.removePassHash();
+      await SessionStore.removeSession();
 
       await clearAsyncStorages();
 

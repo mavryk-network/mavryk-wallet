@@ -5,7 +5,6 @@ import {
   MavrykWalletDAppResponse
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
-import { char2Bytes } from '@mavrykdynamics/webmavryk-utils';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
@@ -41,6 +40,7 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
+import { buildMavrykSignedMessagePayloadHex } from 'mavryk/api/auth-payload.helpers';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
@@ -58,6 +58,7 @@ import {
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
+import { assertExtensionUiPortInfo } from './intercom-permissions';
 import {
   toFront,
   store,
@@ -484,6 +485,8 @@ export function sendOperations(
   networkRpc: string,
   opParams: any[]
 ): Promise<{ opHash: string }> {
+  assertExtensionUiPortInfo(intercom.getPortInfo(port));
+
   return withUnlocked(async () => {
     const sourcePublicKey = await revealPublicKey(sourcePkh);
     const dryRunResult = await dryRunOpParams({
@@ -537,6 +540,8 @@ const promisableUnlock = async (
 
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
     if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
+      assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+
       if (req.confirmed) {
         try {
           const op = await withUnlocked(({ vault }) =>
@@ -586,6 +591,8 @@ const safeAddLocalOperation = async (networkRpc: string, op: any) => {
 };
 
 export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: string, watermark?: string) {
+  assertExtensionUiPortInfo(intercom.getPortInfo(port));
+
   return withUnlocked(
     () =>
       new Promise(async (resolve, reject) => {
@@ -612,6 +619,8 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
 
         const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
           if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
+            assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+
             if (req.confirmed) {
               const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
               resolve(result);
@@ -762,9 +771,6 @@ export async function processBeacon(
 const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: string): Promise<Beacon.Response> => {
   try {
     try {
-      console.log('req', req);
-      console.log('resBase', resBase);
-      console.log('origin', origin);
       return await formatTempleReq(getTempleReq(req), req, resBase, origin);
     } catch (err: any) {
       if (err instanceof MavrykOperationError) {
@@ -914,9 +920,7 @@ function getErrorData(err: any) {
 }
 
 function generateRawPayloadBytes(payload: string) {
-  const bytes = char2Bytes(Buffer.from(payload, 'utf8').toString('hex'));
-  // https://tezostaquito.io/docs/signing/
-  return `0501${char2Bytes(String(bytes.length))}${bytes}`;
+  return buildMavrykSignedMessagePayloadHex(payload);
 }
 
 const close = (

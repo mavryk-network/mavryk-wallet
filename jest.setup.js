@@ -1,8 +1,11 @@
 const { Crypto, CryptoKey } = require('@peculiar/webcrypto');
+const { TextDecoder, TextEncoder } = require('util');
 
 Object.assign(global, {
   crypto: new Crypto(),
-  CryptoKey
+  CryptoKey,
+  TextDecoder,
+  TextEncoder
 });
 
 jest.mock('lib/temple/repo', () => ({

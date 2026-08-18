@@ -49,7 +49,7 @@ const HTML_TEMPLATES = PAGES_NAMES.map(name => {
   })
 );
 
-const CONTENT_SCRIPTS = ['contentScript', 'replaceAds'];
+const CONTENT_SCRIPTS = ['contentScript'];
 if (BACKGROUND_IS_WORKER) CONTENT_SCRIPTS.push('keepBackgroundWorkerAlive');
 
 const mainConfig = (() => {
@@ -184,8 +184,7 @@ const scriptsConfig = (() => {
   config.output!.chunkFormat = 'module';
 
   config.entry = {
-    contentScript: Path.join(PATHS.SOURCE, 'contentScript.ts'),
-    replaceAds: Path.join(PATHS.SOURCE, 'replaceAds.ts')
+    contentScript: Path.join(PATHS.SOURCE, 'contentScript.ts')
   };
 
   if (BACKGROUND_IS_WORKER)

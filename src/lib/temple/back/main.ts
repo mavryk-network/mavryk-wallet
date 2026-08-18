@@ -1,9 +1,9 @@
 import browser, { Runtime } from 'webextension-polyfill';
 
-import { updateRulesStorage } from 'lib/ads/update-rules-storage';
-import { ACCOUNT_PKH_STORAGE_KEY, ANALYTICS_USER_ID_STORAGE_KEY, ContentScriptType } from 'lib/constants';
+import { ACCOUNT_PKH_STORAGE_KEY, ContentScriptType } from 'lib/constants';
 import { E2eMessageType } from 'lib/e2e/types';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
+import type { IntercomPortInfo } from 'lib/intercom';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { clearAsyncStorages } from 'lib/temple/reset';
@@ -11,14 +11,14 @@ import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/typ
 import { getTrackedCashbackServiceDomain, getTrackedUrl } from 'lib/utils/url-track/url-track.utils';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
-import { AnalyticsEventCategory } from '../analytics-types';
-
 import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
+import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
+const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
 export const start = async () => {
   intercom.onRequest(processRequestWithErrorsLogged);
@@ -46,7 +46,15 @@ const processRequestWithErrorsLogged = (...args: Parameters<typeof processReques
     throw error;
   });
 
-const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<TempleResponse | void> => {
+const processRequest = async (
+  req: TempleRequest,
+  port: Runtime.Port,
+  portInfo: IntercomPortInfo
+): Promise<TempleResponse | void> => {
+  if (!req?.type) throw new Error('Invalid intercom request');
+
+  assertTempleRequestAllowedForPortInfo(req, portInfo);
+
   switch (req?.type) {
     case TempleMessageType.SendTrackEventRequest:
       await Analytics.trackEvent(req);
@@ -317,19 +325,12 @@ const getCurrentAccountPkh = async (): Promise<string | undefined> => {
   return frontState.accounts[0]?.publicKeyHash;
 };
 
-const getAnalyticsUserId = async (): Promise<string | undefined> => {
-  const { [ANALYTICS_USER_ID_STORAGE_KEY]: userId } = await browser.storage.local.get(ANALYTICS_USER_ID_STORAGE_KEY);
-
-  return userId;
-};
-
 browser.runtime.onMessage.addListener(async msg => {
   try {
     switch (msg?.type) {
-      case ContentScriptType.UpdateAdsRules:
-        await updateRulesStorage();
-        return;
       case E2eMessageType.ResetRequest:
+        if (!isE2eResetEnabled) return;
+
         return clearAsyncStorages().then(() => ({ type: E2eMessageType.ResetResponse }));
     }
 
@@ -349,16 +350,6 @@ browser.runtime.onMessage.addListener(async msg => {
           await Analytics.client.track('External links activity', { url: trackedUrl, accountPkh });
         }
 
-        break;
-      case ContentScriptType.ExternalAdsActivity:
-        const userId = await getAnalyticsUserId();
-        await Analytics.trackEvent({
-          category: AnalyticsEventCategory.General,
-          userId: userId ?? '',
-          event: 'External Ads Activity',
-          properties: { domain: new URL(msg.url).hostname, accountPkh, provider: msg.provider },
-          rpc: undefined
-        });
         break;
     }
   } catch (e) {

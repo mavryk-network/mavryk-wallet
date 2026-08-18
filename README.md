@@ -81,10 +81,12 @@ It's recommended to use Chrome for developing.
 
 ### Debugging
 
-To enable Redux DevTools during development, specify some port in the `.env` file before running `yarn start` like so:
+To enable Redux DevTools during development, opt in from the `.env` file before running `yarn start`:
 
 ```toml
-REDUX_DEVTOOLS_PORT=8000
+ENABLE_REDUX_DEVTOOLS=true
+# Optional. Defaults to 8000.
+# REDUX_DEVTOOLS_PORT=8000
 ```
 
 Install [`@redux-devtools/cli`](https://github.com/reduxjs/redux-devtools) globally:
@@ -93,7 +95,7 @@ Install [`@redux-devtools/cli`](https://github.com/reduxjs/redux-devtools) globa
 yarn global add @redux-devtools/cli
 ```
 
-Then open an explorer at previously specified port:
+Then open an explorer at the configured port:
 
 ```bash
 redux-devtools --open --port=8000

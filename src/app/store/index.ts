@@ -23,6 +23,7 @@ export const SLICES_BLACKLIST = [
 ];
 
 const persistConfigBlacklist: (keyof RootState)[] = SLICES_BLACKLIST;
+const DEFAULT_REDUX_DEVTOOLS_PORT = 8000;
 
 const persistedReducer = persistReducer<RootState>(
   {
@@ -37,7 +38,21 @@ const persistedReducer = persistReducer<RootState>(
   rootReducer
 );
 
-const REDUX_DEVTOOLS_PORT = IS_DEV_ENV ? process.env.REDUX_DEVTOOLS_PORT : null;
+const REDUX_DEVTOOLS_ENABLED = IS_DEV_ENV && process.env.ENABLE_REDUX_DEVTOOLS === 'true';
+
+const getReduxDevToolsPort = () => {
+  const rawPort = process.env.REDUX_DEVTOOLS_PORT;
+  if (!rawPort) return DEFAULT_REDUX_DEVTOOLS_PORT;
+
+  const port = Number(rawPort);
+  if (!Number.isInteger(port) || port <= 0) {
+    throw new Error(`Invalid REDUX_DEVTOOLS_PORT: ${rawPort}`);
+  }
+
+  return port;
+};
+
+const REDUX_DEVTOOLS_PORT = REDUX_DEVTOOLS_ENABLED ? getReduxDevToolsPort() : null;
 
 const store = configureStore({
   reducer: persistedReducer,

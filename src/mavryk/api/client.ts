@@ -17,7 +17,14 @@ import {
   type ResolvedMavrykAuthStorageContext
 } from './storage';
 
+const MAVRYK_API_BASE_PATHNAME = '/api/v1';
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = ['/auth/challenge', '/auth/verify', '/auth/refresh', '/auth/logout'] as const;
+const AUTH_PATHNAMES_WITHOUT_REFRESH = new Set<string>(
+  AUTH_ENDPOINTS_WITHOUT_REFRESH.reduce<string[]>((pathnames, endpoint) => {
+    pathnames.push(endpoint, `${MAVRYK_API_BASE_PATHNAME}${endpoint}`);
+    return pathnames;
+  }, [])
+);
 const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
 const MAINNET_MAVRYK_API_URL = 'https://wallet.mavryk.network';
 const BASENET_MAVRYK_API_URL = 'https://basenet.wallet.mavryk.network';
@@ -43,7 +50,8 @@ export const getMavrykApiUrl = (networkId?: string | null) => {
   return MAVRYK_API_URLS[normalizedNetworkId] ?? MAINNET_MAVRYK_API_URL;
 };
 
-export const getMavrykApiBaseUrl = (networkId?: string | null) => new URL('/api/v1', getMavrykApiUrl(networkId)).href;
+export const getMavrykApiBaseUrl = (networkId?: string | null) =>
+  new URL(MAVRYK_API_BASE_PATHNAME, getMavrykApiUrl(networkId)).href;
 
 export const mavrykApi = axios.create({
   baseURL: getMavrykApiBaseUrl(DEFAULT_NETWORK_ID),
@@ -68,8 +76,21 @@ type WebLockManager = {
 
 const refreshAuthTokensPromises = new Map<string, Promise<FreshAuthTokens>>();
 
-const isAuthRefreshCandidate = (url?: string) =>
-  !AUTH_ENDPOINTS_WITHOUT_REFRESH.some(endpoint => (url ?? '').includes(endpoint));
+const getRequestPathname = (url?: string) => {
+  if (!url) return undefined;
+
+  try {
+    return new URL(url, `${MAINNET_MAVRYK_API_URL}${MAVRYK_API_BASE_PATHNAME}/`).pathname;
+  } catch {
+    return undefined;
+  }
+};
+
+const isAuthRefreshCandidate = (url?: string) => {
+  const pathname = getRequestPathname(url);
+
+  return !pathname || !AUTH_PATHNAMES_WITHOUT_REFRESH.has(pathname);
+};
 
 const isMavrykApiRequestConfig = (config: unknown): config is MavrykApiRequestConfig =>
   Boolean(config && typeof config === 'object');
@@ -196,7 +217,7 @@ mavrykApi.interceptors.request.use(async rawConfig => {
   }
   config._authContext = authContext;
 
-  if (accessToken) {
+  if (accessToken && isAuthRefreshCandidate(config.url)) {
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${accessToken}`

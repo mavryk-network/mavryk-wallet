@@ -1,2 +1,10 @@
 export { IntercomClient } from './client';
-export { IntercomServer } from './server';
+export {
+  IntercomServer,
+  IntercomPortKind,
+  type IntercomPortInfo,
+  classifyIntercomPort,
+  isConfirmUiPortInfo,
+  isExtensionUiPortInfo,
+  isTrustedUiPortInfo
+} from './server';

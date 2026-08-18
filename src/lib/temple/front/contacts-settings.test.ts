@@ -5,6 +5,7 @@ import {
   buildContactsStorageKey,
   canAccountUseContacts,
   getContactsAccountScope,
+  getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
 
@@ -108,6 +109,7 @@ describe('contacts-settings', () => {
       contactsApi: {
         accounts: {
           [mainStorageKey]: {
+            accountDataKey: 'main-key',
             contacts: [{ name: 'Main Contact', address: 'mv1-main-contact' }],
             recordId: 'main-record'
           }
@@ -123,21 +125,25 @@ describe('contacts-settings', () => {
       {
         'mv1-derived-contact': 'user',
         'mv1-removed-contact': 'validator'
-      }
+      },
+      'derived-key'
     );
 
     expect(patch.contacts).toEqual([{ name: 'Derived Contact', address: 'mv1-derived-contact' }]);
     expect(patch.contactsApi?.accounts?.[mainStorageKey]).toEqual({
+      accountDataKey: 'main-key',
       contacts: [{ name: 'Main Contact', address: 'mv1-main-contact' }],
       recordId: 'main-record'
     });
     expect(patch.contactsApi?.accounts?.[derivedStorageKey]).toEqual({
+      accountDataKey: 'derived-key',
       contacts: [{ name: 'Derived Contact', address: 'mv1-derived-contact' }],
       recordId: 'derived-record',
       typesByAddress: {
         'mv1-derived-contact': 'user'
       }
     });
+    expect(getStoredContactsAccountDataKey(patch as TempleSettings, derivedStorageKey)).toBe('derived-key');
   });
 
   it('does not treat missing empty contacts state as a settings change', () => {
@@ -177,5 +183,46 @@ describe('contacts-settings', () => {
         }
       )
     ).toBe(true);
+  });
+
+  it('treats a generated account data key as a settings change', () => {
+    const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
+
+    expect(
+      hasContactsSettingsAccountPatchMismatch(
+        {},
+        {
+          accountDataKey: 'generated-key',
+          contactsStorageKey: storageKey,
+          contacts: [],
+          recordId: null
+        }
+      )
+    ).toBe(true);
+  });
+
+  it('preserves the stored account data key when building a default contacts patch', () => {
+    const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
+    const patch = buildContactsSettingsPatch(
+      {
+        contactsApi: {
+          accounts: {
+            [storageKey]: {
+              accountDataKey: 'stored-key',
+              contacts: [{ name: 'Existing', address: 'mv1-existing' }],
+              recordId: 'record-id'
+            }
+          }
+        }
+      },
+      storageKey,
+      [{ name: 'Next', address: 'mv1-next' }]
+    );
+
+    expect(patch.contactsApi?.accounts?.[storageKey]).toEqual({
+      accountDataKey: 'stored-key',
+      contacts: [{ name: 'Next', address: 'mv1-next' }],
+      recordId: 'record-id'
+    });
   });
 });

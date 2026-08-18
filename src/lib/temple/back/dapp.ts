@@ -13,10 +13,6 @@ import {
   MavrykWalletDAppNetwork
 } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { MavrykOperationError } from '@mavrykdynamics/webmavryk';
-import { localForger } from '@mavrykdynamics/webmavryk-local-forging';
-import { valueDecoder } from '@mavrykdynamics/webmavryk-local-forging/dist/lib/michelson/codec';
-import { Uint8ArrayConsumer } from '@mavrykdynamics/webmavryk-local-forging/dist/lib/uint8array-consumer';
-import { emitMicheline } from '@mavrykdynamics/webmavryk-michel-codec';
 import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { nanoid } from 'nanoid';
 import browser, { Runtime } from 'webextension-polyfill';
@@ -41,14 +37,14 @@ import {
 
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
+import { assertConfirmUiPortInfo } from './intercom-permissions';
+import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
 import { withUnlocked } from './store';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
 const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
-const HEX_PATTERN = /^[0-9a-fA-F]+$/;
-const TEZ_MSG_SIGN_PATTERN = /^0501[a-f0-9]{8}54657a6f73205369676e6564204d6573736167653a20[a-f0-9]*$/;
 
 export async function getCurrentPermission(origin: string): Promise<MavrykWalletDAppGetCurrentPermissionResponse> {
   const dApp = await getDApp(origin);
@@ -239,59 +235,40 @@ export async function requestSign(
   origin: string,
   req: MavrykWalletDAppSignRequest
 ): Promise<MavrykWalletDAppSignResponse> {
-  if (req?.payload?.startsWith('0x')) {
-    req = { ...req, payload: req.payload.substring(2) };
-  }
-
-  if (![isAddressValid(req?.sourcePkh), HEX_PATTERN.test(req?.payload)].every(Boolean)) {
+  if (![isAddressValid(req?.sourcePkh), typeof req?.payload === 'string'].every(Boolean)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
+  let preparedPayload: PreparedDAppSignPayload;
+  try {
+    preparedPayload = prepareDAppSignPayload(req.payload, origin);
+  } catch {
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
+  }
+
+  const signReq = { ...req, payload: preparedPayload.payload };
   const dApp = await getDApp(origin);
 
   if (!dApp) {
     throw new Error(MavrykWalletDAppErrorType.NotGranted);
   }
 
-  if (req.sourcePkh !== dApp.pkh) {
+  if (signReq.sourcePkh !== dApp.pkh) {
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
-  return new Promise((resolve, reject) => generatePromisifySign(resolve, reject, dApp, req));
+  return new Promise((resolve, reject) => generatePromisifySign(resolve, reject, dApp, signReq, preparedPayload));
 }
 
 const generatePromisifySign = async (
   resolve: any,
   reject: any,
   dApp: TempleDAppSession,
-  req: MavrykWalletDAppSignRequest
+  req: MavrykWalletDAppSignRequest,
+  preparedPayload: PreparedDAppSignPayload
 ) => {
   const id = nanoid();
   const networkRpc = await getNetworkRPC(dApp.network);
-
-  let preview: any;
-  try {
-    const value = valueDecoder(Uint8ArrayConsumer.fromHexString(req.payload.slice(2)));
-    const parsed = emitMicheline(value, {
-      indent: '  ',
-      newline: '\n'
-    }).slice(1, -1);
-
-    if (req.payload.match(TEZ_MSG_SIGN_PATTERN)) {
-      preview = value.string;
-    } else {
-      if (parsed.length > 0) {
-        preview = parsed;
-      } else {
-        const parsed = await localForger.parse(req.payload);
-        if (parsed.contents.length > 0) {
-          preview = parsed;
-        }
-      }
-    }
-  } catch {
-    preview = null;
-  }
 
   await requestConfirm({
     id,
@@ -302,7 +279,7 @@ const generatePromisifySign = async (
       appMeta: dApp.appMeta,
       sourcePkh: req.sourcePkh,
       payload: req.payload,
-      preview
+      preview: preparedPayload.preview
     },
     onDecline: () => {
       reject(new Error(MavrykWalletDAppErrorType.NotGranted));
@@ -310,7 +287,9 @@ const generatePromisifySign = async (
     handleIntercomRequest: async (confirmReq, decline) => {
       if (confirmReq?.type === TempleMessageType.DAppSignConfirmationRequest && confirmReq?.id === id) {
         if (confirmReq.confirmed) {
-          const { prefixSig: signature } = await withUnlocked(({ vault }) => vault.sign(dApp.pkh, req.payload));
+          const { prefixSig: signature } = await withUnlocked(({ vault }) =>
+            vault.sign(dApp.pkh, preparedPayload.bytesToSign, preparedPayload.watermark)
+          );
           resolve({
             type: MavrykWalletDAppMessageType.SignResponse,
             signature
@@ -428,8 +407,10 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
   };
 
   let knownPort: Runtime.Port | undefined;
-  const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port) => {
+  const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port, portInfo) => {
     if (req?.type === TempleMessageType.DAppGetPayloadRequest && req.id === id) {
+      assertConfirmUiPortInfo(portInfo);
+
       knownPort = port;
 
       if (payload.type === 'confirm_operations') {
@@ -454,6 +435,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
       };
     } else {
       if (knownPort !== port) return;
+      assertConfirmUiPortInfo(portInfo);
 
       const result = await handleIntercomRequest(req, onDecline);
       if (result) {

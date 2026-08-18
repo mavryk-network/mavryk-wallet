@@ -1,6 +1,8 @@
 import { browser } from 'lib/browser';
 import * as Repo from 'lib/temple/repo';
 
+import { clearSessionWrappingKeys } from './back/vault/session-wrapping-key-store';
+
 export async function clearAllStorages() {
   await clearAsyncStorages();
   localStorage.clear();
@@ -11,6 +13,7 @@ export async function clearAsyncStorages() {
   await Repo.db.open();
   await browser.storage.local.clear();
   await browser.storage.session?.clear();
+  await clearSessionWrappingKeys();
 }
 
 export function clearLocalStorage(exceptionsKeys?: string[]) {

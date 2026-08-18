@@ -11,6 +11,7 @@ import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
   getContactsAccountScope,
+  getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
 
@@ -84,9 +85,10 @@ export function useContactsSync(
     void (async () => {
       const contactsStorageKey = buildContactsStorageKey(activeScope.storageAddress, networkId);
       const authContext = { walletAddress: activeScope.authAddress, networkId };
+      const accountDataKey = getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey);
 
       try {
-        await ensureAuthorized(activeScope.authAddress, networkId, true, activeScope.authAddress);
+        await ensureAuthorized(activeScope.authAddress, networkId, false, activeScope.authAddress);
         if (cancelled) return;
 
         const { accessToken } = await getAuthTokensFromStorage(authContext);
@@ -98,10 +100,20 @@ export function useContactsSync(
         const publicKey = await revealPublicKey(activeScope.authAddress);
         if (cancelled) return;
 
-        const { contacts, recordId, typesByAddress } = await fetchContactsRecord(publicKey, authContext);
+        const {
+          accountDataKey: nextAccountDataKey,
+          contacts,
+          recordId,
+          typesByAddress
+        } = await fetchContactsRecord({
+          accountDataKey,
+          publicKey,
+          authContext
+        });
         if (cancelled) return;
 
         const contactsPatch = {
+          accountDataKey: nextAccountDataKey,
           contactsStorageKey,
           contacts,
           recordId,
@@ -113,7 +125,14 @@ export function useContactsSync(
         }
 
         await updateSettings(
-          buildContactsSettingsPatch(settingsRef.current, contactsStorageKey, contacts, recordId, typesByAddress)
+          buildContactsSettingsPatch(
+            settingsRef.current,
+            contactsStorageKey,
+            contacts,
+            recordId,
+            typesByAddress,
+            nextAccountDataKey
+          )
         );
       } catch (error) {
         if (!cancelled) {

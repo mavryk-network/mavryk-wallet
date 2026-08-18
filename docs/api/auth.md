@@ -10,12 +10,61 @@ The Mavryk Wallet Backend uses the Taquito/Mavryk standard message signing forma
 
 ## Authentication Endpoints
 
-- `POST /auth/challenge` returns the challenge text, nonce, and expiration used for wallet signing.
+- `POST /auth/challenge` returns the structured challenge text, nonce, and expiration used for wallet signing.
 - `POST /auth/verify` verifies the signed challenge and returns an `accessToken` plus `refreshToken`.
 - `POST /auth/refresh` rotates the refresh token and returns a new `accessToken` plus `refreshToken`.
 - `POST /auth/logout` invalidates the provided refresh token.
 
-Tokens are returned only in JSON response bodies. The client is responsible for storing both tokens and sending the access token in protected requests.
+Tokens are returned only in JSON response bodies. The client is responsible for storing both tokens and sending the access token in protected requests. The client does not attach `Authorization` to `/auth/challenge`, `/auth/verify`, `/auth/refresh`, or `/auth/logout`.
+
+## Auth Challenge Contract
+
+The preferred backend challenge should exactly match the client-constructed structured message:
+
+```text
+Mavryk Wallet Authentication
+
+Please sign this message to authenticate.
+
+Wallet Address: <mv1...>
+Network: <mainnet|basenet|...>
+Nonce: <16-256 char nonce>
+Expires At: <ISO timestamp>
+Audience: mavryk-wallet-api
+```
+
+Client validation before signing:
+
+- `challenge` length must be at most 1024 characters.
+- `nonce` must match `^[A-Za-z0-9._~-]{16,256}$`.
+- `expiresAt` must parse as an ISO timestamp, be in the future, and be no more than 10 minutes ahead of client time.
+- `Wallet Address`, `Network`, `Nonce`, `Expires At`, and `Audience` must exactly match the request context and response fields.
+
+Malformed or legacy free-form challenges are rejected before storage and are never signed silently.
+
+Until the backend is migrated to include `Network` and `Audience`, the client also accepts the current backend structured
+message:
+
+```text
+Mavryk Wallet Authentication
+
+Please sign this message to authenticate.
+
+Wallet Address: <mv1...>
+Nonce: <16-256 char nonce>
+Timestamp: <ISO timestamp>
+Expires: <ISO timestamp>
+
+This request will not trigger a blockchain transaction or cost any gas fees.
+```
+
+Compatibility validation still rejects arbitrary text. The wallet address and nonce must match the challenge response,
+the response `expiresAt` must pass the normal expiry checks, and the challenge `Expires` timestamp must match the
+response expiry within one second.
+
+For `/auth/verify`, accepted auth challenge messages are signed with the verifier-compatible auth challenge payload
+encoding described below. This preserves the deployed backend contract while still preventing arbitrary challenge text
+from being signed.
 
 ## Refresh Token Rotation
 
@@ -45,6 +94,15 @@ The client must treat `REFRESH_TOKEN_REUSE` as a terminal authentication failure
 Protected endpoints may also return `401 Token has been revoked`. This is also terminal and should clear stored auth tokens instead of attempting refresh.
 
 Because refresh tokens rotate, clients must serialize refresh calls for each wallet/network auth scope. Multiple simultaneous refresh calls with the same refresh token can trigger reuse detection. Browser contexts that can run at the same time should coordinate refresh and read the latest stored token pair before refreshing.
+
+## Client Token Storage And Lock Behavior
+
+The client validates token responses before storage:
+
+- `accessToken` must be JWT-like (`header.payload.signature`) with a parseable, unexpired `exp` claim.
+- `refreshToken` must be a non-empty string no longer than 4096 characters.
+
+On wallet lock/logout, the client captures stored refresh tokens for best-effort server revocation, clears all scoped and legacy auth token keys locally first, then calls `/auth/logout`. A network or backend logout failure must not keep local access or refresh tokens.
 
 ---
 

@@ -29,6 +29,10 @@ export type ResolvedMavrykAuthStorageContext = {
   walletAddress: string | null;
 };
 
+export type StoredMavrykRefreshToken = ResolvedMavrykAuthStorageContext & {
+  refreshToken: string;
+};
+
 const AUTH_TOKEN_STORAGE_KEY_PATTERN = /^\[([^\]]+)\]\[([^\]]+)\](\[refresh\])?$/;
 
 export async function getWalletAddressFromStorage(): Promise<string | null> {
@@ -166,17 +170,62 @@ export async function clearAuthTokensFromStorage(context: MavrykAuthStorageConte
 
 export async function clearAllAuthTokensFromStorage(context: MavrykAuthStorageContext = {}) {
   const authContext = await getCurrentAuthStorageContext(context);
-  const keysToRemove = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
 
   if (authContext.walletAddress) {
-    const walletAddress = authContext.walletAddress;
-    const storageItems = await browser.storage.local.get(null);
-    keysToRemove.push(
-      ...Object.keys(storageItems).filter(storageKey => isAuthTokenStorageKeyForWallet(storageKey, walletAddress))
-    );
+    await clearStoredAuthTokens({ walletAddress: authContext.walletAddress });
+    return;
   }
 
-  await removeFromStorage(keysToRemove);
+  await clearStoredAuthTokens();
+}
+
+export async function collectStoredRefreshTokens(
+  context?: MavrykAuthStorageContext
+): Promise<StoredMavrykRefreshToken[]> {
+  const authContext = await resolveOptionalAuthTokenContext(context);
+  const storageItems = await browser.storage.local.get(null);
+  const refreshTokens: StoredMavrykRefreshToken[] = [];
+
+  Object.entries(storageItems).forEach(([storageKey, value]) => {
+    if (typeof value !== 'string' || value.length === 0) return;
+
+    if (storageKey === MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY) {
+      refreshTokens.push({
+        refreshToken: value,
+        networkId: authContext?.networkId ?? DEFAULT_NETWORK_ID,
+        walletAddress: authContext?.walletAddress ?? null
+      });
+      return;
+    }
+
+    const parsedStorageKey = parseAuthTokenStorageKey(storageKey);
+
+    if (!parsedStorageKey?.isRefresh || !matchesAuthTokenContext(parsedStorageKey, authContext)) return;
+
+    refreshTokens.push({
+      refreshToken: value,
+      walletAddress: parsedStorageKey.walletAddress,
+      networkId: parsedStorageKey.networkId
+    });
+  });
+
+  return uniqueStoredRefreshTokens(refreshTokens);
+}
+
+export async function clearStoredAuthTokens(context?: MavrykAuthStorageContext) {
+  const authContext = await resolveOptionalAuthTokenContext(context);
+  const storageItems = await browser.storage.local.get(null);
+  const keysToRemove = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
+
+  keysToRemove.push(
+    ...Object.keys(storageItems).filter(storageKey => {
+      const parsedStorageKey = parseAuthTokenStorageKey(storageKey);
+
+      return parsedStorageKey && matchesAuthTokenContext(parsedStorageKey, authContext);
+    })
+  );
+
+  await removeFromStorage(Array.from(new Set(keysToRemove)));
 }
 
 export async function getLastChallengeFromStorage(): Promise<string | null> {
@@ -217,8 +266,64 @@ function buildRefreshTokenStorageKey(walletAddress: string, networkId: string) {
   return `[${walletAddress}][${networkId}][refresh]`;
 }
 
-function isAuthTokenStorageKeyForWallet(storageKey: string, walletAddress: string) {
+type ParsedAuthTokenStorageKey = {
+  walletAddress: string;
+  networkId: string;
+  isRefresh: boolean;
+};
+
+type AuthTokenStorageFilter = {
+  networkId?: string | null;
+  walletAddress?: string | null;
+};
+
+function parseAuthTokenStorageKey(storageKey: string): ParsedAuthTokenStorageKey | null {
   const match = AUTH_TOKEN_STORAGE_KEY_PATTERN.exec(storageKey);
 
-  return match?.[1] === walletAddress;
+  if (!match) return null;
+
+  return {
+    walletAddress: match[1],
+    networkId: match[2],
+    isRefresh: Boolean(match[3])
+  };
+}
+
+async function resolveOptionalAuthTokenContext(
+  context?: MavrykAuthStorageContext
+): Promise<AuthTokenStorageFilter | undefined> {
+  if (!context || (context.walletAddress === undefined && context.networkId === undefined)) {
+    return undefined;
+  }
+
+  return {
+    walletAddress: context.walletAddress,
+    networkId: context.networkId === undefined ? undefined : normalizeNetworkId(context.networkId) ?? DEFAULT_NETWORK_ID
+  };
+}
+
+function matchesAuthTokenContext(storageKey: ParsedAuthTokenStorageKey, context?: AuthTokenStorageFilter) {
+  if (!context) return true;
+
+  if (context.walletAddress && storageKey.walletAddress !== context.walletAddress) {
+    return false;
+  }
+
+  if (context.networkId && storageKey.networkId !== context.networkId) {
+    return false;
+  }
+
+  return true;
+}
+
+function uniqueStoredRefreshTokens(tokens: StoredMavrykRefreshToken[]) {
+  const seen = new Set<string>();
+
+  return tokens.filter(token => {
+    const key = [token.walletAddress ?? '', token.networkId, token.refreshToken].join('::');
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
 }

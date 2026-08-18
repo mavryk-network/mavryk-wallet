@@ -177,6 +177,7 @@ export interface TempleContact {
 export type TempleContactApiType = 'user' | 'validator' | 'contract';
 
 export interface TempleContactsAccountState {
+  accountDataKey?: string;
   contacts: TempleContact[];
   recordId?: string;
   typesByAddress?: Record<string, TempleContactApiType>;

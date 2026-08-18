@@ -6,7 +6,6 @@ import {
   putStoredAppUpdateDetails,
   removeStoredAppUpdateDetails
 } from 'app/storage/app-update';
-import { updateRulesStorage } from 'lib/ads/update-rules-storage';
 import { start } from 'lib/temple/back/main';
 
 browser.runtime.onInstalled.addListener(({ reason }) => {
@@ -49,5 +48,3 @@ globalThis.addEventListener('notificationclick', event => {
   // @ts-expect-error
   event.waitUntil(clients.openWindow(`${event.target.registration.scope}fullpage.html`));
 });
-
-updateRulesStorage();

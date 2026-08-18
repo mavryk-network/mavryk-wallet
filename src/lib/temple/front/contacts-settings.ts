@@ -16,6 +16,7 @@ export type ContactsAccountScope = {
 };
 
 export type ContactsSettingsAccountPatch = {
+  accountDataKey?: string | null;
   contactsStorageKey: string;
   contacts: TempleContact[];
   recordId?: string | null;
@@ -96,6 +97,10 @@ export function getStoredContactsRecordId(settings: TempleSettings, contactsStor
   return getCachedContactsState(settings, contactsStorageKey)?.recordId ?? null;
 }
 
+export function getStoredContactsAccountDataKey(settings: TempleSettings, contactsStorageKey: string) {
+  return getCachedContactsState(settings, contactsStorageKey)?.accountDataKey ?? null;
+}
+
 export function getStoredContactsTypesByAddress(settings: TempleSettings, contactsStorageKey: string) {
   return getCachedContactsState(settings, contactsStorageKey)?.typesByAddress;
 }
@@ -117,7 +122,8 @@ export function getCurrentAccountStoredContacts(settings: TempleSettings, contac
 function buildContactsAccountState(
   contacts: TempleContact[],
   recordId?: string | null,
-  typesByAddress?: Record<string, TempleContactApiType>
+  typesByAddress?: Record<string, TempleContactApiType>,
+  accountDataKey?: string | null
 ): TempleContactsAccountState {
   const normalizedContacts = normalizeContacts(contacts);
   const normalizedTypesByAddress =
@@ -132,6 +138,7 @@ function buildContactsAccountState(
       : undefined;
 
   return {
+    ...(accountDataKey ? { accountDataKey } : {}),
     contacts: normalizedContacts,
     ...(recordId ? { recordId } : {}),
     ...(normalizedTypesByAddress && Object.keys(normalizedTypesByAddress).length > 0
@@ -142,23 +149,31 @@ function buildContactsAccountState(
 
 function hasContactsAccountStateContent(state: TempleContactsAccountState) {
   return Boolean(
-    state.contacts.length || state.recordId || (state.typesByAddress && Object.keys(state.typesByAddress).length > 0)
+    state.accountDataKey ||
+      state.contacts.length ||
+      state.recordId ||
+      (state.typesByAddress && Object.keys(state.typesByAddress).length > 0)
   );
 }
 
 export function hasContactsSettingsAccountPatchMismatch(
   settings: TempleSettings,
-  { contactsStorageKey, contacts, recordId, typesByAddress }: ContactsSettingsAccountPatch
+  { accountDataKey, contactsStorageKey, contacts, recordId, typesByAddress }: ContactsSettingsAccountPatch
 ) {
   const currentState = getCachedContactsState(settings, contactsStorageKey);
-  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress);
+  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress, accountDataKey);
 
   if (!currentState) {
     return hasContactsAccountStateContent(nextState);
   }
 
   return !isEqual(
-    buildContactsAccountState(currentState.contacts, currentState.recordId, currentState.typesByAddress),
+    buildContactsAccountState(
+      currentState.contacts,
+      currentState.recordId,
+      currentState.typesByAddress,
+      currentState.accountDataKey
+    ),
     nextState
   );
 }
@@ -168,10 +183,11 @@ export function buildContactsSettingsPatch(
   contactsStorageKey: string,
   contacts: TempleContact[],
   recordId = getStoredContactsRecordId(settings, contactsStorageKey),
-  typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey)
+  typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey),
+  accountDataKey = getStoredContactsAccountDataKey(settings, contactsStorageKey)
 ): Partial<TempleSettings> {
   const nextAccounts = { ...(settings.contactsApi?.accounts ?? {}) };
-  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress);
+  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress, accountDataKey);
 
   nextAccounts[contactsStorageKey] = nextAccountState;
 

@@ -84,6 +84,7 @@ describe('network-storage', () => {
       contactsApi: {
         accounts: {
           '[mv1-wallet][basenet]': {
+            accountDataKey: 'basenet-key',
             contacts: [{ name: 'Basenet', address: 'mv1-basenet-contact' }],
             recordId: 'basenet-record',
             typesByAddress: {
@@ -91,6 +92,7 @@ describe('network-storage', () => {
             }
           },
           '[mv1-wallet][atlasnet]': {
+            accountDataKey: 'atlasnet-key',
             contacts: [
               { name: 'Atlasnet', address: 'mv1-atlasnet-contact' },
               { name: 'Duplicate', address: 'mv1-basenet-contact' }
@@ -110,6 +112,7 @@ describe('network-storage', () => {
       contactsApi: {
         accounts: {
           '[mv1-wallet][basenet]': {
+            accountDataKey: 'basenet-key',
             contacts: [
               { name: 'Basenet', address: 'mv1-basenet-contact' },
               { name: 'Atlasnet', address: 'mv1-atlasnet-contact' }

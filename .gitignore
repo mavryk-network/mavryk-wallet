@@ -24,8 +24,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Local AI agent context
+/.codex/
+/codex/
+AGENTS.md
+agents.md
+CONTEXT.md
+security-tickets/
+
 # Xcode
-#
 build/
 *.pbxuser
 !default.pbxuser

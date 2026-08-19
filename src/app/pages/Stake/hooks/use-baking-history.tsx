@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 
 import { useUserTestingGroupNameSelector } from 'app/store/ab-testing/selectors';
 import { getDelegatorRewards, isKnownChainId } from 'lib/apis/tzkt';
+import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
 import { useAccount, useChainId, useDelegate } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
@@ -35,12 +36,20 @@ export const useBakingHistory = () => {
       if (!isKnownChainId(chainId!)) {
         return [];
       }
-      return (
-        (await getDelegatorRewards(chainId, {
-          address: accountPkh,
-          limit: 30
-        })) || []
-      );
+      try {
+        return (
+          (await getDelegatorRewards(chainId, {
+            address: accountPkh,
+            limit: 30
+          })) || []
+        );
+      } catch (err) {
+        if (IS_DEV_ENV) {
+          console.error('[use-baking-history] getDelegatorRewards failed:', err);
+        }
+
+        return [];
+      }
     },
     []
   );

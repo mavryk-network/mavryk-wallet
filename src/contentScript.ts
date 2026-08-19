@@ -6,6 +6,7 @@ import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
+import { isProcessablePageMessage } from './content-scripts/page-message.helpers';
 import { getIntercom } from './intercom-client';
 
 const TRACK_URL_CHANGE_INTERVAL = 5000;
@@ -47,7 +48,7 @@ if (isTopFrame()) {
       let oldHref = '';
 
       const trackUrlChange = () => {
-        const newHref = window.parent.location.href;
+        const newHref = window.location.href;
         if (oldHref !== newHref) {
           oldHref = newHref;
 
@@ -76,7 +77,7 @@ if (isTopFrame()) {
   window.addEventListener(
     'message',
     evt => {
-      if (evt.source !== window) return;
+      if (!isProcessablePageMessage(evt, window)) return;
 
       const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
       const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;

@@ -396,10 +396,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     []
   );
 
-  const getDAppPayload = useCallback(async (id: string) => {
+  const getDAppPayload = useCallback(async (id: string, token: string) => {
     const res = await request({
       type: TempleMessageType.DAppGetPayloadRequest,
-      id
+      id,
+      token
     });
     assertResponse(res.type === TempleMessageType.DAppGetPayloadResponse);
     return res.payload;
@@ -721,15 +722,12 @@ export function assertResponse(condition: any): asserts condition {
 }
 
 function withoutFeesOverride<T>(params: any, op: T): T {
-  try {
-    const { fee, gasLimit, storageLimit } = params;
-    return {
-      ...op,
-      fee,
-      gas_limit: gasLimit,
-      storage_limit: storageLimit
-    };
-  } catch {
-    return params;
-  }
+  const { fee, gasLimit, storageLimit } = params;
+
+  return {
+    ...op,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit
+  };
 }

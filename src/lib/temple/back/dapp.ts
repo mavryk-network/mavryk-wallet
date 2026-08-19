@@ -36,7 +36,7 @@ import {
 } from 'lib/temple/types';
 
 import { intercom } from './defaults';
-import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
+import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
 import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
 import { withUnlocked } from './store';
@@ -45,6 +45,15 @@ const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
 const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
+
+export const consumeConfirmToken = (expectedToken: string | null, receivedToken?: string) => {
+  const isValid = expectedToken !== null && receivedToken === expectedToken;
+
+  return {
+    isValid,
+    nextToken: isValid ? null : expectedToken
+  };
+};
 
 export async function getCurrentPermission(origin: string): Promise<MavrykWalletDAppGetCurrentPermissionResponse> {
   const dApp = await getDApp(origin);
@@ -134,13 +143,17 @@ export async function requestOperation(
   origin: string,
   req: MavrykWalletDAppOperationRequest
 ): Promise<MavrykWalletDAppOperationResponse> {
-  if (
-    ![
-      isAddressValid(req?.sourcePkh),
-      req?.opParams?.length > 0,
-      req?.opParams?.every(op => typeof op.kind === 'string')
-    ].every(Boolean)
-  ) {
+  if (!isAddressValid(req?.sourcePkh)) {
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
+  }
+
+  try {
+    validateOpParams(req?.opParams);
+  } catch {
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
+  }
+
+  if (req.opParams.some(op => typeof op?.source === 'string' && op.source !== req.sourcePkh)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
@@ -257,12 +270,15 @@ export async function requestSign(
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
-  return new Promise((resolve, reject) => generatePromisifySign(resolve, reject, dApp, signReq, preparedPayload));
+  return new Promise((resolve, reject) =>
+    generatePromisifySign(resolve, reject, origin, dApp, signReq, preparedPayload)
+  );
 }
 
 const generatePromisifySign = async (
   resolve: any,
   reject: any,
+  origin: string,
   dApp: TempleDAppSession,
   req: MavrykWalletDAppSignRequest,
   preparedPayload: PreparedDAppSignPayload
@@ -406,11 +422,18 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     close();
   };
 
+  const initialConfirmToken = nanoid();
+  let confirmToken: string | null = initialConfirmToken;
   let knownPort: Runtime.Port | undefined;
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, port, portInfo) => {
     if (req?.type === TempleMessageType.DAppGetPayloadRequest && req.id === id) {
       assertConfirmUiPortInfo(portInfo);
 
+      const tokenResult = consumeConfirmToken(confirmToken, req.token);
+      if (!tokenResult.isValid) {
+        throw new Error('Unauthorized dApp confirmation token');
+      }
+      confirmToken = tokenResult.nextToken;
       knownPort = port;
 
       if (payload.type === 'confirm_operations') {
@@ -445,7 +468,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     }
   });
 
-  const confirmWin = await createConfirmationWindow(id);
+  const confirmWin = await createConfirmationWindow(id, initialConfirmToken);
 
   const closeWindow = async () => {
     if (confirmWin.id) {
@@ -524,7 +547,7 @@ function removeLastSlash(str: string) {
   return str.endsWith('/') ? str.slice(0, -1) : str;
 }
 
-async function createConfirmationWindow(confirmationId: string) {
+async function createConfirmationWindow(confirmationId: string, token: string) {
   const isWin = (await browser.runtime.getPlatformInfo()).os === 'win';
 
   const height = isWin ? CONFIRM_WINDOW_HEIGHT + 17 : CONFIRM_WINDOW_HEIGHT;
@@ -534,7 +557,9 @@ async function createConfirmationWindow(confirmationId: string) {
 
   const options: browser.Windows.CreateCreateDataType = {
     type: 'popup',
-    url: browser.runtime.getURL(`confirm.html#?id=${confirmationId}`),
+    url: browser.runtime.getURL(
+      `confirm.html#?id=${encodeURIComponent(confirmationId)}&token=${encodeURIComponent(token)}`
+    ),
     width,
     height
   };

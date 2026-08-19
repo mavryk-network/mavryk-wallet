@@ -1,5 +1,7 @@
 # PR #30 Remediation Plan — Keep the New Architecture, Fix the Confirmed Defects
 
+> Branch alignment update, 2026-08-19: `MAV-3974/architecture` is the architecture integration branch. `dev-architecture-update` is only a PR #30 reference branch; any branch-target instructions below that use it as the integration branch are superseded by `docs/pr-30-branch-alignment-dev-sync-ledger.md`.
+
 Date: 2026-08-18 (v2)
 **Reviewed**: 2026-08-18 — architect, code-reviewer, and security-reviewer agents, all GO WITH AMENDMENTS; every amendment is incorporated in this version. The reviewers verified all file/line claims below against both this branch and `origin/dev` (prod 2.0.0).
 Responds to: `pr-30-architecture-investigation.md` (2026-08-13)

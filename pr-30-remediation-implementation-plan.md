@@ -3,6 +3,8 @@
 Date: 2026-08-18
 Last validated: 2026-08-19
 
+> Branch alignment update, 2026-08-19: `MAV-3974/architecture` is the architecture integration branch. `dev-architecture-update` is only a PR #30 reference branch; any branch-target instructions below that use it as the integration branch are superseded by `docs/pr-30-branch-alignment-dev-sync-ledger.md`.
+
 Source of truth: root `pr-30-remediation-plan.md`, verified against PR #30 / `origin/dev-architecture-update`.
 
 Compared refs:

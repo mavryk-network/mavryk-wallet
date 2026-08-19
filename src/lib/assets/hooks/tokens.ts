@@ -111,7 +111,7 @@ export const useAccountTokens = (account: string, chainId: string, returnRemoved
   return useMemoWithCompare<AccountToken[]>(
     () => {
       // 1. Stored
-      const stored = Object.entries(storedRaw).map<AccountToken>(([slug, { status }]) => ({
+      const stored = Object.entries(storedRaw ?? {}).map<AccountToken>(([slug, { status }]) => ({
         slug,
         status: getAssetStatus(balances[slug], status)
       }));

@@ -1,0 +1,55 @@
+name: CI
+
+# Quality gate for PRs targeting the architecture integration branch now and the
+# final branch later. Blocks merges on type errors and failing tests.
+on:
+  pull_request:
+    branches:
+      - MAV-3974/architecture
+      - MAV-3979/book-scoping
+  push:
+    branches:
+      - MAV-3974/architecture
+      - MAV-3979/book-scoping
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.11.0
+          cache: yarn
+
+      - name: Enable Yarn v1
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          YARN_VERSION="$(yarn --version)"
+          echo "Yarn ${YARN_VERSION}"
+          case "${YARN_VERSION}" in
+            1.*) ;;
+            *) echo "Expected Yarn v1"; exit 1 ;;
+          esac
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type-check (blocking)
+        run: yarn ts
+
+      - name: Tests (blocking)
+        run: yarn test
+
+      # Lint currently carries a formatting/import-order backlog. Keep it advisory
+      # until a dedicated cleanup lands, then remove continue-on-error.
+      - name: Lint (advisory)
+        run: yarn lint
+        continue-on-error: true

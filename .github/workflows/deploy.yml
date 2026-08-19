@@ -54,7 +54,6 @@ jobs:
           NODES_URL=${{ secrets.NODES_URL }}
           EXTERNAL_API=${{ secrets.EXTERNAL_API }}
           REDUX_DEVTOOLS_PORT=${{ secrets.REDUX_DEVTOOLS_PORT }}
-          SUPER_ADMIN_PRIVATE_KEY=${{ secrets.SUPER_ADMIN_PRIVATE_KEY }}
           KYC_CONTRACT=${{ secrets.KYC_CONTRACT }}
           COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
           COINGECKO_API=${{ secrets.COINGECKO_API }}

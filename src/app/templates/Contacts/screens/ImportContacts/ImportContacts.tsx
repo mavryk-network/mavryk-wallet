@@ -137,11 +137,18 @@ const ImportFileView: FC<ImportFileViewProps> = ({ changeActiveView, setFilesCon
   );
 };
 
-const ImportDropzone: FC<{ disabled: boolean }> = ({ disabled }) => (
+type ImportDropzoneProps = React.HTMLAttributes<HTMLElement> & {
+  disabled: boolean;
+};
+
+const ImportDropzone: FC<ImportDropzoneProps> = ({ disabled, className, ...sectionProps }) => (
   <section
+    {...sectionProps}
+    aria-disabled={disabled}
     className={clsx(
       'px-4 py-6 flex items justify-center border border-dashed border-blue-200 rounded-lg',
-      disabled && 'opacity-50'
+      disabled && 'opacity-50',
+      className
     )}
   >
     <div className="flex flex-col gap-4 items-center">

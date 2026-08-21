@@ -1,6 +1,6 @@
-import { Route3Dex } from 'lib/apis/route3/fetch-route3-dexes';
-import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
-import { Route3SwapParamsResponse } from 'lib/route3/interfaces';
+import type { Route3Dex } from 'lib/apis/route3/fetch-route3-dexes';
+import type { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';
+import type { Route3SwapParamsResponse } from 'lib/route3/interfaces';
 import { createEntity, LoadableEntityState } from 'lib/store';
 
 import { DEFAULT_SWAP_PARAMS } from './state.mock';

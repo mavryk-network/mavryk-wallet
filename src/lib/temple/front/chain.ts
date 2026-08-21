@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Subscription, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import constate from 'constate';
@@ -44,6 +44,7 @@ function useNewBlockTriggers() {
 export function useOnBlock(callback: (blockHash: string) => void, altTezos?: MavrykToolkit, pause = false) {
   const currentTezos = useTezos();
   const blockHashRef = useRef<string>();
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const callbackRef = useUpdatableRef(callback);
 
   const tezos = altTezos || currentTezos;
@@ -51,7 +52,10 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
   // Keep a head-block subscription alive for the active RPC.
   // Cleanup closes the current subscription and cancels pending retries on network changes or unmount.
   useEffect(() => {
-    if (pause) return;
+    if (pause) {
+      setIsSubscribed(false);
+      return;
+    }
 
     let sub: Subscription<string> | null = null;
     let retryTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -86,8 +90,14 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
 
       try {
         sub = tezos.stream.subscribe('head');
+        if (!cancelled) {
+          setIsSubscribed(true);
+        }
       } catch (err) {
         console.error(err);
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
         scheduleRespawn();
         return;
       }
@@ -100,9 +110,14 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Mav
       });
       sub.on('error', err => {
         console.error(err);
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
         sub?.close();
         scheduleRespawn();
       });
     }
   }, [callbackRef, pause, tezos]);
+
+  return isSubscribed;
 }

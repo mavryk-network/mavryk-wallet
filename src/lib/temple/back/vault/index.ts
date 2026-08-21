@@ -14,7 +14,12 @@ import {
   DEFAULT_LEDGER_TEZOS_DERIVATION_PATH,
   WALLETS_SPECS_STORAGE_KEY
 } from 'lib/constants';
-import { CONTACTS_ENCRYPTION_INFO, CONTACTS_KEY_BYTES, bytesToBase64 } from 'lib/temple/contacts-crypto';
+import {
+  CONTACTS_ENCRYPTION_INFO,
+  CONTACTS_KEY_BYTES,
+  CONTACTS_LEGACY_GCM_ENCRYPTION_INFO,
+  bytesToBase64
+} from 'lib/temple/contacts-crypto';
 import {
   formatOpParamsBeforeSend,
   getSameGroupAccounts,
@@ -92,20 +97,24 @@ interface RemoveAccountEventPayload {
 
 type SignerCleanup = () => void | Promise<void>;
 
-async function deriveRawContactsKey(ikm: BufferSource, bookAddr: string) {
+async function deriveRawContactsKey(ikm: BufferSource, bookAddr: string, info = CONTACTS_ENCRYPTION_INFO) {
   const baseKey = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: 'HKDF',
       hash: 'SHA-256',
       salt: contactsKeyEncoder.encode(bookAddr),
-      info: contactsKeyEncoder.encode(CONTACTS_ENCRYPTION_INFO)
+      info: contactsKeyEncoder.encode(info)
     },
     baseKey,
     CONTACTS_KEY_BYTES * 8
   );
 
   return bytesToBase64(new Uint8Array(derivedBits));
+}
+
+function dedupeContactsKeys(keys: string[]) {
+  return keys.filter((key, index, values) => values.indexOf(key) === index);
 }
 
 function buildUnavailableContactsKey(
@@ -495,6 +504,7 @@ export class Vault {
             return {
               status: 'available',
               key: await deriveRawContactsKey(seed, bookAddr),
+              legacyKeys: [await deriveRawContactsKey(seed, bookAddr, CONTACTS_LEGACY_GCM_ENCRYPTION_INFO)],
               bookAddr,
               identityKind: 'hd'
             };
@@ -502,10 +512,25 @@ export class Vault {
 
           case TempleAccountType.Imported: {
             const privateKey = await fetchAndDecryptOne<string>(accPrivKeyStrgKey(account.publicKeyHash), this.passKey);
+            const signer = await createMemorySigner(privateKey);
+            const canonicalPrivateKey = await signer.secretKey();
+            const canonicalIkm = contactsKeyEncoder.encode(canonicalPrivateKey);
+            const storedIkm = contactsKeyEncoder.encode(privateKey);
+            const currentKey = await deriveRawContactsKey(canonicalIkm, account.publicKeyHash);
+            const legacyKeys = await Promise.all([
+              deriveRawContactsKey(canonicalIkm, account.publicKeyHash, CONTACTS_LEGACY_GCM_ENCRYPTION_INFO),
+              ...(privateKey === canonicalPrivateKey
+                ? []
+                : [
+                    deriveRawContactsKey(storedIkm, account.publicKeyHash),
+                    deriveRawContactsKey(storedIkm, account.publicKeyHash, CONTACTS_LEGACY_GCM_ENCRYPTION_INFO)
+                  ])
+            ]);
 
             return {
               status: 'available',
-              key: await deriveRawContactsKey(contactsKeyEncoder.encode(privateKey), account.publicKeyHash),
+              key: currentKey,
+              legacyKeys: dedupeContactsKeys(legacyKeys.filter(key => key !== currentKey)),
               bookAddr: account.publicKeyHash,
               identityKind: 'imported'
             };

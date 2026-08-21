@@ -1,5 +1,6 @@
 import { isEqual } from 'lodash';
 
+import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
 import {
   ContactsUnavailableReason,
   TempleAccount,
@@ -32,6 +33,7 @@ export type ContactsSettingsAccountPatch = {
   recordId?: string | null;
   syncError?: TempleContactsAccountState['syncError'];
   typesByAddress?: Record<string, TempleContactApiType>;
+  lastSeenVersion?: string;
 };
 
 function normalizeContact(contact: TempleContact): TempleContact | null {
@@ -134,6 +136,14 @@ export function getStoredContactsTypesByAddress(settings: TempleSettings, contac
   return getCachedContactsState(settings, contactsStorageKey)?.typesByAddress;
 }
 
+export function getStoredContactsLastSeenVersion(settings: TempleSettings, contactsStorageKey: string) {
+  return getCachedContactsState(settings, contactsStorageKey)?.lastSeenVersion;
+}
+
+export function canReadLegacyContacts(settings: TempleSettings, contactsStorageKey: string) {
+  return getStoredContactsLastSeenVersion(settings, contactsStorageKey) !== CONTACTS_ENCRYPTION_VERSION;
+}
+
 export function getCurrentAccountStoredContacts(settings: TempleSettings, contactsStorageKey: string) {
   const cachedContacts = getCachedContactsState(settings, contactsStorageKey)?.contacts;
 
@@ -152,7 +162,8 @@ function buildContactsAccountState(
   contacts: TempleContact[],
   recordId?: string | null,
   typesByAddress?: Record<string, TempleContactApiType>,
-  syncError?: TempleContactsAccountState['syncError']
+  syncError?: TempleContactsAccountState['syncError'],
+  lastSeenVersion?: string
 ): TempleContactsAccountState {
   const normalizedContacts = normalizeContacts(contacts);
   const normalizedTypesByAddress =
@@ -170,6 +181,7 @@ function buildContactsAccountState(
     contacts: normalizedContacts,
     ...(recordId ? { recordId } : {}),
     ...(syncError ? { syncError } : {}),
+    ...(lastSeenVersion ? { lastSeenVersion } : {}),
     ...(normalizedTypesByAddress && Object.keys(normalizedTypesByAddress).length > 0
       ? { typesByAddress: normalizedTypesByAddress }
       : {})
@@ -181,16 +193,19 @@ function hasContactsAccountStateContent(state: TempleContactsAccountState) {
     state.contacts.length ||
       state.recordId ||
       state.syncError ||
+      state.lastSeenVersion ||
       (state.typesByAddress && Object.keys(state.typesByAddress).length > 0)
   );
 }
 
 export function hasContactsSettingsAccountPatchMismatch(
   settings: TempleSettings,
-  { contactsStorageKey, contacts, recordId, syncError, typesByAddress }: ContactsSettingsAccountPatch
+  { contactsStorageKey, contacts, recordId, syncError, typesByAddress, lastSeenVersion }: ContactsSettingsAccountPatch
 ) {
   const currentState = getCachedContactsState(settings, contactsStorageKey);
-  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError);
+  const resolvedLastSeenVersion =
+    lastSeenVersion === undefined ? getStoredContactsLastSeenVersion(settings, contactsStorageKey) : lastSeenVersion;
+  const nextState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError, resolvedLastSeenVersion);
 
   if (!currentState) {
     return hasContactsAccountStateContent(nextState);
@@ -201,7 +216,8 @@ export function hasContactsSettingsAccountPatchMismatch(
       currentState.contacts,
       currentState.recordId,
       currentState.typesByAddress,
-      currentState.syncError
+      currentState.syncError,
+      currentState.lastSeenVersion
     ),
     nextState
   );
@@ -213,10 +229,11 @@ export function buildContactsSettingsPatch(
   contacts: TempleContact[],
   recordId = getStoredContactsRecordId(settings, contactsStorageKey),
   typesByAddress = getStoredContactsTypesByAddress(settings, contactsStorageKey),
-  syncError?: TempleContactsAccountState['syncError']
+  syncError?: TempleContactsAccountState['syncError'],
+  lastSeenVersion = getStoredContactsLastSeenVersion(settings, contactsStorageKey)
 ): Partial<TempleSettings> {
   const nextAccounts = { ...(settings.contactsApi?.accounts ?? {}) };
-  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError);
+  const nextAccountState = buildContactsAccountState(contacts, recordId, typesByAddress, syncError, lastSeenVersion);
 
   nextAccounts[contactsStorageKey] = nextAccountState;
 

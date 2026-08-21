@@ -35,6 +35,7 @@ import {
   TempleNotification
 } from 'lib/temple/types';
 
+import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
@@ -43,7 +44,6 @@ import { withUnlocked } from './store';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
-const AUTODECLINE_AFTER = 120_000;
 const STORAGE_KEY = 'dapp_sessions';
 
 export const consumeConfirmToken = (expectedToken: string | null, receivedToken?: string) => {
@@ -488,7 +488,7 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
   const stopWinRemovedListening = () => browser.windows.onRemoved.removeListener(handleWinRemoved);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, AUTODECLINE_AFTER);
+  const t = setTimeout(declineAndClose, DAPP_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
 }
 

@@ -29,6 +29,7 @@ import toBuffer from 'typedarray-to-buffer';
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
 import { useRetryableSWR } from 'lib/swr';
+import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
   TempleConfirmationPayload,
@@ -45,6 +46,7 @@ import {
   TempleAccountType
 } from 'lib/temple/types';
 
+import { fetchTempleStateWithRetry } from './get-state';
 import { useStorage } from './storage';
 
 type Confirmation = {
@@ -60,11 +62,7 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
    * State
    */
 
-  const fetchState = useCallback(async () => {
-    const res = await request({ type: TempleMessageType.GetStateRequest });
-    assertResponse(res.type === TempleMessageType.GetStateResponse);
-    return res.state;
-  }, []);
+  const fetchState = useCallback(() => fetchTempleStateWithRetry(request), []);
 
   const { data, mutate } = useRetryableSWR('state', fetchState, {
     suspense: true,
@@ -710,7 +708,7 @@ async function getPublicKey(accountPublicKeyHash: string) {
 }
 
 export async function request<T extends TempleRequest>(req: T) {
-  const res = await intercom.request(req);
+  const res = await intercom.request(req, { timeoutMs: getTempleRequestTimeoutMs(req.type) });
   assertResponse('type' in res);
   return res as TempleResponse;
 }

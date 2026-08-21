@@ -4,6 +4,7 @@ import browser from 'webextension-polyfill';
 import { ContentScriptType, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
+import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
 import { isProcessablePageMessage } from './content-scripts/page-message.helpers';
@@ -100,11 +101,16 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
   const { payload, reqId } = evt.data as MavrykWalletPageMessage;
 
   getIntercom()
-    .request({
-      type: TempleMessageType.PageRequest,
-      origin: evt.origin,
-      payload
-    })
+    .request(
+      {
+        type: TempleMessageType.PageRequest,
+        origin: evt.origin,
+        payload
+      },
+      {
+        timeoutMs: getTempleRequestTimeoutMs(TempleMessageType.PageRequest)
+      }
+    )
     .then((res: TempleResponse) => {
       if (res?.type === TempleMessageType.PageResponse) {
         send(
@@ -133,13 +139,18 @@ function beaconRequest(evt: MessageEvent) {
   const { origin, data } = evt;
   const encrypted = Boolean(data.encryptedPayload);
   getIntercom()
-    .request({
-      type: TempleMessageType.PageRequest,
-      origin: origin,
-      payload: data.encryptedPayload ?? data.payload,
-      beacon: true,
-      encrypted: Boolean(data.encryptedPayload)
-    })
+    .request(
+      {
+        type: TempleMessageType.PageRequest,
+        origin: origin,
+        payload: data.encryptedPayload ?? data.payload,
+        beacon: true,
+        encrypted: Boolean(data.encryptedPayload)
+      },
+      {
+        timeoutMs: getTempleRequestTimeoutMs(TempleMessageType.PageRequest)
+      }
+    )
     .then((res: TempleResponse) => {
       if (res?.type === TempleMessageType.PageResponse && res.payload) {
         const message = {

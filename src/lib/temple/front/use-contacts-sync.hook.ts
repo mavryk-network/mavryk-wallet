@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 
+import { isEqual } from 'lodash';
+
+import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
 import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 import { getAuthTokensFromStorage } from 'mavryk/api/storage';
 
@@ -10,6 +13,7 @@ import type { ContactsBookScope } from './contacts-settings';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
+  canReadLegacyContacts,
   getCachedContactsState,
   getContactsBookScope,
   getStoredContactsAccountDataKey,
@@ -93,9 +97,17 @@ export function useContactsSync(
           key: derivedContactsKey.key,
           bookAddr: derivedContactsKey.bookAddr
         };
+        const legacyContactsKeys =
+          derivedContactsKey.legacyKeys?.map(key => ({
+            key,
+            bookAddr: derivedContactsKey.bookAddr
+          })) ?? [];
         const contactsStorageKey = buildContactsStorageKey(derivedContactsKey.bookAddr, networkId);
         const authContext = { walletAddress: derivedContactsKey.bookAddr, networkId };
-        const accountDataKey = getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey);
+        const shouldReadLegacyContacts = canReadLegacyContacts(settingsRef.current, contactsStorageKey);
+        const accountDataKey = shouldReadLegacyContacts
+          ? getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey)
+          : null;
 
         updateContactsSyncError = async syncError => {
           const cachedState = getCachedContactsState(settingsRef.current, contactsStorageKey);
@@ -133,16 +145,22 @@ export function useContactsSync(
           return;
         }
 
-        const publicKey = await revealPublicKey(derivedContactsKey.bookAddr);
+        const publicKey = shouldReadLegacyContacts ? await revealPublicKey(derivedContactsKey.bookAddr) : null;
         if (cancelled) return;
 
+        const cachedAtFetchStart = getCachedContactsState(settingsRef.current, contactsStorageKey);
         const remoteState = await fetchContactsRecord({
           contactsKey,
+          legacyContactsKeys: shouldReadLegacyContacts ? legacyContactsKeys : [],
           legacyAccountDataKey: accountDataKey,
-          legacyPublicKey: publicKey,
+          legacyPublicKey: publicKey ?? undefined,
           authContext
         });
         if (cancelled) return;
+
+        if (!isEqual(getCachedContactsState(settingsRef.current, contactsStorageKey), cachedAtFetchStart)) {
+          return;
+        }
 
         const syncedState =
           remoteState.shouldReencrypt && remoteState.recordId
@@ -156,10 +174,16 @@ export function useContactsSync(
             : remoteState;
         if (cancelled) return;
 
+        if (!isEqual(getCachedContactsState(settingsRef.current, contactsStorageKey), cachedAtFetchStart)) {
+          return;
+        }
+
         const contactsPatch = {
           contactsStorageKey,
           contacts: syncedState.contacts,
           recordId: syncedState.recordId,
+          lastSeenVersion:
+            syncedState.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? syncedState.encryptionVersion : undefined,
           typesByAddress: syncedState.typesByAddress
         };
 
@@ -173,7 +197,9 @@ export function useContactsSync(
             contactsStorageKey,
             syncedState.contacts,
             syncedState.recordId,
-            syncedState.typesByAddress
+            syncedState.typesByAddress,
+            undefined,
+            contactsPatch.lastSeenVersion
           )
         );
       } catch (error) {

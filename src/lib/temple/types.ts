@@ -187,6 +187,7 @@ export type DerivedContactsKey =
   | {
       status: 'available';
       key: string;
+      legacyKeys?: string[];
       bookAddr: string;
       identityKind: 'hd' | 'imported';
     }
@@ -200,6 +201,7 @@ export interface TempleContactsAccountState {
   /** @deprecated SEC-02 keeps this only as a read-only compatibility source for old local GCM2 records. */
   accountDataKey?: string;
   contacts: TempleContact[];
+  lastSeenVersion?: string;
   recordId?: string;
   syncError?: Extract<ContactsUnavailableReason, 'decrypt-failed' | 'auth-unavailable'>;
   typesByAddress?: Record<string, TempleContactApiType>;

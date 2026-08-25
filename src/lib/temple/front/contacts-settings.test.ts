@@ -1,10 +1,13 @@
+import { CONTACTS_ENCRYPTION_VERSION } from '../contacts-crypto';
 import { TempleAccount, TempleAccountType, TempleChainKind, TempleSettings } from '../types';
 
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
+  canReadLegacyContacts,
   canAccountUseContacts,
   getContactsBookScope,
+  getStoredContactsLastSeenVersion,
   getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
@@ -227,5 +230,33 @@ describe('contacts-settings', () => {
       contacts: [{ name: 'Next', address: 'mv1-next' }],
       recordId: 'record-id'
     });
+  });
+
+  it('preserves the current-version latch when building contacts patches', () => {
+    const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
+    const patch = buildContactsSettingsPatch(
+      {
+        contactsApi: {
+          accounts: {
+            [storageKey]: {
+              contacts: [{ name: 'Existing', address: 'mv1-existing' }],
+              lastSeenVersion: CONTACTS_ENCRYPTION_VERSION,
+              recordId: 'record-id'
+            }
+          }
+        }
+      },
+      storageKey,
+      [{ name: 'Next', address: 'mv1-next' }]
+    );
+
+    expect(getStoredContactsLastSeenVersion(patch as TempleSettings, storageKey)).toBe(CONTACTS_ENCRYPTION_VERSION);
+    expect(canReadLegacyContacts(patch as TempleSettings, storageKey)).toBe(false);
+  });
+
+  it('allows legacy contacts before the current-version latch is set', () => {
+    const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
+
+    expect(canReadLegacyContacts({}, storageKey)).toBe(true);
   });
 });

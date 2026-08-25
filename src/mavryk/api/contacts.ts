@@ -346,7 +346,9 @@ async function decryptContactsRecord(
     );
     shouldReencrypt = true;
   } else {
-    throw new Error(`Unsupported contacts encryption version: ${record.encryptedValue.version}`);
+    throw new CurrentContactsRecordDecryptionError(
+      `Unsupported contacts encryption version: ${record.encryptedValue.version}`
+    );
   }
 
   if (!decrypted) {

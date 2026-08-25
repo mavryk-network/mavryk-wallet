@@ -9,7 +9,12 @@ import type { ContactsCurrentKey } from 'lib/temple/contacts-crypto';
 import type { TempleContactApiType } from 'lib/temple/types';
 
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
-import { deleteContactsRecord, fetchContactsRecord, saveContactsRecord } from './contacts';
+import {
+  CurrentContactsRecordDecryptionError,
+  deleteContactsRecord,
+  fetchContactsRecord,
+  saveContactsRecord
+} from './contacts';
 
 jest.mock('@vespaiach/axios-fetch-adapter', () => jest.fn());
 
@@ -507,6 +512,31 @@ describe('contacts account data encryption', () => {
         authContext: AUTH_CONTEXT
       })
     ).rejects.toThrow('Unable to decrypt current contacts record');
+  });
+
+  it('treats unsupported contacts encryption versions as explicit decryption failures', async () => {
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      CONTACTS_KEY.key,
+      CONTACTS_KEY.bookAddr,
+      'AES-256-GCM-4'
+    );
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow(CurrentContactsRecordDecryptionError);
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unsupported contacts encryption version: AES-256-GCM-4');
   });
 
   it('keeps legacy v1 public-key encrypted contacts readable and marks them for re-encryption', async () => {

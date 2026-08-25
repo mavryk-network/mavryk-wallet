@@ -173,7 +173,7 @@ export function useContactsActions() {
         authContext,
         contactsKey,
         contactsStorageKey: resolvedContactsStorageKey,
-        legacyContactsKeys,
+        legacyContactsKeys: shouldReadLegacyContacts ? legacyContactsKeys : [],
         legacyAccountDataKey: shouldReadLegacyContacts
           ? getStoredContactsAccountDataKey(settingsRef.current, resolvedContactsStorageKey)
           : null,

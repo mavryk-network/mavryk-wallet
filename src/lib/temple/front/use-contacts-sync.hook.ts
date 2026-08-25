@@ -151,7 +151,7 @@ export function useContactsSync(
         const cachedAtFetchStart = getCachedContactsState(settingsRef.current, contactsStorageKey);
         const remoteState = await fetchContactsRecord({
           contactsKey,
-          legacyContactsKeys,
+          legacyContactsKeys: shouldReadLegacyContacts ? legacyContactsKeys : [],
           legacyAccountDataKey: accountDataKey,
           legacyPublicKey: publicKey ?? undefined,
           authContext

@@ -322,6 +322,10 @@ export function revealPublicKey(accPublicKeyHash: string) {
   return withUnlocked(({ vault }) => vault.revealPublicKey(accPublicKeyHash));
 }
 
+export function deriveContactsKey(accPublicKeyHash: string) {
+  return withUnlocked(({ vault }) => vault.deriveContactsKey(accPublicKeyHash));
+}
+
 export function removeAccount(id: string, password: string) {
   return withUnlocked(async () => {
     try {

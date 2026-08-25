@@ -1,6 +1,18 @@
 import axios from 'axios';
 import { z } from 'zod';
 
+import {
+  CONTACTS_DATA_KEY,
+  CONTACTS_DATA_TYPE,
+  CONTACTS_ENCRYPTION_VERSION,
+  CONTACTS_KEY_BYTES,
+  CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION,
+  CONTACTS_LEGACY_ENCRYPTION_VERSION,
+  ContactsCurrentKey,
+  base64ToBytes,
+  buildContactsAad,
+  bytesToBase64
+} from 'lib/temple/contacts-crypto';
 import type { TempleContact, TempleContactApiType } from 'lib/temple/types';
 
 import { mavrykApi } from './client';
@@ -8,17 +20,12 @@ import type { MavrykApiRequestConfig } from './client';
 import { extractMavrykApiErrorMessage } from './errors';
 import type { ResolvedMavrykAuthStorageContext } from './storage';
 
-const CONTACTS_DATA_KEY = 'contacts';
-const CONTACTS_DATA_TYPE = 'contacts';
 const CONTACTS_API_TYPES = ['user', 'validator', 'contract'] as const;
-const CONTACTS_LEGACY_ENCRYPTION_VERSION = 'AES-256-CBC-1';
-const CONTACTS_ENCRYPTION_VERSION = 'AES-256-GCM-2';
 // Version -> cipher/key source:
 // AES-256-CBC-1 -> AES-CBC with the legacy PBKDF2(publicKey) key. Read only.
-// AES-256-GCM-2 -> AES-GCM with accountDataKey. New writes use the shared public-key-derived key when available.
-const ACCOUNT_DATA_KEY_BYTES = 32;
+// AES-256-GCM-2 -> AES-GCM compatibility: PR-era derived key + AAD, then legacy keys. Read only.
+// AES-256-GCM-3 -> AES-GCM with HKDF(seed/private-key) key and contacts AAD.
 const AES_GCM_IV_BYTES = 12;
-const BASE64_CHUNK_SIZE = 0x8000;
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
 
 const EncryptedValueSchema = z.object({
@@ -60,51 +67,32 @@ type EncryptedValue = z.infer<typeof EncryptedValueSchema>;
 type GroupedContactsPayload = z.infer<typeof GroupedContactsPayloadSchema>;
 type AccountDataRecord = z.infer<typeof AccountDataRecordSchema>;
 type ContactsPayloadItem = z.infer<typeof ContactsPayloadItemSchema>;
+type ContactsKeyCandidate = ContactsCurrentKey & { legacy: boolean };
+type LegacyGcmKeyCandidate = {
+  key: string;
+  bookAddr?: string;
+};
 type DecryptedContactsRecord = {
-  accountDataKey?: string;
   contacts: TempleContact[];
+  shouldReencrypt?: boolean;
   typesByAddress: Record<string, TempleContactApiType>;
 };
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-class CurrentContactsRecordDecryptionError extends Error {
-  shouldGenerateAccountDataKey: boolean;
-
-  constructor(message: string, shouldGenerateAccountDataKey: boolean) {
+export class CurrentContactsRecordDecryptionError extends Error {
+  constructor(message = 'Unable to decrypt current contacts record') {
     super(message);
     this.name = 'CurrentContactsRecordDecryptionError';
-    this.shouldGenerateAccountDataKey = shouldGenerateAccountDataKey;
     Object.setPrototypeOf(this, CurrentContactsRecordDecryptionError.prototype);
   }
-}
-
-function bytesToBase64(bytes: Uint8Array) {
-  let binary = '';
-
-  for (let offset = 0; offset < bytes.length; offset += BASE64_CHUNK_SIZE) {
-    binary += String.fromCharCode(...Array.from(bytes.subarray(offset, offset + BASE64_CHUNK_SIZE)));
-  }
-
-  return btoa(binary);
-}
-
-function base64ToBytes(value: string) {
-  return Uint8Array.from(atob(value), char => char.charCodeAt(0));
-}
-
-async function generateAccountDataKey() {
-  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
-  const rawKey = await crypto.subtle.exportKey('raw', key);
-
-  return bytesToBase64(new Uint8Array(rawKey));
 }
 
 async function importAccountDataKey(accountDataKey: string): Promise<CryptoKey> {
   const rawKey = base64ToBytes(accountDataKey);
 
-  if (rawKey.length !== ACCOUNT_DATA_KEY_BYTES) {
+  if (rawKey.length !== CONTACTS_KEY_BYTES) {
     throw new Error('Invalid contacts encryption key');
   }
 
@@ -138,7 +126,7 @@ async function deriveSharedAccountDataKey(publicKey: string) {
       hash: 'SHA-256'
     },
     baseKey,
-    ACCOUNT_DATA_KEY_BYTES * 8
+    CONTACTS_KEY_BYTES * 8
   );
 
   return bytesToBase64(new Uint8Array(derivedBits));
@@ -211,10 +199,14 @@ function buildGroupedPayload(
   );
 }
 
-async function encryptValueForBackend(data: GroupedContactsPayload, key: CryptoKey): Promise<EncryptedValue> {
+async function encryptValueForBackend(
+  data: GroupedContactsPayload,
+  contactsKey: ContactsCurrentKey
+): Promise<EncryptedValue> {
   const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTES));
+  const key = await importAccountDataKey(contactsKey.key);
   const encryptedBuffer = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
+    { name: 'AES-GCM', iv, additionalData: buildContactsAad(contactsKey.bookAddr) },
     key,
     encoder.encode(JSON.stringify(data))
   );
@@ -227,10 +219,22 @@ async function encryptValueForBackend(data: GroupedContactsPayload, key: CryptoK
   };
 }
 
-async function decryptCurrentValueFromBackend(encrypted: EncryptedValue, key: CryptoKey): Promise<string> {
+async function decryptCurrentValueFromBackend(
+  encrypted: EncryptedValue,
+  key: CryptoKey,
+  bookAddr?: string
+): Promise<string> {
   const iv = base64ToBytes(encrypted.iv);
   const ciphertext = base64ToBytes(encrypted.ciphertext);
-  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: 'AES-GCM',
+      iv,
+      ...(bookAddr ? { additionalData: buildContactsAad(bookAddr, encrypted.version) } : {})
+    },
+    key,
+    ciphertext
+  );
 
   return decoder.decode(decrypted);
 }
@@ -243,29 +247,83 @@ async function decryptLegacyValueFromBackend(encrypted: EncryptedValue, key: Cry
   return decoder.decode(decrypted);
 }
 
+function getContactsKeyCandidates(
+  contactsKey?: ContactsCurrentKey | null,
+  legacyContactsKeys?: ContactsCurrentKey[] | null
+) {
+  return [
+    contactsKey ? { ...contactsKey, legacy: false } : null,
+    ...(legacyContactsKeys?.map(key => ({ ...key, legacy: true })) ?? [])
+  ].filter((value, index, values): value is ContactsKeyCandidate =>
+    Boolean(value && values.findIndex(item => item?.key === value.key && item?.bookAddr === value.bookAddr) === index)
+  );
+}
+
 async function decryptContactsRecord(
   record: AccountDataRecord,
-  params: { accountDataKey?: string | null; publicKey?: string | null }
+  params: {
+    contactsKey?: ContactsCurrentKey | null;
+    legacyContactsKeys?: ContactsCurrentKey[] | null;
+    legacyAccountDataKey?: string | null;
+    legacyPublicKey?: string | null;
+  }
 ): Promise<DecryptedContactsRecord> {
   let decrypted: string | null = null;
-  let accountDataKey: string | undefined;
+  let shouldReencrypt = false;
 
   if (record.encryptedValue.version === CONTACTS_ENCRYPTION_VERSION) {
-    const sharedAccountDataKey = params.publicKey ? await deriveSharedAccountDataKey(params.publicKey) : null;
-    const accountDataKeyCandidates = [params.accountDataKey, sharedAccountDataKey].filter(
-      (value, index, values): value is string => Boolean(value) && values.indexOf(value) === index
+    const contactsKeyCandidates = getContactsKeyCandidates(params.contactsKey, params.legacyContactsKeys);
+
+    if (contactsKeyCandidates.length === 0) {
+      throw new CurrentContactsRecordDecryptionError('Missing contacts encryption key');
+    }
+
+    for (const candidate of contactsKeyCandidates) {
+      try {
+        decrypted = await decryptCurrentValueFromBackend(
+          record.encryptedValue,
+          await importAccountDataKey(candidate.key),
+          candidate.bookAddr
+        );
+        shouldReencrypt = candidate.legacy;
+        break;
+      } catch {}
+    }
+
+    if (!decrypted) {
+      throw new CurrentContactsRecordDecryptionError();
+    }
+  } else if (record.encryptedValue.version === CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION) {
+    const legacySharedAccountDataKey = params.legacyPublicKey
+      ? await deriveSharedAccountDataKey(params.legacyPublicKey)
+      : null;
+    const contactsKeyCandidates = getContactsKeyCandidates(params.contactsKey, params.legacyContactsKeys);
+    const mixedAccountDataKeyCandidates: Array<LegacyGcmKeyCandidate | null> = [
+      ...contactsKeyCandidates,
+      params.legacyAccountDataKey ? { key: params.legacyAccountDataKey, bookAddr: undefined } : null,
+      legacySharedAccountDataKey ? { key: legacySharedAccountDataKey, bookAddr: undefined } : null
+    ];
+    const accountDataKeyCandidates = mixedAccountDataKeyCandidates.filter(
+      (value, index, values): value is LegacyGcmKeyCandidate =>
+        Boolean(
+          value && values.findIndex(item => item?.key === value.key && item?.bookAddr === value.bookAddr) === index
+        )
     );
 
     if (accountDataKeyCandidates.length === 0) {
-      throw new CurrentContactsRecordDecryptionError('Missing local contacts encryption key', true);
+      throw new CurrentContactsRecordDecryptionError('Missing legacy contacts encryption key');
     }
 
     let decryptError: unknown;
 
     for (const candidate of accountDataKeyCandidates) {
       try {
-        decrypted = await decryptCurrentValueFromBackend(record.encryptedValue, await importAccountDataKey(candidate));
-        accountDataKey = candidate;
+        decrypted = await decryptCurrentValueFromBackend(
+          record.encryptedValue,
+          await importAccountDataKey(candidate.key),
+          candidate.bookAddr
+        );
+        shouldReencrypt = true;
         break;
       } catch (error) {
         decryptError = error;
@@ -273,26 +331,24 @@ async function decryptContactsRecord(
     }
 
     if (!decrypted) {
-      const shouldGenerateAccountDataKey =
-        !sharedAccountDataKey &&
-        decryptError instanceof Error &&
-        decryptError.message === 'Invalid contacts encryption key';
-      const errorMessage = extractMavrykApiErrorMessage(decryptError);
-
-      throw new CurrentContactsRecordDecryptionError(
-        errorMessage === 'Mavryk API request failed' ? 'Unable to decrypt current contacts record' : errorMessage,
-        shouldGenerateAccountDataKey
-      );
+      throw decryptError instanceof CurrentContactsRecordDecryptionError
+        ? decryptError
+        : new CurrentContactsRecordDecryptionError();
     }
   } else if (record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION) {
-    if (!params.publicKey) {
-      throw new Error('Missing public key for legacy contacts decryption');
+    if (!params.legacyPublicKey) {
+      throw new CurrentContactsRecordDecryptionError('Missing public key for legacy contacts decryption');
     }
 
-    decrypted = await decryptLegacyValueFromBackend(record.encryptedValue, await deriveLegacyCbcKey(params.publicKey));
-    accountDataKey = await deriveSharedAccountDataKey(params.publicKey);
+    decrypted = await decryptLegacyValueFromBackend(
+      record.encryptedValue,
+      await deriveLegacyCbcKey(params.legacyPublicKey)
+    );
+    shouldReencrypt = true;
   } else {
-    throw new Error(`Unsupported contacts encryption version: ${record.encryptedValue.version}`);
+    throw new CurrentContactsRecordDecryptionError(
+      `Unsupported contacts encryption version: ${record.encryptedValue.version}`
+    );
   }
 
   if (!decrypted) {
@@ -300,54 +356,24 @@ async function decryptContactsRecord(
   }
 
   return {
-    ...(accountDataKey ? { accountDataKey } : {}),
+    ...(shouldReencrypt ? { shouldReencrypt } : {}),
     ...normalizeDecryptedPayload(ContactsPayloadSchema.parse(JSON.parse(decrypted)))
   };
 }
 
 async function parseContactsResponse(
   data: unknown,
-  params: { accountDataKey?: string | null; publicKey?: string | null }
+  params: Parameters<typeof decryptContactsRecord>[1]
 ): Promise<{
-  accountDataKey?: string;
   contacts: TempleContact[];
   record: AccountDataRecord;
+  shouldReencrypt?: boolean;
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   const record = AccountDataRecordSchema.parse(data);
   const decrypted = await decryptContactsRecord(record, params);
 
   return { ...decrypted, record };
-}
-
-async function buildUnreadableCurrentContactsRecovery(
-  record: AccountDataRecord,
-  error: CurrentContactsRecordDecryptionError,
-  accountDataKey?: string | null,
-  publicKey?: string | null
-) {
-  const sharedAccountDataKey = publicKey ? await deriveSharedAccountDataKey(publicKey) : null;
-  const canReuseAccountDataKey = accountDataKey ? await isValidAccountDataKey(accountDataKey) : false;
-  const shouldGenerateAccountDataKey =
-    !sharedAccountDataKey && (error.shouldGenerateAccountDataKey || !canReuseAccountDataKey);
-  const nextAccountDataKey = shouldGenerateAccountDataKey
-    ? await generateAccountDataKey()
-    : sharedAccountDataKey ?? accountDataKey!;
-
-  return {
-    accountDataKey: nextAccountDataKey,
-    contacts: [],
-    recordId: record.id
-  };
-}
-
-async function isValidAccountDataKey(accountDataKey: string) {
-  try {
-    await importAccountDataKey(accountDataKey);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function isNotFoundError(error: unknown) {
@@ -390,6 +416,12 @@ async function updateContactsRecord(
   return mavrykApi.put(`/account/data/${recordId}`, { encryptedValue }, requestConfig);
 }
 
+export async function deleteContactsRecord(recordId: string, authContext?: ResolvedMavrykAuthStorageContext) {
+  const requestConfig: MavrykApiRequestConfig = authContext ? { _authContext: authContext } : {};
+
+  await mavrykApi.delete(`/account/data/${recordId}`, requestConfig);
+}
+
 async function createOrUpdateExistingContactsRecord(
   encryptedValue: EncryptedValue,
   requestConfig: MavrykApiRequestConfig
@@ -428,14 +460,16 @@ async function saveEncryptedContactsRecord(
 }
 
 export async function fetchContactsRecord(params: {
-  accountDataKey?: string | null;
-  publicKey?: string;
+  contactsKey?: ContactsCurrentKey | null;
+  legacyContactsKeys?: ContactsCurrentKey[] | null;
+  legacyAccountDataKey?: string | null;
+  legacyPublicKey?: string;
   authContext?: ResolvedMavrykAuthStorageContext;
-  recoverUnreadableCurrentRecord?: boolean;
 }): Promise<{
-  accountDataKey?: string;
   contacts: TempleContact[];
+  encryptionVersion?: string;
   recordId: string | null;
+  shouldReencrypt?: boolean;
   typesByAddress?: Record<string, TempleContactApiType>;
 }> {
   try {
@@ -446,75 +480,68 @@ export async function fetchContactsRecord(params: {
       ...(params.authContext ? { _authContext: params.authContext } : {})
     };
     const record = await fetchEncryptedContactsRecord(requestConfig);
-    let decrypted: Awaited<ReturnType<typeof decryptContactsRecord>>;
-
-    try {
-      decrypted = await decryptContactsRecord(record, params);
-    } catch (error) {
-      if (params.recoverUnreadableCurrentRecord && error instanceof CurrentContactsRecordDecryptionError) {
-        return buildUnreadableCurrentContactsRecovery(record, error, params.accountDataKey, params.publicKey);
-      }
-
-      throw error;
-    }
-
-    const accountDataKey =
-      record.encryptedValue.version === CONTACTS_LEGACY_ENCRYPTION_VERSION
-        ? decrypted.accountDataKey ?? params.accountDataKey ?? (await generateAccountDataKey())
-        : decrypted.accountDataKey ?? params.accountDataKey ?? undefined;
+    const decrypted = await decryptContactsRecord(record, params);
 
     return {
-      ...(accountDataKey ? { accountDataKey } : {}),
       contacts: decrypted.contacts,
+      encryptionVersion: record.encryptedValue.version,
       recordId: record.id,
+      ...(decrypted.shouldReencrypt ? { shouldReencrypt: true } : {}),
       typesByAddress: decrypted.typesByAddress
     };
   } catch (error) {
     if (isNotFoundError(error)) {
       return {
-        ...(params.accountDataKey ? { accountDataKey: params.accountDataKey } : {}),
         contacts: [],
         recordId: null
       };
     }
-    throw new Error(extractMavrykApiErrorMessage(error));
+
+    if (error instanceof CurrentContactsRecordDecryptionError) {
+      throw error;
+    }
+
+    if (axios.isAxiosError(error)) {
+      throw new Error(extractMavrykApiErrorMessage(error));
+    }
+
+    throw error;
   }
 }
 
 export async function saveContactsRecord(params: {
-  accountDataKey?: string | null;
+  contactsKey: ContactsCurrentKey;
   contacts: TempleContact[];
-  publicKey?: string | null;
   recordId?: string | null;
   typesByAddress?: Record<string, TempleContactApiType>;
   authContext?: ResolvedMavrykAuthStorageContext;
 }): Promise<{
-  accountDataKey: string;
   contacts: TempleContact[];
+  encryptionVersion: string;
   recordId: string;
   typesByAddress: Record<string, TempleContactApiType>;
 }> {
   try {
-    const accountDataKey = params.publicKey
-      ? await deriveSharedAccountDataKey(params.publicKey)
-      : params.accountDataKey ?? (await generateAccountDataKey());
-    const key = await importAccountDataKey(accountDataKey);
     const encryptedValue = await encryptValueForBackend(
       buildGroupedPayload(params.contacts, params.typesByAddress),
-      key
+      params.contactsKey
     );
     const requestConfig: MavrykApiRequestConfig = params.authContext ? { _authContext: params.authContext } : {};
     const response = await saveEncryptedContactsRecord(encryptedValue, params.recordId, requestConfig);
 
-    const parsed = await parseContactsResponse(response.data, { accountDataKey, publicKey: params.publicKey });
+    const parsed = await parseContactsResponse(response.data, { contactsKey: params.contactsKey });
 
     return {
-      accountDataKey: parsed.accountDataKey ?? accountDataKey,
       contacts: parsed.contacts,
+      encryptionVersion: parsed.record.encryptedValue.version,
       recordId: parsed.record.id,
       typesByAddress: parsed.typesByAddress
     };
   } catch (error) {
+    if (error instanceof CurrentContactsRecordDecryptionError) {
+      throw error;
+    }
+
     throw new Error(extractMavrykApiErrorMessage(error));
   }
 }

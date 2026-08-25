@@ -24,6 +24,7 @@ export { validateDerivationPath, validateContractAddress } from './helpers';
 export { useBlockTriggers, useOnBlock } from './chain';
 
 export { useContactsActions, searchContacts } from './address-book';
+export { getContactsUnavailableMessage } from './contacts-availability';
 
 export { useTezosDomainsClient, isDomainNameValid } from './tzdns';
 

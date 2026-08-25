@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useRef } from 'react';
 
-import { fetchContactsRecord } from 'mavryk/api/contacts';
+import { isEqual } from 'lodash';
+
+import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
+import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 import { getAuthTokensFromStorage } from 'mavryk/api/storage';
 
 import { TempleAccount, TempleSettings } from '../types';
 
 import { useTempleClient } from './client';
-import type { ContactsAccountScope } from './contacts-settings';
+import type { ContactsBookScope } from './contacts-settings';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
-  getContactsAccountScope,
+  canReadLegacyContacts,
+  getCachedContactsState,
+  getContactsBookScope,
   getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
@@ -21,12 +26,8 @@ type ContactsSyncContext = {
   scopeKey: string;
 };
 
-function buildContactsScopeKey(scope: ContactsAccountScope | null) {
-  if (!scope) {
-    return '';
-  }
-
-  return `${scope.storageAddress}:${scope.authAddress}`;
+function buildContactsScopeKey(scope: ContactsBookScope) {
+  return scope.status === 'available' ? scope.bookAddr : `unavailable:${scope.reason}:${scope.bookAddr ?? ''}`;
 }
 
 export function useContactsSync(
@@ -35,18 +36,18 @@ export function useContactsSync(
   networkId: string,
   settings: TempleSettings
 ) {
-  const { ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
+  const { deriveContactsKey, ensureAuthorized, revealPublicKey, updateSettings } = useTempleClient();
 
   const settingsRef = useRef(settings);
-  const activeContactsAccountScopeRef = useRef<ContactsAccountScope | null>(null);
+  const activeContactsBookScopeRef = useRef<ContactsBookScope>({ status: 'unavailable', reason: 'missing-account' });
   const previousSyncContextRef = useRef<ContactsSyncContext | null>(null);
-  const activeContactsAccountScope = useMemo(
-    () => getContactsAccountScope(allAccounts, account.publicKeyHash),
+  const activeContactsBookScope = useMemo(
+    () => getContactsBookScope(allAccounts, account.publicKeyHash),
     [account.publicKeyHash, allAccounts]
   );
-  const activeContactsScopeKey = buildContactsScopeKey(activeContactsAccountScope);
+  const activeContactsScopeKey = buildContactsScopeKey(activeContactsBookScope);
 
-  activeContactsAccountScopeRef.current = activeContactsAccountScope;
+  activeContactsBookScopeRef.current = activeContactsBookScope;
 
   // Keep the latest settings available for async sync work without retriggering the fetch logic.
   // No cleanup is needed because this only updates an in-memory ref.
@@ -70,54 +71,120 @@ export function useContactsSync(
 
     previousSyncContextRef.current = syncContext;
 
-    if (!activeContactsScopeKey) {
+    const activeScope = activeContactsBookScopeRef.current;
+
+    if (activeScope.status !== 'available') {
       return;
     }
 
-    const activeScope = activeContactsAccountScopeRef.current;
-
-    if (!activeScope || (!isInitialSync && !hasNetworkChanged && !hasAccountChanged && !hasScopeChanged)) {
+    if (!isInitialSync && !hasNetworkChanged && !hasAccountChanged && !hasScopeChanged) {
       return;
     }
 
     let cancelled = false;
 
     void (async () => {
-      const contactsStorageKey = buildContactsStorageKey(activeScope.storageAddress, networkId);
-      const authContext = { walletAddress: activeScope.authAddress, networkId };
-      const accountDataKey = getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey);
+      let updateContactsSyncError: ((syncError: 'auth-unavailable' | 'decrypt-failed') => Promise<void>) | null = null;
 
       try {
-        await ensureAuthorized(activeScope.authAddress, networkId, false, activeScope.authAddress);
+        const derivedContactsKey = await deriveContactsKey(account.publicKeyHash);
+
+        if (cancelled || derivedContactsKey.status !== 'available') {
+          return;
+        }
+
+        const contactsKey = {
+          key: derivedContactsKey.key,
+          bookAddr: derivedContactsKey.bookAddr
+        };
+        const legacyContactsKeys =
+          derivedContactsKey.legacyKeys?.map(key => ({
+            key,
+            bookAddr: derivedContactsKey.bookAddr
+          })) ?? [];
+        const contactsStorageKey = buildContactsStorageKey(derivedContactsKey.bookAddr, networkId);
+        const authContext = { walletAddress: derivedContactsKey.bookAddr, networkId };
+        const shouldReadLegacyContacts = canReadLegacyContacts(settingsRef.current, contactsStorageKey);
+        const accountDataKey = shouldReadLegacyContacts
+          ? getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey)
+          : null;
+
+        updateContactsSyncError = async syncError => {
+          const cachedState = getCachedContactsState(settingsRef.current, contactsStorageKey);
+          const contactsPatch = {
+            contactsStorageKey,
+            contacts: cachedState?.contacts ?? [],
+            recordId: cachedState?.recordId ?? null,
+            syncError,
+            typesByAddress: cachedState?.typesByAddress
+          };
+
+          if (!hasContactsSettingsAccountPatchMismatch(settingsRef.current, contactsPatch)) {
+            return;
+          }
+
+          await updateSettings(
+            buildContactsSettingsPatch(
+              settingsRef.current,
+              contactsStorageKey,
+              contactsPatch.contacts,
+              contactsPatch.recordId,
+              contactsPatch.typesByAddress,
+              syncError
+            )
+          );
+        };
+
+        await ensureAuthorized(derivedContactsKey.bookAddr, networkId, false, derivedContactsKey.bookAddr);
         if (cancelled) return;
 
         const { accessToken } = await getAuthTokensFromStorage(authContext);
 
         if (!accessToken) {
+          await updateContactsSyncError('auth-unavailable');
           return;
         }
 
-        const publicKey = await revealPublicKey(activeScope.authAddress);
+        const publicKey = shouldReadLegacyContacts ? await revealPublicKey(derivedContactsKey.bookAddr) : null;
         if (cancelled) return;
 
-        const {
-          accountDataKey: nextAccountDataKey,
-          contacts,
-          recordId,
-          typesByAddress
-        } = await fetchContactsRecord({
-          accountDataKey,
-          publicKey,
+        const cachedAtFetchStart = getCachedContactsState(settingsRef.current, contactsStorageKey);
+        const remoteState = await fetchContactsRecord({
+          contactsKey,
+          legacyContactsKeys: shouldReadLegacyContacts ? legacyContactsKeys : [],
+          legacyAccountDataKey: accountDataKey,
+          legacyPublicKey: publicKey ?? undefined,
           authContext
         });
         if (cancelled) return;
 
+        if (!isEqual(getCachedContactsState(settingsRef.current, contactsStorageKey), cachedAtFetchStart)) {
+          return;
+        }
+
+        const syncedState =
+          remoteState.shouldReencrypt && remoteState.recordId
+            ? await saveContactsRecord({
+                contactsKey,
+                contacts: remoteState.contacts,
+                recordId: remoteState.recordId,
+                typesByAddress: remoteState.typesByAddress,
+                authContext
+              })
+            : remoteState;
+        if (cancelled) return;
+
+        if (!isEqual(getCachedContactsState(settingsRef.current, contactsStorageKey), cachedAtFetchStart)) {
+          return;
+        }
+
         const contactsPatch = {
-          accountDataKey: nextAccountDataKey,
           contactsStorageKey,
-          contacts,
-          recordId,
-          typesByAddress
+          contacts: syncedState.contacts,
+          recordId: syncedState.recordId,
+          lastSeenVersion:
+            syncedState.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? syncedState.encryptionVersion : undefined,
+          typesByAddress: syncedState.typesByAddress
         };
 
         if (!hasContactsSettingsAccountPatchMismatch(settingsRef.current, contactsPatch)) {
@@ -128,15 +195,21 @@ export function useContactsSync(
           buildContactsSettingsPatch(
             settingsRef.current,
             contactsStorageKey,
-            contacts,
-            recordId,
-            typesByAddress,
-            nextAccountDataKey
+            syncedState.contacts,
+            syncedState.recordId,
+            syncedState.typesByAddress,
+            undefined,
+            contactsPatch.lastSeenVersion
           )
         );
       } catch (error) {
+        if (error instanceof CurrentContactsRecordDecryptionError && updateContactsSyncError) {
+          await updateContactsSyncError('decrypt-failed');
+          return;
+        }
+
         if (!cancelled) {
-          console.error(`Failed to sync contacts for ${activeScope.storageAddress}`, error);
+          console.error(`Failed to sync contacts for ${activeScope.bookAddr}`, error);
         }
       }
     })();
@@ -144,5 +217,13 @@ export function useContactsSync(
     return () => {
       cancelled = true;
     };
-  }, [account.publicKeyHash, activeContactsScopeKey, ensureAuthorized, networkId, revealPublicKey, updateSettings]);
+  }, [
+    account.publicKeyHash,
+    activeContactsScopeKey,
+    deriveContactsKey,
+    ensureAuthorized,
+    networkId,
+    revealPublicKey,
+    updateSettings
+  ]);
 }

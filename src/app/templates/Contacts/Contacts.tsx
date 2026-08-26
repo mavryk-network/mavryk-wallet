@@ -10,8 +10,8 @@ import { ContactAvatar } from 'app/molecules/ContactAvatar';
 import { TopbarRightText } from 'app/molecules/TopbarRightText';
 import { TabComponentProps } from 'app/pages/Settings/Settings';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
-import { T } from 'lib/i18n';
-import { useAccount, useFilteredContacts } from 'lib/temple/front';
+import { T, t } from 'lib/i18n';
+import { getContactsUnavailableMessage, useAccount, useFilteredContacts } from 'lib/temple/front';
 import { TempleAccount, TempleContact } from 'lib/temple/types';
 import { Link, navigate } from 'lib/woozie';
 
@@ -26,7 +26,7 @@ type ContactActions = {
 };
 
 export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComponent }) => {
-  const { outsideWalletContacts: filteredContacts } = useFilteredContacts();
+  const { availability, canMutateContacts, outsideWalletContacts: filteredContacts } = useFilteredContacts();
   const account = useAccount();
   const { popup } = useAppEnv();
 
@@ -46,14 +46,16 @@ export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComp
 
   // There is always one account (the current one)
   const isContactsEmpty = allContacts.length === 0;
+  const unavailableMessage =
+    availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
 
   const handleAddContactClick = useCallback(() => {
     navigate('/settings/add-contact');
   }, []);
 
   const ContactsSettingsComponent = useMemo(
-    () => <TopbarRightText label={<ContactsDropdown allContacts={allContacts} />} />,
-    [allContacts]
+    () => <TopbarRightText label={<ContactsDropdown allContacts={allContacts} disabled={!canMutateContacts} />} />,
+    [allContacts, canMutateContacts]
   );
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComp
         style={{ maxHeight: !popup ? '70vh' : 'auto' }}
         className="flex flex-col flex-1 overflow-y-auto no-scrollbarD"
       >
-        {!isContactsEmpty && (
+        {!unavailableMessage && !isContactsEmpty && (
           <div className={clsx('w-full mx-auto -mt-3', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
             <CustomSelect
               className={clsx('p-0', isContactsEmpty ? 'mb-0' : 'mb-6')}
@@ -86,7 +88,16 @@ export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComp
           </div>
         )}
 
-        {isContactsEmpty && (
+        {unavailableMessage && (
+          <section className="w-full flex-grow flex justify-center items-center px-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="text-base-plus text-white mb-2">{t('contactsUnavailable')}</div>
+              <div className="text-sm text-secondary-white mb-4 text-center">{unavailableMessage}</div>
+            </div>
+          </section>
+        )}
+
+        {!unavailableMessage && isContactsEmpty && (
           <section className="w-full flex-grow flex justify-center items-center">
             <div className="flex flex-col items-center text-center">
               <div className="text-base-plus text-white mb-2">
@@ -103,7 +114,7 @@ export const Contacts: React.FC<TabComponentProps> = ({ setToolbarRightSidedComp
       <div
         className={clsx('absolute bottom-0 w-full grid grid-cols-1 gap-3 bg-gray-920 z-10', popup ? 'py-6' : 'pt-6')}
       >
-        <ButtonRounded onClick={handleAddContactClick} size="big" btnType="primary" fill>
+        <ButtonRounded onClick={handleAddContactClick} size="big" btnType="primary" fill disabled={!canMutateContacts}>
           <T id="addContact" />
         </ButtonRounded>
       </div>

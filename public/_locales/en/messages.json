@@ -3429,6 +3429,24 @@
   "addAddresesDesc": {
     "message": "Add your first one to get started!"
   },
+  "contactsUnavailable": {
+    "message": "Contacts unavailable"
+  },
+  "contactsUnavailableLedger": {
+    "message": "Encrypted contacts are not available for Ledger accounts."
+  },
+  "contactsUnavailableWatchOnly": {
+    "message": "Encrypted contacts are not available for watch-only accounts."
+  },
+  "contactsUnavailableAccount": {
+    "message": "Contacts are unavailable because the book account cannot be resolved."
+  },
+  "contactsDecryptFailed": {
+    "message": "Contacts cannot be decrypted. Existing remote data was not overwritten."
+  },
+  "contactsAuthUnavailable": {
+    "message": "Contacts are temporarily unavailable until this account is authorized."
+  },
   "goToAddressBook": {
     "message": "Go to Address Book"
   },

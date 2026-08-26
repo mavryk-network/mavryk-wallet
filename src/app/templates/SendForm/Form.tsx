@@ -95,7 +95,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
 
   const assetSymbol = useMemo(() => getAssetSymbol(assetMetadata), [assetMetadata]);
 
-  const { allContacts } = useFilteredContacts();
+  const { allContacts, canMutateContacts } = useFilteredContacts();
   const network = useNetwork();
   const acc = useAccount();
   const tezos = useTezos();
@@ -557,7 +557,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         </div>
       )}
 
-      {toFilled && !filledContact ? (
+      {canMutateContacts && toFilled && !filledContact ? (
         <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
           <button
             type="button"

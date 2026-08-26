@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { isEqual } from 'lodash';
 
@@ -6,14 +6,13 @@ import { useMemoWithCompare } from 'lib/ui/hooks';
 
 import { TempleContact } from '../types';
 
-import { useTempleClient } from './client';
 import {
-  buildContactsSettingsPatch,
   buildContactsStorageKey,
-  getContactsAccountScope,
+  ContactsAvailability,
+  getCachedContactsState,
+  getContactsBookScope,
   getCurrentAccountStoredContacts,
-  getStoredContactsTypesByAddress,
-  hasContactsSettingsMismatch
+  getStoredContactsTypesByAddress
 } from './contacts-settings';
 import { useAccount, useAllAccounts, useNetwork, useRelevantAccounts, useSettings } from './ready';
 
@@ -22,14 +21,30 @@ export function useFilteredContacts() {
   const account = useAccount();
   const allAccounts = useAllAccounts();
   const network = useNetwork();
-  const contactsAccountScope = useMemo(
-    () => getContactsAccountScope(allAccounts, account.publicKeyHash),
+  const contactsBookScope = useMemo(
+    () => getContactsBookScope(allAccounts, account.publicKeyHash),
     [account.publicKeyHash, allAccounts]
   );
   const contactsStorageKey = useMemo(
-    () => (contactsAccountScope ? buildContactsStorageKey(contactsAccountScope.storageAddress, network.id) : null),
-    [contactsAccountScope, network.id]
+    () =>
+      contactsBookScope.status === 'available' ? buildContactsStorageKey(contactsBookScope.bookAddr, network.id) : null,
+    [contactsBookScope, network.id]
   );
+  const cachedState = useMemo(
+    () => (contactsStorageKey ? getCachedContactsState(settings, contactsStorageKey) : null),
+    [contactsStorageKey, settings]
+  );
+  const availability = useMemo<ContactsAvailability>(() => {
+    if (contactsBookScope.status === 'unavailable') {
+      return { status: 'unavailable', reason: contactsBookScope.reason };
+    }
+
+    if (cachedState?.syncError) {
+      return { status: 'unavailable', reason: cachedState.syncError };
+    }
+
+    return { status: 'ready' };
+  }, [cachedState?.syncError, contactsBookScope]);
   const contacts = useMemo(() => {
     if (!contactsStorageKey) {
       return [];
@@ -63,24 +78,18 @@ export function useFilteredContacts() {
     [contacts, accountContacts],
     isEqual
   );
+  const availableFilteredContacts = availability.status === 'ready' ? filteredContacts : [];
 
-  const allContacts = useMemo(() => [...filteredContacts, ...accountContacts], [filteredContacts, accountContacts]);
+  const allContacts = useMemo(
+    () => [...availableFilteredContacts, ...accountContacts],
+    [availableFilteredContacts, accountContacts]
+  );
 
-  const { updateSettings } = useTempleClient();
-
-  // Keep the scoped contacts cache aligned with filtered contacts for the active wallet/network view.
-  // No cleanup is needed because this is a one-shot settings synchronization.
-  useEffect(() => {
-    if (!contactsStorageKey) {
-      return;
-    }
-
-    if (!hasContactsSettingsMismatch(settings, contactsStorageKey, filteredContacts)) {
-      return;
-    }
-
-    void updateSettings(buildContactsSettingsPatch(settings, contactsStorageKey, filteredContacts));
-  }, [contactsStorageKey, filteredContacts, settings, updateSettings]);
-
-  return { contacts: filteredContacts, allContacts, outsideWalletContacts: filteredContacts };
+  return {
+    availability,
+    canMutateContacts: availability.status === 'ready',
+    contacts: availableFilteredContacts,
+    allContacts,
+    outsideWalletContacts: availableFilteredContacts
+  };
 }

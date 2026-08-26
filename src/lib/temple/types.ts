@@ -175,11 +175,35 @@ export interface TempleContact {
 }
 
 export type TempleContactApiType = 'user' | 'validator' | 'contract';
+export type ContactsUnavailableReason =
+  | 'ledger'
+  | 'watch-only'
+  | 'missing-owner'
+  | 'missing-account'
+  | 'auth-unavailable'
+  | 'decrypt-failed';
+
+export type DerivedContactsKey =
+  | {
+      status: 'available';
+      key: string;
+      legacyKeys?: string[];
+      bookAddr: string;
+      identityKind: 'hd' | 'imported';
+    }
+  | {
+      status: 'unavailable';
+      bookAddr?: string;
+      reason: Exclude<ContactsUnavailableReason, 'auth-unavailable' | 'decrypt-failed'>;
+    };
 
 export interface TempleContactsAccountState {
+  /** @deprecated SEC-02 keeps this only as a read-only compatibility source for old local GCM2 records. */
   accountDataKey?: string;
   contacts: TempleContact[];
+  lastSeenVersion?: string;
   recordId?: string;
+  syncError?: Extract<ContactsUnavailableReason, 'decrypt-failed' | 'auth-unavailable'>;
   typesByAddress?: Record<string, TempleContactApiType>;
 }
 
@@ -286,6 +310,8 @@ export enum TempleMessageType {
   FindFreeHDAccountIndexResponse = 'TEMPLE_FIND_FREE_HD_ACCOUNT_INDEX_RESPONSE',
   RevealPublicKeyRequest = 'TEMPLE_REVEAL_PUBLIC_KEY_REQUEST',
   RevealPublicKeyResponse = 'TEMPLE_REVEAL_PUBLIC_KEY_RESPONSE',
+  DeriveContactsKeyRequest = 'TEMPLE_DERIVE_CONTACTS_KEY_REQUEST',
+  DeriveContactsKeyResponse = 'TEMPLE_DERIVE_CONTACTS_KEY_RESPONSE',
   RevealPrivateKeyRequest = 'TEMPLE_REVEAL_PRIVATE_KEY_REQUEST',
   RevealPrivateKeyResponse = 'TEMPLE_REVEAL_PRIVATE_KEY_RESPONSE',
   RevealMnemonicRequest = 'TEMPLE_REVEAL_MNEMONIC_REQUEST',
@@ -367,6 +393,7 @@ export type TempleRequest =
   | TempleRemoveHdWalletRequest
   | TempleRemoveAccountsByTypeRequest
   | TempleRevealPublicKeyRequest
+  | TempleDeriveContactsKeyRequest
   | TempleRevealPrivateKeyRequest
   | TempleRevealMnemonicRequest
   | TempleGenerateSyncPayloadRequest
@@ -408,6 +435,7 @@ export type TempleResponse =
   | TempleRemoveHdWalletResponse
   | TempleRemoveAccountsByTypeResponse
   | TempleRevealPublicKeyResponse
+  | TempleDeriveContactsKeyResponse
   | TempleRevealPrivateKeyResponse
   | TempleRevealMnemonicResponse
   | TempleGenerateSyncPayloadResponse
@@ -555,6 +583,16 @@ interface TempleRevealPublicKeyRequest extends TempleMessageBase {
 interface TempleRevealPublicKeyResponse extends TempleMessageBase {
   type: TempleMessageType.RevealPublicKeyResponse;
   publicKey: string;
+}
+
+interface TempleDeriveContactsKeyRequest extends TempleMessageBase {
+  type: TempleMessageType.DeriveContactsKeyRequest;
+  accountPublicKeyHash: string;
+}
+
+interface TempleDeriveContactsKeyResponse extends TempleMessageBase {
+  type: TempleMessageType.DeriveContactsKeyResponse;
+  result: DerivedContactsKey;
 }
 
 interface TempleRevealPrivateKeyRequest extends TempleMessageBase {

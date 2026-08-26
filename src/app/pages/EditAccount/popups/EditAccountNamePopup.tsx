@@ -9,7 +9,12 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { PopupModalWithTitle } from 'app/templates/PopupModalWithTitle';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
-import { useContactsActions, useTempleClient } from 'lib/temple/front';
+import {
+  getContactsUnavailableMessage,
+  useContactsActions,
+  useFilteredContacts,
+  useTempleClient
+} from 'lib/temple/front';
 import { TempleContact } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 
@@ -38,6 +43,9 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
   const customAlert = useAlert();
   const formAnalytics = useFormAnalytics('ChangeAccountName');
   const { editContact } = useContactsActions();
+  const { availability } = useFilteredContacts();
+  const unavailableMessage =
+    !isOwn && availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
 
   const editAccNameFieldRef = useRef<HTMLInputElement>(null);
   const accNamePrevRef = useRef<string>();
@@ -65,6 +73,10 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
       (async () => {
         formAnalytics.trackSubmit();
         try {
+          if (unavailableMessage) {
+            throw new Error(unavailableMessage);
+          }
+
           const newName = editAccNameFieldRef.current?.value;
           if (newName && newName !== accountName && isOwn) {
             // update "own" account name
@@ -88,7 +100,17 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
         }
       })();
     },
-    [formAnalytics, accountName, isOwn, close, editAccountName, accountHash, editContact, customAlert]
+    [
+      formAnalytics,
+      unavailableMessage,
+      accountName,
+      isOwn,
+      close,
+      editAccountName,
+      accountHash,
+      editContact,
+      customAlert
+    ]
   );
 
   const handleEditFieldFocus = useCallback(() => {
@@ -128,8 +150,14 @@ export const EditAccountNamePopup: FC<EditAccountNamePopupPeops> = ({
             onClean={handleClean}
             cleanable={Boolean(value)}
           />
+          {unavailableMessage && <p className="text-sm text-secondary-white text-center">{unavailableMessage}</p>}
 
-          <ButtonRounded size="big" className="w-full capitalize mt-auto" testID={EditableTitleSelectors.saveButton}>
+          <ButtonRounded
+            size="big"
+            className="w-full capitalize mt-auto"
+            testID={EditableTitleSelectors.saveButton}
+            disabled={Boolean(unavailableMessage)}
+          >
             <T id="save" />
           </ButtonRounded>
         </form>

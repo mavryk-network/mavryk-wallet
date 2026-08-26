@@ -1,12 +1,19 @@
 export const CONTACTS_DATA_KEY = 'contacts';
 export const CONTACTS_DATA_TYPE = 'contacts';
 export const CONTACTS_LEGACY_ENCRYPTION_VERSION = 'AES-256-CBC-1';
-export const CONTACTS_ENCRYPTION_VERSION = 'AES-256-GCM-2';
+export const CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION = 'AES-256-GCM-2';
+export const CONTACTS_ENCRYPTION_VERSION = 'AES-256-GCM-3';
 export const CONTACTS_ENCRYPTION_INFO = [
   'mavryk-wallet',
   CONTACTS_DATA_TYPE,
   CONTACTS_DATA_KEY,
   CONTACTS_ENCRYPTION_VERSION
+].join('|');
+export const CONTACTS_LEGACY_GCM_ENCRYPTION_INFO = [
+  'mavryk-wallet',
+  CONTACTS_DATA_TYPE,
+  CONTACTS_DATA_KEY,
+  CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
 ].join('|');
 
 export const CONTACTS_KEY_BYTES = 32;
@@ -19,8 +26,8 @@ export type ContactsCurrentKey = {
   bookAddr: string;
 };
 
-export function buildContactsAad(bookAddr: string) {
-  return encoder.encode([bookAddr, CONTACTS_DATA_TYPE, CONTACTS_DATA_KEY, CONTACTS_ENCRYPTION_VERSION].join('|'));
+export function buildContactsAad(bookAddr: string, version = CONTACTS_ENCRYPTION_VERSION) {
+  return encoder.encode([bookAddr, CONTACTS_DATA_TYPE, CONTACTS_DATA_KEY, version].join('|'));
 }
 
 export function bytesToBase64(bytes: Uint8Array) {

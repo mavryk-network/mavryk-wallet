@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import { getMessage } from 'lib/i18n';
+import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
 import { TempleContact, TempleContactApiType } from 'lib/temple/types';
 import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 
@@ -14,6 +15,7 @@ import { getContactsUnavailableMessage } from './contacts-availability';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
+  canReadLegacyContacts,
   canUseEncryptedContacts,
   getCachedContactsState,
   getContactsBookScope,
@@ -156,16 +158,26 @@ export function useContactsActions() {
         key: derivedContactsKey.key,
         bookAddr: derivedContactsKey.bookAddr
       };
+      const legacyContactsKeys =
+        derivedContactsKey.legacyKeys?.map(key => ({
+          key,
+          bookAddr: derivedContactsKey.bookAddr
+        })) ?? [];
       const authContext = { walletAddress: derivedContactsKey.bookAddr, networkId: network.id };
+      const resolvedContactsStorageKey = buildContactsStorageKey(derivedContactsKey.bookAddr, network.id);
+      const shouldReadLegacyContacts = canReadLegacyContacts(settingsRef.current, resolvedContactsStorageKey);
 
       await ensureAuthorized(derivedContactsKey.bookAddr, network.id, interactive, derivedContactsKey.bookAddr);
 
       return {
         authContext,
         contactsKey,
-        contactsStorageKey: buildContactsStorageKey(derivedContactsKey.bookAddr, network.id),
-        legacyAccountDataKey: getStoredContactsAccountDataKey(settingsRef.current, contactsStorageKey),
-        legacyPublicKey: await revealPublicKey(derivedContactsKey.bookAddr)
+        contactsStorageKey: resolvedContactsStorageKey,
+        legacyContactsKeys: shouldReadLegacyContacts ? legacyContactsKeys : [],
+        legacyAccountDataKey: shouldReadLegacyContacts
+          ? getStoredContactsAccountDataKey(settingsRef.current, resolvedContactsStorageKey)
+          : null,
+        legacyPublicKey: shouldReadLegacyContacts ? await revealPublicKey(derivedContactsKey.bookAddr) : null
       };
     },
     [
@@ -191,9 +203,11 @@ export function useContactsActions() {
       return cachedState;
     }
 
-    const { authContext, contactsKey, legacyAccountDataKey, legacyPublicKey } = await resolveContactsAccess(true);
+    const { authContext, contactsKey, legacyContactsKeys, legacyAccountDataKey, legacyPublicKey } =
+      await resolveContactsAccess(true);
     const remoteState = await fetchContactsRecord({
       contactsKey,
+      legacyContactsKeys,
       legacyAccountDataKey,
       legacyPublicKey,
       authContext
@@ -242,6 +256,7 @@ export function useContactsActions() {
       );
       let nextRecordId = currentRecordId;
       let nextTypesByAddress = resolvedTypesByAddress;
+      let nextLastSeenVersion: string | undefined;
 
       if (normalizedContacts.length > 0 || currentRecordId) {
         const saved = await saveContactsRecord({
@@ -254,6 +269,8 @@ export function useContactsActions() {
 
         nextRecordId = saved.recordId;
         nextTypesByAddress = saved.typesByAddress;
+        nextLastSeenVersion =
+          saved.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? saved.encryptionVersion : undefined;
       } else {
         nextRecordId = null;
         nextTypesByAddress = undefined;
@@ -265,7 +282,9 @@ export function useContactsActions() {
           resolvedContactsStorageKey,
           normalizedContacts,
           nextRecordId,
-          nextTypesByAddress
+          nextTypesByAddress,
+          undefined,
+          nextLastSeenVersion
         )
       );
     },

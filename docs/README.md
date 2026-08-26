@@ -2,6 +2,10 @@
 
 This doc describes how Mavryk Wallet works internally.
 
+## Feature Reports
+
+- [Contacts v3 architecture](contacts-v3.md)
+
 ## Architecture
 
 The application consists of three main parts: UI scripts, one Background script, and the Content script that is injected on every page.

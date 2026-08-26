@@ -55,6 +55,7 @@ import {
   removeDApp,
   removeAllDApps
 } from './dapp';
+import { DAppContactsResponse, isDAppContactsRequest, processDAppContactsRequest } from './dapp-contacts';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
@@ -652,23 +653,54 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
 
 export async function processDApp(
   origin: string,
-  req: MavrykWalletDAppRequest
-): Promise<MavrykWalletDAppResponse | void> {
-  switch (req?.type) {
+  req: MavrykWalletDAppRequest | unknown
+): Promise<MavrykWalletDAppResponse | DAppContactsResponse | void> {
+  if (isDAppContactsRequest(req)) {
+    return withInited(() =>
+      enqueueDApp(() =>
+        withUnlocked(async ({ vault }) => {
+          const [accounts, dApps] = await Promise.all([vault.fetchAccounts(), getAllDApps()]);
+
+          return processDAppContactsRequest(origin, req, {
+            dApp: dApps[origin],
+            ensureAuthorized: (accountPublicKeyHash, networkId, explicitAuthWalletAddress) =>
+              ensureAuthorizedForAccount(
+                vault,
+                accountPublicKeyHash,
+                networkId,
+                accounts,
+                true,
+                explicitAuthWalletAddress
+              ),
+            updateSettings: async settings => {
+              const updatedSettings = await vault.updateSettings(settings);
+              await createCustomNetworksSnapshot(updatedSettings);
+              settingsUpdated(updatedSettings);
+            },
+            vault
+          });
+        })
+      )
+    );
+  }
+
+  const dAppReq = req as MavrykWalletDAppRequest;
+
+  switch (dAppReq?.type) {
     case MavrykWalletDAppMessageType.GetCurrentPermissionRequest:
       return withInited(() => getCurrentPermission(origin));
 
     case MavrykWalletDAppMessageType.PermissionRequest:
-      return withInited(() => enqueueDApp(() => requestPermission(origin, req)));
+      return withInited(() => enqueueDApp(() => requestPermission(origin, dAppReq)));
 
     case MavrykWalletDAppMessageType.OperationRequest:
-      return withInited(() => enqueueDApp(() => requestOperation(origin, req)));
+      return withInited(() => enqueueDApp(() => requestOperation(origin, dAppReq)));
 
     case MavrykWalletDAppMessageType.SignRequest:
-      return withInited(() => enqueueDApp(() => requestSign(origin, req)));
+      return withInited(() => enqueueDApp(() => requestSign(origin, dAppReq)));
 
     case MavrykWalletDAppMessageType.BroadcastRequest:
-      return withInited(() => requestBroadcast(origin, req));
+      return withInited(() => requestBroadcast(origin, dAppReq));
   }
 }
 

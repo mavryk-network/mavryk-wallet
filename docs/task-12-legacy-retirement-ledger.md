@@ -2,7 +2,7 @@
 
 ## Status and filing
 
-Inventory prepared on 2026-09-10. Task 12 is **incomplete pending an agreed deletion-marker version**. No release version is inferred from package.json (2.0.8), tags, elapsed time, or a local merge. No deletion is authorized by this ledger or a future marker.
+Inventory prepared on 2026-09-10. Task 12 is **complete with deletion markers waived by the user**. The user explicitly requested skipping `DELETE IN` comments and merging the completed documentation locally into `MAV-3974/architecture`. No release version is inferred from package.json (2.0.8), tags, elapsed time, or a local merge. No deletion is authorized by this ledger or a future marker.
 
 Ready-to-file ticket title: **Retire legacy migration bridges after verified shipped migrations and supported upgrade paths (Task 21 / Phase 9)**.
 
@@ -26,9 +26,9 @@ Fetch of origin and explicit PR #30 head succeeded on 2026-09-10. Starting tree 
 
 The supplied baseline differs only by the subsequent AGENTS/.gitignore commit, retained intact. New branch `task-12-redem` starts at current integration. PR #30 is reference only; dev remains the production lineage/final target. No push or merge into dev. Commit and local integration outcome belong in the delivery report.
 
-## Bridge inventory and marker boundaries
+## Bridge inventory and retirement boundaries
 
-Paths below are relative to the repository root. A future concrete `DELETE IN` comment must link to this ledger and apply only to the stated scope. No whole-module deletion is justified merely by a legacy filename.
+Paths below are relative to the repository root. Deletion markers are not required for Task 12; this ledger tracks the narrowly scoped retirement candidates. No whole-module deletion is justified merely by a legacy filename.
 
 | Path                                           | Temporary scope and dependencies                                                                                                                                                                                                                                                           | Protections / live behavior to retain                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -81,16 +81,16 @@ Browser persistence uses `src/lib/store/storage.ts` through `storageConfig` in `
 - [ ] Test fresh, already migrated, supported old direct upgrades, skipped releases, malformed sources, absent browser source with serialized fallback, and interrupted/failed migrations. Add explicit allowlisted cleanup tests that assert protected keys and IndexedDB remain untouched outside separately approved scope.
 - [ ] Document rollback implications: retained old snapshots may be stale after new-owner writes; define rollback data/recovery behavior before deleting anything. Maintain rollback sources for the required clean release cycle and longer where the supported-upgrade policy requires them.
 - [ ] Replace migration-coupled readiness with equivalent permanent hydration, validation, single-owner serialization, durable verification and analytics gates before removing obsolete fallback code. Migrate Redux action callers before removing middleware.
-- [ ] Review the concrete deletion-marker version against release evidence. A reached version is a review reminder, never an automatic cleanup trigger. Defer retirement if any prerequisite fails.
+- [ ] Approve the actual retirement release against shipped-release evidence and all prerequisites above. A reached version never authorizes automatic cleanup. Defer retirement if any prerequisite fails.
 
-Still-needed decisions: agreed marker version, release evidence, supported minimum/direct upgrade policy and rollback recovery policy, and external tracker destination/access. No release or upgrade-policy approval is invented here.
+Future-retirement decisions still needed: release evidence, supported minimum/direct upgrade policy and rollback recovery policy, and external tracker destination/access. No release or upgrade-policy approval is invented here.
 
 ## Verification and Task 13 handoff
 
 Inventory is matched to the current Task 11 implementation and live reducer registrations. No executable changes are needed. Markdown formatting, all 29 explicit source paths, relative documentation links and `git diff --check` were verified; runtime tests/builds do not validate documentation-only edits and are intentionally not rerun. Task 11's recorded baseline remains in [its handoff](task-11-legacy-ui-handoff.md); no new runtime pass or installed-profile smoke test is claimed.
 
-Task 13 can use the unchanged [Task 10 foundation](task-10-zustand-foundation.md) and [Task 11 owner contract](task-11-legacy-ui-handoff.md). Task 12 cannot be called complete until concrete scoped markers are added after the version decision. Task 13 must extend this inventory as it establishes actual ownership; this ticket does not authorize its implementation.
+Task 13 can use the unchanged [Task 10 foundation](task-10-zustand-foundation.md) and [Task 11 owner contract](task-11-legacy-ui-handoff.md). Task 12 is complete under the user-approved marker waiver; its future-retirement decisions and external filing blocker do not block Task 13. Task 13 must extend this inventory as it establishes actual ownership; this ticket does not authorize its implementation.
 
 ## Documentation Update
 
-Added this tracked ledger as the ready-to-file future retirement ticket, correcting reference assumptions without replacing ignored task descriptions. No runtime behavior, API, dependency, persistence registration, source payload or IndexedDB change is included.
+Added this tracked ledger as the ready-to-file future retirement ticket, correcting reference assumptions without replacing ignored task descriptions. Recorded the user-approved deletion-marker waiver and Task 12 completion. No runtime behavior, API, dependency, persistence registration, source payload or IndexedDB change is included.

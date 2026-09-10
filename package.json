@@ -208,7 +208,8 @@
     "webpackbar": "5.0.2",
     "yup": "1.7.1",
     "zip-a-folder": "1.1.7",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "zustand": "5.0.11"
   },
   "devDependencies": {
     "source-map": "^0.7.4"

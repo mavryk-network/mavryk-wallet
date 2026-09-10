@@ -15,7 +15,7 @@ import {
 
 import { MetadataMap } from '../collectibles-metadata/state';
 
-export const getAccountAssetsStoreKey = (account: string, chainId: string) => `${account}@${chainId}`;
+export { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
 
 export const isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount = (
   key: string,

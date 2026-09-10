@@ -1,9 +1,8 @@
 import { nanoid } from '@reduxjs/toolkit';
 
-export enum BalanceMode {
-  Fiat = 'fiat',
-  Gas = 'gas'
-}
+import { BalanceMode } from './balance-mode.enum';
+
+export { BalanceMode } from './balance-mode.enum';
 
 export interface SettingsState {
   userId: string;

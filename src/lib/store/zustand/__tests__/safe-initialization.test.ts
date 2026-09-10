@@ -49,7 +49,7 @@ it('importing the boundary only reads destination keys and never writes identity
   jest.dontMock('lib/temple/repo');
 });
 
-it('keeps all runtime consumers outside the inactive destination directory on their existing stores', () => {
+it('activates only the scoped UI/root metadata consumers and keeps asset destinations inactive', () => {
   const src = path.resolve(__dirname, '../../../..');
   const destinationPath = path.resolve(__dirname, '..');
   const consumers: string[] = [];
@@ -60,6 +60,7 @@ it('keeps all runtime consumers outside the inactive destination directory on th
       if (entry.isDirectory()) inspect(file);
       else if (
         /\.tsx?$/.test(file) &&
+        !/\.(test|spec)\.tsx?$/.test(file) &&
         /(?:from\s*|require\s*\()\s*['"][^'"]*store\/zustand/.test(fs.readFileSync(file, 'utf8'))
       ) {
         consumers.push(path.relative(src, file));
@@ -67,5 +68,24 @@ it('keeps all runtime consumers outside the inactive destination directory on th
     }
   };
   inspect(src);
-  expect(consumers).toEqual([]);
+  expect(consumers.sort()).toEqual(
+    [
+      'app/store/index.ts',
+      'app/store/ab-testing/selectors.ts',
+      'app/store/advertising/selectors.ts',
+      'app/store/assets/epics.ts',
+      'app/store/newsletter/newsletter-selectors.ts',
+      'app/store/owned-ui.middleware.ts',
+      'app/store/provider.tsx',
+      'app/store/settings/selectors.ts',
+      'app/store/tokens-metadata/selectors.ts',
+      'lib/analytics/send-events.utils.ts',
+      'lib/notifications/store/selectors.ts',
+      'lib/temple/back/analytics.ts',
+      'lib/temple/back/main.ts'
+    ].sort()
+  );
+  for (const consumer of consumers) {
+    expect(fs.readFileSync(path.join(src, consumer), 'utf8')).not.toMatch(/assetsStore|createAssetsStore/);
+  }
 });

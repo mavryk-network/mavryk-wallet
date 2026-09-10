@@ -1,5 +1,3 @@
-import { nanoid } from '@reduxjs/toolkit';
-
 import { BalanceMode } from './balance-mode.enum';
 
 export { BalanceMode } from './balance-mode.enum';
@@ -12,7 +10,8 @@ export interface SettingsState {
 }
 
 export const settingsInitialState: SettingsState = {
-  userId: nanoid(),
+  // Retired Redux identity slot; the background owner adopts/generates the live ID after successful reads.
+  userId: '',
   isAnalyticsEnabled: true,
   balanceMode: BalanceMode.Fiat,
   isOnRampPossibility: false

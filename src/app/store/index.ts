@@ -1,13 +1,15 @@
 import { devToolsEnhancer } from '@redux-devtools/remote';
 import { Action, configureStore } from '@reduxjs/toolkit';
-import { persistReducer, persistStore, createMigrate } from 'redux-persist';
+import { persistReducer, persistStore, createMigrate, PersistorOptions } from 'redux-persist';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 
 import { IS_DEV_ENV } from 'lib/env';
 import { storageConfig } from 'lib/store';
+import { decodeLegacyUIRoot } from 'lib/store/zustand/legacy-ui-source';
 
 import { sanitizeCollectiblesMetadataForDevTools } from './collectibles-metadata/state';
 import { MIGRATIONS } from './migrations';
+import { ownedUIMiddleware } from './owned-ui.middleware';
 import { epicMiddleware, rootEpic } from './root-state.epics';
 import { rootReducer } from './root-state.reducer';
 import type { RootState } from './root-state.type';
@@ -27,9 +29,16 @@ const DEFAULT_REDUX_DEVTOOLS_PORT = 8000;
 
 const persistedReducer = persistReducer<RootState>(
   {
-    key: 'temple-root',
+    key: 'temple-root-task11',
     version: 3,
     ...storageConfig,
+    // Preserve the rollback root verbatim; unrelated Redux domains continue under a separate live root.
+    getStoredState: async config => {
+      const state =
+        (await storageConfig.getStoredState(config)) ??
+        (await storageConfig.getStoredState({ ...config, key: 'temple-root' }));
+      return state ? (decodeLegacyUIRoot(state) as typeof state) : state;
+    },
     stateReconciler: autoMergeLevel2,
     blacklist: persistConfigBlacklist,
     debug: IS_DEV_ENV,
@@ -62,7 +71,7 @@ const store = configureStore({
       serializableCheck: false
     });
 
-    return defMiddleware.concat(epicMiddleware);
+    return defMiddleware.concat(ownedUIMiddleware, epicMiddleware);
   },
   devTools: false,
   enhancers: REDUX_DEVTOOLS_PORT
@@ -82,7 +91,9 @@ const store = configureStore({
     : undefined
 });
 
-const persistor = persistStore(store);
+// redux-persist 6 implements manualPersist but omits it from its shipped declaration.
+const persistOptions: PersistorOptions & { manualPersist: boolean } = { manualPersist: true };
+const persistor = persistStore(store, persistOptions);
 
 epicMiddleware.run(rootEpic);
 

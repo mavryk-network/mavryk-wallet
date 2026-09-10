@@ -1,6 +1,11 @@
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
+
 import { useSelector } from '../index';
 
 export const useActivePromotionSelector = () => useSelector(({ advertising }) => advertising.activePromotion.data);
 
-export const useIsNewPromotionAvailableSelector = () =>
-  useSelector(({ advertising }) => advertising.lastSeenPromotionName !== advertising.activePromotion.data?.name);
+export const useIsNewPromotionAvailableSelector = () => {
+  const lastSeen = useOwnedUI(({ ui }) => ui.lastSeenPromotionName);
+  const promotion = useActivePromotionSelector();
+  return lastSeen !== promotion?.name;
+};

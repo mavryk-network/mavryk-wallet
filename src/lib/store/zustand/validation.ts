@@ -27,7 +27,7 @@ export const SAFE_KEY_SCHEMA = z
   .refine(key => !UNSAFE_KEYS.has(key));
 
 /** Validate before returning a detached, schema-selected durable snapshot. */
-export function parseData<D>(schema: z.ZodType<D>, value: unknown): D {
+export function parseData<D>(schema: z.ZodType<D, z.ZodTypeDef, unknown>, value: unknown): D {
   assertSafeData(value);
   return schema.parse(value);
 }

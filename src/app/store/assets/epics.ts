@@ -8,6 +8,7 @@ import { ofType, toPayload } from 'ts-action-operators';
 import { fetchWhitelistTokens } from 'lib/apis/temple';
 import { fetchScamlistTokens } from 'lib/apis/temple/scamlist-tokens';
 import { toLatestValue } from 'lib/store';
+import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
 
 import { putTokensBalancesAction } from '../balances/actions';
 import { fixBalances } from '../balances/utils';
@@ -38,7 +39,7 @@ const loadAccountTokensEpic: Epic<Action, Action, RootState> = (action$, state$)
         loadAccountTokens(
           account,
           chainId,
-          mergeAssetsMetadata(state.tokensMetadata.metadataRecord, state.collectiblesMetadata.records)
+          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.collectiblesMetadata.records)
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => {
@@ -63,7 +64,7 @@ const loadAccountCollectiblesEpic: Epic<Action, Action, RootState> = (action$, s
         loadAccountCollectibles(
           account,
           chainId,
-          mergeAssetsMetadata(state.tokensMetadata.metadataRecord, state.collectiblesMetadata.records)
+          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.collectiblesMetadata.records)
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => [
@@ -88,7 +89,7 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
         loadAccountRwas(
           account,
           chainId,
-          mergeAssetsMetadata(state.tokensMetadata.metadataRecord, state.rwasMetadata.records)
+          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.rwasMetadata.records)
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => {

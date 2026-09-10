@@ -7,7 +7,7 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
-- Zustand `5.0.11` (inactive migration destinations only; see `docs/task-10-zustand-foundation.md`)
+- Zustand `5.0.11` (Task 11 activates UI preferences/root token metadata through a background owner; other destinations remain inactive; see `docs/task-11-legacy-ui-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
 ## Architecture and Boundaries
@@ -63,7 +63,7 @@ Target architecture:
     - `notifications/`: notification feature pieces, with UI in `components/`, enums in `enums/`, state in `store/`, and shared helpers in `utils/`
     - `popup-mode/`: popup-vs-full-page behavior switches
     - `route3/`: Route3 domain helpers, interfaces, and mapping utilities used above the raw Route3 API client
-    - `store/`: shared Redux and persistence utilities consumed by `app/store`; `zustand/` contains inactive vanilla migration destinations with guarded hydration, staging, flush, and read-back contracts. Keep production consumers on their current owner until the corresponding migration and handoff are implemented.
+    - `store/`: shared Redux and persistence utilities consumed by `app/store`; `zustand/` contains guarded vanilla destinations with hydration, staging, flush, and read-back contracts. Task 11 owns UI preferences/root token metadata in one background context; foregrounds use its read-only client and commands. Assets, nested metadata/adult flags and promotion destinations remain inactive until their migration/handoff. Do not add competing destination adapters or Redux synchronization loops.
     - `swap-router/`: swap route configuration and shared swap-router UI/helpers
     - `swr/`: typed SWR wrappers
     - `taquito-fast-rpc/`: RPC caching helpers such as chain-id and entrypoint caches

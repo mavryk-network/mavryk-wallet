@@ -26,7 +26,7 @@ export function commitStagedWrites(...writes: StagedWrite[]): void {
 export function createDestinationStore<D extends object, A extends object>(options: {
   name: string;
   defaults: D;
-  schema: z.ZodType<D>;
+  schema: z.ZodType<D, z.ZodTypeDef, unknown>;
   actions: (update: (recipe: (draft: D) => void) => void) => A;
   storage?: BrowserStorage;
   delay?: number;

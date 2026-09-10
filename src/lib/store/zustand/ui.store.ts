@@ -1,33 +1,12 @@
-import { z } from 'zod';
-
 import { BalanceMode } from 'app/store/settings/balance-mode.enum';
 import { ABTestGroup } from 'lib/apis/temple/ab-test-group.enum';
 
 import { createDestinationStore } from './destination-store';
 import { BrowserStorage } from './persist-storage';
-import { SAFE_KEY_SCHEMA } from './validation';
+import { UI_SCHEMA } from './ui-state.schema';
+export type { UIState } from './ui-state.schema';
 
-const UI_SCHEMA = z.object({
-  shouldShowNewsletterModal: z.boolean(),
-  userId: z
-    .string()
-    .min(1)
-    .max(256)
-    .regex(/^[A-Za-z0-9_-]+$/)
-    .nullable(),
-  isAnalyticsEnabled: z.boolean(),
-  balanceMode: z.nativeEnum(BalanceMode),
-  isOnRampPossibility: z.boolean(),
-  abTestGroupName: z.nativeEnum(ABTestGroup),
-  lastSeenPromotionName: z.string().max(512).optional(),
-  shouldShowPromotion: z.boolean(),
-  promotionHidingTimestamps: z.record(SAFE_KEY_SCHEMA, z.number().finite()),
-  isNewsEnabled: z.boolean()
-});
-
-export type UIState = z.infer<typeof UI_SCHEMA>;
-
-/** Inactive preferences destination. null ID means unadopted; initialization never generates an ID. */
+/** Background-owned preferences destination. null ID means unadopted; initialization never generates an ID. */
 export function createUIStore(storage?: BrowserStorage) {
   return createDestinationStore({
     name: 'zustand-ui',
@@ -43,7 +22,8 @@ export function createUIStore(storage?: BrowserStorage) {
       abTestGroupName: ABTestGroup.Unknown,
       shouldShowPromotion: false,
       promotionHidingTimestamps: {},
-      isNewsEnabled: true
+      isNewsEnabled: true,
+      legacyMigrated: false
     },
     actions: update => ({
       setShouldShowNewsletterModal: (value: boolean) =>

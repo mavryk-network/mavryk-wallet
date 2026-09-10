@@ -25,6 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local AI agent context
+/docs/agent-directory-map.local.md
 /.codex/
 /codex/
 AGENTS.md

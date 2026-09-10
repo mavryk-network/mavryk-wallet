@@ -1,0 +1,34 @@
+{
+  "settings": {
+    "userId": "legacy-sanitized-id",
+    "isAnalyticsEnabled": false,
+    "balanceMode": "gas",
+    "isOnRampPossibility": true
+  },
+  "abTesting": { "groupName": "A" },
+  "newsletter": { "shouldShowNewsletterModal": false },
+  "notifications": {
+    "isNewsEnabled": false,
+    "startFromTime": 1700000000000,
+    "list": { "data": [], "isLoading": false }
+  },
+  "advertising": {
+    "lastSeenPromotionName": "sanitized-promotion",
+    "activePromotion": { "data": null, "isLoading": false }
+  },
+  "tokensMetadata": {
+    "metadataLoading": false,
+    "metadataRecord": {
+      "KT1sanitized_0": {
+        "name": "Sanitized Token",
+        "symbol": "SAN",
+        "decimals": 6,
+        "address": "KT1sanitized",
+        "id": "0",
+        "thumbnailUri": "ipfs://sanitized"
+      }
+    }
+  },
+  "currency": { "usdToTokenRates": {} },
+  "_persist": { "version": 3, "rehydrated": true }
+}

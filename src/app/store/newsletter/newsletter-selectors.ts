@@ -1,4 +1,3 @@
-import { useSelector } from '../index';
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
-export const useShouldShowNewsletterModalSelector = () =>
-  useSelector(({ newsletter }) => newsletter.shouldShowNewsletterModal);
+export const useShouldShowNewsletterModalSelector = () => useOwnedUI(({ ui }) => ui.shouldShowNewsletterModal);

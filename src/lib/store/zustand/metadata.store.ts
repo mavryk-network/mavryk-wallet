@@ -1,30 +1,11 @@
-import { z } from 'zod';
-
 import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
-import { TokenMetadata, TokenStandardsEnum } from 'lib/metadata/types';
+import { TokenMetadata } from 'lib/metadata/types';
 
 import { createDestinationStore } from './destination-store';
+import { METADATA_SCHEMA } from './metadata-state.schema';
 import { BrowserStorage } from './persist-storage';
 import { SAFE_KEY_SCHEMA } from './validation';
-
-const TOKEN_METADATA_SCHEMA: z.ZodType<TokenMetadata> = z.object({
-  name: z.string(),
-  symbol: z.string(),
-  decimals: z.number().finite().int().nonnegative(),
-  address: z.string(),
-  id: z.string(),
-  standard: z.nativeEnum(TokenStandardsEnum).optional(),
-  thumbnailUri: z.string().optional(),
-  displayUri: z.string().optional(),
-  artifactUri: z.string().optional()
-});
-const METADATA_SCHEMA = z.object({
-  tokensMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
-  collectiblesMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
-  rwasMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA)
-});
-
-export type MetadataState = z.infer<typeof METADATA_SCHEMA>;
+export type { MetadataState } from './metadata-state.schema';
 
 /** Already-built metadata only. Stored token records override predefined entries; missing predefined entries survive. */
 export function createMetadataStore(storage?: BrowserStorage) {

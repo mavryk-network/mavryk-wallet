@@ -1,12 +1,10 @@
 import { createReducer } from '@reduxjs/toolkit';
-import { persistReducer } from 'redux-persist';
-import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 
 import { AD_HIDING_TIMEOUT } from 'lib/constants';
-import { createEntity, storageConfig } from 'lib/store';
+import { createEntity } from 'lib/store';
 
 import { hidePromotionAction, loadPartnersPromoAction, togglePartnersPromotionAction } from './actions';
-import { partnersPromotionInitialState, PartnersPromotionState } from './state';
+import { partnersPromotionInitialState } from './state';
 
 const partnersPromotionReducer = createReducer(partnersPromotionInitialState, builder => {
   builder.addCase(loadPartnersPromoAction.submit, state => ({
@@ -40,11 +38,5 @@ const partnersPromotionReducer = createReducer(partnersPromotionInitialState, bu
   });
 });
 
-export const partnersPromotionPersistedReducer = persistReducer<PartnersPromotionState>(
-  {
-    key: 'root.partnersPromotion',
-    ...storageConfig,
-    stateReconciler: hardSet
-  },
-  partnersPromotionReducer
-);
+// Retained legacy payloads are read only; active unrelated Redux data persists in the task11 root.
+export const partnersPromotionPersistedReducer = partnersPromotionReducer;

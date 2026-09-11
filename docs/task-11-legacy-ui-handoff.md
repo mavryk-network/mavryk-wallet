@@ -157,3 +157,7 @@ Task 12 may document future retirement using this concrete owner and preserved r
 - `src/lib/store/zustand/validation.ts`
 - `src/lib/temple/back/analytics.ts`
 - `src/lib/temple/back/main.ts`
+
+## Task 13 activation handoff
+
+[Task 13](task-13-legacy-assets-handoff.md) now extends the same background owner to asset records/statuses, collectible/RWA adult flags and metadata, and partner-promotion choices. Earlier inactive/nested-Redux statements above describe the Task 10/11 release. Redux retains unrelated domains and security caches in the active task11 root; all six nested legacy payloads are retained read-only. IndexedDB migration registration and source clearing remain Task 14 work.

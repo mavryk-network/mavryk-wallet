@@ -21,7 +21,8 @@ export const UI_SCHEMA = z.object({
   shouldShowPromotion: z.boolean(),
   promotionHidingTimestamps: z.record(SAFE_KEY_SCHEMA, z.number().finite()),
   isNewsEnabled: z.boolean(),
-  legacyMigrated: z.boolean().default(false)
+  legacyMigrated: z.boolean().default(false),
+  legacyAssetsMigrated: z.boolean().default(false)
 });
 
 export type UIState = z.infer<typeof UI_SCHEMA>;

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 
 import browser from 'webextension-polyfill';
 
+import { LEGACY_ASSETS_KEYS, LegacyAssetsKey } from './legacy-assets-source';
 import { LEGACY_UI_ROOT_KEY } from './legacy-ui-source';
 import { UI_OWNER_CHANNEL, UI_SNAPSHOT_SCHEMA, UICommand, UISnapshot } from './ui-owner.contract';
 import { parseData } from './validation';
@@ -27,6 +28,13 @@ async function send(command?: UICommand) {
     const fallback = localStorage.getItem(LEGACY_UI_ROOT_KEY);
     response = await browser.runtime.sendMessage({ channel: UI_OWNER_CHANNEL, fallback, command });
   }
+  const assetsFallback: Partial<Record<LegacyAssetsKey, string | null>> = {};
+  while (response?.error === 'assets-fallback-required') {
+    const key = response.key as LegacyAssetsKey;
+    if (!LEGACY_ASSETS_KEYS.includes(key) || key in assetsFallback) throw new Error('Invalid fallback request');
+    assetsFallback[key] = localStorage.getItem(key);
+    response = await browser.runtime.sendMessage({ channel: UI_OWNER_CHANNEL, assetsFallback, command });
+  }
   if (!response || response.error) throw new Error(response?.error ?? 'Preference owner unavailable');
   snapshot = parseData(UI_SNAPSHOT_SCHEMA, response.snapshot);
   error = undefined;
@@ -51,7 +59,7 @@ export function initializeOwnedUI(): Promise<void> {
   if (!isListening) {
     isListening = true;
     browser.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && (changes['zustand-ui'] || changes['zustand-metadata'])) {
+      if (area === 'local' && (changes['zustand-ui'] || changes['zustand-metadata'] || changes['zustand-assets'])) {
         void updateOwnedUI().catch(() => undefined); // Error is exposed by the gate, never treated as readiness.
       }
     });

@@ -1,3 +1,5 @@
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
+
 import { useSelector } from '../root-state.selector';
 
 import type { CollectibleDetails } from './state';
@@ -12,4 +14,4 @@ export const useAllCollectiblesDetailsLoadingSelector = () =>
   useSelector(({ collectibles }) => collectibles.details.isLoading);
 
 export const useCollectibleIsAdultSelector = (slug: string): boolean | undefined =>
-  useSelector(({ collectibles }) => collectibles.adultFlags[slug]?.val);
+  useOwnedUI(state => state.assets.collectibleAdultFlags[slug]?.val);

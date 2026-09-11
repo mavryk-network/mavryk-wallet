@@ -49,7 +49,7 @@ it('importing the boundary only reads destination keys and never writes identity
   jest.dontMock('lib/temple/repo');
 });
 
-it('activates only the scoped UI/root metadata consumers and keeps asset destinations inactive', () => {
+it('activates scoped read-only consumers without foreground destination adapters', () => {
   const src = path.resolve(__dirname, '../../../..');
   const destinationPath = path.resolve(__dirname, '..');
   const consumers: string[] = [];
@@ -71,6 +71,14 @@ it('activates only the scoped UI/root metadata consumers and keeps asset destina
   expect(consumers.sort()).toEqual(
     [
       'app/store/index.ts',
+      'app/store/assets/security-persistence.ts',
+      'app/store/assets/selectors.ts',
+      'app/store/collectibles/selectors.ts',
+      'app/store/rwas/selectors.ts',
+      'app/store/collectibles-metadata/selectors.ts',
+      'app/store/rwas-metadata/selectors.ts',
+      'app/store/partners-promotion/selectors.ts',
+      'app/store/owned-assets.middleware.ts',
       'app/store/ab-testing/selectors.ts',
       'app/store/advertising/selectors.ts',
       'app/store/assets/epics.ts',

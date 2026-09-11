@@ -1,8 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit';
-import { persistReducer } from 'redux-persist';
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
-import { storageConfig, createTransformsBeforePersist } from 'lib/store';
+import { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
 
 import {
   loadAccountTokensActions,
@@ -18,7 +17,6 @@ import {
   putRwasAsIsAction
 } from './actions';
 import { initialState, SliceState } from './state';
-import { getAccountAssetsStoreKey } from './utils';
 
 const assetsReducer = createReducer<SliceState>(initialState, builder => {
   builder.addCase(loadAccountTokensActions.submit, state => {
@@ -31,22 +29,9 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
     state.tokens.error = payload ? String(payload) : 'unknown';
   });
 
-  builder.addCase(loadAccountTokensActions.success, (state, { payload }) => {
+  builder.addCase(loadAccountTokensActions.success, state => {
     state.tokens.isLoading = false;
     delete state.tokens.error;
-
-    const { account, chainId, slugs } = payload;
-
-    const data = state.tokens.data;
-    const key = getAccountAssetsStoreKey(account, chainId);
-
-    if (!data[key]) data[key] = {};
-    const tokens = data[key];
-
-    for (const slug of slugs) {
-      const stored = tokens[slug];
-      if (!stored) tokens[slug] = { status: 'idle' };
-    }
   });
 
   // collectibles
@@ -60,29 +45,9 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
     state.collectibles.error = payload.code ? String(payload.code) : 'unknown';
   });
 
-  builder.addCase(loadAccountCollectiblesActions.success, (state, { payload }) => {
+  builder.addCase(loadAccountCollectiblesActions.success, state => {
     state.collectibles.isLoading = false;
     delete state.collectibles.error;
-
-    const { account, chainId, slugs } = payload;
-
-    const data = state.collectibles.data;
-    const key = getAccountAssetsStoreKey(account, chainId);
-
-    if (!data[key]) data[key] = {};
-    const collectibles = data[key];
-
-    // Removing no-longer owned collectibles (if not 'idle' or added manually)
-    for (const [slug, stored] of Object.entries(collectibles)) {
-      if (stored.manual || stored.status !== 'idle') continue;
-
-      if (!slugs.includes(slug)) delete collectibles[slug];
-    }
-
-    for (const slug of slugs) {
-      const stored = collectibles[slug];
-      if (!stored) collectibles[slug] = { status: 'idle' };
-    }
   });
 
   // rwas
@@ -96,29 +61,9 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
     state.rwas.error = payload.code ? String(payload.code) : 'unknown';
   });
 
-  builder.addCase(loadAccountRwasActions.success, (state, { payload }) => {
+  builder.addCase(loadAccountRwasActions.success, state => {
     state.rwas.isLoading = false;
     delete state.rwas.error;
-
-    const { account, chainId, slugs } = payload;
-
-    const data = state.rwas.data;
-    const key = getAccountAssetsStoreKey(account, chainId);
-
-    if (!data[key]) data[key] = {};
-    const rwas = data[key];
-
-    // Removing no-longer owned collectibles (if not 'idle' or added manually)
-    for (const [slug, stored] of Object.entries(rwas)) {
-      if (stored.manual || stored.status !== 'idle') continue;
-
-      if (!slugs.includes(slug)) delete rwas[slug];
-    }
-
-    for (const slug of slugs) {
-      const stored = rwas[slug];
-      if (!stored) rwas[slug] = { status: 'idle' };
-    }
   });
 
   builder.addCase(setRwaStatusAction, (state, { payload: { account, chainId, slug, status } }) => {
@@ -219,19 +164,5 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
   });
 });
 
-export const assetsPersistedReducer = persistReducer<SliceState>(
-  {
-    key: 'root.assets',
-    ...storageConfig,
-    transforms: [
-      createTransformsBeforePersist<SliceState>({
-        tokens: entry => ({ ...entry, isLoading: false }),
-        collectibles: entry => ({ ...entry, isLoading: false }),
-        rwas: entry => ({ ...entry, isLoading: false }),
-        mainnetWhitelist: entry => ({ ...entry, isLoading: false }),
-        mainnetScamlist: entry => ({ ...entry, isLoading: false })
-      })
-    ]
-  },
-  assetsReducer
-);
+// Retained legacy payloads are read only; active unrelated Redux data persists in the task11 root.
+export const assetsPersistedReducer = assetsReducer;

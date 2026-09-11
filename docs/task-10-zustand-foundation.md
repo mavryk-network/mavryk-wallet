@@ -160,3 +160,7 @@ No runtime file under `src/mavryk/api/**` changed, no legacy key is read/written
 Task 11 now activates UI preferences and root token metadata through the single background owner documented in [Task 11](task-11-legacy-ui-handoff.md). The original sections above record Task 10's inactive release. Foreground consumers use read-only snapshots and commands; they must not instantiate destination adapters. Asset, collectible/RWA metadata/adult-flag and partner-promotion ownership remains unchanged/inactive for Tasks 13+.
 
 Task 11 adds default-false completion state compatible with existing version-1 envelopes, bounds built metadata strings, and preserves the original root under `persist:temple-root` while unrelated Redux root persistence continues under `persist:temple-root-task11`. The inactive-consumer test deliberately permits only scoped activation and still checks that imports do not write defaults/identity or activate asset destinations. Hydration/staging/actual adapter flush/read-back protections remain required.
+
+## Task 13 activation handoff
+
+[Task 13](task-13-legacy-assets-handoff.md) now extends the same background owner to asset records/statuses, collectible/RWA adult flags and metadata, and partner-promotion choices. Earlier inactive/nested-Redux statements above describe the Task 10/11 release. Redux retains unrelated domains and security caches in the active task11 root; all six nested legacy payloads are retained read-only. IndexedDB migration registration and source clearing remain Task 14 work.

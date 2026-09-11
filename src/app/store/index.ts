@@ -1,14 +1,23 @@
 import { devToolsEnhancer } from '@redux-devtools/remote';
 import { Action, configureStore } from '@reduxjs/toolkit';
-import { persistReducer, persistStore, createMigrate, PersistorOptions } from 'redux-persist';
+import {
+  persistReducer,
+  persistStore,
+  createMigrate,
+  PersistorOptions,
+  PersistConfig,
+  PersistedState
+} from 'redux-persist';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 
 import { IS_DEV_ENV } from 'lib/env';
-import { storageConfig } from 'lib/store';
+import { createTransformsBeforePersist, storageConfig } from 'lib/store';
 import { decodeLegacyUIRoot } from 'lib/store/zustand/legacy-ui-source';
 
+import { persistAssetSecurity, restoreAssetSecurity } from './assets/security-persistence';
 import { sanitizeCollectiblesMetadataForDevTools } from './collectibles-metadata/state';
 import { MIGRATIONS } from './migrations';
+import { ownedAssetsMiddleware } from './owned-assets.middleware';
 import { ownedUIMiddleware } from './owned-ui.middleware';
 import { epicMiddleware, rootEpic } from './root-state.epics';
 import { rootReducer } from './root-state.reducer';
@@ -20,32 +29,42 @@ export const SLICES_BLACKLIST = [
   'collectibles' as const,
   'rwas' as const,
   'rwasMetadata' as const,
-  'assets' as const,
   'collectiblesMetadata' as const
 ];
 
 const persistConfigBlacklist: (keyof RootState)[] = SLICES_BLACKLIST;
 const DEFAULT_REDUX_DEVTOOLS_PORT = 8000;
 
-const persistedReducer = persistReducer<RootState>(
-  {
-    key: 'temple-root-task11',
-    version: 3,
-    ...storageConfig,
-    // Preserve the rollback root verbatim; unrelated Redux domains continue under a separate live root.
-    getStoredState: async config => {
-      const state =
-        (await storageConfig.getStoredState(config)) ??
-        (await storageConfig.getStoredState({ ...config, key: 'temple-root' }));
-      return state ? (decodeLegacyUIRoot(state) as typeof state) : state;
-    },
-    stateReconciler: autoMergeLevel2,
-    blacklist: persistConfigBlacklist,
-    debug: IS_DEV_ENV,
-    migrate: createMigrate(MIGRATIONS, { debug: IS_DEV_ENV })
-  },
-  rootReducer
-);
+let preparedReduxState: PersistedState;
+
+// Preflight before redux-persist starts: its internal rehydrate path otherwise swallows rejected storage reads.
+async function readReduxState(config: PersistConfig<RootState>): Promise<PersistedState> {
+  const state =
+    (await storageConfig.getStoredState(config)) ??
+    (await storageConfig.getStoredState({ ...config, key: 'temple-root' }));
+  const decoded = state ? decodeLegacyUIRoot(state) : {};
+  decoded.assets = await restoreAssetSecurity(decoded.assets);
+  return {
+    ...rootReducer(undefined, { type: '@@INIT' }),
+    ...decoded,
+    _persist: decoded._persist ?? { version: 3, rehydrated: false }
+  } as PersistedState;
+}
+
+const reduxPersistConfig: PersistConfig<RootState> = {
+  key: 'temple-root-task11',
+  version: 3,
+  ...storageConfig,
+  // Preserve the rollback root verbatim; unrelated Redux domains continue under a separate live root.
+  getStoredState: async () => preparedReduxState,
+  stateReconciler: autoMergeLevel2,
+  blacklist: persistConfigBlacklist,
+  transforms: [createTransformsBeforePersist<RootState>({ assets: persistAssetSecurity })],
+  debug: IS_DEV_ENV,
+  migrate: createMigrate(MIGRATIONS, { debug: IS_DEV_ENV })
+};
+
+const persistedReducer = persistReducer<RootState>(reduxPersistConfig, rootReducer);
 
 const REDUX_DEVTOOLS_ENABLED = IS_DEV_ENV && process.env.ENABLE_REDUX_DEVTOOLS === 'true';
 
@@ -71,7 +90,7 @@ const store = configureStore({
       serializableCheck: false
     });
 
-    return defMiddleware.concat(ownedUIMiddleware, epicMiddleware);
+    return defMiddleware.concat(ownedUIMiddleware, ownedAssetsMiddleware, epicMiddleware);
   },
   devTools: false,
   enhancers: REDUX_DEVTOOLS_PORT
@@ -94,6 +113,12 @@ const store = configureStore({
 // redux-persist 6 implements manualPersist but omits it from its shipped declaration.
 const persistOptions: PersistorOptions & { manualPersist: boolean } = { manualPersist: true };
 const persistor = persistStore(store, persistOptions);
+
+/** Surface root/security read failures to the startup retry gate before allowing Redux or consumers to run. */
+export async function initializeReduxPersistence(): Promise<void> {
+  preparedReduxState = await readReduxState(reduxPersistConfig);
+  persistor.persist();
+}
 
 epicMiddleware.run(rootEpic);
 

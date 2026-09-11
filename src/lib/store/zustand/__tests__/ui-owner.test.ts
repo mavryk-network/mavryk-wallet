@@ -1,5 +1,6 @@
 import type { Runtime } from 'webextension-polyfill';
 
+import { LEGACY_ASSETS_KEYS } from '../legacy-assets-source';
 import fixture from '../test-support/fixtures/legacy-ui-root.json';
 import { deferred, memoryStorage } from '../test-support/helpers';
 import { UI_OWNER_CHANNEL } from '../ui-owner.contract';
@@ -36,7 +37,15 @@ function setup(initial: Record<string, unknown> = { 'persist:temple-root': fixtu
       id: 'test-extension',
       url: 'moz-extension://test/fullpage.html'
     }
-  ) => listener({ channel: UI_OWNER_CHANNEL, ...values }, sender);
+  ) =>
+    listener(
+      {
+        channel: UI_OWNER_CHANNEL,
+        assetsFallback: Object.fromEntries(LEGACY_ASSETS_KEYS.map(key => [key, null])),
+        ...values
+      },
+      sender
+    );
   return { ...memory, owner, request };
 }
 
@@ -151,4 +160,103 @@ it('preserves explicit promotion clearing through JSON messages and durable relo
   const reload = setup(s.records);
   expect((await reload.request()).error).toBeUndefined();
   expect(JSON.parse(reload.records['zustand-ui'] as string).state.lastSeenPromotionName).toBeUndefined();
+});
+
+it('serializes asset/status producers across contexts and preserves nested metadata, flags and promotion on reload', async () => {
+  const s = setup();
+  const value = { account: 'alice', chainId: 'mainnet', slug: 'asset', status: 'idle', manual: false };
+  const [put, status] = await Promise.all([
+    s.request({ command: { kind: 'assets-put', category: 'collectibles', records: [value] } }),
+    s.request({
+      command: {
+        kind: 'assets-status',
+        category: 'collectibles',
+        value: { account: 'alice', chainId: 'mainnet', slug: 'asset', status: 'disabled' }
+      }
+    })
+  ]);
+  expect(put.error).toBeUndefined();
+  expect(status.error).toBeUndefined();
+  for (const command of [
+    {
+      kind: 'assets-loaded',
+      category: 'collectibles',
+      value: { account: 'alice', chainId: 'mainnet', slugs: ['new'] }
+    },
+    { kind: 'adult-flags', category: 'collectibles', flags: { asset: { val: true, ts: 100 } }, timestamp: 100 },
+    { kind: 'adult-flags', category: 'rwas', flags: { rwa: { val: false, ts: 100 } }, timestamp: 100 },
+    { kind: 'nested-metadata', category: 'rwasMetadata', records: fixture.tokensMetadata.metadataRecord },
+    { kind: 'promotion-toggle', value: true },
+    { kind: 'promotion-hide', id: '/home', timestamp: 123 }
+  ])
+    expect((await s.request({ command })).error).toBeUndefined();
+  for (let i = 0; i < 2; i++) {
+    const reload = setup(s.records);
+    expect((await reload.request()).error).toBeUndefined();
+    const assets = JSON.parse(reload.records['zustand-assets'] as string).state;
+    expect(assets.collectibles['alice@mainnet']).toEqual({
+      asset: { status: 'disabled', manual: false },
+      new: { status: 'idle' }
+    });
+    expect(assets.collectibleAdultFlags.asset.val).toBe(true);
+    expect(assets.rwaAdultFlags.rwa.val).toBe(false);
+    const ui = JSON.parse(reload.records['zustand-ui'] as string).state;
+    expect(ui.promotionHidingTimestamps).toEqual({ '/home': 123 });
+    expect(ui.shouldShowPromotion).toBe(true);
+    expect(JSON.parse(reload.records['zustand-metadata'] as string).state.rwasMetadata).toEqual(
+      fixture.tokensMetadata.metadataRecord
+    );
+  }
+});
+
+it('does not acknowledge asset writes until durable and suppresses analytics on failure until retry', async () => {
+  const s = setup();
+  await s.request();
+  await s.request({ command: { kind: 'preferences', values: { isAnalyticsEnabled: true } } });
+  expect(s.owner.getReadyAnalyticsIdentity()).toBe('durable-id');
+  (s.storage.set as jest.Mock).mockRejectedValueOnce(new Error('asset write failed'));
+  const result = await s.request({
+    command: {
+      kind: 'assets-put',
+      category: 'tokens',
+      records: [{ account: 'a', chainId: 'b', slug: 'custom', status: 'enabled', manual: true }]
+    }
+  });
+  expect(result.error).toBeDefined();
+  expect(result.snapshot).toBeUndefined();
+  expect(s.owner.getReadyAnalyticsIdentity()).toBeNull();
+  expect((await s.request()).error).toBeUndefined();
+  expect(JSON.parse(s.records['zustand-assets'] as string).state.tokens['a@b'].custom.manual).toBe(true);
+  expect(s.owner.getReadyAnalyticsIdentity()).toBe('durable-id');
+});
+
+it('expires adult flags and removes only no-longer-owned automatic idle assets', async () => {
+  const s = setup();
+  await s.request({
+    command: {
+      kind: 'assets-put',
+      category: 'rwas',
+      records: [
+        { account: 'a', chainId: 'b', slug: 'automatic', status: 'idle', manual: false },
+        { account: 'a', chainId: 'b', slug: 'manual', status: 'idle', manual: true },
+        { account: 'a', chainId: 'b', slug: 'removed', status: 'removed' }
+      ]
+    }
+  });
+  await s.request({
+    command: { kind: 'assets-loaded', category: 'rwas', value: { account: 'a', chainId: 'b', slugs: [] } }
+  });
+  expect(JSON.parse(s.records['zustand-assets'] as string).state.rwas['a@b']).toEqual({
+    manual: { status: 'idle', manual: true },
+    removed: { status: 'removed' }
+  });
+  await s.request({
+    command: { kind: 'adult-flags', category: 'rwas', flags: { old: { val: true, ts: 0 } }, timestamp: 0 }
+  });
+  await s.request({
+    command: { kind: 'adult-flags', category: 'rwas', flags: { current: { val: false, ts: 20000 } }, timestamp: 20000 }
+  });
+  expect(JSON.parse(s.records['zustand-assets'] as string).state.rwaAdultFlags).toEqual({
+    current: { val: false, ts: 20000 }
+  });
 });

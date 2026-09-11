@@ -7,7 +7,7 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
-- Zustand `5.0.11` (Task 11 activates UI preferences/root token metadata through a background owner; other destinations remain inactive; see `docs/task-11-legacy-ui-handoff.md`)
+- Zustand `5.0.11` (Tasks 11/13 activate preferences, assets, adult flags and metadata through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
 ## Architecture and Boundaries
@@ -16,8 +16,8 @@ Current pinned stack in manifest includes:
 - `src/app/` owns React presentation and app orchestration; `src/lib/` owns shared domain services and infrastructure.
 - Keep content scripts thin and browser-specific. Keep API transport in provider clients and orchestration above them.
 - `src/mavryk/` owns Mavryk-specific integrations; preserve task-specific restrictions on `src/mavryk/api/**`.
-- Task 11 owns UI preferences/root token metadata through one background owner. Foregrounds use read-only snapshots and commands. Do not add competing destination adapters or Redux synchronization loops.
-- Assets, nested metadata/adult flags and promotion destinations remain inactive until their migration/handoff. Preserve unrelated Redux owners.
+- Tasks 11/13 own UI preferences, promotion choices, asset records/statuses, adult flags and metadata through one background owner. Foregrounds use read-only snapshots and commands. Do not add competing destination adapters or Redux synchronization loops.
+- Redux retains fetched details, loading/errors, whitelist/scamlist security caches and unrelated domains. Security caches persist in `persist:temple-root-task11`; the six nested legacy keys are retained read-only sources. Task 14 IndexedDB registration/clearing remains separate.
 - For unfamiliar paths, consult only the relevant section of [the local directory reference](docs/agent-directory-map.local.md). Do not load it by default. If absent in another checkout, inspect the relevant directories instead; it is optional navigation context.
 
 ## Context and Verification Efficiency

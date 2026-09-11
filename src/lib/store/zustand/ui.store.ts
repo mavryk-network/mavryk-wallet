@@ -23,7 +23,8 @@ export function createUIStore(storage?: BrowserStorage) {
       shouldShowPromotion: false,
       promotionHidingTimestamps: {},
       isNewsEnabled: true,
-      legacyMigrated: false
+      legacyMigrated: false,
+      legacyAssetsMigrated: false
     },
     actions: update => ({
       setShouldShowNewsletterModal: (value: boolean) =>

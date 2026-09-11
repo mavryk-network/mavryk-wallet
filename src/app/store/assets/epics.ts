@@ -34,12 +34,15 @@ const loadAccountTokensEpic: Epic<Action, Action, RootState> = (action$, state$)
     ofType(loadAccountTokensActions.submit),
     toPayload(),
     toLatestValue(state$),
-    switchMap(([{ account, chainId }, state]) =>
+    switchMap(([{ account, chainId }]) =>
       from(
         loadAccountTokens(
           account,
           chainId,
-          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.collectiblesMetadata.records)
+          mergeAssetsMetadata(
+            getOwnedUISnapshot().metadata.tokensMetadata,
+            new Map(Object.entries(getOwnedUISnapshot().metadata.collectiblesMetadata))
+          )
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => {
@@ -59,12 +62,15 @@ const loadAccountCollectiblesEpic: Epic<Action, Action, RootState> = (action$, s
     ofType(loadAccountCollectiblesActions.submit),
     toPayload(),
     toLatestValue(state$),
-    switchMap(([{ account, chainId }, state]) =>
+    switchMap(([{ account, chainId }]) =>
       from(
         loadAccountCollectibles(
           account,
           chainId,
-          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.collectiblesMetadata.records)
+          mergeAssetsMetadata(
+            getOwnedUISnapshot().metadata.tokensMetadata,
+            new Map(Object.entries(getOwnedUISnapshot().metadata.collectiblesMetadata))
+          )
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => [
@@ -84,12 +90,15 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
     ofType(loadAccountRwasActions.submit),
     toPayload(),
     toLatestValue(state$),
-    switchMap(([{ account, chainId }, state]) => {
+    switchMap(([{ account, chainId }]) => {
       return from(
         loadAccountRwas(
           account,
           chainId,
-          mergeAssetsMetadata(getOwnedUISnapshot().metadata.tokensMetadata, state.rwasMetadata.records)
+          mergeAssetsMetadata(
+            getOwnedUISnapshot().metadata.tokensMetadata,
+            new Map(Object.entries(getOwnedUISnapshot().metadata.rwasMetadata))
+          )
         )
       ).pipe(
         concatMap(({ slugs, balances, newMeta }) => {

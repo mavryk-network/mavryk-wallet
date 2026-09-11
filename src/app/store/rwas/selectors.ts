@@ -1,3 +1,5 @@
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
+
 import { useSelector } from '../root-state.selector';
 
 import type { RwaDetails } from './state';
@@ -11,4 +13,4 @@ export const useAllRwaDetailsSelector = (): Record<string, RwaDetails | nullish>
 export const useAllRwasDetailsLoadingSelector = () => useSelector(({ rwas }) => rwas.details.isLoading);
 
 export const useRwaIsAdultSelector = (slug: string): boolean | undefined =>
-  useSelector(({ rwas }) => rwas.adultFlags[slug]?.val);
+  useOwnedUI(state => state.assets.rwaAdultFlags[slug]?.val);

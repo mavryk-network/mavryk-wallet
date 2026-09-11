@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { isString } from 'lodash';
 import { useDispatch } from 'react-redux';
 
 import { loadCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
@@ -26,9 +25,11 @@ import { isMavSlug } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
+import { isCollectible, isRwa } from './classification';
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
 import { mapToRecord } from './utils';
+export { isCollectible, isRwa } from './classification';
 
 export type { AssetMetadataBase, TokenMetadata } from './types';
 export { MAVEN_METADATA, EMPTY_BASE_METADATA } from './defaults';
@@ -199,15 +200,6 @@ export function getAssetName(metadata: AssetMetadataBase | nullish) {
 }
 
 /** Empty string for `artifactUri` counts */
-export const isCollectible = (metadata: Record<string, any>) =>
-  'artifactUri' in metadata && isString(metadata.artifactUri);
-
-// TODO update hardcoded logic to be dynamic one, at this moment api doesn't provide this info
-const RWA_SYMBOLS = ['ocean', 'mars1', 'ntbm', 'queen', 'xaug', 'khbe', 'mcdx'];
-
-export const isRwa = (metadata: Record<string, any>) =>
-  'symbol' in metadata && RWA_SYMBOLS.includes(metadata.symbol.toLowerCase());
-
 /**
  * @deprecated // Assertion here is not safe!
  */

@@ -5,7 +5,9 @@ it('foreground waits for the background before reading fallback and never owns a
   const memory = memoryStorage({ analytics_user_id: 'durable-id' });
   let listener!: (...args: unknown[]) => unknown;
   const sender = { id: 'test', url: 'moz-extension://test/popup.html' };
-  const read = jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify(fixture));
+  const read = jest
+    .spyOn(Storage.prototype, 'getItem')
+    .mockImplementation(key => (key === 'persist:temple-root' ? JSON.stringify(fixture) : null));
   const sendMessage = jest.fn((request: unknown) => listener(JSON.parse(JSON.stringify(request)), sender));
   jest.doMock('webextension-polyfill', () => ({
     __esModule: true,
@@ -33,8 +35,8 @@ it('foreground waits for the background before reading fallback and never owns a
   expect(() => client.getOwnedUISnapshot()).toThrow('readiness');
   expect(read).not.toHaveBeenCalled();
   await client.initializeOwnedUI();
-  expect(read).toHaveBeenCalledTimes(1);
-  expect(sendMessage).toHaveBeenCalledTimes(2);
+  expect(read).toHaveBeenCalledTimes(7);
+  expect(sendMessage).toHaveBeenCalledTimes(8);
   expect(client.getOwnedUISnapshot().ui.userId).toBe('durable-id');
   expect(memory.records.analytics_user_id).toBe('durable-id');
   await client.updateOwnedUI({ kind: 'preferences', values: { isNewsEnabled: true } });

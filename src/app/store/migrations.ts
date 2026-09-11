@@ -1,7 +1,7 @@
 import type { MigrationManifest, PersistedState } from 'redux-persist';
 
 import { toTokenSlug } from 'lib/assets';
-import { isCollectible, isRwa } from 'lib/metadata';
+import { isCollectible, isRwa } from 'lib/metadata/classification';
 
 import { collectiblesMetadataInitialStateClone } from './collectibles-metadata/state';
 import type { RootState } from './root-state.type';
@@ -25,9 +25,7 @@ export const MIGRATIONS: MigrationManifest = {
 
     // `collectiblesMetadata` slice data is absent. Setting initial value here.
     // It is safe as it is blacklisted & won't be persisted in this (root) slice.
-    // @ts-expect-error // Due to the absence of `_persist` property yet
     const collectiblesMetadata = (typedPersistedState.collectiblesMetadata = collectiblesMetadataInitialStateClone);
-    // @ts-expect-error // Due to the absence of `_persist` property yet
     const rwasMetadata = (typedPersistedState.rwasMetadata = rwasMetadataInitialStateClone);
 
     for (const slug of Object.keys(allTokensMetadata)) {

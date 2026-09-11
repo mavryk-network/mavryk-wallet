@@ -52,7 +52,8 @@ describe('inactive destination contracts', () => {
       shouldShowPromotion: true,
       promotionHidingTimestamps: { banner: 123 },
       isNewsEnabled: false,
-      legacyMigrated: false
+      legacyMigrated: false,
+      legacyAssetsMigrated: false
     };
     expect(await store.persistence.readBack()).toEqual({ version: 1, state: expected });
     const reloaded = createUIStore(storage);

@@ -260,3 +260,34 @@ it('expires adult flags and removes only no-longer-owned automatic idle assets',
     current: { val: false, ts: 20000 }
   });
 });
+
+it('serializes Task 14 after legacy readiness, blocks analytics and waits before later user commands', async () => {
+  const entered = deferred<void>();
+  const finish = deferred<void>();
+  const run = jest.fn(
+    async (stores: { ui: { getState: () => { legacyMigrated: boolean; legacyAssetsMigrated: boolean } } }) => {
+      expect(stores.ui.getState().legacyMigrated).toBe(true);
+      expect(stores.ui.getState().legacyAssetsMigrated).toBe(true);
+      entered.resolve();
+      await finish.promise;
+    }
+  );
+  jest.doMock('lib/assets/indexeddb-migration-owner', () => ({ runIndexedDBAssetsMigration: run }));
+  try {
+    const s = setup();
+    const first = s.request({ command: { kind: 'indexeddb-assets-migration' } });
+    await entered.promise;
+    const second = s.request({ command: { kind: 'preferences', values: { isNewsEnabled: false } } });
+    expect(s.owner.getReadyAnalyticsIdentity()).toBeNull();
+    finish.resolve();
+    expect((await first).error).toBeUndefined();
+    expect((await second).snapshot?.ui.isNewsEnabled).toBe(false);
+    expect(run).toHaveBeenCalledTimes(1);
+    run.mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+    expect((await s.request({ command: { kind: 'indexeddb-assets-migration' } })).error).toBeDefined();
+    expect(s.owner.getReadyAnalyticsIdentity()).toBeNull();
+    expect((await s.request({ command: { kind: 'indexeddb-assets-migration' } })).error).toBeUndefined();
+  } finally {
+    jest.dontMock('lib/assets/indexeddb-migration-owner');
+  }
+});

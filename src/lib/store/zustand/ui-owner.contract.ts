@@ -9,6 +9,7 @@ import { SAFE_KEY_SCHEMA } from './validation';
 
 export const UI_OWNER_CHANNEL = 'task11-ui-owner';
 export const UI_COMMAND_SCHEMA = z.union([
+  z.object({ kind: z.literal('indexeddb-assets-migration') }).strict(),
   ASSETS_COMMAND_SCHEMA,
   z
     .object({

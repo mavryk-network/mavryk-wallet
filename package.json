@@ -212,6 +212,7 @@
     "zustand": "5.0.11"
   },
   "devDependencies": {
+    "fake-indexeddb": "5.0.2",
     "source-map": "^0.7.4"
   },
   "resolutions": {

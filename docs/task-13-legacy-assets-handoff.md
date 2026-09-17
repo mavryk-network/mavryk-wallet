@@ -140,3 +140,7 @@ No edits under `src/mavryk/api/**`, IndexedDB migration/repository/registration 
 - `src/lib/store/zustand/ui-owner.ts`
 - `src/lib/store/zustand/ui-state.schema.ts`
 - `src/lib/store/zustand/ui.store.ts`
+
+## Task 14 resolution
+
+[Task 14](task-14-indexeddb-assets-handoff.md) supersedes the unsafe IndexedDB limitation above. Its `assets-migrations@3.0.0` registration awaits a dedicated command in the same background owner after Tasks 11/13. It validates all source rows, preserves existing destination tuples across categories, uses all restored metadata categories and scoped metadata fetch/fallback, verifies actual adapter persistence, and transactionally deletes only unchanged verified source rows. History is separately serialized and verified; neither Task 11/13 flag proves Task 14 completion. The old Redux migration producers are removed; the middleware remains for other live producers. No legacy Redux payload is deleted. See the Task 14 handoff for fallback limitations and interruption recovery.

@@ -14,7 +14,7 @@ import type { RootState } from './root-state.type';
 import { loadRwasDetailsActions } from './rwas/actions';
 import { putRwasMetadataAction, resetRwasMetadataLoadingAction } from './rwas-metadata/actions';
 
-/** Compatibility commands cover every existing producer, including the unchanged IndexedDB migration actions. */
+/** Compatibility commands cover live Redux producers; IndexedDB migration uses a separate awaited owner operation. */
 export const ownedAssetsMiddleware: Middleware<{}, RootState> = api => next => action => {
   let command: AssetsCommand | undefined;
   let shouldContinue = false;

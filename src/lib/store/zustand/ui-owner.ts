@@ -70,6 +70,9 @@ async function processCommand(command?: UICommand) {
         }
       })
       .commit();
+  } else if (command?.kind === 'indexeddb-assets-migration') {
+    const { runIndexedDBAssetsMigration } = await import('lib/assets/indexeddb-migration-owner');
+    await runIndexedDBAssetsMigration({ ui: uiStore, metadata: metadataStore, assets: assetsStore });
   } else if (command) applyAssetsCommand(command, { ui: uiStore, metadata: metadataStore, assets: assetsStore });
   await Promise.all([uiStore.persistence.flush(), metadataStore.persistence.flush(), assetsStore.persistence.flush()]);
   const snapshot = parseData(

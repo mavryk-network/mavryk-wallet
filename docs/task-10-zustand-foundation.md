@@ -85,7 +85,7 @@ The local Tasks 15–20 still assume reference architecture which has not been p
 
 | Task | Missing port / decision before implementation                                                                                                                                                                                                                                                            |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 15   | TanStack Query dependency/client/provider and collectible/RWA batched detail query modules do not exist. Scope that foundation and consumer port first, preserving batched fetches and reactive leaf reads.                                                                                              |
+| 15   | Completed by [Task 15](task-15-reactive-details-handoff.md): approved Query 4.41.0 pin, foreground provider, scoped shared batches, reactive disabled leaves and all detail consumers. Other server-state foundations remain deferred.                                                                                              |
 | 16   | Notifications, rates, buy-with-card, swap lists, advertising and promotion query modules/consumers remain on the current stack. Port ownership per domain. Do not resurrect advertising surfaces deleted in the dev lineage.                                                                             |
 | 17   | Account asset query/loader and explicit sync functions are absent. Destination whitelist/scamlist persistence and cold-start security policy must be added in that task; Redux remains authoritative today.                                                                                              |
 | 18   | Fetched metadata parsing/refresh/query sync and component read ports remain. Task 10 provides direct built-metadata puts only.                                                                                                                                                                           |
@@ -164,3 +164,7 @@ Task 11 adds default-false completion state compatible with existing version-1 e
 ## Task 13 activation handoff
 
 [Task 13](task-13-legacy-assets-handoff.md) now extends the same background owner to asset records/statuses, collectible/RWA adult flags and metadata, and partner-promotion choices. Earlier inactive/nested-Redux statements above describe the Task 10/11 release. Redux retains unrelated domains and security caches in the active task11 root; all six nested legacy payloads are retained read-only. IndexedDB migration registration and source clearing remain Task 14 work.
+
+## Task 15 detail foundation handoff
+
+[Task 15](task-15-reactive-details-handoff.md) adds the previously deferred Query foundation only for collectible/RWA details. Existing Task 9 swap keys and Tasks 10–14 durable owners, readiness and migrations remain intact. The earlier statement that no Query provider exists describes the Task 10 release. This does not complete the remaining Tasks 16–20 / Phase 8 ports.

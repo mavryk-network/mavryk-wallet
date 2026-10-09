@@ -88,6 +88,8 @@ it('activates scoped read-only consumers without foreground destination adapters
       'app/store/settings/selectors.ts',
       'app/store/tokens-metadata/selectors.ts',
       'lib/analytics/send-events.utils.ts',
+      // Task 15 publishes flags through the existing foreground command client, never a destination adapter.
+      'lib/asset-details/publish-adult-flags.ts',
       'lib/assets/indexeddb-migration.ts',
       'lib/assets/migrations.ts',
       'lib/local-storage/migrator.ts',

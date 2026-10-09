@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { DetailsQueryProvider } from 'lib/asset-details/query-provider';
 import { initializeOwnedUI, useOwnedUIStatus } from 'lib/store/zustand/ui-client';
 
 import { store, persistor, initializeReduxPersistence } from './index';
@@ -28,7 +29,7 @@ export const StoreProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor} loading={null}>
-        {children}
+        <DetailsQueryProvider>{children}</DetailsQueryProvider>
       </PersistGate>
     </Provider>
   );

@@ -80,7 +80,7 @@ Tests use real Dexie operations against fake-indexeddb and real destination adap
 
 ## Documentation Update and next-task requirements
 
-Updated this handoff, Task 13's resolved IndexedDB limitation, Task 12's concrete temporary-bridge inventory and AGENTS architecture/testing facts. Future work must preserve permanent validation, owner serialization, actual adapter flush/read-back, identity/consent/readiness and history coordination. Any metadata re-bucketing or network-scoped metadata destination needs its own explicit policy and tests. Task 15 still needs the missing Query/provider architecture scoped in Tasks 10/13; none is introduced here. Retirement still requires supported-upgrade, shipped-release and rollback decisions from the existing ledger.
+Updated this handoff, Task 13's resolved IndexedDB limitation, Task 12's concrete temporary-bridge inventory and AGENTS architecture/testing facts. Future work must preserve permanent validation, owner serialization, actual adapter flush/read-back, identity/consent/readiness and history coordination. Any metadata re-bucketing or network-scoped metadata destination needs its own explicit policy and tests. [Task 15](task-15-reactive-details-handoff.md) now supplies the scoped Query/provider foundation and collectible/RWA detail-consumer port deferred here. It preserves this task’s migration/history/owner protections; it does not resolve the separate metadata re-bucketing limitation. Retirement still requires supported-upgrade, shipped-release and rollback decisions from the existing ledger.
 
 ## Exact changed files
 

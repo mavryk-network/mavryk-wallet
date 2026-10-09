@@ -5,6 +5,7 @@ import { createEntity } from 'lib/store';
 import { loadCollectiblesDetailsActions } from './actions';
 import { collectiblesInitialState, CollectiblesState } from './state';
 
+// Task 15 retains this legacy action contract only; production fetchers/readers now use Query.
 const collectiblesReducer = createReducer<CollectiblesState>(collectiblesInitialState, builder => {
   builder.addCase(loadCollectiblesDetailsActions.submit, state => {
     state.details.isLoading = true;

@@ -6,11 +6,11 @@ import clsx from 'clsx';
 import Money from 'app/atoms/Money';
 import { useAppEnv } from 'app/env';
 import { useBalanceSelector } from 'app/store/balances/selectors';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
+import {
+  useAreCollectibleDetailsLoading,
+  useCollectibleDetails
+} from 'lib/collectibles/use-collectibles-details.query';
 import { T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -40,8 +40,8 @@ export const CollectibleItem = memo<Props>(({ assetSlug, chainId, accountPkh, ar
     [balanceAtomic, decimals]
   );
 
-  const areDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
-  const details = useCollectibleDetailsSelector(assetSlug);
+  const areDetailsLoading = useAreCollectibleDetailsLoading();
+  const details = useCollectibleDetails(assetSlug);
 
   const listing = useMemo(() => getDetailsListing(details), [details]);
 

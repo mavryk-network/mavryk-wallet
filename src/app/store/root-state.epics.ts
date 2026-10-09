@@ -9,12 +9,10 @@ import { abTestingEpics } from './ab-testing/epics';
 import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
 import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
-import { collectiblesEpics } from './collectibles/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 import { currencyEpics } from './currency/epics';
 // import { partnersPromotionEpics } from './partners-promotion/epics';
 import type { RootState } from './root-state.type';
-import { rwasEpics } from './rwas/epics';
 import { rwasMetadataEpics } from './rwas-metadata/epics';
 // import { swapEpics } from './swap/epics';
 import { tokensMetadataEpics } from './tokens-metadata/epics';
@@ -27,13 +25,11 @@ const allEpics = combineEpics(
   // partnersPromotionEpics,
   balancesEpics,
   assetsEpics,
-  rwasEpics,
   tokensMetadataEpics,
   rwasMetadataEpics,
   collectiblesMetadataEpics,
   abTestingEpics,
-  buyWithCreditCardEpics,
-  collectiblesEpics
+  buyWithCreditCardEpics
 );
 
 export const epicMiddleware = createEpicMiddleware<Action, Action, RootState>();

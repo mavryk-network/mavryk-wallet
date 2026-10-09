@@ -31,3 +31,11 @@ export const swapKeys = {
     ] as const;
   }
 };
+
+/** Details are isolated by account, chain and configured API network; slug sets never enter batch keys. */
+export const assetDetailsKeys = {
+  batch: (category: 'collectibles' | 'rwas', account: string, chainId: string, networkId: string) =>
+    ['asset-details', category, 'batch', account, chainId, networkId] as const,
+  leaf: (category: 'collectibles' | 'rwas', account: string, chainId: string, networkId: string, slug: string) =>
+    ['asset-details', category, 'leaf', account, chainId, networkId, slug] as const
+};

@@ -127,3 +127,14 @@ This supersedes the pending Task 14 entry. See [Task 14 handoff](task-14-indexed
 | localStorage `MIGRATIONS`                                                | Task 14 named completion alongside retained older entries                               | Retain `assets-migrations@1.18.2`, `@3.0.0` and unrelated history; Task 11/13 flags are not substitutes       |
 
 IndexedDB producers no longer use `owned-assets.middleware.ts`; other live action producers still require that bridge. Repository schema, destination stores and analytics protections remain permanent. All seven legacy Redux payloads and their localStorage copies remain retained; Task 14 does not authorize their retirement.
+
+## Task 15 detail ownership inventory
+
+[Task 15](task-15-reactive-details-handoff.md) removes both detail epics and all production detail-action submitters. Cards, detail pages and the all-record sorting hooks now read scoped Query entries. This supersedes the earlier statement that fetched collectible/RWA details remain actively Redux-owned.
+
+- `src/app/store/collectibles/epics.ts` and `src/app/store/rwas/epics.ts` are removed, including their root-epic registrations.
+- The two `selectors.ts` files retain old detail hook names as aliases to disabled Query observers; their adult-flag selectors still read the background owner. Detail types and the collectible mapper retain compatible re-exports at the old store paths.
+- The two legacy detail `actions.ts`, `reducer.ts` and state shapes remain dormant compatibility contracts in the root reducer. There are no live detail-action producers. The detail-success branch in `owned-assets.middleware.ts` remains for that contract and its regression test; new Query batches call the existing adult-flag owner command directly and never dispatch detail success into Redux.
+- The middleware’s asset, metadata and promotion producers remain live. No general middleware retirement, legacy payload deletion, prefix change or future-release decision is authorized.
+
+The Query provider is ephemeral foreground infrastructure, not a destination persistence adapter. All existing migration sources, durable owners, security caches, history and the deletion-marker waiver remain unchanged. No external retirement ticket was filed.

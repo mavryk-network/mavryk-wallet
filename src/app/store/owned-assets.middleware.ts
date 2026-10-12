@@ -19,22 +19,13 @@ export const ownedAssetsMiddleware: Middleware<{}, RootState> = api => next => a
   let command: AssetsCommand | undefined;
   let shouldContinue = false;
   let resetLoading: (() => unknown) | undefined;
-  for (const [category, put, status, loaded] of [
-    ['tokens', assets.putTokensAsIsAction, assets.setTokenStatusAction, assets.loadAccountTokensActions.success],
-    [
-      'collectibles',
-      assets.putCollectiblesAsIsAction,
-      assets.setCollectibleStatusAction,
-      assets.loadAccountCollectiblesActions.success
-    ],
-    ['rwas', assets.putRwasAsIsAction, assets.setRwaStatusAction, assets.loadAccountRwasActions.success]
+  for (const [category, put, status] of [
+    ['tokens', assets.putTokensAsIsAction, assets.setTokenStatusAction],
+    ['collectibles', assets.putCollectiblesAsIsAction, assets.setCollectibleStatusAction],
+    ['rwas', assets.putRwasAsIsAction, assets.setRwaStatusAction]
   ] as const) {
     if (put.match(action)) command = { kind: 'assets-put', category, records: action.payload };
     else if (status.match(action)) command = { kind: 'assets-status', category, value: action.payload };
-    else if (loaded.match(action)) {
-      command = { kind: 'assets-loaded', category, value: action.payload };
-      shouldContinue = true; // Loading/error state still belongs to Redux.
-    }
   }
   if (loadCollectiblesDetailsActions.success.match(action) || loadRwasDetailsActions.success.match(action)) {
     const isCollectible = loadCollectiblesDetailsActions.success.match(action);

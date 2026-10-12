@@ -88,7 +88,7 @@ it.each(['object', 'serialized', 'fallback'])(
     expect(s.metadata.getState().collectiblesMetadata.KT1example_0).toEqual(metadata);
     expect(s.metadata.getState().rwasMetadata.KT1example_1.name).toBe('RWA');
     expect(JSON.parse(s.records['zustand-assets'] as string).state.tokens).toEqual(data.tokens);
-    expect(JSON.parse(s.records['zustand-assets'] as string).state).not.toHaveProperty('mainnetScamlist');
+    expect(JSON.parse(s.records['zustand-assets'] as string).state.mainnetScamlist).toBeNull();
     const legacyBefore = Object.fromEntries(LEGACY_ASSETS_KEYS.map(key => [key, s.records[key]]));
     s.assets
       .getState()

@@ -3,7 +3,6 @@ import { combineEpics, createEpicMiddleware } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
 
 import { abTestingEpics } from './ab-testing/epics';
-import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 import type { RootState } from './root-state.type';
@@ -14,7 +13,6 @@ import { tokensMetadataEpics } from './tokens-metadata/epics';
 const allEpics = combineEpics(
   // swapEpics,
   balancesEpics,
-  assetsEpics,
   tokensMetadataEpics,
   rwasMetadataEpics,
   collectiblesMetadataEpics,

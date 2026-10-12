@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
+import { getAccountAssetsSyncKey } from 'lib/assets/account-assets-sync-key';
 import { AD_HIDING_TIMEOUT } from 'lib/constants';
 
 import { ADULT_FLAGS_SCHEMA, ASSET_TO_PUT_SCHEMA } from './assets-state.schema';
@@ -58,6 +59,16 @@ export function applyAssetsCommand(
   }
 ) {
   const { assets, ui, metadata } = stores;
+  if (command.kind === 'assets-put' || command.kind === 'assets-status') {
+    // Explicit user choices invalidate older fetch publications, including an explicit return to idle.
+    const records = command.kind === 'assets-put' ? command.records : [command.value];
+    assets.persistence
+      .prepare(draft => {
+        for (const { account, chainId } of records)
+          delete draft.syncRequests[getAccountAssetsSyncKey(command.category, account, chainId)];
+      })
+      .commit();
+  }
   if (command.kind === 'assets-put') {
     const put = {
       tokens: assets.getState().putTokensAsIs,

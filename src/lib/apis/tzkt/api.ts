@@ -186,6 +186,7 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
 
   const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
     const data = await fetchTzktAccountAssetsPage(account, chainId, offset, fungible);
+    if (!Array.isArray(data)) throw new Error('Invalid account assets page');
     if (!data.length) return accum;
 
     if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)

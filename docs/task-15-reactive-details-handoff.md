@@ -143,3 +143,7 @@ Updated AGENTS dependency/ownership/testing facts, resolved Task 10’s deferred
 ## Task 16 shared-provider extension
 
 [Task 16](task-16-query-only-server-domains-handoff.md) reuses `DetailsQueryProvider` unchanged for additional server domains. Its historical name is retained; the client is now shared with rates, card-provider data and dormant server-domain readers. No extra client, persistence adapter, provider gate, detail key or batch/leaf behavior was introduced. Detail ownership and all Task 15 protections above remain unchanged.
+
+## Task 17 shared-provider extension
+
+[Task 17](task-17-assets-security-ownership-handoff.md) reuses the existing foreground Query client for asset/security request lifecycle; durable responses stay owner-read. Detail keys, batches, disabled leaves, polling and null/error semantics are unchanged. The existing RWA selection guard is extracted into `lib/assets/scoped-wallet-request.ts` and reused around asset loading/publication. It still observes account/network/auth-map transitions, including A→B→A, without modifying reserved transports. The existing RWA detail and account-assets batches remain separate domain requests; this task does not unify their payload caches.

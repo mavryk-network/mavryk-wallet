@@ -150,3 +150,15 @@ The Query provider is ephemeral foreground infrastructure, not a destination per
 - `MVRK_PRICE` and `RWA_ASSET_PRICES` are retained read-only price fallbacks on the active Query path. Legacy exported transport wrappers still support their old persistence behavior, but have no production callers; fresh Query transports do not invoke them or write storage.
 
 All existing persistence keys, seven legacy source payloads, migration histories, security caches, durable owner gates and the Task 12 deletion-marker waiver remain intact. No wider retirement or Phase 8 completion is claimed.
+
+## Task 17 asset/security ownership inventory
+
+[Task 17](task-17-assets-security-ownership-handoff.md) removes `src/app/store/assets/epics.ts`, its root registration, asset/security fetch dispatchers and fetched reducer handlers. The whitelist-success metadata epic is removed. Asset load-success actions no longer command the owner through `owned-assets.middleware.ts`; put/status and unrelated metadata/flag/promotion compatibility commands remain live.
+
+- `security-migration.ts` adopts validated security sources through the sole background owner with independent flush/read-back and `zustand-assets.state.isSecurityAdopted`. Neither Task 13's completion flag nor Task 14 history substitutes for this step.
+- `owner-fallback.ts` extends the trusted foreground read-only fallback protocol to `persist:temple-root-task11`. The six Task 13 source keys and migration completion semantics are unchanged.
+- `security-persistence.ts` retains active Redux source values and resets transient fields; it no longer reads historical security data or supplies UI data. Security fetched actions are inert. No current owner data is mirrored into Redux.
+- `syncAccountAssets` retains only the scoped Redux balance publication needed by Task 19. Coupled metadata is built with existing helpers and acknowledged within the existing owner; unrelated metadata loaders and action bridges remain for Task 18.
+- Security/asset destination schemas, synchronization ordering, owner readiness and fail-closed consumers are permanent protections, not retirement candidates.
+
+All source payloads, persistence prefixes, storage histories and the deletion-marker waiver remain. No future release, broader Phase 8 completion or source deletion is authorized.

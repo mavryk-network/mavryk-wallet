@@ -10,7 +10,7 @@ it('retains offline whitelist/scamlist while leaving legacy payloads untouched a
   };
   const before = JSON.stringify(legacy);
   const read = jest.spyOn(BROWSER_STORAGE, 'get').mockResolvedValue({ 'persist:root.assets': legacy });
-  const restored = await restoreAssetSecurity(undefined);
+  const restored = await restoreAssetSecurity(legacy);
   expect(restored.mainnetWhitelist).toMatchObject({ data: ['safe'], isLoading: false });
   expect(restored.mainnetScamlist.data).toEqual({ scam: true });
   expect(restored.tokens.data).toEqual({});
@@ -25,7 +25,8 @@ it('retains offline whitelist/scamlist while leaving legacy payloads untouched a
 
 it('exposes storage and invalid security-cache errors', async () => {
   const read = jest.spyOn(BROWSER_STORAGE, 'get').mockRejectedValue(new Error('offline read failure'));
-  await expect(restoreAssetSecurity(undefined)).rejects.toThrow('offline read failure');
+  expect((await restoreAssetSecurity(undefined)).mainnetScamlist.data).toEqual({});
+  expect(read).not.toHaveBeenCalled();
   await expect(
     restoreAssetSecurity({ mainnetWhitelist: { data: [] }, mainnetScamlist: { data: { scam: 'false' } } })
   ).rejects.toThrow();

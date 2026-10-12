@@ -21,7 +21,7 @@ it.each([
   ],
   ['rwas', actions.putRwasAsIsAction, actions.setRwaStatusAction, actions.loadAccountRwasActions.success]
 ] as const)(
-  'hands off all %s producer actions while retaining Redux loading/security ownership',
+  'hands off %s user commands while fetched actions remain inert compatibility contracts',
   (category, put, status, loaded) => {
     const next = jest.fn();
     const middleware = ownedAssetsMiddleware({ dispatch: jest.fn(), getState: jest.fn() })(next);
@@ -40,14 +40,16 @@ it.each([
     expect(updateOwnedUI).toHaveBeenLastCalledWith({ kind: 'assets-status', category, value: statusValue });
     expect(next).not.toHaveBeenCalled();
     const fetched = loaded({ account: 'a', chainId: value.chainId, slugs: ['fetched'] });
+    (updateOwnedUI as jest.Mock).mockClear();
     middleware(fetched);
+    expect(updateOwnedUI).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith(fetched);
     const state = assetsPersistedReducer(undefined, fetched);
     expect(state[category].data).toEqual({});
     const security = actions.loadTokensScamlistActions.success({ scam: true });
     middleware(security);
     expect(next).toHaveBeenLastCalledWith(security);
-    expect(assetsPersistedReducer(state, security).mainnetScamlist.data).toEqual({ scam: true });
+    expect(assetsPersistedReducer(state, security).mainnetScamlist.data).toEqual({});
   }
 );
 

@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 import { ASSETS_COMMAND_SCHEMA } from './assets-command';
 import { ASSETS_SCHEMA } from './assets-state.schema';
-import { LEGACY_ASSETS_KEYS } from './legacy-assets-source';
+import { ASSETS_SYNC_COMMAND_SCHEMA } from './assets-sync-command';
 import { METADATA_SCHEMA, TOKEN_METADATA_SCHEMA } from './metadata-state.schema';
+import { OWNER_FALLBACK_KEYS } from './owner-fallback';
 import { UI_SCHEMA, UI_PREFERENCES_SCHEMA } from './ui-state.schema';
 import { SAFE_KEY_SCHEMA } from './validation';
 
@@ -11,6 +12,7 @@ export const UI_OWNER_CHANNEL = 'task11-ui-owner';
 export const UI_COMMAND_SCHEMA = z.union([
   z.object({ kind: z.literal('indexeddb-assets-migration') }).strict(),
   ASSETS_COMMAND_SCHEMA,
+  ASSETS_SYNC_COMMAND_SCHEMA,
   z
     .object({
       kind: z.literal('preferences'),
@@ -35,7 +37,7 @@ export const UI_REQUEST_SCHEMA = z
   .object({
     channel: z.literal(UI_OWNER_CHANNEL),
     fallback: z.string().nullable().optional(),
-    assetsFallback: z.record(z.enum(LEGACY_ASSETS_KEYS), z.string().nullable()).optional(),
+    assetsFallback: z.record(z.enum(OWNER_FALLBACK_KEYS), z.string().nullable()).optional(),
     command: UI_COMMAND_SCHEMA.optional()
   })
   .strict();

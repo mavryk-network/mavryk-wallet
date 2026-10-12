@@ -57,3 +57,7 @@ export const notificationKeys = {
 };
 
 export const advertisingKeys = { active: ['advertising', 'temple', 'active'] as const };
+
+export const partnerPromotionKeys = {
+  decision: (account: string, variant: string) => ['partner-promotion', 'optimal', '1729', account, variant] as const
+};

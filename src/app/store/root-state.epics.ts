@@ -6,7 +6,6 @@ import { abTestingEpics } from './ab-testing/epics';
 import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
-// import { partnersPromotionEpics } from './partners-promotion/epics';
 import type { RootState } from './root-state.type';
 import { rwasMetadataEpics } from './rwas-metadata/epics';
 // import { swapEpics } from './swap/epics';
@@ -14,7 +13,6 @@ import { tokensMetadataEpics } from './tokens-metadata/epics';
 
 const allEpics = combineEpics(
   // swapEpics,
-  // partnersPromotionEpics,
   balancesEpics,
   assetsEpics,
   tokensMetadataEpics,

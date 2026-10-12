@@ -1,8 +1,7 @@
+import { usePartnersPromo } from 'app/hooks/use-partners-promo.query';
 import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
-import { useSelector } from '..';
-
-export const usePartnersPromoSelector = () => useSelector(state => state.partnersPromotion.promotion);
+export const usePartnersPromoSelector = usePartnersPromo;
 export const useShouldShowPartnersPromoSelector = () => useOwnedUI(state => state.ui.shouldShowPromotion);
 
 export const usePromotionHidingTimestampSelector = (id: string) =>

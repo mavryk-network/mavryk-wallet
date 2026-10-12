@@ -2,11 +2,9 @@ import axios from 'axios';
 import { Action } from 'redux';
 import { combineEpics, Epic } from 'redux-observable';
 import { from, of, concatMap } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { ofType, toPayload } from 'ts-action-operators';
 
-import { fetchWhitelistTokens } from 'lib/apis/temple';
-import { fetchScamlistTokens } from 'lib/apis/temple/scamlist-tokens';
 import { toLatestValue } from 'lib/store';
 import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
 
@@ -19,13 +17,7 @@ import { putRwasMetadataAction } from '../rwas-metadata/actions';
 import { putTokensMetadataAction } from '../tokens-metadata/actions';
 import { MetadataRecords } from '../tokens-metadata/state';
 
-import {
-  loadAccountTokensActions,
-  loadAccountCollectiblesActions,
-  loadTokensWhitelistActions,
-  loadTokensScamlistActions,
-  loadAccountRwasActions
-} from './actions';
+import { loadAccountTokensActions, loadAccountCollectiblesActions, loadAccountRwasActions } from './actions';
 // TODO add RWA loading assets
 import { loadAccountTokens, loadAccountCollectibles, loadAccountRwas } from './utils';
 
@@ -113,35 +105,7 @@ const loadAccountRwasEpic: Epic<Action, Action, RootState> = (action$, state$) =
     })
   );
 
-const loadTokensWhitelistEpic: Epic = action$ =>
-  action$.pipe(
-    ofType(loadTokensWhitelistActions.submit),
-    switchMap(() =>
-      from(fetchWhitelistTokens()).pipe(
-        map(loadTokensWhitelistActions.success),
-        catchError(err => of(loadTokensWhitelistActions.fail({ code: axios.isAxiosError(err) ? err.code : undefined })))
-      )
-    )
-  );
-
-const loadTokensScamlistEpic: Epic = action$ =>
-  action$.pipe(
-    ofType(loadTokensScamlistActions.submit),
-    switchMap(() =>
-      from(fetchScamlistTokens()).pipe(
-        map(loadTokensScamlistActions.success),
-        catchError(err => of(loadTokensScamlistActions.fail({ code: axios.isAxiosError(err) ? err.code : undefined })))
-      )
-    )
-  );
-
-export const assetsEpics = combineEpics(
-  loadAccountTokensEpic,
-  loadAccountCollectiblesEpic,
-  loadAccountRwasEpic,
-  loadTokensWhitelistEpic,
-  loadTokensScamlistEpic
-);
+export const assetsEpics = combineEpics(loadAccountTokensEpic, loadAccountCollectiblesEpic, loadAccountRwasEpic);
 
 const mergeAssetsMetadata = (tokensMetadata: MetadataRecords, assetsMetadata: MetadataMap) => {
   const map = new Map(Object.entries(tokensMetadata));

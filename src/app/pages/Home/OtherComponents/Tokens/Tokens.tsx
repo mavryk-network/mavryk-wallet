@@ -3,7 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { ChainIds } from '@mavrykdynamics/webmavryk';
 import clsx from 'clsx';
 
-import { SyncSpinner } from 'app/atoms';
+import { Alert, SyncSpinner } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
@@ -123,7 +123,7 @@ export const TokensTab: FC = () => {
         key={assetSlug}
         publicKeyHash={publicKeyHash}
         assetSlug={assetSlug}
-        scam={mainnetTokensScamSlugsRecord[assetSlug]}
+        scam={mainnetTokensScamSlugsRecord?.[assetSlug]}
         active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
         onClick={handleAssetOpen}
       />
@@ -137,7 +137,15 @@ export const TokensTab: FC = () => {
 
     return tokensJsx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedSlugs, activeAssetSlug, balances, sortOption]);
+  }, [
+    sortedSlugs,
+    activeAssetSlug,
+    balances,
+    sortOption,
+    mainnetTokensScamSlugsRecord,
+    publicKeyHash,
+    handleAssetOpen
+  ]);
 
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 
@@ -179,6 +187,9 @@ export const TokensTab: FC = () => {
 
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+      {mainnetTokensScamSlugsRecord === null && (
+        <Alert type="warning" description={<T id="assetSecurityUnavailable" />} />
+      )}
       <div className={clsx('mt-3 w-full flex justify-end')}>
         <SearchExplorer>
           <>

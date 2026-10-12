@@ -17,7 +17,17 @@ export function createAssetsStore(storage?: BrowserStorage) {
     name: 'zustand-assets',
     storage,
     schema: ASSETS_SCHEMA,
-    defaults: { tokens: {}, collectibles: {}, rwas: {}, collectibleAdultFlags: {}, rwaAdultFlags: {} },
+    defaults: {
+      tokens: {},
+      collectibles: {},
+      rwas: {},
+      collectibleAdultFlags: {},
+      rwaAdultFlags: {},
+      mainnetWhitelist: null,
+      mainnetScamlist: null,
+      isSecurityAdopted: false,
+      syncRequests: {}
+    },
     actions: update => {
       const put = (category: 'tokens' | 'collectibles' | 'rwas', assets: AssetToPut[]) => {
         const validated = parseData(z.array(ASSET_TO_PUT_SCHEMA), assets);

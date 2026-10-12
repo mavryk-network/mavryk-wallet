@@ -4136,5 +4136,8 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "assetSecurityUnavailable": {
+    "message": "Token security data is unavailable. Assets have not been checked for scam labels."
   }
 }

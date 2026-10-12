@@ -1,26 +1,21 @@
-import { useEffect } from 'react';
-
 import { dispatch } from 'app/store';
 import {
   loadAccountTokensActions,
-  loadTokensWhitelistActions,
   loadAccountCollectiblesActions,
   loadAccountRwasActions
 } from 'app/store/assets/actions';
 import { useAreAssetsLoading } from 'app/store/assets/selectors';
 import { isKnownChainId } from 'lib/apis/tzkt';
+import { useSecurityQuery } from 'lib/assets/use-security-query';
 import { ASSETS_SYNC_INTERVAL } from 'lib/fixed-times';
 import { useAccount, useChainId } from 'lib/temple/front';
-import { TempleChainId } from 'lib/temple/types';
 import { useInterval } from 'lib/ui/hooks';
 
 export const useAssetsLoading = () => {
   const chainId = useChainId()!;
   const { publicKeyHash } = useAccount();
 
-  useEffect(() => {
-    if (chainId === TempleChainId.Mainnet) dispatch(loadTokensWhitelistActions.submit());
-  }, [chainId]);
+  useSecurityQuery(chainId);
 
   const tokensAreLoading = useAreAssetsLoading('tokens');
 

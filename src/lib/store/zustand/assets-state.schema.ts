@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { SCAMLIST_SCHEMA, WHITELIST_SCHEMA } from './security-state.schema';
 import { SAFE_KEY_SCHEMA } from './validation';
 
 export const STORED_ASSET_SCHEMA = z.object({
@@ -21,7 +22,11 @@ export const ASSETS_SCHEMA = z.object({
   collectibles: ASSET_RECORDS_SCHEMA,
   rwas: ASSET_RECORDS_SCHEMA,
   collectibleAdultFlags: ADULT_FLAGS_SCHEMA,
-  rwaAdultFlags: ADULT_FLAGS_SCHEMA
+  rwaAdultFlags: ADULT_FLAGS_SCHEMA,
+  mainnetWhitelist: WHITELIST_SCHEMA.nullable().default(null),
+  mainnetScamlist: SCAMLIST_SCHEMA.nullable().default(null),
+  isSecurityAdopted: z.boolean().default(false),
+  syncRequests: z.record(SAFE_KEY_SCHEMA, SAFE_KEY_SCHEMA).default({})
 });
 
 export type AssetsState = z.infer<typeof ASSETS_SCHEMA>;

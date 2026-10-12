@@ -5,17 +5,7 @@ import { ofType, toPayload } from 'ts-action-operators';
 
 import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
 
-import { loadTokensWhitelistActions } from '../assets/actions';
-
-import {
-  putTokensMetadataAction,
-  loadTokensMetadataAction,
-  addWhitelistTokensMetadataAction,
-  resetTokensMetadataLoadingAction
-} from './actions';
-
-const addWhitelistMetadataEpic: Epic = action$ =>
-  action$.pipe(ofType(loadTokensWhitelistActions.success), toPayload(), map(addWhitelistTokensMetadataAction));
+import { putTokensMetadataAction, loadTokensMetadataAction, resetTokensMetadataLoadingAction } from './actions';
 
 const loadTokensMetadataEpic: Epic = action$ =>
   action$.pipe(
@@ -30,4 +20,4 @@ const loadTokensMetadataEpic: Epic = action$ =>
     )
   );
 
-export const tokensMetadataEpics = combineEpics(addWhitelistMetadataEpic, loadTokensMetadataEpic);
+export const tokensMetadataEpics = combineEpics(loadTokensMetadataEpic);

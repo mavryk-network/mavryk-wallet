@@ -64,3 +64,10 @@ export const advertisingKeys = { active: ['advertising', 'temple', 'active'] as 
 export const partnerPromotionKeys = {
   decision: (account: string, variant: string) => ['partner-promotion', 'optimal', '1729', account, variant] as const
 };
+
+/** Durable data is owner-read; these keys contain only request lifecycle and synchronization receipts. */
+export const assetsKeys = {
+  account: (category: 'tokens' | 'collectibles' | 'rwas', account: string, chainId: string, networkId: string) =>
+    ['account-assets', category, account, chainId, networkId] as const,
+  security: (category: 'scamlist' | 'whitelist') => ['asset-security', 'madfish-mainnet', category] as const
+};

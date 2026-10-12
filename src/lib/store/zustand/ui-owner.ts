@@ -2,12 +2,14 @@ import isEqual from 'lodash/isEqual';
 import browser from 'webextension-polyfill';
 
 import { applyAssetsCommand } from './assets-command';
+import { applyAssetsSyncCommand } from './assets-sync-command';
 import { assetsStore } from './assets.store';
 import { createLegacyAssetsMigration } from './legacy-assets-migration';
-import { LegacyAssetsKey } from './legacy-assets-source';
 import { createLegacyUIMigration } from './legacy-ui-migration';
 import { metadataStore } from './metadata.store';
+import { OwnerFallbackKey } from './owner-fallback';
 import { BROWSER_STORAGE } from './persist-storage';
+import { createSecurityMigration } from './security-migration';
 import { UI_OWNER_CHANNEL, UI_REQUEST_SCHEMA, UI_SNAPSHOT_SCHEMA, UICommand } from './ui-owner.contract';
 import { applyUIPreferences } from './ui-preferences.helpers';
 import { uiStore } from './ui.store';
@@ -23,22 +25,28 @@ const migration = createLegacyUIMigration({
     return fallback;
   }
 });
-let assetsFallback: Partial<Record<LegacyAssetsKey, string | null>> = {};
-let requestedFallbackKey: LegacyAssetsKey | undefined;
+let assetsFallback: Partial<Record<OwnerFallbackKey, string | null>> = {};
+let requestedFallbackKey: OwnerFallbackKey | undefined;
 const assetsMigration = createLegacyAssetsMigration({
   ui: uiStore,
   metadata: metadataStore,
   assets: assetsStore,
   storage: BROWSER_STORAGE,
-  readFallback: async key => {
-    const value = assetsFallback[key];
-    if (value === undefined) {
-      requestedFallbackKey = key;
-      throw new Error('assets-fallback-required');
-    }
-    return value;
-  }
+  readFallback: readAssetsFallback
 });
+const securityMigration = createSecurityMigration({
+  assets: assetsStore,
+  storage: BROWSER_STORAGE,
+  readFallback: readAssetsFallback
+});
+async function readAssetsFallback(key: OwnerFallbackKey) {
+  const value = assetsFallback[key];
+  if (value === undefined) {
+    requestedFallbackKey = key;
+    throw new Error('assets-fallback-required');
+  }
+  return value;
+}
 let queue: Promise<unknown> = Promise.resolve();
 let isStarted = false;
 let hasWriteFailure = false;
@@ -48,9 +56,18 @@ let pendingOperations = 0;
 async function processCommand(command?: UICommand) {
   await migration.initialize();
   await assetsMigration.initialize();
+  await securityMigration.initialize();
   // Explicit retries drain retained failed snapshots before accepting more commands.
   await Promise.all([uiStore.persistence.flush(), metadataStore.persistence.flush(), assetsStore.persistence.flush()]);
-  if (command?.kind === 'preferences') {
+  if (
+    command &&
+    (command.kind === 'assets-sync-start' ||
+      command.kind === 'assets-sync' ||
+      command.kind === 'scamlist-sync' ||
+      command.kind === 'whitelist-sync')
+  ) {
+    applyAssetsSyncCommand(command, { ui: uiStore, assets: assetsStore, metadata: metadataStore });
+  } else if (command?.kind === 'preferences') {
     uiStore.persistence
       .prepare(draft => {
         applyUIPreferences(draft, command.values);
@@ -101,6 +118,7 @@ async function processCommand(command?: UICommand) {
 export const getReadyAnalyticsIdentity = () =>
   migration.isReady() &&
   assetsMigration.isReady() &&
+  securityMigration.isReady() &&
   pendingOperations === 0 &&
   !hasWriteFailure &&
   uiStore.getState().isAnalyticsEnabled

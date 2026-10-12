@@ -43,7 +43,7 @@ afterEach(() => {
   jest.dontMock('./root-state.epics');
 });
 
-it('boots fresh Redux, seeds security once, preserves unrelated state and never writes any nested legacy key', async () => {
+it('retains Redux security sources read-only, preserves unrelated state and never writes any nested legacy key', async () => {
   const legacy = {
     'persist:root.assets': { mainnetWhitelist: { data: ['safe'] }, mainnetScamlist: { data: { scam: true } } },
     'persist:root.collectibles': { adultFlags: { nft: { val: true, ts: 1 } } },
@@ -55,7 +55,7 @@ it('boots fresh Redux, seeds security once, preserves unrelated state and never 
     'zustand-ui': 'untouched',
     MIGRATIONS: ['keep']
   };
-  const s = setup(legacy);
+  const s = setup({ ...legacy, 'persist:temple-root-task11': { assets: legacy['persist:root.assets'] } });
   await start(s.app);
   expect(s.app.store.getState().assets.mainnetScamlist.data).toEqual({ scam: true });
   const { loadTokensScamlistActions } = require('./assets/actions');
@@ -65,7 +65,7 @@ it('boots fresh Redux, seeds security once, preserves unrelated state and never 
     assets: { mainnetScamlist: { data: object } };
     currency: object;
   };
-  expect(active.assets.mainnetScamlist.data).toEqual({ newer: true });
+  expect(active.assets.mainnetScamlist.data).toEqual({ scam: true });
   expect(active.currency).toEqual(s.app.store.getState().currency);
   for (const [key, value] of Object.entries(legacy)) expect(s.records[key]).toEqual(value);
   expect(
@@ -76,14 +76,14 @@ it('boots fresh Redux, seeds security once, preserves unrelated state and never 
   s.app.persistor.pause();
   const reload = setup(s.records);
   await start(reload.app);
-  expect(reload.app.store.getState().assets.mainnetScamlist.data).toEqual({ newer: true });
+  expect(reload.app.store.getState().assets.mainnetScamlist.data).toEqual({ scam: true });
   reload.app.persistor.pause();
 });
 
 it('keeps Redux persistence stopped on a rejected security source read and allows explicit retry', async () => {
   const s = setup({});
   (s.storage.get as jest.Mock).mockImplementation(async key => {
-    if (key === 'persist:root.assets') throw new Error('read failure');
+    if (key === 'persist:temple-root-task11') throw new Error('read failure');
     return {};
   });
   await expect(s.app.initializeReduxPersistence()).rejects.toThrow('read failure');

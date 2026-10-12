@@ -2,8 +2,8 @@ import { useSyncExternalStore } from 'react';
 
 import browser from 'webextension-polyfill';
 
-import { LEGACY_ASSETS_KEYS, LegacyAssetsKey } from './legacy-assets-source';
 import { LEGACY_UI_ROOT_KEY } from './legacy-ui-source';
+import { OWNER_FALLBACK_KEYS, OwnerFallbackKey } from './owner-fallback';
 import { UI_OWNER_CHANNEL, UI_SNAPSHOT_SCHEMA, UICommand, UISnapshot } from './ui-owner.contract';
 import { parseData } from './validation';
 
@@ -28,10 +28,10 @@ async function send(command?: UICommand) {
     const fallback = localStorage.getItem(LEGACY_UI_ROOT_KEY);
     response = await browser.runtime.sendMessage({ channel: UI_OWNER_CHANNEL, fallback, command });
   }
-  const assetsFallback: Partial<Record<LegacyAssetsKey, string | null>> = {};
+  const assetsFallback: Partial<Record<OwnerFallbackKey, string | null>> = {};
   while (response?.error === 'assets-fallback-required') {
-    const key = response.key as LegacyAssetsKey;
-    if (!LEGACY_ASSETS_KEYS.includes(key) || key in assetsFallback) throw new Error('Invalid fallback request');
+    const key = response.key as OwnerFallbackKey;
+    if (!OWNER_FALLBACK_KEYS.includes(key) || key in assetsFallback) throw new Error('Invalid fallback request');
     assetsFallback[key] = localStorage.getItem(key);
     response = await browser.runtime.sendMessage({ channel: UI_OWNER_CHANNEL, assetsFallback, command });
   }
@@ -39,10 +39,11 @@ async function send(command?: UICommand) {
   snapshot = parseData(UI_SNAPSHOT_SCHEMA, response.snapshot);
   error = undefined;
   notify();
+  return snapshot;
 }
 
 /** Queue commands without optimistic defaults; failures close the consumer gate and remain explicitly retryable. */
-export function updateOwnedUI(command?: UICommand): Promise<void> {
+export function requestOwnedUISnapshot(command?: UICommand): Promise<UISnapshot> {
   const run = queue
     .then(() => send(command))
     .catch(() => {
@@ -52,6 +53,11 @@ export function updateOwnedUI(command?: UICommand): Promise<void> {
     });
   queue = run.catch(() => undefined);
   return run;
+}
+
+/** Apply a command and await the owner’s durable acknowledgement. */
+export async function updateOwnedUI(command?: UICommand): Promise<void> {
+  await requestOwnedUISnapshot(command);
 }
 
 /** Read-only frontend projection of the background's durable stores; no foreground persistence adapter exists. */

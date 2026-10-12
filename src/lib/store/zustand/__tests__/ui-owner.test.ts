@@ -1,6 +1,6 @@
 import type { Runtime } from 'webextension-polyfill';
 
-import { LEGACY_ASSETS_KEYS } from '../legacy-assets-source';
+import { OWNER_FALLBACK_KEYS } from '../owner-fallback';
 import fixture from '../test-support/fixtures/legacy-ui-root.json';
 import { deferred, memoryStorage } from '../test-support/helpers';
 import { UI_OWNER_CHANNEL } from '../ui-owner.contract';
@@ -41,7 +41,7 @@ function setup(initial: Record<string, unknown> = { 'persist:temple-root': fixtu
     listener(
       {
         channel: UI_OWNER_CHANNEL,
-        assetsFallback: Object.fromEntries(LEGACY_ASSETS_KEYS.map(key => [key, null])),
+        assetsFallback: Object.fromEntries(OWNER_FALLBACK_KEYS.map(key => [key, null])),
         ...values
       },
       sender
@@ -290,4 +290,25 @@ it('serializes Task 14 after legacy readiness, blocks analytics and waits before
   } finally {
     jest.dontMock('lib/assets/indexeddb-migration-owner');
   }
+});
+
+it('orders security refreshes across contexts, persists successful empty responses and retains labels after failure/restart', async () => {
+  const s = setup();
+  await s.request();
+  const send = (command: object) => s.request({ command });
+  const read = () => JSON.parse(s.records['zustand-assets'] as string).state;
+  await send({ kind: 'assets-sync-start', requestKey: 'scamlist', requestId: 'old' });
+  await send({ kind: 'assets-sync-start', requestKey: 'scamlist', requestId: 'new' });
+  await send({ kind: 'scamlist-sync', requestKey: 'scamlist', requestId: 'new', data: { scam: true } });
+  await send({ kind: 'scamlist-sync', requestKey: 'scamlist', requestId: 'old', data: {} });
+  expect(read().mainnetScamlist).toEqual({ scam: true });
+  expect(
+    (await send({ kind: 'scamlist-sync', requestKey: 'scamlist', requestId: 'new', data: null })).error
+  ).toBeDefined();
+  expect(read().mainnetScamlist).toEqual({ scam: true });
+  const restart = setup(s.records);
+  expect((await restart.request()).error).toBeUndefined();
+  expect(JSON.parse(restart.records['zustand-assets'] as string).state.mainnetScamlist).toEqual({ scam: true });
+  await send({ kind: 'scamlist-sync', requestKey: 'scamlist', requestId: 'new', data: {} });
+  expect(read().mainnetScamlist).toEqual({});
 });

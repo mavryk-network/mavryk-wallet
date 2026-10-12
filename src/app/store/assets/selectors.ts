@@ -21,6 +21,9 @@ export const useAccountRwasSelector = (account: string, chainId: string) =>
 
 export const useAreAssetsLoading = (type: AssetsType) => useSelector(state => state.assets[type].isLoading);
 
-export const useMainnetTokensWhitelistSelector = () => useSelector(state => state.assets.mainnetWhitelist.data);
+const EMPTY_WHITELIST: string[] = [];
 
-export const useMainnetTokensScamlistSelector = () => useSelector(state => state.assets.mainnetScamlist.data);
+export const useMainnetTokensWhitelistSelector = () =>
+  useOwnedUI(state => state.assets.mainnetWhitelist ?? EMPTY_WHITELIST);
+
+export const useMainnetTokensScamlistSelector = () => useOwnedUI(state => state.assets.mainnetScamlist);

@@ -1,18 +1,15 @@
 import { createReducer } from '@reduxjs/toolkit';
 
-import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
 
 import {
   loadAccountTokensActions,
   loadAccountCollectiblesActions,
   loadAccountRwasActions,
-  loadTokensWhitelistActions,
   setTokenStatusAction,
   setCollectibleStatusAction,
   putTokensAsIsAction,
   putCollectiblesAsIsAction,
-  loadTokensScamlistActions,
   setRwaStatusAction,
   putRwasAsIsAction
 } from './actions';
@@ -123,44 +120,6 @@ const assetsReducer = createReducer<SliceState>(initialState, builder => {
       if (!records[key]) records[key] = {};
       records[key][slug] = { status, manual };
     }
-  });
-
-  builder.addCase(loadTokensWhitelistActions.submit, state => {
-    state.mainnetWhitelist.isLoading = true;
-    delete state.mainnetScamlist.error;
-  });
-
-  builder.addCase(loadTokensWhitelistActions.fail, (state, { payload }) => {
-    state.mainnetWhitelist.isLoading = false;
-    state.mainnetWhitelist.error = payload ? String(payload) : 'unknown';
-  });
-
-  builder.addCase(loadTokensWhitelistActions.success, (state, { payload }) => {
-    state.mainnetWhitelist.isLoading = false;
-    delete state.mainnetWhitelist.error;
-
-    for (const token of payload) {
-      if (token.contractAddress === MAV_TOKEN_SLUG) continue;
-      const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
-      if (!state.mainnetWhitelist.data.includes(slug)) state.mainnetWhitelist.data.push(slug);
-    }
-  });
-
-  builder.addCase(loadTokensScamlistActions.submit, state => {
-    state.mainnetScamlist.isLoading = true;
-    delete state.mainnetScamlist.error;
-  });
-
-  builder.addCase(loadTokensScamlistActions.fail, (state, { payload }) => {
-    state.mainnetScamlist.isLoading = false;
-    state.mainnetScamlist.error = payload ? String(payload) : 'unknown';
-  });
-
-  builder.addCase(loadTokensScamlistActions.success, (state, { payload }) => {
-    state.mainnetScamlist.isLoading = false;
-    delete state.mainnetScamlist.error;
-
-    state.mainnetScamlist.data = payload;
   });
 });
 

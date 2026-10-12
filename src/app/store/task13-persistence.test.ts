@@ -1,7 +1,6 @@
 import { memoryStorage } from 'lib/store/zustand/test-support/helpers';
 
 jest.mock('lib/apis/temple', () => require('lib/apis/temple/ab-test-group.enum'));
-jest.mock('lib/notifications/store/epics', () => ({ notificationsEpics: jest.fn() }));
 jest.mock('@redux-devtools/remote', () => ({ devToolsEnhancer: jest.fn() }));
 
 function setup(records: Record<string, unknown>) {

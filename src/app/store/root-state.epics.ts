@@ -2,8 +2,6 @@ import type { Action } from 'redux';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
 
-// import { notificationsEpics } from 'lib/notifications';
-
 import { abTestingEpics } from './ab-testing/epics';
 // import { advertisingEpics } from './advertising/epics';
 import { assetsEpics } from './assets/epics';
@@ -17,7 +15,6 @@ import { tokensMetadataEpics } from './tokens-metadata/epics';
 
 const allEpics = combineEpics(
   // advertisingEpics,
-  // notificationsEpics,
   // swapEpics,
   // partnersPromotionEpics,
   balancesEpics,

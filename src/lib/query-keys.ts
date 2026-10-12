@@ -51,3 +51,7 @@ export const buyCardKeys = {
   limits: (fiat: string, crypto: string, provider: string, inputs: unknown) =>
     ['buy-card', 'limits', fiat, crypto, provider, inputs] as const
 };
+
+export const notificationKeys = {
+  list: (startFromTime: number) => ['notifications', 'extension', startFromTime] as const
+};

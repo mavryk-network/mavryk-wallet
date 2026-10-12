@@ -2,7 +2,6 @@ import React, { FC, useEffect } from 'react';
 
 import { dispatch } from 'app/store';
 import { loadTokensScamlistActions } from 'app/store/assets/actions';
-import { loadSwapDexesAction, loadSwapTokensAction } from 'app/store/swap/actions';
 
 import { useAdvertisingLoading } from './hooks/use-advertising.hook';
 import { useAssetsLoading } from './hooks/use-assets-loading';
@@ -31,12 +30,6 @@ export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
 
   useLongRefreshLoading();
   useAdvertisingLoading();
-
-  // Seed existing swap lists once; their Redux requests have no component-owned subscription to clean up.
-  useEffect(() => {
-    dispatch(loadSwapDexesAction.submit());
-    dispatch(loadSwapTokensAction.submit());
-  }, []);
 
   useStorageAnalytics();
   useUserIdSync();

@@ -44,3 +44,10 @@ export const assetDetailsKeys = {
 export const exchangeRateKeys = {
   all: ['exchange-rates', 'coingecko-mavryk', 'dodo-mav'] as const
 };
+
+export const buyCardKeys = {
+  all: ['buy-card'] as const,
+  currencies: (provider: string) => ['buy-card', 'currencies', provider] as const,
+  limits: (fiat: string, crypto: string, provider: string, inputs: unknown) =>
+    ['buy-card', 'limits', fiat, crypto, provider, inputs] as const
+};

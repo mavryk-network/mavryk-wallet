@@ -8,7 +8,6 @@ import { abTestingEpics } from './ab-testing/epics';
 // import { advertisingEpics } from './advertising/epics';
 import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
-import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 // import { partnersPromotionEpics } from './partners-promotion/epics';
 import type { RootState } from './root-state.type';
@@ -26,8 +25,7 @@ const allEpics = combineEpics(
   tokensMetadataEpics,
   rwasMetadataEpics,
   collectiblesMetadataEpics,
-  abTestingEpics,
-  buyWithCreditCardEpics
+  abTestingEpics
 );
 
 export const epicMiddleware = createEpicMiddleware<Action, Action, RootState>();

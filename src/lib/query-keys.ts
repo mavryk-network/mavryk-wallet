@@ -48,6 +48,8 @@ export const exchangeRateKeys = {
 
 export const buyCardKeys = {
   all: ['buy-card'] as const,
+  output: (provider: string, amount: number | undefined, inputs: unknown) =>
+    ['buy-card', 'output', provider, amount ?? null, inputs] as const,
   currencies: (provider: string) => ['buy-card', 'currencies', provider] as const,
   limits: (fiat: string, crypto: string, provider: string, inputs: unknown) =>
     ['buy-card', 'limits', fiat, crypto, provider, inputs] as const

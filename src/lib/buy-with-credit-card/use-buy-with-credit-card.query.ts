@@ -17,9 +17,9 @@ import { createEntity } from 'lib/store';
 import { PAIR_NOT_FOUND_MESSAGE } from './constants';
 import { getUpdatedFiatLimits } from './get-updated-fiat-limits';
 import { TopUpProviderId } from './top-up-provider-id.enum';
-import { TopUpProviderPairLimits } from './topup.interface';
+import { TopUpInputInterface, TopUpOutputInterface, TopUpProviderPairLimits } from './topup.interface';
 
-const POLICY = {
+export const CARD_QUERY_POLICY = {
   staleTime: 20_000,
   cacheTime: 5 * 60_000,
   retry: false,
@@ -43,7 +43,7 @@ export async function fetchProviderCurrencies(provider: TopUpProviderId): Promis
 
 export const useProviderCurrenciesQuery = (provider: TopUpProviderId) =>
   useQuery({
-    ...POLICY,
+    ...CARD_QUERY_POLICY,
     queryKey: buyCardKeys.currencies(provider),
     queryFn: () => fetchProviderCurrencies(provider)
   });
@@ -62,22 +62,37 @@ export const useProviderCurrencies = (provider: TopUpProviderId) => {
   );
 };
 
+/** Share exactly the same limit request/cache between observers and imperative output estimation. */
+export const getProviderLimitsQueryOptions = (
+  fiat: string,
+  crypto: string,
+  provider: TopUpProviderId,
+  fiatCurrency?: TopUpInputInterface,
+  cryptoCurrency?: TopUpOutputInterface
+) => ({
+  ...CARD_QUERY_POLICY,
+  queryKey: buyCardKeys.limits(fiat, crypto, provider, [fiatCurrency ?? null, cryptoCurrency ?? null]),
+  queryFn: async () => {
+    if (!fiatCurrency || !cryptoCurrency) throw new Error(PAIR_NOT_FOUND_MESSAGE);
+    const result = await getUpdatedFiatLimits(fiatCurrency, cryptoCurrency, provider);
+    if (result.error) throw new Error(result.error);
+    if (!result.data) throw new Error('Provider limits unavailable');
+    return result.data;
+  }
+});
+
 /** Catalog limits affect the response and are therefore included alongside the selected pair. */
 export const useProviderLimitsQuery = (fiat: string, crypto: string, provider: TopUpProviderId) => {
   const catalog = useProviderCurrenciesQuery(provider);
-  const fiatCurrency = catalog.data?.fiat.find(item => item.code === fiat);
-  const cryptoCurrency = catalog.data?.crypto.find(item => item.code === crypto);
   return useQuery({
-    ...POLICY,
-    queryKey: buyCardKeys.limits(fiat, crypto, provider, [fiatCurrency ?? null, cryptoCurrency ?? null]),
-    enabled: Boolean(catalog.data && fiat && crypto),
-    queryFn: async () => {
-      if (!fiatCurrency || !cryptoCurrency) throw new Error(PAIR_NOT_FOUND_MESSAGE);
-      const result = await getUpdatedFiatLimits(fiatCurrency, cryptoCurrency, provider);
-      if (result.error) throw new Error(result.error);
-      if (!result.data) throw new Error('Provider limits unavailable');
-      return result.data;
-    }
+    ...getProviderLimitsQueryOptions(
+      fiat,
+      crypto,
+      provider,
+      catalog.data?.fiat.find(item => item.code === fiat),
+      catalog.data?.crypto.find(item => item.code === crypto)
+    ),
+    enabled: Boolean(catalog.data && fiat && crypto)
   });
 };
 

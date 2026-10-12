@@ -23,11 +23,15 @@ it('keeps old fetched actions inert and Query functions free of store mirrors', 
   expect(
     currencyReducer(currency, loadExchangeRates.success({ usdToTokenRates: { mav: '99' }, fiatToTezosRates: {} }))
   ).toBe(currency);
+  expect(source('app/pages/BuyWithCreditCard/hooks/use-one-payment-provider.ts')).not.toMatch(
+    /getUpdatedFiatLimits|setOutputAmount|setOutputError/
+  );
   const cards = buyWithCreditCardReducer(undefined, { type: 'init' });
   expect(buyWithCreditCardReducer(cards, loadAllCurrenciesActions.submit())).toBe(cards);
   for (const path of [
     'app/hooks/use-exchange-rates.query.ts',
     'lib/buy-with-credit-card/use-buy-with-credit-card.query.ts',
+    'lib/buy-with-credit-card/use-card-output.query.ts',
     'lib/notifications/hooks/use-notifications.query.ts',
     'lib/swap/use-swap.query.ts',
     'app/hooks/use-advertising-promotion.query.ts',

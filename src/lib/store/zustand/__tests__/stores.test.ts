@@ -142,7 +142,11 @@ describe('inactive destination contracts', () => {
       collectibles: expected,
       rwas: expected,
       collectibleAdultFlags: { one: { val: true, ts: 123 } },
-      rwaAdultFlags: { two: { val: false, ts: 456 } }
+      rwaAdultFlags: { two: { val: false, ts: 456 } },
+      mainnetScamlist: null,
+      mainnetWhitelist: null,
+      isSecurityAdopted: false,
+      syncRequests: {}
     });
     const reloaded = createAssetsStore(storage);
     await awaitStoresHydrated(reloaded);

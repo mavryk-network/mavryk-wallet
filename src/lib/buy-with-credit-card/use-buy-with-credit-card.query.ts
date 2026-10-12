@@ -97,19 +97,29 @@ export function useAllCachedPairLimits(): BuyWithCreditCardState['pairLimits'] {
   const snapshot = useSyncExternalStore(subscribe, () =>
     JSON.stringify(
       cache
-        .findAll(['buy-card', 'limits'])
-        .map(query => [query.queryHash, query.state.dataUpdatedAt, query.state.errorUpdatedAt, query.state.fetchStatus])
+        .findAll(buyCardKeys.all)
+        .map(query => [
+          query.queryHash,
+          query.state.dataUpdateCount,
+          query.state.errorUpdateCount,
+          query.state.fetchStatus
+        ])
     )
   );
   return useMemo(() => {
+    // The external-store revision invalidates this derived view; cached catalogs choose the matching input version.
+    void snapshot;
     const pairs: BuyWithCreditCardState['pairLimits'] = {};
     for (const query of cache.findAll(['buy-card', 'limits'])) {
-      const [, , fiat, crypto, provider] = query.queryKey;
-      if (
-        typeof fiat !== 'string' ||
-        typeof crypto !== 'string' ||
-        !TOP_UP_PROVIDER_IDS.includes(provider as TopUpProviderId)
-      )
+      const [, , fiat, crypto, providerKey] = query.queryKey;
+      const provider = TOP_UP_PROVIDER_IDS.find(id => id === providerKey);
+      if (typeof fiat !== 'string' || typeof crypto !== 'string' || !provider) continue;
+      const catalog = client.getQueryData<TopUpProviderCurrencies>(buyCardKeys.currencies(provider));
+      const inputs = [
+        catalog?.fiat.find(item => item.code === fiat) ?? null,
+        catalog?.crypto.find(item => item.code === crypto) ?? null
+      ];
+      if (JSON.stringify(query.queryKey) !== JSON.stringify(buyCardKeys.limits(fiat, crypto, provider, inputs)))
         continue;
       const pair = (pairs[fiat] ??= {});
       const limits = (pair[crypto] ??= {
@@ -117,7 +127,7 @@ export function useAllCachedPairLimits(): BuyWithCreditCardState['pairLimits'] {
         [TopUpProviderId.Utorg]: createEntity(undefined),
         [TopUpProviderId.AliceBob]: createEntity(undefined)
       });
-      limits[provider as TopUpProviderId] = createEntity(
+      limits[provider] = createEntity(
         client.getQueryData<TopUpProviderPairLimits>(query.queryKey),
         query.state.fetchStatus === 'fetching',
         query.state.error instanceof Error ? query.state.error.message : undefined

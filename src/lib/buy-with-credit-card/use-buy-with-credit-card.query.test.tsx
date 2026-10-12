@@ -75,6 +75,14 @@ it('gates limits on catalogs, deduplicates consumers, isolates pairs and preserv
   expect(fetchLimits).toHaveBeenCalledTimes(1);
   expect(result?.data).toEqual({ min: 5, max: 10 });
   expect(pairs.USD.MVRK[TopUpProviderId.MoonPay].data).toEqual(result?.data);
+  await act(async () => {
+    client.setQueryData(buyCardKeys.limits('USD', 'MVRK', TopUpProviderId.MoonPay, [null, null]), {
+      min: 999,
+      max: 1000
+    });
+  });
+  await settle();
+  expect(pairs.USD.MVRK[TopUpProviderId.MoonPay].data).toEqual({ min: 5, max: 10 });
   fetchLimits.mockResolvedValue(createEntity(undefined, false, 'offline'));
   await act(async () => {
     await client.invalidateQueries(['buy-card', 'limits', 'USD', 'MVRK']);

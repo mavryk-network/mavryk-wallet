@@ -4,21 +4,26 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 
-import { fetchUsdToTokenRates, fetchRWAToUsdtRates } from 'lib/apis/temple';
+import { fetchFreshUsdToTokenRates, fetchFreshRWAToUsdtRates } from 'lib/apis/temple';
 import { fetchFiatToTezosRates } from 'lib/fiat-currency';
 import { exchangeRateKeys } from 'lib/query-keys';
 
 import { useExchangeRatesQuery } from './use-exchange-rates.query';
 
-jest.mock('lib/apis/temple', () => ({ fetchUsdToTokenRates: jest.fn(), fetchRWAToUsdtRates: jest.fn() }));
+jest.mock('lib/apis/temple', () => ({ fetchFreshUsdToTokenRates: jest.fn(), fetchFreshRWAToUsdtRates: jest.fn() }));
 jest.mock('lib/fiat-currency', () => ({ fetchFiatToTezosRates: jest.fn() }));
+jest.mock('app/store/root-state.selector', () => ({
+  useSelector: (select: (state: unknown) => unknown) =>
+    select({ currency: { usdToTokenRates: { data: {} }, fiatToTezosRates: { data: {} } } })
+}));
+jest.mock('lib/storage', () => ({ fetchFromStorage: jest.fn(async () => undefined) }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 it('deduplicates drivers, publishes to readers and retains values when refresh fails', async () => {
-  const token = (fetchUsdToTokenRates as jest.MockedFunction<typeof fetchUsdToTokenRates>).mockResolvedValue({
+  const token = (fetchFreshUsdToTokenRates as jest.MockedFunction<typeof fetchFreshUsdToTokenRates>).mockResolvedValue({
     mav: '2'
   });
-  (fetchRWAToUsdtRates as jest.MockedFunction<typeof fetchRWAToUsdtRates>).mockResolvedValue({ rwa: '3' });
+  (fetchFreshRWAToUsdtRates as jest.MockedFunction<typeof fetchFreshRWAToUsdtRates>).mockResolvedValue({ rwa: '3' });
   const fiat = (fetchFiatToTezosRates as jest.MockedFunction<typeof fetchFiatToTezosRates>).mockResolvedValue({
     usd: 2
   });

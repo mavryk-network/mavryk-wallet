@@ -42,7 +42,8 @@ export const assetDetailsKeys = {
 
 /** Fixed public feeds do not vary with the selected wallet or network. */
 export const exchangeRateKeys = {
-  all: ['exchange-rates', 'coingecko-mavryk', 'dodo-mav'] as const
+  all: ['exchange-rates', 'coingecko-mavryk', 'dodo-mav'] as const,
+  legacyFallback: ['exchange-rates', 'legacy-price-fallback'] as const
 };
 
 export const buyCardKeys = {

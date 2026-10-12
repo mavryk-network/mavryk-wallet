@@ -139,3 +139,7 @@ Updated AGENTS dependency/ownership/testing facts, resolved Task 10’s deferred
 - `src/lib/rwas/use-rwas-details.query.ts`
 - `src/lib/store/zustand/__tests__/safe-initialization.test.ts`
 - `yarn.lock`
+
+## Task 16 shared-provider extension
+
+[Task 16](task-16-query-only-server-domains-handoff.md) reuses `DetailsQueryProvider` unchanged for additional server domains. Its historical name is retained; the client is now shared with rates, card-provider data and dormant server-domain readers. No extra client, persistence adapter, provider gate, detail key or batch/leaf behavior was introduced. Detail ownership and all Task 15 protections above remain unchanged.

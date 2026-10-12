@@ -7,7 +7,7 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
-- TanStack Query `4.41.0` (Task 15 collectible/RWA details only; TypeScript 4.5.5 remains pinned)
+- TanStack Query `4.41.0` (Tasks 15/16 foreground server data; TypeScript 4.5.5 remains pinned)
 - Zustand `5.0.11` (Tasks 11/13 activate preferences, assets, adult flags and metadata through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
@@ -19,6 +19,7 @@ Current pinned stack in manifest includes:
 - `src/mavryk/` owns Mavryk-specific integrations; preserve task-specific restrictions on `src/mavryk/api/**`.
 - Tasks 11/13 own UI preferences, promotion choices, asset records/statuses, adult flags and metadata through one background owner. Foregrounds use read-only snapshots and commands. Do not add competing destination adapters or Redux synchronization loops.
 - Query owns fetched collectible/RWA details and their loading/errors through one in-memory client per foreground StoreProvider. Batch drivers alone fetch; disabled per-slug observers read reactively. Account, chain and API network scope every detail key; see `docs/task-15-reactive-details-handoff.md`.
+- Task 16 Query owns exchange rates and card-provider catalogs/limits/output estimates. Notifications, swap lists, advertising and partner decisions use dormant Query readers; their endpoints remain disabled. Retained Redux fetched fields are read-only upgrade/compatibility sources. Notification read/viewed choices remain Redux-persisted; promotion/news preferences remain background-owner commands. See `docs/task-16-query-only-server-domains-handoff.md`.
 - Redux retains unrelated loading/errors, whitelist/scamlist security caches and unrelated domains. Security caches persist in `persist:temple-root-task11`; the six nested legacy keys are retained read-only sources. Task 14 migrates IndexedDB assets through that owner with verified per-record cleanup and separate `assets-migrations@3.0.0` history; see `docs/task-14-indexeddb-assets-handoff.md`.
 - For unfamiliar paths, consult only the relevant section of [the local directory reference](docs/agent-directory-map.local.md). Do not load it by default. If absent in another checkout, inspect the relevant directories instead; it is optional navigation context.
 
@@ -92,7 +93,7 @@ Current pinned stack in manifest includes:
 - `yarn build`
 - `yarn build:firefox`
 
-Task 15 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
+Tasks 15/16 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
 
 IndexedDB migration tests use pinned development-only `fake-indexeddb` with real Dexie transactions and destination adapters. LocalStorage migration history requires cross-context Web Locks; never replace it with an unlocked writer.
 

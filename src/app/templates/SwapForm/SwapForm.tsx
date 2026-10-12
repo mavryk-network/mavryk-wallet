@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 
-import { TransferParams } from '@mavrykdynamics/webmavryk';
 import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
+import { TransferParams } from '@mavrykdynamics/webmavryk';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -10,12 +10,12 @@ import { useDispatch } from 'react-redux';
 
 import { Alert, Divider, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { useExchangeRates } from 'app/hooks/use-exchange-rates.query';
 import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { useBlockAwareSwapParams, useSwap } from 'app/hooks/use-swap';
 import { ReactComponent as InfoIcon } from 'app/icons/info.svg';
 import { ReactComponent as ToggleIcon } from 'app/icons/toggle.svg';
 import { buildSwapPageUrlQuery } from 'app/pages/Swap/utils/build-url-query';
-import { useSelector } from 'app/store';
 import { resetSwapParamsAction } from 'app/store/swap/actions';
 import { useSwapParamsSelector, useSwapTokenSelector, useSwapTokensSelector } from 'app/store/swap/selectors';
 import OperationStatus from 'app/templates/OperationStatus';
@@ -71,7 +71,7 @@ export const SwapForm: FC = () => {
   const getSwapParams = useSwap();
   const { data: route3Tokens } = useSwapTokensSelector();
   const swapParams = useSwapParamsSelector();
-  const allUsdToTokenRates = useSelector(state => state.currency.usdToTokenRates.data);
+  const allUsdToTokenRates = useExchangeRates().usdToTokenRates;
   const getTokenMetadata = useGetTokenMetadata();
   const account = useAccount();
   const { popup } = useAppEnv();

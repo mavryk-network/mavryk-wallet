@@ -10,7 +10,6 @@ import { assetsEpics } from './assets/epics';
 import { balancesEpics } from './balances/epics';
 import { buyWithCreditCardEpics } from './buy-with-credit-card/epics';
 import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
-import { currencyEpics } from './currency/epics';
 // import { partnersPromotionEpics } from './partners-promotion/epics';
 import type { RootState } from './root-state.type';
 import { rwasMetadataEpics } from './rwas-metadata/epics';
@@ -18,7 +17,6 @@ import { rwasMetadataEpics } from './rwas-metadata/epics';
 import { tokensMetadataEpics } from './tokens-metadata/epics';
 
 const allEpics = combineEpics(
-  currencyEpics,
   // advertisingEpics,
   // notificationsEpics,
   // swapEpics,

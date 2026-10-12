@@ -1,3 +1,3 @@
-import { useSelector } from '../index';
+import { useExchangeRates } from 'app/hooks/use-exchange-rates.query';
 
-export const useUsdToTokenRatesSelector = () => useSelector(({ currency }) => currency.usdToTokenRates.data);
+export const useUsdToTokenRatesSelector = () => useExchangeRates().usdToTokenRates;

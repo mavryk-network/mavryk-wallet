@@ -103,3 +103,7 @@ Updated this handoff, Task 13's resolved IndexedDB limitation, Task 12's concret
 - `src/lib/store/zustand/ui-owner.contract.ts`
 - `src/lib/store/zustand/ui-owner.ts`
 - `yarn.lock`
+
+## Task 17 ownership extension
+
+[Task 17](task-17-assets-security-ownership-handoff.md) moves security caches from Redux into the same asset owner and replaces asset-fetch epics with Query orchestration. Task 14's migration command, destination precedence, per-record cleanup, history and Web Lock protocol are unchanged. The added nullable security fields, adoption marker and request-ordering receipts are preserved by full-state destination staging/read-back. Metadata and balance ownership ports remain subsequent work.

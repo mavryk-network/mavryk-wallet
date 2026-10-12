@@ -138,3 +138,15 @@ IndexedDB producers no longer use `owned-assets.middleware.ts`; other live actio
 - The middleware’s asset, metadata and promotion producers remain live. No general middleware retirement, legacy payload deletion, prefix change or future-release decision is authorized.
 
 The Query provider is ephemeral foreground infrastructure, not a destination persistence adapter. All existing migration sources, durable owners, security caches, history and the deletion-marker waiver remain unchanged. No external retirement ticket was filed.
+
+## Task 16 server-domain inventory
+
+[Task 16](task-16-query-only-server-domains-handoff.md) removes currency, card, notification, advertising and partner-promotion epics and the swap-list branches of the dormant swap epic. The Redux quote branch remains. Old fetch action exports/state shapes remain compatible but have no fetching producers or fetched reducer handlers.
+
+- Currency, notification, swap-list and advertising fields retained in the active Redux root are read-only upgrade seeds for Query. They are not refreshed or synchronized from Query. Notification `statuses` persists read/viewed choices separately from the retained list; the news preference remains owner-controlled.
+- Card state remains blacklisted and inert. Its old selector module is a Query view adapter; pair menus subscribe to the Query cache and filter by current catalog inputs. Imperative card output estimation shares Query-owned limits and keys estimates by provider/amount/assets; local fetched output/error/loading state is removed. Purchase-link submission remains an explicit form mutation.
+- Partner responses cannot be attributed to an account/placement, so they do not seed scoped Query decisions. Existing blank promotion defaults remain presentation fallback; owner preference/hiding commands are unchanged.
+- Advertising's new dismissal action carries the Query-read name into the existing owner middleware. The old no-argument skip action still reads the legacy name for compatibility; no live component dispatches it.
+- `MVRK_PRICE` and `RWA_ASSET_PRICES` are retained read-only price fallbacks on the active Query path. Legacy exported transport wrappers still support their old persistence behavior, but have no production callers; fresh Query transports do not invoke them or write storage.
+
+All existing persistence keys, seven legacy source payloads, migration histories, security caches, durable owner gates and the Task 12 deletion-marker waiver remain intact. No wider retirement or Phase 8 completion is claimed.

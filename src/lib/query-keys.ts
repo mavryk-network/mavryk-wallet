@@ -39,3 +39,28 @@ export const assetDetailsKeys = {
   leaf: (category: 'collectibles' | 'rwas', account: string, chainId: string, networkId: string, slug: string) =>
     ['asset-details', category, 'leaf', account, chainId, networkId, slug] as const
 };
+
+/** Fixed public feeds do not vary with the selected wallet or network. */
+export const exchangeRateKeys = {
+  all: ['exchange-rates', 'coingecko-mavryk', 'dodo-mav'] as const,
+  legacyFallback: ['exchange-rates', 'legacy-price-fallback'] as const
+};
+
+export const buyCardKeys = {
+  all: ['buy-card'] as const,
+  output: (provider: string, amount: number | undefined, inputs: unknown) =>
+    ['buy-card', 'output', provider, amount ?? null, inputs] as const,
+  currencies: (provider: string) => ['buy-card', 'currencies', provider] as const,
+  limits: (fiat: string, crypto: string, provider: string, inputs: unknown) =>
+    ['buy-card', 'limits', fiat, crypto, provider, inputs] as const
+};
+
+export const notificationKeys = {
+  list: (startFromTime: number) => ['notifications', 'extension', startFromTime] as const
+};
+
+export const advertisingKeys = { active: ['advertising', 'temple', 'active'] as const };
+
+export const partnerPromotionKeys = {
+  decision: (account: string, variant: string) => ['partner-promotion', 'optimal', '1729', account, variant] as const
+};

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import { BigNumber } from 'bignumber.js';
 
-import { useSelector } from 'app/store/root-state.selector';
+import { useExchangeRates } from 'app/hooks/use-exchange-rates.query';
 import { COINGECKO_MVRK_ID, fetchCoingeckoRates } from 'lib/apis/temple';
 import { useStorage } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
@@ -13,7 +13,7 @@ import type { FiatCurrencyOption } from './types';
 
 const FIAT_CURRENCY_STORAGE_KEY = 'fiat_currency';
 
-export const useUsdToTokenRates = () => useSelector(state => state.currency.usdToTokenRates.data);
+export const useUsdToTokenRates = () => useExchangeRates().usdToTokenRates;
 
 function useAssetUSDPrice(slug: string) {
   const usdToTokenRates = useUsdToTokenRates();
@@ -52,7 +52,7 @@ export function useAssetFiatCurrencyPrice(slug: string): BigNumber {
 }
 
 export const useFiatCurrency = () => {
-  const { data } = useSelector(state => state.currency.fiatToTezosRates);
+  const { fiatToTezosRates: data } = useExchangeRates();
 
   const [selectedFiatCurrency, setSelectedFiatCurrency] = useStorage<FiatCurrencyOption>(
     FIAT_CURRENCY_STORAGE_KEY,

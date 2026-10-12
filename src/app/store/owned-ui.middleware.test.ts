@@ -1,5 +1,6 @@
 import { updateOwnedUI } from 'lib/store/zustand/ui-client';
 
+import { dismissAdvertisingPromotionAction } from './advertising/actions';
 import { ownedUIMiddleware } from './owned-ui.middleware';
 import { setIsAnalyticsEnabledAction } from './settings/actions';
 import { putTokensMetadataAction, resetTokensMetadataLoadingAction } from './tokens-metadata/actions';
@@ -39,4 +40,17 @@ it('builds fetched metadata once and only resets Redux loading after the owner s
   expect(dispatch).not.toHaveBeenCalled();
   await Promise.resolve();
   expect(dispatch).toHaveBeenCalledWith(resetTokensMetadataLoadingAction());
+});
+
+it('dismisses the Query-read campaign without consulting the legacy response', () => {
+  const next = jest.fn();
+  const getState = jest.fn();
+  const middleware = ownedUIMiddleware({ dispatch: jest.fn(), getState })(next);
+  middleware(dismissAdvertisingPromotionAction({ name: 'query-campaign' }));
+  expect(updateOwnedUI).toHaveBeenLastCalledWith({
+    kind: 'preferences',
+    values: { lastSeenPromotionName: 'query-campaign' }
+  });
+  expect(getState).not.toHaveBeenCalled();
+  expect(next).not.toHaveBeenCalled();
 });

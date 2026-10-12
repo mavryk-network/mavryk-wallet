@@ -7,7 +7,7 @@ import { updateOwnedUI } from 'lib/store/zustand/ui-client';
 import type { UICommand } from 'lib/store/zustand/ui-owner.contract';
 
 import { getUserTestingGroupNameActions } from './ab-testing/actions';
-import { skipAdvertisingPromotionAction } from './advertising/actions';
+import { dismissAdvertisingPromotionAction, skipAdvertisingPromotionAction } from './advertising/actions';
 import { shouldShowNewsletterModalAction } from './newsletter/newsletter-actions';
 import type { RootState } from './root-state.type';
 import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction, toggleBalanceModeAction } from './settings/actions';
@@ -33,6 +33,8 @@ export const ownedUIMiddleware: Middleware<{}, RootState> = api => next => actio
     command = { kind: 'preferences', values: { shouldShowNewsletterModal: action.payload } };
   else if (setIsNewsEnabledAction.match(action))
     command = { kind: 'preferences', values: { isNewsEnabled: action.payload } };
+  else if (dismissAdvertisingPromotionAction.match(action))
+    command = { kind: 'preferences', values: { lastSeenPromotionName: action.payload.name ?? null } };
   else if (skipAdvertisingPromotionAction.match(action))
     command = {
       kind: 'preferences',

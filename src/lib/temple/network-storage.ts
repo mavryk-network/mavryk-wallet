@@ -152,10 +152,12 @@ function mergeContactsAccountState(
     ...(currentState?.typesByAddress ?? {})
   };
   const accountDataKey = currentState?.accountDataKey ?? incomingState.accountDataKey;
+  const lastSeenVersion = currentState?.lastSeenVersion ?? incomingState.lastSeenVersion;
 
   return {
     ...(accountDataKey ? { accountDataKey } : {}),
     contacts,
+    ...(lastSeenVersion ? { lastSeenVersion } : {}),
     ...(currentState?.recordId || incomingState.recordId
       ? { recordId: currentState?.recordId ?? incomingState.recordId }
       : {}),

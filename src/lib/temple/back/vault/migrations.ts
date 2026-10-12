@@ -149,7 +149,7 @@ export const MIGRATIONS = [
 
     const accountValuesToSave: [string, unknown][] = accountsStrgKeys.map((key, i) => [key, accountsStrgValues[i]]);
 
-    const toSave: [string, unknown][] = [
+    const migrationItems: [string, unknown][] = [
       [checkStrgKey, generateCheck()],
       [mnemonicStrgKey, mnemonic],
       [accountsStrgKey, accounts],
@@ -158,7 +158,8 @@ export const MIGRATIONS = [
         migrateLegacyContactsSettings(settings, accounts, contacts, selectedAccountPkh, selectedNetworkId)
       ],
       ...accountValuesToSave
-    ].filter(([_key, value]) => value !== undefined);
+    ];
+    const toSave = migrationItems.filter((item): item is [string, unknown] => item[1] !== undefined);
 
     // Save new storage items
     const passKey = await Passworder.generateKey(password);
@@ -427,13 +428,14 @@ function normalizeContactsAccountState(
   const contacts = normalizeContacts(state.contacts);
   const typesByAddress = normalizeTypesByAddress(state.typesByAddress, contacts);
 
-  if (contacts.length === 0 && !state.recordId && !typesByAddress && !state.accountDataKey) {
+  if (contacts.length === 0 && !state.recordId && !typesByAddress && !state.accountDataKey && !state.lastSeenVersion) {
     return null;
   }
 
   return {
     ...(state.accountDataKey ? { accountDataKey: state.accountDataKey } : {}),
     contacts,
+    ...(state.lastSeenVersion ? { lastSeenVersion: state.lastSeenVersion } : {}),
     ...(state.recordId ? { recordId: state.recordId } : {}),
     ...(typesByAddress ? { typesByAddress } : {})
   };
@@ -450,11 +452,13 @@ function mergeContactsAccountStates(
     contacts
   );
   const accountDataKey = currentState?.accountDataKey ?? incomingState.accountDataKey;
+  const lastSeenVersion = currentState?.lastSeenVersion ?? incomingState.lastSeenVersion;
   const recordId = currentState?.recordId ?? (canPreserveRecordId ? incomingState.recordId : undefined);
 
   return {
     ...(accountDataKey ? { accountDataKey } : {}),
     contacts,
+    ...(lastSeenVersion ? { lastSeenVersion } : {}),
     ...(recordId ? { recordId } : {}),
     ...(typesByAddress ? { typesByAddress } : {})
   };

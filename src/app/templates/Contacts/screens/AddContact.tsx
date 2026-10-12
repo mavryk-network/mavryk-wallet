@@ -10,8 +10,10 @@ import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { t, T } from 'lib/i18n';
 import {
+  getContactsUnavailableMessage,
   isDomainNameValid,
   useContactsActions,
+  useFilteredContacts,
   useKnownBakers,
   useNetwork,
   useTezosDomainsClient
@@ -41,6 +43,7 @@ const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   const { addContact } = useContactsActions();
+  const { availability, canMutateContacts } = useFilteredContacts();
   const network = useNetwork();
   const knownBakers = useKnownBakers(false);
   const domainsClient = useTezosDomainsClient();
@@ -68,7 +71,9 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
   );
 
   const inHome = pathname === '/';
-  const isSubmitDisabled = !name.length || !address.length;
+  const isSubmitDisabled = !canMutateContacts || !name.length || !address.length;
+  const unavailableMessage =
+    availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
   const properHistoryPosition = historyPosition > 0 || !inHome;
 
   // Keep the contact name aligned with the entered validator address by resolving domains
@@ -251,6 +256,7 @@ const AddNewContactForm: React.FC<{ className?: string }> = ({ className }) => {
           }}
         />
       </div>
+      {unavailableMessage && <p className="text-sm text-secondary-white mb-3 text-center">{unavailableMessage}</p>}
       <div className="grid grid-cols-2 gap-3">
         <ButtonRounded size="big" fill={false} onClick={onCancelSubmit} disabled={submitting}>
           <T id="cancel" />

@@ -23,11 +23,13 @@ import {
   useBlockExplorer,
   useContactsActions,
   useExplorerBaseUrls,
+  getContactsUnavailableMessage,
   useSetAccountPkh
 } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import useHistory from 'lib/temple/history/hook';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
+import { useAlert } from 'lib/ui';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
@@ -120,19 +122,27 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   const setAccountPkh = useSetAccountPkh();
   const { removeContact } = useContactsActions();
   const account = useAccount();
+  const customAlert = useAlert();
   const confirm = useConfirm();
   const { popup } = useAppEnv();
   const { explorer } = useBlockExplorer();
   const { account: explorerBaseUrl } = useExplorerBaseUrls();
 
-  const { accToChange, isOwn } = useAccountOwnership(accHash);
+  const { accToChange, contactsAvailability, isOwn } = useAccountOwnership(accHash);
+  const unavailableMessage =
+    !isOwn && contactsAvailability.status === 'unavailable'
+      ? getContactsUnavailableMessage(contactsAvailability.reason)
+      : null;
 
   const accountHash = useMemo(
-    () => (accToChange ? accToChange.address : account.publicKeyHash),
-    [accToChange, account.publicKeyHash]
+    () => (accToChange ? accToChange.address : accHash ?? account.publicKeyHash),
+    [accHash, accToChange, account.publicKeyHash]
   );
 
-  const accountName = useMemo(() => (accToChange ? accToChange.name : account.name), [accToChange, account.name]);
+  const accountName = useMemo(
+    () => (accToChange ? accToChange.name : accHash ? t('contactsUnavailable') : account.name),
+    [accHash, accToChange, account.name]
+  );
 
   const accountObj: TempleAccount = useMemo(
     () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly }),
@@ -168,6 +178,14 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
       return navigate('/settings/remove-account');
     }
 
+    if (unavailableMessage) {
+      await customAlert({
+        title: t('contactsUnavailable'),
+        children: unavailableMessage
+      });
+      return;
+    }
+
     if (
       !(await confirm({
         title: t('deleteContact'),
@@ -182,7 +200,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
 
     await removeContact(accountHash);
     goBack();
-  }, [accountHash, confirm, isOwn, removeContact, setAccountPkh]);
+  }, [accountHash, confirm, customAlert, isOwn, removeContact, setAccountPkh, unavailableMessage]);
 
   const handleItemClick = useCallback(
     (hash: string) => {
@@ -226,7 +244,11 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
                   {accountName}
                 </Name>
 
-                <button onClick={editNamePopup.open} className="outline-none focus:outline-none">
+                <button
+                  onClick={editNamePopup.open}
+                  className="outline-none focus:outline-none"
+                  disabled={Boolean(unavailableMessage)}
+                >
                   <EditIcon className="min-w-6 w-6 h-6 fill-current" />
                 </button>
               </div>
@@ -272,6 +294,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             fill={false}
             className={clsx('w-full', popup && 'mb-8')}
             onClick={handleRemoveContactClick}
+            disabled={Boolean(unavailableMessage)}
           >
             <T id="deleteContact" />
           </ButtonRounded>

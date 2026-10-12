@@ -341,7 +341,7 @@ export const getAccountStatsFromTzkt = async (account: string, chainId: TzktApiC
   fetchGet<TzktAccount>(chainId, `/accounts/${account}`);
 
 type KYCContractStorage = {
-  memberLedger?: number;
+  memberRegistrarLedger?: number;
   memberKycLedger?: number;
 };
 
@@ -352,13 +352,14 @@ export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string
 
       if (!kycAddress) return false;
       const storageRes = await fetchGet<KYCContractStorage>(chainId, `/contracts/${kycAddress}/storage/`);
-      const memberLedgerBigMapId = storageRes.memberLedger;
+      // memberLedger is keyed by (registrar, member); this index is keyed by member address.
+      const memberRegistrarLedgerBigMapId = storageRes.memberRegistrarLedger;
       const memberKycLedgerBigMapId = storageRes.memberKycLedger;
 
-      if (!memberLedgerBigMapId || !memberKycLedgerBigMapId) return false;
+      if (!memberRegistrarLedgerBigMapId || !memberKycLedgerBigMapId) return false;
 
       const [memberData, memberKycData] = await Promise.all([
-        fetchGet<unknown>(chainId, `/bigmaps/${memberLedgerBigMapId}/keys/${pkh}`),
+        fetchGet<unknown>(chainId, `/bigmaps/${memberRegistrarLedgerBigMapId}/keys/${pkh}`),
         fetchGet<unknown>(chainId, `/bigmaps/${memberKycLedgerBigMapId}/keys/${pkh}`)
       ]);
 

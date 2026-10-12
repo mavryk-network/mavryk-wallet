@@ -19,6 +19,7 @@ import { ContactExportPopup } from '../popups/ContactExportPopup';
 
 type ContactDropdownProps = {
   allContacts: TempleContact[];
+  disabled?: boolean;
 };
 
 type RenderOptionContentType = {
@@ -30,7 +31,7 @@ type RenderOptionContentType = {
   isExport?: boolean;
 };
 
-export const ContactsDropdown: FC<ContactDropdownProps> = ({ allContacts }) => {
+export const ContactsDropdown: FC<ContactDropdownProps> = ({ allContacts, disabled = false }) => {
   const { open, opened, close } = usePopupState();
   const { popup } = useAppEnv();
 
@@ -44,17 +45,18 @@ export const ContactsDropdown: FC<ContactDropdownProps> = ({ allContacts }) => {
         id: nanoid(),
         Icon: ImportSvg,
         label: t('importContacts'),
-        onClick: handleImportContactClick
+        onClick: handleImportContactClick,
+        disabled
       },
       {
         id: nanoid(),
         label: t('exportContacts'),
         Icon: ExportSvg,
         isExport: true,
-        disabled: allContacts.length === 0
+        disabled: disabled || allContacts.length === 0
       }
     ],
-    [allContacts.length, handleImportContactClick]
+    [allContacts.length, disabled, handleImportContactClick]
   );
 
   const renderOption = useCallback(
@@ -66,7 +68,7 @@ export const ContactsDropdown: FC<ContactDropdownProps> = ({ allContacts }) => {
         </div>
       );
 
-      if (!option.isExport) return content;
+      if (!option.isExport || option.disabled) return content;
 
       return (
         <FileExportWrapper data={allContacts} suggestedFileName="contacts" onClick={open}>
@@ -94,7 +96,7 @@ export const ContactsDropdown: FC<ContactDropdownProps> = ({ allContacts }) => {
           noItemsText: 'No Items',
           renderOptionContent: renderOption,
           onOptionChange: option => {
-            if (!option.isExport) option.onClick?.();
+            if (!option.disabled && !option.isExport) option.onClick?.();
           }
         }}
       />

@@ -19,11 +19,11 @@ export const useAccountNameInputHandlers = (accountName = '', ref: React.RefObje
 };
 
 export const useAccountOwnership = (accHash?: string | null) => {
-  const { allContacts: filteredContacts } = useFilteredContacts();
+  const { allContacts: filteredContacts, availability } = useFilteredContacts();
 
   const accToChange = useMemo(() => filteredContacts.find(acc => acc.address === accHash), [filteredContacts, accHash]);
 
   const isOwn = !!accToChange?.accountInWallet;
 
-  return { accToChange, isOwn };
+  return { accToChange, contactsAvailability: availability, isOwn };
 };

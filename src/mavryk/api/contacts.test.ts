@@ -1,9 +1,20 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
+import {
+  CONTACTS_ENCRYPTION_VERSION,
+  CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION,
+  buildContactsAad
+} from 'lib/temple/contacts-crypto';
+import type { ContactsCurrentKey } from 'lib/temple/contacts-crypto';
 import type { TempleContactApiType } from 'lib/temple/types';
 
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
-import { fetchContactsRecord, saveContactsRecord } from './contacts';
+import {
+  CurrentContactsRecordDecryptionError,
+  deleteContactsRecord,
+  fetchContactsRecord,
+  saveContactsRecord
+} from './contacts';
 
 jest.mock('@vespaiach/axios-fetch-adapter', () => jest.fn());
 
@@ -28,6 +39,14 @@ const GROUPED_CONTACTS: GroupedContactsPayload = {
   user: [{ address: 'mv1-alice', name: 'Alice', type: 'user' }],
   validator: [],
   contract: []
+};
+const CONTACTS_KEY: ContactsCurrentKey = {
+  key: bytesToBase64(new Uint8Array(Array.from({ length: 32 }, (_, index) => index + 1))),
+  bookAddr: AUTH_CONTEXT.walletAddress
+};
+const LEGACY_DERIVED_CONTACTS_KEY: ContactsCurrentKey = {
+  key: bytesToBase64(new Uint8Array(Array.from({ length: 32 }, (_, index) => 32 - index))),
+  bookAddr: AUTH_CONTEXT.walletAddress
 };
 
 const encoder = new TextEncoder();
@@ -127,10 +146,15 @@ async function importAccountDataKey(accountDataKey: string) {
   ]);
 }
 
-async function encryptCurrentPayload(payload: GroupedContactsPayload, accountDataKey: string): Promise<EncryptedValue> {
+async function encryptCurrentPayload(
+  payload: GroupedContactsPayload,
+  accountDataKey: string,
+  bookAddr?: string,
+  version = CONTACTS_ENCRYPTION_VERSION
+): Promise<EncryptedValue> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encryptedBuffer = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
+    { name: 'AES-GCM', iv, ...(bookAddr ? { additionalData: buildContactsAad(bookAddr, version) } : {}) },
     await importAccountDataKey(accountDataKey),
     encoder.encode(JSON.stringify(payload))
   );
@@ -139,7 +163,7 @@ async function encryptCurrentPayload(payload: GroupedContactsPayload, accountDat
     ciphertext: bytesToBase64(new Uint8Array(encryptedBuffer)),
     iv: bytesToBase64(iv),
     timestamp: Date.now(),
-    version: 'AES-256-GCM-2'
+    version
   };
 }
 
@@ -164,7 +188,7 @@ describe('contacts account data encryption', () => {
     jest.clearAllMocks();
   });
 
-  it('saves contacts as v2 AES-GCM encrypted data with a local account data key', async () => {
+  it('saves contacts as current AES-GCM encrypted data with the derived contacts key', async () => {
     const savedEncryptedValues: EncryptedValue[] = [];
     const adapter = jest.fn(async (config: AxiosRequestConfig) => {
       const body = parseAdapterData((config as MavrykApiRequestConfig).data) as {
@@ -179,6 +203,7 @@ describe('contacts account data encryption', () => {
     mavrykApi.defaults.adapter = adapter;
 
     const saved = await saveContactsRecord({
+      contactsKey: CONTACTS_KEY,
       contacts: [{ address: 'mv1-alice', name: 'Alice' }],
       typesByAddress: {
         'mv1-alice': 'user'
@@ -192,16 +217,39 @@ describe('contacts account data encryption', () => {
       throw new Error('Expected contacts to be encrypted before saving');
     }
 
-    expect(savedEncryptedValue.version).toBe('AES-256-GCM-2');
+    expect(savedEncryptedValue.version).toBe(CONTACTS_ENCRYPTION_VERSION);
     expect(base64ToBytes(savedEncryptedValue.iv)).toHaveLength(12);
-    expect(base64ToBytes(saved.accountDataKey)).toHaveLength(32);
     expect(saved.contacts).toEqual([{ address: 'mv1-alice', name: 'Alice' }]);
     expect(saved.typesByAddress).toEqual({
       'mv1-alice': 'user'
     });
   });
 
-  it('saves contacts with the shared v2 key when a public key is available', async () => {
+  it('binds current contacts to the contacts book AAD', async () => {
+    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, CONTACTS_KEY.key, CONTACTS_KEY.bookAddr);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).resolves.toMatchObject({
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      recordId: 'record-id'
+    });
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: { ...CONTACTS_KEY, bookAddr: 'mv1-other-book' },
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unable to decrypt current contacts record');
+  });
+
+  it('does not use the public-key-derived legacy GCM key for new writes', async () => {
     const savedEncryptedValues: EncryptedValue[] = [];
     const adapter = jest.fn(async (config: AxiosRequestConfig) => {
       const body = parseAdapterData((config as MavrykApiRequestConfig).data) as {
@@ -215,18 +263,26 @@ describe('contacts account data encryption', () => {
 
     mavrykApi.defaults.adapter = adapter;
 
-    const expectedAccountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
+    const sharedAccountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
     const saved = await saveContactsRecord({
+      contactsKey: CONTACTS_KEY,
       contacts: [{ address: 'mv1-alice', name: 'Alice' }],
-      publicKey: PUBLIC_KEY,
-      typesByAddress: {
-        'mv1-alice': 'user'
-      },
       authContext: AUTH_CONTEXT
     });
 
-    expect(saved.accountDataKey).toBe(expectedAccountDataKey);
-    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
+    expect(savedEncryptedValues[0]?.version).toBe(CONTACTS_ENCRYPTION_VERSION);
+    expect(saved).not.toHaveProperty('accountDataKey');
+
+    mavrykApi.defaults.adapter = jest.fn(async (config: AxiosRequestConfig) =>
+      createResponse(config, buildRecord(savedEncryptedValues[0]!))
+    );
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: { key: sharedAccountDataKey, bookAddr: CONTACTS_KEY.bookAddr },
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unable to decrypt current contacts record');
   });
 
   it('creates a contacts record when the cached record id no longer exists', async () => {
@@ -249,6 +305,7 @@ describe('contacts account data encryption', () => {
     mavrykApi.defaults.adapter = adapter;
 
     const saved = await saveContactsRecord({
+      contactsKey: CONTACTS_KEY,
       contacts: [{ address: 'mv1-alice', name: 'Alice' }],
       recordId: 'stale-record-id',
       typesByAddress: {
@@ -297,6 +354,7 @@ describe('contacts account data encryption', () => {
     mavrykApi.defaults.adapter = adapter;
 
     const saved = await saveContactsRecord({
+      contactsKey: CONTACTS_KEY,
       contacts: [
         { address: 'mv1-bob', name: 'Bob' },
         { address: 'mv1-alice', name: 'Alice' }
@@ -313,87 +371,183 @@ describe('contacts account data encryption', () => {
       'get:/account/data/contacts/contacts',
       'put:/account/data/legacy-record-id'
     ]);
-    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
+    expect(savedEncryptedValues[0]?.version).toBe(CONTACTS_ENCRYPTION_VERSION);
     expect(saved.recordId).toBe('legacy-record-id');
-    expect(base64ToBytes(saved.accountDataKey)).toHaveLength(32);
     expect(saved.contacts).toEqual([
       { address: 'mv1-bob', name: 'Bob' },
       { address: 'mv1-alice', name: 'Alice' }
     ]);
   });
 
-  it('rejects random v2 contacts without a matching local or shared key', async () => {
+  it('reads old random-key GCM2 contacts only through the read-only legacy key candidate', async () => {
     const accountDataKey = await generateAccountDataKey();
-    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      accountDataKey,
+      undefined,
+      CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
+    );
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
 
     mavrykApi.defaults.adapter = adapter;
 
-    await expect(fetchContactsRecord({ publicKey: PUBLIC_KEY, authContext: AUTH_CONTEXT })).rejects.toThrow(
-      'Unable to decrypt current contacts record'
-    );
+    await expect(
+      fetchContactsRecord({ contactsKey: CONTACTS_KEY, legacyPublicKey: PUBLIC_KEY, authContext: AUTH_CONTEXT })
+    ).rejects.toThrow('Unable to decrypt current contacts record');
 
     await expect(
       fetchContactsRecord({
-        accountDataKey,
-        publicKey: PUBLIC_KEY,
+        contactsKey: CONTACTS_KEY,
+        legacyAccountDataKey: accountDataKey,
+        legacyPublicKey: PUBLIC_KEY,
         authContext: AUTH_CONTEXT
       })
     ).resolves.toMatchObject({
-      accountDataKey,
       contacts: [{ address: 'mv1-alice', name: 'Alice' }],
       recordId: 'record-id',
+      shouldReencrypt: true,
       typesByAddress: {
         'mv1-alice': 'user'
       }
     });
   });
 
-  it('fetches shared v2 contacts without a cached local key', async () => {
-    const accountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
-    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
+  it('reads PR-era derived-key GCM2 contacts with version-bound AAD and marks them for re-encryption', async () => {
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      LEGACY_DERIVED_CONTACTS_KEY.key,
+      LEGACY_DERIVED_CONTACTS_KEY.bookAddr,
+      CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
+    );
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
 
     mavrykApi.defaults.adapter = adapter;
 
     await expect(
       fetchContactsRecord({
-        publicKey: PUBLIC_KEY,
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unable to decrypt current contacts record');
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        legacyContactsKeys: [LEGACY_DERIVED_CONTACTS_KEY],
         authContext: AUTH_CONTEXT
       })
     ).resolves.toMatchObject({
-      accountDataKey,
       contacts: [{ address: 'mv1-alice', name: 'Alice' }],
-      recordId: 'record-id'
+      recordId: 'record-id',
+      shouldReencrypt: true,
+      typesByAddress: {
+        'mv1-alice': 'user'
+      }
     });
   });
 
-  it('recovers an unreadable v2 contacts record when mutations need to continue', async () => {
-    const accountDataKey = await generateAccountDataKey();
-    const encryptedValue = await encryptCurrentPayload(GROUPED_CONTACTS, accountDataKey);
+  it('reads current GCM3 contacts encrypted with a derived compatibility key and marks them for re-encryption', async () => {
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      LEGACY_DERIVED_CONTACTS_KEY.key,
+      LEGACY_DERIVED_CONTACTS_KEY.bookAddr
+    );
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
 
     mavrykApi.defaults.adapter = adapter;
 
-    const fetched = await fetchContactsRecord({
-      publicKey: PUBLIC_KEY,
-      authContext: AUTH_CONTEXT,
-      recoverUnreadableCurrentRecord: true
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        legacyContactsKeys: [LEGACY_DERIVED_CONTACTS_KEY],
+        authContext: AUTH_CONTEXT
+      })
+    ).resolves.toMatchObject({
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      recordId: 'record-id',
+      shouldReencrypt: true
     });
-
-    expect(fetched.contacts).toEqual([]);
-    expect(fetched.recordId).toBe('record-id');
-    expect(base64ToBytes(fetched.accountDataKey ?? '')).toHaveLength(32);
   });
 
-  it('keeps legacy v1 public-key encrypted contacts readable and returns a new local key', async () => {
+  it('reads old public-key-derived GCM2 contacts as read-only compatibility data', async () => {
+    const accountDataKey = await deriveSharedAccountDataKey(PUBLIC_KEY);
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      accountDataKey,
+      undefined,
+      CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
+    );
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        legacyPublicKey: PUBLIC_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).resolves.toMatchObject({
+      contacts: [{ address: 'mv1-alice', name: 'Alice' }],
+      recordId: 'record-id',
+      shouldReencrypt: true
+    });
+  });
+
+  it('throws for unreadable GCM2 contacts instead of recovering with an empty book', async () => {
+    const accountDataKey = await generateAccountDataKey();
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      accountDataKey,
+      undefined,
+      CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
+    );
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unable to decrypt current contacts record');
+  });
+
+  it('treats unsupported contacts encryption versions as explicit decryption failures', async () => {
+    const encryptedValue = await encryptCurrentPayload(
+      GROUPED_CONTACTS,
+      CONTACTS_KEY.key,
+      CONTACTS_KEY.bookAddr,
+      'AES-256-GCM-4'
+    );
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow(CurrentContactsRecordDecryptionError);
+    await expect(
+      fetchContactsRecord({
+        contactsKey: CONTACTS_KEY,
+        authContext: AUTH_CONTEXT
+      })
+    ).rejects.toThrow('Unsupported contacts encryption version: AES-256-GCM-4');
+  });
+
+  it('keeps legacy v1 public-key encrypted contacts readable and marks them for re-encryption', async () => {
     const encryptedValue = await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY);
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, buildRecord(encryptedValue)));
 
     mavrykApi.defaults.adapter = adapter;
 
     const fetched = await fetchContactsRecord({
-      publicKey: PUBLIC_KEY,
+      contactsKey: CONTACTS_KEY,
+      legacyPublicKey: PUBLIC_KEY,
       authContext: AUTH_CONTEXT
     });
 
@@ -402,10 +556,10 @@ describe('contacts account data encryption', () => {
     expect(fetched.typesByAddress).toEqual({
       'mv1-alice': 'user'
     });
-    expect(base64ToBytes(fetched.accountDataKey ?? '')).toHaveLength(32);
+    expect(fetched.shouldReencrypt).toBe(true);
   });
 
-  it('rewrites a fetched legacy v1 contacts record as v2 AES-GCM on save', async () => {
+  it('rewrites a fetched legacy v1 contacts record as current AES-GCM on save', async () => {
     const encryptedLegacyValue = await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY);
     const savedEncryptedValues: EncryptedValue[] = [];
     const adapter = jest.fn(async (config: AxiosRequestConfig) => {
@@ -431,26 +585,47 @@ describe('contacts account data encryption', () => {
     mavrykApi.defaults.adapter = adapter;
 
     const fetched = await fetchContactsRecord({
-      publicKey: PUBLIC_KEY,
+      contactsKey: CONTACTS_KEY,
+      legacyPublicKey: PUBLIC_KEY,
       authContext: AUTH_CONTEXT
     });
     const saved = await saveContactsRecord({
-      accountDataKey: fetched.accountDataKey,
+      contactsKey: CONTACTS_KEY,
       contacts: [{ address: 'mv1-bob', name: 'Bob' }, ...fetched.contacts],
       recordId: fetched.recordId,
       typesByAddress: fetched.typesByAddress,
       authContext: AUTH_CONTEXT
     });
 
-    expect(savedEncryptedValues[0]?.version).toBe('AES-256-GCM-2');
+    expect(savedEncryptedValues[0]?.version).toBe(CONTACTS_ENCRYPTION_VERSION);
     expect(base64ToBytes(savedEncryptedValues[0]?.iv ?? '')).toHaveLength(12);
     expect(saved).toMatchObject({
-      accountDataKey: fetched.accountDataKey,
       contacts: [
         { address: 'mv1-bob', name: 'Bob' },
         { address: 'mv1-alice', name: 'Alice' }
       ],
       recordId: 'record-id'
     });
+  });
+
+  it('deletes a contacts record by id', async () => {
+    const calls: MavrykApiRequestConfig[] = [];
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      calls.push(config as MavrykApiRequestConfig);
+
+      return createResponse(config, {});
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+
+    await deleteContactsRecord('record-id', AUTH_CONTEXT);
+
+    expect(calls.map(({ method, url, _authContext }) => ({ method, url, _authContext }))).toEqual([
+      {
+        method: 'delete',
+        url: '/account/data/record-id',
+        _authContext: AUTH_CONTEXT
+      }
+    ]);
   });
 });

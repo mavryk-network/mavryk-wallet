@@ -19,7 +19,8 @@ type BigMapLookup = {
 };
 
 type KYCContractStorage = {
-  memberLedger: BigMapLookup;
+  // Membership is indexed by member address here; memberLedger uses a (registrar, member) key.
+  memberRegistrarLedger: BigMapLookup;
   memberKycLedger: BigMapLookup;
 };
 
@@ -66,7 +67,7 @@ export const getKYCStatusFromContract = async (rpcUrl: string, address: string, 
   const contract = await loadContract(tezos, kycAddress, false);
   const storage = await contract.storage<KYCContractStorage>();
   const [memberData, memberKycData] = await Promise.all([
-    storage.memberLedger.get(address),
+    storage.memberRegistrarLedger.get(address),
     storage.memberKycLedger.get(address)
   ]);
 

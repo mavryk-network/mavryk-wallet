@@ -8,17 +8,11 @@ import {
   MICHELINE_WATERMARK
 } from 'mavryk/api/auth-payload.helpers';
 
+import { isTrustedAuthChallengeSignerOrigin } from './trusted-origin.helpers';
+
 const HEX_BYTES_PATTERN = /^(?:[0-9a-fA-F]{2})+$/;
 const FORBIDDEN_SIGN_PAYLOAD_PREFIXES = new Set(['01', '02', '03']);
 const TEZOS_SIGNED_MESSAGE_PREFIX = 'Tezos Signed Message: ';
-const TRUSTED_AUTH_CHALLENGE_SIGNER_HOSTS = new Set([
-  'basenet.nexus.mavryk.org',
-  'nexus.mavryk.org',
-  'app.equiteez.com',
-  'equiteez-app.pages.dev'
-]);
-const TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES = ['.equiteez-app.pages.dev', '.mavryk-nexus.pages.dev'];
-const LOCAL_AUTH_CHALLENGE_SIGNER_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 type MichelinePreview = {
   preview: string;
@@ -77,35 +71,6 @@ export function prepareDAppSignPayload(payload: string, origin?: string): Prepar
     bytesToSign: getMichelinePayloadBytes(normalizedPayload),
     watermark: MICHELINE_WATERMARK
   };
-}
-
-function isTrustedAuthChallengeSignerOrigin(origin?: string) {
-  if (!origin) {
-    return false;
-  }
-
-  try {
-    const { hostname, port, protocol } = new URL(origin);
-
-    if ((protocol === 'http:' || protocol === 'https:') && LOCAL_AUTH_CHALLENGE_SIGNER_HOSTS.has(hostname)) {
-      return true;
-    }
-
-    if (protocol !== 'https:') {
-      return false;
-    }
-
-    if (port) {
-      return false;
-    }
-
-    return (
-      TRUSTED_AUTH_CHALLENGE_SIGNER_HOSTS.has(hostname) ||
-      TRUSTED_AUTH_CHALLENGE_SIGNER_HOST_SUFFIXES.some(hostSuffix => hostname.endsWith(hostSuffix))
-    );
-  } catch {
-    return false;
-  }
 }
 
 function getMichelinePreview(payload: string): MichelinePreview | null {

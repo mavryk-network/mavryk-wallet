@@ -98,3 +98,51 @@ it('gates limits on catalogs, deduplicates consumers, isolates pairs and preserv
   act(() => root.unmount());
   client.clear();
 });
+
+it('keeps a late response for the previous pair out of the selected pair', async () => {
+  (getMoonPayCurrencies as jest.Mock).mockResolvedValue({
+    fiat: [{ code: 'USD' }, { code: 'EUR' }],
+    crypto: [{ code: 'MVRK' }]
+  });
+  let resolveUsd: (value: unknown) => void = () => undefined;
+  (getUpdatedFiatLimits as jest.Mock).mockImplementation((fiat: { code: string }) =>
+    fiat.code === 'USD'
+      ? new Promise(resolve => {
+          resolveUsd = resolve;
+        })
+      : Promise.resolve(createEntity({ min: 2, max: 4 }))
+  );
+  const client = new QueryClient({ logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } });
+  let result: ReturnType<typeof useProviderLimits> | undefined;
+  function Consumer({ fiat }: { fiat: string }) {
+    result = useProviderLimits(fiat, 'MVRK', TopUpProviderId.MoonPay);
+    return null;
+  }
+  const root = createRoot(document.createElement('div'));
+  const render = async (fiat: string) => {
+    await act(async () => {
+      root.render(
+        <QueryClientProvider client={client}>
+          <Consumer fiat={fiat} />
+        </QueryClientProvider>
+      );
+    });
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 25));
+    });
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 25));
+    });
+  };
+  await render('USD');
+  expect(result?.isLoading).toBe(true);
+  await render('EUR');
+  expect(result?.data).toEqual({ min: 2, max: 4 });
+  await act(async () => {
+    resolveUsd(createEntity({ min: 100, max: 200 }));
+    await new Promise(resolve => setTimeout(resolve, 25));
+  });
+  expect(result?.data).toEqual({ min: 2, max: 4 });
+  act(() => root.unmount());
+  client.clear();
+});

@@ -1,45 +1,11 @@
-import { dispatch } from 'app/store';
-import {
-  loadAccountTokensActions,
-  loadAccountCollectiblesActions,
-  loadAccountRwasActions
-} from 'app/store/assets/actions';
-import { useAreAssetsLoading } from 'app/store/assets/selectors';
-import { isKnownChainId } from 'lib/apis/tzkt';
+import { useAssetsQuery } from 'lib/assets/use-assets-query';
 import { useSecurityQuery } from 'lib/assets/use-security-query';
-import { ASSETS_SYNC_INTERVAL } from 'lib/fixed-times';
-import { useAccount, useChainId } from 'lib/temple/front';
-import { useInterval } from 'lib/ui/hooks';
+import { useChainId } from 'lib/temple/front';
 
+/** Mount request drivers under the existing owner/account readiness boundary. */
 export const useAssetsLoading = () => {
-  const chainId = useChainId()!;
-  const { publicKeyHash } = useAccount();
-
-  useSecurityQuery(chainId);
-
-  const tokensAreLoading = useAreAssetsLoading('tokens');
-
-  useInterval(
-    () => {
-      if (!tokensAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountTokensActions.submit({ account: publicKeyHash, chainId }));
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
-
-  const collectiblesAreLoading = useAreAssetsLoading('collectibles');
-  const rwasAreLoading = useAreAssetsLoading('rwas');
-
-  useInterval(
-    () => {
-      if (!collectiblesAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountCollectiblesActions.submit({ account: publicKeyHash, chainId }));
-
-      if (!rwasAreLoading && isKnownChainId(chainId))
-        dispatch(loadAccountRwasActions.submit({ account: publicKeyHash, chainId }));
-    },
-    ASSETS_SYNC_INTERVAL,
-    [chainId, publicKeyHash]
-  );
+  useSecurityQuery(useChainId() ?? '');
+  useAssetsQuery('tokens');
+  useAssetsQuery('collectibles');
+  useAssetsQuery('rwas');
 };

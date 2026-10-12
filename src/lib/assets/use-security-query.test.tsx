@@ -58,6 +58,9 @@ it('deduplicates ready consumers, respects whitelist mainnet gate and waits for 
   expect(client.getQueryData(assetsKeys.security('scamlist'))).toBe(true);
   await render(TempleChainId.Mainnet);
   expect(fetchWhitelistTokens).toHaveBeenCalledTimes(1);
+  await render('test');
+  await render(TempleChainId.Mainnet);
+  expect(fetchWhitelistTokens).toHaveBeenCalledTimes(2);
   (fetchScamlistTokens as jest.Mock).mockRejectedValueOnce(new Error('offline'));
   await act(async () => {
     await client.invalidateQueries(assetsKeys.security('scamlist'));

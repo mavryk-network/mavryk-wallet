@@ -7,6 +7,7 @@ import { UI_OWNER_CHANNEL } from '../ui-owner.contract';
 
 function setup(initial: Record<string, unknown> = { 'persist:temple-root': fixture, analytics_user_id: 'durable-id' }) {
   const memory = memoryStorage(initial);
+  const storageListeners: Array<(changes: Record<string, unknown>, area: string) => void> = [];
   let listener!: (
     message: unknown,
     sender: Runtime.MessageSender
@@ -14,7 +15,13 @@ function setup(initial: Record<string, unknown> = { 'persist:temple-root': fixtu
   jest.doMock('webextension-polyfill', () => ({
     __esModule: true,
     default: {
-      storage: { local: memory.storage, onChanged: { addListener: jest.fn() } },
+      storage: {
+        local: memory.storage,
+        onChanged: {
+          addListener: (listener: (changes: Record<string, unknown>, area: string) => void) =>
+            storageListeners.push(listener)
+        }
+      },
       runtime: {
         id: 'test-extension',
         getURL: (path: string) => `moz-extension://test/${path}`,
@@ -46,7 +53,12 @@ function setup(initial: Record<string, unknown> = { 'persist:temple-root': fixtu
       },
       sender
     );
-  return { ...memory, owner, request };
+  return {
+    ...memory,
+    owner,
+    request,
+    changeSelection: () => storageListeners.forEach(listener => listener({ network_id: {} }, 'local'))
+  };
 }
 
 afterEach(() => {
@@ -311,4 +323,78 @@ it('orders security refreshes across contexts, persists successful empty respons
   expect(JSON.parse(restart.records['zustand-assets'] as string).state.mainnetScamlist).toEqual({ scam: true });
   await send({ kind: 'scamlist-sync', requestKey: 'scamlist', requestId: 'new', data: {} });
   expect(read().mainnetScamlist).toEqual({});
+});
+
+it('reconciles fetched lists with durable choices, rejects superseded/user-edited requests and preserves metadata on late scopes', async () => {
+  const s = setup();
+  await s.request();
+  const send = (command: object) => s.request({ command });
+  const read = () => JSON.parse(s.records['zustand-assets'] as string).state;
+  const requestKey = 'collectibles:alice@chain';
+  const start = (requestId: string) => send({ kind: 'assets-sync-start', requestKey, requestId });
+  const publish = (requestId: string, slugs: string[]) =>
+    send({
+      kind: 'assets-sync',
+      requestKey,
+      requestId,
+      category: 'collectibles',
+      value: { account: 'alice', chainId: 'chain', slugs },
+      metadata: {}
+    });
+  const records = [
+    { slug: 'manual', status: 'idle', manual: true },
+    { slug: 'disabled', status: 'disabled' },
+    { slug: 'removed', status: 'removed' },
+    { slug: 'automatic', status: 'idle' }
+  ].map(value => ({ ...value, account: 'alice', chainId: 'chain' }));
+  await send({ kind: 'assets-put', category: 'collectibles', records });
+  await start('one');
+  await publish('one', ['fetched']);
+  expect(read().collectibles['alice@chain']).toEqual({
+    manual: { status: 'idle', manual: true },
+    disabled: { status: 'disabled' },
+    removed: { status: 'removed' },
+    fetched: { status: 'idle' }
+  });
+  await start('two');
+  await send({
+    kind: 'assets-status',
+    category: 'collectibles',
+    value: { account: 'alice', chainId: 'chain', slug: 'disabled', status: 'idle' }
+  });
+  await publish('two', []);
+  expect(read().collectibles['alice@chain'].disabled.status).toBe('idle');
+  expect(read().collectibles['alice@chain'].fetched).toBeDefined();
+  await start('old');
+  await start('new');
+  await publish('new', ['latest']);
+  await publish('old', ['obsolete']);
+  expect(read().collectibles['alice@chain'].latest).toBeDefined();
+  expect(read().collectibles['alice@chain'].obsolete).toBeUndefined();
+  await start('changed');
+  s.changeSelection();
+  s.changeSelection();
+  await publish('changed', ['wrong-network']);
+  expect(read().collectibles['alice@chain']['wrong-network']).toBeUndefined();
+  await start('empty');
+  await publish('empty', []);
+  expect(read().collectibles['alice@chain']).toEqual({
+    manual: { status: 'idle', manual: true },
+    removed: { status: 'removed' }
+  });
+  await start('restart');
+  const restart = setup(s.records);
+  await restart.request({
+    command: {
+      kind: 'assets-sync',
+      requestKey,
+      requestId: 'restart',
+      category: 'collectibles',
+      value: { account: 'alice', chainId: 'chain', slugs: ['obsolete'] },
+      metadata: {}
+    }
+  });
+  expect(
+    JSON.parse(restart.records['zustand-assets'] as string).state.collectibles['alice@chain'].obsolete
+  ).toBeUndefined();
 });

@@ -15,7 +15,7 @@ export function useSecurityQuery(chainId: string) {
     useQuery({
       queryKey: assetsKeys.security(category),
       enabled: isReady && enabled,
-      staleTime: Infinity,
+      staleTime: 0,
       cacheTime: 5 * 60_000,
       retry: false,
       refetchOnWindowFocus: false,

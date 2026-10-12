@@ -1,6 +1,8 @@
 import isEqual from 'lodash/isEqual';
 import browser from 'webextension-polyfill';
 
+import { ASSET_SCOPE_STORAGE_KEYS } from 'lib/assets/scoped-wallet-request';
+
 import { applyAssetsCommand } from './assets-command';
 import { applyAssetsSyncCommand } from './assets-sync-command';
 import { assetsStore } from './assets.store';
@@ -51,6 +53,8 @@ let queue: Promise<unknown> = Promise.resolve();
 let isStarted = false;
 let hasWriteFailure = false;
 let pendingOperations = 0;
+let selectionRevision = 0;
+const assetRequests = new Map<string, { id: string; selectionRevision: number }>();
 
 /** Background-only authority; every command and read is serialized behind successful migration and durable writes. */
 async function processCommand(command?: UICommand) {
@@ -66,7 +70,22 @@ async function processCommand(command?: UICommand) {
       command.kind === 'scamlist-sync' ||
       command.kind === 'whitelist-sync')
   ) {
-    applyAssetsSyncCommand(command, { ui: uiStore, assets: assetsStore, metadata: metadataStore });
+    if (command.kind === 'assets-sync-start') {
+      assetRequests.set(command.requestKey, { id: command.requestId, selectionRevision });
+    }
+    const request = assetRequests.get(command.requestKey);
+    if (
+      command.kind === 'assets-sync' &&
+      (!request || request.id !== command.requestId || request.selectionRevision !== selectionRevision)
+    ) {
+      // A queued response must not publish across a selection transition, even A→B→A or a background restart.
+      assetsStore.persistence
+        .prepare(draft => {
+          if (draft.syncRequests[command.requestKey] === command.requestId)
+            delete draft.syncRequests[command.requestKey];
+        })
+        .commit();
+    } else applyAssetsSyncCommand(command, { ui: uiStore, assets: assetsStore, metadata: metadataStore });
   } else if (command?.kind === 'preferences') {
     uiStore.persistence
       .prepare(draft => {
@@ -129,6 +148,9 @@ export const getReadyAnalyticsIdentity = () =>
 export function startUIOwner() {
   if (isStarted) return;
   isStarted = true;
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && ASSET_SCOPE_STORAGE_KEYS.some(key => key in changes)) selectionRevision++;
+  });
   browser.runtime.onMessage.addListener((raw, sender) => {
     if (raw?.channel !== UI_OWNER_CHANNEL) return undefined;
     if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL(''))) {

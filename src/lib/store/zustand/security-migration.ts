@@ -37,9 +37,13 @@ export function createSecurityMigration(options: {
       const durable = await assets.persistence.readBack();
       if (!durable) throw new Error('Security destination missing');
       if (!durable.state.isSecurityAdopted) {
-        const active = await read('persist:temple-root-task11');
-        const raw =
-          active?.assets === undefined ? await read('persist:root.assets') : decodeLegacyUIRoot(active.assets);
+        const hasDestinationCaches = durable.state.mainnetWhitelist !== null && durable.state.mainnetScamlist !== null;
+        const active = hasDestinationCaches ? undefined : await read('persist:temple-root-task11');
+        const raw = hasDestinationCaches
+          ? undefined
+          : active?.assets === undefined
+          ? await read('persist:root.assets')
+          : decodeLegacyUIRoot(active.assets);
         const source = raw === undefined ? undefined : parseData(LEGACY_SECURITY_SCHEMA, raw);
         assets.persistence
           .prepare(draft => {

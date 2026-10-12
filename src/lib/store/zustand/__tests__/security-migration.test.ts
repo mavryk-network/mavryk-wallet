@@ -88,3 +88,21 @@ it.each(['read', 'malformed', 'write', 'readback'])(
     expect(s.assets.getState().mainnetScamlist).toEqual({ cached: true });
   }
 );
+
+it('preserves an existing destination even before this adoption marker and ignores obsolete malformed sources', async () => {
+  const s = await setup({ 'persist:temple-root-task11': 'malformed' });
+  s.assets.persistence
+    .prepare(draft => {
+      draft.mainnetScamlist = {};
+      draft.mainnetWhitelist = ['destination'];
+    })
+    .commit();
+  await s.assets.persistence.flush();
+  await s.migration.initialize();
+  expect(s.assets.getState()).toMatchObject({
+    mainnetScamlist: {},
+    mainnetWhitelist: ['destination'],
+    isSecurityAdopted: true
+  });
+  expect(s.readFallback).not.toHaveBeenCalled();
+});

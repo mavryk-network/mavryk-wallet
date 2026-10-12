@@ -4,7 +4,7 @@ import { fetchTokensMetadata, isKnownChainId } from 'lib/apis/temple';
 import { fetchTzktAccountAssets } from 'lib/apis/tzkt';
 import type { TzktAccountAsset } from 'lib/apis/tzkt/types';
 import { toTokenSlug } from 'lib/assets';
-import { isCollectible, isRwa } from 'lib/metadata';
+import { isCollectible, isRwa } from 'lib/metadata/classification';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import {
   fetchWalletRwaAssets,
@@ -29,15 +29,7 @@ export const loadAccountTokens = (account: string, chainId: string, knownMeta: M
     fetchTzktAccountAssets(account, chainId, true).then(data => finishTokensLoading(data, chainId, knownMeta)),
     // Fetching unknowns only, checking metadata to filter for FTs
     fetchTzktAccountUnknownAssets(account, chainId).then(data => finishTokensLoading(data, chainId, knownMeta, true))
-  ]).then(
-    ([data1, data2]) => {
-      return mergeLoadedAssetsData(data1, data2);
-    },
-    error => {
-      console.error(error);
-      throw error;
-    }
-  );
+  ]).then(([data1, data2]) => mergeLoadedAssetsData(data1, data2));
 
 export const loadAccountCollectibles = (account: string, chainId: string, knownMeta: MetadataMap) =>
   Promise.all([
@@ -49,30 +41,24 @@ export const loadAccountCollectibles = (account: string, chainId: string, knownM
     fetchTzktAccountUnknownAssets(account, chainId).then(data => {
       return finishCollectiblesLoadingWithoutMeta(data, knownMeta, chainId);
     })
-  ]).then(
-    ([data1, data2]) => {
-      return mergeLoadedAssetsData(data1, data2);
-    },
-    error => {
-      console.error(error);
-      throw error;
-    }
-  );
+  ]).then(([data1, data2]) => mergeLoadedAssetsData(data1, data2));
 
 export const loadAccountRwas = (account: string, _chainId: string, _knownMeta: MetadataMap) =>
-  fetchWalletRwaAssets({ walletAddress: account }).then(
-    data => finishRwasLoading(data),
-    error => {
-      console.error(error);
-      throw error;
-    }
-  );
+  fetchWalletRwaAssets({ walletAddress: account }).then(finishRwasLoading);
 
 const fetchTzktAccountUnknownAssets = memoizee(
   // Simply reducing frequency of requests per set of arguments.
   (account: string, chainId: string) => fetchTzktAccountAssets(account, chainId, null),
   { maxAge: 10_000, normalizer: ([account, chainId]) => `${account}_${chainId}`, promise: true }
 );
+
+/** Classification must not reconcile an incomplete/failed metadata batch as an empty asset list. */
+async function fetchClassificationMetadata(chainId: string, slugs: string[]) {
+  if (!isKnownChainId(chainId)) return null;
+  const result = await fetchTokensMetadata(chainId, slugs);
+  if (!Array.isArray(result) || result.length !== slugs.length) throw new Error('Incomplete asset metadata response');
+  return result;
+}
 
 const finishTokensLoading = async (
   data: TzktAccountAsset[],
@@ -85,11 +71,7 @@ const finishTokensLoading = async (
     return knownMeta.has(slug) ? acc : acc.concat(slug);
   }, []);
 
-  const newMetadatas = isKnownChainId(chainId)
-    ? await fetchTokensMetadata(chainId, slugsWithoutMeta).catch(err => {
-        console.error(err);
-      })
-    : null;
+  const newMetadatas = await fetchClassificationMetadata(chainId, slugsWithoutMeta);
 
   const slugs: string[] = [];
   const balances: StringRecord = {};
@@ -104,7 +86,8 @@ const finishTokensLoading = async (
     if (fungibleByMetaCheck) {
       const metadata = metadataOfNew || knownMeta.get(slug);
 
-      if (!metadata || isCollectible(metadata) || isRwa(metadata)) continue;
+      if (!metadata) throw new Error('Incomplete asset classification');
+      if (isCollectible(metadata) || isRwa(metadata)) continue;
     }
     slugs.push(slug);
     balances[slug] = asset.balance;
@@ -140,11 +123,7 @@ const finishCollectiblesLoadingWithoutMeta = async (
     return knownMeta.has(slug) ? acc : acc.concat(slug);
   }, []);
 
-  const newMetadatas = isKnownChainId(chainId)
-    ? await fetchTokensMetadata(chainId, slugsWithoutMeta).catch(err => {
-        console.error(err);
-      })
-    : null;
+  const newMetadatas = await fetchClassificationMetadata(chainId, slugsWithoutMeta);
 
   const slugs: string[] = [];
   const balances: StringRecord = {};
@@ -157,7 +136,8 @@ const finishCollectiblesLoadingWithoutMeta = async (
     const metadataOfNew = newMetadatas?.[slugsWithoutMeta.indexOf(slug)];
     const metadata = metadataOfNew || knownMeta.get(slug);
 
-    if (!metadata || !isCollectible(metadata)) continue;
+    if (!metadata) throw new Error('Incomplete asset classification');
+    if (!isCollectible(metadata)) continue;
 
     if (metadataOfNew) newMeta[slug] = metadataOfNew;
 

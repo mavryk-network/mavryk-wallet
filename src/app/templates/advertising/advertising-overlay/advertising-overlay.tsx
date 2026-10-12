@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Anchor, Button } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import ContentContainer from 'app/layouts/ContentContainer';
-import { skipAdvertisingPromotionAction } from 'app/store/advertising/actions';
+import { dismissAdvertisingPromotionAction } from 'app/store/advertising/actions';
 import { useActivePromotionSelector, useIsNewPromotionAvailableSelector } from 'app/store/advertising/selectors';
 import { T } from 'lib/i18n/react';
 import { useTempleClient } from 'lib/temple/front';
@@ -23,10 +23,10 @@ export const AdvertisingOverlay: FC = () => {
   const analyticsEventPrefix = `${activePromotion?.name}_${popup ? 'POPUP' : 'FULLPAGE'}`;
 
   const handleSkipPress = () => {
-    dispatch(skipAdvertisingPromotionAction());
+    dispatch(dismissAdvertisingPromotionAction({ name: activePromotion?.name }));
   };
   const handleBannerPress = () => {
-    dispatch(skipAdvertisingPromotionAction());
+    dispatch(dismissAdvertisingPromotionAction({ name: activePromotion?.name }));
   };
 
   return ready && isNewPromotionAvailable && isDefined(activePromotion) ? (

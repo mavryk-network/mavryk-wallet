@@ -55,3 +55,5 @@ export const buyCardKeys = {
 export const notificationKeys = {
   list: (startFromTime: number) => ['notifications', 'extension', startFromTime] as const
 };
+
+export const advertisingKeys = { active: ['advertising', 'temple', 'active'] as const };

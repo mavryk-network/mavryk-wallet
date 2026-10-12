@@ -3,7 +3,6 @@ import React, { FC, useEffect } from 'react';
 import { dispatch } from 'app/store';
 import { loadTokensScamlistActions } from 'app/store/assets/actions';
 
-import { useAdvertisingLoading } from './hooks/use-advertising.hook';
 import { useAssetsLoading } from './hooks/use-assets-loading';
 import { useAssetsMigrations } from './hooks/use-assets-migrations';
 import { useBalancesLoading } from './hooks/use-balances-loading';
@@ -29,7 +28,6 @@ export const WithDataLoading: FC<PropsWithChildren> = ({ children }) => {
   useRwasDetailsBatch();
 
   useLongRefreshLoading();
-  useAdvertisingLoading();
 
   useStorageAnalytics();
   useUserIdSync();

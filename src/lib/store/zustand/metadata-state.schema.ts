@@ -15,7 +15,22 @@ export const TOKEN_METADATA_SCHEMA: z.ZodType<TokenMetadata> = z.object({
   displayUri: z.string().max(8192).optional(),
   artifactUri: z.string().max(8192).optional()
 });
+export const METADATA_SCOPE_KEY_SCHEMA = z
+  .string()
+  .min(1)
+  .max(32768)
+  .refine(key => !['__proto__', 'constructor', 'prototype'].includes(key));
+export const METADATA_RECORD_SCHEMA = z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA);
+export const SCOPED_METADATA_SCHEMA = z.object({
+  tokensMetadata: METADATA_RECORD_SCHEMA,
+  collectiblesMetadata: METADATA_RECORD_SCHEMA,
+  rwasMetadata: METADATA_RECORD_SCHEMA,
+  revisions: z.record(METADATA_SCOPE_KEY_SCHEMA, z.number().int().nonnegative())
+});
 export const METADATA_SCHEMA = z.object({
+  scoped: z.record(METADATA_SCOPE_KEY_SCHEMA, SCOPED_METADATA_SCHEMA).optional(),
+  revision: z.number().int().nonnegative().optional(),
+  lastReceipt: z.string().optional(),
   tokensMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
   collectiblesMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
   rwasMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA)

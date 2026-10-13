@@ -147,3 +147,7 @@ Updated AGENTS dependency/ownership/testing facts, resolved Task 10’s deferred
 ## Task 17 shared-provider extension
 
 [Task 17](task-17-assets-security-ownership-handoff.md) reuses the existing foreground Query client for asset/security request lifecycle; durable responses stay owner-read. Detail keys, batches, disabled leaves, polling and null/error semantics are unchanged. The existing RWA selection guard is extracted into `lib/assets/scoped-wallet-request.ts` and reused around asset loading/publication. It still observes account/network/auth-map transitions, including A→B→A, without modifying reserved transports. The existing RWA detail and account-assets batches remain separate domain requests; this task does not unify their payload caches.
+
+## Task 18 shared-provider extension
+
+[Task 18](task-18-metadata-ownership-handoff.md) reuses this Query client for receipt-only metadata requests and provisional AddAsset previews. Metadata-owned UI fields remain owner-read; fetched collectible/RWA detail records, leaf/batch ownership, keys and fallback precedence remain here. The shared storage selection guard additionally observes custom-network snapshot changes, rejecting requests spanning a custom-RPC edit. No new provider or persistence adapter is added.

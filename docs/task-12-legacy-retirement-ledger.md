@@ -162,3 +162,9 @@ All existing persistence keys, seven legacy source payloads, migration histories
 - Security/asset destination schemas, synchronization ordering, owner readiness and fail-closed consumers are permanent protections, not retirement candidates.
 
 All source payloads, persistence prefixes, storage histories and the deletion-marker waiver remain. No future release, broader Phase 8 completion or source deletion is authorized.
+
+## Task 18 metadata inventory
+
+[Task 18](task-18-metadata-ownership-handoff.md) removes all three `*-metadata/epics.ts` modules and their root registrations. Metadata presence checks no longer dispatch fetched actions or keep `checkedRef` misses. Pagination and AddAsset no longer fetch/publish through independent metadata paths; versioned refresh no longer treats Redux dispatch as durable acknowledgement.
+
+Legacy metadata action/reducer shapes and middleware command adapters remain compatibility APIs, with no live foreground metadata-action producers. Their unscoped puts remain fallback records; new scoped records take precedence. These adapters still cannot be deleted wholesale because preference, status, flag and promotion producers remain active. Old metadata payloads are retained and never mirrored from Query. New metadata synchronization commands, scoped schema fields and request coordination are permanent ownership infrastructure, not migration markers. Task 12's deletion-marker waiver is unchanged.

@@ -172,3 +172,9 @@ M	src/lib/store/zustand/ui-client.ts
 M	src/lib/store/zustand/ui-owner.contract.ts
 M	src/lib/store/zustand/ui-owner.ts
 ```
+
+## Task 18 metadata resolution
+
+[Task 18](task-18-metadata-ownership-handoff.md) replaces independent metadata epics/direct fetching with shared Query batches and awaited metadata commands. Asset responses reuse shared normalization/application rules and their already-fetched payload; they still publish metadata inside the same acknowledged asset operation. The asset driver supplies RPC provenance for scoped metadata; original Task 17 asset/security Query keys remain unchanged. Owner request reservations capture a metadata revision, so an older asset response cannot replace newer independent metadata or an explicit save. Asset/status protections and the narrow acknowledged Redux balance dispatch remain.
+
+New whitelist metadata seeds use the fixed mainnet provenance bucket, are read only on mainnet, and never overwrite existing records. Historical global whitelist-derived metadata cannot be distinguished from other legacy metadata and remains fallback. Custom-network snapshot changes now invalidate selection guards. Security adoption/unknown-versus-empty semantics and offline scam labels are unchanged. Task 19 still owns the balance handoff; no broader Phase 8 completion is claimed.

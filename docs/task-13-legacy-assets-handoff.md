@@ -148,3 +148,7 @@ No edits under `src/mavryk/api/**`, IndexedDB migration/repository/registration 
 ## Task 17 security handoff
 
 [Task 17](task-17-assets-security-ownership-handoff.md) supersedes the earlier Redux security/loading ownership statements. Assets/statuses still use the same background destination. Security adopts separately into that destination after Task 13, without replaying completed Task 13 migrations. Asset request lifecycle now belongs to Query; user put/status commands still use the existing compatibility middleware. Its legacy fetched-load action branch is retired. `persist:temple-root-task11` security and all six historical payloads remain retained read-only sources. Metadata remains with its existing owner; asset responses now await its acknowledgement rather than dispatching unacknowledged metadata actions.
+
+## Task 18 metadata extension
+
+[Task 18](task-18-metadata-ownership-handoff.md) adds optional scoped records, owner-issued revisions and a durable acknowledgement receipt to the same version-1 metadata envelope. Existing unscoped maps, predefined hydration and Tasks 11/13 completion/recovery remain intact. New foreground requests and explicit saves write scoped records; selectors overlay those records on retained unscoped fallbacks. Legacy metadata actions remain compatibility commands, not active request drivers. No migration replay, new completion marker, foreground adapter or source deletion is introduced.

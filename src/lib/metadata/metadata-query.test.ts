@@ -181,3 +181,32 @@ it('deduplicates provisional previews without saving or enabling assets, then aw
   await save;
   expect(isSaved).toBe(true);
 });
+
+it('serializes concurrent foreground refresh completion and preserves entries added during transport', async () => {
+  let queue: Promise<unknown> = Promise.resolve();
+  Object.defineProperty(navigator, 'locks', {
+    configurable: true,
+    value: {
+      request: (_name: string, run: () => Promise<unknown>) => {
+        const result = queue.then(run);
+        queue = result.catch(() => undefined);
+        return result;
+      }
+    }
+  });
+  localStorage.setItem('METADATA_REFRESH', JSON.stringify({ legacy: 1 }));
+  (getOwnedUISnapshot as jest.Mock).mockReturnValue({ metadata: { tokensMetadata: { KT1test_0: raw } } });
+  (mapWalletTokensToFetchedMetadataRecord as jest.Mock).mockReturnValue({ KT1test_0: raw });
+  const transport = deferred<unknown[]>();
+  (fetchWalletTokens as jest.Mock).mockReturnValue(transport.promise);
+  const other = new QueryClient();
+  const first = refreshMetadata(client, scope);
+  const second = refreshMetadata(other, scope);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  localStorage.setItem('METADATA_REFRESH', JSON.stringify({ legacy: 1, unrelated: 7 }));
+  transport.resolve([]);
+  await Promise.all([first, second]);
+  expect(fetchWalletTokens).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(localStorage.getItem('METADATA_REFRESH')!)).toMatchObject({ legacy: 1, unrelated: 7 });
+  other.clear();
+});

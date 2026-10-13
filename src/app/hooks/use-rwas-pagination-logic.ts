@@ -1,11 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { putRwasMetadataAction } from 'app/store/rwas-metadata/actions';
 import { useAllRwasMetadataSelector } from 'app/store/rwas-metadata/selectors';
-import { loadTokensMetadata } from 'lib/metadata/fetch';
-import { useNetwork } from 'lib/temple/front';
+import { useRequestMetadata } from 'lib/metadata/use-metadata-query';
 import { useDidMount, useDidUpdate } from 'lib/ui/hooks';
 import { setNavigateSearchParams } from 'lib/woozie';
 
@@ -14,8 +10,7 @@ export const ITEMS_PER_PAGE = 30;
 export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: number) => {
   const allMeta = useAllRwasMetadataSelector();
 
-  const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
+  const requestMetadata = useRequestMetadata('rwas');
 
   const [slugs, setSlugs] = useState<string[]>(() => allSlugsSorted.slice(0, initialSize));
 
@@ -34,14 +29,13 @@ export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: nu
         .filter(slug => !allMeta.get(slug));
 
       if (slugsWithoutMeta.length)
-        await loadTokensMetadata(rpcUrl, slugsWithoutMeta)
+        await requestMetadata(slugsWithoutMeta)
           .then(
-            records => {
-              dispatch(putRwasMetadataAction({ records }));
+            () => {
               setSlugs(nextSlugs);
             },
-            error => {
-              console.error(error);
+            () => {
+              console.error('Unable to load page metadata');
             }
           )
           .finally(() => setIsLoading(false));
@@ -52,7 +46,7 @@ export const useRwasPaginationLogic = (allSlugsSorted: string[], initialSize: nu
 
       setNavigateSearchParams({ amount: String(size) });
     },
-    [allSlugsSorted, slugs.length, allMeta, rpcUrl, dispatch]
+    [allSlugsSorted, slugs.length, allMeta, requestMetadata]
   );
 
   useDidMount(() => {

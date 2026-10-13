@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ASSETS_COMMAND_SCHEMA } from './assets-command';
 import { ASSETS_SCHEMA } from './assets-state.schema';
 import { ASSETS_SYNC_COMMAND_SCHEMA } from './assets-sync-command';
+import { METADATA_COMMAND_SCHEMA } from './metadata-command';
 import { METADATA_SCHEMA, TOKEN_METADATA_SCHEMA } from './metadata-state.schema';
 import { OWNER_FALLBACK_KEYS } from './owner-fallback';
 import { UI_SCHEMA, UI_PREFERENCES_SCHEMA } from './ui-state.schema';
@@ -13,6 +14,7 @@ export const UI_COMMAND_SCHEMA = z.union([
   z.object({ kind: z.literal('indexeddb-assets-migration') }).strict(),
   ASSETS_COMMAND_SCHEMA,
   ASSETS_SYNC_COMMAND_SCHEMA,
+  METADATA_COMMAND_SCHEMA,
   z
     .object({
       kind: z.literal('preferences'),

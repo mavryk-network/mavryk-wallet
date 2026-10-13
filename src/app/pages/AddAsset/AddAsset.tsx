@@ -1,9 +1,9 @@
 import React, { FC, memo, ReactNode, useCallback, useEffect, useRef, useMemo } from 'react';
 
 import { ContractAbstraction, ContractProvider, Wallet } from '@mavrykdynamics/webmavryk';
+import { useQueryClient } from '@tanstack/react-query';
 import classNames from 'clsx';
 import { FormContextValues, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { useSWRConfig, unstable_serialize } from 'swr';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -11,9 +11,6 @@ import { Alert, FormField, FormSubmitButton, NoSpaceField } from 'app/atoms';
 import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
-import { putTokensAsIsAction, putCollectiblesAsIsAction } from 'app/store/assets/actions';
-import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
-import { putTokensMetadataAction } from 'app/store/tokens-metadata/actions';
 import { useFormAnalytics } from 'lib/analytics';
 import { TokenMetadataResponse } from 'lib/apis/temple';
 import { toTokenSlug } from 'lib/assets';
@@ -26,8 +23,11 @@ import {
 import { getBalanceSWRKey } from 'lib/balances';
 import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
-import { fetchOneTokenMetadata } from 'lib/metadata/fetch';
 import { TokenMetadataNotFoundError } from 'lib/metadata/on-chain';
+import { previewMetadata } from 'lib/metadata/preview-metadata';
+import { saveMetadata } from 'lib/metadata/sync-metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
+import { updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { loadContract } from 'lib/temple/contract';
 import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
@@ -87,7 +87,8 @@ const Form = memo(() => {
   const { popup } = useAppEnv();
 
   const formAnalytics = useFormAnalytics('AddAsset');
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const metadataScope = useMetadataScope();
 
   const { register, handleSubmit, errors, formState, watch, setValue, triggerValidation, clearError } =
     useForm<FormData>({
@@ -113,6 +114,7 @@ const Form = memo(() => {
     if (!formValid) return;
 
     const attempt = ++attemptRef.current;
+    metadataRef.current = undefined;
     setState({
       ...INITIAL_STATE,
       processing: true
@@ -135,8 +137,8 @@ const Form = memo(() => {
 
       if (tokenStandard === 'fa2') await assertFa2TokenDefined(tezos, contract, tokenId);
 
-      const rpcUrl = tezos.rpc.getRpcUrl();
-      const metadata = await fetchOneTokenMetadata(rpcUrl, contractAddress, String(tokenId));
+      const metadata = await previewMetadata(queryClient, metadataScope, contractAddress, String(tokenId));
+      if (attempt !== attemptRef.current) return;
 
       if (metadata) {
         metadataRef.current = metadata;
@@ -153,7 +155,8 @@ const Form = memo(() => {
         bottomSectionVisible: true
       };
     } catch (err: any) {
-      console.error(err);
+      if (attempt !== attemptRef.current) return;
+      console.error('Unable to complete asset form operation');
 
       await delay();
 
@@ -167,16 +170,19 @@ const Form = memo(() => {
         processing: false
       }));
     }
-  }, [tezos, setValue, setState, formValid, contractAddress, tokenId]);
+  }, [tezos, queryClient, metadataScope, setValue, setState, formValid, contractAddress, tokenId]);
 
   const loadMetadata = useDebouncedCallback(loadMetadataPure, 500);
 
   const loadMetadataRef = useRef(loadMetadata);
+  // Keep the debounce callback current; no external resource needs cleanup.
   useEffect(() => {
     loadMetadataRef.current = loadMetadata;
   }, [loadMetadata]);
 
+  // Revalidate edited inputs and invalidate late previews on change or unmount.
   useEffect(() => {
+    metadataRef.current = undefined;
     if (formValid) {
       clearError();
       loadMetadataRef.current();
@@ -184,7 +190,11 @@ const Form = memo(() => {
       setState(INITIAL_STATE);
       attemptRef.current++;
     }
-  }, [setState, formValid, networkId, contractAddress, tokenId]);
+    return () => {
+      loadMetadataRef.current.cancel();
+      attemptRef.current++;
+    };
+  }, [setState, formValid, networkId, contractAddress, tokenId, accountPkh, metadataScope.rpcUrl]);
 
   const cleanContractAddress = useCallback(() => {
     setValue('address', '');
@@ -216,9 +226,9 @@ const Form = memo(() => {
 
         const assetIsCollectible = isCollectible(tokenMetadata);
 
-        const actionPayload = { records: { [tokenSlug]: tokenMetadata } };
-        if (assetIsCollectible) dispatch(putCollectiblesMetadataAction(actionPayload));
-        else dispatch(putTokensMetadataAction(actionPayload));
+        await saveMetadata(metadataScope, assetIsCollectible ? 'collectibles' : 'tokens', {
+          [tokenSlug]: tokenMetadata
+        });
 
         const asset = {
           chainId,
@@ -227,7 +237,11 @@ const Form = memo(() => {
           status: 'enabled' as const
         };
 
-        dispatch(assetIsCollectible ? putCollectiblesAsIsAction([asset]) : putTokensAsIsAction([asset]));
+        await updateOwnedUI({
+          kind: 'assets-put',
+          category: assetIsCollectible ? 'collectibles' : 'tokens',
+          records: [asset]
+        });
 
         swrCache.delete(unstable_serialize(getBalanceSWRKey(tezos, tokenSlug, accountPkh)));
 
@@ -247,7 +261,7 @@ const Form = memo(() => {
       } catch (err: any) {
         formAnalytics.trackSubmitFail();
 
-        console.error(err);
+        console.error('Unable to complete asset form operation');
 
         // Human delay
         await delay();
@@ -262,7 +276,7 @@ const Form = memo(() => {
       accountPkh,
       setSubmitError,
       formAnalytics,
-      dispatch,
+      metadataScope,
       contractAddress,
       tokenId
     ]

@@ -8,16 +8,14 @@ import { putTokensBalancesAction } from 'app/store/balances/actions';
 import { fixBalances } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
 import { DetailScope } from 'lib/asset-details/details.types';
-import { isRwa } from 'lib/metadata/classification';
-import { buildTokenMetadataFromFetched } from 'lib/metadata/utils';
+import { getMetadataScopeKey } from 'lib/metadata/metadata-scope';
+import { normalizeMetadata } from 'lib/metadata/sync-metadata';
 import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
-import { UICommand } from 'lib/store/zustand/ui-owner.contract';
 import { parseData, SAFE_KEY_SCHEMA } from 'lib/store/zustand/validation';
 
 import { getAccountAssetsSyncKey } from './account-assets-sync-key';
 import { withScopedWalletRequest } from './scoped-wallet-request';
 import { acknowledgeAssetSync, beginAssetSync } from './sync-security';
-import { fromAssetSlug } from './utils';
 
 const loadedSchema = z.object({
   slugs: z.array(SAFE_KEY_SCHEMA),
@@ -27,7 +25,7 @@ const loadedSchema = z.object({
 /** One publication path for asset records and their existing coupled metadata/balance effects. */
 export async function syncAccountAssets(
   request: Awaited<ReturnType<typeof beginAssetSync>>,
-  scope: DetailScope,
+  scope: DetailScope & { rpcUrl?: string },
   category: AssetsType,
   response: Awaited<ReturnType<typeof loadAccountTokens>>,
   assertScope: () => Promise<void>
@@ -37,19 +35,15 @@ export async function syncAccountAssets(
   const { slugs, balances } = parseData(loadedSchema, response);
   if (slugs.some(slug => !Object.prototype.hasOwnProperty.call(balances, slug)))
     throw new Error('Incomplete asset balances');
-  const metadata: Extract<UICommand, { kind: 'assets-sync' }>['metadata'] = {};
-  for (const [slug, raw] of Object.entries(response.newMeta)) {
-    if (!raw || (category === 'rwas' && !isRwa(raw))) continue;
-    const [address, id] = fromAssetSlug(slug);
-    if (id) metadata[slug] = buildTokenMetadataFromFetched(raw, address, id);
-  }
+  const metadata = normalizeMetadata(category, Object.keys(response.newMeta), response.newMeta);
   await assertScope();
   await acknowledgeAssetSync({
     kind: 'assets-sync',
     ...request,
     category,
     value: { account: scope.account, chainId: scope.chainId, slugs },
-    metadata
+    metadata,
+    scopeKey: scope.rpcUrl ? getMetadataScopeKey({ ...scope, rpcUrl: scope.rpcUrl }) : undefined
   });
   await assertScope();
   // Task 19 retains Redux balance ownership; no second fetch or metadata fire-and-forget dispatch.
@@ -57,15 +51,24 @@ export async function syncAccountAssets(
 }
 
 /** Capture transport inputs and latest classification metadata; Query stores a receipt, never UI records. */
-export async function loadAccountAssets(scope: DetailScope, category: AssetsType, signal?: AbortSignal) {
+export async function loadAccountAssets(
+  scope: DetailScope & { rpcUrl?: string },
+  category: AssetsType,
+  signal?: AbortSignal
+) {
   return withScopedWalletRequest(scope, signal, async assertScope => {
     const request = await beginAssetSync(getAccountAssetsSyncKey(category, scope.account, scope.chainId));
     if (signal?.aborted) throw new CancelledError({ revert: true });
     const metadata = getOwnedUISnapshot().metadata;
+    const scoped = scope.rpcUrl
+      ? metadata.scoped?.[getMetadataScopeKey({ ...scope, rpcUrl: scope.rpcUrl })]
+      : undefined;
     const known = new Map(
       Object.entries({
         ...metadata.tokensMetadata,
-        ...(category === 'rwas' ? metadata.rwasMetadata : metadata.collectiblesMetadata)
+        ...scoped?.tokensMetadata,
+        ...(category === 'rwas' ? metadata.rwasMetadata : metadata.collectiblesMetadata),
+        ...(category === 'rwas' ? scoped?.rwasMetadata : scoped?.collectiblesMetadata)
       })
     );
     const load = { tokens: loadAccountTokens, collectibles: loadAccountCollectibles, rwas: loadAccountRwas }[category];

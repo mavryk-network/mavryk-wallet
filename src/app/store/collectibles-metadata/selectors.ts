@@ -1,16 +1,13 @@
 import { useMemo } from 'react';
 
-import { useOwnedUI } from 'lib/store/zustand/ui-client';
+import { useMetadataFetching } from 'lib/metadata/use-metadata-query';
+import { useOwnedMetadata } from 'lib/metadata/use-owned-metadata';
 
-import { useSelector } from '../root-state.selector';
+export const useCollectibleMetadataSelector = (slug: string) => useOwnedMetadata('collectibles')[slug];
 
 export const useAllCollectiblesMetadataSelector = () => {
-  const records = useOwnedUI(state => state.metadata.collectiblesMetadata);
+  const records = useOwnedMetadata('collectibles');
   return useMemo(() => new Map(Object.entries(records)), [records]);
 };
 
-export const useCollectibleMetadataSelector = (slug: string) =>
-  useOwnedUI(state => state.metadata.collectiblesMetadata[slug]);
-
-export const useCollectiblesMetadataLoadingSelector = () =>
-  useSelector(({ collectiblesMetadata }) => collectiblesMetadata.isLoading);
+export const useCollectiblesMetadataLoadingSelector = () => useMetadataFetching('collectibles');

@@ -1,33 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { loadCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
 import {
-  useCollectiblesMetadataLoadingSelector,
   useAllCollectiblesMetadataSelector,
   useCollectibleMetadataSelector
 } from 'app/store/collectibles-metadata/selectors';
-import { loadRwasMetadataAction } from 'app/store/rwas-metadata/actions';
-import {
-  useAllRwasMetadataSelector,
-  useRwaMetadataSelector,
-  useRwasMetadataLoadingSelector
-} from 'app/store/rwas-metadata/selectors';
-import { loadTokensMetadataAction } from 'app/store/tokens-metadata/actions';
-import {
-  useTokenMetadataSelector,
-  useTokensMetadataLoadingSelector,
-  useAllTokensMetadataSelector
-} from 'app/store/tokens-metadata/selectors';
-import { METADATA_API_LOAD_CHUNK_SIZE } from 'lib/apis/temple';
+import { useAllRwasMetadataSelector, useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
+import { useTokenMetadataSelector, useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
 import { isMavSlug } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
-import { isTruthy } from 'lib/utils';
 
 import { isCollectible, isRwa } from './classification';
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
+import { useMetadataQuery } from './use-metadata-query';
 import { mapToRecord } from './utils';
 export { isCollectible, isRwa } from './classification';
 
@@ -118,75 +103,29 @@ export const useGetAssetMetadata = () => {
   );
 };
 
-/**
- * @param slugsToCheck // Memoize
- */
-export const useTokensMetadataPresenceCheck = (slugsToCheck?: string[]) => {
-  const metadataLoading = useTokensMetadataLoadingSelector();
+/** Missing values register with the shared Query batch; owner snapshots remain the only metadata source. */
+export const useTokensMetadataPresenceCheck = (slugs: string[] = []) => {
   const getMetadata = useGetTokenMetadata();
-
-  useAssetsMetadataPresenceCheck('tokens', metadataLoading, getMetadata, slugsToCheck);
+  useMetadataQuery(
+    'tokens',
+    slugs.filter(slug => !isMavSlug(slug) && !getMetadata(slug))
+  );
 };
 
-/**
- * @param slugsToCheck // Memoize
- */
-export const useCollectiblesMetadataPresenceCheck = (slugsToCheck?: string[]) => {
-  const metadataLoading = useCollectiblesMetadataLoadingSelector();
+export const useCollectiblesMetadataPresenceCheck = (slugs: string[] = []) => {
   const getMetadata = useGetCollectibleMetadata();
-
-  useAssetsMetadataPresenceCheck('collectibles', metadataLoading, getMetadata, slugsToCheck);
+  useMetadataQuery(
+    'collectibles',
+    slugs.filter(slug => !isMavSlug(slug) && !getMetadata(slug))
+  );
 };
 
-/**
- * @param slugsToCheck // Memoize
- */
-export const useRwasMetadataPresenceCheck = (slugsToCheck?: string[]) => {
-  const metadataLoading = useRwasMetadataLoadingSelector();
+export const useRwasMetadataPresenceCheck = (slugs: string[] = []) => {
   const getMetadata = useGetRwaMetadata();
-
-  useAssetsMetadataPresenceCheck('rwas', metadataLoading, getMetadata, slugsToCheck);
-};
-
-const useAssetsMetadataPresenceCheck = (
-  ofAssets: 'collectibles' | 'rwas' | 'tokens',
-  metadataLoading: boolean,
-  getMetadata: TokenMetadataGetter,
-  slugsToCheck?: string[]
-) => {
-  const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
-
-  const checkedRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    if (metadataLoading || !slugsToCheck?.length) return;
-
-    const missingChunk = slugsToCheck
-      .filter(
-        slug =>
-          !isMavSlug(slug) &&
-          !isTruthy(getMetadata(slug)) &&
-          // In case fetched metadata is `null` & won't save
-          !checkedRef.current.includes(slug)
-      )
-      .slice(0, METADATA_API_LOAD_CHUNK_SIZE);
-
-    if (missingChunk.length > 0) {
-      checkedRef.current = [...checkedRef.current, ...missingChunk];
-
-      dispatch(
-        (ofAssets === 'collectibles'
-          ? loadCollectiblesMetadataAction
-          : ofAssets === 'rwas'
-          ? loadRwasMetadataAction
-          : loadTokensMetadataAction)({
-          rpcUrl,
-          slugs: missingChunk
-        })
-      );
-    }
-  }, [ofAssets, slugsToCheck, getMetadata, metadataLoading, dispatch, rpcUrl]);
+  useMetadataQuery(
+    'rwas',
+    slugs.filter(slug => !isMavSlug(slug) && !getMetadata(slug))
+  );
 };
 
 export function getAssetSymbol(metadata: AssetMetadataBase | nullish, short = false) {

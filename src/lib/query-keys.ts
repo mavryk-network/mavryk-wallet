@@ -71,3 +71,21 @@ export const assetsKeys = {
     ['account-assets', category, account, chainId, networkId] as const,
   security: (category: 'scamlist' | 'whitelist') => ['asset-security', 'madfish-mainnet', category] as const
 };
+
+/** Receipt-only metadata lifecycle; RPC selects a source independently of chain ID. */
+export const metadataKeys = {
+  scope: (category: string, scope: { account: string; chainId: string; networkId: string; rpcUrl: string }) =>
+    ['metadata', category, scope.account, scope.chainId, scope.networkId, scope.rpcUrl] as const,
+  batch: (
+    category: string,
+    scope: { account: string; chainId: string; networkId: string; rpcUrl: string },
+    mode: string,
+    slugs: string[]
+  ) => [...metadataKeys.scope(category, scope), mode, 'batch', slugs] as const,
+  receipt: (
+    category: string,
+    scope: { account: string; chainId: string; networkId: string; rpcUrl: string },
+    mode: string,
+    slug: string
+  ) => [...metadataKeys.scope(category, scope), mode, 'receipt', slug] as const
+};

@@ -1,11 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import { useDispatch } from 'react-redux';
-
-import { putCollectiblesMetadataAction } from 'app/store/collectibles-metadata/actions';
 import { useAllCollectiblesMetadataSelector } from 'app/store/collectibles-metadata/selectors';
-import { loadTokensMetadata } from 'lib/metadata/fetch';
-import { useNetwork } from 'lib/temple/front';
+import { useRequestMetadata } from 'lib/metadata/use-metadata-query';
 import { useDidMount, useDidUpdate } from 'lib/ui/hooks';
 import { setNavigateSearchParams } from 'lib/woozie';
 
@@ -14,8 +10,7 @@ export const ITEMS_PER_PAGE = 30;
 export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initialSize: number) => {
   const allMeta = useAllCollectiblesMetadataSelector();
 
-  const { rpcBaseURL: rpcUrl } = useNetwork();
-  const dispatch = useDispatch();
+  const requestMetadata = useRequestMetadata('collectibles');
 
   const [slugs, setSlugs] = useState<string[]>(() => allSlugsSorted.slice(0, initialSize));
 
@@ -34,14 +29,13 @@ export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initial
         .filter(slug => !allMeta.get(slug));
 
       if (slugsWithoutMeta.length)
-        await loadTokensMetadata(rpcUrl, slugsWithoutMeta)
+        await requestMetadata(slugsWithoutMeta)
           .then(
-            records => {
-              dispatch(putCollectiblesMetadataAction({ records }));
+            () => {
               setSlugs(nextSlugs);
             },
-            error => {
-              console.error(error);
+            () => {
+              console.error('Unable to load page metadata');
             }
           )
           .finally(() => setIsLoading(false));
@@ -52,7 +46,7 @@ export const useCollectiblesPaginationLogic = (allSlugsSorted: string[], initial
 
       setNavigateSearchParams({ amount: String(size) });
     },
-    [allSlugsSorted, slugs.length, allMeta, rpcUrl, dispatch]
+    [allSlugsSorted, slugs.length, allMeta, requestMetadata]
   );
 
   useDidMount(() => {

@@ -152,3 +152,7 @@ No edits under `src/mavryk/api/**`, IndexedDB migration/repository/registration 
 ## Task 18 metadata extension
 
 [Task 18](task-18-metadata-ownership-handoff.md) adds optional scoped records, owner-issued revisions and a durable acknowledgement receipt to the same version-1 metadata envelope. Existing unscoped maps, predefined hydration and Tasks 11/13 completion/recovery remain intact. New foreground requests and explicit saves write scoped records; selectors overlay those records on retained unscoped fallbacks. Legacy metadata actions remain compatibility commands, not active request drivers. No migration replay, new completion marker, foreground adapter or source deletion is introduced.
+
+## Task 19 balance ownership handoff
+
+The same background owner now also adopts and persists balances. Asset/status/adult-flag/promotion migrations, precedence and completion flags are unchanged. New coupled asset responses include normalized balances; success requires all four owner adapters to flush and pass read-back. Partial durability still requires retry and is not a cross-store transaction. See [Task 19](task-19-balances-ownership-handoff.md) for the current contract and verification.

@@ -151,3 +151,7 @@ Updated AGENTS dependency/ownership/testing facts, resolved Task 10’s deferred
 ## Task 18 shared-provider extension
 
 [Task 18](task-18-metadata-ownership-handoff.md) reuses this Query client for receipt-only metadata requests and provisional AddAsset previews. Metadata-owned UI fields remain owner-read; fetched collectible/RWA detail records, leaf/batch ownership, keys and fallback precedence remain here. The shared storage selection guard additionally observes custom-network snapshot changes, rejecting requests spanning a custom-RPC edit. No new provider or persistence adapter is added.
+
+## Task 19 balance ownership handoff
+
+Task 19 reuses the sole foreground Query client for balance request receipts. Details batching/leaf reads, gates, keys and lifetimes are unchanged. Durable balance UI reads the background owner; no Query persistence or additional provider was introduced. See [Task 19](task-19-balances-ownership-handoff.md) for the current contract and verification.

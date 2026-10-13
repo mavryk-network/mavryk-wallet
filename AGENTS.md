@@ -7,8 +7,8 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
-- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17/18 asset/security/metadata request orchestration; TypeScript 4.5.5 remains pinned)
-- Zustand `5.0.11` (Tasks 11/13 activate preferences, assets, adult flags and metadata through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
+- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17–19 asset/security/metadata/balance request orchestration; TypeScript 4.5.5 remains pinned)
+- Zustand `5.0.11` (Tasks 11/13/19 activate preferences, assets, adult flags, metadata and balances through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
 ## Architecture and Boundaries
@@ -22,7 +22,8 @@ Current pinned stack in manifest includes:
 - Task 16 Query owns exchange rates and card-provider catalogs/limits/output estimates. Notifications, swap lists, advertising and partner decisions use dormant Query readers; their endpoints remain disabled. Retained Redux fetched fields are read-only upgrade/compatibility sources. Notification read/viewed choices remain Redux-persisted; promotion/news preferences remain background-owner commands. See `docs/task-16-query-only-server-domains-handoff.md`.
 - Task 17 keeps asset records/statuses and scamlist/whitelist in the existing background-owned `zustand-assets`. Query owns request lifecycle only; named sync functions await owner flush/read-back. Security adoption has its own `isSecurityAdopted` marker; null means unknown, and validated empty responses differ from failures. See `docs/task-17-assets-security-ownership-handoff.md`.
 - Task 18 metadata stays in the existing background owner. Query batches return synchronization receipts; scoped account/chain/API-network/RPC records override retained unscoped fallback records. Owner-issued revisions protect newer writes; versioned media refresh completion follows durable acknowledgement. See `docs/task-18-metadata-ownership-handoff.md`.
-- Redux retains balances, unrelated loading/errors and unrelated domains. Security fields in `persist:temple-root-task11` and the six nested legacy keys are read-only compatibility sources, never refreshed from Query. Task 14 retains verified per-record IndexedDB cleanup and separate `assets-migrations@3.0.0` history; see `docs/task-14-indexeddb-assets-handoff.md`.
+- Task 19 balances live in background-owned `zustand-balances`; foreground Query holds request receipts/loading/errors only. Exact account/chain/API-network/RPC records override retained legacy account/chain fallback per slug. Asset payloads publish balances in the same acknowledged owner operation; see `docs/task-19-balances-ownership-handoff.md`.
+- Redux retains unrelated loading/errors and unrelated domains. Retained balance fields are read-only upgrade sources. Security fields in `persist:temple-root-task11` and the six nested legacy keys are read-only compatibility sources, never refreshed from Query. Task 14 retains verified per-record IndexedDB cleanup and separate `assets-migrations@3.0.0` history; see `docs/task-14-indexeddb-assets-handoff.md`.
 - For unfamiliar paths, consult only the relevant section of [the local directory reference](docs/agent-directory-map.local.md). Do not load it by default. If absent in another checkout, inspect the relevant directories instead; it is optional navigation context.
 
 ## Context and Verification Efficiency
@@ -95,7 +96,7 @@ Current pinned stack in manifest includes:
 - `yarn build`
 - `yarn build:firefox`
 
-Tasks 15–18 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
+Tasks 15–19 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
 
 IndexedDB migration tests use pinned development-only `fake-indexeddb` with real Dexie transactions and destination adapters. LocalStorage migration history requires cross-context Web Locks; never replace it with an unlocked writer.
 

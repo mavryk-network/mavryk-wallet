@@ -111,3 +111,7 @@ Updated this handoff, Task 13's resolved IndexedDB limitation, Task 12's concret
 ## Task 18 metadata extension
 
 [Task 18](task-18-metadata-ownership-handoff.md) scopes new foreground metadata by account, chain, configured API network and RPC. Task 14 continues using its existing restored global metadata and bounded source-chain transport for classification. It does not guess the missing API-network/RPC provenance of historical IndexedDB rows to select a new scoped record, and it does not run through a foreground Query client. Existing classification fallback, destination precedence, flush/read-back, conditional per-record cleanup and `assets-migrations@3.0.0` history are unchanged.
+
+## Task 19 balance ownership handoff
+
+The outer owner acknowledgement now also verifies its balance destination. IndexedDB source classification, destination precedence, bounded requests, per-record comparison/deletion and Web Lock history are unchanged. Historical IndexedDB `latestBalance` is still not adopted: the supported balance sources are the separately inspected Redux roots. Task 14 is not replayed or renamed. See [Task 19](task-19-balances-ownership-handoff.md) for the current contract and verification.

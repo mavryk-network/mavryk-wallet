@@ -35,8 +35,8 @@ it('foreground waits for the background before reading fallback and never owns a
   expect(() => client.getOwnedUISnapshot()).toThrow('readiness');
   expect(read).not.toHaveBeenCalled();
   await client.initializeOwnedUI();
-  expect(read).toHaveBeenCalledTimes(8);
-  expect(sendMessage).toHaveBeenCalledTimes(9);
+  expect(read).toHaveBeenCalledTimes(9);
+  expect(sendMessage).toHaveBeenCalledTimes(10);
   expect(client.getOwnedUISnapshot().ui.userId).toBe('durable-id');
   expect(memory.records.analytics_user_id).toBe('durable-id');
   await client.updateOwnedUI({ kind: 'preferences', values: { isNewsEnabled: true } });

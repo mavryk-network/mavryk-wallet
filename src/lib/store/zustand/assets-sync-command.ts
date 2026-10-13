@@ -4,6 +4,7 @@ import { WHITELIST_METADATA_SCOPE_KEY } from 'lib/metadata/metadata-scope';
 
 import { applyAssetsCommand } from './assets-command';
 import { ASSET_TO_PUT_SCHEMA } from './assets-state.schema';
+import { BALANCE_RECORD_SCHEMA } from './balances-state.schema';
 import { applyMetadataRecords } from './metadata-command';
 import { TOKEN_METADATA_SCHEMA, METADATA_SCOPE_KEY_SCHEMA } from './metadata-state.schema';
 import { SCAMLIST_SCHEMA, WHITELIST_SCHEMA } from './security-state.schema';
@@ -19,6 +20,7 @@ export const ASSETS_SYNC_COMMAND_SCHEMA = z.union([
       category: z.enum(['tokens', 'collectibles', 'rwas']),
       value: ASSET_TO_PUT_SCHEMA.pick({ account: true, chainId: true }).extend({ slugs: z.array(SAFE_KEY_SCHEMA) }),
       scopeKey: METADATA_SCOPE_KEY_SCHEMA.optional(),
+      balances: BALANCE_RECORD_SCHEMA.optional(),
       metadata: metadataSchema
     })
     .strict(),

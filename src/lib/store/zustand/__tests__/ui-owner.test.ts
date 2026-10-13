@@ -488,3 +488,72 @@ it('reuses scoped coupled asset metadata policy without letting older asset resp
     assets: { tokens: { 'alice@chain': { KT1test_0: { status: 'idle' } } } }
   });
 });
+
+it('orders concurrent foreground balance snapshots and deltas, rejects switched/restarted reservations', async () => {
+  const s = setup();
+  const scope = { account: 'alice', chainId: 'chain', networkId: 'mainnet', rpcUrl: 'rpc' };
+  const key = JSON.stringify(Object.values(scope));
+  const start = (requestId: string) => s.request({ command: { kind: 'balances-start', scope, requestId } });
+  const publish = (requestId: string, records: Record<string, string>) =>
+    s.request({ command: { kind: 'balances-sync', scope, requestId, records } });
+  await start('older');
+  await start('newer');
+  await publish('newer', { mav: '3' });
+  await publish('older', { mav: '7', token: '2' });
+  expect(JSON.parse(s.records['zustand-balances'] as string).state.scoped[key].data).toEqual({ mav: '3', token: '2' });
+  await start('snapshot');
+  await start('delta');
+  await s.request({
+    command: {
+      kind: 'balances-delta',
+      scope,
+      requestId: 'delta',
+      records: { token: '0' },
+      level: 20,
+      category: 'tokens',
+      isReorg: false
+    }
+  });
+  await publish('snapshot', { token: '10' });
+  expect(JSON.parse(s.records['zustand-balances'] as string).state.scoped[key].data.token).toBe('0');
+  await start('switched');
+  s.changeSelection();
+  await publish('switched', { mav: '100' });
+  expect(JSON.parse(s.records['zustand-balances'] as string).state.scoped[key].data.mav).toBe('3');
+  await start('restart');
+  const restart = setup(s.records);
+  await restart.request({ command: { kind: 'balances-sync', scope, requestId: 'restart', records: { mav: '100' } } });
+  expect(JSON.parse(restart.records['zustand-balances'] as string).state.scoped[key].data.mav).toBe('3');
+});
+
+it('acknowledges coupled assets/metadata/balances only after every destination is durable and recovers partial writes', async () => {
+  const s = setup();
+  const scopeKey = JSON.stringify(['alice', 'chain', 'mainnet', 'rpc']);
+  const request = { requestKey: 'tokens:alice@chain', requestId: 'coupled' };
+  await s.request({ command: { kind: 'assets-sync-start', ...request } });
+  const originalSet = s.storage.set;
+  (s.storage.set as jest.Mock).mockImplementation(async items => {
+    if (items['zustand-balances']) throw new Error('balance write');
+    Object.assign(s.records, items);
+  });
+  const command = {
+    kind: 'assets-sync',
+    ...request,
+    category: 'tokens',
+    value: { account: 'alice', chainId: 'chain', slugs: ['token'] },
+    scopeKey,
+    metadata: { token: { name: 'Token', symbol: 'TOK', decimals: 0, address: 'token', id: '0' } },
+    balances: { token: '12' }
+  };
+  expect((await s.request({ command })).error).toBeDefined();
+  expect(s.owner.getReadyAnalyticsIdentity()).toBeNull();
+  (originalSet as jest.Mock).mockImplementation(async items => {
+    Object.assign(s.records, items);
+  });
+  expect((await s.request({ command })).error).toBeUndefined();
+  expect(JSON.parse(s.records['zustand-balances'] as string).state.scoped[scopeKey].data.token).toBe('12');
+  expect(JSON.parse(s.records['zustand-metadata'] as string).state.scoped[scopeKey].tokensMetadata.token.name).toBe(
+    'Token'
+  );
+  expect(JSON.parse(s.records['zustand-assets'] as string).state.tokens['alice@chain'].token).toBeDefined();
+});

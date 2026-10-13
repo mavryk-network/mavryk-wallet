@@ -21,6 +21,7 @@ import {
   IncorrectTokenIdError
 } from 'lib/assets/standards';
 import { getBalanceSWRKey } from 'lib/balances';
+import { refreshBalances } from 'lib/balances/balance-query';
 import { T, t } from 'lib/i18n';
 import { isCollectible, TokenMetadata } from 'lib/metadata';
 import { TokenMetadataNotFoundError } from 'lib/metadata/on-chain';
@@ -243,6 +244,7 @@ const Form = memo(() => {
           records: [asset]
         });
 
+        await refreshBalances(queryClient, metadataScope);
         swrCache.delete(unstable_serialize(getBalanceSWRKey(tezos, tokenSlug, accountPkh)));
 
         formAnalytics.trackSubmitSuccess();
@@ -271,6 +273,7 @@ const Form = memo(() => {
     [
       tezos,
       swrCache,
+      queryClient,
       formState.isSubmitting,
       chainId,
       accountPkh,

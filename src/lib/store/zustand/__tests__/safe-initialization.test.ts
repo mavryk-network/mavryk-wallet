@@ -28,9 +28,15 @@ it('importing the boundary only reads destination keys and never writes identity
   jest.isolateModules(() => {
     destinations = require('../index');
   });
-  await awaitStoresHydrated(destinations.uiStore, destinations.metadataStore, destinations.assetsStore);
+  await awaitStoresHydrated(
+    destinations.uiStore,
+    destinations.metadataStore,
+    destinations.assetsStore,
+    destinations.balancesStore
+  );
   expect((storage.get as jest.Mock).mock.calls.map(call => call[0]).sort()).toEqual([
     'zustand-assets',
+    'zustand-balances',
     'zustand-metadata',
     'zustand-ui'
   ]);
@@ -71,6 +77,11 @@ it('activates scoped read-only consumers without foreground destination adapters
   expect(consumers.sort()).toEqual(
     [
       'app/hooks/use-metadata-refresh.ts',
+      'app/hooks/use-balances-loading.ts',
+      'app/store/balances/selectors.ts',
+      'lib/balances/balance-query.ts',
+      'lib/balances/sync-balances.ts',
+      'lib/balances/use-balances-query.ts',
       'app/pages/AddAsset/AddAsset.tsx',
       'app/store/index.ts',
       'app/store/assets/security-persistence.ts',
@@ -114,6 +125,6 @@ it('activates scoped read-only consumers without foreground destination adapters
       // The injected migration contract names the owner type, but never imports or constructs an adapter.
       source = source.replace(/import type \{ assetsStore \} from '[^']+';/, '').replace(/typeof assetsStore/g, '');
     }
-    expect(source).not.toMatch(/assetsStore|createAssetsStore/);
+    expect(source).not.toMatch(/assetsStore|createAssetsStore|balancesStore|createBalancesStore/);
   }
 });

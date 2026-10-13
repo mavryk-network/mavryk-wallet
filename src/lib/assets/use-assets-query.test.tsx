@@ -108,11 +108,8 @@ it('deduplicates transport, uses fetching without a feedback loop, preserves eff
   await settle();
   expect(isFetching).toBe(false);
   expect(client.getQueryData(key())).toBe(true);
-  expect((dispatch as jest.Mock).mock.calls[0][0].payload).toEqual({
-    publicKeyHash: 'alice',
-    chainId: 'chain',
-    balances: response.balances
-  });
+  expect(command).toMatchObject({ balances: response.balances });
+  expect(dispatch).not.toHaveBeenCalled();
   (requestOwnedUISnapshot as jest.Mock).mockRejectedValueOnce(new Error('publication failed'));
   const effects = (dispatch as jest.Mock).mock.calls.length;
   await act(async () => {

@@ -1,10 +1,8 @@
 import { CancelledError } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { dispatch } from 'app/store';
 import type { AssetsType } from 'app/store/assets/selectors';
 import { loadAccountCollectibles, loadAccountRwas, loadAccountTokens } from 'app/store/assets/utils';
-import { putTokensBalancesAction } from 'app/store/balances/actions';
 import { fixBalances } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
 import { DetailScope } from 'lib/asset-details/details.types';
@@ -25,7 +23,7 @@ const loadedSchema = z.object({
 /** One publication path for asset records and their existing coupled metadata/balance effects. */
 export async function syncAccountAssets(
   request: Awaited<ReturnType<typeof beginAssetSync>>,
-  scope: DetailScope & { rpcUrl?: string },
+  scope: DetailScope & { rpcUrl: string },
   category: AssetsType,
   response: Awaited<ReturnType<typeof loadAccountTokens>>,
   assertScope: () => Promise<void>
@@ -43,16 +41,15 @@ export async function syncAccountAssets(
     category,
     value: { account: scope.account, chainId: scope.chainId, slugs },
     metadata,
-    scopeKey: scope.rpcUrl ? getMetadataScopeKey({ ...scope, rpcUrl: scope.rpcUrl }) : undefined
+    balances: fixBalances(balances),
+    scopeKey: getMetadataScopeKey(scope)
   });
   await assertScope();
-  // Task 19 retains Redux balance ownership; no second fetch or metadata fire-and-forget dispatch.
-  dispatch(putTokensBalancesAction({ publicKeyHash: scope.account, chainId, balances: fixBalances(balances) }));
 }
 
 /** Capture transport inputs and latest classification metadata; Query stores a receipt, never UI records. */
 export async function loadAccountAssets(
-  scope: DetailScope & { rpcUrl?: string },
+  scope: DetailScope & { rpcUrl: string },
   category: AssetsType,
   signal?: AbortSignal
 ) {

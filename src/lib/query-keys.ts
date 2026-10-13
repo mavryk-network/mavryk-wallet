@@ -89,3 +89,11 @@ export const metadataKeys = {
     slug: string
   ) => [...metadataKeys.scope(category, scope), mode, 'receipt', slug] as const
 };
+
+/** Balance request receipts are isolated by every source input; durable values stay in the owner. */
+export const balancesKeys = {
+  scope: (scope: { account: string; chainId: string; networkId: string; rpcUrl: string }) =>
+    ['balances', scope.account, scope.chainId, scope.networkId, scope.rpcUrl] as const,
+  request: (scope: { account: string; chainId: string; networkId: string; rpcUrl: string }, category: string) =>
+    [...balancesKeys.scope(scope), category] as const
+};

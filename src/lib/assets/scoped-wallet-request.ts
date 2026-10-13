@@ -2,7 +2,7 @@ import { CancelledError } from '@tanstack/react-query';
 import browser from 'webextension-polyfill';
 
 import { DetailScope } from 'lib/asset-details/details.types';
-import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
+import { ACCOUNT_PKH_STORAGE_KEY, CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY } from 'lib/constants';
 import { NETWORK_ID_STORAGE_KEY } from 'lib/temple/network-storage';
 import {
   getSelectedNetworkIdFromStorage,
@@ -12,6 +12,7 @@ import {
 
 export const ASSET_SCOPE_STORAGE_KEYS = [
   ACCOUNT_PKH_STORAGE_KEY,
+  CUSTOM_NETWORKS_SNAPSHOT_STORAGE_KEY,
   NETWORK_ID_STORAGE_KEY,
   MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY
 ];

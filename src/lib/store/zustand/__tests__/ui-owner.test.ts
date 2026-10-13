@@ -398,3 +398,93 @@ it('reconciles fetched lists with durable choices, rejects superseded/user-edite
     JSON.parse(restart.records['zustand-assets'] as string).state.collectibles['alice@chain'].obsolete
   ).toBeUndefined();
 });
+
+it('orders metadata across foregrounds, protects explicit saves and rejects selection/restart-late responses', async () => {
+  const s = setup();
+  await s.request();
+  const scopeKey = JSON.stringify(['alice', 'chain', 'network', 'rpc']);
+  const records = { KT1test_0: { address: 'KT1test', id: '0', name: 'Fetched', symbol: 'F', decimals: 0 } };
+  const start = (requestId: string) => s.request({ command: { kind: 'metadata-sync-start', scopeKey, requestId } });
+  const publish = (requestId: string) =>
+    s.request({ command: { kind: 'metadata-sync', scopeKey, requestId, category: 'tokens', mode: 'put', records } });
+  await start('old');
+  await s.request({
+    command: {
+      kind: 'metadata-save',
+      scopeKey,
+      category: 'tokens',
+      records: { KT1test_0: { ...records.KT1test_0, name: 'User' } }
+    }
+  });
+  expect((await publish('old')).snapshot).toMatchObject({
+    metadata: { scoped: { [scopeKey]: { tokensMetadata: { KT1test_0: { name: 'User' } } } } }
+  });
+  await start('late');
+  s.changeSelection();
+  const late = await publish('late');
+  expect(late.snapshot).not.toMatchObject({ metadata: { lastReceipt: 'late' } });
+  await start('restart');
+  const restarted = setup(s.records);
+  const afterRestart = await restarted.request({
+    command: { kind: 'metadata-sync', scopeKey, requestId: 'restart', category: 'tokens', mode: 'put', records }
+  });
+  expect(afterRestart.snapshot).not.toMatchObject({ metadata: { lastReceipt: 'restart' } });
+  expect(afterRestart.snapshot).toMatchObject({
+    metadata: { scoped: { [scopeKey]: { tokensMetadata: { KT1test_0: { name: 'User' } } } } }
+  });
+});
+
+it('acknowledges metadata only after actual storage succeeds, and preserves it after recovery', async () => {
+  const s = setup();
+  await s.request();
+  await s.request({ command: { kind: 'metadata-sync-start', scopeKey: 'scope', requestId: 'request' } });
+  const records = { KT1test_0: { address: 'KT1test', id: '0', name: 'Fetched', symbol: 'F', decimals: 0 } };
+  (s.storage.set as jest.Mock).mockRejectedValueOnce(new Error('write failed'));
+  expect(
+    await s.request({
+      command: {
+        kind: 'metadata-sync',
+        scopeKey: 'scope',
+        requestId: 'request',
+        category: 'tokens',
+        mode: 'put',
+        records
+      }
+    })
+  ).toHaveProperty('error');
+  const recovered = await s.request();
+  expect(recovered.snapshot).toMatchObject({ metadata: { scoped: { scope: { tokensMetadata: records } } } });
+  expect((await setup(s.records).request()).snapshot).toMatchObject({
+    metadata: { scoped: { scope: { tokensMetadata: records } } }
+  });
+});
+
+it('reuses scoped coupled asset metadata policy without letting older asset responses overwrite user saves', async () => {
+  const s = setup();
+  await s.request();
+  const records = { KT1test_0: { address: 'KT1test', id: '0', name: 'Fetched', symbol: 'F', decimals: 0 } };
+  await s.request({ command: { kind: 'assets-sync-start', requestKey: 'assets', requestId: 'old' } });
+  await s.request({
+    command: {
+      kind: 'metadata-save',
+      scopeKey: 'scope',
+      category: 'tokens',
+      records: { KT1test_0: { ...records.KT1test_0, name: 'User' } }
+    }
+  });
+  const result = await s.request({
+    command: {
+      kind: 'assets-sync',
+      requestKey: 'assets',
+      requestId: 'old',
+      scopeKey: 'scope',
+      category: 'tokens',
+      value: { account: 'alice', chainId: 'chain', slugs: ['KT1test_0'] },
+      metadata: records
+    }
+  });
+  expect(result.snapshot).toMatchObject({
+    metadata: { scoped: { scope: { tokensMetadata: { KT1test_0: { name: 'User' } } } } },
+    assets: { tokens: { 'alice@chain': { KT1test_0: { status: 'idle' } } } }
+  });
+});

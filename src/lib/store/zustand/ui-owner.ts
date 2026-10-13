@@ -8,6 +8,7 @@ import { applyAssetsSyncCommand } from './assets-sync-command';
 import { assetsStore } from './assets.store';
 import { createLegacyAssetsMigration } from './legacy-assets-migration';
 import { createLegacyUIMigration } from './legacy-ui-migration';
+import { applyMetadataRecords, reserveMetadataRevision } from './metadata-command';
 import { metadataStore } from './metadata.store';
 import { OwnerFallbackKey } from './owner-fallback';
 import { BROWSER_STORAGE } from './persist-storage';
@@ -54,7 +55,8 @@ let isStarted = false;
 let hasWriteFailure = false;
 let pendingOperations = 0;
 let selectionRevision = 0;
-const assetRequests = new Map<string, { id: string; selectionRevision: number }>();
+const assetRequests = new Map<string, { id: string; selectionRevision: number; metadataRevision: number }>();
+const metadataRequests = new Map<string, { scopeKey: string; revision: number; selectionRevision: number }>();
 
 /** Background-only authority; every command and read is serialized behind successful migration and durable writes. */
 async function processCommand(command?: UICommand) {
@@ -63,7 +65,38 @@ async function processCommand(command?: UICommand) {
   await securityMigration.initialize();
   // Explicit retries drain retained failed snapshots before accepting more commands.
   await Promise.all([uiStore.persistence.flush(), metadataStore.persistence.flush(), assetsStore.persistence.flush()]);
-  if (
+  if (command?.kind === 'metadata-sync-start') {
+    let revision = 0;
+    metadataStore.persistence
+      .prepare(draft => {
+        revision = reserveMetadataRevision(draft);
+      })
+      .commit();
+    metadataRequests.set(command.requestId, { scopeKey: command.scopeKey, revision, selectionRevision });
+  } else if (command?.kind === 'metadata-sync-cancel') {
+    metadataRequests.delete(command.requestId);
+  } else if (command?.kind === 'metadata-sync' || command?.kind === 'metadata-save') {
+    const request = command.kind === 'metadata-sync' ? metadataRequests.get(command.requestId) : undefined;
+    if (
+      command.kind === 'metadata-save' ||
+      (request && request.scopeKey === command.scopeKey && request.selectionRevision === selectionRevision)
+    ) {
+      metadataStore.persistence
+        .prepare(draft => {
+          const isComplete = applyMetadataRecords(
+            draft,
+            command.category,
+            command.records,
+            command.kind === 'metadata-save' ? 'put' : command.mode,
+            command.scopeKey,
+            request?.revision
+          );
+          if (command.kind === 'metadata-sync' && isComplete) draft.lastReceipt = command.requestId;
+        })
+        .commit();
+    }
+    if (command.kind === 'metadata-sync') metadataRequests.delete(command.requestId);
+  } else if (
     command &&
     (command.kind === 'assets-sync-start' ||
       command.kind === 'assets-sync' ||
@@ -71,7 +104,13 @@ async function processCommand(command?: UICommand) {
       command.kind === 'whitelist-sync')
   ) {
     if (command.kind === 'assets-sync-start') {
-      assetRequests.set(command.requestKey, { id: command.requestId, selectionRevision });
+      let metadataRevision = 0;
+      metadataStore.persistence
+        .prepare(draft => {
+          metadataRevision = reserveMetadataRevision(draft);
+        })
+        .commit();
+      assetRequests.set(command.requestKey, { id: command.requestId, selectionRevision, metadataRevision });
     }
     const request = assetRequests.get(command.requestKey);
     if (
@@ -85,7 +124,12 @@ async function processCommand(command?: UICommand) {
             delete draft.syncRequests[command.requestKey];
         })
         .commit();
-    } else applyAssetsSyncCommand(command, { ui: uiStore, assets: assetsStore, metadata: metadataStore });
+    } else
+      applyAssetsSyncCommand(
+        command,
+        { ui: uiStore, assets: assetsStore, metadata: metadataStore },
+        request?.metadataRevision
+      );
   } else if (command?.kind === 'preferences') {
     uiStore.persistence
       .prepare(draft => {
@@ -95,15 +139,7 @@ async function processCommand(command?: UICommand) {
   } else if (command?.kind === 'metadata') {
     metadataStore.persistence
       .prepare(draft => {
-        for (const [slug, metadata] of Object.entries(command.records)) {
-          const current = draft.tokensMetadata[slug];
-          if (command.mode === 'whitelist' && current) continue;
-          if (command.mode === 'refresh') {
-            if (!current) continue;
-            current.artifactUri = metadata.artifactUri;
-            current.displayUri = metadata.displayUri;
-          } else draft.tokensMetadata[slug] = metadata;
-        }
+        applyMetadataRecords(draft, 'tokens', command.records, command.mode);
       })
       .commit();
   } else if (command?.kind === 'indexeddb-assets-migration') {

@@ -14,6 +14,12 @@ import { getSelectedNetworkIdFromStorage, getWalletAddressFromStorage } from 'ma
 
 import { useAssetsFetching, useAssetsQuery } from './use-assets-query';
 
+jest.mock('lib/metadata/use-metadata-scope', () => ({
+  useMetadataScope: () => ({
+    ...require('lib/asset-details/use-detail-scope').useDetailScope(),
+    rpcUrl: 'https://rpc.test'
+  })
+}));
 jest.mock('app/store', () => ({ dispatch: jest.fn() }));
 jest.mock('app/store/assets/utils', () => ({
   loadAccountTokens: jest.fn(),

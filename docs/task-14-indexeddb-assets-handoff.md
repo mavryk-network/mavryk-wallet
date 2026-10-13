@@ -107,3 +107,7 @@ Updated this handoff, Task 13's resolved IndexedDB limitation, Task 12's concret
 ## Task 17 ownership extension
 
 [Task 17](task-17-assets-security-ownership-handoff.md) moves security caches from Redux into the same asset owner and replaces asset-fetch epics with Query orchestration. Task 14's migration command, destination precedence, per-record cleanup, history and Web Lock protocol are unchanged. The added nullable security fields, adoption marker and request-ordering receipts are preserved by full-state destination staging/read-back. Metadata and balance ownership ports remain subsequent work.
+
+## Task 18 metadata extension
+
+[Task 18](task-18-metadata-ownership-handoff.md) scopes new foreground metadata by account, chain, configured API network and RPC. Task 14 continues using its existing restored global metadata and bounded source-chain transport for classification. It does not guess the missing API-network/RPC provenance of historical IndexedDB rows to select a new scoped record, and it does not run through a foreground Query client. Existing classification fallback, destination precedence, flush/read-back, conditional per-record cleanup and `assets-migrations@3.0.0` history are unchanged.

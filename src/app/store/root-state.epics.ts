@@ -4,18 +4,12 @@ import { catchError } from 'rxjs/operators';
 
 import { abTestingEpics } from './ab-testing/epics';
 import { balancesEpics } from './balances/epics';
-import { collectiblesMetadataEpics } from './collectibles-metadata/epics';
 import type { RootState } from './root-state.type';
-import { rwasMetadataEpics } from './rwas-metadata/epics';
 // import { swapEpics } from './swap/epics';
-import { tokensMetadataEpics } from './tokens-metadata/epics';
 
 const allEpics = combineEpics(
   // swapEpics,
   balancesEpics,
-  tokensMetadataEpics,
-  rwasMetadataEpics,
-  collectiblesMetadataEpics,
   abTestingEpics
 );
 

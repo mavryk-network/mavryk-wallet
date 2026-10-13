@@ -7,7 +7,7 @@ Current pinned stack in manifest includes:
 
 - TypeScript `4.5.5`
 - React `18.2.0`
-- TanStack Query `4.41.0` (Tasks 15/16 server data and Task 17 asset/security request orchestration; TypeScript 4.5.5 remains pinned)
+- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17/18 asset/security/metadata request orchestration; TypeScript 4.5.5 remains pinned)
 - Zustand `5.0.11` (Tasks 11/13 activate preferences, assets, adult flags and metadata through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
@@ -21,6 +21,7 @@ Current pinned stack in manifest includes:
 - Query owns fetched collectible/RWA details and their loading/errors through one in-memory client per foreground StoreProvider. Batch drivers alone fetch; disabled per-slug observers read reactively. Account, chain and API network scope every detail key; see `docs/task-15-reactive-details-handoff.md`.
 - Task 16 Query owns exchange rates and card-provider catalogs/limits/output estimates. Notifications, swap lists, advertising and partner decisions use dormant Query readers; their endpoints remain disabled. Retained Redux fetched fields are read-only upgrade/compatibility sources. Notification read/viewed choices remain Redux-persisted; promotion/news preferences remain background-owner commands. See `docs/task-16-query-only-server-domains-handoff.md`.
 - Task 17 keeps asset records/statuses and scamlist/whitelist in the existing background-owned `zustand-assets`. Query owns request lifecycle only; named sync functions await owner flush/read-back. Security adoption has its own `isSecurityAdopted` marker; null means unknown, and validated empty responses differ from failures. See `docs/task-17-assets-security-ownership-handoff.md`.
+- Task 18 metadata stays in the existing background owner. Query batches return synchronization receipts; scoped account/chain/API-network/RPC records override retained unscoped fallback records. Owner-issued revisions protect newer writes; versioned media refresh completion follows durable acknowledgement. See `docs/task-18-metadata-ownership-handoff.md`.
 - Redux retains balances, unrelated loading/errors and unrelated domains. Security fields in `persist:temple-root-task11` and the six nested legacy keys are read-only compatibility sources, never refreshed from Query. Task 14 retains verified per-record IndexedDB cleanup and separate `assets-migrations@3.0.0` history; see `docs/task-14-indexeddb-assets-handoff.md`.
 - For unfamiliar paths, consult only the relevant section of [the local directory reference](docs/agent-directory-map.local.md). Do not load it by default. If absent in another checkout, inspect the relevant directories instead; it is optional navigation context.
 
@@ -94,7 +95,7 @@ Current pinned stack in manifest includes:
 - `yarn build`
 - `yarn build:firefox`
 
-Tasks 15–17 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
+Tasks 15–18 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
 
 IndexedDB migration tests use pinned development-only `fake-indexeddb` with real Dexie transactions and destination adapters. LocalStorage migration history requires cross-context Web Locks; never replace it with an unlocked writer.
 

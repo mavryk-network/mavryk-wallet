@@ -172,3 +172,7 @@ Updated AGENTS ownership/testing facts, Task 10's deferred Task 16 entry, Task 1
 ## Task 17 resolution
 
 [Task 17](task-17-assets-security-ownership-handoff.md) completes the asset/security handoff described above using this same provider/client. Query owns those requests, while their durable asset/security data stays with the background owner. All Task 16 active/dormant endpoint decisions, keys and compatibility fallbacks remain unchanged. No Task 18/19 metadata/balance ownership port or wider Phase 8 completion is claimed.
+
+## Task 18 shared-provider extension
+
+[Task 18](task-18-metadata-ownership-handoff.md) adds metadata orchestration to the existing foreground client. All active/dormant endpoint decisions and server-domain keys above remain unchanged. Metadata durable data remains owner-backed; this does not activate any dormant Task 16 endpoint or complete balance ownership.

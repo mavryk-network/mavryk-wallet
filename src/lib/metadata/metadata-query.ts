@@ -7,7 +7,7 @@ import { metadataKeys } from 'lib/query-keys';
 import { updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
 
-import { loadTokensMetadataStrict } from './fetch';
+import { FetchedMetadataRecord, loadTokensMetadataStrict } from './fetch';
 import { getMetadataScopeKey, MetadataCategory, MetadataMode, MetadataScope } from './metadata-scope';
 import { beginMetadataSync, normalizeMetadata, syncMetadata } from './sync-metadata';
 
@@ -84,27 +84,7 @@ export async function requestMetadata(
             if (!active.length) throw new CancelledError({ revert: true });
             const request = await beginMetadataSync(scope);
             try {
-              const response =
-                category === 'tokens'
-                  ? mapWalletTokensToFetchedMetadataRecord(
-                      active,
-                      await fetchWalletTokens({ walletAddress: scope.account })
-                    )
-                  : Object.assign(
-                      {},
-                      ...(await Promise.all(
-                        Array.from({ length: Math.ceil(active.length / METADATA_API_LOAD_CHUNK_SIZE) }, (_, index) =>
-                          loadTokensMetadataStrict(
-                            scope.rpcUrl,
-                            active.slice(
-                              index * METADATA_API_LOAD_CHUNK_SIZE,
-                              (index + 1) * METADATA_API_LOAD_CHUNK_SIZE
-                            ),
-                            scope.chainId
-                          )
-                        )
-                      ))
-                    );
+              const response = await fetchMetadataBatch(scope, category, active);
               const records = normalizeMetadata(category, active, response);
               await assertScope();
               const remaining = active.filter(isWanted);
@@ -140,4 +120,23 @@ export async function requestMetadata(
   void Promise.resolve().then(run);
   await Promise.all(promises);
   if (signal?.aborted) throw new CancelledError({ revert: true });
+}
+
+/** Keep transport batching independent of publication and preserve the existing API chunk limit. */
+async function fetchMetadataBatch(
+  scope: MetadataScope,
+  category: MetadataCategory,
+  slugs: string[]
+): Promise<FetchedMetadataRecord> {
+  if (category === 'tokens')
+    return mapWalletTokensToFetchedMetadataRecord(slugs, await fetchWalletTokens({ walletAddress: scope.account }));
+  const requests: Promise<FetchedMetadataRecord>[] = [];
+  for (let index = 0; index < slugs.length; index += METADATA_API_LOAD_CHUNK_SIZE)
+    requests.push(
+      loadTokensMetadataStrict(scope.rpcUrl, slugs.slice(index, index + METADATA_API_LOAD_CHUNK_SIZE), scope.chainId)
+    );
+  const chunks = await Promise.all(requests);
+  const response: FetchedMetadataRecord = {};
+  for (const chunk of chunks) Object.assign(response, chunk);
+  return response;
 }

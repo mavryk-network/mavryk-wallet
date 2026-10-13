@@ -70,13 +70,13 @@ it('activates scoped read-only consumers without foreground destination adapters
   inspect(src);
   expect(consumers.sort()).toEqual(
     [
+      'app/hooks/use-metadata-refresh.ts',
+      'app/pages/AddAsset/AddAsset.tsx',
       'app/store/index.ts',
       'app/store/assets/security-persistence.ts',
       'app/store/assets/selectors.ts',
       'app/store/collectibles/selectors.ts',
       'app/store/rwas/selectors.ts',
-      'app/store/collectibles-metadata/selectors.ts',
-      'app/store/rwas-metadata/selectors.ts',
       'app/store/partners-promotion/selectors.ts',
       'app/store/owned-assets.middleware.ts',
       'app/store/ab-testing/selectors.ts',
@@ -91,13 +91,18 @@ it('activates scoped read-only consumers without foreground destination adapters
       'app/store/owned-ui.middleware.ts',
       'app/store/provider.tsx',
       'app/store/settings/selectors.ts',
-      'app/store/tokens-metadata/selectors.ts',
       'lib/analytics/send-events.utils.ts',
       // Task 15 publishes flags through the existing foreground command client, never a destination adapter.
       'lib/asset-details/publish-adult-flags.ts',
       'lib/assets/indexeddb-migration.ts',
       'lib/assets/migrations.ts',
       'lib/local-storage/migrator.ts',
+      // Task 18 metadata readers and acknowledged commands never instantiate destination adapters.
+      'lib/metadata/metadata-query.ts',
+      'lib/metadata/refresh-metadata.ts',
+      'lib/metadata/sync-metadata.ts',
+      'lib/metadata/use-metadata-query.ts',
+      'lib/metadata/use-owned-metadata.ts',
       'lib/notifications/store/selectors.ts',
       'lib/temple/back/analytics.ts',
       'lib/temple/back/main.ts'

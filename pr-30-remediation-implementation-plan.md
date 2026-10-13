@@ -1,13 +1,16 @@
 # PR #30 Remediation Implementation Plan
 
+> Finalization decision, 2026-10-13: deliver Tasks 1–19 plus Task 20 acceptance work in one PR from `MAV-3974/architecture` to `dev`. Do not merge into, merge from, or recreate work on `dev-architecture-update`; it is historical reference only. [finalize.md](finalize.md) governs remaining work and supersedes the historical incremental delivery instructions and full-stack-retirement assumptions below. Current ownership is documented in `AGENTS.md` and the task handoffs; Task 21 remains a separate future release.
+
 Date: 2026-08-18
-Last validated: 2026-08-19
+Historical PR #30 validation: 2026-08-19
+Finalization instructions updated: 2026-10-13 (local repository review only)
 
 > Branch alignment update, 2026-08-19: `MAV-3974/architecture` is the architecture integration branch. `dev-architecture-update` is only a PR #30 reference branch; any branch-target instructions below that use it as the integration branch are superseded by `docs/pr-30-branch-alignment-dev-sync-ledger.md`.
 
 Source of truth: root `pr-30-remediation-plan.md`, verified against PR #30 / `origin/dev-architecture-update`.
 
-Compared refs:
+Historical compared refs (not refreshed for this documentation update):
 
 - Active planning branch: `MAV-3979/book-scoping` at `c8bb574a`
 - Current `origin/dev`: `80379e38` (`v2.0.7`)
@@ -20,17 +23,11 @@ Validation note: GitHub still reports PR #30 as open and conflicting. The PR hea
 
 The remediation plan overrides the older architecture investigation and the existing `arch-adjust` task assumptions.
 
-The new architecture from PR #30 is kept:
+Keep the architecture implemented on `MAV-3974/architecture`. Tasks 11–19 establish background-owned durable domains and Query-owned server data/request lifecycle; unrelated Redux domains and compatibility sources remain live. Do not infer complete Redux/SWR/Effector removal from the older PR #30 design.
 
-- Redux, Redux Observable, Redux Persist, SWR, and Effector stay retired on `dev-architecture-update`.
-- Zustand owns durable/client wallet state.
-- TanStack Query owns server cache state.
-- Legacy Redux/SWR/Effector must not be reintroduced, even temporarily.
-- Legacy migration code is one-shot bridge code only and must carry deletion markers for a later release.
+Tasks 1–19 are integrated according to current history and handoffs. Task 20 must verify coverage and acceptance, not replay them onto the reference branch. The final PR is `MAV-3974/architecture` → `dev` and includes all Tasks 1–19 plus Task 20 changes. Task 21 remains deferred.
 
-Implementation must not happen directly on `MAV-3979/book-scoping`. That branch is useful for comparison and planning, but it still has the old Redux/SWR/Effector stack and current `src/mavryk/api`/contacts work. Track A remediation branches start from `dev-architecture-update`; Track B peel-off branches start from `dev`.
-
-Global constraint from the remediation plan: do not touch `src/mavryk/api` during remediation phases. Current branch/API lineage must be preserved or ported through explicit sync work, never overwritten by a broad PR #30 merge.
+Preserve `src/mavryk/api/**` and current API/auth/contacts lineage. The historical disposition and Steps 0–18 below describe original planning, not instructions to overwrite the implemented branch. For remaining work, use [finalize.md](finalize.md); task handoffs and `AGENTS.md` govern actual ownership and pinned versions.
 
 ## PR #30 Disposition
 
@@ -304,28 +301,28 @@ No existing `arch-adjust/*.md` task is valid as-is for Track A remediation. The 
 - How to verify/test: Tests for initial load, account/network cache separation, explicit sync function, offline persisted balance display, block/MVKT update behavior, loading/error states. Run `yarn ts` and relevant balance tests/smokes.
 - Existing `arch-adjust` mapping: Rewrites `24-extract-balances-server-state.md`.
 
-### Step 19. Final Core Architecture PR To `dev`
+### Step 19 / Task 20. Final Cumulative Architecture PR To `dev`
 
-- What needs to change: After Track A remediation and Track B peel-offs are merged and synced, open the final core PR from `dev-architecture-update` to `dev`. The remaining atomic change is the new architecture itself plus PR #30 features that depend on it.
-- Why it needs to change: The state-stack swap cannot be merged piecemeal into Redux-based `dev`; the preceding steps make the final diff smaller and remediated.
-- Relevant files/modules: `package.json`, `yarn.lock`, `src/app/store/**`, `src/lib/store/zustand/**`, `src/lib/query-keys.ts`, `src/lib/swr/index.ts`, `src/lib/temple/front/use-mavryk-client.ts`, `src/lib/temple/front/**`, `src/app/**` call sites, PR #30 UI/product feature files.
-- Source: PR #30 core architecture plus remediation Track B5.
-- Dependencies: Steps 0-18 complete; no unresolved sync ledger items; no remediation edits under `src/mavryk/api`.
-- How to verify/test: Full gate: `yarn ts`, `yarn test`, `yarn build`, `yarn build:firefox`; upgrade-path test from prod profile; confirmation-window tests; MV3 worker-eviction test; swap staleness test; scamlist fail-closed test; migration idempotency reload; dApp smoke test; verify PR #30 product features still work.
-- Existing `arch-adjust` mapping: Replaces `01-split-wallet-actions-from-state-selectors.md`, `15-replace-effector-background-store.md`, and the new-stack parts of the old server-state tasks.
+- Objective: Open one PR from `MAV-3974/architecture` to `dev`, covering Tasks 1–19 and Task 20 acceptance/finalization changes. No merge through `dev-architecture-update` and no reconstructed peel-off queue.
+- Scope: Follow [finalize.md](finalize.md): refresh refs, review incoming `dev` changes, inventory completed task evidence and the actual cumulative diff, extend CI to PRs targeting `dev`, resolve blocking verification failures, and complete installed-extension acceptance.
+- Boundaries: Preserve background owners, scoped Query contracts, retained unrelated Redux domains, dormant endpoints, API/auth/contacts lineage and pinned tooling. Do not import unimplemented PR #30 product features or retire live infrastructure to satisfy historical descriptions.
+- Dependencies: Tasks 1–19 coverage accounted for; every material sync/verification item has an explicit disposition. A draft PR may expose remaining blockers, but Task 20 acceptance requires passing gates and recorded manual evidence.
+- Verification: Frozen install, `yarn ts`, `yarn test`, Chrome/Firefox builds, and the upgrade, confirmation, disconnect, quote, security, scope and dApp checks in `finalize.md`. Historical baseline failures are not passing results.
+- PR notes: Include the current-branch delivery decision, task coverage, exact tested refs, verification results, remaining limitations, rollback implications and Task 21 deferral. Opening the PR does not merge it into `dev`.
 
-### Step 20. Future Release: Phase 9 Legacy Dead-Code Retirement
+### Step 20 / Task 21. Future Release: Evidence-Gated Legacy Retirement
 
-- What needs to change: After one clean release cycle, delete legacy migration modules and their markers, remove all seven legacy redux-persist keys plus localStorage fallback copies, delete dead `src/intercom-client.ts` after confirming zero callers, optionally align `balances.store.ts` persistence key naming, and sweep anchored historical patterns.
-- Why it needs to change: Migration bridge code should not become permanent architecture.
-- Relevant files/modules: Migration modules from Steps 10-13, browser/localStorage cleanup helper, `src/intercom-client.ts`, `src/lib/store/zustand/balances.store.ts`.
-- Source: Remediation Phase 9.
-- Dependencies: Final core architecture release has shipped and upgrade telemetry/manual verification is clean.
-- How to verify/test: Upgrade from the previous release still works before deletion; after deletion, fresh install and already-migrated profile boot cleanly; no active code references legacy keys except historical docs/comments.
-- Existing `arch-adjust` mapping: Missing from `arch-adjust`; future-only, not part of PR #30 remediation landing.
+- Objective: Retire only proven-obsolete compatibility paths in a separate future PR after shipped migrations and supported upgrade/rollback paths are verified.
+- Source of truth: [Task 12 retirement ledger](docs/task-12-legacy-retirement-ledger.md), including Tasks 13–19 additions; do not replace its inventory with blanket module/key deletion.
+- Dependencies: At least one clean release cycle after the relevant migrations ship, a supported skipped-release upgrade policy, rollback/recovery policy, and zero-live-reader/writer proof for each candidate.
+- Boundaries: Preserve live `persist:temple-root-task11`, unrelated Redux domains, background readiness/identity/consent, migration history/Web Locks and active intercom callers. `DELETE IN` markers were waived; package version or elapsed time does not authorize deletion. Persistence-key renames require their own compatible migration.
+- Verification: Fresh, migrated, supported direct/skipped upgrades, interrupted/failed migrations, concurrent contexts, durable read-back and allowlisted cleanup tests per the ledger.
+- Delivery: Task 20 references this follow-up; retirement implementation is excluded from the Tasks 1–20 PR. File/link the ready-to-file ticket once an established tracker destination is available.
 
 ## Documentation Update
 
 This document replaces the old `arch-adjust` folder assumptions as the actionable PR #30 implementation plan. The `arch-adjust` folder has been regenerated into `remed-task-<number>-<short-description>.md` developer tasks plus `remed-final-report.md`; the older investigation-derived task files should not be used as source of truth.
 
-When Phase 0 or the final core PR changes actual package versions, scripts, folder conventions, or testing workflow, update `AGENTS.md` in the same PR after verifying `package.json` and local config. In particular, the current guide still names the old active-branch TypeScript stack, while PR #30 resolves newer versions that Phase 0 must pin exactly.
+When Phase 0 or the final core PR changes actual package versions, scripts, folder conventions, or testing workflow, update `AGENTS.md` in the same PR after verifying `package.json` and local config. The current manifest pins TypeScript 4.5.5, React 18.2.0, TanStack Query 4.41.0 and Zustand 5.0.11; do not substitute historical PR #30 versions.
+
+Task numbering is one-based in `arch-adjust`: Task 20 maps to Step 19, and Task 21 maps to Step 20. Those local task files are ignored by Git; this tracked plan and `finalize.md` carry the authoritative finalization instructions.

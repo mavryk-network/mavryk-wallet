@@ -1,5 +1,7 @@
 # PR #30 Remediation Plan — Keep the New Architecture, Fix the Confirmed Defects
 
+> Finalization decision, 2026-10-13: deliver Tasks 1–19 plus Task 20 acceptance work in one PR from `MAV-3974/architecture` to `dev`. Do not merge into, merge from, or recreate work on `dev-architecture-update`; it is historical reference only. [finalize.md](finalize.md) governs remaining work and supersedes the historical incremental delivery instructions and full-stack-retirement assumptions below. Current ownership is documented in `AGENTS.md` and the task handoffs; Task 21 remains a separate future release.
+
 > Branch alignment update, 2026-08-19: `MAV-3974/architecture` is the architecture integration branch. `dev-architecture-update` is only a PR #30 reference branch; any branch-target instructions below that use it as the integration branch are superseded by `docs/pr-30-branch-alignment-dev-sync-ledger.md`.
 
 Date: 2026-08-18 (v2)
@@ -10,9 +12,10 @@ Audience: the investigating dev; executable by Codex without additional context.
 
 ## Branch
 
-- Integration branch is `dev-architecture-update` (the PR #30 source branch); final target is `dev`. Per the team's preference, work is **not** delivered as one large PR: each task below gets its own branch off `dev-architecture-update`, its own small PR back into `dev-architecture-update`, its own test gate, and merges one by one — see **Delivery Strategy** below for the merge queue and for how the final landing into `dev` is decomposed.
-- **Important:** the investigation reviewed PR head `dad4cc8d4`, which was a stale snapshot. The branch has since been pushed with ~67 additional commits, including the full merge of `origin/dev` v2.0.0 (commit `fe88c2421`). Re-fetch `pull/30/head` before starting.
-- Constraint for every phase: **do not touch `src/mavryk/api`**. The team's restructured API layer (`MAV-3943/intercom` / `MAV-3979/book-scoping`) rebases on top of this PR after it merges (default sequencing; flag to the team lead if that should flip).
+- Integration and final PR source: `MAV-3974/architecture`; PR base: `dev`. The user's accepted delivery is one cumulative PR covering Tasks 1–19 and Task 20 validation/finalization.
+- `dev-architecture-update` / PR #30 is reference only. No intermediate merge, branch rename, replay of completed tasks, or separate peel-off PR is required.
+- Preserve current API/auth/contacts lineage. Do not edit `src/mavryk/api/**` as remediation; review fresh `dev` changes against the current branch and resolve reserved API changes with its owner.
+- Use [finalize.md](finalize.md) for remaining gates. Historical PR #30 version, package, path and retirement claims below are not assertions about the current integration branch.
 
 ## Affected Repos
 
@@ -213,9 +216,11 @@ File the ticket **when Phase 3 lands**, so it doesn't rot. After one release cyc
 - Optional consistency: `balances.store.ts:144` persists under bare key `'balances'` while every other store uses a `zustand-` prefix — align while touching it.
 - Sweep with anchored patterns (`\btemple-root\b`, `\bredux\b`, `\beffector\b`, `\bswr\b` — an unanchored `swr` matches unrelated substrings); remaining hits should be historical comments only.
 
-## Delivery Strategy — Incremental Merge Queue
+## Delivery Strategy — Current Decision and Historical Queue
 
-Team preference (accepted): no 600-file merge. Every mergeable unit is a named branch with its own PR, test gate, and independent revert. Two tracks:
+The current delivery is one PR, `MAV-3974/architecture` → `dev`, covering Tasks 1–20. Preserve completed work and commit history. Task 20 verifies the cumulative diff and completes acceptance; Task 21 is deferred. No reconstruction of Track A/B PRs is required.
+
+The Track A/B queue and ongoing-sync recipe below are historical planning context, superseded by [finalize.md](finalize.md). They do not authorize work on `dev-architecture-update` or require additional peel-offs.
 
 ### Track A — Remediation phases, merged one by one into `dev-architecture-update`
 
@@ -312,10 +317,9 @@ End-to-end before requesting re-review:
 
 ## Commit Strategy
 
-- Delivery follows the **Delivery Strategy merge queue**: one branch + one small PR per task (Track A rows A1–A9.x into `dev-architecture-update`; Track B rows B1–B5 into `dev`), each tested and merged individually.
-- Within a task branch: conventional commits (`chore:` Phase 0, `fix:` Phases 1–7, `refactor:` Phase 8), tests in the same commit as the change they cover. Phase 8 stays one branch/PR **per domain**.
-- No force-pushes — review history stays intact everywhere.
-- Phase 9 is a separate future PR after one clean release cycle.
+- Preserve the completed Tasks 1–19 history on `MAV-3974/architecture`; add focused Task 20 fixes and evidence there, or integrate task branches back into it.
+- Deliver one cumulative PR to `dev`. No force-push, history rewrite, or intermediate merge through `dev-architecture-update` is required.
+- Task 21 retirement is a separate future PR subject to the Task 12 ledger's release and supported-upgrade gates.
 
 ## Errata — Factual Issues in `pr-30-architecture-investigation.md`
 

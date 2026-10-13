@@ -170,3 +170,7 @@ M	src/lib/store/zustand/metadata-state.schema.ts
 M	src/lib/store/zustand/ui-owner.contract.ts
 M	src/lib/store/zustand/ui-owner.ts
 ```
+
+## Task 19 balance ownership handoff
+
+Task 19 resolves the retained Redux balance bridge. `loadAccountAssets`/`syncAccountAssets` now require RPC provenance and publish normalized balances alongside assets/metadata in the existing command. All production callers already supply that scope. Metadata reservations, explicit-save precedence, refresh completion and normalization stay unchanged; balance revisions are separate. Coupled success covers four durable destinations, with retained-write retry after partial persistence rather than cross-store atomicity. See [Task 19](task-19-balances-ownership-handoff.md) for the current contract and verification.

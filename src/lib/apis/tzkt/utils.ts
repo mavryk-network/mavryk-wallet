@@ -1,7 +1,30 @@
-import { TzktAccount } from './types';
+import BigNumber from 'bignumber.js';
 
-export const calcTzktAccountSpendableTezBalance = ({ balance, stakedBalance, unstakedBalance }: TzktAccount) =>
-  ((balance ?? 0) - (stakedBalance ?? 0) - (unstakedBalance ?? 0)).toFixed();
+import { TzktAccount, TzktAccountType } from './types';
+
+/** Validate native values before exact spendable-balance subtraction; empty/ghost accounts are legitimate zero. */
+export const calcTzktAccountSpendableTezBalance = (account: TzktAccount) => {
+  if (!account || !Object.values(TzktAccountType).includes(account.type)) throw new Error('Invalid native account');
+  const parse = (value: unknown, isOptional: boolean) => {
+    if (value === undefined && isOptional) return new BigNumber(0);
+    if (
+      !(typeof value === 'string' && /^\d+$/.test(value)) &&
+      !(typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)
+    )
+      throw new Error('Invalid native balance');
+    return new BigNumber(value as string | number);
+  };
+  const isEmpty =
+    account.type === TzktAccountType.Empty ||
+    account.type === TzktAccountType.Ghost ||
+    account.type === TzktAccountType.Rollup ||
+    account.type === TzktAccountType.SmartRollup;
+  const balance = parse(account.balance, isEmpty)
+    .minus(parse(account.stakedBalance, true))
+    .minus(parse(account.unstakedBalance, true));
+  if (balance.isNegative()) throw new Error('Invalid spendable balance');
+  return balance.toFixed();
+};
 
 type ParameterFa12 = {
   entrypoint: string;

@@ -1,6 +1,7 @@
 import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
 import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
+import { z } from 'zod';
 
 import { toTokenSlug } from 'lib/assets';
 import { KYC_CONTRACTS } from 'lib/route3/constants';
@@ -313,7 +314,9 @@ export const fetchAllAssetsBalancesFromTzkt = async (account: string, chainId: T
   const balances: StringRecord = {};
 
   await (async function recourse(offset: number) {
-    const data = await fetchAssetsBalancesFromTzktOnce(account, chainId, offset);
+    const data = z
+      .array(z.tuple([z.string().min(1), z.string().regex(/^\d+$/), z.string().regex(/^\d+$/)]))
+      .parse(await fetchAssetsBalancesFromTzktOnce(account, chainId, offset));
 
     for (const [address, tokenId, balance] of data) {
       const slug = toTokenSlug(address, tokenId);

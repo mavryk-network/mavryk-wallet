@@ -65,7 +65,13 @@ export function initializeOwnedUI(): Promise<void> {
   if (!isListening) {
     isListening = true;
     browser.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && (changes['zustand-ui'] || changes['zustand-metadata'] || changes['zustand-assets'])) {
+      if (
+        area === 'local' &&
+        (changes['zustand-ui'] ||
+          changes['zustand-metadata'] ||
+          changes['zustand-assets'] ||
+          changes['zustand-balances'])
+      ) {
         void updateOwnedUI().catch(() => undefined); // Error is exposed by the gate, never treated as readiness.
       }
     });

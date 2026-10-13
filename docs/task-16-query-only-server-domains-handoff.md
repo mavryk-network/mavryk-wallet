@@ -176,3 +176,7 @@ Updated AGENTS ownership/testing facts, Task 10's deferred Task 16 entry, Task 1
 ## Task 18 shared-provider extension
 
 [Task 18](task-18-metadata-ownership-handoff.md) adds metadata orchestration to the existing foreground client. All active/dormant endpoint decisions and server-domain keys above remain unchanged. Metadata durable data remains owner-backed; this does not activate any dormant Task 16 endpoint or complete balance ownership.
+
+## Task 19 balance ownership handoff
+
+Current/other-account valuation keeps Task 16 Query rates and existing decimal/fiat conversion, but its balance selectors now read Task 19 owner snapshots. Rate/card keys, active/dormant endpoint dispositions and retained source handling are unchanged. See [Task 19](task-19-balances-ownership-handoff.md) for the current contract and verification.

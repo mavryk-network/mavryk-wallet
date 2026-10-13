@@ -28,7 +28,7 @@ export async function syncBalances(
     assertCurrent();
     await updateOwnedUI({ kind: 'balances-start', scope, requestId });
     assertCurrent();
-    const records = parseData(BALANCE_RECORD_SCHEMA, await load());
+    const records = parseData(BALANCE_RECORD_SCHEMA, await awaitBalanceResponse(load(), signal));
     assertCurrent();
     const snapshot = await requestOwnedUISnapshot(
       delta
@@ -42,4 +42,27 @@ export async function syncBalances(
     browser.storage.onChanged.removeListener(handleChange);
     await updateOwnedUI({ kind: 'balances-cancel', requestId });
   }
+}
+
+/** Release owner reservations/listeners promptly even when a non-abortable transport never settles. */
+function awaitBalanceResponse(response: Promise<Record<string, string>>, signal?: AbortSignal) {
+  if (!signal) return response;
+  return new Promise<Record<string, string>>((resolve, reject) => {
+    const handleAbort = () => {
+      signal.removeEventListener('abort', handleAbort);
+      reject(new CancelledError({ revert: true }));
+    };
+    signal.addEventListener('abort', handleAbort);
+    response.then(
+      value => {
+        signal.removeEventListener('abort', handleAbort);
+        resolve(value);
+      },
+      error => {
+        signal.removeEventListener('abort', handleAbort);
+        reject(error);
+      }
+    );
+    if (signal.aborted) handleAbort();
+  });
 }

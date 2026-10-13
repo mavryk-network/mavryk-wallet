@@ -7,9 +7,9 @@ import { useOwnedUIStatus } from 'lib/store/zustand/ui-client';
 import { balanceQueryOptions } from './balance-query';
 
 /** Other accounts share the same batching and readiness without requiring selection as the active account. */
-export function useBalancesQuery(account: string, isEnabled = true) {
+export function useBalancesQuery(account: string, isEnabled = true, chainId?: string) {
   const selected = useMetadataScope();
-  const scope = { ...selected, account };
+  const scope = { ...selected, account, chainId: chainId ?? selected.chainId };
   const { isReady } = useOwnedUIStatus();
   const enabled =
     isEnabled && isReady && !!account && !!scope.rpcUrl && !!scope.networkId && isKnownChainId(scope.chainId);

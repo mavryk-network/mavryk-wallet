@@ -141,3 +141,18 @@ it('coalesces block/explicit refreshes while an initial request is active', asyn
   unsubscribe();
   c.clear();
 });
+
+it('releases its owner reservation and storage listener when a hanging transport is cancelled', async () => {
+  const c = client();
+  (fetchAllAssetsBalancesFromTzkt as jest.Mock).mockReturnValue(new Promise(() => undefined));
+  const request = c.fetchQuery(balanceQueryOptions(scope, 'tokens'));
+  const rejected = expect(request).rejects.toBeDefined();
+  await settle();
+  const listener = (browser.storage.onChanged.addListener as jest.Mock).mock.calls.slice(-1)[0][0];
+  await c.cancelQueries({ queryKey: balancesKeys.request(scope, 'tokens') });
+  await rejected;
+  await settle();
+  expect(browser.storage.onChanged.removeListener).toHaveBeenCalledWith(listener);
+  expect(updateOwnedUI).toHaveBeenLastCalledWith(expect.objectContaining({ kind: 'balances-cancel' }));
+  c.clear();
+});

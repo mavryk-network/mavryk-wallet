@@ -38,8 +38,8 @@ export const useAllAccountBalancesSelector = (publicKeyHash: string, chainId: st
 export const useBalanceSelector = (publicKeyHash: string, chainId: string, assetSlug: string): string | undefined =>
   useAllAccountBalancesSelector(publicKeyHash, chainId)[assetSlug];
 
-export const useBalancesLoadingSelector = (publicKeyHash: string, _chainId: string) =>
-  useBalancesQuery(publicKeyHash, false).isLoading;
+export const useBalancesLoadingSelector = (publicKeyHash: string, chainId: string) =>
+  useBalancesQuery(publicKeyHash, false, chainId).isLoading;
 
-export const useBalancesErrorSelector = (publicKeyHash: string, _chainId: string) =>
-  useBalancesQuery(publicKeyHash, false).error;
+export const useBalancesErrorSelector = (publicKeyHash: string, chainId: string) =>
+  useBalancesQuery(publicKeyHash, false, chainId).error;

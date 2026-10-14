@@ -1,6 +1,6 @@
 type ProcessDotEnv = {
   NODE_ENV: 'development' | 'production' | 'test';
-  TARGET_BROWSER: string;
+  TARGET_BROWSER?: string;
   SOURCE_MAP?: 'true' | 'false';
   IMAGE_INLINE_SIZE_LIMIT?: string;
   PRODUCTION_EXTENSION_ID?: string;

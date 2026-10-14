@@ -5,9 +5,9 @@
 Before enforcing versions, scripts, or conventions, verify in `package.json` and local config files.
 Current pinned stack in manifest includes:
 
-- TypeScript `4.5.5`
+- TypeScript `4.9.5`
 - React `18.2.0`
-- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17–19 asset/security/metadata/balance request orchestration; TypeScript 4.5.5 remains pinned)
+- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17–19 asset/security/metadata/balance request orchestration; TypeScript 4.9.5 is the Task 20 user-approved compatibility pin)
 - Zustand `5.0.11` (Tasks 11/13/19 activate preferences, assets, adult flags, metadata and balances through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
 - `@mavrykdynamics/webmavryk*` family `2.0.1`
 
@@ -91,6 +91,10 @@ Current pinned stack in manifest includes:
 - Never log PII.
 
 ## Quick Commands
+
+CI runs frozen install, blocking `yarn ts` and blocking `yarn test` for PRs targeting `dev`, `MAV-3974/architecture` and `MAV-3979/book-scoping`. Tests run after a successful install even when type-check fails; neither gate is advisory. Lint retains its existing advisory status.
+
+`basenet_kyc_onboard.spec.ts` tests the wallet KYC onboarding contract with mocked chain transport. It does not provision an admin, submit live transactions, or replace installed-extension/Basenet acceptance.
 
 - `yarn start`
 - `yarn build`

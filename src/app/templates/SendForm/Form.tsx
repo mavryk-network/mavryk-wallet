@@ -53,7 +53,7 @@ import {
   useChainId
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mumavToTz, tokensToAtoms, tzToMumav } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';

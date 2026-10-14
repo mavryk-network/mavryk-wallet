@@ -6,18 +6,16 @@ import { Props as TippyProps } from 'tippy.js';
 
 import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
-import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
-import { useAccount, useNetwork } from 'lib/temple/front';
+import { useAccount } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
 import * as Woozie from 'lib/woozie';
@@ -51,7 +49,6 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();
-  const network = useNetwork();
   const dispatch = useDispatch();
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();

@@ -21,6 +21,7 @@ import {
 
 import { MoneyDiffView } from './MoneyDiffView';
 import {
+  buildHistoryPreviewOperations,
   getAssetsFromOperations,
   getHistoryOperationAddress,
   getMultipleInteractionMessageData,
@@ -28,7 +29,7 @@ import {
 } from './utils';
 
 interface Props {
-  item: IndividualHistoryItem;
+  item: IndividualHistoryItem | ReturnType<typeof buildHistoryPreviewOperations>[number];
   isTiny?: boolean;
   moneyDiff?: MoneyDiff;
   originalHistoryItem?: UserHistoryItem;

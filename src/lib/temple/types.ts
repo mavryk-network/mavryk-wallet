@@ -608,6 +608,7 @@ interface TempleRevealPrivateKeyResponse extends TempleMessageBase {
 
 interface TempleRevealMnemonicRequest extends TempleMessageBase {
   type: TempleMessageType.RevealMnemonicRequest;
+  walletId: string;
   password: string;
 }
 

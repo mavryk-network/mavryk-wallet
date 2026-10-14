@@ -1,10 +1,10 @@
 name: CI
 
-# Quality gate for PRs targeting the architecture integration branch now and the
-# final branch later. Blocks merges on type errors and failing tests.
+# Quality gate for integration and final delivery PRs.
 on:
   pull_request:
     branches:
+      - dev
       - MAV-3974/architecture
       - MAV-3979/book-scoping
   push:
@@ -40,12 +40,14 @@ jobs:
           esac
 
       - name: Install dependencies
+        id: install
         run: yarn install --frozen-lockfile
 
       - name: Type-check (blocking)
         run: yarn ts
 
       - name: Tests (blocking)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: yarn test
 
       # Lint currently carries a formatting/import-order backlog. Keep it advisory

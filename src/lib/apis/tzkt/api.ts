@@ -141,14 +141,15 @@ export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `parameter.${'to' | 'in' | '[*].in' | '[*].txs.[*].to_'}`]?: string;
 } & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
-} & { type?: TzktOperationType };
-
-export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+} & {
   type?: TzktOperationType;
   hasInternals?: boolean;
-  entrypoint?: string;
   'entrypoint.null'?: boolean;
   'entrypoint.ne'?: string;
+};
+
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  entrypoint?: string;
   'parameter.originatedContract.null'?: boolean;
   'sender.eq'?: string;
   'target.eq'?: string;

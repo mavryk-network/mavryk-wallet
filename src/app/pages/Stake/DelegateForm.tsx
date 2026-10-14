@@ -349,7 +349,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;
-        let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
           const contract = await loadContract(tezos, acc.publicKeyHash);
           op = await contract.methods.do(setDelegate(to)).send({ amount: 0 });
@@ -361,8 +360,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
               fee
             } as any)
             .send();
-
-          opHash = op.opHash;
         }
 
         // create pending delegate operation

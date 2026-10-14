@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js';
 
 import { PENNY } from 'lib/constants';
-import { MAVEN_METADATA } from 'lib/metadata';
-import { tokensToAtoms, atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccount, TempleAccountType } from 'lib/temple/types';
 
 export const formatAmountToTargetSize = (value: string | number, targetSize = 6) => {

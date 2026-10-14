@@ -1,63 +1,95 @@
-//
-// BASENET: KYC-onboard the buyer (and ensure sender/admin is a member) so the
-// MARS1 TRANSFER launch purchase passes verifyValidKycTransfer.
-//
-// membershipKyc has enableMembership=true + enableKyc=true. For an admin->buyer
-// RWA transfer to be valid:
-//   1) both admin (sender) and buyer (receiver) must be in memberLedger  -> setMember
-//   2) buyer must have a memberKyc record (hard failwith otherwise)       -> setMemberKyc
-//      (admin already has one). country "NIL" has an unfrozen transfer rule.
-//
+import { MavrykToolkit, OpKind } from '@mavrykdynamics/webmavryk';
+import { InMemorySigner } from '@mavrykdynamics/webmavryk-signer';
 
-describe('Basenet — KYC onboard buyer for MARS1 TRANSFER', async () => {
-  let utils: Utils;
-  let tezos: any;
-  let adminPkh: string;
-  let kyc: any;
-  let st: any;
+import { signKYCAction } from 'app/pages/ProVersion/utils/tezosSigner';
+import { loadContract } from 'lib/temple/contract';
+import { TempleChainId } from 'lib/temple/types';
 
-  before('connect as admin/registrar', async () => {
-    const sk = process.env.DEPLOYER_SK;
-    if (!sk) throw new Error('DEPLOYER_SK env var required (admin/registrar key)');
-    utils = new Utils();
-    await utils.init(sk);
-    tezos = utils.tezos;
-    adminPkh = await tezos.signer.publicKeyHash();
-    kyc = await tezos.contract.at(KYC_ADDR);
-    st = load();
-    st.kycOnboard = st.kycOnboard || {};
-    console.log(`\n  admin/registrar: ${adminPkh}`);
-    console.log(`  buyer          : ${BUYER}\n`);
+const mockConfirmation = jest.fn();
+const mockSend = jest.fn();
+const mockBatch = jest.fn();
+const mockSetProvider = jest.fn();
+
+jest.mock('@mavrykdynamics/webmavryk', () => ({
+  OpKind: { TRANSACTION: 'transaction' },
+  MavrykToolkit: jest.fn(() => ({ setProvider: mockSetProvider, wallet: { batch: mockBatch } }))
+}));
+jest.mock('@mavrykdynamics/webmavryk-signer', () => ({ InMemorySigner: jest.fn() }));
+jest.mock('lib/temple/contract', () => ({ loadContract: jest.fn() }));
+jest.mock('lib/route3/constants', () => ({
+  KYC_CONTRACTS: new Map([['NetXmtMsNf69w1w', 'test-kyc-contract']])
+}));
+
+const originalEnvironment = process.env;
+const memberParams = { to: 'test-kyc-contract', amount: 0, parameter: { entrypoint: 'setMember' } };
+const kycParams = { to: 'test-kyc-contract', amount: 0, parameter: { entrypoint: 'setMemberKyc' } };
+const mockSetMember = jest.fn(() => ({ toTransferParams: () => memberParams }));
+const mockSetMemberKyc = jest.fn(() => ({ toTransferParams: () => kycParams }));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  process.env = { ...originalEnvironment, NODE_ENV: 'test', TESTNET_KYC_SIGNER_PRIVATE_KEY: 'test-only-key' };
+  mockConfirmation.mockResolvedValue(undefined);
+  mockSend.mockResolvedValue({ opHash: 'test-operation', confirmation: mockConfirmation });
+  mockBatch.mockReturnValue({ send: mockSend });
+  (loadContract as unknown as jest.Mock).mockResolvedValue({
+    methods: { setMember: mockSetMember, setMemberKyc: mockSetMemberKyc }
+  });
+});
+
+afterEach(() => {
+  process.env = originalEnvironment;
+});
+
+describe('Basenet KYC onboarding contract', () => {
+  it('batches Starter membership and NIL KYC for the buyer, then awaits one confirmation', async () => {
+    const operation = await signKYCAction('test-rpc', 'test-buyer', TempleChainId.Basenet);
+
+    expect(MavrykToolkit).toHaveBeenCalledWith('test-rpc');
+    expect(InMemorySigner).toHaveBeenCalledWith('test-only-key');
+    expect(mockSetProvider).toHaveBeenCalledWith({ signer: expect.any(InMemorySigner) });
+    expect(loadContract).toHaveBeenCalledWith(expect.any(Object), 'test-kyc-contract');
+    expect(mockSetMember).toHaveBeenCalledWith([
+      { updateType: 'update', memberAddress: 'test-buyer', membershipTier: 'Starter' }
+    ]);
+    expect(mockSetMemberKyc).toHaveBeenCalledWith('addMemberKyc', [
+      { memberAddress: 'test-buyer', country: 'NIL', region: 'NIL', investorType: 'NIL' }
+    ]);
+    expect(mockBatch).toHaveBeenCalledWith([
+      { ...memberParams, kind: OpKind.TRANSACTION },
+      { ...kycParams, kind: OpKind.TRANSACTION }
+    ]);
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(mockConfirmation).toHaveBeenCalledWith(1);
+    expect(operation.opHash).toBe('test-operation');
   });
 
-  it('setMember: admin + buyer into memberLedger', async () => {
-    if (st.kycOnboard.membersSet) {
-      console.log('  ↩︎ members already set');
-      return;
-    }
-    const op = await kyc.methods
-      .setMember([
-        { updateType: 'update', memberAddress: adminPkh, membershipTier: 'none' },
-        { updateType: 'update', memberAddress: BUYER, membershipTier: 'none' }
-      ])
-      .send();
-    await op.confirmation(1);
-    st.kycOnboard.membersSet = true;
-    save(st);
-    console.log(`  ✓ setMember admin+buyer  ${op.hash}`);
+  it('does not report success before confirmation settles', async () => {
+    let confirm!: () => void;
+    let markConfirmationStarted!: () => void;
+    const confirmationStarted = new Promise<void>(resolve => (markConfirmationStarted = resolve));
+    mockConfirmation.mockImplementationOnce(() => {
+      markConfirmationStarted();
+      return new Promise<void>(resolve => (confirm = resolve));
+    });
+    let hasCompleted = false;
+    const pending = signKYCAction('test-rpc', 'test-buyer', TempleChainId.Basenet).then(() => {
+      hasCompleted = true;
+    });
+    await confirmationStarted;
+    expect(mockConfirmation).toHaveBeenCalledWith(1);
+    expect(hasCompleted).toBe(false);
+    confirm();
+    await pending;
+    expect(hasCompleted).toBe(true);
   });
 
-  it('setMemberKyc: buyer (country/region/investorType = NIL)', async () => {
-    if (st.kycOnboard.buyerKyc) {
-      console.log('  ↩︎ buyer KYC already set');
-      return;
-    }
-    const op = await kyc.methods
-      .setMemberKyc('addMemberKyc', [{ memberAddress: BUYER, country: 'NIL', region: 'NIL', investorType: 'NIL' }])
-      .send();
-    await op.confirmation(1);
-    st.kycOnboard.buyerKyc = true;
-    save(st);
-    console.log(`  ✓ setMemberKyc buyer  ${op.hash}`);
+  it('propagates send and confirmation failures without automatic resubmission', async () => {
+    mockSend.mockRejectedValueOnce(new Error('send failed'));
+    await expect(signKYCAction('test-rpc', 'test-buyer', TempleChainId.Basenet)).rejects.toThrow('send failed');
+    expect(mockConfirmation).not.toHaveBeenCalled();
+    mockConfirmation.mockRejectedValueOnce(new Error('confirmation failed'));
+    await expect(signKYCAction('test-rpc', 'test-buyer', TempleChainId.Basenet)).rejects.toThrow('confirmation failed');
+    expect(mockSend).toHaveBeenCalledTimes(2);
   });
 });

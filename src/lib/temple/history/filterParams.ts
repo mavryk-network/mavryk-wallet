@@ -64,10 +64,13 @@ export const mergeOpParams = (
   }
 
   // Merge all other parameters except `type`
-  const keys = new Set([...Object.keys(prevParams), ...Object.keys(params)]);
+  const keys = new Set([
+    ...Object.keys(prevParams),
+    ...Object.keys(params)
+  ] as (keyof ExtendedGetOperationsTransactionsParams)[]);
   keys.delete('type');
 
-  keys.forEach(key => {
+  keys.forEach(<K extends keyof ExtendedGetOperationsTransactionsParams>(key: K) => {
     const prevValue = prevParams[key];
     const newValue = params[key];
 

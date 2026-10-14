@@ -194,7 +194,7 @@
     "ts-jest": "27.1.1",
     "ts-node": "10.9.2",
     "ts-prune": "0.10.3",
-    "typescript": "4.5.5",
+    "typescript": "4.9.5",
     "use-debounce": "7.0.1",
     "use-force-update": "1.0.7",
     "use-onclickoutside": "0.4.1",

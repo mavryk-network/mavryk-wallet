@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BatchWalletOperation } from '@mavrykdynamics/taquito/dist/types/wallet/batch-operation';
 import { TransferParams } from '@mavrykdynamics/webmavryk';
+import { BatchWalletOperation } from '@mavrykdynamics/webmavryk/dist/types/wallet/batch-operation';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -15,6 +15,7 @@ import { useOperationStatus } from 'app/hooks/use-operation-status';
 import { useBlockAwareSwapParams, useSwap } from 'app/hooks/use-swap';
 import { ReactComponent as InfoIcon } from 'app/icons/info.svg';
 import { ReactComponent as ToggleIcon } from 'app/icons/toggle.svg';
+import type { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { buildSwapPageUrlQuery } from 'app/pages/Swap/utils/build-url-query';
 import { resetSwapParamsAction } from 'app/store/swap/actions';
 import { useSwapParamsSelector, useSwapTokenSelector, useSwapTokensSelector } from 'app/store/swap/selectors';
@@ -241,21 +242,18 @@ export const SwapForm: FC = () => {
     });
   }, [register, dirtyFields, maxAmount]);
 
-  const successScreenProps = useMemo(
+  const successScreenProps = useMemo<SuccessStateType>(
     () => ({
       pageTitle: 'swap',
       btnText: 'goToMain',
       contentId: 'hash',
-      // @ts-expect-error
-      contentIdFnProps: { hash: operation?.opHash ?? operation?.hash, i18nKey: 'swap' },
+      contentIdFnProps: { hash: operation?.opHash, i18nKey: 'swap' },
       subHeader: 'success'
     }),
-    // @ts-expect-error
-    [operation?.hash, operation?.opHash]
+    [operation?.opHash]
   );
 
-  // @ts-expect-error
-  useOperationStatus(operation, successScreenProps);
+  useOperationStatus(operation ?? null, successScreenProps);
 
   const onSubmit = async () => {
     if (isSubmitting) {

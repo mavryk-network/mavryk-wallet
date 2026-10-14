@@ -1,5 +1,7 @@
 # PR #30 Remediation Plan — Keep the New Architecture, Fix the Confirmed Defects
 
+> Delivery update, 2026-10-14: the user instructed that all work finish locally and that no push or remote PR creation/update be performed. The user will handle remote delivery. Keep `MAV-3974/architecture` as the future cumulative source to `dev`; Task 21 stays deferred. The user also approved only TypeScript 4.5.5 → 4.9.5. See [Task 20 evidence](docs/task-20-finalization-handoff.md) for local commits, acceptance results and remaining manual gates. This update supersedes remote execution instructions below.
+
 > Finalization decision, 2026-10-13: deliver Tasks 1–19 plus Task 20 acceptance work in one PR from `MAV-3974/architecture` to `dev`. Do not merge into, merge from, or recreate work on `dev-architecture-update`; it is historical reference only. [finalize.md](finalize.md) governs remaining work and supersedes the historical incremental delivery instructions and full-stack-retirement assumptions below. Current ownership is documented in `AGENTS.md` and the task handoffs; Task 21 remains a separate future release.
 
 > Branch alignment update, 2026-08-19: `MAV-3974/architecture` is the architecture integration branch. `dev-architecture-update` is only a PR #30 reference branch; any branch-target instructions below that use it as the integration branch are superseded by `docs/pr-30-branch-alignment-dev-sync-ledger.md`.

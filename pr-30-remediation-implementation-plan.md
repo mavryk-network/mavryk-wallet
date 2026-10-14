@@ -1,5 +1,7 @@
 # PR #30 Remediation Implementation Plan
 
+> Delivery update, 2026-10-14: the user instructed that all work finish locally and that no push or remote PR creation/update be performed. The user will handle remote delivery. Keep `MAV-3974/architecture` as the future cumulative source to `dev`; Task 21 stays deferred. The user also approved only TypeScript 4.5.5 → 4.9.5. See [Task 20 evidence](docs/task-20-finalization-handoff.md) for local commits, acceptance results and remaining manual gates. This update supersedes remote execution instructions below.
+
 > Finalization decision, 2026-10-13: deliver Tasks 1–19 plus Task 20 acceptance work in one PR from `MAV-3974/architecture` to `dev`. Do not merge into, merge from, or recreate work on `dev-architecture-update`; it is historical reference only. [finalize.md](finalize.md) governs remaining work and supersedes the historical incremental delivery instructions and full-stack-retirement assumptions below. Current ownership is documented in `AGENTS.md` and the task handoffs; Task 21 remains a separate future release.
 
 Date: 2026-08-18
@@ -323,6 +325,6 @@ No existing `arch-adjust/*.md` task is valid as-is for Track A remediation. The 
 
 This document replaces the old `arch-adjust` folder assumptions as the actionable PR #30 implementation plan. The `arch-adjust` folder has been regenerated into `remed-task-<number>-<short-description>.md` developer tasks plus `remed-final-report.md`; the older investigation-derived task files should not be used as source of truth.
 
-When Phase 0 or the final core PR changes actual package versions, scripts, folder conventions, or testing workflow, update `AGENTS.md` in the same PR after verifying `package.json` and local config. The current manifest pins TypeScript 4.5.5, React 18.2.0, TanStack Query 4.41.0 and Zustand 5.0.11; do not substitute historical PR #30 versions.
+When Phase 0 or the final core PR changes actual package versions, scripts, folder conventions, or testing workflow, update `AGENTS.md` in the same PR after verifying `package.json` and local config. The current manifest pins TypeScript 4.9.5 (explicitly approved for Task 20), React 18.2.0, TanStack Query 4.41.0 and Zustand 5.0.11; do not substitute historical PR #30 versions.
 
 Task numbering is one-based in `arch-adjust`: Task 20 maps to Step 19, and Task 21 maps to Step 20. Those local task files are ignored by Git; this tracked plan and `finalize.md` carry the authoritative finalization instructions.

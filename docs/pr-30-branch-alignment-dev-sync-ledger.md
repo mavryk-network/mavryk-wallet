@@ -188,3 +188,34 @@ Results:
 Not applicable in this task:
 
 - Ported-feature smoke tests: no runtime feature was ported.
+
+## Task 20 reconciliation (2026-10-13; local delivery updated 2026-10-14)
+
+Fresh `git fetch origin` completed before reconciliation. Starting integration was
+`7c32286e438666b7f35a5de52a3a6beb57998add`; fetched `origin/MAV-3974/architecture`
+was `c02dcd4597b8c8eb067a64bcc878839d1e06ea34`, and fetched `origin/dev` was
+`e735af469a85b56fc140999b345989d41afbeadc`. Remote integration was an ancestor:
+all 12 existing local commits were preserved. The three uncommitted finalization
+documents were backed up outside the repository, then preserved in `0d29e08f`.
+
+`git log HEAD..origin/dev` identified only `e735af46` (`update: KYC contract`).
+Merge `38144252` reconciled it directly into `MAV-3974/architecture`:
+
+| Incoming surface | Disposition | Result |
+| --- | --- | --- |
+| ProVersion `tezosSigner.ts` | Carry KYC lookup | Address lookup uses `memberRegistrarLedger`, not tuple-keyed `memberLedger`. Existing production prohibition and Basenet-only signer guards remain. |
+| `src/lib/apis/tzkt/api.ts` | Carry KYC lookup | Indexer lookup uses the matching registrar big-map ID. Task 19 balance validation and normalization remain. No network URLs or routing changed. |
+| `package.json` version 2.0.9 | Retain integration version | Resolved the only merge conflict to the existing 3.0.0. No release tag was created. |
+| Local directory reference | Carry as-is | Preserved the incoming documentation. |
+| Reserved API/auth/contacts lineage | Preserve | No incoming reserved API changes. The cumulative `origin/dev...HEAD` diff under `src/mavryk/api/**` is empty at reconciliation. Earlier intentional contacts lineage is already on dev, not lost or reapplied. |
+
+The later Task 20 type fixes narrow contact cache/null handling and correct existing
+request typings without changing reserved API files. TypeScript 4.5.5 → 4.9.5 is the
+**only user-approved dependency exception**; no other manifest dependency or lock
+entry changed during Task 20.
+
+`dev-architecture-update` was neither merged into nor merged from. On 2026-10-14
+the user instructed that all remote PR-related work be left to them. Task 20 therefore
+finishes with local commits and [acceptance evidence](task-20-finalization-handoff.md),
+without push, PR creation/update, or merge into dev. The intended future delivery is
+still one cumulative `MAV-3974/architecture` → `dev` PR. Task 21 remains deferred.

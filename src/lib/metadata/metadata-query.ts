@@ -1,11 +1,13 @@
 import { CancelledError, QueryClient } from '@tanstack/react-query';
 
 import { METADATA_API_LOAD_CHUNK_SIZE } from 'lib/apis/temple/metadata';
+import { isRwaTokenException } from 'lib/assets/rwa-classification';
 import { withScopedWalletRequest } from 'lib/assets/scoped-wallet-request';
 import { isMavSlug } from 'lib/assets/utils';
 import { metadataKeys } from 'lib/query-keys';
 import { updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
+import { fetchWalletRwaAssets, mapWalletRwaAssetsToFetchedMetadataRecord } from 'mavryk/api/rwas';
 
 import { FetchedMetadataRecord, loadTokensMetadataStrict } from './fetch';
 import { getMetadataScopeKey, MetadataCategory, MetadataMode, MetadataScope } from './metadata-scope';
@@ -130,6 +132,13 @@ async function fetchMetadataBatch(
 ): Promise<FetchedMetadataRecord> {
   if (category === 'tokens')
     return mapWalletTokensToFetchedMetadataRecord(slugs, await fetchWalletTokens({ walletAddress: scope.account }));
+  if (category === 'rwas') {
+    const assets = await fetchWalletRwaAssets({ walletAddress: scope.account });
+    const records = mapWalletRwaAssetsToFetchedMetadataRecord(assets);
+    return Object.fromEntries(
+      slugs.map(slug => [slug, isRwaTokenException(slug, scope.chainId) ? null : records[slug] ?? null])
+    );
+  }
   const requests: Promise<FetchedMetadataRecord>[] = [];
   for (let index = 0; index < slugs.length; index += METADATA_API_LOAD_CHUNK_SIZE)
     requests.push(

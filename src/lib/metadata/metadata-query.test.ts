@@ -4,6 +4,7 @@ import { metadataKeys } from 'lib/query-keys';
 import { deferred } from 'lib/store/zustand/test-support/helpers';
 import { getOwnedUISnapshot, requestOwnedUISnapshot, updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
+import { fetchWalletRwaAssets } from 'mavryk/api/rwas';
 import { getSelectedNetworkIdFromStorage, getWalletAddressFromStorage } from 'mavryk/api/storage';
 
 import { fetchOneTokenMetadata, loadTokensMetadataStrict } from './fetch';
@@ -14,6 +15,11 @@ import { normalizeMetadata, saveMetadata } from './sync-metadata';
 
 jest.mock('./fetch', () => ({ loadTokensMetadataStrict: jest.fn(), fetchOneTokenMetadata: jest.fn() }));
 jest.mock('mavryk/api', () => ({ fetchWalletTokens: jest.fn(), mapWalletTokensToFetchedMetadataRecord: jest.fn() }));
+jest.mock('mavryk/api/client', () => ({ mavrykApi: { get: jest.fn() } }));
+jest.mock('mavryk/api/rwas', () => ({
+  ...jest.requireActual('mavryk/api/rwas'),
+  fetchWalletRwaAssets: jest.fn()
+}));
 jest.mock('lib/store/zustand/ui-client', () => ({
   updateOwnedUI: jest.fn(),
   requestOwnedUISnapshot: jest.fn(),
@@ -114,13 +120,31 @@ it('keeps all source inputs distinct and uses wallet mapping for tokens only', a
     symbol: '???'
   });
   expect(() => normalizeMetadata('tokens', ['KT1test_0'], { KT1test_0: { decimals: NaN } })).toThrow();
-  expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: raw })).toEqual({});
+  expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: raw }).KT1test_0.symbol).toBe('T');
   expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: { ...raw, symbol: 'OCEAN' } }).KT1test_0.symbol).toBe(
     'OCEAN'
   );
   expect(
     normalizeMetadata('collectibles', ['KT1test_0'], { KT1test_0: { ...raw, artifactUri: '' } }).KT1test_0.artifactUri
   ).toBe('');
+});
+
+it('loads RWA page metadata from the catalog without symbol filtering or the legacy metadata transport', async () => {
+  (fetchWalletRwaAssets as jest.Mock).mockResolvedValue([
+    { address: 'KT1new', balance: 1, symbol: 'ANTH', metadata: { decimals: '6', icon: 'https://asset.test/icon' } }
+  ]);
+  await requestMetadata(client, scope, 'rwas', ['KT1new_0', 'KT1missing_0']);
+  expect(loadTokensMetadataStrict).not.toHaveBeenCalled();
+  expect(requestOwnedUISnapshot).toHaveBeenCalledWith(
+    expect.objectContaining({
+      category: 'rwas',
+      records: {
+        KT1new_0: expect.objectContaining({ symbol: 'ANTH', decimals: 6, thumbnailUri: 'https://asset.test/icon' })
+      }
+    })
+  );
+  expect(client.getQueryData(metadataKeys.receipt('rwas', scope, 'put', 'KT1new_0'))).toBe('found');
+  expect(client.getQueryData(metadataKeys.receipt('rwas', scope, 'put', 'KT1missing_0'))).toBe('missing');
 });
 
 it('records scoped refresh completion after acknowledgement, preserves history and retries incomplete refreshes', async () => {

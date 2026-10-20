@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
 import { getAccountAssetsSyncKey } from 'lib/assets/account-assets-sync-key';
+import { isRwaTokenException } from 'lib/assets/rwa-classification';
 import { AD_HIDING_TIMEOUT } from 'lib/constants';
 
 import { ADULT_FLAGS_SCHEMA, ASSET_TO_PUT_SCHEMA } from './assets-state.schema';
@@ -87,6 +88,29 @@ export function applyAssetsCommand(
         } else {
           const records = draft[command.category][key] ?? (draft[command.category][key] = {});
           const slugs = new Set(command.value.slugs);
+          if (command.category === 'rwas' || command.category === 'tokens') {
+            const tokens = draft.tokens[key] ?? (draft.tokens[key] = {});
+            const rwas = draft.rwas[key] ?? (draft.rwas[key] = {});
+            // Repair previous classifications in the sole owner, preserving explicit destination choices.
+            for (const [slug, stored] of Object.entries(rwas)) {
+              if (!isRwaTokenException(slug, chainId)) continue;
+              tokens[slug] ??= stored;
+              delete rwas[slug];
+            }
+            if (command.category === 'rwas') {
+              for (const slug of slugs) {
+                if (isRwaTokenException(slug, chainId)) {
+                  slugs.delete(slug);
+                  continue;
+                }
+                rwas[slug] ??= tokens[slug] ?? { status: 'idle' };
+                delete tokens[slug];
+              }
+            } else {
+              // A slower token response must not reintroduce an already classified RWA.
+              for (const slug of Object.keys(rwas)) slugs.delete(slug);
+            }
+          }
           if (command.category !== 'tokens') {
             for (const [slug, stored] of Object.entries(records)) {
               if (!stored.manual && stored.status === 'idle' && !slugs.has(slug)) delete records[slug];

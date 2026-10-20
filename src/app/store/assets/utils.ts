@@ -4,7 +4,8 @@ import { fetchTokensMetadata, isKnownChainId } from 'lib/apis/temple';
 import { fetchTzktAccountAssets } from 'lib/apis/tzkt';
 import type { TzktAccountAsset } from 'lib/apis/tzkt/types';
 import { toTokenSlug } from 'lib/assets';
-import { isCollectible, isRwa } from 'lib/metadata/classification';
+import { isRwaTokenException } from 'lib/assets/rwa-classification';
+import { isCollectible } from 'lib/metadata/classification';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import {
   fetchWalletRwaAssets,
@@ -23,13 +24,21 @@ export const isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount = (
   chainId: string
 ) => !key.startsWith(account) && key.endsWith(chainId);
 
-export const loadAccountTokens = (account: string, chainId: string, knownMeta: MetadataMap) =>
-  Promise.all([
-    // Fetching assets known to be FTs, not checking metadata
-    fetchTzktAccountAssets(account, chainId, true).then(data => finishTokensLoading(data, chainId, knownMeta)),
-    // Fetching unknowns only, checking metadata to filter for FTs
-    fetchTzktAccountUnknownAssets(account, chainId).then(data => finishTokensLoading(data, chainId, knownMeta, true))
-  ]).then(([data1, data2]) => mergeLoadedAssetsData(data1, data2));
+/** Classify both indexer branches against the wallet catalog before publishing token holdings. */
+export const loadAccountTokens = async (account: string, chainId: string, knownMeta: MetadataMap) => {
+  const [fungible, unknown, assets] = await Promise.all([
+    fetchTzktAccountAssets(account, chainId, true),
+    fetchTzktAccountUnknownAssets(account, chainId),
+    fetchWalletRwaAssets({ walletAddress: account })
+  ]);
+  const rwaSlugs = new Set(assets.map(walletRwaAssetToSlug).filter(slug => !isRwaTokenException(slug, chainId)));
+  const excludeRwas = (data: TzktAccountAsset[]) => data.filter(asset => !rwaSlugs.has(tzktAssetToTokenSlug(asset)));
+  const [data1, data2] = await Promise.all([
+    finishTokensLoading(excludeRwas(fungible), chainId, knownMeta),
+    finishTokensLoading(excludeRwas(unknown), chainId, knownMeta, true)
+  ]);
+  return mergeLoadedAssetsData(data1, data2);
+};
 
 export const loadAccountCollectibles = (account: string, chainId: string, knownMeta: MetadataMap) =>
   Promise.all([
@@ -43,8 +52,10 @@ export const loadAccountCollectibles = (account: string, chainId: string, knownM
     })
   ]).then(([data1, data2]) => mergeLoadedAssetsData(data1, data2));
 
-export const loadAccountRwas = (account: string, _chainId: string, _knownMeta: MetadataMap) =>
-  fetchWalletRwaAssets({ walletAddress: account }).then(finishRwasLoading);
+export const loadAccountRwas = (account: string, chainId: string, _knownMeta: MetadataMap) =>
+  fetchWalletRwaAssets({ walletAddress: account }).then(assets =>
+    finishRwasLoading(assets.filter(asset => !isRwaTokenException(walletRwaAssetToSlug(asset), chainId)))
+  );
 
 const fetchTzktAccountUnknownAssets = memoizee(
   // Simply reducing frequency of requests per set of arguments.
@@ -87,7 +98,7 @@ const finishTokensLoading = async (
       const metadata = metadataOfNew || knownMeta.get(slug);
 
       if (!metadata) throw new Error('Incomplete asset classification');
-      if (isCollectible(metadata) || isRwa(metadata)) continue;
+      if (isCollectible(metadata)) continue;
     }
     slugs.push(slug);
     balances[slug] = asset.balance;

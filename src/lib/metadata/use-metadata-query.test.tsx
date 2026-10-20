@@ -7,6 +7,7 @@ import { act } from 'react-dom/test-utils';
 import { useMetadataPagination } from 'app/hooks/use-metadata-pagination';
 import { deferred } from 'lib/store/zustand/test-support/helpers';
 import { requestOwnedUISnapshot, updateOwnedUI, useOwnedUIStatus } from 'lib/store/zustand/ui-client';
+import { fetchWalletRwaAssets } from 'mavryk/api/rwas';
 import { getSelectedNetworkIdFromStorage, getWalletAddressFromStorage } from 'mavryk/api/storage';
 
 import { loadTokensMetadataStrict } from './fetch';
@@ -17,6 +18,11 @@ jest.mock('lib/woozie', () => ({ setNavigateSearchParams: jest.fn() }));
 jest.mock('./use-owned-metadata', () => ({ useOwnedMetadata: () => ({}) }));
 jest.mock('./fetch', () => ({ loadTokensMetadataStrict: jest.fn() }));
 jest.mock('mavryk/api', () => ({ fetchWalletTokens: jest.fn(), mapWalletTokensToFetchedMetadataRecord: jest.fn() }));
+jest.mock('mavryk/api/client', () => ({ mavrykApi: { get: jest.fn() } }));
+jest.mock('mavryk/api/rwas', () => ({
+  ...jest.requireActual('mavryk/api/rwas'),
+  fetchWalletRwaAssets: jest.fn()
+}));
 jest.mock('./use-metadata-scope', () => ({ useMetadataScope: jest.fn() }));
 jest.mock('lib/store/zustand/ui-client', () => ({
   requestOwnedUISnapshot: jest.fn(),
@@ -29,6 +35,45 @@ jest.mock('mavryk/api/storage', () => ({
   MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY: 'auth-map'
 }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
+it('shows the first RWA page with new symbols even when the legacy metadata service fails', async () => {
+  const scope = { account: 'alice', chainId: 'chain', networkId: 'basenet', rpcUrl: 'https://rpc.test' };
+  (useMetadataScope as jest.Mock).mockReturnValue(scope);
+  (getWalletAddressFromStorage as jest.Mock).mockResolvedValue(scope.account);
+  (getSelectedNetworkIdFromStorage as jest.Mock).mockResolvedValue(scope.networkId);
+  (updateOwnedUI as jest.Mock).mockResolvedValue(undefined);
+  (requestOwnedUISnapshot as jest.Mock).mockImplementation(async command => ({
+    metadata: { lastReceipt: command.requestId }
+  }));
+  (loadTokensMetadataStrict as jest.Mock).mockRejectedValue(new Error('legacy metadata unavailable'));
+  (fetchWalletRwaAssets as jest.Mock).mockResolvedValue([
+    { address: 'new-rwa', balance: 1, symbol: 'ANTH', metadata: { decimals: '6' } },
+    { address: 'other-rwa', balance: 2, symbol: 'VOO', metadata: { decimals: '6' } }
+  ]);
+  const client = new QueryClient({ logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } });
+  const root = createRoot(document.createElement('div'));
+  let page: ReturnType<typeof useMetadataPagination> | undefined;
+  function Consumer() {
+    page = useMetadataPagination('rwas', ['new-rwa_0', 'other-rwa_0'], 0);
+    return null;
+  }
+  await act(async () => {
+    root.render(
+      <QueryClientProvider client={client}>
+        <Consumer />
+      </QueryClientProvider>
+    );
+    await new Promise(resolve => setTimeout(resolve, 30));
+  });
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 30));
+  });
+  expect(page?.slugs).toEqual(['new-rwa_0', 'other-rwa_0']);
+  expect(loadTokensMetadataStrict).not.toHaveBeenCalled();
+  await act(async () => root.unmount());
+  client.clear();
+  jest.clearAllMocks();
+});
 
 it('mounts a single batch behind readiness, settles misses without loops and permits custom RPCs', async () => {
   const scope = { account: 'alice', chainId: 'unknown', networkId: 'custom', rpcUrl: 'https://custom.test' };

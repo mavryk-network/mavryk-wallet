@@ -6,7 +6,6 @@ import { TOKEN_METADATA_SCHEMA } from 'lib/store/zustand/metadata-state.schema';
 import { requestOwnedUISnapshot, updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { parseData } from 'lib/store/zustand/validation';
 
-import { isRwa } from './classification';
 import { FetchedMetadataRecord } from './fetch';
 import { getMetadataScopeKey, MetadataCategory, MetadataMode, MetadataScope } from './metadata-scope';
 import { TokenMetadata } from './types';
@@ -21,15 +20,14 @@ const responseSchema = z.object({
   artifactUri: z.string().optional()
 });
 
-/** Validate the entire response before publishing any record; null alone confirms a miss. */
-export function normalizeMetadata(category: MetadataCategory, slugs: string[], response: FetchedMetadataRecord) {
+/** Validate metadata for the caller's category without reclassifying symbols; null alone confirms a miss. */
+export function normalizeMetadata(_category: MetadataCategory, slugs: string[], response: FetchedMetadataRecord) {
   const records: Record<string, TokenMetadata> = {};
   for (const slug of slugs) {
     if (!Object.prototype.hasOwnProperty.call(response, slug)) throw new Error('Incomplete metadata response');
     const raw = response[slug];
     if (raw === null) continue;
     const parsed = parseData(responseSchema, raw);
-    if (category === 'rwas' && !isRwa(parsed)) continue;
     const [address, id] = fromAssetSlug(slug);
     if (!id) throw new Error('Invalid metadata slug');
     records[slug] = parseData(TOKEN_METADATA_SCHEMA, buildTokenMetadataFromFetched(parsed, address, id));

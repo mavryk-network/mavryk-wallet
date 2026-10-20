@@ -6,6 +6,7 @@ import { isEqual, sortBy, uniqBy } from 'lodash';
 import {
   useAllTokensSelector,
   useAccountTokensSelector,
+  useAccountRwasSelector,
   useMainnetTokensWhitelistSelector
 } from 'app/store/assets/selectors';
 import { isAccountAssetsStoreKeyOfSameChainIdAndDifferentAccount } from 'app/store/assets/utils';
@@ -102,6 +103,7 @@ const TOKENS_SORT_ITERATEES: (keyof AccountToken)[] = ['predefined', 'slug'];
 
 export const useAccountTokens = (account: string, chainId: string, returnRemovedTokes = true) => {
   const storedRaw = useAccountTokensSelector(account, chainId);
+  const rwas = useAccountRwasSelector(account, chainId);
   const whitelistSlugs = useWhitelistSlugs(chainId);
 
   const metadatas = useAllTokensMetadataSelector();
@@ -133,7 +135,11 @@ export const useAccountTokens = (account: string, chainId: string, returnRemoved
       const whitelisted = whitelistSlugs.map<AccountToken>(slug => ({ slug, status: getAssetStatus(balances[slug]) }));
 
       // Keep this order to preserve correct statuses & flags
-      const concatenated: AccountToken[] = predefined.concat(stored).concat(whitelisted);
+      // RWA ownership also excludes retained token choices and whitelist entries after upgrades.
+      const concatenated: AccountToken[] = predefined
+        .concat(stored)
+        .concat(whitelisted)
+        .filter(({ slug }) => !Object.prototype.hasOwnProperty.call(rwas, slug));
 
       const filteredConcatened = returnRemovedTokes
         ? concatenated
@@ -144,7 +150,7 @@ export const useAccountTokens = (account: string, chainId: string, returnRemoved
         TOKENS_SORT_ITERATEES
       );
     },
-    [storedRaw, chainId, whitelistSlugs, returnRemovedTokes, balances, metadatas],
+    [storedRaw, rwas, chainId, whitelistSlugs, returnRemovedTokes, balances, metadatas],
     isEqual
   );
 };

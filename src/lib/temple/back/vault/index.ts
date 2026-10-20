@@ -201,7 +201,7 @@ export class Vault {
 
       await SessionStore.removeSession();
 
-      await clearAsyncStorages();
+      await clearAsyncStorages({ shouldPreserveOwnedState: true });
 
       await encryptAndSaveMany(
         [

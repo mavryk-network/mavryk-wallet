@@ -114,7 +114,7 @@ it('keeps all source inputs distinct and uses wallet mapping for tokens only', a
     symbol: '???'
   });
   expect(() => normalizeMetadata('tokens', ['KT1test_0'], { KT1test_0: { decimals: NaN } })).toThrow();
-  expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: raw })).toEqual({});
+  expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: raw }).KT1test_0).toMatchObject(raw);
   expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: { ...raw, symbol: 'OCEAN' } }).KT1test_0.symbol).toBe(
     'OCEAN'
   );

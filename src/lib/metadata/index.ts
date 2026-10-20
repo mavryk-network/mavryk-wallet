@@ -9,7 +9,7 @@ import { useTokenMetadataSelector, useAllTokensMetadataSelector } from 'app/stor
 import { isMavSlug } from 'lib/assets';
 import { useNetwork } from 'lib/temple/front';
 
-import { isCollectible, isRwa } from './classification';
+import { isCollectible } from './classification';
 import { MAVEN_METADATA, FILM_METADATA } from './defaults';
 import { AssetMetadataBase, TokenMetadata } from './types';
 import { useMetadataQuery } from './use-metadata-query';
@@ -31,10 +31,7 @@ export const useAssetMetadata = (slug: string): AssetMetadataBase | undefined =>
   const rwaMetadata = useRwaMetadataSelector(slug);
   const gasMetadata = useGasTokenMetadata();
 
-  return (
-    (isMavSlug(slug) ? gasMetadata : tokenMetadata) ||
-    (rwaMetadata && isRwa(rwaMetadata) ? rwaMetadata : collectibleMetadata)
-  );
+  return (isMavSlug(slug) ? gasMetadata : rwaMetadata ?? tokenMetadata) || collectibleMetadata;
 };
 
 export const useMultipleAssetsMetadata = (slugs: string[]): AssetMetadataBase[] | undefined => {

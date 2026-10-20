@@ -1,27 +1,29 @@
 import { useCallback, useState } from 'react';
 
-import { useDidUpdate } from 'lib/ui/hooks';
+import { isEqual } from 'lodash';
 
-/**
- * @arg sources // Memoize
- */
+import { useDidUpdate, useMemoWithCompare } from 'lib/ui/hooks';
+
+/** Keep image progress across equivalent owner snapshots; changed source URLs start a new stack. */
 export const useImagesStackLoading = (sources: string[]) => {
-  const emptyStack = sources.length < 1;
+  const stack = useMemoWithCompare(() => sources, [sources], isEqual);
+  const emptyStack = stack.length < 1;
 
   const [isLoading, setIsLoading] = useState(emptyStack === false);
   const [isStackFailed, setIsStackFailed] = useState(emptyStack);
 
+  // Reset browser image loading only for changed URLs; no subscription or cleanup is needed.
   useDidUpdate(() => {
-    const emptyStack = sources.length < 1;
+    const emptyStack = stack.length < 1;
 
     setIndex(emptyStack ? -1 : 0);
     setIsLoading(emptyStack === false);
     setIsStackFailed(emptyStack);
-  }, [sources]);
+  }, [stack]);
 
   const [index, setIndex] = useState(emptyStack ? -1 : 0);
 
-  const src = sources[index] as string | undefined;
+  const src = stack[index] as string | undefined;
 
   const onSuccess = useCallback(() => void setIsLoading(false), []);
 
@@ -30,7 +32,7 @@ export const useImagesStackLoading = (sources: string[]) => {
       return;
     }
 
-    if (index + 1 === sources.length) {
+    if (index + 1 === stack.length) {
       setIndex(-1);
       setIsLoading(false);
       setIsStackFailed(true);
@@ -39,7 +41,7 @@ export const useImagesStackLoading = (sources: string[]) => {
     }
 
     setIndex(index + 1);
-  }, [isStackFailed, sources.length, index]);
+  }, [isStackFailed, stack.length, index]);
 
   return {
     src,

@@ -287,3 +287,155 @@ describe('History UI helpers', () => {
     expect(historyItem.operations[0].entrypoint).toBe('update_operators');
   });
 });
+
+describe('primary purchases', () => {
+  const { purchaseFixture, PURCHASE_WALLET, PURCHASE_ASSET, PAYMENT_ASSET, PURCHASE_DECIMALS } =
+    require('./purchase.fixture') as typeof import('./purchase.fixture');
+  const normalize = (parent = purchaseFixture(), decimals = PURCHASE_DECIMALS, address = PURCHASE_WALLET) => {
+    const context = { address, decimals };
+    return mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([parent])[0], context);
+  };
+
+  it('retains the observed mint and authoritative payment once, with separate network fees', () => {
+    const parent = purchaseFixture();
+    const original = JSON.stringify(parent);
+    const item = normalize(parent);
+    expect(item.type).toBe(HistoryItemOpTypeEnum.Interaction);
+    expect(item.hash).toBe(parent.hash);
+    expect(item.operations).toHaveLength(4);
+    expect(item.status).toBe('applied');
+    expect(buildHistoryMoneyDiffs(item)).toEqual([
+      { assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' },
+      { assetSlug: `${PURCHASE_ASSET}_0`, diff: '0.2' }
+    ]);
+    expect(item.operations[1]).toMatchObject({
+      entrypoint: 'mint',
+      assetSlug: `${PURCHASE_ASSET}_0`,
+      amountSigned: '0.2',
+      atomicAmount: '200000',
+      destination: { address: PURCHASE_WALLET }
+    });
+    expect(item.mainOperation?.networkFees?.totalFee).toBe(0.010438);
+    expect(getHistoryOperationAddress(item.mainOperation)).toBe(parent.details!.contract);
+    expect(item.hideOperationMoneyDiffs).toBe(true);
+    expect(JSON.stringify(parent)).toBe(original);
+  });
+
+  it('normalizes all wallet allocations and IDs using distinct decimals without losing precision', () => {
+    const parent = purchaseFixture();
+    parent.operations![1].parameter!.value = [
+      { owner: PURCHASE_WALLET, amount: '123456789012345678901', token_id: '1' },
+      { owner: PURCHASE_WALLET, amount: '2', token_id: '1' },
+      { owner: PURCHASE_WALLET, amount: '35', token_id: '2' },
+      { owner: 'another-owner', amount: '999999', token_id: '2' }
+    ];
+    const item = normalize(parent, { [`${PURCHASE_ASSET}_1`]: 18, [`${PURCHASE_ASSET}_2`]: 1 });
+    expect(item.displayMoneyDiffs).toEqual([
+      { assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' },
+      { assetSlug: `${PURCHASE_ASSET}_1`, diff: '123.456789012345678903' },
+      { assetSlug: `${PURCHASE_ASSET}_2`, diff: '3.5' }
+    ]);
+  });
+
+  it('deduplicates repeated children, retaining distinct split payment operations', () => {
+    const parent = purchaseFixture();
+    parent.operations!.push(...parent.operations!);
+    expect(normalize(parent).displayMoneyDiffs).toEqual(normalize().displayMoneyDiffs);
+    expect(normalize(parent).operations).toHaveLength(4);
+  });
+
+  it('hides missing decimals and keeps mint identity and raw quantity', () => {
+    const item = normalize(purchaseFixture(), {});
+    expect(item.displayMoneyDiffs).toEqual([{ assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' }]);
+    expect(item.operations[1]).toMatchObject({
+      assetSlug: `${PURCHASE_ASSET}_0`,
+      atomicAmount: '200000',
+      isAmountUnavailable: true
+    });
+    expect(item.operations[1].amountDiff).toBeUndefined();
+  });
+
+  it.each(['failed', 'backtracked', 'skipped', 'pending'])('does not settle a %s parent or child', status => {
+    for (const failParent of [true, false]) {
+      const parent = purchaseFixture();
+      (failParent ? parent : parent.operations![1]).status = status;
+      const item = normalize(parent);
+      expect(item.status).toBe(status);
+      expect(buildHistoryMoneyDiffs(item, true)).toEqual([]);
+      expect(item.operations[1].amountDiff).toBeUndefined();
+    }
+  });
+
+  it('uses actual split transfers when the payment summary is missing, never the purchase limit', () => {
+    const parent = purchaseFixture();
+    delete parent.details!.amount;
+    delete parent.amount;
+    expect(normalize(parent).displayMoneyDiffs).toEqual([
+      { assetSlug: `${PURCHASE_ASSET}_0`, diff: '0.2' },
+      { assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' }
+    ]);
+  });
+
+  it('includes incoming refunds without adding outgoing payment children twice', () => {
+    const parent = purchaseFixture();
+    parent.operations!.push({
+      ...parent.operations![2],
+      id: 999,
+      parameter: {
+        entrypoint: 'transfer',
+        value: [{ from_: 'seller', txs: [{ to_: PURCHASE_WALLET, amount: '1000000', token_id: '0' }] }]
+      }
+    });
+    expect(normalize(parent).displayMoneyDiffs).toContainEqual({ assetSlug: `${PAYMENT_ASSET}_0`, diff: '-5' });
+  });
+
+  it('does not attribute another buyer payment or mint to the viewed account', () => {
+    expect(normalize(purchaseFixture(), PURCHASE_DECIMALS, 'unrelated-wallet').displayMoneyDiffs).toEqual([]);
+  });
+
+  it('does not depend on the example hash or currency label', () => {
+    const parent = purchaseFixture();
+    parent.hash = 'different-hash';
+    parent.details!.currency = 'OTHER';
+    parent.operations!.forEach(operation => {
+      operation.hash = parent.hash;
+    });
+    expect(normalize(parent).displayMoneyDiffs).toEqual(normalize().displayMoneyDiffs);
+  });
+
+  it('deduplicates child IDs returned with a different role', () => {
+    const parent = purchaseFixture();
+    parent.operations!.push({ ...parent.operations![1], role: 'recipient' });
+    expect(normalize(parent).displayMoneyDiffs).toEqual(normalize().displayMoneyDiffs);
+  });
+
+  it('aggregates fallback payments by exact token ID and recipient', () => {
+    const parent = purchaseFixture();
+    delete parent.details!.amount;
+    delete parent.amount;
+    parent.operations![2].parameter!.value = [
+      {
+        from_: PURCHASE_WALLET,
+        txs: [
+          { to_: 'seller', amount: '1200', token_id: '1' },
+          { to_: 'fee-recipient', amount: '300', token_id: '1' },
+          { to_: PURCHASE_WALLET, amount: '9000', token_id: '1' }
+        ]
+      }
+    ];
+    const result = normalize(parent, { ...PURCHASE_DECIMALS, [`${PAYMENT_ASSET}_1`]: 2 });
+    expect(result.displayMoneyDiffs).toContainEqual({ assetSlug: `${PAYMENT_ASSET}_1`, diff: '-15' });
+    expect(result.displayMoneyDiffs).toContainEqual({ assetSlug: `${PAYMENT_ASSET}_0`, diff: '-0.06' });
+  });
+
+  it.each([
+    null,
+    [{ owner: PURCHASE_WALLET, amount: '-1', token_id: '0' }],
+    [{ owner: PURCHASE_WALLET, amount: 9007199254740992, token_id: '0' }]
+  ])('preserves the interaction for unsupported mint parameters', value => {
+    const parent = purchaseFixture();
+    parent.operations![1].parameter!.value = value;
+    expect(normalize(parent).displayMoneyDiffs).toEqual([{ assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' }]);
+    expect(normalize(parent).operations[1].entrypoint).toBe('mint');
+  });
+});

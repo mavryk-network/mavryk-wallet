@@ -114,6 +114,8 @@ it('activates scoped read-only consumers without foreground destination adapters
       'lib/metadata/sync-metadata.ts',
       'lib/metadata/use-metadata-query.ts',
       'lib/metadata/use-owned-metadata.ts',
+      // Purchase enrichment reads scoped owner snapshots; publication stays in the metadata request path.
+      'lib/temple/history/purchase-metadata.ts',
       'lib/notifications/store/selectors.ts',
       'lib/temple/back/analytics.ts',
       'lib/temple/back/main.ts'

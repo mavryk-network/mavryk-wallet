@@ -85,12 +85,22 @@ export const getOperationTypeI18nKeyVerb = (type: HistoryItemOpTypeEnum) => {
 
 export function getAssetsFromOperations(item: UserHistoryItem | null | undefined) {
   if (item?.displayMoneyDiffs?.length) {
-    return [...new Set(item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug).filter(Boolean))];
+    return [
+      ...new Set(
+        [
+          ...item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug),
+          ...item.operations
+            .filter(operation => operation.atomicAmount !== undefined)
+            .map(operation => operation.assetSlug ?? '')
+        ].filter(Boolean)
+      )
+    ];
   }
 
   if (!item || item.operations.length <= 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {
+    if (op.assetSlug && op.atomicAmount !== undefined) return [...new Set([...acc, op.assetSlug])];
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
     let assetSlug: string = '';
@@ -119,6 +129,7 @@ export const getHistoryOperationAddress = (
   originalHistoryItem?: UserHistoryItem
 ): string => {
   if (!item) return '';
+  if (item.entrypoint === 'mint' && item.atomicAmount !== undefined) return item.contractAddress ?? '';
 
   switch (item.type) {
     case HistoryItemOpTypeEnum.Delegation: {

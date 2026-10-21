@@ -25,7 +25,16 @@ const HistoryOperationDetailsSchema = z
     tokenAddress: z.string().optional(),
     tokenId: NumberLikeSchema.optional(),
     timestamp: z.string().optional(),
-    amount: NumberLikeSchema.optional(),
+    amount: z
+      .union([
+        z.number().finite(),
+        z
+          .string()
+          .trim()
+          .min(1)
+          .refine(value => Number.isFinite(Number(value)), 'Invalid amount')
+      ])
+      .optional(),
     currency: z.string().optional(),
     usdAmount: NumberLikeSchema.optional(),
     entrypoint: z.string().optional(),

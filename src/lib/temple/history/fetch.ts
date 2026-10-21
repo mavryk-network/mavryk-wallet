@@ -8,6 +8,7 @@ import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } f
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
 import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
+import { getPurchaseMovements } from './purchase';
 import type { UserHistoryItem, OperationsGroup } from './types';
 import { HistoryItemOpTypeEnum } from './types';
 import {
@@ -17,6 +18,8 @@ import {
   mavrykHistoryGroupToHistoryItem,
   operationsGroupToHistoryItem
 } from './utils';
+
+type PurchaseDecimalsResolver = (slugs: string[]) => Promise<Record<string, number>>;
 
 export type FetchUserHistoryResult = {
   items: UserHistoryItem[];
@@ -65,17 +68,30 @@ function getTokenAddressFromSlug(assetSlug?: string) {
   return assetSlug.split('_')[0];
 }
 
-function normalizeBackendHistoryItems(
+async function normalizeBackendHistoryItems(
   operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
   accountAddress: string,
   requestedTypes: HistoryItemOpTypeEnum[],
-  assetSlug?: string
+  assetSlug?: string,
+  resolveDecimals?: PurchaseDecimalsResolver
 ) {
+  const groups = groupMavrykHistoryOperations(operations);
+  const slugs = [
+    ...new Set(
+      groups
+        .filter(group => group.summaryOperation?.details?.entrypoint === 'purchase')
+        .flatMap(group => getPurchaseMovements(group.operations))
+        .filter(movement => movement.to === accountAddress || movement.from === accountAddress)
+        .map(movement => movement.assetSlug)
+    )
+  ];
+  const decimals = slugs.length && resolveDecimals ? await resolveDecimals(slugs) : {};
   return applyLocalTypeFilter(
-    groupMavrykHistoryOperations(operations).map(group =>
+    groups.map(group =>
       mavrykHistoryGroupToHistoryItem(group, {
         address: accountAddress,
-        assetSlug
+        assetSlug,
+        decimals
       })
     ),
     requestedTypes
@@ -117,7 +133,8 @@ export async function fetchUserOperationByHash(
   _chainId: TzktApiChainId,
   accountAddress: string,
   hash: string,
-  assetSlug?: string
+  assetSlug?: string,
+  resolveDecimals?: PurchaseDecimalsResolver
 ) {
   try {
     const tokenAddress = getTokenAddressFromSlug(assetSlug);
@@ -131,7 +148,7 @@ export async function fetchUserOperationByHash(
           search: hash
         });
 
-    return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug);
+    return await normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
   } catch (error) {
     console.error('Error while fetching user operation by hash:', error);
     return [];
@@ -145,7 +162,8 @@ export default async function fetchUserHistory(
   pseudoLimit: number,
   _tezos: ReactiveTezosToolkit,
   cursor?: number,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: GetOperationsTransactionsParams,
+  resolveDecimals?: PurchaseDecimalsResolver
 ): Promise<FetchUserHistoryResult> {
   const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
   const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
@@ -166,11 +184,12 @@ export default async function fetchUserHistory(
           filter: backendFilter
         });
 
-    const normalizedItems = normalizeBackendHistoryItems(
+    const normalizedItems = await normalizeBackendHistoryItems(
       response.operations,
       account.publicKeyHash,
       localRequestedTypes,
-      assetSlug
+      assetSlug,
+      resolveDecimals
     );
     const visibleCollected = normalizedItems.slice(0, pseudoLimit);
     const nextCursor = response.cursor ?? undefined;

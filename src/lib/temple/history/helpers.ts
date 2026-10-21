@@ -43,6 +43,8 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       source: oper.source,
       status: oper.status,
       amountSigned: oper.amountSigned,
+      atomicAmount: oper.atomicAmount,
+      isAmountUnavailable: oper.isAmountUnavailable,
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
@@ -162,7 +164,7 @@ export type MoneyDiff = HistoryDisplayMoneyDiff;
 export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allowZero = false) {
   if (!historyItem) return [];
 
-  if (historyItem.displayMoneyDiffs?.length) {
+  if (historyItem.displayMoneyDiffs) {
     return allowZero
       ? historyItem.displayMoneyDiffs
       : historyItem.displayMoneyDiffs.filter(({ diff }) => !isZero(diff));

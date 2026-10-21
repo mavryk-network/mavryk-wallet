@@ -67,6 +67,9 @@ export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   source: HistoryMember;
   status: HistoryItemStatus;
   amountSigned: string;
+  /** Raw purchase quantity; never used as a display-unit amount. */
+  atomicAmount?: string;
+  isAmountUnavailable?: boolean;
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;

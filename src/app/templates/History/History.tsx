@@ -17,6 +17,7 @@ import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
 import { createOpParams, mergeOpParams } from 'lib/temple/history/filterParams';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
+import { usePurchaseMetadata } from 'lib/temple/history/use-purchase-metadata';
 import { isKnownChainId } from 'lib/temple/types';
 
 import useHistory from '../../../lib/temple/history/hook';
@@ -61,6 +62,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     const { popup } = useAppEnv();
     const { publicKeyHash: accountAddress } = useAccount();
     const chainId = useChainId();
+    const resolvePurchaseDecimals = usePurchaseMetadata();
 
     // factory method to create params object for api calls
     const paramsRecord = useMemo(() => createOpParams(accountAddress), [accountAddress]);
@@ -208,18 +210,27 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // end of debounced search ****************************************************
 
-    // fetch single user operation by entered search value
+    // Fetch hash history for the captured scope; cleanup discards results after search or network changes.
     useEffect(() => {
+      let isCancelled = false;
       async function fetchOperationData() {
         setIsSearchingByHash(true);
         if (chainId && isKnownChainId(chainId) && searchValueForFilter !== '') {
           try {
-            const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter, assetSlug);
+            const arr = await fetchUserOperationByHash(
+              chainId,
+              accountAddress,
+              searchValueForFilter,
+              assetSlug,
+              resolvePurchaseDecimals
+            );
+            if (isCancelled) return;
             setIsSearchingByHash(false);
 
             setFilteredHistory(arr);
           } catch (e) {
-            console.log(e);
+            if (isCancelled) return;
+            console.error('Unable to search history');
             setFilteredHistory([]);
             setIsSearchingByHash(false);
           }
@@ -229,7 +240,10 @@ export const HistoryComponent: React.FC<Props> = memo(
       }
 
       fetchOperationData();
-    }, [searchValueForFilter, chainId, accountAddress, assetSlug]);
+      return () => {
+        isCancelled = true;
+      };
+    }, [searchValueForFilter, chainId, accountAddress, assetSlug, resolvePurchaseDecimals]);
 
     // popup states
     const [isOpen, setIsOpen] = useState(false);

@@ -8,7 +8,7 @@ Investigated on 2026-10-21. The initial investigation did not modify application
 | RWA loading | Already fixed — skipped | N/A | N/A |
 | Token history | Confirmed with authenticated API responses | Backend whitelist rejects most contracts; frontend converts request failures into successful empty history | Backend + frontend |
 | Asset classification | **Fixed / Verified** in code, automated tests and sampled API catalog | Catalog-based partition and owner reconciliation already replace incomplete symbol-based classification; Basenet wUSDT exception is implemented | No additional fix proposed |
-| Primary purchase history | Confirmed with backend and public indexer responses | Backend summary contains payment only; frontend suppresses children and does not normalize the mint | Frontend fix possible; backend normalized asset movements recommended |
+| Primary purchase history | Implemented; automated verification below | Scoped purchase normalization retains mint credits with authoritative payment and separate fees | Frontend; broader backend normalization remains optional |
 | Full-screen flickering | Reload/background gap confirmed in code; visual acceptance pending | Setting reloads the document; new/full-page document has no initial background, with background assigned after React mounts | Frontend |
 | Mavryk Pro upgrade | Confirmed | Both production UI actions still invoke deliberately blocked frontend privileged signing; no replacement service integration; Mainnet contract mapping also empty | Backend + frontend + deployment configuration |
 
@@ -313,6 +313,55 @@ If that extension is chosen, validate it in `src/mavryk/api/history.ts`, map it 
 - Test split payments, multiple mint recipients/IDs, duplicate child operations, differing decimals, large atomic strings, no metadata, failed operations, refunds and accounts other than the buyer. Do not infer that every positive parameter amount is a credit to the viewed account.
 - Preserve existing swap/sell/buy-order summaries, standalone transfers, delegation/staking, pagination, pending confirmation deduplication and summary fee tests.
 - Re-run `utils.test.ts`, History rendering/helper tests and `yarn ts`; then full `yarn test --runInBand`. Use installed extension acceptance for the sample hash.
+
+### Implementation status — 2026-10-21
+
+**Implemented for the observed frontend purchase/mint contract.** The original implementation was checked against the sample regression and failed specifically because `KRKN_0: 0.2` was absent. The repaired main history and hash-search paths normalize the parent plus all four children into one contract interaction with **+0.2 KRKN**, **-6 wUSDT**, and **0.010438 MVRK** network fees separately. The details popup uses the parent's authoritative fee totals instead of summing its children.
+
+New decisions and amount contract:
+
+- Only grouped parents with `details.entrypoint === 'purchase'` activate this path. Mint allocation arrays (`owner`, unsigned `amount`, unsigned `token_id`) and FA2 transfer arrays are structurally validated. No example hash, token symbol, or proposed `assetChanges` field participates in recognition.
+- Raw atomic quantities and token IDs stay as strings. Validated decimals (integer 0–255) are supplied explicitly to pure normalization. BigNumber shifts atomic quantities once; parent payment amounts remain display units. API validation now preserves numeric strings in `details.amount`, including values exceeding JavaScript's safe integer precision, rather than coercing them to numbers. Numeric backend values retain their existing meaning; precision already lost by the server cannot be recovered.
+- Metadata enrichment reads the exact account/chain/API-network/RPC owner scope, requests missing RWA metadata through the existing Query batch/owner publication path, and falls back to the existing on-chain metadata batch for catalog misses. It introduces no metadata owner or persistent cache. Legacy unscoped metadata is not used to infer purchase amounts.
+- The buyer's authoritative outgoing payment replaces its matching outgoing children. Incoming refunds and wallet-owned mints are added; without a trustworthy summary, actual FA2 movements are aggregated by contract and token ID. Other recipients are excluded. Duplicate operation IDs do not duplicate movements. Failed, backtracked, skipped and pending groups have no settled display diffs.
+- Per the user's fallback decision, unavailable amounts are **hidden**, with the mint contract visible and token ID/recipient retained in the normalized data; no estimated amount or unavailable-amount notice is shown. `atomicAmount` and `isAmountUnavailable` distinguish raw evidence from display amounts in child details. The required numeric-string compatibility placeholder is never rendered as a zero-token receipt.
+- Main purchase details point to the purchase contract; mint data retains token identity and recipient. Per the design correction, the history UI omits the `#0 → address` line. Summary suppression remains active, including for unrelated history. Existing token-history endpoint selection/restriction (#3), password fix (#1), pagination and pending-operation logic are unchanged.
+
+Changed implementation files:
+
+- `src/lib/temple/history/purchase.ts` — pure validated movement decoding, exact decimal conversion and aggregation.
+- `src/lib/temple/history/purchase-metadata.ts`, `use-purchase-metadata.ts` — scoped owner reads and existing Query metadata orchestration.
+- `src/lib/temple/history/utils.ts`, `types.ts`, `helpers.ts` — purchase child normalization, explicit raw/unavailable fields, group status and empty-summary handling.
+- `src/lib/temple/history/fetch.ts`, `hook.ts` — enrichment for fetched history, scope-sensitive reloads, and explicit decimals passed into normalization.
+- `src/mavryk/api/history.ts` — preserve validated display-unit amount strings.
+- `src/app/templates/History/History.tsx` — enrich hash searches and discard obsolete search results after scope changes.
+- `src/app/templates/History/HistoryDetailsPopup.tsx`, `OperStackItem.tsx`, `utils.ts` — purchase multi-asset display, authoritative fees, meaningful mint details and asset identity retention.
+
+Regression coverage:
+
+- `src/lib/temple/history/purchase.fixture.ts` — documented parent and four children, with observed IDs, payloads, timestamp, level and fee fields; unspecified transport fields are omitted.
+- `src/lib/temple/history/utils.test.ts` — sample purchase, immutable parsing, varying decimals, large atomic strings, recipients/IDs, duplicate children, split payments, refunds, missing metadata, unsupported mint shapes, statuses and symbol/hash independence, alongside retained generic-history tests.
+- `src/lib/temple/history/fetch.test.ts` — normal API envelope, pagination/hash-search enrichment, unchanged wallet endpoint and exact display-unit strings through response parsing.
+- `src/lib/temple/history/purchase-metadata.test.ts` — exact scope isolation, owner publication, catalog miss/on-chain fallback, failures and cancellation.
+- `src/lib/store/zustand/__tests__/safe-initialization.test.ts` — add the scoped read-only purchase metadata consumer to the explicit architecture allowlist; destination-adapter prohibition remains enforced.
+- `src/app/templates/History/purchase-rendering.test.tsx` — real compact-row/details rendering with presentation/service boundaries mocked; both assets, separate fee, and hidden unknown amounts with retained mint details.
+
+Verification:
+
+- Original-source sample regression: **failed as expected**, specifically on missing `+0.2 KRKN`.
+- Targeted history/request/metadata/rendering tests: **5 suites, 31 tests passed**.
+- `yarn ts`: **passed**.
+- Full `yarn test --runInBand`: **104 suites / 636 tests passed; 1 architecture-allowlist test failed** because the new scoped owner reader was not yet listed. The allowlist was updated without relaxing the destination-adapter prohibition. A focused rerun of `src/lib/store/zustand/__tests__/safe-initialization.test.ts`: **1 suite, 2 tests passed**. All tests are verified across these runs; the already-passing 104 suites were not repeated for that test-only allowlist correction.
+- Targeted ESLint (`--quiet`), Prettier, and `git diff --check`: **passed**. Existing advisory lint warnings remain.
+- Design follow-up: removed the mint token-ID/recipient line. Focused rendering tests: **1 suite, 2 tests passed**; Prettier and `git diff --check`: **passed**.
+- No runtime build or installed-extension acceptance was performed.
+
+Remaining limitations:
+
+- Installed-extension/live Basenet visual acceptance was not performed. Evidence and fixtures use the previously recorded Basenet response; no live transaction was submitted.
+- Unsupported mint encodings remain generic interaction details without inferred received amounts. Fallback transfer decoding is limited to the confirmed FA2 encoding; this is not a general contract-effect interpreter.
+- A metadata miss/failure hides the affected amount. Enrichment is retried when history is fetched again, subject to existing metadata receipt expiry/invalidation; already displayed history is not automatically re-normalized on unrelated metadata writes.
+- The separate token-history whitelist restriction in issue #3 remains. No backend changes, commits, publication or deployment were performed.
 
 ### Backend dependencies
 

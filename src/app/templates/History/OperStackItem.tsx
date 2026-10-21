@@ -42,7 +42,10 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
   const componentBaseProps = {
     status: item.status,
-    moneyDiff,
+    moneyDiff:
+      item.entrypoint === 'mint' && item.atomicAmount !== undefined && item.amountDiff !== undefined && item.assetSlug
+        ? { assetSlug: item.assetSlug, diff: item.amountDiff }
+        : moneyDiff,
     last
   };
 

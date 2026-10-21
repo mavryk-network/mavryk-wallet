@@ -105,7 +105,10 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      historyItem?.operations.reduce<HistoryFeeTotals>((acc, item) => {
+      (mainOperation?.entrypoint === 'purchase' && mainOperation.networkFees
+        ? [mainOperation]
+        : historyItem?.operations
+      )?.reduce<HistoryFeeTotals>((acc, item) => {
         acc.gasFee = acc.gasFee.plus(item.networkFees?.gasFee ?? 0);
         acc.storageFee = acc.storageFee.plus(item.networkFees?.storageFee ?? 0);
         acc.networkFee = acc.networkFee.plus(item.networkFees?.totalFee ?? 0);
@@ -113,7 +116,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         return acc;
       }, createEmptyHistoryFeeTotals()) ?? createEmptyHistoryFeeTotals(),
-    [historyItem?.operations]
+    [historyItem?.operations, mainOperation]
   );
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
@@ -173,19 +176,21 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             {HistoryItemOpTypeTexts[historyItem.type]}{' '}
             {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
           </div>
-          {showDiffs && (
+          {(showDiffs || mainOperation?.entrypoint === 'purchase') && (
             <div className="flex flex-col">
-              {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
-                <MoneyDiffView
-                  key={i}
-                  assetId={assetSlug}
-                  diff={diff}
-                  pending={status === 'pending'}
-                  className="flex flex-col items-center"
-                  moneyClassname="text-xl leading-6 tracking-tight"
-                  isColored={false}
-                />
-              ))}
+              {(mainOperation?.entrypoint === 'purchase' ? moneyDiffs : moneyDiffs.slice(0, 1)).map(
+                ({ assetSlug, diff }, i) => (
+                  <MoneyDiffView
+                    key={i}
+                    assetId={assetSlug}
+                    diff={diff}
+                    pending={status === 'pending'}
+                    className="flex flex-col items-center"
+                    moneyClassname="text-xl leading-6 tracking-tight"
+                    isColored={false}
+                  />
+                )
+              )}
             </div>
           )}
 

@@ -24,6 +24,7 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import type { AssetMetadataBase } from '../../metadata';
 
 import { getMoneyDiff, isZero } from './helpers';
+import { buildPurchaseDiffs, getPurchaseMovements, purchaseDisplayAmount } from './purchase';
 import {
   Fa2TransferSummaryArray,
   HistoryDisplayMoneyDiff,
@@ -49,6 +50,7 @@ import {
 type BackendHistoryNormalizationContext = {
   address: string;
   assetSlug?: string;
+  decimals?: Readonly<Record<string, number>>;
 };
 
 type MavrykHistoryOperationsGroup = {
@@ -166,7 +168,7 @@ const normalizeBackendFees = (fees?: MavrykHistoryNetworkFees) => {
 const buildBackendOperationBase = (
   operation: MavrykHistoryOperation,
   address: string,
-  amount: number,
+  amount: number | string,
   source: HistoryMember,
   index: number
 ): HistoryItemOperationBase => {
@@ -211,19 +213,21 @@ const getBackendHistoryMember = (operation: MavrykHistoryOperation) =>
 const getBackendAmountSigned = (
   operation: MavrykHistoryOperation,
   address: string,
-  amount: number,
+  amount: number | string,
   source: HistoryMember
 ) =>
-  getAmountSigned(
-    {
-      type: getBackendOperationType(operation) as TzktOperation['type'],
-      sender: source,
-      baker: undefined
-    } as TzktOperation,
-    address,
-    amount,
-    source
-  );
+  typeof amount === 'string' && !['staking', 'delegation'].includes(getBackendOperationType(operation))
+    ? new BigNumber(amount).times(source.address === address ? -1 : 1).toFixed()
+    : getAmountSigned(
+        {
+          type: getBackendOperationType(operation) as TzktOperation['type'],
+          sender: source,
+          baker: undefined
+        } as TzktOperation,
+        address,
+        typeof amount === 'string' ? Number(amount) : amount,
+        source
+      );
 
 const buildBackendSummaryDisplayMoneyDiffs = (
   group: MavrykHistoryOperationsGroup,
@@ -261,7 +265,7 @@ const buildBackendTokenTransfer = (
   tokenId: number,
   source: HistoryMember,
   destination: HistoryMember,
-  amount: number
+  amount: number | string
 ): HistoryItemTokenTransfer => ({
   totalAmount: String(amount),
   recipients: [{ to: destination, amount: String(amount) }],
@@ -315,7 +319,7 @@ const buildBackendTransactionOperation = (
   index: number,
   context: BackendHistoryNormalizationContext,
   args: {
-    amount: number;
+    amount: number | string;
     source: HistoryMember;
     destination: HistoryMember;
     contractAddress?: string;
@@ -445,7 +449,13 @@ const reduceOneBackendOperation = (
   const details = operation.details ?? undefined;
   const effectiveOperationType = getBackendOperationType(operation);
   const sourceAddress = details?.from ?? operation.parameter?.from ?? operation.sender ?? '';
-  const destinationAddress = details?.to ?? details?.contract ?? operation.parameter?.to ?? operation.target ?? '';
+  const destinationAddress =
+    (details?.entrypoint === 'purchase' ? details.contract : undefined) ??
+    details?.to ??
+    details?.contract ??
+    operation.parameter?.to ??
+    operation.target ??
+    '';
   const source = transformToHistoryMember(sourceAddress);
   const destination = transformToHistoryMember(destinationAddress);
   const amount = details?.amount ?? operation.amount ?? operation.parameter?.amount ?? 0;
@@ -475,7 +485,7 @@ const reduceOneBackendOperation = (
 
       return {
         ...stakingOpBase,
-        amount,
+        amount: Number(amount),
         action: (details?.action ?? operation.action ?? operation.parameter?.entrypoint ?? 'stake') as StakingActions,
         sender: source,
         baker:
@@ -618,17 +628,64 @@ export function mavrykHistoryGroupToHistoryItem(
     group.summaryOperation?.details != null
       ? reduceOneBackendOperation(group.summaryOperation, 0, context) ?? undefined
       : undefined;
+  const isPurchase = group.summaryOperation?.details?.entrypoint === 'purchase';
+  const movements = isPurchase ? getPurchaseMovements(operations) : [];
+  const purchaseStatus = isPurchase
+    ? [group.summaryOperation!, ...operations].find(operation => operation.status !== 'applied')?.status ?? 'applied'
+    : undefined;
   const historyItemOperations = operations
-    .map((operation, index) => reduceOneBackendOperation(operation, index, context))
+    .flatMap((operation, index) => {
+      const base = reduceOneBackendOperation(operation, index, context);
+      const allocations = movements.filter(
+        movement =>
+          movement.operationIndex === index && (movement.to === context.address || movement.from === context.address)
+      );
+      if (!base || !allocations.length) return [base];
+      return allocations.map((movement, allocationIndex) => {
+        const amount = purchaseDisplayAmount(movement.atomicAmount, context.decimals?.[movement.assetSlug]);
+        const signed =
+          amount === undefined || purchaseStatus !== 'applied'
+            ? undefined
+            : new BigNumber(amount)
+                .times(Number(movement.to === context.address) - Number(movement.from === context.address))
+                .toFixed();
+        return {
+          ...base,
+          networkFees: allocationIndex === 0 ? base.networkFees : undefined,
+          type: movement.isMint ? HistoryItemOpTypeEnum.Interaction : base.type,
+          source: transformToHistoryMember(movement.from || movement.contract),
+          destination: transformToHistoryMember(movement.to),
+          contractAddress: movement.contract,
+          assetSlug: movement.assetSlug,
+          atomicAmount: movement.atomicAmount,
+          isAmountUnavailable: amount === undefined,
+          amountSigned: signed ?? '0',
+          amountDiff: signed,
+          tokenTransfers: undefined
+        };
+      });
+    })
     .filter(isTruthy);
 
-  const status = deriveHistoryItemStatus(
-    historyItemOperations.length
-      ? historyItemOperations
-      : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
-  );
+  const status = purchaseStatus
+    ? stringToHistoryItemStatus(purchaseStatus)
+    : deriveHistoryItemStatus(
+        historyItemOperations.length
+          ? historyItemOperations
+          : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
+      );
   const type = deriveBackendItemType(group, historyItemOperations, context.address, mainOperation);
-  const displayMoneyDiffs = buildBackendSummaryDisplayMoneyDiffs(group, type, context);
+  const summaryDiffs = buildBackendSummaryDisplayMoneyDiffs(group, type, context);
+  const payment =
+    group.summaryOperation?.details?.from === context.address &&
+    summaryDiffs?.every(diff => new BigNumber(diff.diff).isFinite() && new BigNumber(diff.diff).lt(0))
+      ? summaryDiffs
+      : undefined;
+  const displayMoneyDiffs = isPurchase
+    ? status === 'applied'
+      ? buildPurchaseDiffs(movements, context.address, context.decimals ?? {}, payment)
+      : []
+    : summaryDiffs;
   const firstOperation = historyItemOperations[0];
   const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
 

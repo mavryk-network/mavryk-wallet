@@ -9,7 +9,7 @@ Investigated on 2026-10-21. The initial investigation did not modify application
 | Token history | Confirmed with authenticated API responses | Backend whitelist rejects most contracts; frontend converts request failures into successful empty history | Backend + frontend |
 | Asset classification | **Fixed / Verified** in code, automated tests and sampled API catalog | Catalog-based partition and owner reconciliation already replace incomplete symbol-based classification; Basenet wUSDT exception is implemented | No additional fix proposed |
 | Primary purchase history | Implemented; automated verification below | Scoped purchase normalization retains mint credits with authoritative payment and separate fees | Frontend; broader backend normalization remains optional |
-| Full-screen flickering | Reload/background gap confirmed in code; visual acceptance pending | Setting reloads the document; new/full-page document has no initial background, with background assigned after React mounts | Frontend |
+| Full-screen flickering | Implemented; automated/build verification below; installed-extension visual acceptance pending | Parse-time dark canvas fallback and redirect before React root creation | Frontend |
 | Mavryk Pro upgrade | Confirmed | Both production UI actions still invoke deliberately blocked frontend privileged signing; no replacement service integration; Mainnet contract mapping also empty | Backend + frontend + deployment configuration |
 
 ## Evidence, scope and working rules
@@ -373,7 +373,7 @@ No missing purchase operation: the backend returns it and all four children. Fro
 
 Changing the Full-screen setting briefly exposes white before the dark wallet view appears. Preserve current mode persistence and navigation behavior; do not add a loading screen.
 
-### Confirmed code path / unverified visual boundary
+### Confirmed code path before implementation / unverified visual boundary
 
 - `src/app/templates/SettingsGeneral/Components/PopupSettings.tsx`, `handlePopupModeChange`, writes `setPopupMode(!checked)` and immediately calls `window.location.reload()`. This recreates the document and React tree, not just a layout component.
 - `src/lib/popup-mode/index.ts` persists `popup_mode` in localStorage.
@@ -400,6 +400,32 @@ This establishes an exposed default-background interval. No installed-extension 
 ### Risks and verification
 
 Verify popup → fullpage, fullpage setting off, next toolbar popup, reload while locked/unlocked, cold start with slow JavaScript and CSS, repeated toggles, preserved route/query, no duplicate tabs, and Firefox. Record before/after filmstrips using the built extension, distinguishing native browser chrome from extension pixels. The extension canvas should remain dark before React mounts and during route cleanup. Confirm later theme/route backgrounds still override the fallback. Run `yarn ts` if changing bootstrap TypeScript and build Chrome/Firefox outputs to inspect templates; a snapshot-only unit test cannot establish absence of flicker.
+
+### Implementation status — 2026-10-21
+
+**Implemented; installed-extension visual acceptance pending.** The setting really does reload the document. That behavior and localStorage persistence remain unchanged, including keeping the current fullpage tab open when the preference is disabled. Subsequent toolbar openings use the saved preference.
+
+Changed files:
+
+- `public/popup.html`, `public/fullpage.html` — inline critical `:where(html)` background rule in the head, available during parsing before external CSS or deferred JavaScript. The HTML canvas covers the empty document; the body retains its existing transparency/classes so fullpage route gradients are not obscured. Zero specificity allows later route/theme rules to override the fallback, which remains after `DocBg` cleanup. No dimensions or scrolling rules changed.
+- `webpack.config.ts` — supplies the shared `documentBackground` template value from the existing Tailwind `primary-bg` token (`#010101`), avoiding a second color definition.
+- `src/popup.tsx` — checks the existing redirect condition before creating/rendering the React root. Redirects still use `openInFullPage` once and close only the popup; the normal popup branch mounts once.
+- `src/popup.test.tsx` — exercises all four popup-window/preference combinations with real mode storage and navigation helper, mocked browser APIs and React root. Verifies no root on redirect, one tab/close, retained query/hash, one normal mount and unchanged preference.
+
+Verification results:
+
+- `yarn ts`: **passed**.
+- Full `yarn test --runInBand --watch=false`: **105 suites / 637 tests passed**; the new bootstrap suite initially failed compilation because the pinned Jest types lack `jest.mocked`. Replaced it with typed `jest.spyOn` and reran the affected suite: **4 tests passed**, with TypeScript passing afterward. Combined verification covers **106 suites / 641 tests**; the full command was not rerun after that test-only correction. Password setup, legacy keystore and vault compatibility suites passed in the full run.
+- `yarn build:chrome` and `yarn build:firefox`: **passed**, including production checks and packaging (`dist/chrome.zip`, `dist/firefox.xpi`).
+- Inspected both generated popup/fullpage HTML pairs and their linked production CSS: `:where(html){background-color:#010101}` precedes stylesheet links and deferred scripts; no unexpanded template values remain. Popup 375×600 sizing, body scroll sizing, Firefox horizontal overflow class and fullpage 640px minimum width/100vh body sizing remain intact. Theme background classes and fullpage gradient CSS remain emitted. Manifest CSP permits the critical style.
+- Targeted Prettier and `git diff --check`: **passed**. Targeted ESLint: **0 errors**, 17 existing assertion warnings in bootstrap/build configuration; the new test has no lint warnings.
+
+Visual acceptance limitations:
+
+- Computer-use inventory exposed no browsers or native apps. No installed extension was accessible, and no before/after screenshots or filmstrips were captured.
+- Cold startup, throttled CSS/JavaScript, locked/unlocked reloads, both setting directions, subsequent toolbar opening, repeated toggles and Firefox visual behavior remain manual acceptance items. DOM tests and generated artifact inspection do not prove absence of flicker.
+- This correction covers the extension document canvas. Browser-native new-tab/popup surfaces are outside its CSS control; any remaining flash needs a frame sequence distinguishing those surfaces from extension pixels before further lifecycle changes.
+- Issue #1's completed password fix and unrelated code remain untouched. No loading screen, timer, dependency, video fullscreen change or new fullscreen architecture was introduced. No commit, publication or deployment was performed.
 
 ### Backend dependencies
 

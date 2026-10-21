@@ -105,6 +105,9 @@ const mainConfig = (() => {
         ({ name, filename, path }) =>
           new HtmlWebpackPlugin({
             template: path,
+            templateParameters: {
+              documentBackground: require('./tailwind.config.js').theme.colors['primary-bg']
+            },
             filename,
             chunks: liveReload ? [name, 'live_reload'] : [name],
             inject: 'body',

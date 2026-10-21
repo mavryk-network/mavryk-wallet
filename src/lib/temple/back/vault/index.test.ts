@@ -3,9 +3,16 @@ import browser from 'webextension-polyfill';
 import * as Passworder from 'lib/temple/passworder';
 import { TempleAccount, TempleAccountType, TempleChainKind } from 'lib/temple/types';
 
+import { MIGRATIONS } from './migrations';
 import { createMemorySigner, mnemonicToTezosAccountCreds } from './misc';
-import { encryptAndSaveMany } from './safe-storage';
-import { accPrivKeyStrgKey, accountsStrgKey, walletMnemonicStrgKey } from './storage-keys';
+import { encryptAndSaveMany, savePlain } from './safe-storage';
+import {
+  accPrivKeyStrgKey,
+  accountsStrgKey,
+  checkStrgKey,
+  migrationLevelStrgKey,
+  walletMnemonicStrgKey
+} from './storage-keys';
 
 import { Vault } from './index';
 
@@ -151,4 +158,14 @@ describe('Vault contacts key derivation', () => {
       identityKind: 'imported'
     });
   });
+});
+
+it('unlocks an existing vault with a password below the new-vault policy', async () => {
+  await browser.storage.local.clear();
+  const legacyPassword = 'old';
+  const legacyPassKey = await Passworder.generateKey(legacyPassword);
+  await encryptAndSaveMany([[checkStrgKey, 'legacy-check']], legacyPassKey);
+  await savePlain(migrationLevelStrgKey, MIGRATIONS.length);
+
+  await expect(Vault.setup(legacyPassword)).resolves.toBeInstanceOf(Vault);
 });

@@ -4,7 +4,7 @@ import { isDefined } from '@rnw-community/shared';
 import { debounce } from 'lodash';
 
 import { useCollectibleIsAdultSelector } from 'app/store/collectibles/selectors';
-import { buildCollectibleImagesStack } from 'lib/images-uri';
+import { buildRwaImagesStack } from 'lib/images-uri';
 import type { TokenMetadata } from 'lib/metadata';
 import { ImageStacked } from 'lib/ui/ImageStacked';
 import { useIntersectionByOffsetObserver } from 'lib/ui/use-intersection-observer';
@@ -25,10 +25,10 @@ const isAudioCollectible = false;
 
 export const RwaItemImage = memo<Props>(({ assetSlug, metadata, adultBlur, areDetailsLoading, containerElemRef }) => {
   const isAdultContent = useCollectibleIsAdultSelector(assetSlug);
-  const isAdultFlagLoading = areDetailsLoading && !isDefined(isAdultContent);
+  const isAdultFlagLoading = adultBlur && areDetailsLoading && !isDefined(isAdultContent);
   const shouldShowBlur = isAdultContent && adultBlur;
 
-  const sources = useMemo(() => (metadata ? buildCollectibleImagesStack(metadata) : []), [metadata]);
+  const sources = useMemo(() => buildRwaImagesStack(metadata), [metadata]);
 
   const [isInViewport, setIsInViewport] = useState(false);
   const handleIntersection = useMemo(() => debounce(setIsInViewport, 500), []);

@@ -10,8 +10,6 @@ const MEMBER_KYC_ACTION = 'addMemberKyc';
 const DEFAULT_MEMBERSHIP_TIER = 'Starter';
 const DEFAULT_KYC_FIELD_VALUE = 'NIL';
 const CONFIRMATIONS_COUNT = 1;
-const PRODUCTION_KYC_SIGNING_ERROR =
-  'KYC signing is not available in frontend production builds. Server-side signing is required.';
 const TESTNET_KYC_SIGNING_ONLY_ERROR = 'Frontend KYC signing is only available on Basenet testnet.';
 const TESTNET_KYC_SIGNER_KEY_MISSING_ERROR = 'Testnet KYC signer key is not configured for this frontend build.';
 
@@ -48,10 +46,6 @@ const getKYCContractAddress = (chainId: string | null | undefined) => {
 };
 
 const getTestnetKYCSignerPrivateKey = (chainId: string | null | undefined) => {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(PRODUCTION_KYC_SIGNING_ERROR);
-  }
-
   if (!chainId || !isKnownChainId(chainId)) {
     throw new Error('Unknown chain Id');
   }

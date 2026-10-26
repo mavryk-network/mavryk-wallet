@@ -68,7 +68,8 @@ const publicEnvFilesData: Record<string, string> = Object.fromEntries(
   Object.entries(envFilesData).filter(([name]) => publicEnvVarNames.has(name) && !blockedPublicEnvVarNames.has(name))
 );
 
+// Basenet test releases also use production optimization. This optional key is public in every bundle.
 publicEnvFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] =
-  NODE_ENV === 'production' ? '' : envFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] ?? '';
+  envFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] ?? '';
 
 export { envFilesData, publicEnvFilesData };

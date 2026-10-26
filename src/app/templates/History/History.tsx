@@ -43,6 +43,7 @@ const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
 
 interface Props {
   assetSlug?: string;
+  tokenAddress?: string;
   searchWrapperClassname?: string;
   theme?: ComponentTheme;
   showRestOfSearchSectionOptions?: boolean;
@@ -53,6 +54,7 @@ interface Props {
 export const HistoryComponent: React.FC<Props> = memo(
   ({
     assetSlug,
+    tokenAddress,
     searchWrapperClassname,
     theme = DARK_THEME,
     showRestOfSearchSectionOptions = true,
@@ -163,7 +165,7 @@ export const HistoryComponent: React.FC<Props> = memo(
       reachedTheEnd,
       list: userHistory,
       loadMore
-    } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams);
+    } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams, undefined, tokenAddress);
 
     // useLoadPartnersPromo();
 
@@ -222,7 +224,8 @@ export const HistoryComponent: React.FC<Props> = memo(
               accountAddress,
               searchValueForFilter,
               assetSlug,
-              resolvePurchaseDecimals
+              resolvePurchaseDecimals,
+              tokenAddress
             );
             if (isCancelled) return;
             setIsSearchingByHash(false);
@@ -243,7 +246,7 @@ export const HistoryComponent: React.FC<Props> = memo(
       return () => {
         isCancelled = true;
       };
-    }, [searchValueForFilter, chainId, accountAddress, assetSlug, resolvePurchaseDecimals]);
+    }, [searchValueForFilter, chainId, accountAddress, assetSlug, resolvePurchaseDecimals, tokenAddress]);
 
     // popup states
     const [isOpen, setIsOpen] = useState(false);

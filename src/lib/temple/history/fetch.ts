@@ -7,6 +7,7 @@ import { TempleAccount } from 'lib/temple/types';
 import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
+import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
 import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
 import { getPurchaseMovements } from './purchase';
 import type { UserHistoryItem, OperationsGroup } from './types';
@@ -63,7 +64,8 @@ function applyLocalTypeFilter(items: UserHistoryItem[], requestedTypes: HistoryI
 }
 
 function getTokenAddressFromSlug(assetSlug?: string) {
-  if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) return undefined;
+  if (!assetSlug) return undefined;
+  if (assetSlug === MAV_TOKEN_SLUG) return MVRK_HISTORY_TOKEN_ADDRESS;
 
   return assetSlug.split('_')[0];
 }
@@ -134,10 +136,10 @@ export async function fetchUserOperationByHash(
   accountAddress: string,
   hash: string,
   assetSlug?: string,
-  resolveDecimals?: PurchaseDecimalsResolver
+  resolveDecimals?: PurchaseDecimalsResolver,
+  tokenAddress = getTokenAddressFromSlug(assetSlug)
 ) {
   try {
-    const tokenAddress = getTokenAddressFromSlug(assetSlug);
     const response = tokenAddress
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: accountAddress,
@@ -163,12 +165,12 @@ export default async function fetchUserHistory(
   _tezos: ReactiveTezosToolkit,
   cursor?: number,
   operationParams?: GetOperationsTransactionsParams,
-  resolveDecimals?: PurchaseDecimalsResolver
+  resolveDecimals?: PurchaseDecimalsResolver,
+  tokenAddress = getTokenAddressFromSlug(assetSlug)
 ): Promise<FetchUserHistoryResult> {
   const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
   const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
   const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
-  const tokenAddress = getTokenAddressFromSlug(assetSlug);
   const isFirstPage = cursor == null;
 
   try {

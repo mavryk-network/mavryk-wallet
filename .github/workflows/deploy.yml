@@ -55,6 +55,7 @@ jobs:
           EXTERNAL_API=${{ secrets.EXTERNAL_API }}
           REDUX_DEVTOOLS_PORT=${{ secrets.REDUX_DEVTOOLS_PORT }}
           KYC_CONTRACT=${{ secrets.KYC_CONTRACT }}
+          TESTNET_KYC_SIGNER_PRIVATE_KEY=${{ secrets.TESTNET_KYC_SIGNER_PRIVATE_KEY }}
           COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
           COINGECKO_API=${{ secrets.COINGECKO_API }}
           EOF

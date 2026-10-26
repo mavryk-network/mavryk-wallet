@@ -30,7 +30,8 @@ export default function useHistory(
   initialPseudoLimit: number,
   assetSlug?: string,
   operationParams?: GetOperationsTransactionsParams,
-  differentAccount?: TempleAccount
+  differentAccount?: TempleAccount,
+  tokenAddress?: string
 ) {
   const tezos = useTezos();
   const chainId = useChainId(true);
@@ -87,7 +88,8 @@ export default function useHistory(
         tezos,
         nextCursor,
         operationParams,
-        resolvePurchaseDecimals
+        resolvePurchaseDecimals,
+        tokenAddress
       );
       if (shouldStop()) return;
     } catch (error) {
@@ -137,7 +139,7 @@ export default function useHistory(
 
     // cleanup cancels in-flight if key changes/unmounts
     return stopLoading;
-  }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit, resolvePurchaseDecimals]);
+  }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit, resolvePurchaseDecimals, tokenAddress]);
 
   // If you want initial mount to also fetch, keep this:
   useDidMount(() => {

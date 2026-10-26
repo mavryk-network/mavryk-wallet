@@ -96,6 +96,8 @@ CI runs frozen install, blocking `yarn ts` and blocking `yarn test` for PRs targ
 
 `basenet_kyc_onboard.spec.ts` tests the wallet KYC onboarding contract with mocked chain transport. It does not provision an admin, submit live transactions, or replace installed-extension/Basenet acceptance.
 
+Basenet KYC signing supports development and production builds when `TESTNET_KYC_SIGNER_PRIVATE_KEY` is configured. This optional test registrar key is public in the bundle; never use a Mainnet or production/admin key. The deploy workflow reads the corresponding optional GitHub secret. Mainnet signing remains disabled. See `docs/token-history-kyc-investigation.md`.
+
 - `yarn start`
 - `yarn build`
 - `yarn build:firefox`

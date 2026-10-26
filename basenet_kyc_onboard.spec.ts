@@ -41,7 +41,11 @@ afterEach(() => {
   process.env = originalEnvironment;
 });
 
-describe('Basenet KYC onboarding contract', () => {
+describe.each(['development', 'production'] as const)('Basenet KYC onboarding contract (%s)', nodeEnv => {
+  beforeEach(() => {
+    process.env = { ...process.env, NODE_ENV: nodeEnv };
+  });
+
   it('batches Starter membership and NIL KYC for the buyer, then awaits one confirmation', async () => {
     const operation = await signKYCAction('test-rpc', 'test-buyer', TempleChainId.Basenet);
 

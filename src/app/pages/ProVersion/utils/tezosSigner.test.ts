@@ -45,10 +45,10 @@ it('looks up membership by address in the registrar ledger and requires KYC too'
   );
 });
 
-it('retains production and non-Basenet signing guards after dev reconciliation', () => {
-  process.env = { ...originalEnvironment, NODE_ENV: 'production', TESTNET_KYC_SIGNER_PRIVATE_KEY: 'test-only' };
-  expect(() => signerTezos('test-rpc', TempleChainId.Basenet)).toThrow('Server-side signing is required');
-  process.env = { ...originalEnvironment, NODE_ENV: 'test', TESTNET_KYC_SIGNER_PRIVATE_KEY: '' };
+it.each(['development', 'production'] as const)('retains network and key guards in %s builds', nodeEnv => {
+  process.env = { ...originalEnvironment, NODE_ENV: nodeEnv, TESTNET_KYC_SIGNER_PRIVATE_KEY: 'test-only' };
   expect(() => signerTezos('test-rpc', TempleChainId.Mainnet)).toThrow('only available on Basenet');
+  expect(() => signerTezos('test-rpc', 'unknown-chain')).toThrow('Unknown chain Id');
+  process.env.TESTNET_KYC_SIGNER_PRIVATE_KEY = '  ';
   expect(() => signerTezos('test-rpc', TempleChainId.Basenet)).toThrow('key is not configured');
 });

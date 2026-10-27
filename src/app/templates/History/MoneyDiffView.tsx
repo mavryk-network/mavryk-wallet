@@ -11,6 +11,7 @@ import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 interface Props {
   assetId: string;
   diff: string;
+  symbol?: string;
   pending?: boolean;
   className?: string;
   moneyClassname?: string;
@@ -23,6 +24,7 @@ export const MoneyDiffView = memo<Props>(
   ({
     assetId: assetSlug,
     diff,
+    symbol,
     pending = false,
     isColored = true,
     showFiatBalance = true,
@@ -43,22 +45,22 @@ export const MoneyDiffView = memo<Props>(
     const conditionalPendingClassName = pending ? 'text-yellow-600' : conditionalDiffClassName;
     const showPlus = diffBN.gt(0) ? '+' : '';
 
-    return metadata ? (
+    return metadata || symbol ? (
       <div className={classNames('inline-flex flex-wrap justify-end items-end', className)}>
         <div className={classNames('flex items-baseline', conditionalPopupClassName, conditionalPendingClassName)}>
           <span>{showPlus}</span>
-          <Money smallFractionFont={false} cryptoDecimals={isTzbtcAsset(assetSlug) ? metadata.decimals : undefined}>
+          <Money smallFractionFont={false} cryptoDecimals={isTzbtcAsset(assetSlug) ? metadata?.decimals : undefined}>
             {diffBN}
           </Money>
           {showAssetSymbol && (
             <>
               <span>&nbsp;</span>
-              <span>{getAssetSymbol(metadata, true)}</span>
+              <span>{symbol ?? getAssetSymbol(metadata, true)}</span>
             </>
           )}
         </div>
 
-        {assetSlug && showFiatBalance && (
+        {metadata && assetSlug && showFiatBalance && (
           <InFiat volume={diffBN.abs()} assetSlug={assetSlug} smallFractionFont={false}>
             {({ balance, symbol }) => (
               <div className="text-sm tracking-normal text-secondary-white flex">

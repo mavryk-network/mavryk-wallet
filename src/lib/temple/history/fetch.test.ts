@@ -3,9 +3,10 @@ import { TempleChainId } from 'lib/temple/types';
 import { mavrykApi } from 'mavryk/api/client';
 import { fetchWalletHistory } from 'mavryk/api/history';
 
-import fetchUserHistory, { fetchUserOperationByHash } from './fetch';
 import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
+import fetchUserHistory, { fetchUserOperationByHash } from './fetch';
 import { PAYMENT_ASSET, PURCHASE_ASSET, PURCHASE_DECIMALS, PURCHASE_WALLET, purchaseFixture } from './purchase.fixture';
+import { refundFixture, REFUND_TOKEN, REFUND_WALLET } from './refund.fixture';
 
 jest.mock('mavryk/api/client', () => ({ mavrykApi: { get: jest.fn() } }));
 jest.mock('lib/storage', () => ({ fetchFromStorage: jest.fn().mockResolvedValue([]), putToStorage: jest.fn() }));
@@ -136,4 +137,22 @@ it('uses the popup token address even without an asset slug, for pagination and 
     `/wallets/${PURCHASE_WALLET}/tokens/mv2ZZZZZZZZZZZZZZZZZZZZZZZZZZZDXMF2d/history`,
     { params: { cursor: undefined, search: 'test-hash', filter: undefined } }
   );
+});
+
+it('resolves metadata for raw-only interaction summaries through the existing history enrichment', async () => {
+  const operation = refundFixture();
+  delete operation.details!.amount;
+  (mavrykApi.get as jest.Mock).mockResolvedValue({
+    data: { walletAddress: REFUND_WALLET, operations: [operation], hasMore: false }
+  });
+  const resolveDecimals = jest.fn().mockResolvedValue({ [`${REFUND_TOKEN}_0`]: 6 });
+  const items = await fetchUserOperationByHash(
+    TempleChainId.Basenet,
+    REFUND_WALLET,
+    operation.hash,
+    undefined,
+    resolveDecimals
+  );
+  expect(resolveDecimals).toHaveBeenCalledWith([`${REFUND_TOKEN}_0`]);
+  expect(items[0].displayMoneyDiffs).toEqual([{ assetSlug: `${REFUND_TOKEN}_0`, diff: '4.26', symbol: 'OCEAN' }]);
 });

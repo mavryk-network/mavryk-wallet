@@ -1,5 +1,44 @@
 # Token history and KYC investigation
 
+## Interaction token amounts
+
+History summary diffs retain the API `currency` as the display symbol. The row and
+interaction detail popup can render API display amounts without cached token
+metadata; fiat rendering still requires metadata. `details.amount` takes precedence
+(including zero and precise decimal strings). Only when it is absent does
+`details.rawAmount` use token decimals from the existing scoped metadata resolver
+and decimal conversion helper. Missing decimals leave raw quantities hidden.
+Grouped summaries and single interaction records share this behavior; nested raw
+operations are not counted again as summary amounts.
+
+The supplied `refunnd.json` contains `4.26 OCEAN`; `4.5` is an illustrative amount,
+not an override. Sanitized regression fixtures cover both values, raw fallback,
+missing metadata, outgoing interactions, and list/detail rendering. Existing
+purchase, pending, filtering and pagination coverage remains in the history suites.
+Follow-up verification with a fresh temporary credential returned HTTP 200 from
+Basenet wallet history. Its latest refund matches the supplied fixture:
+`details.amount = 4.26`, `details.currency = OCEAN`, while nested operation amounts
+are zero. The complete live page passed API validation and rendered `+4.26 OCEAN`
+in both the compact row and detail header in the local regression harness. A
+permanent API-to-render test uses an anonymized refund fixture and a string token
+ID, matching the wire format. Records with `amount` do not require `rawAmount`.
+The credential is not stored in project files.
+
+The user still reported a missing amount in the running Chrome extension. This
+runtime discrepancy was not reproduced from the fixture or live wallet response.
+The generated Chrome bundle contains the symbol fallback; reload the extension
+from `dist/chrome_unpacked` and reopen its pages after rebuilding. Expanded child
+rows retain the existing grouped-summary suppression to avoid displaying raw
+atomic quantities or double-counting the summary.
+
+The follow-up production build initially failed on cached ESLint formatting errors
+for source files that already passed Prettier. Running the existing
+`yarn clear:lint` command removed that blocker. `yarn build` then passed Webpack,
+chunk-size checks and Chrome ZIP packaging. TypeScript and all five history
+rendering tests passed. No further production history logic changed in this
+follow-up; installed-extension confirmation still requires reloading and reopening
+the wallet.
+
 ## Native token history
 
 The shared history selector previously mapped both an absent asset slug and the

@@ -289,6 +289,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
         <MoneyDiffView
           assetId={moneyDiff.assetSlug}
           diff={moneyDiff.diff}
+          symbol={moneyDiff.symbol}
           pending={status === 'pending'}
           className="flex flex-col -mt-2px"
           moneyClassname="text-sm"

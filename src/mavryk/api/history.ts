@@ -35,6 +35,7 @@ const HistoryOperationDetailsSchema = z
           .refine(value => Number.isFinite(Number(value)), 'Invalid amount')
       ])
       .optional(),
+    rawAmount: z.string().regex(/^\d+$/).optional(),
     currency: z.string().optional(),
     usdAmount: NumberLikeSchema.optional(),
     entrypoint: z.string().optional(),

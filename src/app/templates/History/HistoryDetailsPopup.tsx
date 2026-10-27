@@ -126,6 +126,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const isInteractionOperation = historyItem?.type === HistoryItemOpTypeEnum.Interaction;
   const entrypointToShow =
     (isInteractionOperation || isMultipleOperation) && mainOperation?.entrypoint ? mainOperation.entrypoint : undefined;
+  const hasInteractionDiffs = isInteractionOperation && Boolean(historyItem?.displayMoneyDiffs?.length);
   const showDiffs =
     historyItem?.type === HistoryItemOpTypeEnum.TransferTo || historyItem?.type === HistoryItemOpTypeEnum.TransferFrom;
 
@@ -176,21 +177,23 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
             {HistoryItemOpTypeTexts[historyItem.type]}{' '}
             {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
           </div>
-          {(showDiffs || mainOperation?.entrypoint === 'purchase') && (
+          {(showDiffs || hasInteractionDiffs || mainOperation?.entrypoint === 'purchase') && (
             <div className="flex flex-col">
-              {(mainOperation?.entrypoint === 'purchase' ? moneyDiffs : moneyDiffs.slice(0, 1)).map(
-                ({ assetSlug, diff }, i) => (
-                  <MoneyDiffView
-                    key={i}
-                    assetId={assetSlug}
-                    diff={diff}
-                    pending={status === 'pending'}
-                    className="flex flex-col items-center"
-                    moneyClassname="text-xl leading-6 tracking-tight"
-                    isColored={false}
-                  />
-                )
-              )}
+              {(isInteractionOperation || mainOperation?.entrypoint === 'purchase'
+                ? moneyDiffs
+                : moneyDiffs.slice(0, 1)
+              ).map(({ assetSlug, diff, symbol }, i) => (
+                <MoneyDiffView
+                  key={i}
+                  assetId={assetSlug}
+                  diff={diff}
+                  symbol={symbol}
+                  pending={status === 'pending'}
+                  className="flex flex-col items-center"
+                  moneyClassname="text-xl leading-6 tracking-tight"
+                  isColored={false}
+                />
+              ))}
             </div>
           )}
 

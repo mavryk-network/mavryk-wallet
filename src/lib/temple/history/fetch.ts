@@ -1,6 +1,6 @@
 import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
 import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
-import { MAV_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
@@ -78,14 +78,26 @@ async function normalizeBackendHistoryItems(
   resolveDecimals?: PurchaseDecimalsResolver
 ) {
   const groups = groupMavrykHistoryOperations(operations);
+  const rawAmountSlugs = groups.flatMap(group =>
+    [group.summaryOperation, ...group.operations].flatMap(operation => {
+      const details = operation?.details;
+      if (details?.amount != null || details?.rawAmount === undefined) return [];
+      return details.tokenAddress
+        ? [toTokenSlug(details.tokenAddress, details.tokenId ?? 0)]
+        : assetSlug
+        ? [assetSlug]
+        : [];
+    })
+  );
   const slugs = [
-    ...new Set(
-      groups
+    ...new Set([
+      ...rawAmountSlugs,
+      ...groups
         .filter(group => group.summaryOperation?.details?.entrypoint === 'purchase')
         .flatMap(group => getPurchaseMovements(group.operations))
         .filter(movement => movement.to === accountAddress || movement.from === accountAddress)
         .map(movement => movement.assetSlug)
-    )
+    ])
   ];
   const decimals = slugs.length && resolveDecimals ? await resolveDecimals(slugs) : {};
   return applyLocalTypeFilter(

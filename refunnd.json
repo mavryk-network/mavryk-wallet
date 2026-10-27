@@ -1,0 +1,123 @@
+{
+            "type": "interaction",
+            "hash": "opNzhzvzmqXiFmWLDJ6Th2jrSsScECd8USCV7ZmhkkwU2SCdci9",
+            "status": "applied",
+            "details": {
+                "type": "interaction",
+                "transferType": "received",
+                "from": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9",
+                "to": "mv1Ak9rZRV8MdpgEDBWpB9PNT6spYr9JJZsp",
+                "tokenAddress": "KT1PXS6bacaVGHHWCQtvNSvoGL9Daho3ozcp",
+                "tokenId": "0",
+                "rawAmount": "4260000",
+                "transfers": [
+                    {
+                        "type": "transfer",
+                        "transferType": "received",
+                        "from": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9",
+                        "to": "mv1Ak9rZRV8MdpgEDBWpB9PNT6spYr9JJZsp",
+                        "tokenAddress": "KT1PXS6bacaVGHHWCQtvNSvoGL9Daho3ozcp",
+                        "tokenId": "0",
+                        "rawAmount": "4260000",
+                        "timestamp": "2026-10-26T15:05:47Z",
+                        "amount": 4.26,
+                        "currency": "OCEAN"
+                    }
+                ],
+                "entrypoint": "processRefund",
+                "contract": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9",
+                "timestamp": "2026-10-26T15:05:47Z",
+                "amount": 4.26,
+                "currency": "OCEAN"
+            },
+            "gasLimit": 23351,
+            "gasUsed": 23252,
+            "storageLimit": 56,
+            "storageUsed": 36,
+            "networkFees": {
+                "totalFee": 0.011647,
+                "usdAmount": 0.000066,
+                "gasFee": 0.002647,
+                "bakerFee": 0.002647,
+                "storageFee": 0.009,
+                "burnedFromFees": 0.009
+            },
+            "operations": [
+                {
+                    "id": 66679487856640,
+                    "hash": "opNzhzvzmqXiFmWLDJ6Th2jrSsScECd8USCV7ZmhkkwU2SCdci9",
+                    "type": "interaction",
+                    "role": "initiating",
+                    "block": "BMbVKT5jGovLk2JeWRyMV5kkKAu5Ve8zGp8S2KyaDVt5LCjv1CA",
+                    "level": 6998922,
+                    "counter": 262940,
+                    "timestamp": "2026-10-26T15:05:47Z",
+                    "sender": "mv1Ak9rZRV8MdpgEDBWpB9PNT6spYr9JJZsp",
+                    "target": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9",
+                    "amount": 0,
+                    "parameter": {
+                        "value": [
+                            {
+                                "orderId": "2061",
+                                "orderType": "SELL"
+                            }
+                        ],
+                        "entrypoint": "processRefund"
+                    },
+                    "gasLimit": 23351,
+                    "gasUsed": 4789,
+                    "storageLimit": 56,
+                    "storageUsed": 0,
+                    "networkFees": {
+                        "totalFee": 0.002647,
+                        "usdAmount": 0.000015,
+                        "gasFee": 0.002647,
+                        "bakerFee": 0.002647,
+                        "storageFee": 0,
+                        "burnedFromFees": 0
+                    },
+                    "status": "applied"
+                },
+                {
+                    "id": 66679488905216,
+                    "hash": "opNzhzvzmqXiFmWLDJ6Th2jrSsScECd8USCV7ZmhkkwU2SCdci9",
+                    "type": "interaction",
+                    "role": "internal",
+                    "block": "BMbVKT5jGovLk2JeWRyMV5kkKAu5Ve8zGp8S2KyaDVt5LCjv1CA",
+                    "level": 6998922,
+                    "counter": 262940,
+                    "timestamp": "2026-10-26T15:05:47Z",
+                    "sender": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9",
+                    "target": "KT1PXS6bacaVGHHWCQtvNSvoGL9Daho3ozcp",
+                    "amount": 0,
+                    "parameter": {
+                        "value": [
+                            {
+                                "txs": [
+                                    {
+                                        "to_": "mv1Ak9rZRV8MdpgEDBWpB9PNT6spYr9JJZsp",
+                                        "amount": "4260000",
+                                        "token_id": "0"
+                                    }
+                                ],
+                                "from_": "KT1DhyC3hPkX7PUQY5GNsVjqy6ArcCDYauP9"
+                            }
+                        ],
+                        "entrypoint": "transfer"
+                    },
+                    "gasLimit": 0,
+                    "gasUsed": 18463,
+                    "storageLimit": 0,
+                    "storageUsed": 36,
+                    "networkFees": {
+                        "totalFee": 0.009,
+                        "usdAmount": 0.000051,
+                        "gasFee": 0,
+                        "storageFee": 0.009,
+                        "burnedFromFees": 0.009
+                    },
+                    "status": "applied"
+                }
+            ],
+            "operationsCount": 2
+        },

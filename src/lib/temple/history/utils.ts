@@ -234,16 +234,16 @@ const buildBackendSummaryDisplayMoneyDiffs = (
   type: HistoryItemOpTypeEnum,
   context: BackendHistoryNormalizationContext
 ): HistoryDisplayMoneyDiff[] | undefined => {
-  const summaryOperation = group.summaryOperation;
+  const summaryOperation =
+    group.summaryOperation ??
+    (group.operations.length === 1 && getBackendOperationType(group.operations[0]) === 'interaction'
+      ? group.operations[0]
+      : undefined);
   if (!summaryOperation || !BACKEND_SUMMARY_DIFF_TYPES.has(type)) return undefined;
 
   const tokenContext = getBackendTokenContext(context.assetSlug);
   const details = summaryOperation.details ?? undefined;
-  const amount = details?.amount ?? summaryOperation.amount;
-
-  if (amount == null) return undefined;
-
-  // API history amounts are already normalized display units. Never recompute them from nested raw operations.
+  // API detail amounts are display units; raw token quantities require resolved metadata.
   const contractAddress = normalizeBackendContractAddress(
     details?.tokenAddress ?? tokenContext?.contractAddress,
     details?.currency
@@ -253,10 +253,18 @@ const buildBackendSummaryDisplayMoneyDiffs = (
 
   const tokenId = details?.tokenId ?? tokenContext?.tokenId ?? 0;
   const assetSlug = contractAddress === MAV_TOKEN_SLUG ? MAV_TOKEN_SLUG : toTokenSlug(contractAddress, tokenId);
+  const amount =
+    details?.amount ??
+    (details?.rawAmount !== undefined
+      ? purchaseDisplayAmount(details.rawAmount, context.decimals?.[assetSlug])
+      : summaryOperation.amount);
+  // Do not expose nested atomic quantities when token decimals could not be resolved.
+  if (amount == null) return details?.rawAmount !== undefined ? [] : undefined;
+
   const source = getBackendHistoryMember(summaryOperation);
   const diff = getMoneyDiff(getBackendAmountSigned(summaryOperation, context.address, amount, source));
 
-  return [{ assetSlug, diff }];
+  return [{ assetSlug, diff, ...(details?.currency ? { symbol: details.currency } : {}) }];
 };
 
 const buildBackendTokenTransfer = (

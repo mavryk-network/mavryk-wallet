@@ -26,6 +26,7 @@ export interface UserHistoryItem {
 }
 
 export interface HistoryDisplayMoneyDiff {
+  symbol?: string;
   assetSlug: string;
   diff: string;
 }

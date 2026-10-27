@@ -145,13 +145,14 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         </div>
 
         <div className="flex flex-col justify-center items-end gap-1">
-          {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
+          {filteredMoneyDiffBase.map(({ assetSlug, diff, symbol }, i) => {
             return (
               <MoneyDiffView
                 key={i}
                 className="gap-1 flex-col"
                 assetId={assetSlug}
                 diff={diff}
+                symbol={symbol}
                 pending={status === 'pending'}
                 showFiatBalance={!isSwapOperation && !isInteractionOperation}
               />

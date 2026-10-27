@@ -8,6 +8,7 @@ import {
   PURCHASE_DECIMALS,
   purchaseFixture
 } from 'lib/temple/history/purchase.fixture';
+import { refundFixture, REFUND_TOKEN, REFUND_WALLET } from 'lib/temple/history/refund.fixture';
 import { groupMavrykHistoryOperations, mavrykHistoryGroupToHistoryItem } from 'lib/temple/history/utils';
 
 import { HistoryDetailsPopup } from './HistoryDetailsPopup';
@@ -66,10 +67,13 @@ jest.mock('../OpenInExplorerChip', () => ({ OpenInExplorerChip: () => null }));
 jest.mock('./HistoryTime', () => ({ HistoryTime: () => null }));
 jest.mock('./HistoryTokenIcon', () => ({ HistoryTokenIcon: () => null, AssetIconPlaceholder: () => null }));
 jest.mock('lib/metadata', () => ({
-  useAssetMetadata: (slug: string) => ({
-    decimals: 6,
-    symbol: slug === MAV_TOKEN_SLUG ? 'MVRK' : slug.startsWith(PURCHASE_ASSET) ? 'KRKN' : 'wUSDT'
-  }),
+  useAssetMetadata: (slug: string) =>
+    slug === `${REFUND_TOKEN}_0`
+      ? undefined
+      : {
+          decimals: 6,
+          symbol: slug === MAV_TOKEN_SLUG ? 'MVRK' : slug.startsWith(PURCHASE_ASSET) ? 'KRKN' : 'wUSDT'
+        },
   getAssetSymbol: (metadata: { symbol: string }) => metadata.symbol,
   useMultipleAssetsMetadata: () => []
 }));
@@ -113,4 +117,48 @@ it('hides unknown amounts and the token ID/recipient line while retaining the mi
   expect(content).not.toContain(PURCHASE_WALLET);
   expect(content).not.toContain('#0');
   expect(getAssetsFromOperations(historyItem)).toContain(`${PURCHASE_ASSET}_0`);
+});
+
+it.each([true, false])(
+  'renders API refund amount and symbol without metadata (transfer direction: %s)',
+  hasDirection => {
+    const fixture = refundFixture();
+    if (!hasDirection) delete fixture.details!.transferType;
+    const historyItem = mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([fixture])[0], {
+      address: REFUND_WALLET
+    });
+    for (const element of [
+      <HistoryItem historyItem={historyItem} address={REFUND_WALLET} handleItemClick={() => undefined} />,
+      <HistoryDetailsPopup historyItem={historyItem} isOpen />
+    ]) {
+      const content = text(element);
+      expect(content).toContain('+4.26 OCEAN');
+      expect(content).not.toContain('4260000');
+    }
+  }
+);
+
+jest.mock('mavryk/api/client', () => ({ mavrykApi: { get: jest.fn() } }));
+
+it('preserves the refund amount through API validation, fetching and rendering', async () => {
+  const { mavrykApi } = require('mavryk/api/client') as typeof import('mavryk/api/client');
+  const { fetchUserOperationByHash } = require('lib/temple/history/fetch') as typeof import('lib/temple/history/fetch');
+  const { TempleChainId } = require('lib/temple/types') as typeof import('lib/temple/types');
+  const operation = refundFixture();
+  const response = {
+    walletAddress: REFUND_WALLET,
+    operations: [{ ...operation, details: { ...operation.details, tokenId: '0' } }],
+    hasMore: false
+  };
+  (mavrykApi.get as jest.Mock).mockResolvedValue({
+    data: response
+  });
+  const [historyItem] = await fetchUserOperationByHash(TempleChainId.Basenet, REFUND_WALLET, operation.hash);
+  expect(historyItem).toBeDefined();
+  for (const element of [
+    <HistoryItem historyItem={historyItem} address={REFUND_WALLET} handleItemClick={() => undefined} />,
+    <HistoryDetailsPopup historyItem={historyItem} isOpen />
+  ]) {
+    expect(text(element)).toContain('+4.26 OCEAN');
+  }
 });

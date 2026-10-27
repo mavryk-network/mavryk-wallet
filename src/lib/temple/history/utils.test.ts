@@ -1,6 +1,8 @@
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
+import { refundFixture, REFUND_TOKEN, REFUND_WALLET } from './refund.fixture';
+
 jest.mock('lib/apis/tzkt', () => ({
   isKnownChainId: jest.fn()
 }));
@@ -97,10 +99,12 @@ describe('mavrykHistoryGroupToHistoryItem', () => {
     expect(mainOperation?.entrypoint).toBe('placeSellOrder');
     expect(mainOperation?.destination?.address).toBe(ALT_CONTRACT_ADDRESS);
     expect(historyItem.operations[0].entrypoint).toBe('update_operators');
-    expect(historyItem.displayMoneyDiffs).toEqual([{ assetSlug: MAV_TOKEN_SLUG, diff: '-0.200784' }]);
+    expect(historyItem.displayMoneyDiffs).toEqual([{ assetSlug: MAV_TOKEN_SLUG, diff: '-0.200784', symbol: 'MVRK' }]);
     expect(historyItem.hideOperationMoneyDiffs).toBe(true);
     expect(historyItem.operations[1].amountSigned).toBe('-200784');
-    expect(buildHistoryMoneyDiffs(historyItem, true)).toEqual([{ assetSlug: MAV_TOKEN_SLUG, diff: '-0.200784' }]);
+    expect(buildHistoryMoneyDiffs(historyItem, true)).toEqual([
+      { assetSlug: MAV_TOKEN_SLUG, diff: '-0.200784', symbol: 'MVRK' }
+    ]);
   });
 
   it('keeps normalized amounts untouched for simple API history items', () => {
@@ -437,5 +441,47 @@ describe('primary purchases', () => {
     parent.operations![1].parameter!.value = value;
     expect(normalize(parent).displayMoneyDiffs).toEqual([{ assetSlug: `${PAYMENT_ASSET}_0`, diff: '-6' }]);
     expect(normalize(parent).operations[1].entrypoint).toBe('mint');
+  });
+});
+
+describe('interaction amounts', () => {
+  const normalize = (operation = refundFixture(), decimals: Record<string, number> = {}) =>
+    mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([operation])[0], {
+      address: REFUND_WALLET,
+      decimals
+    });
+
+  it.each([4.26, 4.5, 0, '123456789.123456789'])('prefers API display amount %s over atomic quantities', amount => {
+    const operation = refundFixture();
+    operation.details!.amount = amount;
+    expect(buildHistoryMoneyDiffs(normalize(operation), true)).toEqual([
+      { assetSlug: `${REFUND_TOKEN}_0`, diff: String(amount), symbol: 'OCEAN' }
+    ]);
+  });
+
+  it('does not require rawAmount when the API supplies amount', () => {
+    const operation = refundFixture();
+    delete operation.details!.rawAmount;
+    expect(normalize(operation).displayMoneyDiffs).toEqual([
+      { assetSlug: `${REFUND_TOKEN}_0`, diff: '4.26', symbol: 'OCEAN' }
+    ]);
+  });
+
+  it.each([0, 6, 8])('uses actual token decimals %s only when the display amount is absent', decimals => {
+    const operation = refundFixture();
+    delete operation.details!.amount;
+    const result = normalize(operation, { [`${REFUND_TOKEN}_0`]: decimals });
+    expect(result.displayMoneyDiffs?.[0].diff).toBe(String(4260000 / 10 ** decimals));
+    expect(normalize(operation).displayMoneyDiffs).toEqual([]);
+  });
+
+  it('supports ungrouped interactions and outgoing signs', () => {
+    const operation = refundFixture();
+    delete operation.operations;
+    operation.details!.from = REFUND_WALLET;
+    operation.details!.transferType = 'sent';
+    expect(normalize(operation).displayMoneyDiffs).toEqual([
+      { assetSlug: `${REFUND_TOKEN}_0`, diff: '-4.26', symbol: 'OCEAN' }
+    ]);
   });
 });

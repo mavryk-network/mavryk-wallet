@@ -67,12 +67,14 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   const moneyDiffsBase = useMemo(
     () =>
-      isSwapOperation
+      historyItem.isPartialTransfers || moneyDiffs.some(diff => diff.usdAmount !== undefined)
+        ? moneyDiffs
+        : isSwapOperation
         ? getMoneyDiffsForSwap(moneyDiffs)
         : isInteractionOperation
         ? getMoneyDiffForMultiple(moneyDiffs, OP_STACK_PREVIEW_MULTIPLE_SIZE)
         : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
-    [isInteractionOperation, isSwapOperation, moneyDiffs]
+    [historyItem.isPartialTransfers, isInteractionOperation, isSwapOperation, moneyDiffs]
   );
 
   // 0 to show all operations
@@ -84,7 +86,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   const filteredMoneyDiffBase = useMemo(
     () =>
       moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
-        if (!isZero(item.diff)) acc.push(item);
+        if (item.usdAmount !== undefined || !isZero(item.diff)) acc.push(item);
         return acc;
       }, []),
     [moneyDiffsBase]
@@ -145,19 +147,26 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         </div>
 
         <div className="flex flex-col justify-center items-end gap-1">
-          {filteredMoneyDiffBase.map(({ assetSlug, diff, symbol }, i) => {
-            return (
-              <MoneyDiffView
-                key={i}
-                className="gap-1 flex-col"
-                assetId={assetSlug}
-                diff={diff}
-                symbol={symbol}
-                pending={status === 'pending'}
-                showFiatBalance={!isSwapOperation && !isInteractionOperation}
-              />
-            );
-          })}
+          {historyItem.isPartialTransfers && <span className="text-xs text-secondary-white">Incomplete breakdown</span>}
+          {filteredMoneyDiffBase.map(
+            ({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => {
+              return (
+                <MoneyDiffView
+                  key={i}
+                  className="gap-1 flex-col"
+                  assetId={assetSlug}
+                  diff={diff}
+                  symbol={symbol}
+                  usdAmount={usdAmount}
+                  isNeutral={isNeutral}
+                  isNegative={isNegative}
+                  isAmountUnavailable={isAmountUnavailable}
+                  pending={status === 'pending'}
+                  showFiatBalance={usdAmount !== undefined || (!isSwapOperation && !isInteractionOperation)}
+                />
+              );
+            }
+          )}
         </div>
       </div>
 

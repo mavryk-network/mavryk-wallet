@@ -40,6 +40,9 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   for (const oper of historyitem.operations) {
     const basicFields: HistoryItemOperationBase = {
       contractAddress: oper.contractAddress,
+      calledContract: oper.calledContract,
+      movementKind: oper.movementKind,
+      displayMoneyDiff: oper.displayMoneyDiff,
       source: oper.source,
       status: oper.status,
       amountSigned: oper.amountSigned,
@@ -173,6 +176,10 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
   const diffs: MoneyDiff[] = [];
 
   for (const oper of historyItem.operations) {
+    if (oper.displayMoneyDiff) {
+      diffs.push(oper.displayMoneyDiff);
+      continue;
+    }
     // TODO check why Origination type returns another token diff when called with Interaction or Multiple op
     if (isZero(oper.amountSigned) && !allowZero) continue;
 

@@ -27,6 +27,8 @@ export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefin
     return slug ?? historyItem.displayMoneyDiffs[0].assetSlug;
   }
 
+  if (mainOperation?.displayMoneyDiff) return slug ?? mainOperation.displayMoneyDiff.assetSlug;
+
   if (!historyItem || mainOperation?.contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
 
   return slug || !mainOperation?.contractAddress
@@ -100,7 +102,8 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
   if (!item || item.operations.length <= 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {
-    if (op.assetSlug && op.atomicAmount !== undefined) return [...new Set([...acc, op.assetSlug])];
+    if (op.assetSlug && (op.atomicAmount !== undefined || op.displayMoneyDiff))
+      return [...new Set([...acc, op.assetSlug])];
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
     let assetSlug: string = '';
@@ -129,6 +132,7 @@ export const getHistoryOperationAddress = (
   originalHistoryItem?: UserHistoryItem
 ): string => {
   if (!item) return '';
+  if (item.type === HistoryItemOpTypeEnum.Interaction && item.calledContract) return item.calledContract;
   if (item.entrypoint === 'mint' && item.atomicAmount !== undefined) return item.contractAddress ?? '';
 
   switch (item.type) {

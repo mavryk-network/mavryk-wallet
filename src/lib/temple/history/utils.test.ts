@@ -455,7 +455,14 @@ describe('interaction amounts', () => {
     const operation = refundFixture();
     operation.details!.amount = amount;
     expect(buildHistoryMoneyDiffs(normalize(operation), true)).toEqual([
-      { assetSlug: `${REFUND_TOKEN}_0`, diff: String(amount), symbol: 'OCEAN' }
+      {
+        assetSlug: `${REFUND_TOKEN}_0`,
+        diff: String(amount),
+        symbol: 'OCEAN',
+        usdAmount: null,
+        isNeutral: false,
+        isAmountUnavailable: false
+      }
     ]);
   });
 
@@ -463,7 +470,14 @@ describe('interaction amounts', () => {
     const operation = refundFixture();
     delete operation.details!.rawAmount;
     expect(normalize(operation).displayMoneyDiffs).toEqual([
-      { assetSlug: `${REFUND_TOKEN}_0`, diff: '4.26', symbol: 'OCEAN' }
+      {
+        assetSlug: `${REFUND_TOKEN}_0`,
+        diff: '4.26',
+        symbol: 'OCEAN',
+        usdAmount: null,
+        isNeutral: false,
+        isAmountUnavailable: false
+      }
     ]);
   });
 
@@ -481,7 +495,115 @@ describe('interaction amounts', () => {
     operation.details!.from = REFUND_WALLET;
     operation.details!.transferType = 'sent';
     expect(normalize(operation).displayMoneyDiffs).toEqual([
-      { assetSlug: `${REFUND_TOKEN}_0`, diff: '-4.26', symbol: 'OCEAN' }
+      {
+        assetSlug: `${REFUND_TOKEN}_0`,
+        diff: '-4.26',
+        symbol: 'OCEAN',
+        usdAmount: null,
+        isNeutral: false,
+        isAmountUnavailable: false
+      }
     ]);
+  });
+});
+
+describe('bridge movement history', () => {
+  const { bridgeFixture, BRIDGE_WALLET, BRIDGE_TOKEN, BRIDGE_CONTRACT } =
+    require('./bridge.fixture') as typeof import('./bridge.fixture');
+  const normalize = (operation: MavrykHistoryOperation) =>
+    mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([operation])[0], {
+      address: BRIDGE_WALLET,
+      decimals: { [`${BRIDGE_TOKEN}_0`]: 6 }
+    });
+
+  it('uses the summary once while retaining both movements and the called contract', () => {
+    const item = normalize(bridgeFixture());
+    expect(item.type).toBe(HistoryItemOpTypeEnum.Interaction);
+    expect(getHistoryOperationAddress(item.mainOperation)).toBe(BRIDGE_CONTRACT);
+    expect(item.displayMoneyDiffs).toHaveLength(1);
+    expect(item.displayMoneyDiffs?.[0]).toMatchObject({ diff: '121.8', usdAmount: 121.64 });
+    expect(item.operations.map(op => op.displayMoneyDiff?.diff)).toEqual(['120.582', '1.218']);
+    expect(item.operations.every(op => op.movementKind === 'mint' && op.source.address === '')).toBe(true);
+  });
+
+  it.each([true, false])('keeps separate movements when totals are missing or partial (%s)', partial => {
+    const fixture = bridgeFixture();
+    if (partial) fixture.details!.partialTransfers = true;
+    else delete fixture.details!.amount;
+    const item = normalize(fixture);
+    expect(item.displayMoneyDiffs?.map(diff => diff.diff)).toEqual(['120.582', '1.218']);
+    expect(item.isPartialTransfers).toBe(partial || undefined);
+  });
+
+  it('preserves huge/missing IDs, self transfers, missing amounts and known zero USD', () => {
+    const fixture = bridgeFixture();
+    delete fixture.details!.amount;
+    const transfers = fixture.details!.transfers!;
+    transfers[0].tokenId = '900719925474099312345';
+    transfers[0].transferType = 'self';
+    transfers[0].usdAmount = 0;
+    delete transfers[1].amount;
+    delete transfers[1].tokenId;
+    delete transfers[1].currency;
+    const item = normalize(fixture);
+    expect(item.displayMoneyDiffs?.[0]).toMatchObject({
+      assetSlug: `${BRIDGE_TOKEN}_900719925474099312345`,
+      diff: '120.582',
+      isNeutral: true,
+      usdAmount: 0
+    });
+    expect(item.displayMoneyDiffs?.[1]).toMatchObject({ assetSlug: BRIDGE_TOKEN, isAmountUnavailable: true });
+  });
+
+  it('uses burn direction without inventing a recipient from the relayer', () => {
+    const fixture = bridgeFixture();
+    fixture.details = {
+      type: 'interaction',
+      entrypoint: 'unwrapToken',
+      contract: BRIDGE_CONTRACT,
+      tokenAddress: BRIDGE_TOKEN,
+      tokenId: '0',
+      amount: 14,
+      currency: 'wUSDT',
+      movementKind: 'burn',
+      transferType: 'sent',
+      from: BRIDGE_WALLET
+    };
+    fixture.sender = 'relayer';
+    expect(normalize(fixture).displayMoneyDiffs?.[0].diff).toBe('-14');
+    expect(getHistoryOperationAddress(normalize(fixture).operations[0])).toBe(BRIDGE_CONTRACT);
+  });
+
+  it('deduplicates raw token legs but preserves native movements in incomplete groups', () => {
+    const fixture = bridgeFixture();
+    fixture.details!.partialTransfers = true;
+    fixture.operations = [
+      {
+        hash: fixture.hash,
+        type: 'transaction',
+        status: 'applied',
+        target: BRIDGE_TOKEN,
+        parameter: { entrypoint: 'mint', value: [{ owner: BRIDGE_WALLET, amount: '120582000', token_id: '0' }] }
+      },
+      {
+        hash: fixture.hash,
+        id: 2,
+        type: 'transaction',
+        status: 'applied',
+        amount: 2,
+        sender: 'nativeSender',
+        target: BRIDGE_WALLET
+      }
+    ];
+    fixture.operations[0].networkFees = { totalFee: 0.1, gasFee: 0.08, storageFee: 0.02, burnedFromFees: 0.02 };
+    const item = normalize(fixture);
+    expect(item.operations.reduce((sum, op) => sum + (op.networkFees?.totalFee ?? 0), 0)).toBe(0.1);
+    expect(item.operations).toHaveLength(3);
+    expect(item.operations[2].displayMoneyDiff).toMatchObject({
+      assetSlug: MAV_TOKEN_SLUG,
+      diff: '2',
+      usdAmount: null
+    });
+    expect(item.displayMoneyDiffs?.map(diff => diff.diff)).toEqual(['120.582', '1.218', '2']);
   });
 });

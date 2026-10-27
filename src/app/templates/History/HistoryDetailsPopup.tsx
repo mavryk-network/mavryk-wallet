@@ -105,8 +105,8 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      (mainOperation?.entrypoint === 'purchase' && mainOperation.networkFees
-        ? [mainOperation]
+      (historyItem?.mainOperation?.networkFees
+        ? [historyItem.mainOperation]
         : historyItem?.operations
       )?.reduce<HistoryFeeTotals>((acc, item) => {
         acc.gasFee = acc.gasFee.plus(item.networkFees?.gasFee ?? 0);
@@ -116,7 +116,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         return acc;
       }, createEmptyHistoryFeeTotals()) ?? createEmptyHistoryFeeTotals(),
-    [historyItem?.operations, mainOperation]
+    [historyItem?.operations, historyItem?.mainOperation]
   );
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
@@ -174,20 +174,32 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               isSwapOperation ? 'text-xl leading-6 tracking-tight mb-1 text-white' : 'text-sm text-secondary-white'
             )}
           >
-            {HistoryItemOpTypeTexts[historyItem.type]}{' '}
-            {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
+            {mainOperation?.movementKind === 'mint' && !isInteractionOperation ? (
+              <OpertionStackItem item={mainOperation} userAddress={publicKeyHash} />
+            ) : (
+              <>
+                {mainOperation?.movementKind === 'burn' && !isInteractionOperation
+                  ? 'Burned'
+                  : HistoryItemOpTypeTexts[historyItem.type]}{' '}
+                {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
+              </>
+            )}
           </div>
           {(showDiffs || hasInteractionDiffs || mainOperation?.entrypoint === 'purchase') && (
             <div className="flex flex-col">
-              {(isInteractionOperation || mainOperation?.entrypoint === 'purchase'
+              {(isInteractionOperation || historyItem.displayMoneyDiffs || mainOperation?.entrypoint === 'purchase'
                 ? moneyDiffs
                 : moneyDiffs.slice(0, 1)
-              ).map(({ assetSlug, diff, symbol }, i) => (
+              ).map(({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => (
                 <MoneyDiffView
                   key={i}
                   assetId={assetSlug}
                   diff={diff}
                   symbol={symbol}
+                  usdAmount={usdAmount}
+                  isNeutral={isNeutral}
+                  isNegative={isNegative}
+                  isAmountUnavailable={isAmountUnavailable}
                   pending={status === 'pending'}
                   className="flex flex-col items-center"
                   moneyClassname="text-xl leading-6 tracking-tight"
@@ -332,10 +344,13 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
           </div>
         </CardContainer>
 
-        {operStack.length > 1 && (
+        {(operStack.length > 1 || mainOperation?.displayMoneyDiff || historyItem.isPartialTransfers) && (
           <>
             <h4 className="text-base-plus text-white mt-6 mb-4">
               <T id="transactionDetails" />
+              {historyItem.isPartialTransfers && (
+                <span className="text-sm text-secondary-white"> — Incomplete breakdown</span>
+              )}
             </h4>
 
             <CardContainer className="text-white flex flex-col">
@@ -499,7 +514,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
     }
   }, [historyItem.type, item, swappedOpItem]);
 
-  if (!getTxOpDisplayData) return null;
+  if (!getTxOpDisplayData?.address) return null;
 
   return (
     <CardContainer className="mb-6 text-base-plus text-white">

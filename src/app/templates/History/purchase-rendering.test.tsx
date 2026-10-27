@@ -60,6 +60,12 @@ jest.mock('app/templates/PopupModalWithTitle', () => ({
     </div>
   )
 }));
+let mockFiat = { name: 'USD', symbol: '$' };
+let mockFiatRate = 1;
+jest.mock('lib/fiat-currency', () => ({
+  useFiatCurrency: () => ({ selectedFiatCurrency: mockFiat }),
+  useFiatToUsdRate: () => mockFiatRate
+}));
 jest.mock('app/templates/InFiat', () => ({ __esModule: true, default: () => null }));
 jest.mock('app/pages/Home/OtherComponents/Tokens/components/Balance', () => ({ FiatBalance: () => null }));
 jest.mock('../AssetImage', () => ({ AssetImage: () => null }));
@@ -161,4 +167,127 @@ it('preserves the refund amount through API validation, fetching and rendering',
   ]) {
     expect(text(element)).toContain('+4.26 OCEAN');
   }
+});
+
+const { bridgeFixture, BRIDGE_WALLET, BRIDGE_CONTRACT, BRIDGE_TOKEN } =
+  require('lib/temple/history/bridge.fixture') as typeof import('lib/temple/history/bridge.fixture');
+const bridgeItem = (fixture = bridgeFixture()) =>
+  mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([fixture])[0], { address: BRIDGE_WALLET });
+
+it('renders one bridge summary and both priced mint breakdown entries', () => {
+  const historyItem = bridgeItem();
+  const content = text(<HistoryDetailsPopup historyItem={historyItem} isOpen />)!;
+  expect(content.match(/121.8 wUSDT/g)).toHaveLength(1);
+  expect(content).toContain('+120.582 wUSDT');
+  expect(content).toContain('+1.218 wUSDT');
+  expect(content).toContain('+$121.64');
+  expect(content).not.toContain('Minted');
+  expect(content.match(new RegExp(BRIDGE_TOKEN, 'g'))).toHaveLength(2);
+  expect(content).toContain('Called');
+  expect(content).toContain(BRIDGE_CONTRACT);
+  expect(content).not.toContain(BRIDGE_WALLET);
+});
+
+it('keeps partial, missing and self-transfer amounts visible with neutral or unavailable fiat', () => {
+  const fixture = bridgeFixture();
+  fixture.details!.partialTransfers = true;
+  fixture.details!.transfers![0].transferType = 'self';
+  fixture.details!.transfers![0].usdAmount = 0;
+  delete fixture.details!.transfers![1].amount;
+  delete fixture.details!.transfers![1].currency;
+  delete fixture.details!.transfers![1].usdAmount;
+  const historyItem = bridgeItem(fixture);
+  for (const element of [
+    <HistoryItem historyItem={historyItem} address={BRIDGE_WALLET} handleItemClick={() => undefined} />,
+    <HistoryDetailsPopup historyItem={historyItem} isOpen />
+  ]) {
+    const content = text(element)!;
+    expect(content).toContain('Incomplete breakdown');
+    expect(content).toContain('120.582 wUSDT');
+    expect(content).not.toContain('+120.582');
+    expect(content).toContain('$0');
+    expect(content).toContain(`— ${BRIDGE_TOKEN}`);
+    expect(content).not.toContain('121.8 wUSDT');
+  }
+});
+
+it('validates movement IDs without rounding and passes token ID to token history', async () => {
+  const { mavrykApi } = require('mavryk/api/client') as typeof import('mavryk/api/client');
+  const { fetchTokenHistory } = require('mavryk/api/history') as typeof import('mavryk/api/history');
+  const fixture = bridgeFixture();
+  fixture.details!.tokenId = '900719925474099312345';
+  delete fixture.details!.transfers![1].tokenId;
+  fixture.details!.transfers![1].usdAmount = null;
+  (mavrykApi.get as jest.Mock).mockResolvedValue({
+    data: { walletAddress: BRIDGE_WALLET, operations: [fixture], hasMore: false }
+  });
+  const response = await fetchTokenHistory(BRIDGE_TOKEN, {
+    walletAddress: BRIDGE_WALLET,
+    tokenId: '900719925474099312345'
+  });
+  expect(response.operations[0].details!.tokenId).toBe('900719925474099312345');
+  expect(response.operations[0].details!.transfers![1].tokenId).toBeUndefined();
+  expect(mavrykApi.get).toHaveBeenLastCalledWith(`/wallets/${BRIDGE_WALLET}/tokens/${BRIDGE_TOKEN}/history`, {
+    params: { cursor: undefined, filter: undefined, search: undefined, limit: 20, token_id: '900719925474099312345' }
+  });
+});
+
+it('converts API USD to selected fiat and distinguishes zero from missing quotes', () => {
+  const { MoneyDiffView } = require('./MoneyDiffView') as typeof import('./MoneyDiffView');
+  mockFiat = { name: 'EUR', symbol: '€' };
+  mockFiatRate = 0.9;
+  try {
+    const content = text(<MoneyDiffView assetId={BRIDGE_TOKEN} diff="-14" symbol="wUSDT" usdAmount={10} />);
+    expect(content).toContain('-€9');
+    const zero = text(<MoneyDiffView assetId={BRIDGE_TOKEN} diff="-14" symbol="wUSDT" usdAmount={0} />);
+    expect(zero).toContain('€0');
+    expect(zero).not.toContain('-€');
+    const missing = text(<MoneyDiffView assetId={BRIDGE_TOKEN} diff="-14" symbol="wUSDT" usdAmount={null} />);
+    expect(missing).toContain('—');
+    expect(missing).not.toContain('€');
+  } finally {
+    mockFiat = { name: 'USD', symbol: '$' };
+    mockFiatRate = 1;
+  }
+});
+
+it.each(['mint', 'burn'] as const)('renders %s without an empty counterparty label', movementKind => {
+  const fixture = bridgeFixture();
+  fixture.details = {
+    type: 'transfer',
+    movementKind,
+    tokenAddress: BRIDGE_TOKEN,
+    tokenId: '0',
+    currency: 'wUSDT',
+    amount: 14,
+    transferType: movementKind === 'mint' ? 'received' : 'sent'
+  };
+  const historyItem = bridgeItem(fixture);
+  for (const element of [
+    <HistoryItem historyItem={historyItem} address={BRIDGE_WALLET} handleItemClick={() => undefined} />,
+    <HistoryDetailsPopup historyItem={historyItem} isOpen />
+  ]) {
+    const content = text(element)!;
+    expect(content).toContain(movementKind === 'mint' ? 'Called' : 'Burned');
+    if (movementKind === 'mint') {
+      expect(content).toContain('mint');
+      expect(content).toContain(BRIDGE_TOKEN);
+      expect(content).not.toContain('Minted');
+    }
+    expect(content).toContain(`${movementKind === 'mint' ? '+' : '-'}14 wUSDT`);
+    expect(content).not.toContain('Sent to');
+    expect(content).not.toContain('Received from');
+    expect(content).not.toContain(BRIDGE_WALLET);
+  }
+});
+
+it.each(['received', 'sent'])('keeps the %s fiat sign when the token amount is unavailable', transferType => {
+  const fixture = bridgeFixture();
+  fixture.details = { type: 'transfer', tokenAddress: BRIDGE_TOKEN, currency: 'wUSDT', transferType, usdAmount: 10 };
+  const historyItem = bridgeItem(fixture);
+  const content = text(
+    <HistoryItem historyItem={historyItem} address={BRIDGE_WALLET} handleItemClick={() => undefined} />
+  );
+  expect(content).toContain('— wUSDT');
+  expect(content).toContain(`${transferType === 'sent' ? '-' : '+'}$10`);
 });

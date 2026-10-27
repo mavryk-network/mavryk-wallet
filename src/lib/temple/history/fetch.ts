@@ -7,6 +7,7 @@ import { TempleAccount } from 'lib/temple/types';
 import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
+import { hasHistoryMovement } from './bridge';
 import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
 import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
 import { getPurchaseMovements } from './purchase';
@@ -93,7 +94,11 @@ async function normalizeBackendHistoryItems(
     ...new Set([
       ...rawAmountSlugs,
       ...groups
-        .filter(group => group.summaryOperation?.details?.entrypoint === 'purchase')
+        .filter(
+          group =>
+            group.summaryOperation?.details?.entrypoint === 'purchase' ||
+            hasHistoryMovement((group.summaryOperation ?? group.operations[0])?.details)
+        )
         .flatMap(group => getPurchaseMovements(group.operations))
         .filter(movement => movement.to === accountAddress || movement.from === accountAddress)
         .map(movement => movement.assetSlug)
@@ -155,6 +160,7 @@ export async function fetchUserOperationByHash(
     const response = tokenAddress
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: accountAddress,
+          tokenId: assetSlug?.split('_')[1],
           search: hash
         })
       : await fetchWalletHistory({
@@ -190,6 +196,7 @@ export default async function fetchUserHistory(
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: account.publicKeyHash,
           cursor,
+          tokenId: assetSlug?.split('_')[1],
           filter: backendFilter
         })
       : await fetchWalletHistory({

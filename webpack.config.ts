@@ -169,7 +169,12 @@ const mainConfig = (() => {
     chunks: 'all',
     maxSize: MAX_JS_CHUNK_SIZE_IN_BYTES,
     enforceSizeThreshold: MAX_JS_CHUNK_SIZE_IN_BYTES,
-    name: (_: any, chunks: any) => chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+    // Shared chunks of named (entry) chunks keep their entry-combination names. Splits of unnamed async chunks
+    // (lazy pages, dynamic imports) stay unnamed: one shared name would merge every async split into one chunk.
+    name: (_: any, chunks: any) =>
+      chunks.every((chunk: any) => chunk.name)
+        ? chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+        : undefined
   };
 
   config.optimization!.minimizer!.push(

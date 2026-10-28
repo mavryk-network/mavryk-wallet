@@ -178,3 +178,63 @@ Load endpoints (median / p90 ms; marks build without the probe, 5 runs; "before"
 ### Deferred
 
 Two-stage readiness and per-domain owner refresh (contract changes) are deferred: the measured startup gain on this profile is a few ms. Re-evaluate with a much larger profile, or with Task 21.
+
+## Phase 3 (2026-10-28)
+
+Branch `MAV-3974/load-phase-3` (from `MAV-3974/architecture-load` `2a9c126c`). Same machine and Chrome as Phase 0–2. Open question 4 answered: no bundle-analyzer dependency; bytes were attributed with webpack's built-in `--json` stats (production build, no repo change) plus terser-minified sizes of the emitted modules. `SOURCE_MAP=true` is ignored in production builds (`webpack/env.ts`), so the plan's source-map-explorer route would have needed a config change.
+
+### Where the bytes went (measured first)
+
+Popup, fullpage and confirm share the same eager chunks (each entry file is ~5 KB), so every page module was evaluated in all three. Minified share of the 4.73 MB eager JS:
+
+| Candidate                                               | Eager min (gz)    | Reached through                                                      | Decision                                     |
+| ------------------------------------------------------- | ----------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| Non-first-screen routes                                 | ~0.43 MB          | `PageRouter.tsx` static page imports                                 | Lazy                                         |
+| node-forge                                              | 308 KB (86 KB)    | `lib/temple/front/kukai.ts` (Kukai backup decrypt only)              | `import()` inside the decrypt                |
+| Apollo + graphql                                        | 229 KB (82 KB)    | `lib/apis/objkt` (collectible details driver)                        | `import()` on the first objkt request        |
+| Taquito + mavryk-domains + idna                         | ~615 KB (~137 KB) | `tzdns.ts`; its domain validator is synchronous (AddressChip, forms) | Not changed: would make validation async     |
+| react-json-view                                         | 117 KB            | ConfirmPage `OperationsBanner` (renders immediately)                 | Not changed: would add a fallback to confirm |
+| lodash (whole `lodash.js` via named imports, ~30 files) | 71 KB             | many modules                                                         | Not changed: mass edit for a small gain      |
+
+Estimate before building: evaluation (`entry-start`→`entry-evaluated`) was ~20 ms warm and ~47 ms cold; routes alone (~9% of bytes) looked like noise, routes + node-forge + Apollo (~20%) like −10 to −25 ms cold.
+
+### What changed
+
+1. **Lazy pages without Suspense** (`lib/ui/lazy-page.tsx`). Every route except Unlock, Home (with `/explore`) and Welcome loads on demand; ConfirmPage is untouched (the confirm window never renders `PageRouter`). Route wrappers and the route table are unchanged; only the component references are lazy. A loaded page renders synchronously; a page that is not loaded yet renders the existing `RootSuspenseFallback` spinner and re-renders through a normal state update when its module arrives. `React.lazy` was not used: its re-render is a Suspense retry, and React 18 throttles a retry commit by up to ~500 ms when the page's own nested boundaries suspend in it (the Phase 1 failure mode). A failed chunk load goes to the error boundary; the next mount retries.
+2. **Idle preload.** Once ready (not while locked), pages are loaded one per idle callback: Send, Receive, Settings, collectible/RWA pages, then the rest. While no wallet exists, ImportWallet and CreateWallet.
+3. **node-forge** is imported inside the Kukai decrypt; **Apollo/graphql** moved to `lib/apis/objkt/client.ts`, loaded on the first objkt request (`fetchObjktCollectibles$`, `fetchCollectibleExtraDetails`). Request contracts are unchanged.
+4. **`splitChunks.name` fix** (`webpack.config.ts`). The name function joined chunk names, so every async-only split got the same name `.split-chunk` and webpack merged them: node-forge, libsodium, model-viewer, Apollo and three.js landed in one ~2 MB group, loaded by any of them. Splits of named (entry) chunks keep their names, so eager chunk names are unchanged; async splits are now unnamed and per library (model-viewer/three, ledger/libsodium, node-forge, Apollo each separate).
+
+### Results
+
+Bytes (Chrome production build, normal flags; Firefox build has the same eager script count):
+
+|                         | before (Phase 2)                | after Phase 3                              |
+| ----------------------- | ------------------------------- | ------------------------------------------ |
+| Popup/fullpage eager JS | 8 scripts, 4.73 MB / 1.45 MB gz | **6 scripts, 3.71 MB / 1.15 MB gz** (−22%) |
+| Background JS           | 10 files, 3.71 MB               | 10 files, 3.71 MB                          |
+| Content script          | 26 KB                           | 26 KB                                      |
+
+Load endpoints (median / p90 ms, 5 runs). Both sides were run in this session: the Phase 2 build gave popup cold locked 179 ms against 202 ms in the Phase 1 table, a session drift as large as the expected gain, so the documented numbers were not used as "before".
+
+| ID  | Scenario             | Metric                             | before (Phase 2) | after Phase 3 |
+| --- | -------------------- | ---------------------------------- | ---------------- | ------------- |
+| b   | Popup cold locked    | Unlock                             | 179 / 181        | **174 / 188** |
+| b   | Popup cold locked    | evaluation (entry-start→evaluated) | 47               | **36**        |
+| b   | Popup cold unlocked  | Home                               | 331 / 334        | **328 / 335** |
+| b   | Popup cold unlocked  | evaluation                         | 48               | **35**        |
+| c   | Fullpage cold locked | Unlock                             | 173 / 181        | **166 / 172** |
+| c   | Fullpage cold locked | evaluation                         | 51               | **39**        |
+| a/d | Popup warm unlocked  | Home / tokenRow                    | 127 / 136 §      | 120 / 125     |
+| d   | Popup warm unlocked  | balancesSettled                    | 347 / 354 §      | 346 / 483     |
+
+§ Phase 2 table (previous session). JS heap at the locked first screen fell from ~14.0 to ~12.6 MB (not GC-normalized).
+
+Evaluation is 11–16 ms shorter in every cold scenario, but the first screen gains only 3–7 ms: after evaluation, a cold page waits for the worker (`owner-snapshot`, and `get-state` when unlocked), so the remaining cold cost is Phase 4. The confirm window loads the same smaller eager set. Not measured separately per item (routes, node-forge, Apollo); their byte shares are in the table above.
+
+Navigation to a lazy route (fullpage unlocked, hash navigation, time until the new page shows, median of 5): after idle preload (3 s after Home) Send 28 vs 28 ms, Settings 12 vs 9, Receive 23 vs 23, no spinner. Navigating immediately after Home appears, before preload, costs +0–6 ms and shows the route spinner for a frame.
+
+### Notes for later phases
+
+- The cold first screen is now bounded by worker boot and session recovery, not page evaluation (Phase 4).
+- Remaining eager byte candidates: tzdns/Taquito (~615 KB, needs async domain validation), react-json-view in the confirm window (117 KB), lodash per-method imports (71 KB).

@@ -269,15 +269,15 @@ export function unlock(password: string) {
 
 export async function unlockFromSession() {
   await enqueueUnlock(async () => {
-    const vault = await Vault.recoverFromSession();
-    if (vault == null) return;
+    const recovered = await Vault.recoverFromSession();
+    if (recovered == null) return;
 
     if (await shouldLockOnSessionRecovery()) {
       await lock();
       return;
     }
 
-    const accounts = await vault.fetchAccounts();
+    const { vault, accounts } = recovered;
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);

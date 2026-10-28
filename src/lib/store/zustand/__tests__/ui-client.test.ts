@@ -50,3 +50,47 @@ it('foreground waits for the background before reading fallback and never owns a
   read.mockRestore();
   jest.dontMock('webextension-polyfill');
 });
+
+it('page entry starts the owner request once; StoreProvider adopts it and a retry asks the owner again', async () => {
+  const memory = memoryStorage({ analytics_user_id: 'durable-id' });
+  let listener!: (...args: unknown[]) => unknown;
+  const sender = { id: 'test', url: 'moz-extension://test/popup.html' };
+  const read = jest
+    .spyOn(Storage.prototype, 'getItem')
+    .mockImplementation(key => (key === 'persist:temple-root' ? JSON.stringify(fixture) : null));
+  const sendMessage = jest.fn((request: unknown) => listener(JSON.parse(JSON.stringify(request)), sender));
+  jest.doMock('webextension-polyfill', () => ({
+    __esModule: true,
+    default: {
+      storage: { local: memory.storage, onChanged: { addListener: jest.fn() } },
+      runtime: {
+        id: 'test',
+        getURL: (path: string) => `moz-extension://test/${path}`,
+        onMessage: {
+          addListener: (callback: typeof listener) => {
+            listener = callback;
+          }
+        },
+        sendMessage
+      }
+    }
+  }));
+  let owner!: typeof import('../ui-owner');
+  let client!: typeof import('../ui-client');
+  jest.isolateModules(() => {
+    owner = require('../ui-owner');
+    client = require('../ui-client');
+  });
+  owner.startUIOwner();
+  client.startOwnedUIInitialization();
+  client.startOwnedUIInitialization();
+  const sentAtEntry = sendMessage.mock.calls.length;
+  expect(sentAtEntry).toBe(1);
+  await client.initializeOwnedUI();
+  const sentByEarlyRequest = sendMessage.mock.calls.length;
+  expect(client.getOwnedUISnapshot().ui.userId).toBe('durable-id');
+  await client.initializeOwnedUI();
+  expect(sendMessage.mock.calls.length).toBeGreaterThan(sentByEarlyRequest);
+  read.mockRestore();
+  jest.dontMock('webextension-polyfill');
+});

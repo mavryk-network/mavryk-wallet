@@ -9,6 +9,7 @@ import { setAnotherSelector } from 'lib/analytics';
 import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -33,6 +34,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
   const { data: accStats } = useDelegate(publicKeyHash);
   const myBakerPkh = accStats?.delegate?.address ?? null;
+  useLoadPerfMark('token-row-painted', metadata != null);
 
   const { delegatedBalance, stakedBalance } = useMemo(() => {
     const stakedBalance = accStats?.stakedBalance ?? ZERO;

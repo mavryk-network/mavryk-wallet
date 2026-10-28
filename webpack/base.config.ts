@@ -28,7 +28,8 @@ import {
   MANIFEST_VERSION,
   BACKGROUND_IS_WORKER,
   IMAGE_INLINE_SIZE_LIMIT_ENV,
-  PRODUCTION_EXTENSION_ID
+  PRODUCTION_EXTENSION_ID,
+  LOAD_PERF_MARKS
 } from './env';
 import { PATHS } from './paths';
 
@@ -251,7 +252,8 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
           return [key, JSON.stringify(value)];
         })
       ),
-      'process.env.PRODUCTION_EXTENSION_ID': JSON.stringify(PRODUCTION_EXTENSION_ID ?? '')
+      'process.env.PRODUCTION_EXTENSION_ID': JSON.stringify(PRODUCTION_EXTENSION_ID ?? ''),
+      'process.env.LOAD_PERF_MARKS': JSON.stringify(String(LOAD_PERF_MARKS))
     }),
 
     new ForkTsCheckerWebpackPlugin({

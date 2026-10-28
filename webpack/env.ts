@@ -4,6 +4,7 @@ type ProcessDotEnv = {
   SOURCE_MAP?: 'true' | 'false';
   IMAGE_INLINE_SIZE_LIMIT?: string;
   PRODUCTION_EXTENSION_ID?: string;
+  LOAD_PERF_MARKS?: 'true' | 'false';
 };
 
 const {
@@ -11,7 +12,8 @@ const {
   TARGET_BROWSER = 'chrome',
   SOURCE_MAP: SOURCE_MAP_ENV,
   IMAGE_INLINE_SIZE_LIMIT: IMAGE_INLINE_SIZE_LIMIT_ENV = '10000',
-  PRODUCTION_EXTENSION_ID: PRODUCTION_EXTENSION_ID_ENV
+  PRODUCTION_EXTENSION_ID: PRODUCTION_EXTENSION_ID_ENV,
+  LOAD_PERF_MARKS: LOAD_PERF_MARKS_ENV
 } = process.env as ProcessDotEnv;
 
 export const WEBPACK_MODE = NODE_ENV === 'test' ? 'none' : NODE_ENV;
@@ -22,6 +24,9 @@ export const PRODUCTION_ENV = NODE_ENV === 'production';
 export const SOURCE_MAP = NODE_ENV !== 'production' && SOURCE_MAP_ENV !== 'false';
 
 export const DROP_CONSOLE_IN_PROD = true;
+
+/** Opt-in load-time marks (`window.__WE_LOAD__`) for docs/load-performance.md; off in normal builds. */
+export const LOAD_PERF_MARKS = LOAD_PERF_MARKS_ENV === 'true';
 
 export const RELOADER_PORTS = {
   BACKGROUND: 9090,

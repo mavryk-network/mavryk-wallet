@@ -14,6 +14,7 @@ import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
@@ -46,6 +47,7 @@ export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
   const { fullPage, registerBackHandler } = useAppEnv();
+  useLoadPerfMark('home-painted');
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
   const { search } = useLocation();

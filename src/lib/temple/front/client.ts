@@ -28,6 +28,7 @@ import toBuffer from 'typedarray-to-buffer';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
+import { markLoad } from 'lib/load-perf';
 import { useRetryableSWR } from 'lib/swr';
 import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { clearLocalStorage } from 'lib/temple/reset';
@@ -62,7 +63,14 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
    * State
    */
 
-  const fetchState = useCallback(() => fetchTempleStateWithRetry(request), []);
+  const fetchState = useCallback(
+    () =>
+      fetchTempleStateWithRetry(request).then(state => {
+        markLoad('get-state');
+        return state;
+      }),
+    []
+  );
 
   const { data, mutate } = useRetryableSWR('state', fetchState, {
     suspense: true,

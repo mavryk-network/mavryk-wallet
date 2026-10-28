@@ -121,3 +121,60 @@ Bytes are unchanged (popup/fullpage eager JS 4.73 MB / 1.45 MB gz; background 3.
 
 - Cold-unlocked is bimodal across sessions (a ~470 ms mode came from the Suspense retry throttle described above); compare sessions interleaved, not across days.
 - `IntercomClient.subscribe`'s unsubscribe uses `findIndex(callback)` (the subscriber is used as predicate), so subscribers are never removed. Pre-existing; not changed here.
+
+## Phase 2 (2026-10-28)
+
+Branch `MAV-3974/load-phase-2` (from `MAV-3974/architecture-load` `92786208`). Same machine and Chrome as Phase 0/1. Scope decision (load plan open question 2): **the owner contract change is deferred**. `ui-owner.contract.ts` and the owner are unchanged; only the foreground client `src/lib/store/zustand/ui-client.ts` changed.
+
+### Measured first (before = `92786208` + temporary counters)
+
+A temporary, uncommitted probe in `ui-client.ts` counted owner round trips, foreground parse time and render time (from `notify()` to the microtask after React's synchronous re-render) while Home stayed open for 20 s; CDP `Performance.getMetrics` gave page script time. 5 runs per scenario.
+
+- **Startup snapshot is small and cheap.** The full snapshot is ~85 KB (assets 45 KB, metadata 36 KB, balances 3 KB, ui 0.3 KB); the first owner round trip is ~20 ms and its foreground parse ~3 ms (warm). Two-stage readiness (plan item 1) could save a few ms at most, so it was not built. The ~210 ms cold `owner-snapshot` is worker boot and hydration (Phase 4), not snapshot size.
+- **Applying `changes[key].newValue` directly (item 2 option) is not safe**: owner metadata state merges predefined token metadata at hydration, so raw storage values differ from owner snapshots. Not built.
+- **The real cost was re-rendering.** In 20 s on Home: 86 owner round trips, 41 of them storage-change refreshes, and **54 of the 86 responses were identical** to the previous one (the commanding page receives the new snapshot and then refetches it on `storage.onChanged`). Every response replaced the snapshot object, so all ~443 `useOwnedUI` subscribers re-rendered each time (~6.5 ms per response, ~40k hook calls). In the first 1.5 s after opening Home this was ~45 round trips and ~350 ms of main-thread parse and render.
+
+### What changed
+
+1. **Structural sharing.** Each parsed owner snapshot passes through `replaceEqualDeep` (already exported by the pinned `@tanstack/react-query`; no new dependency). Unchanged slices keep their identity; an identical response notifies nobody.
+2. **Selector bail-out.** `useOwnedUI` now runs its selector inside `useSyncExternalStore`, so a component re-renders only when its selected slice changes. Selectors must return snapshot slices, primitives or module constants (all 24 existing call sites do).
+3. **Coalesced storage-change refreshes.** A storage-change refresh that is still queued (not yet sent) absorbs later changes, because it reads the owner's state when it is sent. Commands, the first request, retries and fail-closed error handling are unchanged.
+
+### Results
+
+Main-thread work on Home over 20 s (median of 5; both sides carry the same probe):
+
+| Scenario               | Metric                           | before  | after Phase 2 |
+| ---------------------- | -------------------------------- | ------- | ------------- |
+| Fullpage warm unlocked | owner round trips / refreshes    | 86 / 41 | **67 / 22**   |
+| Fullpage warm unlocked | subscriber notifications         | 86      | **32**        |
+| Fullpage warm unlocked | render after notify (ms)         | 649     | **187**       |
+| Fullpage warm unlocked | `useOwnedUI` hook calls          | 40,509  | **10,909**    |
+| Fullpage warm unlocked | page script time (CDP, ms)       | 807     | **389**       |
+| Fullpage warm unlocked | first 1.5 s: parse + render (ms) | 366     | **127**       |
+| Popup warm unlocked    | owner round trips / refreshes    | 86 / 41 | **68 / 23**   |
+| Popup warm unlocked    | render after notify (ms)         | 588     | **198**       |
+| Popup warm unlocked    | page script time (CDP, ms)       | 771     | **411**       |
+| Popup warm unlocked    | first 1.5 s: parse + render (ms) | 347     | **123**       |
+
+Foreground parse rose slightly (~105 → ~119 ms per 20 s) because it now includes the deep comparison.
+
+Load endpoints (median / p90 ms; marks build without the probe, 5 runs; "before" = Phase 1 final run, 10 runs, previous session):
+
+| ID  | Scenario               | Metric          | before (Phase 1) | after Phase 2 |
+| --- | ---------------------- | --------------- | ---------------- | ------------- |
+| a/d | Popup warm unlocked    | Home / tokenRow | 131 / 197        | 127 / 136     |
+| d   | Popup warm unlocked    | balancesSettled | 351 / 430        | 347 / 354     |
+| d   | Popup warm unlocked    | balancesFetched | 415 / 749        | 392 / 479     |
+| c/d | Fullpage warm unlocked | Home / tokenRow | 119 / 126        | 121 / 127     |
+| d   | Fullpage warm unlocked | balancesSettled | 332 / 345        | 342 / 402     |
+| d   | Fullpage warm unlocked | balancesFetched | 403 / 784        | 394 / 757     |
+| d   | Unlock flow            | unlock→home ‡   | 179 / 199        | 171 / 178     |
+| d   | Unlock flow            | balancesSettled | 396 / 435        | 388 / 397     |
+| d   | Unlock flow            | balancesFetched | 445 / 467        | 435 / 541     |
+
+‡ Auth tokens were present for these unlocks (same as the Phase 1 final run). First-screen and balance endpoints are unchanged within noise: the gain is main-thread time during syncs (scrolling/typing responsiveness and headroom on slower machines), not an earlier first paint. Locked and cold scenarios were not re-run: startup is one owner response either way, and its parse was ~3 ms. Bytes are unchanged (popup/fullpage eager JS 4.73 MB / 1.45 MB gz; background 3.71 MB). The two client changes were measured together; refresh coalescing alone accounts for the round-trip reduction (41 → 22 refreshes).
+
+### Deferred
+
+Two-stage readiness and per-domain owner refresh (contract changes) are deferred: the measured startup gain on this profile is a few ms. Re-evaluate with a much larger profile, or with Task 21.

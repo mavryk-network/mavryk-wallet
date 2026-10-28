@@ -238,3 +238,55 @@ Navigation to a lazy route (fullpage unlocked, hash navigation, time until the n
 
 - The cold first screen is now bounded by worker boot and session recovery, not page evaluation (Phase 4).
 - Remaining eager byte candidates: tzdns/Taquito (~615 KB, needs async domain validation), react-json-view in the confirm window (117 KB), lodash per-method imports (71 KB).
+
+## Phase 4 (2026-10-28)
+
+Branch `MAV-3974/load-phase-4` (from `MAV-3974/architecture-load` `25cfbf9e`). Same machine and Chrome as Phase 0–3. **Outcome: no code change.** The one item built (plan item 3) showed no gain and was reverted; the other items were measured as negligible or blocked and were not built. Bytes are unchanged (popup/fullpage eager JS 3.71 MB / 1.15 MB gz; background 10 files, 3.71 MB).
+
+### Fact check
+
+- **Background chunks load eagerly in Chrome.** `webpack-target-webextension` (MV3 only) sets the entry's chunk loading to `import-scripts` and emits `__webpack_require__.f.i(<id>)` for every reachable async chunk at startup, before any module evaluates. All nine chunks are loaded on every cold start: `775.chunk.js` (1.5 MB, wasm-themis glue for the sync payload), `265`/`67`/`280`/`502`/`743`/`899` (ledger), `320` (IndexedDB assets migration) and `483`. The existing `import()` calls (`lib/temple/back/ledger.ts`, the vault's `wasm-themis`, `ui-owner.ts`'s IndexedDB migration) resolve against these already installed chunks, so they are safe in Chrome but defer nothing. Chrome only allows `importScripts` of new scripts during the first evaluation, so this cannot be made lazy.
+- **Firefox differs.** `BACKGROUND_IS_WORKER` is false (MV2 background page); the plugin is not applied, so the same `import()` calls are real lazy script loads there, and `unlockFromSession` is skipped.
+- **Owner hydration is half eager.** The four destination stores start reading storage when their modules evaluate (`destination-store.ts`); the migration readiness chain (`initialize()` × 4, flush, snapshot, read-back) runs on the first owner message. It does not await `Actions.init`, but shares the worker's event loop with it.
+
+### Where the cold time goes (measured first)
+
+A temporary, uncommitted probe recorded epoch-ms marks in the worker (`globalThis.__WE_BG_TRACE__`, read by the runner; no payloads) plus marks patched into a copy of the built `background/index.js`; the runner also returned the page's `timeOrigin`, so both sides are on one clock. Medians of 5 runs, ms from page navigation start:
+
+| Step                                                              | popup cold locked | popup cold unlocked | fullpage cold locked |
+| ----------------------------------------------------------------- | ----------------- | ------------------- | -------------------- |
+| Page sends owner request (`entry-start`) / worker starts          | 81 / 84           | 79 / 88             | 81 / 85              |
+| `index.js` loaded and compiled (first statement runs)             | 96                | 101                 | 98                   |
+| Nine eager chunks loaded (`775` ≈ 4 ms of it)                     | 102               | 107                 | 103                  |
+| Module evaluation done, `start()` called                          | 113               | 119                 | 115                  |
+| First owner message handled                                       | 124               | 126                 | 127                  |
+| Owner answers (migration chain ≈ 15 ms, snapshot ≈ 5 ms)          | 146               | 143                 | 141                  |
+| Page has the owner snapshot                                       | 151               | 149                 | 150                  |
+| GetState answered                                                 | 152               | **235**             | 152                  |
+| First screen                                                      | 169               | 322                 | 170                  |
+
+- **Worker script evaluation is ~29 ms** (load/compile 12, eager chunks 5, module evaluation 11).
+- **No async work completes until evaluation ends.** A `storage.local.get` issued by the first module resolves only right after evaluation (117 vs 116); the four stores finish hydrating at 124, the same moment the first owner message is handled (125). The migration chain after that is ~8 serial storage round trips plus the snapshot read-back.
+- **Cold unlocked is bound by session recovery** (127 → 235): ~22 ms of `storage.session` and IndexedDB reads for the session key, then three PBKDF2-SHA256 derivations (310,000 iterations: the check item, accounts, settings) at ~28 ms each. In this Chrome, three PBKDF2 derivations take ~84 ms whether serial or in `Promise.all`: WebCrypto runs them on one sequenced thread, so reading accounts and settings concurrently would gain nothing.
+- The remaining cold-unlocked time after GetState (235 → 322) is foreground Home rendering, not the worker.
+
+### Built, measured and reverted
+
+| Item                                                                                                     | Result                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3. Owner readiness at boot: `startUIOwner` queues the four migration `initialize()` calls once, before any request (failures silent, retried by the first request) | Boot run finished at the same time the first-request run did before (popup cold locked `owner-migrated` 141 → 145, fullpage 135 → 141); first screen 169 → 174, 170 → 175, cold unlocked 322 → 319 (noise). The chain waits on store hydration, which ends when the message arrives anyway, so only ~1 ms could be won. Reverted with its tests. |
+
+### Not built
+
+| Item                                                                 | Reason                                                                                                                                                                                          |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2. Defer top-level work in the worker                                | Module evaluation totals 11 ms; deferring individual modules could win a few ms at most.                                                                                                       |
+| Start session recovery concurrently with `Actions.init`              | ~8 ms on cold unlocked (2.5%, below session drift); `unlocked` must not run before `inited`, so it is an ordering risk for little gain. Declined by decision.                                    |
+| Lazy background chunks                                               | Not possible in Chrome (see fact check).                                                                                                                                                       |
+| Read accounts and settings concurrently during session recovery      | No gain: PBKDF2 does not overlap.                                                                                                                                                              |
+
+### Remaining options (each needs an explicit decision; none is in Phase 4 scope)
+
+- **Fewer session decryptions** (vault semantics): `recoverFromSession` decrypts the check item before accounts and settings; each decryption is one ~28 ms PBKDF2. Dropping or merging one would save ~28 ms on every cold unlocked start.
+- **Parallel owner migration reads** (Task 11/13/17/19 owner change): the ~15 ms readiness chain is serial storage round trips on an already migrated profile; issuing the read-only checks concurrently might save ~5–10 ms on every cold start.
+- **Smaller background bundle:** load/compile of `index.js` (2.1 MB) plus the eager chunks is ~17 ms per cold start.

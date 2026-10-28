@@ -290,3 +290,70 @@ A temporary, uncommitted probe recorded epoch-ms marks in the worker (`globalThi
 - **Fewer session decryptions** (vault semantics): `recoverFromSession` decrypts the check item before accounts and settings; each decryption is one ~28 ms PBKDF2. Dropping or merging one would save ~28 ms on every cold unlocked start.
 - **Parallel owner migration reads** (Task 11/13/17/19 owner change): the ~15 ms readiness chain is serial storage round trips on an already migrated profile; issuing the read-only checks concurrently might save ~5–10 ms on every cold start.
 - **Smaller background bundle:** load/compile of `index.js` (2.1 MB) plus the eager chunks is ~17 ms per cold start.
+
+## Phase 5 (2026-10-28)
+
+Branch `MAV-3974/load-phase-5` (from `MAV-3974/architecture-load` `500fcb01`). Same machine and Chrome (156.0.8078.49) as Phase 0–4. Scenario (d): after unlock / on Home, token list with balances and metadata visible (cached, then fresh). The endpoint is the `balances-fresh` mark (first settled current-account balance Query, both native and tokens), measured from `home-painted`.
+
+### Fact check
+
+- **Item 1 (cached data first) was already done.** `token-row-painted` lands in the same commit as `home-painted` (within 1 ms) in popup warm, fullpage warm, the unlock flow and popup cold; cached owner balances and metadata render with Home, without a spinner. Nothing built.
+- **Item 2 (serial fetch chains): no gating chain in code.** The drivers mount in Home's commit (`PageRouter` wraps the routed element in `WithDataLoading`); the balance Query functions start ~1 ms after `home-painted`, their `balances-start` reservations are the first owner commands in the queue, and REST balances are not gated on the TzKT socket. The chain was in the network (below).
+- **Item 3 (non-visible work) does not compete.** Asset/security start commands queue behind the balance reservations; rates and collectible/RWA details call other hosts, and their only owner write (adult flags) lands after fresh balances; `useStorageAnalytics` runs a sub-millisecond localStorage scan into a no-op `trackEvent` (transport disabled); `useUserIdSync` is a bare selector. Parse + render of every owner response between Home and the balance acknowledgement totals ~40 ms. Not built.
+- **Earlier `balancesFetched` numbers were misattributed.** The runner took the first `/accounts/<address>` request, which is the delegate lookup on Home (`lib/temple/front/baking`), not the native balance. `balancesSettled` (last balance-text change) also does not track freshness, because cached values usually equal fresh ones. Phase 5 uses the mark instead.
+
+### Where the time went (measured first)
+
+A temporary, uncommitted probe recorded owner commands (queued/sent/response/parsed/rendered by kind), the `syncBalances` phases, socket events and resource timing (paths only, addresses redacted). Popup warm unlocked, median ms after `home-painted`, 5 runs (the other three scenarios matched):
+
+| Step                                                             | ms after Home       |
+| ---------------------------------------------------------------- | ------------------- |
+| Balance Query functions start (driver start; no gating waits)    | +1                  |
+| Owner `balances-start` acknowledged, native transport starts     | +37                 |
+| Tokens transport starts (its reservation queues behind native's) | +58                 |
+| `tokens/balances` response                                       | ~+285 (~215 ms)     |
+| Native `/accounts/<address>` response                            | **~+450 (~410 ms)** |
+| `balances-sync` + `balances-cancel` acknowledged, re-render      | ~+35 → mark ~+485   |
+
+Native was the last balance response in 20 of 20 probe runs. Cause: **Chrome's HTTP cache lock.** Home's delegate lookup sends the identical `GET /accounts/<address>` at commit, and Chrome holds a second in-flight request for the same URL until the first response arrives, then sends it. In a plain Chrome page, two identical concurrent GETs took 220/400 ms; with a different URL, `cache: 'no-store'` or a `Cache-Control: no-cache` request header both took ~220 ms. Server-side (curl over one HTTP/2 connection) identical requests are not serialized.
+
+### What changed
+
+- `fetchTezosBalanceFromTzkt` (`lib/apis/tzkt/api.ts`) requests `/accounts/<address>` with a `Cache-Control: no-cache` request header, so it bypasses the HTTP cache and is no longer held behind the delegate lookup. The request is still issued after the owner's `balances-start` reservation (Task 19 reserve-before-transport unchanged); URL, response shape and validation are unchanged; the delegate lookup keeps the default cache mode. Option chosen by decision over sharing one in-flight request (which could reuse a response begun before the reservation) or changing the baking lookup.
+
+### Results
+
+Same session, before = `500fcb01` marks build, after = this branch with marks; 5 runs per scenario (popup warm and cold unlocked: 10, from two passes). Median / p90 ms; balance rows are ms after `home-painted`.
+
+| ID  | Scenario               | Metric                       | before     | after Phase 5 |
+| --- | ---------------------- | ---------------------------- | ---------- | ------------- |
+| d   | Popup warm unlocked    | Home / tokenRow              | 120 / 125  | 116 / 120     |
+| d   | Popup warm unlocked    | native balance fetched       | 513 / 774  | **261 / 610** |
+| d   | Popup warm unlocked    | balances-fresh               | 565 / 1117 | 644 / 699 §   |
+| d   | Fullpage warm unlocked | Home / tokenRow              | 109 / 116  | 111 / 112     |
+| d   | Fullpage warm unlocked | native balance fetched       | 528 / 795  | **254 / 600** |
+| d   | Fullpage warm unlocked | balances-fresh               | 575 / 1091 | **328 / 991** |
+| d   | Unlock flow ‡          | unlock→home / tokenRow       | 169 / 177  | 161 / 169     |
+| d   | Unlock flow ‡          | native balance fetched       | 420 / 451  | **239 / 244** |
+| d   | Unlock flow ‡          | balances-fresh               | 463 / 498  | **308 / 313** |
+| d   | Popup cold unlocked    | Home / tokenRow              | 318 / 323  | 305 / 384     |
+| d   | Popup cold unlocked    | balances-fresh               | 464 / 1438 | 660 / 1465 §  |
+| a   | Popup warm locked      | Unlock (regression check)    | 88 / 100   | 83 / 114      |
+| d   | All unlocked, pooled   | balances-fresh (n = 30 / 24) | 474 / 1117 | **365 / 991** |
+| d   | All unlocked, pooled   | balances-fresh p25 / p75     | 459 / 1050 | **316 / 655** |
+| d   | All unlocked, pooled   | runs under 400 ms            | 0 of 30    | **13 of 24**  |
+
+‡ Auth tokens were present for every unlock (`authKeysBefore`), as in the Phase 1/2 final runs. One "after" unlock run and one runner start (worker did not stop) failed for harness reasons and were excluded/re-run.
+
+§ **Network variance dominates the per-scenario medians.** About 15% of TzKT requests near Home stall ~350 ms (before 19 of 120, after 13 of 84: unchanged by this change). A run whose native or tokens balance request stalls settles at ~640–700 ms on both builds; without a stall, fresh balances settle at ~320–380 ms after the change versus ~460–580 ms before (the lock). Runs above ~1 s on both sides are runs where the socket's `Subscribed` refresh arrived (~+700 ms) while the first fetch was still in flight, so the mark waits for the follow-up fetch (existing `refreshBalances` semantics). The pooled rows are the reliable comparison.
+
+Bytes are unchanged (popup/fullpage eager JS 3.71 MB / 1.15 MB gz; background 3.71 MB).
+
+### Not built
+
+| Item                                                                     | Reason                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Paint cached data first                                               | Already the case (above).                                                                                                                                                                                       |
+| 3. Defer collectible/RWA details, rates, storage analytics, user-id sync | Measured as not competing with the first fresh balances (owner queue order, other hosts, no-op analytics); expected gain ≈ 0.                                                                                   |
+| Parallel `balances-start` reservations for native and tokens             | Tokens' reservation waits ~20 ms behind native's in the serial foreground owner queue; changing that is an owner/intercom ordering change. Tokens is now usually the critical path, so this is the next ~20 ms. |
+| Skip the `Subscribed` follow-up refresh                                  | It closes the gap between the REST snapshot and the socket subscription (correctness); it only affects runs where the first fetch is slow.                                                                      |

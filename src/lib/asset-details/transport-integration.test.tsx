@@ -54,7 +54,17 @@ it('uses one existing transport batch per category for multiple cards and comman
       galleriesAttributesCounts: []
     })
   );
-  fetchRwas.mockResolvedValue([{ address: 'rwa', name: 'RWA', balance: 1 }]);
+  fetchRwas.mockResolvedValue([
+    {
+      address: 'rwa',
+      name: 'RWA',
+      balance: 1,
+      marketPrice: null,
+      lastSale: null,
+      pricingValidUntil: null,
+      marketValueUsd: null
+    }
+  ]);
   const scope = { account: 'a', chainId: 'c', networkId: 'mainnet' };
   function Cards() {
     collectibleDetailHooks.useBatch(scope, ['nft_0', 'missing_0']);

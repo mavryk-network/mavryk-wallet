@@ -29,7 +29,17 @@ beforeEach(() => {
 });
 
 it('keeps the existing wallet batch transport and maps its returned assets', async () => {
-  fetchAssets.mockResolvedValue([{ address: 'asset', name: 'Example', balance: 1 }]);
+  fetchAssets.mockResolvedValue([
+    {
+      address: 'asset',
+      name: 'Example',
+      balance: 1,
+      marketPrice: null,
+      lastSale: null,
+      pricingValidUntil: null,
+      marketValueUsd: null
+    }
+  ]);
   expect(await fetchScopedRwaDetails(scope)).toEqual({ asset_0: { name: 'Example' } });
   expect(fetchAssets).toHaveBeenCalledTimes(1);
   expect(fetchAssets).toHaveBeenCalledWith({ walletAddress: 'a' });

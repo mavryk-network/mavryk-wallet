@@ -1,7 +1,6 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 // import { isDefined } from '@rnw-community/shared';
-import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 
 import { Spinner, Alert, Divider, Identicon, Anchor } from 'app/atoms';
@@ -16,7 +15,6 @@ import { fromAssetSlug } from 'lib/assets/utils';
 import { useBalance } from 'lib/balances';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
-import { TokenMetadata } from 'lib/metadata';
 import {
   useRwaDetails,
   useAreRwaDetailsLoading,
@@ -25,8 +23,6 @@ import {
 } from 'lib/rwas/use-rwas-details.query';
 import { useAccount } from 'lib/temple/front';
 import { ZERO } from 'lib/utils/numbers';
-
-import { addRandomDecimals } from '../utils';
 
 import { CardWithLabel } from './CardWithLabel';
 import { PropertiesItems } from './PropertiesItems';
@@ -37,14 +33,6 @@ const DETAILS_SYNC_INTERVAL = 4 * BLOCK_DURATION;
 interface Props {
   assetSlug: string;
 }
-
-export type TemporaryRwaType = {
-  tokens: BigNumber;
-  totalValue: string;
-  estMarketPrice: string;
-  lastSale: string;
-  metadata: TokenMetadata | undefined;
-};
 
 const RWAPage = memo<Props>(({ assetSlug }) => {
   const detailsError = useRwaDetailsError();
@@ -63,25 +51,15 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
 
   useRwaDetailPageBatch(assetSlug, DETAILS_SYNC_INTERVAL);
 
-  const details: TemporaryRwaType = useMemo(
-    () => ({
-      tokens: balance,
-      totalValue: '5.000.00',
-      estMarketPrice: '50.00',
-      lastSale: `${addRandomDecimals()}`,
-      metadata
-    }),
-    [balance, metadata]
-  );
-
   const name = rwaDetails?.name ?? '--';
+  const description = rwaDetails?.description?.trim();
 
   const CollectibleTextSection = () => (
-    <div>
+    <div className="mb-4">
       <CopyButton text={name} type={'block'} className={'text-white text-xl leading-6 tracking-tight text-left mb-2'}>
         {name}
       </CopyButton>
-      <div className="text-base-plus text-white break-words mb-4">{rwaDetails?.description ?? '--'}</div>
+      {description && <div className="text-base-plus text-white break-words">{description}</div>}
     </div>
   );
 
@@ -133,7 +111,13 @@ const RWAPage = memo<Props>(({ assetSlug }) => {
               </div>
 
               <Divider className="my-6" color="bg-divider" ignoreParent={!popup} />
-              <PropertiesItems assetSlug={assetSlug} accountPkh={account.publicKeyHash} details={details} />
+              <PropertiesItems
+                assetSlug={assetSlug}
+                accountPkh={account.publicKeyHash}
+                balance={balance}
+                symbol={metadata?.symbol}
+                details={rwaDetails}
+              />
             </div>
           </>
         )}

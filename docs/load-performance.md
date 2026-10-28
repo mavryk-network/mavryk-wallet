@@ -74,3 +74,50 @@ Wall time for the popup (trigger → firstScreen) is ~290 ms above the document-
 7. **Long tasks are not the bottleneck** on this hardware (0–52 ms before first screen). Byte reductions (Phase 3) will mainly help evaluation time (`entry-start`→`entry-evaluated`, 20–65 ms), so expected gains are modest.
 
 Suggested order after Phase 0: (1) unlock→Home critical path and the cold-unlocked suspension, (2) Phase 1 waterfall items for the cold path, (3) Phase 5 post-unlock data, then Phase 2/3 only if re-measurement shows a remaining gap.
+
+## Phase 1 (2026-10-28)
+
+Branch `MAV-3974/load-phase-1` (from `MAV-3974/architecture-load` `f3cb073b`). Same machine and Chrome as Phase 0. "before" = `f3cb073b` built with marks in this session; cells marked † were not re-run this session (the final interleaved run was cut short) and show the Phase 0 medians instead. "dev" = this session where available, otherwise Phase 0 (†).
+
+### What changed
+
+1. **Home no longer suspends on staking/baker lookups** (`MainBanner`, token `ListItem`, `StakeTezosTag`). `useDelegate` (TzKT, ~210 ms) and then `useKnownBaker` (~210 ms) used to hold the whole Home page — Send button, tabs, token rows — behind `PageLayout`'s Suspense, serially. They now read with `suspense: false`; the banner total shows a same-height placeholder until staking stats load (a partial total is never shown), the MAV row shows a placeholder row, and the stake/baker tag appears once loaded. A first attempt with local Suspense boundaries was replaced: React 18's retry throttle still held the page commit for up to ~500 ms in some sessions.
+2. **Owner snapshot request at page entry** (Phase 1 item 1). `lib/store/zustand/start-owned-ui` is imported first in popup/fullpage/confirm/options. An idle owner request queue now sends synchronously, so the request leaves before the bundle evaluates; `initializeOwnedUI()` adopts it once; StoreProvider gating, fallback and retry are unchanged.
+
+### Measured and reverted (no gain)
+
+| Item                                                                       | Result                                                                                                                                                                 |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2. `GetStateRequest` at page entry (with a `StateUpdated` staleness guard) | A cold worker answers it only after its own init/session recovery; cold-unlocked Home got worse (222 → 325 ms). Reverted.                                              |
+| 3. Redux root read concurrent with the owner request                       | The owner → `redux-read` gap was already 0–3 ms; first-screen within noise. Reverted. (Verified safe: the owner only reads `persist:temple-root*`, never writes them.) |
+| 4. Start loading the 4 Aeonik weights at page entry (AwaitFonts kept)      | `get-state`→`fonts` gap shrank ~6 ms; first-screen medians within noise across two interleaved sessions. Reverted.                                                     |
+| 5. Move `App.tsx` side-effect imports after first paint                    | Measured each module's own execution: ≤1 ms (cold and warm). Not worth moving; the lock-up check and keep-alive port should stay early anyway. No change.              |
+
+### Results (median / p90 ms; firstScreen unless noted)
+
+| ID  | Scenario               | Metric             | dev         | before        | after Phase 1 |
+| --- | ---------------------- | ------------------ | ----------- | ------------- | ------------- |
+| a   | Popup warm locked      | Unlock             | 114 / 129   | 107 / 120     | **95 / 122**  |
+| a   | Popup warm unlocked    | Home (Send button) | 614 / 1064  | 343 / 722     | **131 / 197** |
+| b   | Popup cold locked      | Unlock             | 198 / 212   | 226 / 281     | **202 / 227** |
+| b   | Popup cold unlocked    | Home               | 700 / 1198  | 859 / 931 †   | **336 / 351** |
+| c   | Fullpage warm locked   | Unlock             | 75 / 80 †   | 80 / 88 †     | **76 / 89**   |
+| c   | Fullpage warm unlocked | Home               | 579 / 877 † | 317 / 700 †   | **119 / 126** |
+| c   | Fullpage cold locked   | Unlock             | 170 / 180 † | 200 / 201 †   | **180 / 182** |
+| d   | Popup warm unlocked    | tokenRow           | 635 / 1356  | 893 / 933     | **131 / 197** |
+| d   | Popup warm unlocked    | balancesFetched    | 839 / 1173  | 693 / 781     | **415 / 749** |
+| d   | Popup cold unlocked    | tokenRow           | 1129 / 1498 | 887 / 1181 †  | **336 / 351** |
+| d   | Popup cold unlocked    | balancesFetched    | 903 / 1248  | 1135 / 1519 † | **633 / 953** |
+| d   | Fullpage warm unlocked | tokenRow           | 610 / 931 † | 533 / 914 †   | **119 / 126** |
+| d   | Unlock flow            | unlock→home ‡      | 591 / 637 † | 1031 / 1114 † | **179 / 199** |
+| d   | Unlock flow            | tokenRow ‡         | 591 / 936 † | 1187 / 1320 † | **179 / 199** |
+| d   | Unlock flow            | balancesFetched ‡  | 359 / 810 † | 1311 / 1655 † | **445 / 467** |
+
+‡ **Unlock-flow numbers depend on auth state.** `lock()` clears the API tokens (`logoutAuth`), so an unlock normally pays challenge → sign → verify (~590 ms, awaited by `unlock()` before it responds; vault decrypt is ~120 ms). Background tracing showed the Phase 0 "+440 ms vs dev" was this handshake: on dev, the tokens **reappear 0.3–1.5 s after lock while the wallet is still locked**, so dev's next unlock skips auth. The same reappearance was later observed on the branch once Home rendered sooner, and the final run's unlock→home (179 ms) is consistent with tokens being present. Kept by decision: unlock still awaits auth. The token reappearance after lock is a separate auth/security issue, not fixed here.
+
+Bytes are unchanged (popup/fullpage eager JS 4.73 MB / 1.45 MB gz; background 3.71 MB).
+
+### Notes for later phases
+
+- Cold-unlocked is bimodal across sessions (a ~470 ms mode came from the Suspense retry throttle described above); compare sessions interleaved, not across days.
+- `IntercomClient.subscribe`'s unsubscribe uses `findIndex(callback)` (the subscriber is used as predicate), so subscribers are never removed. Pre-existing; not changed here.

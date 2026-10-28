@@ -10,8 +10,10 @@ import { parseData } from './validation';
 let snapshot: UISnapshot | undefined;
 let error: Error | undefined;
 let pending: Promise<void> | undefined;
+let earlyInitialization: Promise<void> | undefined;
 let isListening = false;
 let queue: Promise<unknown> = Promise.resolve();
+let queuedCount = 0;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach(listener => listener());
 const subscribe = (listener: () => void) => {
@@ -44,14 +46,19 @@ async function send(command?: UICommand) {
 
 /** Queue commands without optimistic defaults; failures close the consumer gate and remain explicitly retryable. */
 export function requestOwnedUISnapshot(command?: UICommand): Promise<UISnapshot> {
-  const run = queue
-    .then(() => send(command))
-    .catch(() => {
-      error = new Error('Preferences could not be restored or saved. Please retry.');
-      notify();
-      throw error;
+  // An idle queue sends synchronously, so the page-entry request leaves before the app bundle finishes evaluating.
+  const sent = queuedCount === 0 ? send(command) : queue.then(() => send(command));
+  queuedCount++;
+  const run = sent.catch(() => {
+    error = new Error('Preferences could not be restored or saved. Please retry.');
+    notify();
+    throw error;
+  });
+  queue = run
+    .catch(() => undefined)
+    .finally(() => {
+      queuedCount--;
     });
-  queue = run.catch(() => undefined);
   return run;
 }
 
@@ -62,6 +69,12 @@ export async function updateOwnedUI(command?: UICommand): Promise<void> {
 
 /** Read-only frontend projection of the background's durable stores; no foreground persistence adapter exists. */
 export function initializeOwnedUI(): Promise<void> {
+  if (earlyInitialization) {
+    // Adopt the request started at page entry exactly once; a later call (retry) asks the owner again.
+    const adopted = earlyInitialization;
+    earlyInitialization = undefined;
+    return adopted;
+  }
   if (!isListening) {
     isListening = true;
     browser.storage.onChanged.addListener((changes, area) => {
@@ -81,6 +94,17 @@ export function initializeOwnedUI(): Promise<void> {
       pending = undefined;
     });
   return pending;
+}
+
+/**
+ * Send the first owner snapshot request at page entry, before the app bundle evaluates, so a cold worker boots in
+ * parallel. Readiness is unchanged: StoreProvider still gates on this same request via `initializeOwnedUI`.
+ */
+export function startOwnedUIInitialization() {
+  if (earlyInitialization) return;
+  const started = initializeOwnedUI();
+  started.catch(() => undefined); // Failure is surfaced to StoreProvider when it adopts the request.
+  earlyInitialization = started;
 }
 
 export function getOwnedUISnapshot(): UISnapshot {

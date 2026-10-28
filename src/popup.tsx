@@ -1,4 +1,5 @@
 import 'lib/load-perf/start';
+import 'lib/store/zustand/start-owned-ui';
 import './main.css';
 
 import React from 'react';

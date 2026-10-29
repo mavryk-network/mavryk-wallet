@@ -1,12 +1,10 @@
 import { catchError, from, map, of } from 'rxjs';
 
+import { ABTestGroup } from '../ab-test-group.enum';
+
 import { templeWalletApi } from './templewallet.api';
 
-export enum ABTestGroup {
-  A = 'A',
-  B = 'B',
-  Unknown = 'Unknown'
-}
+export { ABTestGroup } from '../ab-test-group.enum';
 
 interface GetABGroupResponse {
   ab: ABTestGroup.A | ABTestGroup.B;

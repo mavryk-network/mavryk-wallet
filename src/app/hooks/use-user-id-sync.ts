@@ -1,16 +1,6 @@
-import { useEffect } from 'react';
-
 import { useUserIdSelector } from 'app/store/settings/selectors';
-import { ANALYTICS_USER_ID_STORAGE_KEY } from 'lib/constants';
-import { usePassiveStorage } from 'lib/temple/front/storage';
 
+/** Identity adoption and durable synchronization belong exclusively to the background owner before this hook mounts. */
 export const useUserIdSync = () => {
-  const [storedUserId, setStoredUserId] = usePassiveStorage<string | null>(ANALYTICS_USER_ID_STORAGE_KEY, null);
-  const userId = useUserIdSelector();
-
-  useEffect(() => {
-    if (userId !== storedUserId) {
-      setStoredUserId(userId);
-    }
-  }, [setStoredUserId, storedUserId, userId]);
+  useUserIdSelector();
 };

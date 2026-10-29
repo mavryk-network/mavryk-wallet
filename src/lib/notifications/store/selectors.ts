@@ -1,28 +1,24 @@
-import { useSelector } from 'app/store';
-import type { RootState } from 'app/store/root-state.type';
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
 import { NotificationStatus } from '../enums/notification-status.enum';
 import { NotificationType } from '../enums/notification-type.enum';
+import { useNotificationsQuery } from '../hooks/use-notifications.query';
+import { NotificationInterface } from '../types';
 
-const getFilteredNotifications = (state: RootState) => {
-  const notifications = state.notifications.list.data;
+const EMPTY_NOTIFICATIONS: NotificationInterface[] = [];
 
-  if (!state.notifications.isNewsEnabled) {
-    return notifications.filter(notification => notification.type !== NotificationType.News);
-  }
-
-  return notifications;
+export const useNotificationsSelector = () => {
+  const isNewsEnabled = useIsNewsEnabledSelector();
+  const notifications = useNotificationsQuery().data ?? EMPTY_NOTIFICATIONS;
+  return isNewsEnabled
+    ? notifications
+    : notifications.filter(notification => notification.type !== NotificationType.News);
 };
 
-export const useNotificationsSelector = () => useSelector(state => getFilteredNotifications(state));
-
 export const useNotificationsItemSelector = (id: number) =>
-  useSelector(state => state.notifications.list.data.find(notification => notification.id === id));
+  useNotificationsQuery().data?.find(notification => notification.id === id);
 
 export const useNewNotificationsAmountSelector = () =>
-  useSelector(
-    state =>
-      getFilteredNotifications(state).filter(notification => notification.status === NotificationStatus.New).length
-  );
+  useNotificationsSelector().filter(notification => notification.status === NotificationStatus.New).length;
 
-export const useIsNewsEnabledSelector = () => useSelector(({ notifications }) => notifications.isNewsEnabled);
+export const useIsNewsEnabledSelector = () => useOwnedUI(({ ui }) => ui.isNewsEnabled);

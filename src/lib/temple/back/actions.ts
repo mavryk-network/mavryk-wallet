@@ -45,6 +45,7 @@ import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
+import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import {
   getCurrentPermission,
   requestPermission,
@@ -77,7 +78,6 @@ export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,1
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
-const AUTODECLINE_AFTER = 60_000;
 const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
 const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
@@ -269,15 +269,15 @@ export function unlock(password: string) {
 
 export async function unlockFromSession() {
   await enqueueUnlock(async () => {
-    const vault = await Vault.recoverFromSession();
-    if (vault == null) return;
+    const recovered = await Vault.recoverFromSession();
+    if (recovered == null) return;
 
     if (await shouldLockOnSessionRecovery()) {
       await lock();
       return;
     }
 
-    const accounts = await vault.fetchAccounts();
+    const { vault, accounts } = recovered;
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);
@@ -583,7 +583,7 @@ const promisableUnlock = async (
   const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, AUTODECLINE_AFTER);
+  const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
 };
 
@@ -645,7 +645,7 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
         const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
 
         // Decline after timeout
-        const t = setTimeout(declineAndClose, AUTODECLINE_AFTER);
+        const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
         const stopTimeout = () => clearTimeout(t);
       })
   );

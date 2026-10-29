@@ -105,7 +105,11 @@ describe('Beacon', () => {
     it('called with correct arguments', async () => {
       await getOrCreateKeyPair();
       expect(mockSodiumUtil.crypto_sign_seed_keypair).toBeCalledWith('mock string');
-      expect(mockSodiumUtil.crypto_generichash).toBeCalledWith(32, new Uint8Array(new Array(64).fill(48)));
+      const [hashLength, seedBytes] = mockSodiumUtil.crypto_generichash.mock.calls[0];
+      expect(hashLength).toBe(32);
+      // libsodium's TextEncoder uses the Node realm; compare the exact bytes across realms.
+      expect(Object.prototype.toString.call(seedBytes)).toBe('[object Uint8Array]');
+      expect(Array.from(seedBytes)).toEqual(new Array(64).fill(48));
     });
     it('Generates new valid seed', async () => {
       const keyPair = await getOrCreateKeyPair();

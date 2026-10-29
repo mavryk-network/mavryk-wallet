@@ -19,6 +19,7 @@ export interface UserHistoryItem {
   mainOperation?: IndividualHistoryItem;
   displayMoneyDiffs?: HistoryDisplayMoneyDiff[];
   hideOperationMoneyDiffs?: boolean;
+  isPartialTransfers?: boolean;
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
   firstOperation?: IndividualHistoryItem;
@@ -26,8 +27,14 @@ export interface UserHistoryItem {
 }
 
 export interface HistoryDisplayMoneyDiff {
+  symbol?: string;
   assetSlug: string;
   diff: string;
+  usdAmount?: number | null;
+  isNeutral?: boolean;
+  /** Direction remains known even when the token amount is unavailable. */
+  isNegative?: boolean;
+  isAmountUnavailable?: boolean;
 }
 
 export interface HistoryOperationNetworkFees {
@@ -64,9 +71,15 @@ export enum StakingActions {
 
 export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   contractAddress?: string;
+  calledContract?: string;
+  movementKind?: 'mint' | 'burn';
+  displayMoneyDiff?: HistoryDisplayMoneyDiff;
   source: HistoryMember;
   status: HistoryItemStatus;
   amountSigned: string;
+  /** Raw purchase quantity; never used as a display-unit amount. */
+  atomicAmount?: string;
+  isAmountUnavailable?: boolean;
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;
@@ -150,7 +163,7 @@ export interface HistoryItemTokenTransfer extends PickedPropsFromTzktTokenTransf
   recipients?: RecipientInfo[];
   totalAmount: string;
   tokenContractAddress: string;
-  tokenId: number;
+  tokenId: number | string;
   tokenType: TokenType;
   assetSlug: string;
   assetMetadata?: AssetMetadataBase;

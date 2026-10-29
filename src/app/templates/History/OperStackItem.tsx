@@ -7,7 +7,7 @@ import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
-import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
+import { MoneyDiff } from 'lib/temple/history/helpers';
 import {
   IndividualHistoryItem,
   HistoryItemOpTypeEnum,
@@ -21,14 +21,16 @@ import {
 
 import { MoneyDiffView } from './MoneyDiffView';
 import {
+  buildHistoryPreviewOperations,
   getAssetsFromOperations,
   getHistoryOperationAddress,
   getMultipleInteractionMessageData,
-  getStakingMessage
+  getStakingMessage,
+  isVisibleMoneyDiff
 } from './utils';
 
 interface Props {
-  item: IndividualHistoryItem;
+  item: IndividualHistoryItem | ReturnType<typeof buildHistoryPreviewOperations>[number];
   isTiny?: boolean;
   moneyDiff?: MoneyDiff;
   originalHistoryItem?: UserHistoryItem;
@@ -41,12 +43,33 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
   const componentBaseProps = {
     status: item.status,
-    moneyDiff,
+    moneyDiff:
+      item.displayMoneyDiff ??
+      (item.entrypoint === 'mint' && item.atomicAmount !== undefined && item.amountDiff !== undefined && item.assetSlug
+        ? { assetSlug: item.assetSlug, diff: item.amountDiff }
+        : moneyDiff),
     last
   };
 
   const slugs = getAssetsFromOperations(originalHistoryItem);
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
+
+  if (item.movementKind && (isTiny || item.type !== HistoryItemOpTypeEnum.Interaction)) {
+    return item.movementKind === 'mint' ? (
+      <Component
+        {...componentBaseProps}
+        titleNode={HistoryItemOpTypeTexts[HistoryItemOpTypeEnum.Interaction]}
+        argsNode={
+          <StackItemArgs
+            i18nKey="interactionOnContract"
+            args={[<span className="text-accent-blue">mint</span>, item.contractAddress ?? '']}
+          />
+        }
+      />
+    ) : (
+      <Component {...componentBaseProps} titleNode="Burned" />
+    );
+  }
 
   switch (item.type) {
     case HistoryItemOpTypeEnum.Staking:
@@ -192,7 +215,9 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[transferFromAddress]} />}
+          argsNode={
+            transferFromAddress ? <StackItemArgs i18nKey="transferFromSmb" args={[transferFromAddress]} /> : undefined
+          }
         />
       );
 
@@ -203,7 +228,9 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[transferToAddress]} />}
+          argsNode={
+            transferToAddress ? <StackItemArgs i18nKey="transferToSmb" args={[transferToAddress]} /> : undefined
+          }
         />
       );
     case HistoryItemOpTypeEnum.Reveal:
@@ -267,11 +294,13 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
 };
 
 const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status, last = false }) => {
+  const isMoneyDiffVisible = Boolean(moneyDiff && isVisibleMoneyDiff(moneyDiff));
+
   return (
     <div
       className={clsx(
         'flex items-start justify-between text-white text-xs py-2',
-        moneyDiff && !isZero(moneyDiff.diff) ? 'h-12' : 'h-9',
+        isMoneyDiffVisible ? 'h-12' : 'h-9',
         !last ? 'border-b border-divider' : 'h-auto'
       )}
     >
@@ -281,10 +310,15 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
         {argsNode}
       </div>
 
-      {moneyDiff && !isZero(moneyDiff.diff) && (
+      {moneyDiff && isMoneyDiffVisible && (
         <MoneyDiffView
           assetId={moneyDiff.assetSlug}
           diff={moneyDiff.diff}
+          symbol={moneyDiff.symbol}
+          usdAmount={moneyDiff.usdAmount}
+          isNeutral={moneyDiff.isNeutral}
+          isNegative={moneyDiff.isNegative}
+          isAmountUnavailable={moneyDiff.isAmountUnavailable}
           pending={status === 'pending'}
           className="flex flex-col -mt-2px"
           moneyClassname="text-sm"

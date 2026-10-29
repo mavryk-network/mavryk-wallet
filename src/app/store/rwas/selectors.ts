@@ -1,14 +1,11 @@
-import { useSelector } from '../root-state.selector';
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
-import type { RwaDetails } from './state';
-
-export const useRwaDetailsSelector = (slug: string): RwaDetails | nullish =>
-  useSelector(({ rwas }) => rwas.details.data[slug]);
-
-export const useAllRwaDetailsSelector = (): Record<string, RwaDetails | nullish> =>
-  useSelector(({ rwas }) => rwas.details.data);
-
-export const useAllRwasDetailsLoadingSelector = () => useSelector(({ rwas }) => rwas.details.isLoading);
+// Compatibility exports for existing callers; fetched details are owned only by Query.
+export {
+  useRwaDetails as useRwaDetailsSelector,
+  useAllRwaDetails as useAllRwaDetailsSelector,
+  useAreRwaDetailsLoading as useAllRwasDetailsLoadingSelector
+} from 'lib/rwas/use-rwas-details.query';
 
 export const useRwaIsAdultSelector = (slug: string): boolean | undefined =>
-  useSelector(({ rwas }) => rwas.adultFlags[slug]?.val);
+  useOwnedUI(state => state.assets.rwaAdultFlags[slug]?.val);

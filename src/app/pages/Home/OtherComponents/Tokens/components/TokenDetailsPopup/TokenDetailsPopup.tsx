@@ -29,6 +29,7 @@ import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T, t } from 'lib/i18n';
 import { AssetMetadataBase, getAssetSymbol } from 'lib/metadata';
 import { useAccount, useDelegate, useNetwork } from 'lib/temple/front';
+import { MVRK_HISTORY_TOKEN_ADDRESS } from 'lib/temple/history/consts';
 import { TempleAccountType } from 'lib/temple/types';
 import { ZERO } from 'lib/utils/numbers';
 import { HistoryAction, navigate } from 'lib/woozie';
@@ -41,11 +42,12 @@ type TokenDetailsPopupProps = {
 } & PopupModalWithTitlePropsProps;
 
 export const TokenDetailsPopup: FC<TokenDetailsPopupProps> = ({
-  assetSlug = MAV_TOKEN_SLUG,
+  assetSlug: selectedAssetSlug,
   publicKeyHash,
   isOpen,
   ...rest
 }) => {
+  const assetSlug = selectedAssetSlug || MAV_TOKEN_SLUG;
   const { value: balance = ZERO, assetMetadata } = useBalance(assetSlug, publicKeyHash);
 
   return (
@@ -203,6 +205,7 @@ const TokenDetailsPopupContent: FC<TokenDetailsPopupContentProps> = ({ assetSlug
       <div className="pb-8 h-full">
         <HistoryComponent
           assetSlug={assetSlug}
+          tokenAddress={isMainToken ? MVRK_HISTORY_TOKEN_ADDRESS : undefined}
           searchWrapperClassname={styles.searchWrapperPopup}
           theme={DARK_LIGHT_THEME}
           showRestOfSearchSectionOptions={false}

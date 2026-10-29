@@ -3,11 +3,30 @@ import browser from 'webextension-polyfill';
 import * as Passworder from 'lib/temple/passworder';
 import { TempleAccount, TempleAccountType, TempleChainKind } from 'lib/temple/types';
 
+import { MIGRATIONS } from './migrations';
 import { createMemorySigner, mnemonicToTezosAccountCreds } from './misc';
-import { encryptAndSaveMany } from './safe-storage';
-import { accPrivKeyStrgKey, accountsStrgKey, walletMnemonicStrgKey } from './storage-keys';
+import { encryptAndSaveMany, savePlain } from './safe-storage';
+import * as SessionStore from './session-store';
+import {
+  accPrivKeyStrgKey,
+  accountsStrgKey,
+  checkStrgKey,
+  migrationLevelStrgKey,
+  walletMnemonicStrgKey
+} from './storage-keys';
 
 import { Vault } from './index';
+
+jest.mock('./session-store', () => ({
+  ...jest.requireActual('./session-store'),
+  getSessionPassKey: jest.fn(),
+  removeSession: jest.fn()
+}));
+
+const mockedGetSessionPassKey = SessionStore.getSessionPassKey as jest.MockedFunction<
+  typeof SessionStore.getSessionPassKey
+>;
+const mockedRemoveSession = SessionStore.removeSession as jest.MockedFunction<typeof SessionStore.removeSession>;
 
 const PASSWORD = 'contacts-key-password';
 const HD_WALLET_ID = 'wallet-1';
@@ -150,5 +169,58 @@ describe('Vault contacts key derivation', () => {
       bookAddr: publicKeyHash,
       identityKind: 'imported'
     });
+  });
+});
+
+it('unlocks an existing vault with a password below the new-vault policy', async () => {
+  await browser.storage.local.clear();
+  const legacyPassword = 'old';
+  const legacyPassKey = await Passworder.generateKey(legacyPassword);
+  await encryptAndSaveMany([[checkStrgKey, 'legacy-check']], legacyPassKey);
+  await savePlain(migrationLevelStrgKey, MIGRATIONS.length);
+
+  await expect(Vault.setup(legacyPassword)).resolves.toBeInstanceOf(Vault);
+});
+
+describe('Vault.recoverFromSession', () => {
+  const account = buildImportedAccount('mv1HmdN1hRxhJW1aeLpGJdvAuBY48z38JjVq');
+
+  beforeAll(async () => {
+    passKey = await Passworder.generateKey(PASSWORD);
+  });
+
+  beforeEach(async () => {
+    await browser.storage.local.clear();
+    mockedGetSessionPassKey.mockReset();
+    mockedRemoveSession.mockReset();
+  });
+
+  it('returns the vault with the accounts it decrypted to validate the session key', async () => {
+    await saveAccounts([account], [[checkStrgKey, 'check']]);
+    mockedGetSessionPassKey.mockResolvedValue(passKey);
+
+    const recovered = await Vault.recoverFromSession();
+
+    expect(recovered?.vault).toBeInstanceOf(Vault);
+    expect(recovered?.accounts).toEqual([account]);
+    expect(mockedRemoveSession).not.toHaveBeenCalled();
+  });
+
+  it('removes the session and stays locked when the session key cannot decrypt the accounts', async () => {
+    await saveAccounts([account], [[checkStrgKey, 'check']]);
+    mockedGetSessionPassKey.mockResolvedValue(await Passworder.generateKey('another-password'));
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(Vault.recoverFromSession()).resolves.toBeNull();
+    expect(mockedRemoveSession).toHaveBeenCalledTimes(1);
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('returns null without decrypting when no session key is saved', async () => {
+    mockedGetSessionPassKey.mockResolvedValue(undefined);
+
+    await expect(Vault.recoverFromSession()).resolves.toBeNull();
+    expect(mockedRemoveSession).not.toHaveBeenCalled();
   });
 });

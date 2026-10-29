@@ -142,10 +142,7 @@ type UnfamiliarWithDelegationScreenProps = {
   setIsFromCoStakeNavigation: (value: boolean) => void;
 };
 
-const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({
-  setShowStakeScreen,
-  setIsFromCoStakeNavigation
-}) => {
+const UnfamiliarWithDelegationScreen: FC<UnfamiliarWithDelegationScreenProps> = ({ setShowStakeScreen }) => {
   const { popup } = useAppEnv();
   const handleBtnClick = useCallback(() => {
     // skip delegate onboarding screen

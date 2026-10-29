@@ -2,22 +2,22 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
 import clsx from 'clsx';
-import { useDispatch } from 'react-redux';
 
 import { FormSubmitButton, Spinner, Money, Alert, Divider } from 'app/atoms';
 import CopyButton from 'app/atoms/CopyButton';
 import { useAppEnv } from 'app/env';
 import PageLayout from 'app/layouts/PageLayout';
 import { AvatarBlock } from 'app/molecules/AvatarBlock/AvatarBlock';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import {
-  useAllCollectiblesDetailsLoadingSelector,
-  useCollectibleDetailsSelector
-} from 'app/store/collectibles/selectors';
 import { useCollectibleMetadataSelector } from 'app/store/collectibles-metadata/selectors';
 import OperationStatus from 'app/templates/OperationStatus';
 import { fetchCollectibleExtraDetails, objktCurrencies } from 'lib/apis/objkt';
 import { fromAssetSlug } from 'lib/assets/utils';
+import {
+  useAreCollectibleDetailsLoading,
+  useCollectibleDetails,
+  useCollectibleDetailPageBatch,
+  useCollectibleDetailsError
+} from 'lib/collectibles/use-collectibles-details.query';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { t, T } from 'lib/i18n';
 import { getAssetName } from 'lib/metadata';
@@ -25,7 +25,6 @@ import { useRetryableSWR } from 'lib/swr';
 import { useAccount } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccountType } from 'lib/temple/types';
-import { useInterval } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
 import { useCollectibleSelling } from '../hooks/use-collectible-selling.hook';
@@ -44,8 +43,9 @@ interface Props {
 
 const CollectiblePage = memo<Props>(({ assetSlug }) => {
   const metadata = useCollectibleMetadataSelector(assetSlug);
-  const details = useCollectibleDetailsSelector(assetSlug);
-  const areAnyNFTsDetailsLoading = useAllCollectiblesDetailsLoadingSelector();
+  const details = useCollectibleDetails(assetSlug);
+  const areAnyNFTsDetailsLoading = useAreCollectibleDetailsLoading();
+  const detailsError = useCollectibleDetailsError();
   const { fullPage } = useAppEnv();
 
   const [contractAddress, tokenId] = fromAssetSlug(assetSlug);
@@ -85,11 +85,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
 
   const onSendButtonClick = useCallback(() => navigate(`/send/${assetSlug}`), [assetSlug]);
 
-  const dispatch = useDispatch();
-  useInterval(() => void dispatch(loadCollectiblesDetailsActions.submit([assetSlug])), DETAILS_SYNC_INTERVAL, [
-    dispatch,
-    assetSlug
-  ]);
+  useCollectibleDetailPageBatch(assetSlug, DETAILS_SYNC_INTERVAL);
 
   const displayedOffer = useMemo(() => {
     const highestOffer = offers?.[0];
@@ -152,6 +148,7 @@ const CollectiblePage = memo<Props>(({ assetSlug }) => {
   return (
     <PageLayout isTopbarVisible={false} pageTitle={<span className="truncate">{collectibleName}</span>}>
       <div className={clsx('flex flex-col w-full', !fullPage && 'pb-6')}>
+        {detailsError && <Alert type="error" title={t('error')} description={t('unknownError')} className="mb-4" />}
         {operationError ? (
           <Alert
             type="error"

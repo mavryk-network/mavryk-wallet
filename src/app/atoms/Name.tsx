@@ -24,7 +24,8 @@ const Name: FC<NameProps> = ({ className, style = {}, testID, tooltipContent, ..
       onShow(instance) {
         const reference = instance.reference;
 
-        return Boolean(tooltipContent) && reference instanceof HTMLElement && isTextTruncated(reference);
+        if (!tooltipContent || !(reference instanceof HTMLElement) || !isTextTruncated(reference)) return false;
+        return;
       }
     }),
     [tooltipContent]

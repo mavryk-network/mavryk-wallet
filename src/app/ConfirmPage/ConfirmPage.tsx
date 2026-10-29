@@ -116,21 +116,28 @@ const ConfirmDAppForm: FC = () => {
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
   const loc = useLocation();
-  const id = useMemo(() => {
+  const { id, token } = useMemo(() => {
     const usp = new URLSearchParams(loc.search);
     const pageId = usp.get('id');
-    if (!pageId) {
+    const pageToken = usp.get('token');
+
+    if (!pageId || !pageToken) {
       throw new Error(t('notIdentified'));
     }
-    return pageId;
+
+    return { id: pageId, token: pageToken };
   }, [loc.search]);
 
-  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data } = useRetryableSWR<TempleDAppPayload, unknown, [string, string]>(
+    [id, token],
+    ([payloadId, payloadToken]) => getDAppPayload(payloadId, payloadToken),
+    {
+      suspense: true,
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   const payload = data!;
   const payloadError = data!.error;

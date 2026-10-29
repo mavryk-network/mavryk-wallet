@@ -17,6 +17,7 @@ import { UserHistoryItem } from 'lib/temple/history';
 import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
 import { createOpParams, mergeOpParams } from 'lib/temple/history/filterParams';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
+import { usePurchaseMetadata } from 'lib/temple/history/use-purchase-metadata';
 import { isKnownChainId } from 'lib/temple/types';
 
 import useHistory from '../../../lib/temple/history/hook';
@@ -42,6 +43,7 @@ const cleanBtnStyles = { backgroundColor: '#202020', borderRadius: 100 };
 
 interface Props {
   assetSlug?: string;
+  tokenAddress?: string;
   searchWrapperClassname?: string;
   theme?: ComponentTheme;
   showRestOfSearchSectionOptions?: boolean;
@@ -52,6 +54,7 @@ interface Props {
 export const HistoryComponent: React.FC<Props> = memo(
   ({
     assetSlug,
+    tokenAddress,
     searchWrapperClassname,
     theme = DARK_THEME,
     showRestOfSearchSectionOptions = true,
@@ -61,6 +64,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     const { popup } = useAppEnv();
     const { publicKeyHash: accountAddress } = useAccount();
     const chainId = useChainId();
+    const resolvePurchaseDecimals = usePurchaseMetadata();
 
     // factory method to create params object for api calls
     const paramsRecord = useMemo(() => createOpParams(accountAddress), [accountAddress]);
@@ -161,7 +165,7 @@ export const HistoryComponent: React.FC<Props> = memo(
       reachedTheEnd,
       list: userHistory,
       loadMore
-    } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams);
+    } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams, undefined, tokenAddress);
 
     // useLoadPartnersPromo();
 
@@ -208,18 +212,28 @@ export const HistoryComponent: React.FC<Props> = memo(
 
     // end of debounced search ****************************************************
 
-    // fetch single user operation by entered search value
+    // Fetch hash history for the captured scope; cleanup discards results after search or network changes.
     useEffect(() => {
+      let isCancelled = false;
       async function fetchOperationData() {
         setIsSearchingByHash(true);
         if (chainId && isKnownChainId(chainId) && searchValueForFilter !== '') {
           try {
-            const arr = await fetchUserOperationByHash(chainId, accountAddress, searchValueForFilter, assetSlug);
+            const arr = await fetchUserOperationByHash(
+              chainId,
+              accountAddress,
+              searchValueForFilter,
+              assetSlug,
+              resolvePurchaseDecimals,
+              tokenAddress
+            );
+            if (isCancelled) return;
             setIsSearchingByHash(false);
 
             setFilteredHistory(arr);
           } catch (e) {
-            console.log(e);
+            if (isCancelled) return;
+            console.error('Unable to search history');
             setFilteredHistory([]);
             setIsSearchingByHash(false);
           }
@@ -229,7 +243,10 @@ export const HistoryComponent: React.FC<Props> = memo(
       }
 
       fetchOperationData();
-    }, [searchValueForFilter, chainId, accountAddress, assetSlug]);
+      return () => {
+        isCancelled = true;
+      };
+    }, [searchValueForFilter, chainId, accountAddress, assetSlug, resolvePurchaseDecimals, tokenAddress]);
 
     // popup states
     const [isOpen, setIsOpen] = useState(false);

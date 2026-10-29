@@ -28,7 +28,9 @@ import toBuffer from 'typedarray-to-buffer';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
 import { IntercomClient } from 'lib/intercom';
+import { markLoad } from 'lib/load-perf';
 import { useRetryableSWR } from 'lib/swr';
+import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { clearLocalStorage } from 'lib/temple/reset';
 import {
   TempleConfirmationPayload,
@@ -45,6 +47,7 @@ import {
   TempleAccountType
 } from 'lib/temple/types';
 
+import { fetchTempleStateWithRetry } from './get-state';
 import { useStorage } from './storage';
 
 type Confirmation = {
@@ -60,11 +63,14 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
    * State
    */
 
-  const fetchState = useCallback(async () => {
-    const res = await request({ type: TempleMessageType.GetStateRequest });
-    assertResponse(res.type === TempleMessageType.GetStateResponse);
-    return res.state;
-  }, []);
+  const fetchState = useCallback(
+    () =>
+      fetchTempleStateWithRetry(request).then(state => {
+        markLoad('get-state');
+        return state;
+      }),
+    []
+  );
 
   const { data, mutate } = useRetryableSWR('state', fetchState, {
     suspense: true,
@@ -396,10 +402,11 @@ export const [TempleClientProvider, useTempleClient] = constate(() => {
     []
   );
 
-  const getDAppPayload = useCallback(async (id: string) => {
+  const getDAppPayload = useCallback(async (id: string, token: string) => {
     const res = await request({
       type: TempleMessageType.DAppGetPayloadRequest,
-      id
+      id,
+      token
     });
     assertResponse(res.type === TempleMessageType.DAppGetPayloadResponse);
     return res.payload;
@@ -709,7 +716,7 @@ async function getPublicKey(accountPublicKeyHash: string) {
 }
 
 export async function request<T extends TempleRequest>(req: T) {
-  const res = await intercom.request(req);
+  const res = await intercom.request(req, { timeoutMs: getTempleRequestTimeoutMs(req.type) });
   assertResponse('type' in res);
   return res as TempleResponse;
 }
@@ -721,15 +728,12 @@ export function assertResponse(condition: any): asserts condition {
 }
 
 function withoutFeesOverride<T>(params: any, op: T): T {
-  try {
-    const { fee, gasLimit, storageLimit } = params;
-    return {
-      ...op,
-      fee,
-      gas_limit: gasLimit,
-      storage_limit: storageLimit
-    };
-  } catch {
-    return params;
-  }
+  const { fee, gasLimit, storageLimit } = params;
+
+  return {
+    ...op,
+    fee,
+    gas_limit: gasLimit,
+    storage_limit: storageLimit
+  };
 }

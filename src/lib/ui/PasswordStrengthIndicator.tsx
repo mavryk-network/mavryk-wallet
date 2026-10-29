@@ -49,7 +49,9 @@ const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({
         </T>
         <span style={{ maxWidth: 343 }}>
           <T id="atLeast1SpecialCharacter">
-            {message => <PasswordStrengthIndicatorItem isValid={specialChar} message={message} noColor />}
+            {message => (
+              <PasswordStrengthIndicatorItem isValid={specialChar} message={message} noColor={!isPasswordError} />
+            )}
           </T>
         </span>
       </ul>

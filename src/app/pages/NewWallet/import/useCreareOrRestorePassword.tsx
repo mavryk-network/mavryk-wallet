@@ -4,13 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { PASSWORD_ERROR_CAPTION } from 'app/atoms';
-import {
-  formatMnemonic,
-  lettersNumbersMixtureRegx,
-  PASSWORD_PATTERN,
-  specialCharacterRegx,
-  uppercaseLowercaseMixtureRegx
-} from 'app/defaults';
+import { formatMnemonic, getPasswordValidation, isPasswordValid } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { SuccessStateType } from 'app/pages/SuccessScreen/SuccessScreen';
 import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter-actions';
@@ -20,13 +14,14 @@ import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics
 import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { putToStorage } from 'lib/storage';
 import { useTempleClient } from 'lib/temple/front';
-import { PasswordValidation } from 'lib/ui/PasswordStrengthIndicator';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
 
 import { useOnboardingProgress } from '../../Onboarding/hooks/useOnboardingProgress.hook';
 
-const MIN_PASSWORD_LENGTH = 8;
+type PasswordOptions =
+  | { shouldUseKeystorePassword: true; keystorePassword: string }
+  | { shouldUseKeystorePassword: false };
 
 export interface FormData extends TestIDProps {
   password?: string;
@@ -42,7 +37,7 @@ export interface FormData extends TestIDProps {
 export const useCreareOrRestorePassword = (
   ownMnemonic: boolean,
   seedPhrase: string,
-  keystorePassword: string | undefined = undefined
+  options: PasswordOptions = { shouldUseKeystorePassword: false }
 ) => {
   const { registerWallet } = useTempleClient();
   const { popup } = useAppEnv();
@@ -70,11 +65,11 @@ export const useCreareOrRestorePassword = (
 
   const { setOnboardingCompleted } = useOnboardingProgress();
 
-  const isImportFromKeystoreFile = Boolean(keystorePassword);
+  const { shouldUseKeystorePassword } = options;
+  const keystorePassword = options.shouldUseKeystorePassword ? options.keystorePassword : '';
+  const isKeystorePasswordWeak = shouldUseKeystorePassword && !isPasswordValid(keystorePassword);
 
-  const isKeystorePasswordWeak = isImportFromKeystoreFile && !PASSWORD_PATTERN.test(keystorePassword!);
-
-  const { control, watch, register, handleSubmit, errors, triggerValidation, formState } = useForm<FormData>({
+  const { control, watch, register, handleSubmit, errors, setError, triggerValidation, formState } = useForm<FormData>({
     defaultValues: {
       analytics: true,
       viewAds: false,
@@ -85,22 +80,17 @@ export const useCreareOrRestorePassword = (
 
   const submitting = formState.isSubmitting;
 
-  const shouldUseKeystorePassword = watch('shouldUseKeystorePassword');
-
   const passwordValue = watch('password');
+  const repeatPasswordValue = watch('repeatPassword');
 
-  const isTermsAccepted: boolean = control.getValues()?.termsAccepted;
-  const isBetaAccepted: boolean = control.getValues()?.betaAgreement;
+  const isTermsAccepted: boolean = watch('termsAccepted');
+  const isBetaAccepted: boolean = watch('betaAgreement');
 
   const isPasswordError = errors.password?.message === PASSWORD_ERROR_CAPTION;
 
-  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
-    minChar: false,
-    cases: false,
-    number: false,
-    specialChar: false
-  });
+  const [passwordValidation, setPasswordValidation] = useState(() => getPasswordValidation(''));
 
+  // Revalidate confirmation when its source password changes; no external resource needs cleanup.
   useLayoutEffect(() => {
     if (formState.dirtyFields.has('repeatPassword')) {
       triggerValidation('repeatPassword');
@@ -109,13 +99,7 @@ export const useCreareOrRestorePassword = (
 
   const handlePasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
-      const tempValue = e.target.value;
-      setPasswordValidation({
-        minChar: tempValue.length >= MIN_PASSWORD_LENGTH,
-        cases: uppercaseLowercaseMixtureRegx.test(tempValue),
-        number: lettersNumbersMixtureRegx.test(tempValue),
-        specialChar: specialCharacterRegx.test(tempValue)
-      });
+      setPasswordValidation(getPasswordValidation(e.target.value));
     },
     []
   );
@@ -123,9 +107,12 @@ export const useCreareOrRestorePassword = (
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (submitting) return;
-      if (shouldUseKeystorePassword && isKeystorePasswordWeak) return;
-
-      const password = ownMnemonic ? (isImportFromKeystoreFile ? keystorePassword : data.password) : data.password;
+      const password = shouldUseKeystorePassword ? keystorePassword : data.password ?? '';
+      if (!isPasswordValid(password)) {
+        setError('password', 'validate', PASSWORD_ERROR_CAPTION);
+        setPasswordValidation(getPasswordValidation(password));
+        return;
+      }
       try {
         const shouldEnableAnalytics = Boolean(data.analytics);
         setAdsViewEnabled(data.viewAds);
@@ -134,7 +121,7 @@ export const useCreareOrRestorePassword = (
         await putToStorage(WEBSITES_ANALYTICS_ENABLED, shouldEnableWebsiteAnalytics);
 
         setOnboardingCompleted(data.skipOnboarding!);
-        const accountPkh = await registerWallet(password!, formatMnemonic(seedPhrase));
+        const accountPkh = await registerWallet(password, formatMnemonic(seedPhrase));
         trackEvent(
           data.skipOnboarding ? 'OnboardingSkipped' : 'OnboardingNotSkipped',
           AnalyticsEventCategory.General,
@@ -168,9 +155,8 @@ export const useCreareOrRestorePassword = (
     [
       submitting,
       shouldUseKeystorePassword,
-      isKeystorePasswordWeak,
+      setError,
       ownMnemonic,
-      isImportFromKeystoreFile,
       keystorePassword,
       setAdsViewEnabled,
       setAnalyticsEnabled,
@@ -190,12 +176,12 @@ export const useCreareOrRestorePassword = (
     submitting,
     handleSubmit,
     isPasswordError,
-    isImportFromKeystoreFile,
     isKeystorePasswordWeak,
     shouldUseKeystorePassword,
     passwordValidation,
     setPasswordValidation,
     passwordValue,
+    repeatPasswordValue,
     handlePasswordChange,
     onSubmit,
     disabled: !isTermsAccepted || !isBetaAccepted

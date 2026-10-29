@@ -1,28 +1,52 @@
 import React, { memo, useMemo } from 'react';
 
+import BigNumber from 'bignumber.js';
+
 import { HashChip, ExternalLinkChip, Money } from 'app/atoms';
-import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { fromFa2TokenSlug } from 'lib/assets/utils';
-import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { T } from 'lib/i18n';
+import type { RwaDetails } from 'lib/rwas/details.types';
+import { isValidRwaDecimals } from 'lib/rwas/rwa-pricing.helpers';
+import { useRwaPricing } from 'lib/rwas/use-rwa-pricing';
 import { useExplorerBaseUrls } from 'lib/temple/front';
 
 import { CardWithLabel } from './CardWithLabel';
 
-import { TemporaryRwaType } from '.';
+const UNAVAILABLE_VALUE = '—';
 
 interface PropertiesItemsProps {
   assetSlug: string;
   accountPkh: string;
-  details?: TemporaryRwaType | null;
+  balance: BigNumber;
+  symbol?: string;
+  details?: RwaDetails | null;
 }
 
-export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details }) => {
+interface UsdValueProps {
+  value: BigNumber | null;
+}
+
+/** Wallet API pricing is USD-only, so it renders with `$` regardless of the selected fiat currency. */
+const UsdValue = memo<UsdValueProps>(({ value }) =>
+  value ? (
+    <div className="flex items-center">
+      <span>$</span>
+      <Money smallFractionFont={false} fiat>
+        {value}
+      </Money>
+    </div>
+  ) : (
+    <span>{UNAVAILABLE_VALUE}</span>
+  )
+);
+
+export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, balance, symbol, details }) => {
   const { contract } = fromFa2TokenSlug(assetSlug);
+  const { marketPriceUsd, lastSaleUsd, marketValueUsd } = useRwaPricing(details?.pricing);
   const isTzBTC = isTzbtcAsset(assetSlug);
-  const price = useAssetFiatCurrencyPrice(assetSlug);
-  const { selectedFiatCurrency } = useFiatCurrency();
+  const decimals = details?.decimals;
+  const hasValidDecimals = isValidRwaDecimals(decimals);
 
   const { contract: explorerBaseUrl } = useExplorerBaseUrls();
 
@@ -38,39 +62,35 @@ export const PropertiesItems = memo<PropertiesItemsProps>(({ assetSlug, details 
       <section className="w-full grid grid-cols-2 gap-x-4 gap-y-6 mb-6">
         <CardWithLabel label={<T id={'yourTokens'} />}>
           <div className={itemValueClassName}>
-            <div className="text-white  flex items-center">
-              <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? details?.metadata?.decimals : undefined}>
-                {details?.tokens ?? 0}
-              </Money>
-              <span>&nbsp;</span>
-              <span>{details?.metadata?.symbol}</span>
-            </div>
+            {hasValidDecimals ? (
+              <div className="text-white  flex items-center">
+                <Money smallFractionFont={false} cryptoDecimals={isTzBTC ? Number(decimals) : undefined}>
+                  {balance}
+                </Money>
+                <span>&nbsp;</span>
+                <span>{symbol}</span>
+              </div>
+            ) : (
+              <span>{UNAVAILABLE_VALUE}</span>
+            )}
           </div>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'totalValue'} />}>
-          <span className={itemValueClassName}>
-            <InFiat assetSlug={assetSlug} volume={details?.tokens ?? 0} smallFractionFont={false}>
-              {({ balance, symbol }) => (
-                <div className="ml-1 font-normal text-white flex items-center truncate text-right">
-                  <span>{symbol}</span>
-                  {balance}
-                </div>
-              )}
-            </InFiat>
-          </span>
+          <div className={itemValueClassName}>
+            <UsdValue value={marketValueUsd} />
+          </div>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'estMarketPrice'} />}>
           <div className={itemValueClassName}>
-            {selectedFiatCurrency.symbol}
-            <Money smallFractionFont={false}>{price}</Money>
+            <UsdValue value={marketPriceUsd} />
           </div>
         </CardWithLabel>
 
         <CardWithLabel label={<T id={'lastSale'} />}>
           <div className={itemValueClassName}>
-            <Money smallFractionFont={false}>{price}</Money>
+            <UsdValue value={lastSaleUsd} />
           </div>
         </CardWithLabel>
       </section>

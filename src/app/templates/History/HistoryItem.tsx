@@ -6,7 +6,7 @@ import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
@@ -21,7 +21,8 @@ import {
   getHistoryPreviewStackOffset,
   getMainHistoryOperation,
   getMoneyDiffForMultiple,
-  getMoneyDiffsForSwap
+  getMoneyDiffsForSwap,
+  isVisibleMoneyDiff
 } from './utils';
 
 interface Props {
@@ -67,12 +68,14 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   const moneyDiffsBase = useMemo(
     () =>
-      isSwapOperation
+      historyItem.isPartialTransfers || moneyDiffs.some(diff => diff.usdAmount !== undefined)
+        ? moneyDiffs
+        : isSwapOperation
         ? getMoneyDiffsForSwap(moneyDiffs)
         : isInteractionOperation
         ? getMoneyDiffForMultiple(moneyDiffs, OP_STACK_PREVIEW_MULTIPLE_SIZE)
         : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
-    [isInteractionOperation, isSwapOperation, moneyDiffs]
+    [historyItem.isPartialTransfers, isInteractionOperation, isSwapOperation, moneyDiffs]
   );
 
   // 0 to show all operations
@@ -82,11 +85,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   );
 
   const filteredMoneyDiffBase = useMemo(
-    () =>
-      moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
-        if (!isZero(item.diff)) acc.push(item);
-        return acc;
-      }, []),
+    () => moneyDiffsBase.filter((item): item is MoneyDiff => Boolean(item) && isVisibleMoneyDiff(item)),
     [moneyDiffsBase]
   );
 
@@ -145,18 +144,26 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         </div>
 
         <div className="flex flex-col justify-center items-end gap-1">
-          {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
-            return (
-              <MoneyDiffView
-                key={i}
-                className="gap-1 flex-col"
-                assetId={assetSlug}
-                diff={diff}
-                pending={status === 'pending'}
-                showFiatBalance={!isSwapOperation && !isInteractionOperation}
-              />
-            );
-          })}
+          {historyItem.isPartialTransfers && <span className="text-xs text-secondary-white">Incomplete breakdown</span>}
+          {filteredMoneyDiffBase.map(
+            ({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => {
+              return (
+                <MoneyDiffView
+                  key={i}
+                  className="gap-1 flex-col"
+                  assetId={assetSlug}
+                  diff={diff}
+                  symbol={symbol}
+                  usdAmount={usdAmount}
+                  isNeutral={isNeutral}
+                  isNegative={isNegative}
+                  isAmountUnavailable={isAmountUnavailable}
+                  pending={status === 'pending'}
+                  showFiatBalance={usdAmount !== undefined || (!isSwapOperation && !isInteractionOperation)}
+                />
+              );
+            }
+          )}
         </div>
       </div>
 

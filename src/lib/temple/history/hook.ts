@@ -8,6 +8,7 @@ import { TempleAccount } from '../types';
 
 import fetchUserHistory from './fetch';
 import { UserHistoryItem } from './types';
+import { usePurchaseMetadata } from './use-purchase-metadata';
 
 type TLoading = 'init' | 'more' | false;
 
@@ -29,7 +30,8 @@ export default function useHistory(
   initialPseudoLimit: number,
   assetSlug?: string,
   operationParams?: GetOperationsTransactionsParams,
-  differentAccount?: TempleAccount
+  differentAccount?: TempleAccount,
+  tokenAddress?: string
 ) {
   const tezos = useTezos();
   const chainId = useChainId(true);
@@ -38,6 +40,7 @@ export default function useHistory(
   const account = differentAccount ? differentAccount : originalAccount;
 
   const accountAddress = account.publicKeyHash;
+  const resolvePurchaseDecimals = usePurchaseMetadata(accountAddress);
 
   const [loading, setLoading] = useSafeState<TLoading>(isKnownChainId(chainId) && 'init');
   const [userHistory, setUserHistory] = useSafeState<UserHistoryItem[]>([]);
@@ -84,7 +87,9 @@ export default function useHistory(
         pseudoLimit,
         tezos,
         nextCursor,
-        operationParams
+        operationParams,
+        resolvePurchaseDecimals,
+        tokenAddress
       );
       if (shouldStop()) return;
     } catch (error) {
@@ -134,7 +139,7 @@ export default function useHistory(
 
     // cleanup cancels in-flight if key changes/unmounts
     return stopLoading;
-  }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit]);
+  }, [chainId, accountAddress, assetSlug, paramsKey, initialPseudoLimit, resolvePurchaseDecimals, tokenAddress]);
 
   // If you want initial mount to also fetch, keep this:
   useDidMount(() => {

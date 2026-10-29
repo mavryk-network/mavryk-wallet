@@ -44,10 +44,7 @@ const buildManifestV3 = (vendor: string): Manifest.WebExtensionManifest => {
     ],
     js: ['scripts/keepBackgroundWorkerAlive.js'],
     run_at: 'document_start',
-    all_frames: true,
-    match_about_blank: true,
-    // @ts-expect-error
-    match_origin_as_fallback: true
+    all_frames: false
   });
 
   return {
@@ -90,10 +87,7 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
 
     permissions: [...PERMISSIONS, ...HOST_PERMISSIONS],
 
-    /** `blob:` was added due to 3D-models not working in Firefox otherwise. See:
-     * https://github.com/madfish-solutions/templewallet-extension/commit/7f170d058e9d628709f0da0759cfee44a0667480
-     */
-    content_security_policy: "script-src 'self' 'unsafe-eval' blob:; object-src 'self'",
+    content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
 
     // Required for dynamic imports `import()`
     web_accessible_resources: WEB_ACCCESSIBLE_RESOURSES,

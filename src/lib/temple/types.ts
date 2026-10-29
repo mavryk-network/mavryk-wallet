@@ -608,6 +608,7 @@ interface TempleRevealPrivateKeyResponse extends TempleMessageBase {
 
 interface TempleRevealMnemonicRequest extends TempleMessageBase {
   type: TempleMessageType.RevealMnemonicRequest;
+  walletId: string;
   password: string;
 }
 
@@ -834,6 +835,7 @@ interface TemplePageResponse extends TempleMessageBase {
 interface TempleDAppGetPayloadRequest extends TempleMessageBase {
   type: TempleMessageType.DAppGetPayloadRequest;
   id: string;
+  token: string;
 }
 
 interface TempleDAppGetPayloadResponse extends TempleMessageBase {

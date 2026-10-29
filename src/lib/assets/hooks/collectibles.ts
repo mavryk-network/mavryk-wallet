@@ -18,7 +18,7 @@ export const useAccountCollectibles = (account: string, chainId: string) => {
     () => {
       const result: AccountAsset[] = [];
 
-      for (const [slug, { status }] of Object.entries(stored)) {
+      for (const [slug, { status }] of Object.entries(stored ?? {})) {
         if (status !== 'removed') result.push({ slug, status: getAssetStatus(balances[slug], status) });
       }
 

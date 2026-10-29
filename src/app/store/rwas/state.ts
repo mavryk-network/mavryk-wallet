@@ -1,13 +1,8 @@
-import { TzktRWAAssetMetadata } from 'lib/apis/tzkt/types';
+import type { RwaDetailsRecord } from 'lib/rwas/details.types';
 import { createEntity, LoadableEntityState } from 'lib/store';
 
-// TODO check UserObjktCollectible
-export type RwaDetails = TzktRWAAssetMetadata & {
-  isAdultContent?: boolean;
-};
-
-/** `null` for no available asset details */
-export type RwaDetailsRecord = Record<string, RwaDetails | null>;
+// Retained type contract for legacy action/reducer imports.
+export type { RwaDetails, RwaDetailsRecord } from 'lib/rwas/details.types';
 
 export interface RwasState {
   details: LoadableEntityState<RwaDetailsRecord>;

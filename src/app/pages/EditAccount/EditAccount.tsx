@@ -28,7 +28,7 @@ import {
 } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
 import useHistory from 'lib/temple/history/hook';
-import { TempleAccount, TempleAccountType } from 'lib/temple/types';
+import { TempleAccount, TempleAccountType, TempleChainKind } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
@@ -65,7 +65,14 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
     () => [
       { i18nKey: 'editName', Icon: EditIcon, onClick: editNamePopup.open, fillIcon: true },
       ...(account.type !== TempleAccountType.WatchOnly
-        ? [{ linkTo: '/settings/reveal-private-key', i18nKey: 'revealPrivateKey', Icon: KeyIcon, fillIcon: false }]
+        ? [
+            {
+              linkTo: '/settings/reveal-private-key',
+              i18nKey: 'revealPrivateKey' as const,
+              Icon: KeyIcon,
+              fillIcon: false
+            }
+          ]
         : [])
     ],
     [account.type, editNamePopup.open]
@@ -145,7 +152,14 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   );
 
   const accountObj: TempleAccount = useMemo(
-    () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly }),
+    () => ({
+      id: accountHash,
+      chain: TempleChainKind.Tezos,
+      publicKeyHash: accountHash,
+      name: accountName,
+      isKYC: false,
+      type: TempleAccountType.WatchOnly
+    }),
     [accountHash, accountName]
   );
 

@@ -38,6 +38,32 @@ const RwaMetadataSchema = z
   })
   .passthrough();
 
+/** Money stays a decimal string; missing values normalize to `null`. */
+const DecimalStringSchema = z
+  .union([z.string(), z.number()])
+  .nullish()
+  .transform(value => (value === null || value === undefined ? null : String(value)));
+
+const NullableStringSchema = z
+  .string()
+  .nullish()
+  .transform(value => value ?? null);
+
+const RwaPriceQuoteSchema = z.object({
+  status: NullableStringSchema,
+  usd: DecimalStringSchema,
+  fxStatus: NullableStringSchema,
+  validUntil: NullableStringSchema,
+  executedAt: NullableStringSchema
+});
+
+export type RwaPriceQuote = z.infer<typeof RwaPriceQuoteSchema>;
+
+/** Malformed pricing degrades to `null` so the holding itself stays visible. */
+const OptionalQuoteSchema = RwaPriceQuoteSchema.nullish()
+  .transform(value => value ?? null)
+  .catch(null);
+
 const WalletRwaAssetSchema = z.object({
   address: z.string(),
   symbol: z.string().nullable().optional(),
@@ -45,12 +71,22 @@ const WalletRwaAssetSchema = z.object({
   balance: NumberLikeSchema,
   usdValue: NumberLikeSchema.optional(),
   price: RwaPriceSchema.optional(),
-  metadata: RwaMetadataSchema.optional()
+  metadata: RwaMetadataSchema.optional(),
+  marketPrice: OptionalQuoteSchema,
+  lastSale: OptionalQuoteSchema,
+  pricingValidUntil: NullableStringSchema.catch(null),
+  marketValueUsd: DecimalStringSchema.catch(null)
 });
 
 const WalletRwaAssetsResponseSchema = z.array(WalletRwaAssetSchema);
 
 export type WalletRwaAsset = z.infer<typeof WalletRwaAssetSchema>;
+
+/**
+ * Validates a `/wallets/{address}/assets` payload.
+ * @returns assets with pricing quotes normalized to strings or `null`
+ */
+export const parseWalletRwaAssets = (data: unknown) => WalletRwaAssetsResponseSchema.parse(data);
 
 async function getWalletAddressOrThrow(walletAddress?: string) {
   const stored = walletAddress ?? (await getWalletAddressFromStorage());
@@ -79,7 +115,7 @@ export async function fetchWalletRwaAssets(params: { walletAddress?: string } = 
 
   const { data } = await mavrykApi.get<WalletRwaAsset[]>(`/wallets/${address}/assets`);
 
-  return WalletRwaAssetsResponseSchema.parse(data);
+  return parseWalletRwaAssets(data);
 }
 
 export const walletRwaAssetToSlug = (asset: Pick<WalletRwaAsset, 'address'>) => toTokenSlug(asset.address, 0);
@@ -109,7 +145,13 @@ export function mapWalletRwaAssetsToFetchedMetadataRecord(assets: WalletRwaAsset
   }, {});
 }
 
-export function walletRwaAssetToDetails(asset: WalletRwaAsset): TzktRWAAssetMetadata {
+/** Raw wallet-row pricing; availability depends on the current time, so it is evaluated at render. */
+export type WalletRwaPricing = Pick<
+  WalletRwaAsset,
+  'marketPrice' | 'lastSale' | 'pricingValidUntil' | 'marketValueUsd'
+>;
+
+export function walletRwaAssetToDetails(asset: WalletRwaAsset): TzktRWAAssetMetadata & { pricing: WalletRwaPricing } {
   const metadata = asset.metadata ?? {};
   const slug = walletRwaAssetToSlug(asset);
 
@@ -123,6 +165,12 @@ export function walletRwaAssetToDetails(asset: WalletRwaAsset): TzktRWAAssetMeta
     symbol: asset.symbol ?? toOptionalString(metadata.symbol) ?? '',
     thumbnailUri: toOptionalString(metadata.thumbnailUri) ?? toOptionalString(metadata.icon),
     identifier: slug,
-    decimals: toMetadataDecimals(metadata.decimals)
+    decimals: toMetadataDecimals(metadata.decimals),
+    pricing: {
+      marketPrice: asset.marketPrice,
+      lastSale: asset.lastSale,
+      pricingValidUntil: asset.pricingValidUntil,
+      marketValueUsd: asset.marketValueUsd
+    }
   };
 }

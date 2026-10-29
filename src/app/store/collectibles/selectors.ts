@@ -1,15 +1,11 @@
-import { useSelector } from '../root-state.selector';
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
-import type { CollectibleDetails } from './state';
-
-export const useCollectibleDetailsSelector = (slug: string): CollectibleDetails | nullish =>
-  useSelector(({ collectibles }) => collectibles.details.data[slug]);
-
-export const useAllCollectibleDetailsSelector = (): Record<string, CollectibleDetails | nullish> =>
-  useSelector(({ collectibles }) => collectibles.details.data);
-
-export const useAllCollectiblesDetailsLoadingSelector = () =>
-  useSelector(({ collectibles }) => collectibles.details.isLoading);
+// Compatibility exports for existing callers; fetched details are owned only by Query.
+export {
+  useCollectibleDetails as useCollectibleDetailsSelector,
+  useAllCollectibleDetails as useAllCollectibleDetailsSelector,
+  useAreCollectibleDetailsLoading as useAllCollectiblesDetailsLoadingSelector
+} from 'lib/collectibles/use-collectibles-details.query';
 
 export const useCollectibleIsAdultSelector = (slug: string): boolean | undefined =>
-  useSelector(({ collectibles }) => collectibles.adultFlags[slug]?.val);
+  useOwnedUI(state => state.assets.collectibleAdultFlags[slug]?.val);

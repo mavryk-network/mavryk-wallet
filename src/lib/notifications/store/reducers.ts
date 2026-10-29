@@ -1,80 +1,35 @@
 import { createReducer } from '@reduxjs/toolkit';
-import { isDefined } from '@rnw-community/shared';
-
-import { createEntity } from 'lib/store';
 
 import { NotificationStatus } from '../enums/notification-status.enum';
 
 import {
-  loadNotificationsAction,
   setIsNewsEnabledAction,
   readNotificationsItemAction,
-  viewAllNotificationsAction
+  viewAllNotificationsAction,
+  viewNotificationsAction
 } from './actions';
 import { notificationsInitialState, NotificationsState } from './state';
 
+/** Retain the old list as a read-only upgrade source; only client choices can change here. */
 export const notificationsReducer = createReducer<NotificationsState>(notificationsInitialState, builder => {
-  builder.addCase(loadNotificationsAction.submit, state => ({
-    ...state,
-    list: createEntity(state.list.data, true)
-  }));
-  builder.addCase(loadNotificationsAction.success, (state, { payload: notifications }) => {
-    const notificationsWithStatus = notifications.map(notification => {
-      const prevNotification = state.list.data.find(item => item.id === notification.id);
-
-      if (isDefined(prevNotification)) {
-        return {
-          ...notification,
-          status: prevNotification.status
-        };
-      }
-
-      return notification;
-    });
-
-    return {
-      ...state,
-      list: createEntity(notificationsWithStatus, false)
-    };
+  const markViewed = (state: NotificationsState, ids: number[]) => {
+    const statuses = (state.statuses ??= {});
+    for (const id of ids) {
+      const previous = statuses[id] ?? state.list.data.find(item => item.id === id)?.status;
+      if (previous !== NotificationStatus.Read) statuses[id] = NotificationStatus.Viewed;
+    }
+  };
+  builder.addCase(viewAllNotificationsAction, state =>
+    markViewed(
+      state,
+      state.list.data.map(item => item.id)
+    )
+  );
+  builder.addCase(viewNotificationsAction, (state, { payload }) => markViewed(state, payload));
+  builder.addCase(readNotificationsItemAction, (state, { payload }) => {
+    (state.statuses ??= {})[payload] = NotificationStatus.Read;
   });
-  builder.addCase(loadNotificationsAction.fail, state => ({
-    ...state,
-    list: createEntity(state.list.data, false)
-  }));
-
-  builder.addCase(viewAllNotificationsAction, state => ({
-    ...state,
-    list: createEntity(
-      state.list.data.map(notification => {
-        if (notification.status === NotificationStatus.New) {
-          return {
-            ...notification,
-            status: NotificationStatus.Viewed
-          };
-        }
-
-        return notification;
-      })
-    )
-  }));
-  builder.addCase(readNotificationsItemAction, (state, { payload: notificationId }) => ({
-    ...state,
-    list: createEntity(
-      state.list.data.map(notification => {
-        if (notification.id === notificationId) {
-          return {
-            ...notification,
-            status: NotificationStatus.Read
-          };
-        }
-
-        return notification;
-      })
-    )
-  }));
-
-  builder.addCase(setIsNewsEnabledAction, (state, { payload: isNewsEnabled }) => ({
-    ...state,
-    isNewsEnabled
-  }));
+  builder.addCase(setIsNewsEnabledAction, (state, { payload }) => {
+    state.isNewsEnabled = payload;
+  });
 });

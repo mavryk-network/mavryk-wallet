@@ -1,13 +1,16 @@
 import type { TzktApiChainId, TzktOperation } from 'lib/apis/tzkt';
 import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
-import { MAV_TOKEN_SLUG } from 'lib/assets';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
 import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
 import type { MavrykHistoryOperation } from 'mavryk/api/history';
 
+import { hasHistoryMovement } from './bridge';
+import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
 import { getBackendHistoryFilters, getHistoryItemTypesFromParams, shouldApplyLocalTypeFilter } from './filterParams';
+import { getPurchaseMovements } from './purchase';
 import type { UserHistoryItem, OperationsGroup } from './types';
 import { HistoryItemOpTypeEnum } from './types';
 import {
@@ -17,6 +20,8 @@ import {
   mavrykHistoryGroupToHistoryItem,
   operationsGroupToHistoryItem
 } from './utils';
+
+type PurchaseDecimalsResolver = (slugs: string[]) => Promise<Record<string, number>>;
 
 export type FetchUserHistoryResult = {
   items: UserHistoryItem[];
@@ -60,22 +65,52 @@ function applyLocalTypeFilter(items: UserHistoryItem[], requestedTypes: HistoryI
 }
 
 function getTokenAddressFromSlug(assetSlug?: string) {
-  if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) return undefined;
+  if (!assetSlug) return undefined;
+  if (assetSlug === MAV_TOKEN_SLUG) return MVRK_HISTORY_TOKEN_ADDRESS;
 
   return assetSlug.split('_')[0];
 }
 
-function normalizeBackendHistoryItems(
+async function normalizeBackendHistoryItems(
   operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
   accountAddress: string,
   requestedTypes: HistoryItemOpTypeEnum[],
-  assetSlug?: string
+  assetSlug?: string,
+  resolveDecimals?: PurchaseDecimalsResolver
 ) {
+  const groups = groupMavrykHistoryOperations(operations);
+  const rawAmountSlugs = groups.flatMap(group =>
+    [group.summaryOperation, ...group.operations].flatMap(operation => {
+      const details = operation?.details;
+      if (details?.amount != null || details?.rawAmount === undefined) return [];
+      return details.tokenAddress
+        ? [toTokenSlug(details.tokenAddress, details.tokenId ?? 0)]
+        : assetSlug
+        ? [assetSlug]
+        : [];
+    })
+  );
+  const slugs = [
+    ...new Set([
+      ...rawAmountSlugs,
+      ...groups
+        .filter(
+          group =>
+            group.summaryOperation?.details?.entrypoint === 'purchase' ||
+            hasHistoryMovement((group.summaryOperation ?? group.operations[0])?.details)
+        )
+        .flatMap(group => getPurchaseMovements(group.operations))
+        .filter(movement => movement.to === accountAddress || movement.from === accountAddress)
+        .map(movement => movement.assetSlug)
+    ])
+  ];
+  const decimals = slugs.length && resolveDecimals ? await resolveDecimals(slugs) : {};
   return applyLocalTypeFilter(
-    groupMavrykHistoryOperations(operations).map(group =>
+    groups.map(group =>
       mavrykHistoryGroupToHistoryItem(group, {
         address: accountAddress,
-        assetSlug
+        assetSlug,
+        decimals
       })
     ),
     requestedTypes
@@ -114,16 +149,18 @@ async function fetchPendingHistoryItems(chainId: TzktApiChainId, account: Temple
 }
 
 export async function fetchUserOperationByHash(
-  chainId: TzktApiChainId,
+  _chainId: TzktApiChainId,
   accountAddress: string,
   hash: string,
-  assetSlug?: string
+  assetSlug?: string,
+  resolveDecimals?: PurchaseDecimalsResolver,
+  tokenAddress = getTokenAddressFromSlug(assetSlug)
 ) {
   try {
-    const tokenAddress = getTokenAddressFromSlug(assetSlug);
     const response = tokenAddress
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: accountAddress,
+          tokenId: assetSlug?.split('_')[1],
           search: hash
         })
       : await fetchWalletHistory({
@@ -131,7 +168,7 @@ export async function fetchUserOperationByHash(
           search: hash
         });
 
-    return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug);
+    return await normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
   } catch (error) {
     console.error('Error while fetching user operation by hash:', error);
     return [];
@@ -145,12 +182,13 @@ export default async function fetchUserHistory(
   pseudoLimit: number,
   _tezos: ReactiveTezosToolkit,
   cursor?: number,
-  operationParams?: GetOperationsTransactionsParams
+  operationParams?: GetOperationsTransactionsParams,
+  resolveDecimals?: PurchaseDecimalsResolver,
+  tokenAddress = getTokenAddressFromSlug(assetSlug)
 ): Promise<FetchUserHistoryResult> {
   const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
   const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
   const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
-  const tokenAddress = getTokenAddressFromSlug(assetSlug);
   const isFirstPage = cursor == null;
 
   try {
@@ -158,6 +196,7 @@ export default async function fetchUserHistory(
       ? await fetchTokenHistory(tokenAddress, {
           walletAddress: account.publicKeyHash,
           cursor,
+          tokenId: assetSlug?.split('_')[1],
           filter: backendFilter
         })
       : await fetchWalletHistory({
@@ -166,14 +205,15 @@ export default async function fetchUserHistory(
           filter: backendFilter
         });
 
-    const normalizedItems = normalizeBackendHistoryItems(
+    const normalizedItems = await normalizeBackendHistoryItems(
       response.operations,
       account.publicKeyHash,
       localRequestedTypes,
-      assetSlug
+      assetSlug,
+      resolveDecimals
     );
     const visibleCollected = normalizedItems.slice(0, pseudoLimit);
-    const nextCursor = response.cursor;
+    const nextCursor = response.cursor ?? undefined;
     const hasMore = response.hasMore;
 
     if (!isFirstPage) {

@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, memo } from 'react';
+import React, { forwardRef, memo } from 'react';
 
 import clsx from 'clsx';
 

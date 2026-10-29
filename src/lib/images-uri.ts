@@ -32,6 +32,17 @@ export const buildTokenImagesStack = (url?: string): string[] => {
   return [];
 };
 
+/** Use wallet-provided RWA thumbnails directly, retaining proxy and legacy media fallbacks. */
+export const buildRwaImagesStack = (metadata?: TokenMetadata, fullView = false): string[] => {
+  if (!metadata) return [];
+
+  const { thumbnailUri } = metadata;
+  if (!thumbnailUri) return buildCollectibleImagesStack(metadata, fullView);
+
+  const directSources = /^https?:\/\//.test(thumbnailUri) ? [thumbnailUri] : [];
+  return uniq([...directSources, ...buildTokenImagesStack(thumbnailUri)]);
+};
+
 export const buildCollectibleImagesStack = (
   { address, id, artifactUri, displayUri, thumbnailUri }: TokenMetadata,
   fullView = false

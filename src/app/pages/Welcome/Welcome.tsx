@@ -8,6 +8,7 @@ import { ReactComponent as PlusIcon } from 'app/icons/plus.svg';
 import { ReactComponent as LogoDesktopIcon } from 'app/misc/logo-desktop.svg';
 import { TestIDProps } from 'lib/analytics';
 import { TID, T } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { Link } from 'lib/woozie';
 
 import { useABTestingLoading } from '../../hooks/use-ab-testing-loading';
@@ -46,6 +47,7 @@ const SIGNS: TSign[] = [
 
 const Welcome: FC = () => {
   useABTestingLoading();
+  useLoadPerfMark('welcome-painted');
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 219 }}>

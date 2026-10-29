@@ -34,7 +34,9 @@ function isPredefinedValidatorAddress(address: string) {
 type ContactsRecordState = Awaited<ReturnType<typeof fetchContactsRecord>>;
 type CachedContactsState = ReturnType<typeof getCachedContactsState>;
 
-function hasContactsServerBinding(cachedState: CachedContactsState) {
+function hasContactsServerBinding(
+  cachedState: CachedContactsState
+): cachedState is NonNullable<CachedContactsState> & { recordId: string } {
   return Boolean(cachedState?.recordId);
 }
 
@@ -209,7 +211,7 @@ export function useContactsActions() {
       contactsKey,
       legacyContactsKeys,
       legacyAccountDataKey,
-      legacyPublicKey,
+      legacyPublicKey: legacyPublicKey ?? undefined,
       authContext
     }).catch(error => {
       if (error instanceof CurrentContactsRecordDecryptionError) {

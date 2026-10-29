@@ -15,19 +15,30 @@ const HistoryNetworkFeesSchema = z.object({
   burnedFromFees: NumberLikeSchema
 });
 
-const HistoryOperationDetailsSchema = z
+const HistoryMovementSchema = z
   .object({
     type: z.string().optional(),
     transferType: z.string().optional(),
+    movementKind: z.enum(['mint', 'burn']).optional(),
     from: z.string().optional(),
     to: z.string().optional(),
     contract: z.string().optional(),
     tokenAddress: z.string().optional(),
-    tokenId: NumberLikeSchema.optional(),
+    tokenId: z.union([z.string(), z.number().int().nonnegative().safe()]).transform(String).optional(),
     timestamp: z.string().optional(),
-    amount: NumberLikeSchema.optional(),
+    amount: z
+      .union([
+        z.number().finite(),
+        z
+          .string()
+          .trim()
+          .min(1)
+          .refine(value => Number.isFinite(Number(value)), 'Invalid amount')
+      ])
+      .optional(),
+    rawAmount: z.string().regex(/^\d+$/).optional(),
     currency: z.string().optional(),
-    usdAmount: NumberLikeSchema.optional(),
+    usdAmount: NumberLikeSchema.nullish(),
     entrypoint: z.string().optional(),
     action: z.string().optional(),
     baker: z.string().optional(),
@@ -37,6 +48,11 @@ const HistoryOperationDetailsSchema = z
     contractBalance: NumberLikeSchema.optional()
   })
   .passthrough();
+
+const HistoryOperationDetailsSchema = HistoryMovementSchema.extend({
+  transfers: z.array(HistoryMovementSchema).optional(),
+  partialTransfers: z.boolean().optional()
+});
 
 const HistoryParameterSchema = z
   .object({
@@ -95,9 +111,10 @@ export type WalletHistoryFilter =
   | 'reveal'
   | 'interaction';
 export type MavrykHistoryNetworkFees = z.infer<typeof HistoryNetworkFeesSchema>;
-export type MavrykHistoryOperationDetails = z.infer<typeof HistoryOperationDetailsSchema>;
+export type MavrykHistoryOperationDetails = z.input<typeof HistoryOperationDetailsSchema>;
 export type MavrykHistoryParameter = z.infer<typeof HistoryParameterSchema>;
-export type MavrykHistoryOperation = Omit<z.infer<typeof HistoryOperationSchema>, 'operations'> & {
+export type MavrykHistoryOperation = Omit<z.infer<typeof HistoryOperationSchema>, 'operations' | 'details'> & {
+  details?: MavrykHistoryOperationDetails | null;
   operations?: MavrykHistoryOperation[];
 };
 export type MavrykHistoryResponse = Omit<z.infer<typeof HistoryResponseSchema>, 'operations'> & {
@@ -109,6 +126,8 @@ export type FetchHistoryRequest = {
   cursor?: number;
   search?: string;
   filter?: WalletHistoryFilter;
+  tokenId?: string;
+  limit?: number;
 };
 
 async function getWalletAddressOrThrow(walletAddress?: string) {
@@ -121,7 +140,9 @@ function buildHistoryParams(params: FetchHistoryRequest) {
   return {
     cursor: params.cursor,
     search: params.search,
-    filter: params.filter
+    filter: params.filter,
+    token_id: params.tokenId,
+    limit: params.limit ?? 20
   };
 }
 

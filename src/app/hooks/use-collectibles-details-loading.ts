@@ -1,25 +1,13 @@
-import { isEqual } from 'lodash';
+import { useDetailScope } from 'lib/asset-details/use-detail-scope';
+import { useAccountCollectibles } from 'lib/assets/hooks/collectibles';
+import { collectibleDetailHooks } from 'lib/collectibles/use-collectibles-details.query';
 
-import { dispatch } from 'app/store';
-import { loadCollectiblesDetailsActions } from 'app/store/collectibles/actions';
-import { useAccountCollectibles } from 'lib/assets/hooks';
-import { COLLECTIBLES_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
-import { useAccount, useChainId } from 'lib/temple/front';
-import { useInterval, useMemoWithCompare } from 'lib/ui/hooks';
-
-export const useCollectiblesDetailsLoading = () => {
-  const chainId = useChainId()!;
-  const { publicKeyHash } = useAccount();
-  const collectibles = useAccountCollectibles(publicKeyHash, chainId);
-
-  const slugs = useMemoWithCompare(() => collectibles.map(({ slug }) => slug).sort(), [collectibles], isEqual);
-
-  useInterval(
-    () => {
-      // Is it necessary for collectibles on non-Mainnet networks too?
-      if (slugs.length) dispatch(loadCollectiblesDetailsActions.submit(slugs));
-    },
-    COLLECTIBLES_DETAILS_SYNC_INTERVAL,
-    [slugs]
+/** Register the current account's asset set with its shared detail batch. */
+export const useCollectiblesDetailsBatch = () => {
+  const scope = useDetailScope();
+  const assets = useAccountCollectibles(scope.account, scope.chainId);
+  collectibleDetailHooks.useBatch(
+    scope,
+    assets.map(({ slug }) => slug)
   );
 };

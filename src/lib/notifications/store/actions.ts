@@ -10,3 +10,5 @@ export const viewAllNotificationsAction = createAction<void>('notifications/VIEW
 export const readNotificationsItemAction = createAction<number>('notifications/READ_NOTIFICATIONS_ITEM');
 
 export const setIsNewsEnabledAction = createAction<boolean>('notifications/SET_IS_NEWS_ENABLED');
+
+export const viewNotificationsAction = createAction<number[]>('notifications/VIEW_NOTIFICATIONS');

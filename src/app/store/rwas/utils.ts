@@ -3,9 +3,8 @@ import { pick } from 'lodash';
 import type { UserObjktCollectible, ObjktGalleryAttributeCount } from 'lib/apis/objkt';
 import { ADULT_CONTENT_TAGS } from 'lib/apis/objkt/adult-tags';
 import type { ObjktAttribute, ObjktTag } from 'lib/apis/objkt/types';
+import type { CollectibleDetails } from 'lib/collectibles/details.types';
 import { atomsToTokens } from 'lib/temple/helpers';
-
-import type { RwaDetails } from './state';
 
 const ADULT_ATTRIBUTE_NAME = '__nsfw_';
 const checkForAdultery = (attributes: ObjktAttribute[], tags: ObjktTag[]) =>
@@ -19,7 +18,7 @@ const TECHNICAL_ATTRIBUTES = ['__nsfw_', '__hazards_'];
 export const convertRwaObjktInfoToStateDetailsType = (
   info: UserObjktCollectible,
   galleryAttributeCounts: ObjktGalleryAttributeCount[]
-): RwaDetails => {
+): CollectibleDetails => {
   const cheepestListing = info.listings_active[0];
   const listing = cheepestListing
     ? {

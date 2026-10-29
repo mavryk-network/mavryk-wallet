@@ -38,6 +38,7 @@ import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
 import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { transferImplicit, transferToContract } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -91,6 +92,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const { registerBackHandler } = useAppEnv();
 
   const assetMetadata = useAssetMetadata(assetSlug);
+  const metadataScope = useMetadataScope();
   const assetPrice = useAssetFiatCurrencyPrice(assetSlug);
 
   const assetSymbol = useMemo(() => getAssetSymbol(assetMetadata), [assetMetadata]);
@@ -411,7 +413,8 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
             amount: actualAmount,
             to: toResolved,
             assetSlug,
-            feeMumav: fee
+            feeMumav: fee,
+            metadataScope
           });
           if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }
@@ -441,6 +444,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       tezos,
       assetSlug,
       assetMetadata,
+      metadataScope,
       setSubmitError,
       setOperation,
       reset,

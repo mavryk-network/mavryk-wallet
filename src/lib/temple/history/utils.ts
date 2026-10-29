@@ -22,6 +22,8 @@ import type {
 
 import { MAV_TOKEN_SLUG, toTokenSlug } from '../../assets';
 import type { AssetMetadataBase } from '../../metadata';
+import type { MetadataScope } from '../../metadata/metadata-scope';
+import { getOwnedAssetMetadata } from '../../metadata/owned-metadata';
 
 import { expandHistoryMovements, getHistoryMovementDiff, hasHistoryMovement } from './bridge';
 import { getMoneyDiff, isZero } from './helpers';
@@ -1284,6 +1286,8 @@ type BuildPendingOperationObjecttype = {
   estimation?: Estimate;
   assetSlug?: string;
   feeMumav?: number;
+  /** Resolves the token/RWA symbol the API would return as `details.currency`. */
+  metadataScope?: MetadataScope;
 };
 
 const normalizePendingAmount = (amount?: number | string) => {
@@ -1295,7 +1299,11 @@ const normalizePendingAmount = (amount?: number | string) => {
   return amountBN.toNumber();
 };
 
-const getPendingAssetContext = (assetSlug?: string) => {
+/** Mirrors API transfer details: `currency` carries the asset symbol and `tokenId` stays a string. */
+const getPendingAssetContext = (
+  assetSlug?: string,
+  metadataScope?: MetadataScope
+): Pick<MavrykHistoryOperationDetails, 'currency' | 'tokenAddress' | 'tokenId'> => {
   if (!assetSlug || assetSlug === MAV_TOKEN_SLUG) {
     return {
       currency: MVRK_CURRENCY
@@ -1303,10 +1311,13 @@ const getPendingAssetContext = (assetSlug?: string) => {
   }
 
   const [tokenAddress, tokenIdRaw] = assetSlug.split('_');
+  // Unresolved metadata leaves `currency` unset; the confirmed API operation replaces the pending one.
+  const symbol = metadataScope ? getOwnedAssetMetadata(assetSlug, metadataScope)?.symbol : undefined;
 
   return {
     tokenAddress,
-    tokenId: Number(tokenIdRaw ?? '0')
+    tokenId: tokenIdRaw ?? '0',
+    currency: symbol || undefined
   };
 };
 
@@ -1358,7 +1369,8 @@ export async function buildPendingOperationObject({
   kind,
   baker,
   assetSlug,
-  feeMumav
+  feeMumav,
+  metadataScope
 }: BuildPendingOperationObjecttype) {
   if (!operation) return null;
 
@@ -1431,7 +1443,7 @@ export async function buildPendingOperationObject({
     }
 
     case 'transaction': {
-      const { tokenAddress, tokenId, currency } = getPendingAssetContext(assetSlug);
+      const { tokenAddress, tokenId, currency } = getPendingAssetContext(assetSlug, metadataScope);
 
       return {
         ...baseOperationFields,

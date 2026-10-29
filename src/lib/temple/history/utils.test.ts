@@ -29,10 +29,15 @@ jest.mock('../../metadata', () => ({
   useAssetMetadata: jest.fn()
 }));
 
+jest.mock('lib/store/zustand/ui-client', () => ({
+  getOwnedUISnapshot: jest.fn()
+}));
+
 const { buildHistoryMoneyDiffs } = require('./helpers') as typeof import('./helpers');
 const { HistoryItemOpTypeEnum } = require('./types') as typeof import('./types');
-const { groupMavrykHistoryOperations, mavrykHistoryGroupToHistoryItem } =
+const { buildPendingOperationObject, groupMavrykHistoryOperations, mavrykHistoryGroupToHistoryItem } =
   require('./utils') as typeof import('./utils');
+const { getOwnedUISnapshot } = require('lib/store/zustand/ui-client') as typeof import('lib/store/zustand/ui-client');
 const {
   buildHistoryPreviewOperations,
   getHistoryOperationAddress,
@@ -605,5 +610,67 @@ describe('bridge movement history', () => {
       usdAmount: null
     });
     expect(item.displayMoneyDiffs?.map(diff => diff.diff)).toEqual(['120.582', '1.218', '2']);
+  });
+});
+
+describe('pending transfer symbol', () => {
+  const RWA_TOKEN_ID = '900719925474099312345';
+  const METADATA_SCOPE = { account: ACCOUNT_ADDRESS, chainId: 'basenet', networkId: 'basenet', rpcUrl: 'rpc' };
+  const tokenMetadata = (symbol: string) => ({ address: CONTRACT_ADDRESS, id: '0', decimals: 6, name: symbol, symbol });
+
+  const buildPendingTransfer = (assetSlug: string, metadataScope = METADATA_SCOPE) =>
+    buildPendingOperationObject({
+      operation: { opHash: 'pendingHash' } as any,
+      type: 'transaction',
+      sender: ACCOUNT_ADDRESS,
+      to: RECIPIENT_ADDRESS,
+      amount: '5',
+      assetSlug,
+      metadataScope
+    });
+
+  const toPendingHistoryItem = (operation: MavrykHistoryOperation) =>
+    mavrykHistoryGroupToHistoryItem(groupMavrykHistoryOperations([operation])[0], { address: ACCOUNT_ADDRESS });
+
+  beforeEach(() => {
+    (getOwnedUISnapshot as jest.Mock).mockReturnValue({
+      metadata: {
+        tokensMetadata: { [`${CONTRACT_ADDRESS}_0`]: tokenMetadata('USDT') },
+        rwasMetadata: { [`${ALT_CONTRACT_ADDRESS}_${RWA_TOKEN_ID}`]: tokenMetadata('OCEAN') },
+        collectiblesMetadata: {}
+      }
+    });
+  });
+
+  it('shows token and RWA symbols like the confirmed API operation', async () => {
+    const token = (await buildPendingTransfer(`${CONTRACT_ADDRESS}_0`)) as MavrykHistoryOperation;
+    const rwa = (await buildPendingTransfer(`${ALT_CONTRACT_ADDRESS}_${RWA_TOKEN_ID}`)) as MavrykHistoryOperation;
+
+    expect(token.details).toMatchObject({ currency: 'USDT', tokenAddress: CONTRACT_ADDRESS, tokenId: '0' });
+    expect(toPendingHistoryItem(token).displayMoneyDiffs?.[0]).toMatchObject({
+      assetSlug: `${CONTRACT_ADDRESS}_0`,
+      symbol: 'USDT',
+      diff: '-5'
+    });
+    expect(toPendingHistoryItem(rwa).displayMoneyDiffs?.[0]).toMatchObject({
+      assetSlug: `${ALT_CONTRACT_ADDRESS}_${RWA_TOKEN_ID}`,
+      symbol: 'OCEAN'
+    });
+  });
+
+  it('leaves currency unset when metadata is unresolved', async () => {
+    (getOwnedUISnapshot as jest.Mock).mockImplementation(() => {
+      throw new Error('Await preference migration readiness');
+    });
+
+    const operation = (await buildPendingTransfer(`${CONTRACT_ADDRESS}_0`)) as MavrykHistoryOperation;
+
+    expect(operation.details?.currency).toBeUndefined();
+  });
+
+  it('keeps the native MVRK currency', async () => {
+    const operation = (await buildPendingTransfer(MAV_TOKEN_SLUG)) as MavrykHistoryOperation;
+
+    expect(operation.details).toMatchObject({ currency: 'MVRK', tokenAddress: undefined });
   });
 });

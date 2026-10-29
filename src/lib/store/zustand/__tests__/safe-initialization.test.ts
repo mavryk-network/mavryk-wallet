@@ -110,6 +110,7 @@ it('activates scoped read-only consumers without foreground destination adapters
       'lib/local-storage/migrator.ts',
       // Task 18 metadata readers and acknowledged commands never instantiate destination adapters.
       'lib/metadata/metadata-query.ts',
+      'lib/metadata/owned-metadata.ts',
       'lib/metadata/refresh-metadata.ts',
       'lib/metadata/sync-metadata.ts',
       'lib/metadata/use-metadata-query.ts',

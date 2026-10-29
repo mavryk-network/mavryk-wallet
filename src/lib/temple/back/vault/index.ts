@@ -149,19 +149,27 @@ export class Vault {
     });
   }
 
-  static async recoverFromSession() {
+  /**
+   * Restores the unlocked vault from the saved session key.
+   * The accounts decryption doubles as the session key check (a wrong key fails AES-GCM authentication),
+   * so a cold start pays one PBKDF2 derivation less than decrypting the check item first.
+   * @returns The vault with its decrypted accounts, or `null` when there is no usable session
+   * (an undecryptable accounts item removes the session, as an invalid key does).
+   */
+  static async recoverFromSession(): Promise<{ vault: Vault; accounts: TempleAccount[] } | null> {
     const passKey = await SessionStore.getSessionPassKey();
     if (!passKey) return null;
 
+    let accounts: TempleAccount[];
     try {
-      await fetchAndDecryptOne<any>(checkStrgKey, passKey);
+      accounts = await fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey);
     } catch (error) {
       console.error(error);
       await SessionStore.removeSession();
       return null;
     }
 
-    return new Vault(passKey);
+    return { vault: new Vault(passKey), accounts };
   }
 
   static forgetSession() {

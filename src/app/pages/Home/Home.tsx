@@ -1,4 +1,4 @@
-import React, { FC, FunctionComponent, SVGProps, useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { FC, FunctionComponent, SVGProps, useEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
@@ -14,12 +14,13 @@ import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { useAccount } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
 import * as Woozie from 'lib/woozie';
-import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/woozie';
+import { createUrl, Link, To } from 'lib/woozie';
 import { createLocationState } from 'lib/woozie/location';
 
 import { togglePartnersPromotionAction } from '../../store/partners-promotion/actions';
@@ -45,26 +46,16 @@ export const tippyPropsMock = {
 export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'];
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
-  const { fullPage, registerBackHandler } = useAppEnv();
+  const { fullPage } = useAppEnv();
+  useLoadPerfMark('home-painted');
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
-  const { search } = useLocation();
   const dispatch = useDispatch();
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
 
   const assetMetadata = useAssetMetadata(assetSlug || MAV_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
-
-  useLayoutEffect(() => {
-    const usp = new URLSearchParams(search);
-    if (assetSlug && usp.get('after_token_added') === 'true') {
-      return registerBackHandler(() => {
-        navigate('/', HistoryAction.Replace);
-      });
-    }
-    return undefined;
-  }, [registerBackHandler, assetSlug, search]);
 
   useEffect(() => {
     if (shouldShowPartnersPromo) {

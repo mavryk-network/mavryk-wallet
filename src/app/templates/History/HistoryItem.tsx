@@ -6,7 +6,7 @@ import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
@@ -21,7 +21,8 @@ import {
   getHistoryPreviewStackOffset,
   getMainHistoryOperation,
   getMoneyDiffForMultiple,
-  getMoneyDiffsForSwap
+  getMoneyDiffsForSwap,
+  isVisibleMoneyDiff
 } from './utils';
 
 interface Props {
@@ -84,11 +85,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   );
 
   const filteredMoneyDiffBase = useMemo(
-    () =>
-      moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
-        if (item.usdAmount !== undefined || !isZero(item.diff)) acc.push(item);
-        return acc;
-      }, []),
+    () => moneyDiffsBase.filter((item): item is MoneyDiff => Boolean(item) && isVisibleMoneyDiff(item)),
     [moneyDiffsBase]
   );
 

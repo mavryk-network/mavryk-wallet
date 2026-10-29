@@ -3,6 +3,7 @@ import browser from 'webextension-polyfill';
 import {
   getAuthTokensFromStorage,
   getSelectedNetworkIdFromStorage,
+  isJwtExpiringSoon,
   refreshAuthTokens,
   requestAuthChallenge,
   verifyAuthSignature
@@ -12,7 +13,7 @@ import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
 
-import { registerNewWallet, unlock } from './actions';
+import { registerNewWallet, unlock, unlockFromSession } from './actions';
 import { inited, locked, store, unlocked } from './store';
 import { Vault } from './vault';
 
@@ -61,6 +62,7 @@ const mockedGetAuthTokensFromStorage = getAuthTokensFromStorage as jest.MockedFu
 const mockedGetSelectedNetworkIdFromStorage = getSelectedNetworkIdFromStorage as jest.MockedFunction<
   typeof getSelectedNetworkIdFromStorage
 >;
+const mockedIsJwtExpiringSoon = isJwtExpiringSoon as jest.MockedFunction<typeof isJwtExpiringSoon>;
 const mockedRefreshAuthTokens = refreshAuthTokens as jest.MockedFunction<typeof refreshAuthTokens>;
 const mockedRequestAuthChallenge = requestAuthChallenge as jest.MockedFunction<typeof requestAuthChallenge>;
 const mockedVerifyAuthSignature = verifyAuthSignature as jest.MockedFunction<typeof verifyAuthSignature>;
@@ -160,5 +162,24 @@ describe('actions auth sequencing', () => {
     expect(mockedVerifyAuthSignature).not.toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it('unlocks from the session with the accounts decrypted during recovery', async () => {
+    inited(true);
+
+    const fetchAccounts = jest.fn();
+    const fetchSettings = jest.fn().mockResolvedValue({});
+    const vault = { fetchAccounts, fetchSettings };
+
+    mockedVault.recoverFromSession.mockResolvedValue({ vault, accounts: [testAccount] } as any);
+    mockedGetAuthTokensFromStorage.mockResolvedValue({ accessToken: 'access-token' } as any);
+    mockedIsJwtExpiringSoon.mockReturnValue(false);
+
+    await unlockFromSession();
+
+    expect(fetchAccounts).not.toHaveBeenCalled();
+    expect(fetchSettings).toHaveBeenCalledTimes(1);
+    expect(store.getState().status).toBe(TempleStatus.Ready);
+    expect(store.getState().accounts).toEqual([testAccount]);
   });
 });

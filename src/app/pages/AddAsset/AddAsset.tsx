@@ -33,7 +33,7 @@ import { loadContract } from 'lib/temple/contract';
 import { useTezos, useNetwork, useChainId, useAccount, validateContractAddress } from 'lib/temple/front';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { navigate } from 'lib/woozie';
+import { HistoryAction, navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
 
@@ -249,10 +249,8 @@ const Form = memo(() => {
 
         formAnalytics.trackSubmitSuccess();
 
-        navigate({
-          pathname: `/explore/${tokenSlug}`,
-          search: 'after_token_added=true'
-        });
+        // Replace the form so the success screen's back arrow returns to the main page.
+        navigate('/', HistoryAction.Replace);
 
         navigate<SuccessStateType>('/success', undefined, {
           pageTitle: 'addAsset',

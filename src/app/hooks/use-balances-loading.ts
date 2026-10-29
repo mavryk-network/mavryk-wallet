@@ -16,6 +16,7 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { refreshBalances } from 'lib/balances/balance-query';
 import { syncBalances } from 'lib/balances/sync-balances';
 import { useBalancesQuery } from 'lib/balances/use-balances-query';
+import { useLoadPerfSettledMark } from 'lib/load-perf';
 import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { balancesKeys } from 'lib/query-keys';
 import { BALANCE_RECORD_SCHEMA } from 'lib/store/zustand/balances-state.schema';
@@ -26,7 +27,8 @@ import { useTzktConnection } from 'lib/temple/front';
 export const useBalancesLoading = () => {
   const scope = useMetadataScope();
   const client = useQueryClient();
-  useBalancesQuery(scope.account);
+  const { isLoading, error } = useBalancesQuery(scope.account);
+  useLoadPerfSettledMark('balances-fresh', isLoading, !!error);
   const { connection, connectionReady } = useTzktConnection();
 
   // Attach scoped socket listeners; abort queued publications and remove both listeners on disconnect/scope change.

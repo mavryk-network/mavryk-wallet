@@ -64,10 +64,16 @@ api.interceptors.response.use(
   }
 );
 
-async function fetchGet<R>(chainId: TzktApiChainId, endpoint: string, params?: Record<string, unknown>) {
+async function fetchGet<R>(
+  chainId: TzktApiChainId,
+  endpoint: string,
+  params?: Record<string, unknown>,
+  headers?: Record<string, string>
+) {
   const { data } = await api.get<R>(endpoint, {
     baseURL: TZKT_API_BASE_URLS[chainId],
-    params
+    params,
+    headers
   });
 
   return data;
@@ -308,8 +314,14 @@ export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundIn
   }
 }
 
+/**
+ * Fresh spendable native balance. Bypasses the HTTP cache: Chrome otherwise holds this request behind an identical
+ * in-flight `/accounts/{address}` request (the delegate lookup on Home) until that response arrives.
+ */
 export const fetchTezosBalanceFromTzkt = async (account: string, chainId: TzktApiChainId) =>
-  getAccountStatsFromTzkt(account, chainId).then(calcTzktAccountSpendableTezBalance);
+  fetchGet<TzktAccount>(chainId, `/accounts/${account}`, undefined, { 'Cache-Control': 'no-cache' }).then(
+    calcTzktAccountSpendableTezBalance
+  );
 
 export const fetchAllAssetsBalancesFromTzkt = async (account: string, chainId: TzktApiChainId) => {
   const balances: StringRecord = {};

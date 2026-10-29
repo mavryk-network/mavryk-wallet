@@ -10,6 +10,7 @@ jest.mock('webextension-polyfill', () => ({
 }));
 
 jest.mock('./main.css', () => ({}));
+jest.mock('lib/store/zustand/start-owned-ui', () => ({}));
 jest.mock('app/App', () => ({ App: () => null }));
 jest.mock('react-dom/client', () => ({ createRoot: jest.fn() }));
 

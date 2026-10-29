@@ -69,3 +69,43 @@ it.each(['tokens-first', 'rwas-first'])(
     expect(restarted.getState().rwas).toEqual(stores.assets.getState().rwas);
   }
 );
+
+// 2.0.9 kept older RWAs under tokens (where users hid/removed them) and also wrote idle RWA records for the
+// same slugs while listing `/assets`. Reclassification must keep the user's choice, not the idle default.
+it('keeps 2.0.9 token choices over idle RWA defaults when reclassifying', async () => {
+  const { storage } = memoryStorage();
+  const stores = {
+    assets: createAssetsStore(storage),
+    metadata: createMetadataStore(storage),
+    ui: createUIStore(storage)
+  };
+  await awaitStoresHydrated(stores.assets, stores.metadata, stores.ui);
+  const base = { account: 'alice', chainId };
+  stores.assets.getState().putTokensAsIs([
+    { ...base, slug: 'hidden-rwa_0', status: 'disabled' },
+    { ...base, slug: 'removed-rwa_0', status: 'removed' },
+    { ...base, slug: 'chosen-rwa_0', status: 'enabled' },
+    { ...base, slug: exception, status: 'idle' }
+  ]);
+  stores.assets.getState().putRwasAsIs([
+    { ...base, slug: 'hidden-rwa_0', status: 'idle' },
+    { ...base, slug: 'removed-rwa_0', status: 'idle' },
+    // An explicit RWA-side choice still wins over the token record.
+    { ...base, slug: 'chosen-rwa_0', status: 'disabled' },
+    { ...base, slug: exception, status: 'disabled' }
+  ]);
+  applyAssetsCommand(
+    {
+      kind: 'assets-loaded',
+      category: 'rwas',
+      value: { ...base, slugs: ['hidden-rwa_0', 'removed-rwa_0', 'chosen-rwa_0', exception] }
+    },
+    stores
+  );
+  expect(stores.assets.getState().rwas[key]).toEqual({
+    'hidden-rwa_0': { status: 'disabled' },
+    'removed-rwa_0': { status: 'removed' },
+    'chosen-rwa_0': { status: 'disabled' }
+  });
+  expect(stores.assets.getState().tokens[key]).toEqual({ [exception]: { status: 'disabled' } });
+});

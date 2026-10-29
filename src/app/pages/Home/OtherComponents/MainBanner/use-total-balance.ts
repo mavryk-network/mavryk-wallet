@@ -21,8 +21,25 @@ import { ZERO } from 'lib/utils/numbers';
 /** Total balance in dollar value of displayed tokens, taken from store */
 export const useTotalBalance = (isStakingBalanceIncluded = false) => {
   const { publicKeyHash } = useAccount();
-  const tokensSlugs = useEnabledAccountTokensSlugs();
   const { data: accStats } = useDelegate(publicKeyHash);
+
+  return useTotalBalanceWithStats(isStakingBalanceIncluded, accStats);
+};
+
+/**
+ * Staking-inclusive total for the Home banner that does not suspend the page: `undefined` until the account's staking
+ * stats have loaded, so a partial total is never shown.
+ */
+export const useLoadedTotalBalanceWithStaking = () => {
+  const { publicKeyHash } = useAccount();
+  const { data: accStats } = useDelegate(publicKeyHash, false);
+  const totalBalance = useTotalBalanceWithStats(true, accStats);
+
+  return accStats === undefined ? undefined : totalBalance;
+};
+
+const useTotalBalanceWithStats = (isStakingBalanceIncluded: boolean, accStats: TzktUserAccount | undefined) => {
+  const tokensSlugs = useEnabledAccountTokensSlugs();
   const metadata = useGasTokenMetadata();
 
   const getBalance = useGetCurrentAccountTokenOrGasBalanceWithDecimals();

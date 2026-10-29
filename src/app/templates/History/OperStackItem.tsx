@@ -7,7 +7,7 @@ import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
 import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
-import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
+import { MoneyDiff } from 'lib/temple/history/helpers';
 import {
   IndividualHistoryItem,
   HistoryItemOpTypeEnum,
@@ -25,7 +25,8 @@ import {
   getAssetsFromOperations,
   getHistoryOperationAddress,
   getMultipleInteractionMessageData,
-  getStakingMessage
+  getStakingMessage,
+  isVisibleMoneyDiff
 } from './utils';
 
 interface Props {
@@ -293,11 +294,13 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
 };
 
 const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status, last = false }) => {
+  const isMoneyDiffVisible = Boolean(moneyDiff && isVisibleMoneyDiff(moneyDiff));
+
   return (
     <div
       className={clsx(
         'flex items-start justify-between text-white text-xs py-2',
-        moneyDiff && (moneyDiff.usdAmount !== undefined || !isZero(moneyDiff.diff)) ? 'h-12' : 'h-9',
+        isMoneyDiffVisible ? 'h-12' : 'h-9',
         !last ? 'border-b border-divider' : 'h-auto'
       )}
     >
@@ -307,7 +310,7 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
         {argsNode}
       </div>
 
-      {moneyDiff && (moneyDiff.usdAmount !== undefined || !isZero(moneyDiff.diff)) && (
+      {moneyDiff && isMoneyDiffVisible && (
         <MoneyDiffView
           assetId={moneyDiff.assetSlug}
           diff={moneyDiff.diff}

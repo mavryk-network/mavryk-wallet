@@ -291,3 +291,19 @@ it.each(['received', 'sent'])('keeps the %s fiat sign when the token amount is u
   expect(content).toContain('— wUSDT');
   expect(content).toContain(`${transferType === 'sent' ? '-' : '+'}$10`);
 });
+
+it('hides zero amounts in the row and popup while keeping the operation', () => {
+  const fixture = bridgeFixture();
+  fixture.details = { type: 'transfer', currency: 'MVRK', amount: 0, usdAmount: null, transferType: 'sent' };
+  const historyItem = bridgeItem(fixture);
+  for (const element of [
+    <HistoryItem historyItem={historyItem} address={BRIDGE_WALLET} handleItemClick={() => undefined} />,
+    <HistoryDetailsPopup historyItem={historyItem} isOpen />
+  ]) {
+    const content = text(element)!;
+    expect(content).toContain('Sent');
+    // Fee rows keep their signed "-0 MVRK"; only the unsigned zero amount and its fiat line must be gone.
+    expect(content).not.toMatch(/(?<!-)0\s+MVRK/);
+    expect(content).not.toContain('—');
+  }
+});

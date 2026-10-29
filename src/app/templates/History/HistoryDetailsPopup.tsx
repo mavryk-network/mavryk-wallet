@@ -44,7 +44,8 @@ import {
   getMainHistoryOperation,
   getHistoryOperationAddress,
   getMoneyDiffForMultiple,
-  getMoneyDiffsForSwap
+  getMoneyDiffsForSwap,
+  isVisibleMoneyDiff
 } from './utils';
 
 const TX_HISTORY_PREVIEW_IDX = 2;
@@ -190,22 +191,24 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               {(isInteractionOperation || historyItem.displayMoneyDiffs || mainOperation?.entrypoint === 'purchase'
                 ? moneyDiffs
                 : moneyDiffs.slice(0, 1)
-              ).map(({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => (
-                <MoneyDiffView
-                  key={i}
-                  assetId={assetSlug}
-                  diff={diff}
-                  symbol={symbol}
-                  usdAmount={usdAmount}
-                  isNeutral={isNeutral}
-                  isNegative={isNegative}
-                  isAmountUnavailable={isAmountUnavailable}
-                  pending={status === 'pending'}
-                  className="flex flex-col items-center"
-                  moneyClassname="text-xl leading-6 tracking-tight"
-                  isColored={false}
-                />
-              ))}
+              )
+                .filter(isVisibleMoneyDiff)
+                .map(({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => (
+                  <MoneyDiffView
+                    key={i}
+                    assetId={assetSlug}
+                    diff={diff}
+                    symbol={symbol}
+                    usdAmount={usdAmount}
+                    isNeutral={isNeutral}
+                    isNegative={isNegative}
+                    isAmountUnavailable={isAmountUnavailable}
+                    pending={status === 'pending'}
+                    className="flex flex-col items-center"
+                    moneyClassname="text-xl leading-6 tracking-tight"
+                    isColored={false}
+                  />
+                ))}
             </div>
           )}
 

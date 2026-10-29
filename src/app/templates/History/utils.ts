@@ -206,6 +206,9 @@ export const getMultipleInteractionMessageData = (
   } as const;
 };
 
+/** Zero amounts are hidden; unavailable amounts stay visible as "—". */
+export const isVisibleMoneyDiff = (moneyDiff: MoneyDiff) => moneyDiff.isAmountUnavailable || !isZero(moneyDiff.diff);
+
 export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   const diff = [...moneyDiffs.filter(m => !new BigNumber(m.diff).isZero())];
 

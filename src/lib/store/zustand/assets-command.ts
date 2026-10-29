@@ -50,6 +50,20 @@ export const ASSETS_COMMAND_SCHEMA = z.union([
 ]);
 export type AssetsCommand = z.infer<typeof ASSETS_COMMAND_SCHEMA>;
 
+type StoredAssetRecord = { status: string; manual?: boolean };
+
+const isExplicitChoice = (record: StoredAssetRecord) => record.status !== 'idle' || Boolean(record.manual);
+
+/**
+ * Pick the record that survives a token/RWA reclassification. Explicit destination choices win;
+ * a default idle destination (e.g. one 2.0.9 created while listing `/assets`) yields to an explicit source choice.
+ */
+function pickReclassifiedRecord<T extends StoredAssetRecord>(destination: T | undefined, source: T | undefined) {
+  if (!destination) return source;
+  if (!source || isExplicitChoice(destination) || !isExplicitChoice(source)) return destination;
+  return source;
+}
+
 /** Apply live producer semantics in the sole owner, against its latest state rather than stale foreground snapshots. */
 export function applyAssetsCommand(
   command: AssetsCommand,
@@ -94,7 +108,7 @@ export function applyAssetsCommand(
             // Repair previous classifications in the sole owner, preserving explicit destination choices.
             for (const [slug, stored] of Object.entries(rwas)) {
               if (!isRwaTokenException(slug, chainId)) continue;
-              tokens[slug] ??= stored;
+              tokens[slug] = pickReclassifiedRecord(tokens[slug], stored) ?? stored;
               delete rwas[slug];
             }
             if (command.category === 'rwas') {
@@ -103,7 +117,7 @@ export function applyAssetsCommand(
                   slugs.delete(slug);
                   continue;
                 }
-                rwas[slug] ??= tokens[slug] ?? { status: 'idle' };
+                rwas[slug] = pickReclassifiedRecord(rwas[slug], tokens[slug]) ?? { status: 'idle' };
                 delete tokens[slug];
               }
             } else {

@@ -21,7 +21,9 @@ existing-profile empty-tab state was not available for inspection.
 
 Both indexer branches now exclude catalog RWA slugs before token publication.
 The background owner moves matching stored entries to RWAs, preserves status and
-manual choices (existing destination choices win), and prevents later token
+manual choices (explicit destination choices win; a non-manual `idle` destination,
+such as the RWA record 2.0.9 wrote while listing `/assets`, yields to an explicit
+hidden/removed/manual token choice), and prevents later token
 responses from recreating duplicates. It moves the wUSDT exception back to Tokens.
 Predefined/whitelisted token presentation respects the owner's classification.
 Balances retain their existing acknowledged publication and conversion paths;

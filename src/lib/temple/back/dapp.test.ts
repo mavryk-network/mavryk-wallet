@@ -1,12 +1,28 @@
-import browser from 'webextension-polyfill';
+import { MavrykWalletDAppErrorType, MavrykWalletDAppMessageType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
+import browser, { Runtime } from 'webextension-polyfill';
 
+import { IntercomPortKind } from 'lib/intercom';
 import * as Beacon from 'lib/temple/beacon';
+import { TempleMessageType } from 'lib/temple/types';
 
-import { consumeConfirmToken, getAllDApps, removeDAppSessionsForPkhs } from './dapp';
+import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
+import { consumeConfirmToken, getAllDApps, removeDAppSessionsForPkhs, requestOperation } from './dapp';
+import { intercom } from './defaults';
+import { inited, locked, unlocked } from './store';
 
 jest.mock('lib/temple/beacon', () => ({
   ...jest.requireActual('lib/temple/beacon'),
   removeDAppPublicKey: jest.fn()
+}));
+
+jest.mock('lib/temple/helpers', () => ({
+  ...jest.requireActual('lib/temple/helpers'),
+  loadChainId: jest.fn(() => Promise.reject(new Error('offline')))
+}));
+
+jest.mock('./dryrun', () => ({
+  ...jest.requireActual('./dryrun'),
+  dryRunOpParams: jest.fn(() => Promise.resolve(null))
 }));
 
 const mockedRemoveDAppPublicKey = Beacon.removeDAppPublicKey as jest.MockedFunction<typeof Beacon.removeDAppPublicKey>;
@@ -68,5 +84,197 @@ describe('removeDAppSessionsForPkhs', () => {
 
     expect(await getAllDApps()).toEqual(sessions);
     expect(mockedRemoveDAppPublicKey).not.toHaveBeenCalled();
+  });
+});
+
+describe('requestConfirm decision finalisation', () => {
+  const ORIGIN = 'https://dapp.example';
+  const PKH = 'mv1DXLvsp4T7X6gXLHn7szGN7WLooy14fQ3G';
+  const CONFIRM_WIN_ID = 7;
+  const confirmPort = {} as Runtime.Port;
+  const confirmPortInfo = { kind: IntercomPortKind.ConfirmUi };
+
+  type Handler = (req: any, port: Runtime.Port, portInfo: any) => Promise<any>;
+
+  let handlers: Handler[];
+  let winRemovedListeners: Array<(winId: number) => void>;
+  let windowsApi: Record<string, any>;
+
+  const flushMicrotasks = async () => {
+    for (let i = 0; i < 50; i++) await Promise.resolve();
+  };
+
+  const createDeferred = <T>() => {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+
+    return { promise, resolve, reject };
+  };
+
+  // webextension-polyfill may drive the underlying chrome-style API through a trailing callback.
+  const callbackApi = (getValue: (...args: any[]) => unknown) =>
+    jest.fn((...args: any[]) => {
+      const callback = args[args.length - 1];
+      if (typeof callback !== 'function') return Promise.resolve(getValue(...args));
+
+      return callback(getValue(...args.slice(0, -1)));
+    });
+
+  const deliver = (req: any) => Promise.all(handlers.map(handler => handler(req, confirmPort, confirmPortInfo)));
+
+  const startOperationRequest = async () => {
+    const outcome = jest.fn();
+    requestOperation(ORIGIN, {
+      type: MavrykWalletDAppMessageType.OperationRequest,
+      sourcePkh: PKH,
+      opParams: [{ kind: 'transaction', to: PKH, amount: 1 }]
+    }).then(
+      res => outcome('resolved', res),
+      err => outcome('rejected', err.message)
+    );
+    await flushMicrotasks();
+
+    const { url } = windowsApi.create.mock.calls[0][0];
+    const params = new URLSearchParams(url.slice(url.indexOf('?') + 1));
+    const id = params.get('id')!;
+    await deliver({ type: TempleMessageType.DAppGetPayloadRequest, id, token: params.get('token') });
+
+    return { id, outcome };
+  };
+
+  beforeEach(async () => {
+    jest.useFakeTimers();
+    inited(true);
+    await browser.storage.local.clear();
+    await browser.storage.local.set({
+      dapp_sessions: {
+        [ORIGIN]: {
+          network: { name: 'Custom', rpc: 'https://rpc.example' },
+          appMeta: { name: 'dApp' },
+          pkh: PKH,
+          publicKey: 'edpk'
+        }
+      }
+    });
+
+    handlers = [];
+    winRemovedListeners = [];
+    jest.spyOn(intercom, 'onRequest').mockImplementation(handler => {
+      handlers.push(handler);
+      return () => {
+        handlers = handlers.filter(h => h !== handler);
+      };
+    });
+
+    windowsApi = {
+      create: callbackApi(() => ({ id: CONFIRM_WIN_ID })),
+      get: callbackApi((winId: number) => ({ id: winId })),
+      remove: callbackApi(() => undefined),
+      update: callbackApi(() => undefined),
+      getLastFocused: callbackApi(() => ({})),
+      onRemoved: {
+        addListener: jest.fn((listener: (winId: number) => void) => winRemovedListeners.push(listener)),
+        removeListener: jest.fn((listener: (winId: number) => void) => {
+          winRemovedListeners = winRemovedListeners.filter(l => l !== listener);
+        })
+      }
+    };
+    Object.assign(browser, { windows: windowsApi });
+    Object.assign(browser.runtime, { getPlatformInfo: callbackApi(() => ({ os: 'mac' })) });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+    locked();
+  });
+
+  it('does not decline a confirmed operation while the vault is still signing and broadcasting', async () => {
+    const sendResult = createDeferred<{ hash: string; results: any[] }>();
+    const sendOperations = jest.fn(() => sendResult.promise);
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    const decision = deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    await flushMicrotasks();
+
+    jest.advanceTimersByTime(DAPP_CONFIRMATION_AUTODECLINE_MS + 1);
+    winRemovedListeners.forEach(listener => listener(CONFIRM_WIN_ID));
+    await flushMicrotasks();
+
+    expect(outcome).not.toHaveBeenCalled();
+    expect(windowsApi.remove).not.toHaveBeenCalled();
+
+    sendResult.resolve({ hash: 'opHash', results: [] });
+    await decision;
+    await flushMicrotasks();
+
+    expect(outcome).toHaveBeenCalledTimes(1);
+    expect(outcome).toHaveBeenCalledWith('resolved', {
+      type: MavrykWalletDAppMessageType.OperationResponse,
+      opHash: 'opHash'
+    });
+    expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
+  });
+
+  it('rejects a second decision for the same id while the first is in flight', async () => {
+    const sendResult = createDeferred<{ hash: string; results: any[] }>();
+    const sendOperations = jest.fn(() => sendResult.promise);
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id } = await startOperationRequest();
+    const decision = deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    await flushMicrotasks();
+
+    const repeatedDecision = deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    repeatedDecision.catch(() => undefined);
+    await flushMicrotasks();
+
+    expect(sendOperations).toHaveBeenCalledTimes(1);
+
+    sendResult.resolve({ hash: 'opHash', results: [] });
+    await decision;
+    await expect(repeatedDecision).rejects.toThrow('Confirmation is already being processed');
+  });
+
+  it('settles and closes the confirmation when the vault fails after the auto-decline deadline', async () => {
+    const sendResult = createDeferred<{ hash: string; results: any[] }>();
+    unlocked({ vault: { sendOperations: jest.fn(() => sendResult.promise) } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    const decision = deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    await flushMicrotasks();
+
+    jest.advanceTimersByTime(DAPP_CONFIRMATION_AUTODECLINE_MS + 1);
+    sendResult.reject(new Error('RPC unreachable'));
+
+    await expect(decision).rejects.toThrow('RPC unreachable');
+    await flushMicrotasks();
+
+    expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
+    expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
+    expect(handlers).toHaveLength(0);
+  });
+
+  it('still auto-declines when a decision of the wrong type is sent for the same id', async () => {
+    const sendOperations = jest.fn();
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    await expect(
+      deliver({ type: TempleMessageType.DAppSignConfirmationRequest, id, confirmed: true })
+    ).resolves.toEqual([undefined]);
+
+    jest.advanceTimersByTime(DAPP_CONFIRMATION_AUTODECLINE_MS + 1);
+    await flushMicrotasks();
+
+    expect(sendOperations).not.toHaveBeenCalled();
+    expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
+    expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
+    expect(handlers).toHaveLength(0);
   });
 });

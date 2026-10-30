@@ -408,6 +408,15 @@ function setDApps(newDApps: TempleDAppSessions) {
   return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
 }
 
+const DAPP_DECISION_REQUEST_TYPES = new Set<TempleMessageType>([
+  TempleMessageType.DAppPermConfirmationRequest,
+  TempleMessageType.DAppOpsConfirmationRequest,
+  TempleMessageType.DAppSignConfirmationRequest
+]);
+
+const isDAppDecisionRequest = (req: TempleRequest, id: string) =>
+  DAPP_DECISION_REQUEST_TYPES.has(req?.type) && 'id' in req && req.id === id;
+
 type RequestConfirmParams = {
   id: string;
   payload: TempleDAppPayload;
@@ -430,9 +439,23 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     } catch (_err) {}
   };
 
+  // While a decision is being processed, auto-decline and window removal are deferred, never applied mid-sign.
+  let deciding = false;
+  let declineDeferred = false;
+
   const declineAndClose = () => {
+    if (deciding) {
+      declineDeferred = true;
+      return;
+    }
+
     onDecline();
     close();
+  };
+
+  const releaseDecision = () => {
+    deciding = false;
+    if (declineDeferred) declineAndClose();
   };
 
   const initialConfirmToken = nanoid();
@@ -473,10 +496,25 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
       if (knownPort !== port) return;
       assertConfirmUiPortInfo(portInfo);
 
-      const result = await handleIntercomRequest(req, onDecline);
-      if (result) {
-        close();
-        return result;
+      const isDecision = isDAppDecisionRequest(req, id);
+      if (isDecision) {
+        if (deciding) {
+          throw new Error('Confirmation is already being processed');
+        }
+        deciding = true;
+      }
+
+      let handled = false;
+      try {
+        const result = await handleIntercomRequest(req, onDecline);
+        if (result) {
+          handled = true;
+          close();
+          return result;
+        }
+      } finally {
+        // A decision the handler did not take (wrong type, or it threw) must not keep auto-decline suspended.
+        if (isDecision && !handled) releaseDecision();
       }
     }
   });

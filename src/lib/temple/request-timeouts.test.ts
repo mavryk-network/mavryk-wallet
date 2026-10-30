@@ -1,23 +1,43 @@
 import { DEFAULT_INTERCOM_REQUEST_TIMEOUT_MS } from 'lib/intercom';
 
-import { LEDGER_CONFIRMATION_REQUEST_TIMEOUT_MS } from './confirmation-timeouts';
+import {
+  DAPP_CONFIRMATION_AUTODECLINE_MS,
+  IN_WALLET_CONFIRMATION_AUTODECLINE_MS,
+  LEDGER_CONFIRMATION_REQUEST_TIMEOUT_MS
+} from './confirmation-timeouts';
 import {
   DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS,
+  DAPP_PAGE_REQUEST_TIMEOUT_MS,
   getTempleRequestTimeoutMs,
-  IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS
+  IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS,
+  IN_WALLET_DECISION_REQUEST_TIMEOUT_MS,
+  IN_WALLET_OPERATION_REQUEST_TIMEOUT_MS
 } from './request-timeouts';
 import { TempleMessageType } from './types';
 
 describe('getTempleRequestTimeoutMs', () => {
-  it('extends in-wallet operation and sign request timeouts', () => {
-    expect(getTempleRequestTimeoutMs(TempleMessageType.OperationsRequest)).toBe(
-      IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS
+  it('extends in-wallet operation and sign request timeouts past the deadline plus the decision budget', () => {
+    expect(getTempleRequestTimeoutMs(TempleMessageType.OperationsRequest)).toBe(IN_WALLET_OPERATION_REQUEST_TIMEOUT_MS);
+    expect(getTempleRequestTimeoutMs(TempleMessageType.SignRequest)).toBe(IN_WALLET_OPERATION_REQUEST_TIMEOUT_MS);
+    expect(IN_WALLET_OPERATION_REQUEST_TIMEOUT_MS).toBeGreaterThan(
+      IN_WALLET_CONFIRMATION_AUTODECLINE_MS + IN_WALLET_DECISION_REQUEST_TIMEOUT_MS
     );
-    expect(getTempleRequestTimeoutMs(TempleMessageType.SignRequest)).toBe(IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS);
   });
 
-  it('extends dApp confirmation and page request timeouts', () => {
-    expect(getTempleRequestTimeoutMs(TempleMessageType.PageRequest)).toBe(DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS);
+  it('extends the in-wallet decision request timeout to cover signing and broadcast', () => {
+    expect(getTempleRequestTimeoutMs(TempleMessageType.ConfirmationRequest)).toBe(
+      Math.max(IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS, LEDGER_CONFIRMATION_REQUEST_TIMEOUT_MS)
+    );
+  });
+
+  it('extends the dApp page request timeout past the deadline plus the decision budget', () => {
+    expect(getTempleRequestTimeoutMs(TempleMessageType.PageRequest)).toBe(DAPP_PAGE_REQUEST_TIMEOUT_MS);
+    expect(DAPP_PAGE_REQUEST_TIMEOUT_MS).toBeGreaterThan(
+      DAPP_CONFIRMATION_AUTODECLINE_MS + getTempleRequestTimeoutMs(TempleMessageType.DAppOpsConfirmationRequest)
+    );
+  });
+
+  it('extends dApp confirmation request timeouts', () => {
     expect(getTempleRequestTimeoutMs(TempleMessageType.DAppPermConfirmationRequest)).toBe(
       DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS
     );

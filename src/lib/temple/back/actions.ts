@@ -568,18 +568,35 @@ const promisableUnlock = async (
   });
 
   let closing = false;
+  // While a decision is being processed, auto-decline and disconnect are deferred, never applied mid-sign.
+  let deciding = false;
+  let declineDeferred = false;
 
   const decline = () => {
     reject(new Error('Declined'));
   };
   const declineAndClose = () => {
+    if (deciding) {
+      declineDeferred = true;
+      return;
+    }
+
     decline();
     closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
+  };
+  const releaseDecision = () => {
+    deciding = false;
+    if (declineDeferred) declineAndClose();
   };
 
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
     if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
       assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+
+      if (deciding) {
+        throw new Error('Confirmation is already being processed');
+      }
+      deciding = true;
 
       if (req.confirmed) {
         try {
@@ -598,6 +615,7 @@ const promisableUnlock = async (
           if (err instanceof MavrykOperationError) {
             reject(err);
           } else {
+            releaseDecision();
             throw err;
           }
         }
@@ -647,22 +665,44 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
         });
 
         let closing = false;
+        // While a decision is being processed, auto-decline and disconnect are deferred, never applied mid-sign.
+        let deciding = false;
+        let declineDeferred = false;
 
         const decline = () => {
           reject(new Error('Declined'));
         };
         const declineAndClose = () => {
+          if (deciding) {
+            declineDeferred = true;
+            return;
+          }
+
           decline();
           closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
+        };
+        const releaseDecision = () => {
+          deciding = false;
+          if (declineDeferred) declineAndClose();
         };
 
         const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
           if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
             assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
 
+            if (deciding) {
+              throw new Error('Confirmation is already being processed');
+            }
+            deciding = true;
+
             if (req.confirmed) {
-              const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
-              resolve(result);
+              try {
+                const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
+                resolve(result);
+              } catch (err) {
+                releaseDecision();
+                throw err;
+              }
             } else {
               decline();
             }

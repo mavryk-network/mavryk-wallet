@@ -15,6 +15,7 @@ import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { isTruthy } from 'lib/utils';
 import type {
+  MavrykHistoryAction,
   MavrykHistoryNetworkFees,
   MavrykHistoryOperation,
   MavrykHistoryOperationDetails
@@ -25,6 +26,7 @@ import type { AssetMetadataBase } from '../../metadata';
 import type { MetadataScope } from '../../metadata/metadata-scope';
 import { getOwnedAssetMetadata } from '../../metadata/owned-metadata';
 
+import { dedupeHistoryActions, deriveHistoryNetworkFeePayer, isSupportedHistoryAction } from './actions';
 import { expandHistoryMovements, getHistoryMovementDiff, hasHistoryMovement } from './bridge';
 import { getMoneyDiff, isZero } from './helpers';
 import { buildPurchaseDiffs, getPurchaseMovements, purchaseDisplayAmount } from './purchase';
@@ -57,6 +59,8 @@ type BackendHistoryNormalizationContext = {
 };
 
 type MavrykHistoryOperationsGroup = {
+  /** Local card identity; equals the hash for hash-merged (legacy/pending) groups. */
+  id: string;
   hash: string;
   operations: MavrykHistoryOperation[];
   summaryOperation?: MavrykHistoryOperation;
@@ -111,24 +115,70 @@ const getNestedBackendOperations = (operation: MavrykHistoryOperation): MavrykHi
   return operation.operations.flatMap(childOperation => getNestedBackendOperations(childOperation));
 };
 
-export const groupMavrykHistoryOperations = (operations: MavrykHistoryOperation[]): MavrykHistoryOperationsGroup[] => {
+/**
+ * Distinguishes several returned groups under one hash. Prefers action IDs, then child operation IDs,
+ * then the summary movement identity; the page occurrence counter breaks exact ties.
+ */
+const getBackendGroupDiscriminator = (operation: MavrykHistoryOperation) => {
+  const details = operation.details;
+  const actions: MavrykHistoryAction[] = details?.actions ?? [];
+  const actionIds = actions.map(action => action.id);
+  if (actionIds.length) return actionIds.join('|');
+
+  const childIds = (operation.operations ?? []).map(child => child.id).filter(id => id != null);
+  if (childIds.length) return childIds.join('|');
+  if (details?.transferId) return details.transferId;
+
+  return [
+    getBackendOperationId(operation, -1),
+    details?.transferType,
+    details?.from,
+    details?.to,
+    details?.tokenAddress,
+    details?.tokenId,
+    details?.rawAmount ?? details?.amount
+  ].join(':');
+};
+
+/**
+ * Groups history operations into cards.
+ *
+ * With `preserveTopLevelGroups` (confirmed Wallet API pages), every returned top-level group that carries a summary
+ * (children or details) stays its own card, even when another group shares its hash; children are normalized only
+ * within that group. Without it (legacy/pending input), operations are merged by hash.
+ */
+export const groupMavrykHistoryOperations = (
+  operations: MavrykHistoryOperation[],
+  { preserveTopLevelGroups = false }: { preserveTopLevelGroups?: boolean } = {}
+): MavrykHistoryOperationsGroup[] => {
   const groupedOperations = new Map<string, MavrykHistoryOperationsGroup>();
   const groupOrder: string[] = [];
   const operationKeys = new Map<string, Set<string>>();
+  const keyOccurrences = new Map<string, number>();
 
   operations.forEach(operation => {
-    if (!groupedOperations.has(operation.hash)) {
-      groupedOperations.set(operation.hash, {
+    const isOwnCard = preserveTopLevelGroups && (Boolean(operation.operations?.length) || operation.details != null);
+    let groupKey = operation.hash;
+    if (isOwnCard) {
+      const baseKey = `${operation.hash}#${getBackendGroupDiscriminator(operation)}`;
+      const occurrence = keyOccurrences.get(baseKey) ?? 0;
+      keyOccurrences.set(baseKey, occurrence + 1);
+      groupKey = occurrence ? `${baseKey}#${occurrence}` : baseKey;
+    }
+
+    if (!groupedOperations.has(groupKey)) {
+      groupedOperations.set(groupKey, {
+        id: groupKey,
         hash: operation.hash,
         operations: [],
         summaryOperation: operation.operations?.length ? operation : undefined
       });
-      operationKeys.set(operation.hash, new Set());
-      groupOrder.push(operation.hash);
+      operationKeys.set(groupKey, new Set());
+      groupOrder.push(groupKey);
     }
 
-    const group = groupedOperations.get(operation.hash);
-    const groupOperationKeys = operationKeys.get(operation.hash);
+    const group = groupedOperations.get(groupKey);
+    const groupOperationKeys = operationKeys.get(groupKey);
     const normalizedOperations = getNestedBackendOperations(operation);
 
     if (!group || !groupOperationKeys) {
@@ -152,7 +202,7 @@ export const groupMavrykHistoryOperations = (operations: MavrykHistoryOperation[
   });
 
   return groupOrder
-    .map(hash => groupedOperations.get(hash))
+    .map(groupKey => groupedOperations.get(groupKey))
     .filter((group): group is MavrykHistoryOperationsGroup => Boolean(group));
 };
 
@@ -756,10 +806,18 @@ export function mavrykHistoryGroupToHistoryItem(
   }
   const firstOperation = historyItemOperations[0];
   const oldestOperation = historyItemOperations[historyItemOperations.length - 1];
+  const actions = dedupeHistoryActions(primaryOperation?.details?.actions ?? []);
+  const operationsCount = group.summaryOperation?.operationsCount;
 
   return {
+    id: group.id,
     type,
     hash: group.hash,
+    actions: actions.length ? actions : undefined,
+    networkFeePayer: deriveHistoryNetworkFeePayer(actions, group.operations, operationsCount, context.address),
+    isGasless:
+      actions.some(action => isSupportedHistoryAction(action) && action.executionMode === 'permit') || undefined,
+    operationsCount,
     addedAt:
       mainOperation?.addedAt ??
       firstOperation?.addedAt ??
@@ -795,6 +853,7 @@ export function operationsGroupToHistoryItem({ hash, operations }: OperationsGro
   const type = deriveHistoryItemType(historyItemOperations, address, operations[0]);
 
   const newUserHistoryItem: UserHistoryItem = {
+    id: hash,
     type,
     hash,
     addedAt: firstOperation ? firstOperation.addedAt : '',

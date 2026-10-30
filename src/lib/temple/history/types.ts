@@ -1,4 +1,5 @@
 import type { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
+import type { MavrykHistoryAction } from 'mavryk/api/history';
 
 import type { AssetMetadataBase } from '../../metadata';
 
@@ -10,9 +11,25 @@ export interface OperationsGroup {
   operations: TzktOperation[];
 }
 
+/**
+ * Who paid the group's network fee, from complete action evidence only.
+ * `wallet`: the viewed account; `other`: one different address; `mixed`: actions exist but evidence is mixed/incomplete.
+ * Absent when no supported actions are present (legacy rendering).
+ */
+export type HistoryNetworkFeePayer = { kind: 'wallet' } | { kind: 'other'; address: string } | { kind: 'mixed' };
+
 export interface UserHistoryItem {
+  /** Local card identity within the loaded scope; several cards may share one hash. */
+  id: string;
   type: HistoryItemOpTypeEnum;
   hash: string;
+  /** Semantic actions of this group, deduplicated by action ID, in API order. */
+  actions?: MavrykHistoryAction[];
+  networkFeePayer?: HistoryNetworkFeePayer;
+  /** True when any action ran through a permit (gasless) relay; says nothing about who paid. */
+  isGasless?: boolean;
+  /** Total child operations reported by the API; the `operations` preview may be capped below it. */
+  operationsCount?: number;
   addedAt: string;
   status: HistoryItemStatus;
   operations: IndividualHistoryItem[];

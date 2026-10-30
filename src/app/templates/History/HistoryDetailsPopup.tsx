@@ -17,6 +17,7 @@ import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsM
 import { useAccount } from 'lib/temple/front';
 import { getPredefinedBaker } from 'lib/temple/front/baking/utils';
 import { UserHistoryItem } from 'lib/temple/history';
+import { isSupportedHistoryAction } from 'lib/temple/history/actions';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import {
@@ -33,6 +34,7 @@ import {
 import { AssetImage } from '../AssetImage';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
 
+import { GaslessTag, HistoryActionsLabel, HistoryActionsList } from './HistoryActions';
 import { HistoryTime } from './HistoryTime';
 import { AssetIconPlaceholder, HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
@@ -161,6 +163,14 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [isMultipleOperation, tokensMetadata]
   );
 
+  const hasSupportedActions = useMemo(
+    () => (historyItem?.actions ?? []).some(isSupportedHistoryAction),
+    [historyItem?.actions]
+  );
+  const feePayer = historyItem?.networkFeePayer;
+  // Only a fee the wallet itself paid (or legacy rows without payer evidence) is shown as a debit.
+  const isFeeDebit = !feePayer || feePayer.kind === 'wallet';
+
   const [, statusTextColor] = useMemo(() => deriveStatusColorClassName(status), [status]);
   if (!historyItem) return null;
 
@@ -175,7 +185,9 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               isSwapOperation ? 'text-xl leading-6 tracking-tight mb-1 text-white' : 'text-sm text-secondary-white'
             )}
           >
-            {mainOperation?.movementKind === 'mint' && !isInteractionOperation ? (
+            {hasSupportedActions ? (
+              <HistoryActionsLabel historyItem={historyItem} />
+            ) : mainOperation?.movementKind === 'mint' && !isInteractionOperation ? (
               <OpertionStackItem item={mainOperation} userAddress={publicKeyHash} />
             ) : (
               <>
@@ -276,10 +288,17 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         {!isSwapOperation && !isMultipleOperation && <TxAddressBlock historyItem={historyItem} />}
 
+        {hasSupportedActions && (
+          <CardContainer className="mb-6 text-white">
+            <HistoryActionsList historyItem={historyItem} />
+          </CardContainer>
+        )}
+
         <CardContainer className={clsx('text-sm text-white flex flex-col')}>
           <div className="flex justify-between items-start text-base-plus">
             <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
               <T id="networkFees" />
+              {historyItem.isGasless && <GaslessTag />}
               <ArrowIcon
                 className={clsx(
                   'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
@@ -295,12 +314,23 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
                 showEqualSymbol={false}
                 className="text-base-plus"
                 roundingMode={BigNumber.ROUND_CEIL}
-                customSymbol="-"
+                customSymbol={isFeeDebit ? '-' : undefined}
               />
 
               <div className="text-sm text-secondary-white">
                 <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
               </div>
+              {feePayer?.kind === 'other' && (
+                <div className="flex items-center gap-1 text-xs text-secondary-white">
+                  <T id="feePaidBy" />
+                  <HashChip hash={feePayer.address} small showIcon={false} />
+                </div>
+              )}
+              {feePayer?.kind === 'mixed' && (
+                <div className="text-xs text-secondary-white">
+                  <T id="feePaidByMultiple" />
+                </div>
+              )}
             </div>
           </div>
           <div

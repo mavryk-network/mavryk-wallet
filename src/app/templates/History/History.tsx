@@ -164,6 +164,8 @@ export const HistoryComponent: React.FC<Props> = memo(
       loading: userHistoryLoading,
       reachedTheEnd,
       list: userHistory,
+      error: userHistoryError,
+      equiteezStatus,
       loadMore
     } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams, undefined, tokenAddress);
 
@@ -257,10 +259,10 @@ export const HistoryComponent: React.FC<Props> = memo(
     }, []);
 
     const handleItemClick = useCallback(
-      (hash: string) => {
+      (id: string) => {
         setIsOpen(true);
         const activeHistory = searchValue.length > 0 ? filteredHistory : userHistory;
-        setActiveHistoryItem(activeHistory.find(item => item.hash === hash) ?? null);
+        setActiveHistoryItem(activeHistory.find(item => item.id === id) ?? null);
       },
       [filteredHistory, searchValue.length, userHistory]
     );
@@ -338,8 +340,14 @@ export const HistoryComponent: React.FC<Props> = memo(
           </SearchExplorer>
         </div>
 
+        {equiteezStatus && !searchValueForFilter && (
+          <div className={classNames('text-xs text-secondary-white py-2', popup && 'px-4')}>
+            <T id={equiteezStatus === 'unavailable' ? 'historyEnrichmentUnavailable' : 'historyEnrichmentUpdating'} />
+          </div>
+        )}
+
         <div className="flex flex-col" style={{ minHeight: LIST_MIN_HEIGHT }}>
-          {!historyToshow.length && !loading ? (
+          {!historyToshow.length && !loading && !userHistoryError ? (
             <div className="flex flex-1 flex-col items-center justify-center py-16 text-white">
               <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
               <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
@@ -361,8 +369,8 @@ export const HistoryComponent: React.FC<Props> = memo(
                   </div>
                 }
               >
-                {historyToshow.map((historyItem, idx) => (
-                  <Fragment key={historyItem.hash + idx}>
+                {historyToshow.map(historyItem => (
+                  <Fragment key={historyItem.id}>
                     <HistoryItem
                       address={accountAddress}
                       historyItem={historyItem}
@@ -373,6 +381,14 @@ export const HistoryComponent: React.FC<Props> = memo(
                   </Fragment>
                 ))}
               </InfiniteScroll>
+              {userHistoryError && !loading && !searchValueForFilter && (
+                <div className="flex items-center justify-center gap-2 py-4 text-sm text-white">
+                  <T id="historyLoadError" />
+                  <button type="button" className="text-accent-blue hover:underline" onClick={loadNext}>
+                    <T id="retry" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

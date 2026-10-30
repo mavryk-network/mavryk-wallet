@@ -4,8 +4,8 @@ import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
 import { TempleAccount } from 'lib/temple/types';
-import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
-import type { MavrykHistoryOperation } from 'mavryk/api/history';
+import { fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
+import type { MavrykEquiteezHistoryStatus, MavrykHistoryOperation } from 'mavryk/api/history';
 
 import { hasHistoryMovement } from './bridge';
 import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
@@ -27,6 +27,8 @@ export type FetchUserHistoryResult = {
   items: UserHistoryItem[];
   cursor?: number;
   hasMore: boolean;
+  /** Equiteez enrichment status of this page; undefined on the legacy response path. */
+  equiteezStatus?: MavrykEquiteezHistoryStatus;
 };
 
 type PendingOperationGroupable = {
@@ -78,7 +80,7 @@ async function normalizeBackendHistoryItems(
   assetSlug?: string,
   resolveDecimals?: PurchaseDecimalsResolver
 ) {
-  const groups = groupMavrykHistoryOperations(operations);
+  const groups = groupMavrykHistoryOperations(operations, { preserveTopLevelGroups: true });
   const rawAmountSlugs = groups.flatMap(group =>
     [group.summaryOperation, ...group.operations].flatMap(operation => {
       const details = operation?.details;
@@ -156,30 +158,25 @@ export async function fetchUserOperationByHash(
   resolveDecimals?: PurchaseDecimalsResolver,
   tokenAddress = getTokenAddressFromSlug(assetSlug)
 ) {
-  try {
-    const response = tokenAddress
-      ? await fetchTokenHistory(tokenAddress, {
-          walletAddress: accountAddress,
-          tokenId: assetSlug?.split('_')[1],
-          search: hash
-        })
-      : await fetchWalletHistory({
-          walletAddress: accountAddress,
-          search: hash
-        });
+  const response = tokenAddress
+    ? await fetchTokenHistory(tokenAddress, {
+        walletAddress: accountAddress,
+        tokenId: assetSlug?.split('_')[1],
+        search: hash
+      })
+    : await fetchWalletHistory({
+        walletAddress: accountAddress,
+        search: hash
+      });
 
-    return await normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
-  } catch (error) {
-    console.error('Error while fetching user operation by hash:', error);
-    return [];
-  }
+  return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
 }
 
 export default async function fetchUserHistory(
   chainId: TzktApiChainId,
   account: TempleAccount,
   assetSlug: string | undefined,
-  pseudoLimit: number,
+  _pseudoLimit: number,
   _tezos: ReactiveTezosToolkit,
   cursor?: number,
   operationParams?: GetOperationsTransactionsParams,
@@ -191,74 +188,60 @@ export default async function fetchUserHistory(
   const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
   const isFirstPage = cursor == null;
 
-  try {
-    const response = tokenAddress
-      ? await fetchTokenHistory(tokenAddress, {
-          walletAddress: account.publicKeyHash,
-          cursor,
-          tokenId: assetSlug?.split('_')[1],
-          filter: backendFilter
-        })
-      : await fetchWalletHistory({
-          walletAddress: account.publicKeyHash,
-          cursor,
-          filter: backendFilter
-        });
+  const response = tokenAddress
+    ? await fetchTokenHistory(tokenAddress, {
+        walletAddress: account.publicKeyHash,
+        cursor,
+        tokenId: assetSlug?.split('_')[1],
+        filter: backendFilter
+      })
+    : await fetchWalletHistory({
+        walletAddress: account.publicKeyHash,
+        cursor,
+        filter: backendFilter
+      });
+  const hasMore = response.hasMore;
+  const nextCursor = response.cursor ?? undefined;
 
-    const normalizedItems = await normalizeBackendHistoryItems(
-      response.operations,
-      account.publicKeyHash,
-      localRequestedTypes,
-      assetSlug,
-      resolveDecimals
-    );
-    const visibleCollected = normalizedItems.slice(0, pseudoLimit);
-    const nextCursor = response.cursor ?? undefined;
-    const hasMore = response.hasMore;
-
-    if (!isFirstPage) {
-      return {
-        items: visibleCollected,
-        cursor: nextCursor,
-        hasMore
-      };
-    }
-
-    const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
-    if (!pendingItems.length) {
-      return {
-        items: visibleCollected,
-        cursor: nextCursor,
-        hasMore
-      };
-    }
-
-    const confirmedHashes = new Set(visibleCollected.map(item => item.hash));
-    const filteredPendingOperations = pendingOperations.filter(
-      operation => !confirmedHashes.has(operation?.hash ?? '')
-    );
-
-    if (filteredPendingOperations.length !== pendingOperations.length) {
-      await putToStorage(storageKey, filteredPendingOperations);
-    }
-
-    const filteredPendingItems = applyLocalTypeFilter(
-      pendingItems.filter(item => !confirmedHashes.has(item.hash)),
-      requestedTypes
-    );
-
-    return {
-      items: [...filteredPendingItems, ...visibleCollected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
-      cursor: nextCursor,
-      hasMore
-    };
-  } catch (error) {
-    console.error('Error while fetching user history:', extractMavrykApiErrorMessage(error));
-
-    return {
-      items: [],
-      cursor,
-      hasMore: false
-    };
+  if (hasMore && (nextCursor === undefined || nextCursor === cursor)) {
+    throw new Error('History response has more pages but no advancing cursor');
   }
+
+  // The whole page is kept: groups sharing a boundary may exceed the requested limit, and the cursor already
+  // points past all of them, so trimming here would lose rows permanently.
+  const collected = await normalizeBackendHistoryItems(
+    response.operations,
+    account.publicKeyHash,
+    localRequestedTypes,
+    assetSlug,
+    resolveDecimals
+  );
+  const pageResult = { cursor: nextCursor, hasMore, equiteezStatus: response.equiteezHistory?.status };
+
+  if (!isFirstPage) {
+    return { items: collected, ...pageResult };
+  }
+
+  const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
+  if (!pendingItems.length) {
+    return { items: collected, ...pageResult };
+  }
+
+  // A confirmed hash retires its pending placeholder; every confirmed group under that hash stays.
+  const confirmedHashes = new Set(collected.map(item => item.hash));
+  const filteredPendingOperations = pendingOperations.filter(operation => !confirmedHashes.has(operation?.hash ?? ''));
+
+  if (filteredPendingOperations.length !== pendingOperations.length) {
+    await putToStorage(storageKey, filteredPendingOperations);
+  }
+
+  const filteredPendingItems = applyLocalTypeFilter(
+    pendingItems.filter(item => !confirmedHashes.has(item.hash)),
+    requestedTypes
+  );
+
+  return {
+    items: [...filteredPendingItems, ...collected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
+    ...pageResult
+  };
 }

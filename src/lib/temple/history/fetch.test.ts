@@ -162,3 +162,47 @@ it('resolves metadata for raw-only interaction summaries through the existing hi
   expect(resolveDecimals).toHaveBeenCalledWith([`${REFUND_TOKEN}_0`]);
   expect(items[0].displayMoneyDiffs).toEqual([{ assetSlug: `${REFUND_TOKEN}_0`, diff: '4.26', symbol: 'OCEAN' }]);
 });
+
+const fetchFirstWalletPage = () =>
+  fetchUserHistory(
+    TempleChainId.Basenet,
+    { publicKeyHash: PURCHASE_WALLET } as Parameters<typeof fetchUserHistory>[1],
+    undefined,
+    1,
+    {} as Parameters<typeof fetchUserHistory>[4],
+    456
+  );
+
+it('keeps the whole page beyond the requested limit and returns the enrichment status', async () => {
+  const transfer = (hash: string) => ({
+    hash,
+    type: 'transfer',
+    status: 'applied',
+    details: { type: 'transfer', transferType: 'received', to: PURCHASE_WALLET, amount: 1, currency: 'MVRK' }
+  });
+  (mavrykApi.get as jest.Mock).mockResolvedValue({
+    data: {
+      walletAddress: PURCHASE_WALLET,
+      operations: [transfer('a'), transfer('b'), transfer('c')],
+      cursor: 7,
+      hasMore: true,
+      equiteezHistory: { status: 'stale' }
+    }
+  });
+
+  await expect(fetchFirstWalletPage()).resolves.toMatchObject({ cursor: 7, hasMore: true, equiteezStatus: 'stale' });
+  expect((await fetchFirstWalletPage()).items).toHaveLength(3);
+});
+
+it('surfaces request failures and a non-advancing cursor instead of an empty terminal page', async () => {
+  (mavrykApi.get as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+  await expect(fetchFirstWalletPage()).rejects.toThrow();
+
+  (mavrykApi.get as jest.Mock).mockResolvedValueOnce({
+    data: { walletAddress: PURCHASE_WALLET, operations: [], cursor: 456, hasMore: true }
+  });
+  await expect(fetchFirstWalletPage()).rejects.toThrow('no advancing cursor');
+
+  (mavrykApi.get as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+  await expect(fetchUserOperationByHash(TempleChainId.Basenet, PURCHASE_WALLET, 'hash')).rejects.toThrow();
+});

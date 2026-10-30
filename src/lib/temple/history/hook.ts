@@ -6,11 +6,17 @@ import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hook
 
 import { TempleAccount } from '../types';
 
-import fetchUserHistory from './fetch';
+import fetchUserHistory, { FetchUserHistoryResult } from './fetch';
+import { mergeHistoryPage } from './merge';
 import { UserHistoryItem } from './types';
 import { usePurchaseMetadata } from './use-purchase-metadata';
 
 type TLoading = 'init' | 'more' | false;
+
+/** Consecutive pages without new cards fetched automatically before handing control back to "load more". */
+const MAX_EMPTY_PAGE_FOLLOW_UPS = 3;
+
+type EquiteezStatus = FetchUserHistoryResult['equiteezStatus'];
 
 // origination, delegation
 // transfer to -> transaction -> initiator -> me, entrypoint -> transfer
@@ -46,6 +52,9 @@ export default function useHistory(
   const [userHistory, setUserHistory] = useSafeState<UserHistoryItem[]>([]);
   const [reachedTheEnd, setReachedTheEnd] = useSafeState(false);
   const [cursor, setCursor] = useSafeState<number | undefined>(undefined);
+  const [error, setError] = useSafeState<Error | null>(null);
+  /** Enrichment status per loaded page, so a later available page never hides an earlier unavailable one. */
+  const [equiteezStatuses, setEquiteezStatuses] = useSafeState<EquiteezStatus[]>([]);
 
   const { stop: stopLoading, stopAndBuildChecker } = useStopper();
 
@@ -68,7 +77,8 @@ export default function useHistory(
     pseudoLimit: number,
     historyItems: UserHistoryItem[],
     nextCursor: number | undefined,
-    shouldStop: () => boolean
+    shouldStop: () => boolean,
+    emptyFollowUps = 0
   ) {
     if (!isKnownChainId(chainId)) {
       setLoading(false);
@@ -77,7 +87,8 @@ export default function useHistory(
     }
 
     setLoading(historyItems.length ? 'more' : 'init');
-    let fetchResult;
+    setError(null);
+    let fetchResult: FetchUserHistoryResult;
 
     try {
       fetchResult = await fetchUserHistory(
@@ -92,29 +103,28 @@ export default function useHistory(
         tokenAddress
       );
       if (shouldStop()) return;
-    } catch (error) {
+    } catch (fetchError) {
       if (shouldStop()) return;
+      // Existing rows stay; the same cursor is retried on the next load.
       setLoading(false);
-      console.error('History hook fetch error:', error);
+      setError(fetchError instanceof Error ? fetchError : new Error(String(fetchError)));
+      console.error('History hook fetch error:', fetchError);
       return;
     }
 
-    const { items: newHistoryItems, cursor: returnedCursor, hasMore } = fetchResult;
-    const newUniqueItems = newHistoryItems.filter(item => !historyItems.some(prevItem => prevItem.hash === item.hash));
+    const { items: pageItems, cursor: returnedCursor, hasMore, equiteezStatus } = fetchResult;
+    const { items: mergedItems, addedCount } = mergeHistoryPage(historyItems, pageItems);
 
-    if (newUniqueItems.length === 0) {
-      setCursor(returnedCursor);
-      setLoading(false);
-      setReachedTheEnd(true);
-      return;
-    }
-
-    setUserHistory(prev => {
-      const merged = [...prev, ...newUniqueItems];
-      return Array.from(new Map(merged.map(item => [item.hash, item])).values());
-    });
-
+    setUserHistory(mergedItems);
+    setEquiteezStatuses(prev => [...prev, equiteezStatus]);
     setCursor(returnedCursor);
+
+    // A short, empty or already-known page with more=true is not the end: follow the cursor a bounded number of times.
+    if (hasMore && addedCount === 0 && emptyFollowUps < MAX_EMPTY_PAGE_FOLLOW_UPS) {
+      await loadUserHistory(pseudoLimit, mergedItems, returnedCursor, shouldStop, emptyFollowUps + 1);
+      return;
+    }
+
     setLoading(false);
     setReachedTheEnd(!hasMore);
   }
@@ -133,6 +143,8 @@ export default function useHistory(
     setLoading(isKnownChainId(chainId) ? 'init' : false);
     setReachedTheEnd(false);
     setCursor(undefined);
+    setError(null);
+    setEquiteezStatuses([]);
 
     // fetch fresh
     loadUserHistory(initialPseudoLimit, [], undefined, shouldStop);
@@ -148,10 +160,20 @@ export default function useHistory(
     return stopLoading;
   });
 
+  const equiteezStatus = useMemo<EquiteezStatus>(
+    () =>
+      equiteezStatuses.find(status => status === 'unavailable') ??
+      equiteezStatuses.find(status => status === 'stale' || status === 'unknown'),
+    [equiteezStatuses]
+  );
+
   return {
     loading,
     reachedTheEnd,
     list: userHistory,
+    error,
+    /** Worst non-available enrichment status among loaded pages; undefined when all are available or legacy. */
+    equiteezStatus,
     loadMore
   };
 }

@@ -3683,6 +3683,35 @@
   "networkFees": {
     "message": "Network Fees"
   },
+  "historyLoadError": {
+    "message": "Couldn't load history."
+  },
+  "historyEnrichmentUpdating": {
+    "message": "Order details are updating and may be incomplete."
+  },
+  "historyEnrichmentUnavailable": {
+    "message": "Order details are temporarily unavailable. Transactions are still shown."
+  },
+  "gasless": {
+    "message": "Gasless"
+  },
+  "feePaidBy": {
+    "message": "Paid by"
+  },
+  "feePaidByMultiple": {
+    "message": "Paid by: multiple"
+  },
+  "historyActions": {
+    "message": "Actions"
+  },
+  "orderNumber": {
+    "message": "Order #$orderId$",
+    "placeholders": {
+      "orderId": {
+        "content": "$1"
+      }
+    }
+  },
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
   },

@@ -40,6 +40,12 @@ const LOCALE_OPTIONS: LocaleOption[] = [
     disabled: true
   },
   {
+    code: 'id',
+    flagName: 'id',
+    label: 'Bahasa Indonesia (Indonesian)',
+    disabled: true
+  },
+  {
     code: 'de',
     flagName: 'de',
     label: 'German (Deutsch)',

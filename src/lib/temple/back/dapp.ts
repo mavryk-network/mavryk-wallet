@@ -391,6 +391,19 @@ export async function removeAllDApps(origins: string[]) {
   };
 }
 
+export async function removeDAppSessionsForPkhs(pkhs: string[]) {
+  const removedPkhs = new Set(pkhs);
+  const sessions = Object.entries(await getAllDApps());
+  const removedOrigins = sessions.filter(([, session]) => removedPkhs.has(session.pkh)).map(([origin]) => origin);
+
+  if (removedOrigins.length === 0) {
+    return;
+  }
+
+  await setDApps(Object.fromEntries(sessions.filter(([, session]) => !removedPkhs.has(session.pkh))));
+  await Promise.all(removedOrigins.map(origin => Beacon.removeDAppPublicKey(origin)));
+}
+
 function setDApps(newDApps: TempleDAppSessions) {
   return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
 }

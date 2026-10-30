@@ -1,9 +1,11 @@
 import browser from 'webextension-polyfill';
 
+import * as Beacon from 'lib/temple/beacon';
 import {
   getAuthTokensFromStorage,
   getSelectedNetworkIdFromStorage,
   isJwtExpiringSoon,
+  logoutAuth,
   refreshAuthTokens,
   requestAuthChallenge,
   verifyAuthSignature
@@ -11,9 +13,17 @@ import {
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
-import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
+import { TempleAccount, TempleAccountType, TempleChainKind, TempleStatus } from '../types';
 
-import { registerNewWallet, unlock, unlockFromSession } from './actions';
+import {
+  registerNewWallet,
+  removeAccount,
+  removeAccountsByType,
+  removeHdWallet,
+  unlock,
+  unlockFromSession
+} from './actions';
+import { getAllDApps } from './dapp';
 import { inited, locked, store, unlocked } from './store';
 import { Vault } from './vault';
 
@@ -47,13 +57,21 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock('lib/temple/beacon', () => ({
+  ...jest.requireActual('lib/temple/beacon'),
+  removeDAppPublicKey: jest.fn()
+}));
+
 jest.mock('./vault', () => ({
   Vault: {
     spawn: jest.fn(),
     setup: jest.fn(),
     recoverFromSession: jest.fn(),
     forgetSession: jest.fn(),
-    isExist: jest.fn()
+    isExist: jest.fn(),
+    removeAccount: jest.fn(),
+    removeHdWallet: jest.fn(),
+    removeAccountsByType: jest.fn()
   }
 }));
 
@@ -72,6 +90,8 @@ const mockedSetAuthWalletAddressesMapToStorage = setAuthWalletAddressesMapToStor
 const mockedSignAuthChallengeWithVault = signAuthChallengeWithVault as jest.MockedFunction<
   typeof signAuthChallengeWithVault
 >;
+const mockedLogoutAuth = logoutAuth as jest.MockedFunction<typeof logoutAuth>;
+const mockedRemoveDAppPublicKey = Beacon.removeDAppPublicKey as jest.MockedFunction<typeof Beacon.removeDAppPublicKey>;
 
 const testAccount: TempleAccount = {
   id: 'account-1',
@@ -181,5 +201,109 @@ describe('actions auth sequencing', () => {
     expect(fetchSettings).toHaveBeenCalledTimes(1);
     expect(store.getState().status).toBe(TempleStatus.Ready);
     expect(store.getState().accounts).toEqual([testAccount]);
+  });
+});
+
+describe('actions account removal clean-up', () => {
+  const removedAccount: TempleAccount = {
+    id: 'account-2',
+    type: TempleAccountType.Imported,
+    name: 'Account 2',
+    publicKeyHash: 'mv1HmdN1hRxhJW1aeLpGJdvAuBY48z38JjVq',
+    chain: TempleChainKind.Tezos,
+    isKYC: undefined
+  };
+  const removedOrigin = 'https://removed.example';
+  const keptOrigin = 'https://kept.example';
+  const buildSession = (pkh: string) => ({
+    network: 'mainnet',
+    appMeta: { name: 'dApp' },
+    pkh,
+    publicKey: 'edpk-public-key'
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    locked();
+    await browser.storage.local.clear();
+    inited(true);
+
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount, removedAccount]);
+    unlocked({ vault: { fetchAccounts } as any, accounts: [testAccount, removedAccount], settings: {} });
+
+    await browser.storage.local.set({
+      dapp_sessions: {
+        [removedOrigin]: buildSession(removedAccount.publicKeyHash),
+        [keptOrigin]: buildSession(testAccount.publicKeyHash)
+      }
+    });
+  });
+
+  it('revokes wallet-API auth before removing accounts by type', async () => {
+    mockedVault.removeAccountsByType.mockResolvedValue([testAccount]);
+
+    await removeAccountsByType(TempleAccountType.Imported, 'password');
+
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+    expect(mockedVault.removeAccountsByType).toHaveBeenCalledWith(TempleAccountType.Imported, 'password');
+  });
+
+  it('drops the dApp sessions of a removed account and keeps the others', async () => {
+    mockedVault.removeAccount.mockResolvedValue({ newAccounts: [testAccount], newWalletsSpecs: {} });
+
+    await removeAccount(removedAccount.id, 'password');
+
+    expect(Object.keys(await getAllDApps())).toEqual([keptOrigin]);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledTimes(1);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(removedOrigin);
+  });
+
+  it('drops the dApp sessions of accounts removed with their HD wallet', async () => {
+    mockedVault.removeHdWallet.mockResolvedValue({ newAccounts: [removedAccount], newWalletsSpecs: {} });
+
+    await removeHdWallet('wallet-1', 'password');
+
+    expect(Object.keys(await getAllDApps())).toEqual([removedOrigin]);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(keptOrigin);
+  });
+
+  it('drops the dApp sessions of accounts removed by type', async () => {
+    mockedVault.removeAccountsByType.mockResolvedValue([testAccount]);
+
+    await removeAccountsByType(TempleAccountType.Imported, 'password');
+
+    expect(Object.keys(await getAllDApps())).toEqual([keptOrigin]);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(removedOrigin);
+  });
+
+  it('sweeps dApp sessions orphaned by earlier removals on unlock', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+    locked();
+    mockedVault.setup.mockResolvedValue({ fetchAccounts, fetchSettings } as any);
+    mockedGetSelectedNetworkIdFromStorage.mockResolvedValue('mainnet');
+    mockedGetAuthTokensFromStorage.mockResolvedValue({ accessToken: null, refreshToken: null });
+
+    await unlock('password');
+
+    expect(Object.keys(await getAllDApps())).toEqual([keptOrigin]);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledTimes(1);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(removedOrigin);
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('sweeps dApp sessions orphaned by earlier removals on session recovery', async () => {
+    const fetchSettings = jest.fn().mockResolvedValue({});
+    locked();
+    mockedVault.recoverFromSession.mockResolvedValue({ vault: { fetchSettings }, accounts: [testAccount] } as any);
+    mockedGetAuthTokensFromStorage.mockResolvedValue({ accessToken: 'access-token' } as any);
+    mockedIsJwtExpiringSoon.mockReturnValue(false);
+
+    await unlockFromSession();
+
+    expect(Object.keys(await getAllDApps())).toEqual([keptOrigin]);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(removedOrigin);
   });
 });

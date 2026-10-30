@@ -54,7 +54,8 @@ import {
   requestBroadcast,
   getAllDApps,
   removeDApp,
-  removeAllDApps
+  removeAllDApps,
+  removeDAppSessionsForPkhs
 } from './dapp';
 import { DAppContactsResponse, isDAppContactsRequest, processDAppContactsRequest } from './dapp-contacts';
 import { intercom } from './defaults';
@@ -98,10 +99,30 @@ const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
   await syncAuthWalletAddresses(accounts);
 };
 
+const removeDAppSessionsOfRemovedAccounts = (prevAccounts: TempleAccount[], newAccounts: TempleAccount[]) => {
+  const remainingPkhs = new Set(newAccounts.map(acc => acc.publicKeyHash));
+
+  return removeDAppSessionsForPkhs(prevAccounts.map(acc => acc.publicKeyHash).filter(pkh => !remainingPkhs.has(pkh)));
+};
+
+// Sweeps sessions orphaned by account removals made before removal clean-up existed (or any later drift),
+// so a re-imported or re-derived pkh never inherits an old dApp session without a new prompt.
+const removeOrphanedDAppSessions = async (accounts: TempleAccount[]) => {
+  try {
+    const accountPkhs = new Set(accounts.map(acc => acc.publicKeyHash));
+    const sessions = Object.values(await getAllDApps());
+
+    await removeDAppSessionsForPkhs(sessions.map(session => session.pkh).filter(pkh => !accountPkhs.has(pkh)));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const setupUnlockedVaultState = async (password: string) => {
   const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
   const [accounts, settings] = await Promise.all([vault.fetchAccounts(), vault.fetchSettings()]);
   await syncAuthWalletAddresses(accounts);
+  await removeOrphanedDAppSessions(accounts);
 
   return { vault, accounts, settings };
 };
@@ -281,6 +302,7 @@ export async function unlockFromSession() {
     const settings = await vault.fetchSettings();
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);
+    await removeOrphanedDAppSessions(accounts);
   });
 }
 
@@ -328,14 +350,16 @@ export function deriveContactsKey(accPublicKeyHash: string) {
 }
 
 export function removeAccount(id: string, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
     try {
       await logoutAuth();
     } catch (err) {
       console.error(err);
     }
+    const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await Vault.removeAccount(id, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 
@@ -428,21 +452,30 @@ export function updateSettings(settings: Partial<TempleSettings>) {
 }
 
 export function removeHdWallet(id: string, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
     try {
       await logoutAuth();
     } catch (err) {
       console.error(err);
     }
+    const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await Vault.removeHdWallet(id, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 
 export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
+    try {
+      await logoutAuth();
+    } catch (err) {
+      console.error(err);
+    }
+    const prevAccounts = await vault.fetchAccounts();
     const newAccounts = await Vault.removeAccountsByType(type, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 

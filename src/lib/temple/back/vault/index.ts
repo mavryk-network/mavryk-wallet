@@ -77,7 +77,6 @@ import * as SessionStore from './session-store';
 import {
   checkStrgKey,
   migrationLevelStrgKey,
-  mnemonicStrgKey,
   accPrivKeyStrgKey,
   accPubKeyStrgKey,
   accountsStrgKey,
@@ -293,9 +292,15 @@ export class Vault {
 
   static async revealMnemonic(walletId: string, password: string) {
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to reveal seed phrase', () =>
-      fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey)
-    );
+    return withError('Failed to reveal seed phrase', async doThrow => {
+      const walletsSpecs = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+
+      if (!(walletId in walletsSpecs)) {
+        throw doThrow();
+      }
+
+      return fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey);
+    });
   }
   static async generateSyncPayload(password: string) {
     let WasmThemis: typeof WasmThemisPackageInterface;
@@ -307,13 +312,20 @@ export class Vault {
     }
 
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to generate sync payload', async () => {
+    return withError('Failed to generate sync payload', async doThrow => {
+      const walletsSpecs = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
+      const [walletId] = Object.keys(walletsSpecs);
+
+      if (!walletId) {
+        throw doThrow();
+      }
+
       const [mnemonic, allAccounts] = await Promise.all([
-        fetchAndDecryptOne<string>(mnemonicStrgKey, passKey),
+        fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey),
         fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey)
       ]);
 
-      const hdAccounts = allAccounts.filter(acc => acc.type === TempleAccountType.HD);
+      const hdAccounts = getSameGroupAccounts(allAccounts, TempleAccountType.HD, walletId);
 
       const data = [mnemonic, hdAccounts.length];
 
@@ -390,6 +402,10 @@ export class Vault {
       await savePlain(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
       await Vault.removeAccountsKeys([acc]);
 
+      if (acc.type === TempleAccountType.HD && !(acc.walletId in newWalletsSpecs)) {
+        await removeMany([walletMnemonicStrgKey(acc.walletId)]);
+      }
+
       return { newAccounts, newWalletsSpecs };
     });
   }
@@ -416,6 +432,7 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
       await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
       await Vault.removeAccountsKeys(accountsToRemove);
+      await removeMany([walletMnemonicStrgKey(id)]);
 
       return { newAccounts, newWalletsSpecs };
     });

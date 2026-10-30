@@ -140,8 +140,9 @@ const mainConfig = (() => {
                 - HTML files are taken care of by the `html-webpack-plugin`. Copying them here leads to:
                   `ERROR in Conflict: Multiple assets emit different content to the same filename [name].html`
                 - Manifest file is copied next, along with transformation of it.
+                - macOS metadata (`.DS_Store`, `__MACOSX/`) gets flagged by the Firefox Add-ons (AMO) validator.
               */
-              ignore: ['**/*.html']
+              ignore: ['**/*.html', '**/.DS_Store', '**/__MACOSX/**']
             }
           },
           /*

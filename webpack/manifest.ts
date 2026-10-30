@@ -124,7 +124,7 @@ const HOST_PERMISSIONS: string[] = ['http://localhost:8732/'];
  * Kept off Chromium on purpose: adding a required host permission there would disable the
  * published extension until the user re-accepts the new permission, and Chromium does not need it.
  */
-const MAVRYK_API_HOST_PERMISSIONS = ['https://wallet.mavryk.network/*', 'https://*.wallet.mavryk.network/*'];
+const MAVRYK_API_HOST_PERMISSIONS = ['https://wallet.mavryk.network/*', 'https://basenet.wallet.mavryk.network/*'];
 
 /** Vendors whose extension origin is generated per install and therefore cannot be allow-listed. */
 const RANDOM_ORIGIN_VENDORS: Vendor[] = ['firefox', 'safari'];
@@ -180,9 +180,15 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
       browser_specific_settings: {
         gecko: {
           id: '{c0abd1ce-af67-42b6-a5a9-a4dfb36d46f8}',
+          /** First versions with built-in data consent; older ones would need a custom consent screen */
+          strict_min_version: '140.0',
+          /** Addresses, balances and transactions are sent to RPC nodes, the indexer and the Mavryk API */
           data_collection_permissions: {
-            required: ['none']
+            required: ['financialAndPaymentInfo']
           }
+        },
+        gecko_android: {
+          strict_min_version: '142.0'
         }
       }
     }),

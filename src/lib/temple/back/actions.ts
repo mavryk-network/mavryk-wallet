@@ -12,6 +12,7 @@ import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
+import { isBeaconPayloadWithinLimit } from 'lib/temple/beacon-payload';
 import {
   buildAuthWalletAddressesMap,
   canAccountSignAuth,
@@ -738,6 +739,10 @@ export async function processDApp(
 }
 
 export async function getBeaconMessage(origin: string, msg: string, encrypted = false) {
+  if (!isBeaconPayloadWithinLimit(msg)) {
+    throw new Error('Invalid Beacon message payload');
+  }
+
   let recipientPubKey: string | null = null;
   let payload = null;
 

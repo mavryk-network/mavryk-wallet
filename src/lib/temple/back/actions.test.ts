@@ -16,6 +16,7 @@ import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 import { TempleAccount, TempleAccountType, TempleChainKind, TempleStatus } from '../types';
 
 import {
+  getBeaconMessage,
   registerNewWallet,
   removeAccount,
   removeAccountsByType,
@@ -57,10 +58,17 @@ jest.mock(
   { virtual: true }
 );
 
-jest.mock('lib/temple/beacon', () => ({
-  ...jest.requireActual('lib/temple/beacon'),
-  removeDAppPublicKey: jest.fn()
-}));
+jest.mock('lib/temple/beacon', () => {
+  const actual = jest.requireActual('lib/temple/beacon');
+
+  return {
+    ...actual,
+    getDAppPublicKey: jest.fn(actual.getDAppPublicKey),
+    decryptMessage: jest.fn(actual.decryptMessage),
+    decodeMessage: jest.fn(actual.decodeMessage),
+    removeDAppPublicKey: jest.fn()
+  };
+});
 
 jest.mock('./vault', () => ({
   Vault: {
@@ -92,6 +100,9 @@ const mockedSignAuthChallengeWithVault = signAuthChallengeWithVault as jest.Mock
 >;
 const mockedLogoutAuth = logoutAuth as jest.MockedFunction<typeof logoutAuth>;
 const mockedRemoveDAppPublicKey = Beacon.removeDAppPublicKey as jest.MockedFunction<typeof Beacon.removeDAppPublicKey>;
+const mockedGetDAppPublicKey = Beacon.getDAppPublicKey as jest.MockedFunction<typeof Beacon.getDAppPublicKey>;
+const mockedDecryptMessage = Beacon.decryptMessage as jest.MockedFunction<typeof Beacon.decryptMessage>;
+const mockedDecodeMessage = Beacon.decodeMessage as jest.MockedFunction<typeof Beacon.decodeMessage>;
 
 const testAccount: TempleAccount = {
   id: 'account-1',
@@ -305,5 +316,55 @@ describe('actions account removal clean-up', () => {
 
     expect(Object.keys(await getAllDApps())).toEqual([keptOrigin]);
     expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(removedOrigin);
+  });
+});
+
+describe('getBeaconMessage payload bound', () => {
+  const origin = 'https://dapp.example';
+  const maxPayloadLength = 64 * 1024;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedGetDAppPublicKey.mockResolvedValue('dapp-public-key');
+    mockedDecryptMessage.mockResolvedValue('decrypted');
+    mockedDecodeMessage.mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    const actualBeacon = jest.requireActual('lib/temple/beacon');
+    mockedGetDAppPublicKey.mockImplementation(actualBeacon.getDAppPublicKey);
+    mockedDecryptMessage.mockImplementation(actualBeacon.decryptMessage);
+    mockedDecodeMessage.mockImplementation(actualBeacon.decodeMessage);
+  });
+
+  it('rejects an oversized encrypted payload before key lookup, decryption or decoding', async () => {
+    await expect(getBeaconMessage(origin, 'a'.repeat(maxPayloadLength + 1), true)).rejects.toThrow();
+
+    expect(mockedGetDAppPublicKey).not.toHaveBeenCalled();
+    expect(mockedDecryptMessage).not.toHaveBeenCalled();
+    expect(mockedDecodeMessage).not.toHaveBeenCalled();
+    expect(mockedRemoveDAppPublicKey).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized plain payload before decoding', async () => {
+    await expect(getBeaconMessage(origin, 'a'.repeat(maxPayloadLength + 1))).rejects.toThrow();
+
+    expect(mockedDecodeMessage).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-string payload before decoding', async () => {
+    await expect(getBeaconMessage(origin, { length: 1 } as unknown as string, true)).rejects.toThrow();
+
+    expect(mockedDecryptMessage).not.toHaveBeenCalled();
+    expect(mockedDecodeMessage).not.toHaveBeenCalled();
+  });
+
+  it('decrypts and decodes a payload at the size limit', async () => {
+    const payload = 'a'.repeat(maxPayloadLength);
+
+    await getBeaconMessage(origin, payload, true);
+
+    expect(mockedDecryptMessage).toHaveBeenCalledWith(payload, 'dapp-public-key');
+    expect(mockedDecodeMessage).toHaveBeenCalledWith('decrypted');
   });
 });

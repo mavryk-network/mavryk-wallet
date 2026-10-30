@@ -254,7 +254,8 @@ const processRequest = async (
       };
 
     case TempleMessageType.Acknowledge: {
-      if (req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
+      const dAppEnabled = await Actions.isDAppEnabled();
+      if (dAppEnabled && req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
         const {
           req: res,
           recipientPubKey,
@@ -263,7 +264,7 @@ const processRequest = async (
         if (payload) {
           return;
         }
-        if (!req) {
+        if (!res) {
           return;
         }
 

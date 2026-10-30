@@ -258,12 +258,27 @@ export async function setLastChallengeToStorage(params: {
   await Promise.all(ops);
 }
 
+// Brackets (and '%', the escape character) are percent-encoded in key segments so every key parses back
+// with AUTH_TOKEN_STORAGE_KEY_PATTERN (and so can be revoked and cleared on lock/logout) and no scope can alias
+// another scope's slot. Custom network ids are raw RPC URLs, which may legitimately contain brackets (IPv6).
+function encodeAuthTokenStorageKeySegment(segment: string) {
+  return segment.replace(/[%[\]]/g, encodeURIComponent);
+}
+
+function decodeAuthTokenStorageKeySegment(segment: string) {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 function buildAccessTokenStorageKey(walletAddress: string, networkId: string) {
-  return `[${walletAddress}][${networkId}]`;
+  return `[${encodeAuthTokenStorageKeySegment(walletAddress)}][${encodeAuthTokenStorageKeySegment(networkId)}]`;
 }
 
 function buildRefreshTokenStorageKey(walletAddress: string, networkId: string) {
-  return `[${walletAddress}][${networkId}][refresh]`;
+  return `${buildAccessTokenStorageKey(walletAddress, networkId)}[refresh]`;
 }
 
 type ParsedAuthTokenStorageKey = {
@@ -283,8 +298,8 @@ function parseAuthTokenStorageKey(storageKey: string): ParsedAuthTokenStorageKey
   if (!match) return null;
 
   return {
-    walletAddress: match[1],
-    networkId: match[2],
+    walletAddress: decodeAuthTokenStorageKeySegment(match[1]),
+    networkId: decodeAuthTokenStorageKeySegment(match[2]),
     isRefresh: Boolean(match[3])
   };
 }

@@ -22,6 +22,7 @@ import {
   CurrentContactsRecordDecryptionError,
   fetchContactsRecord,
   getAuthTokensFromStorage,
+  MAVRYK_API_URLS,
   saveContactsRecord,
   type ResolvedMavrykAuthStorageContext
 } from 'mavryk/api';
@@ -376,7 +377,12 @@ function resolveRequestNetworkId(networkId: unknown, dApp: TempleDAppSession) {
   const normalizedNetworkId = normalizeNetworkId(networkId.trim());
   const dAppNetworkId = getDAppNetworkId(dApp);
 
-  if (dAppNetworkId && normalizedNetworkId !== dAppNetworkId) {
+  // The scope must be a real API network and must be the one the session was approved for.
+  // Custom RPC sessions (dAppNetworkId null) and sandbox have no API scope of their own.
+  if (
+    !Object.prototype.hasOwnProperty.call(MAVRYK_API_URLS, normalizedNetworkId) ||
+    normalizedNetworkId !== dAppNetworkId
+  ) {
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 

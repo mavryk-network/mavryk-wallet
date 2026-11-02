@@ -1,3 +1,6 @@
+import bs58check from 'bs58check';
+import { Buffer } from 'buffer';
+import { crypto_generichash, crypto_sign_seed_keypair, from_string } from 'libsodium-wrappers';
 import browser, { Runtime } from 'webextension-polyfill';
 
 import { IntercomPortKind } from 'lib/intercom';
@@ -488,6 +491,30 @@ describe('processBeacon install identifiers', () => {
     expect(errorA.senderId).not.toBe(errorB.senderId);
 
     consoleLogSpy.mockRestore();
+  });
+
+  it('answers a dApp still holding its pre-update wallet key with a per-origin Disconnect, never the old senderId', async () => {
+    // The Beacon dApp SDK only reads encryptedPayload from the wallet, so this plaintext stub cannot
+    // trigger the dApp's own peer cleanup whatever senderId it carries; echoing the old one would only leak it
+    const origin = 'https://paired-before-update.example';
+    const perOriginSenderId = await Beacon.getSenderId(origin);
+    // The install-wide wallet key and senderId every dApp was given before per-origin derivation,
+    // derived from the same stored seed the wallet reads (Beacon's own storage instance)
+    const beaconStorage = jest.requireActual('webextension-polyfill').storage.local;
+    const { beacon_keypair_seed: seed } = await beaconStorage.get(['beacon_keypair_seed']);
+    const preUpdateWalletKeyPair = crypto_sign_seed_keypair(crypto_generichash(32, from_string(seed)));
+    const preUpdateSenderId = bs58check.encode(Buffer.from(crypto_generichash(5, preUpdateWalletKeyPair.publicKey)));
+    await Beacon.saveDAppPublicKey(origin, pagePublicKey);
+
+    // A message sealed to the pre-update wallet key does not decrypt under the per-origin key
+    const stub = await plainReply(origin, 'ab'.repeat(64), true);
+
+    expect(stub.type).toBe(Beacon.MessageType.Disconnect);
+    expect(stub.senderId).toBe(perOriginSenderId);
+    expect(stub.senderId).not.toBe(preUpdateSenderId);
+    expect(mockedRemoveDAppPublicKey).toHaveBeenCalledWith(origin);
+
+    await beaconStorage.remove(Beacon.toPubKeyStorageKey(origin));
   });
 });
 

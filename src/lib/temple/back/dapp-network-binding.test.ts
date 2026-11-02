@@ -4,13 +4,15 @@ import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 import browser from 'webextension-polyfill';
 
-import { DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from 'lib/temple/confirmation-timeouts';
+import { DAPP_CONFIRMATION_AUTODECLINE_MS, DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from 'lib/temple/confirmation-timeouts';
 import { loadChainId, loadChainIdStrict } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
+import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from 'lib/temple/request-timeouts';
 import { TempleMessageType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
 import {
+  DAPP_OPERATION_TIMEOUT_ERROR,
   getAllDApps,
   getCurrentPermission,
   requestBroadcast,
@@ -423,6 +425,40 @@ describe('dApp custom RPC chain binding', () => {
       await expect(stalled).rejects.toThrow(MavrykWalletDAppErrorType.InvalidParams);
       await expect(queued).resolves.toBe('served');
       expect(windowsCreate).not.toHaveBeenCalled();
+    });
+
+    it('fails an approved operation whose dApp RPC never answers, so other origins still reach their prompt', async () => {
+      jest.useFakeTimers();
+      mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
+      const sendOperations = jest.fn(neverAnswers);
+      mockedWithUnlocked.mockImplementation(fn => (fn as any)({ vault: { sendOperations } }));
+      const stalled = enqueueDAppForOrigin(
+        ORIGIN,
+        deadline => requestOperation(ORIGIN, OPERATION_REQUEST, deadline),
+        isDAppEnabled
+      );
+      stalled.catch(() => undefined);
+      await flushMicrotasks();
+
+      const { id, token, handler } = await waitForConfirmWindow();
+      const port = {};
+      await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, port, {});
+      const decision = handler({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true }, port, {});
+      await flushMicrotasks();
+      expect(sendOperations).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(DAPP_CONFIRMATION_AUTODECLINE_MS / 2);
+      const otherOriginRequest = jest.fn().mockResolvedValue('served');
+      const queued = enqueueDAppForOrigin(OTHER_ORIGIN, otherOriginRequest, isDAppEnabled);
+      await flushMicrotasks();
+      expect(otherOriginRequest).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS - DAPP_CONFIRMATION_AUTODECLINE_MS / 2);
+      await flushMicrotasks();
+
+      await expect(stalled).rejects.toThrow(DAPP_OPERATION_TIMEOUT_ERROR);
+      await expect(decision).resolves.toEqual({ type: TempleMessageType.DAppOpsConfirmationResponse });
+      await expect(queued).resolves.toBe('served');
     });
 
     it("bounds the wallet network's chain id lookup so the operation prompt still opens in time", async () => {

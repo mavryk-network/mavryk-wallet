@@ -22,6 +22,7 @@ import * as Beacon from 'lib/temple/beacon';
 import { loadChainId, isAddressValid } from 'lib/temple/helpers';
 import { normalizeNetworkId } from 'lib/temple/network-storage';
 import { NETWORKS } from 'lib/temple/networks';
+import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from 'lib/temple/request-timeouts';
 import {
   TempleMessageType,
   TempleRequest,
@@ -49,6 +50,9 @@ import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
 import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
 import { withUnlocked } from './store';
+
+/** Not NotGranted: an operation that timed out may still be broadcast, since its RPC call was left in flight */
+export const DAPP_OPERATION_TIMEOUT_ERROR = 'OPERATION_TIMED_OUT';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
@@ -218,8 +222,9 @@ export async function requestOperation(
         const beforeSign = isDAppRpc
           ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain, isDeclineDeferred)
           : undefined;
+        const sent = handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign);
 
-        return handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign);
+        return isDAppRpc ? withDecisionCeiling(sent, reject) : sent;
       }
     });
   });
@@ -243,6 +248,20 @@ const withVerifyingNotice =
       throw new Error(MavrykWalletDAppErrorType.NotGranted);
     }
   };
+
+/**
+ * A dApp-chosen RPC can hold a call open with no end (webmavryk's timeout stops once response headers arrive), and the
+ * decision gate defers every auto-decline until the decision settles. Once the decision outlasts the time the page
+ * budgets for it, the request fails so the shared dApp queue moves on, and the prompt is closed.
+ */
+const withDecisionCeiling = <T>(handling: Promise<T>, reject: (err: Error) => void) =>
+  new Promise<T | { type: TempleMessageType.DAppOpsConfirmationResponse }>((resolve, rejectHandling) => {
+    const timer = setTimeout(() => {
+      reject(new Error(DAPP_OPERATION_TIMEOUT_ERROR));
+      resolve({ type: TempleMessageType.DAppOpsConfirmationResponse });
+    }, DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS);
+    handling.then(resolve, rejectHandling).finally(() => clearTimeout(timer));
+  });
 
 const handleIntercomRequest = async (
   confirmReq: TempleRequest,

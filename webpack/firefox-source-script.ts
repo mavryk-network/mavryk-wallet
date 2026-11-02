@@ -4,7 +4,8 @@
   restricted to the values webpack compiles into the bundle (see `publicEnvFilesData`).
 
   Release flow: commit, then `yarn build:firefox` and `yarn source:firefox` with the same .env, and
-  upload both files. Build from a checkout with a real `node_modules` — a symlinked one changes
+  upload both files. The build records its provenance (build-provenance.ts); this script refuses to pack
+  unless that record matches HEAD, the current .env and the package on disk. Build from a checkout with a real `node_modules` — a symlinked one changes
   webpack's module ids and the reviewer's rebuild will not match.
 */
 
@@ -13,7 +14,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { zip } from 'zip-a-folder';
 
-import { dotenvFilesPaths, envFilesData, publicEnvFilesData } from './dotenv';
+import {
+  BUILD_PROVENANCE_PATH,
+  BuildProvenance,
+  SOURCE_TOP_LEVEL_ENTRIES,
+  findProvenanceProblems,
+  hashPublicEnv,
+  listDirtySourcePaths,
+  sha256File
+} from './build-provenance';
+import { envFilesData, publicEnvFilesData } from './dotenv';
 import { PATHS } from './paths';
 
 const README_SOURCE_PATH = path.join(PATHS.CWD, 'docs/firefox-amo-source-readme.md');
@@ -22,35 +32,7 @@ const STAGING_PATH = path.join(PATHS.DEST, 'firefox-source');
 const TAR_PATH = path.join(PATHS.DEST, 'firefox-source.tar');
 const ARCHIVE_PATH = path.join(PATHS.DEST, 'firefox-source.zip');
 
-/** Top-level entries reviewers may receive. Anything else must be export-ignored (.gitattributes) or added here. */
-const ALLOWED_TOP_LEVEL_ENTRIES = new Set([
-  '.babelrc',
-  '.browserslistrc',
-  '.editorconfig',
-  '.env.dist',
-  '.eslintrc',
-  '.gitattributes',
-  '.gitignore',
-  '.prettierignore',
-  '.prettierrc',
-  'LICENSE',
-  'README.md',
-  'audit-deps.js',
-  'basenet_kyc_onboard.spec.ts',
-  'bin',
-  'e2e',
-  'jest.config.ts',
-  'jest.setup.js',
-  'package.json',
-  'public',
-  'src',
-  'tailwind.config.js',
-  'tsconfig.json',
-  'webpack',
-  'webpack.config.ts',
-  'xcode',
-  'yarn.lock'
-]);
+const ALLOWED_TOP_LEVEL_ENTRIES = new Set(SOURCE_TOP_LEVEL_ENTRIES);
 
 /** Characters dotenv would treat specially if written unquoted — such values would not round-trip. */
 const UNSAFE_ENV_VALUE = /[\n\r#"'`]|^\s|\s$/;
@@ -80,6 +62,11 @@ if (run('git', ['status', '--porcelain', '--untracked-files=no']).trim()) {
   fail('Tracked files have uncommitted changes. The archive is built from HEAD — commit first.');
 }
 
+const dirtySourcePaths = listDirtySourcePaths();
+if (dirtySourcePaths.length) {
+  fail(`Untracked source files would not be in the archive: ${dirtySourcePaths.join(', ')}. Commit or remove them.`);
+}
+
 // It is written into manifest.json but is not part of the archive's .env, so the reviewer build would differ.
 if (envFilesData._MANIFEST_KEY_) {
   fail('_MANIFEST_KEY_ is set in your .env files. Unset it and rebuild before packaging the Firefox source.');
@@ -89,23 +76,47 @@ if (!fs.existsSync(PATHS.OUTPUT_PACKED)) {
   fail(`${PATHS.OUTPUT_PACKED} not found. Run \`yarn build:firefox\` with the same .env first.`);
 }
 
-const xpiMtimeMs = fs.statSync(PATHS.OUTPUT_PACKED).mtimeMs;
-const headCommitTimeMs = Number(run('git', ['log', '-1', '--format=%ct', 'HEAD']).trim()) * 1000;
-if (xpiMtimeMs < headCommitTimeMs) {
-  fail(`${PATHS.OUTPUT_PACKED} is older than the HEAD commit. Run \`yarn build:firefox\` again.`);
+if (!fs.existsSync(BUILD_PROVENANCE_PATH)) {
+  fail(`${BUILD_PROVENANCE_PATH} not found. Run \`yarn build:firefox\` again.`);
 }
 
-const changedEnvFiles = dotenvFilesPaths.filter(
-  filePath => fs.existsSync(filePath) && fs.statSync(filePath).mtimeMs > xpiMtimeMs
-);
-if (changedEnvFiles.length) {
-  const names = changedEnvFiles.map(filePath => path.basename(filePath)).join(', ');
-  fail(`${names} changed after the build. Run \`yarn build:firefox\` again.`);
+const readProvenance = (): BuildProvenance => {
+  try {
+    const provenance = JSON.parse(fs.readFileSync(BUILD_PROVENANCE_PATH, 'utf-8'));
+    if (
+      !Array.isArray(provenance?.dirtySourcePaths) ||
+      !provenance.shellBuildInputs ||
+      typeof provenance.shellBuildInputs !== 'object' ||
+      typeof provenance.manifestKeySet !== 'boolean'
+    ) {
+      throw new Error('unexpected format');
+    }
+
+    return provenance;
+  } catch (error) {
+    return fail(`Could not read ${BUILD_PROVENANCE_PATH}: ${error instanceof Error ? error.message : error}`);
+  }
+};
+
+const provenanceProblems = findProvenanceProblems(readProvenance(), {
+  commit: run('git', ['rev-parse', 'HEAD']).trim(),
+  nodeEnv: 'production',
+  targetBrowser: 'firefox',
+  publicEnvSha256: hashPublicEnv(publicEnvFilesData),
+  packedSha256: sha256File(PATHS.OUTPUT_PACKED)
+});
+if (provenanceProblems.length) {
+  fail(`${provenanceProblems.join('\n')}\nRun \`yarn build:firefox\` again from a clean checkout of HEAD.`);
+}
+
+// The key is compiled into the bundle and would be handed to AMO reviewers in plain text.
+if (publicEnvFilesData.TESTNET_KYC_SIGNER_PRIVATE_KEY) {
+  fail('TESTNET_KYC_SIGNER_PRIVATE_KEY is set. Unset it and rebuild — store releases must not carry it.');
 }
 
 const envEntries = Object.entries(publicEnvFilesData)
-  // dotenv.ts defaults this one to '' when unset, so leaving it out reproduces the same build.
-  .filter(([name, value]) => !(name === 'TESTNET_KYC_SIGNER_PRIVATE_KEY' && !value))
+  // dotenv.ts defaults this one to '' when unset (checked above), so leaving it out reproduces the same build.
+  .filter(([name]) => name !== 'TESTNET_KYC_SIGNER_PRIVATE_KEY')
   .sort(([a], [b]) => a.localeCompare(b));
 
 const unsafeEnvNames = envEntries.filter(([, value]) => UNSAFE_ENV_VALUE.test(value)).map(([name]) => name);

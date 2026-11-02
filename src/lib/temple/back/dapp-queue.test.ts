@@ -3,6 +3,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 
 import * as Beacon from 'lib/temple/beacon';
 
+import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from '../request-timeouts';
 import { TempleSharedStorageKey } from '../types';
 
 import { processDApp } from './actions';
@@ -191,9 +192,35 @@ describe('processDApp request queue gating', () => {
     expect(mockedRequestPermission).toHaveBeenCalledTimes(3);
   });
 
+  it('refuses a queued request whose page has already given up on it, before it opens a prompt', async () => {
+    jest.useFakeTimers();
+    const flushMicrotasks = async () => {
+      for (let i = 0; i < 100; i++) await Promise.resolve();
+    };
+    const first = createDeferred<any>();
+    mockedRequestPermission.mockReturnValueOnce(first.promise).mockResolvedValue(permissionRes);
+
+    const firstReq = processDApp(otherOrigin, permissionReq);
+    const expiredReq = processDApp(dAppOrigin, operationReq);
+    await flushMicrotasks();
+
+    jest.advanceTimersByTime(DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS + 1);
+    const freshReq = processDApp(dAppOrigin, permissionReq);
+    await flushMicrotasks();
+    first.resolve(permissionRes);
+
+    await expect(firstReq).resolves.toBe(permissionRes);
+    await expect(expiredReq).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+    await expect(freshReq).resolves.toBe(permissionRes);
+    expect(mockedRequestOperation).not.toHaveBeenCalled();
+    expect(mockedRequestPermission).toHaveBeenCalledTimes(2);
+  });
+
   describe('relay port lifecycle', () => {
     const connectedPorts = new Set<Runtime.Port>();
+    const disconnectListeners = new Map<Runtime.Port, Array<() => void>>();
     let isConnectedSpy: jest.SpyInstance;
+    let onDisconnectSpy: jest.SpyInstance;
 
     const connectRelayPort = () => {
       const port = {} as Runtime.Port;
@@ -201,13 +228,74 @@ describe('processDApp request queue gating', () => {
       return port;
     };
 
+    const disconnectRelayPort = (port: Runtime.Port) => {
+      connectedPorts.delete(port);
+      disconnectListeners.get(port)?.forEach(listener => listener());
+    };
+
     beforeEach(() => {
       connectedPorts.clear();
+      disconnectListeners.clear();
       isConnectedSpy = jest.spyOn(intercom, 'isConnected').mockImplementation(port => connectedPorts.has(port));
+      onDisconnectSpy = jest.spyOn(intercom, 'onDisconnect').mockImplementation((port, listener) => {
+        disconnectListeners.set(port, [...(disconnectListeners.get(port) ?? []), listener]);
+        return () =>
+          disconnectListeners.set(
+            port,
+            (disconnectListeners.get(port) ?? []).filter(l => l !== listener)
+          );
+      });
     });
 
     afterEach(() => {
       isConnectedSpy.mockRestore();
+      onDisconnectSpy.mockRestore();
+    });
+
+    it("frees a closed tab's queued slots right away so the reloaded page can queue again", async () => {
+      const first = createDeferred<any>();
+      mockedRequestPermission.mockReturnValueOnce(first.promise).mockResolvedValue(permissionRes);
+      const blocker = processDApp(otherOrigin, permissionReq, connectRelayPort());
+      const closedTabPort = connectRelayPort();
+      const closedTabReqs = [0, 1, 2].map(() => processDApp(dAppOrigin, permissionReq, closedTabPort));
+      await flushPromises();
+
+      disconnectRelayPort(closedTabPort);
+      const reloadedReq = processDApp(dAppOrigin, permissionReq, connectRelayPort());
+      first.resolve(permissionRes);
+
+      await expect(blocker).resolves.toBe(permissionRes);
+      await expect(reloadedReq).resolves.toBe(permissionRes);
+      for (const req of closedTabReqs) {
+        await expect(req).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+      }
+      expect(mockedRequestPermission).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps counting a request whose prompt is already open after its tab closes', async () => {
+      const open = createDeferred<any>();
+      mockedRequestPermission.mockReturnValueOnce(open.promise).mockResolvedValue(permissionRes);
+      const port = connectRelayPort();
+      const openReq = processDApp(dAppOrigin, permissionReq, port);
+      const queuedReqs = [0, 1].map(() => processDApp(dAppOrigin, permissionReq, port));
+      await flushPromises();
+      expect(mockedRequestPermission).toHaveBeenCalledTimes(1);
+
+      disconnectRelayPort(port);
+      const reloadedPort = connectRelayPort();
+      const reloadedReqs = [0, 1].map(() => processDApp(dAppOrigin, permissionReq, reloadedPort));
+
+      await expect(processDApp(dAppOrigin, permissionReq, reloadedPort)).rejects.toThrow(
+        DAPP_TOO_MANY_PENDING_REQUESTS_ERROR
+      );
+
+      open.resolve(permissionRes);
+      await expect(openReq).resolves.toBe(permissionRes);
+      await expect(Promise.allSettled(queuedReqs)).resolves.toEqual([
+        expect.objectContaining({ status: 'rejected' }),
+        expect.objectContaining({ status: 'rejected' })
+      ]);
+      await expect(Promise.all(reloadedReqs)).resolves.toEqual([permissionRes, permissionRes]);
     });
 
     it('drops queued requests whose relay port disconnected before they are dequeued', async () => {

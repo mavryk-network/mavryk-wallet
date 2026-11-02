@@ -4,6 +4,7 @@ import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 import browser from 'webextension-polyfill';
 
+import { DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from 'lib/temple/confirmation-timeouts';
 import { loadChainId, loadChainIdStrict } from 'lib/temple/helpers';
 import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleMessageType } from 'lib/temple/types';
@@ -17,7 +18,7 @@ import {
   requestPermission,
   requestSign
 } from './dapp';
-import { assertBranchNotOnBuiltInChain, DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from './dapp-network';
+import { assertBranchNotOnBuiltInChain } from './dapp-network';
 import { enqueueDAppForOrigin } from './dapp-queue';
 import { intercom } from './defaults';
 import { dryRunOpParams } from './dryrun';

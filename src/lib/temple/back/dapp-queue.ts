@@ -1,7 +1,7 @@
 import { MavrykWalletDAppErrorType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { Runtime } from 'webextension-polyfill';
 
-import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from 'lib/temple/request-timeouts';
+import { DAPP_QUEUE_WAIT_BUDGET_MS } from 'lib/temple/request-timeouts';
 import { createQueue } from 'lib/utils';
 
 import { intercom } from './defaults';
@@ -24,9 +24,9 @@ export const enqueueDAppForOrigin = async <T>(
     throw new Error(DAPP_TOO_MANY_PENDING_REQUESTS_ERROR);
   }
 
-  // The page's request timeout (DAPP_PAGE_REQUEST_TIMEOUT_MS) budgets one confirmation request for the wait before the
-  // prompt opens, so the prompt's auto-decline still lands before the page reports the request as failed.
-  const deadline = Date.now() + DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS;
+  // The page's request timeout (DAPP_PAGE_REQUEST_TIMEOUT_MS) budgets this wait apart from network resolution, the
+  // prompt's auto-decline and the decision, so a decision taken before the auto-decline ends before the page gives up.
+  const deadline = Date.now() + DAPP_QUEUE_WAIT_BUDGET_MS;
   let isCounted = true;
   let hasStarted = false;
   const stopCounting = () => {

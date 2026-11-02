@@ -4,6 +4,7 @@ import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { b58cencode, prefix, Prefix } from '@mavrykdynamics/webmavryk-utils';
 import browser from 'webextension-polyfill';
 
+import { DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from 'lib/temple/confirmation-timeouts';
 import { loadChainId, loadChainIdStrict } from 'lib/temple/helpers';
 import {
   migrateLegacyAtlasnetStorage,
@@ -23,8 +24,6 @@ const BUILT_IN_CHAIN_NETWORKS = NETWORKS.filter(n => Array.from(NETWORK_IDS.valu
 const BRANCH_RECHECK_DELAY_MS = 14_000;
 /** Allowed gap between the local clock and block timestamps, including blocks a validator sends slightly early. */
 const CLOCK_TOLERANCE_MS = 2_000;
-/** A dApp RPC is asked for its chain id inside the shared dApp queue, so one that never answers must not stall it */
-export const DAPP_RPC_CHAIN_ID_TIMEOUT_MS = 10_000;
 
 /** `isDAppRpc` marks an RPC chosen by the dApp itself, which only ever serves a chain no built-in network serves. */
 export type ResolvedNetwork = { rpc: string; chainId?: string; isDAppRpc?: boolean };

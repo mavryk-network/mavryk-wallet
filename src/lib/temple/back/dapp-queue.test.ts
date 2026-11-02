@@ -3,7 +3,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 
 import * as Beacon from 'lib/temple/beacon';
 
-import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from '../request-timeouts';
+import { DAPP_QUEUE_WAIT_BUDGET_MS } from '../request-timeouts';
 import { TempleSharedStorageKey } from '../types';
 
 import { processDApp } from './actions';
@@ -204,7 +204,7 @@ describe('processDApp request queue gating', () => {
     const expiredReq = processDApp(dAppOrigin, operationReq);
     await flushMicrotasks();
 
-    jest.advanceTimersByTime(DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS + 1);
+    jest.advanceTimersByTime(DAPP_QUEUE_WAIT_BUDGET_MS + 1);
     const freshReq = processDApp(dAppOrigin, permissionReq);
     await flushMicrotasks();
     first.resolve(permissionRes);

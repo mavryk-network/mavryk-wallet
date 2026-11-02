@@ -2,12 +2,15 @@ import { DEFAULT_INTERCOM_REQUEST_TIMEOUT_MS } from 'lib/intercom';
 
 import {
   DAPP_CONFIRMATION_AUTODECLINE_MS,
+  DAPP_RPC_CHAIN_ID_TIMEOUT_MS,
   IN_WALLET_CONFIRMATION_AUTODECLINE_MS,
   LEDGER_CONFIRMATION_REQUEST_TIMEOUT_MS
 } from './confirmation-timeouts';
 import {
   DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS,
+  DAPP_NETWORK_RESOLUTION_BUDGET_MS,
   DAPP_PAGE_REQUEST_TIMEOUT_MS,
+  DAPP_QUEUE_WAIT_BUDGET_MS,
   getTempleRequestTimeoutMs,
   IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS,
   IN_WALLET_DECISION_REQUEST_TIMEOUT_MS,
@@ -34,6 +37,18 @@ describe('getTempleRequestTimeoutMs', () => {
     expect(getTempleRequestTimeoutMs(TempleMessageType.PageRequest)).toBe(DAPP_PAGE_REQUEST_TIMEOUT_MS);
     expect(DAPP_PAGE_REQUEST_TIMEOUT_MS).toBeGreaterThan(
       DAPP_CONFIRMATION_AUTODECLINE_MS + getTempleRequestTimeoutMs(TempleMessageType.DAppOpsConfirmationRequest)
+    );
+  });
+
+  it('budgets the dApp page request for the queue wait and network resolution before the prompt opens', () => {
+    // resolveNetwork and assertSessionChainId each ask the dApp RPC for its chain id before the prompt opens
+    expect(DAPP_NETWORK_RESOLUTION_BUDGET_MS).toBeGreaterThanOrEqual(2 * DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+    expect(DAPP_QUEUE_WAIT_BUDGET_MS).toBeGreaterThan(0);
+    expect(DAPP_PAGE_REQUEST_TIMEOUT_MS).toBeGreaterThan(
+      DAPP_QUEUE_WAIT_BUDGET_MS +
+        DAPP_NETWORK_RESOLUTION_BUDGET_MS +
+        DAPP_CONFIRMATION_AUTODECLINE_MS +
+        getTempleRequestTimeoutMs(TempleMessageType.DAppOpsConfirmationRequest)
     );
   });
 

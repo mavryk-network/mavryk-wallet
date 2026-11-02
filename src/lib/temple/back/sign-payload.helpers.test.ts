@@ -14,16 +14,9 @@ describe('prepareDAppSignPayload', () => {
   const trustedAuthChallengeOrigins = [
     'https://basenet.nexus.mavryk.org',
     'https://nexus.mavryk.org',
-    'http://localhost:3000',
-    'https://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://[::1]:3000',
     'https://app.equiteez.com',
     'https://app.equiteez.com/path',
-    'https://equiteez-app.pages.dev',
-    'https://preview.equiteez-app.pages.dev',
-    'https://branch.preview.equiteez-app.pages.dev',
-    'https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev/'
+    'https://equiteez-app.pages.dev'
   ];
 
   it.each(['01abcdef', '02abcdef', '03abcdef'])('rejects forbidden payload prefix %s', payload => {
@@ -78,7 +71,15 @@ describe('prepareDAppSignPayload', () => {
     'https://malicious-mavryk-nexus.pages.dev',
     'https://mavryk-nexus.pages.dev.evil.com',
     'https://localhost.evil.com',
-    'http://127.0.0.2:3000'
+    'http://127.0.0.2:3000',
+    // Loopback and preview deployments are trusted in development builds only
+    'http://localhost:3000',
+    'https://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://[::1]:3000',
+    'https://preview.equiteez-app.pages.dev',
+    'https://branch.preview.equiteez-app.pages.dev',
+    'https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev/'
   ])('rejects wallet auth challenge payloads from untrusted near-match origin %s', origin => {
     expect(() => prepareDAppSignPayload(buildMichelineStringPayloadHex(backendAuthChallenge), origin)).toThrow(
       'Auth challenge payloads cannot be signed by dApps'

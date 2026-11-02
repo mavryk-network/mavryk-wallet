@@ -1,10 +1,11 @@
 import { MavrykWalletDAppErrorType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import browser from 'webextension-polyfill';
 
-import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
+import { ACCOUNT_PKH_STORAGE_KEY, UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { WALLET_AUTOLOCK_TIME } from 'lib/fixed-times';
 import {
   getAuthTokensFromStorage,
+  getSelectedNetworkIdFromStorage,
   isJwtExpiringSoon,
   logoutAuth,
   refreshAuthTokens,
@@ -59,6 +60,9 @@ jest.mock('./vault', () => ({
 const mockedEnv: { BACKGROUND_IS_WORKER: boolean } = jest.requireMock('lib/env');
 const mockedVault = Vault as jest.Mocked<typeof Vault>;
 const mockedGetAuthTokensFromStorage = getAuthTokensFromStorage as jest.MockedFunction<typeof getAuthTokensFromStorage>;
+const mockedGetSelectedNetworkIdFromStorage = getSelectedNetworkIdFromStorage as jest.MockedFunction<
+  typeof getSelectedNetworkIdFromStorage
+>;
 const mockedIsJwtExpiringSoon = isJwtExpiringSoon as jest.MockedFunction<typeof isJwtExpiringSoon>;
 const mockedRefreshAuthTokens = refreshAuthTokens as jest.MockedFunction<typeof refreshAuthTokens>;
 const mockedRequestAuthChallenge = requestAuthChallenge as jest.MockedFunction<typeof requestAuthChallenge>;
@@ -274,6 +278,65 @@ describe('actions lock serialization', () => {
     expect(mockedLogoutAuth.mock.invocationCallOrder[1]).toBeGreaterThan(
       mockedVerifyAuthSignature.mock.invocationCallOrder[0]
     );
+  });
+
+  it('clears the auth tokens a password unlock saved when a lock lands during its auth challenge', async () => {
+    const challengeDeferred = createDeferred<any>();
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+
+    await browser.storage.local.set({ [ACCOUNT_PKH_STORAGE_KEY]: testAccount.publicKeyHash });
+    mockedVault.setup.mockResolvedValue({ fetchAccounts, fetchSettings } as any);
+    mockedGetAuthTokensFromStorage.mockResolvedValue({} as any);
+    mockedRefreshAuthTokens.mockRejectedValue(new Error('No refresh token'));
+    mockedRequestAuthChallenge.mockReturnValue(challengeDeferred.promise);
+    mockedVerifyAuthSignature.mockResolvedValue(undefined as any);
+    mockedLogoutAuth.mockResolvedValue(undefined as any);
+
+    const unlockPromise = unlock('password');
+    await flushPromises();
+    expect(mockedRequestAuthChallenge).toHaveBeenCalledTimes(1);
+    expect(store.getState().status).toBe(TempleStatus.Ready);
+
+    await lock();
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+
+    // The auth tokens saved by verifyAuthSignature land after the lock already logged out
+    challengeDeferred.resolve({ nonce: 'nonce', challenge: 'challenge' });
+    await unlockPromise;
+
+    expect(store.getState().status).toBe(TempleStatus.Locked);
+    expect(store.getState().vault).toBeNull();
+    expect(mockedVerifyAuthSignature).toHaveBeenCalledTimes(1);
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(2);
+    expect(mockedLogoutAuth.mock.invocationCallOrder[1]).toBeGreaterThan(
+      mockedVerifyAuthSignature.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('skips the auth challenge of a password unlock once a lock has landed after it unlocked', async () => {
+    const networkIdDeferred = createDeferred<any>();
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+
+    await browser.storage.local.set({ [ACCOUNT_PKH_STORAGE_KEY]: testAccount.publicKeyHash });
+    mockedVault.setup.mockResolvedValue({ fetchAccounts, fetchSettings } as any);
+    mockedGetSelectedNetworkIdFromStorage.mockReturnValueOnce(networkIdDeferred.promise);
+    mockedGetAuthTokensFromStorage.mockResolvedValue({} as any);
+    mockedRefreshAuthTokens.mockRejectedValue(new Error('No refresh token'));
+    mockedLogoutAuth.mockResolvedValue(undefined as any);
+
+    const unlockPromise = unlock('password');
+    await flushPromises();
+    expect(store.getState().status).toBe(TempleStatus.Ready);
+
+    await lock();
+    networkIdDeferred.resolve(undefined);
+    await unlockPromise;
+
+    expect(store.getState().status).toBe(TempleStatus.Locked);
+    expect(mockedRefreshAuthTokens).not.toHaveBeenCalled();
+    expect(mockedRequestAuthChallenge).not.toHaveBeenCalled();
   });
 
   it('forgets the session pass hash that an aborted password unlock saved after the lock', async () => {

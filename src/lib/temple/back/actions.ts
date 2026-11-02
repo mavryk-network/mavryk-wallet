@@ -239,7 +239,7 @@ export function registerNewWallet(password: string, mnemonic?: string) {
     enqueueUnlock(async () => {
       const accountPkh = await Vault.spawn(password, mnemonic);
       // Auth runs inside the guarded setup, so a lock landing during its network calls still aborts the creation
-      const unlockedState = await unlockAfterLocks(async isInterruptedByLock => {
+      const { state: unlockedState } = await unlockAfterLocks(async isInterruptedByLock => {
         const state = await setupUnlockedVaultState(password);
         if (!isInterruptedByLock()) await performAuthForAccount(state.vault, accountPkh, state.accounts);
         return state;
@@ -267,7 +267,9 @@ async function lockWallet() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const unlockedState = await unlockAfterLocks(() => setupUnlockedVaultState(password));
+      const { state: unlockedState, isInterruptedByLock } = await unlockAfterLocks(() =>
+        setupUnlockedVaultState(password)
+      );
       const { vault, accounts } = unlockedState;
       unlocked(unlockedState);
 
@@ -275,12 +277,16 @@ export function unlock(password: string) {
         getStoredSelectedAccountPkh(),
         getSelectedNetworkIdFromStorage()
       ]);
+      if (isInterruptedByLock()) return;
 
       try {
         await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
       } catch (error) {
         console.error(error);
       }
+
+      // A lock landing during the auth calls logged out first, so the tokens the auth saved after it are cleared again
+      if (isInterruptedByLock()) await lock();
     })
   );
 }

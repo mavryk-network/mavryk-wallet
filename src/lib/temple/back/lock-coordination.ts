@@ -49,17 +49,20 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
     return () => epoch !== lockEpoch;
   };
 
-  /** Runs a password unlock's vault setup after every lock in flight, and rejects it if a lock lands meanwhile */
+  /**
+   * Runs a password unlock's vault setup after every lock in flight, and rejects it if a lock lands meanwhile.
+   * The returned check keeps reporting locks that start later, for work the unlock still does once unlocked.
+   */
   const unlockAfterLocks = async <T>(setupVault: (isInterruptedByLock: () => boolean) => Promise<T>) => {
     const isInterruptedByLock = await waitForLocks();
-    const unlockedState = await setupVault(isInterruptedByLock);
+    const state = await setupVault(isInterruptedByLock);
     if (isInterruptedByLock()) {
       // The setup may have saved the session pass hash or auth tokens after the lock cleared them, so it locks again
       await lockWallet();
       throw new Error(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
     }
 
-    return unlockedState;
+    return { state, isInterruptedByLock };
   };
 
   const isLocked = () => hasLockedSinceUnlockStarted && store.getState().status !== TempleStatus.Ready;

@@ -965,6 +965,9 @@
   "unlockPasswordErrorDelay": {
     "message": "You have entered the wrong password three times. Your wallet is being blocked for"
   },
+  "unlockInterruptedByLock": {
+    "message": "The wallet was locked while it was unlocking. Please enter your password again."
+  },
   "unlock": {
     "message": "Unlock"
   },

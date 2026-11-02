@@ -46,7 +46,7 @@ import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
-import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS } from './constants';
+import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS, JWT_EXPIRING_SOON_THRESHOLD_MS } from './constants';
 import {
   getCurrentPermission,
   requestPermission,
@@ -64,6 +64,7 @@ import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { assertExtensionUiPortInfo } from './intercom-permissions';
+import { createLockCoordinator, shouldLockOnSessionRecovery } from './lock-coordination';
 import {
   toFront,
   store,
@@ -82,11 +83,12 @@ export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,1
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
-const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
 const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
 
 const enqueueUnlock = createQueue();
+const { waitForLocks, unlockAfterLocks, ...lockActions } = createLockCoordinator(lockWallet);
+export const { lock, enforceAutolock, enforceAutolockOnPageOpen } = lockActions;
 
 const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
   const prevIds = new Set(prev.map(acc => acc.id));
@@ -201,13 +203,6 @@ const ensureAuthorizedForAccount = async (
   }
 };
 
-const shouldLockOnSessionRecovery = async () => {
-  const { accessToken } = await getAuthTokensFromStorage();
-  if (!accessToken) return true;
-
-  return isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS);
-};
-
 export async function init() {
   const vaultExist = await Vault.isExist();
   inited(vaultExist);
@@ -256,7 +251,7 @@ export function registerNewWallet(password: string, mnemonic?: string) {
   );
 }
 
-export async function lock() {
+async function lockWallet() {
   if (!store.getState().inited) initLocked = true;
   try {
     await logoutAuth();
@@ -272,7 +267,7 @@ export async function lock() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const unlockedState = await setupUnlockedVaultState(password);
+      const unlockedState = await unlockAfterLocks(() => setupUnlockedVaultState(password));
       const { vault, accounts } = unlockedState;
       unlocked(unlockedState);
 
@@ -292,6 +287,7 @@ export function unlock(password: string) {
 
 export async function unlockFromSession() {
   await enqueueUnlock(async () => {
+    const isInterruptedByLock = await waitForLocks();
     const recovered = await Vault.recoverFromSession();
     if (recovered == null) return;
 
@@ -302,6 +298,8 @@ export async function unlockFromSession() {
 
     const { vault, accounts } = recovered;
     const settings = await vault.fetchSettings();
+    await enforceAutolock();
+    if (isInterruptedByLock()) return;
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);
     await removeOrphanedDAppSessions(accounts);
@@ -735,6 +733,7 @@ export async function processDApp(
     if (!isTrustedNexusOrigin(origin)) {
       throw new Error(MavrykWalletDAppErrorType.NotGranted);
     }
+    await enforceAutolock();
 
     return withInited(() =>
       enqueueDApp(async () =>

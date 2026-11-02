@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
+import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { USER_ACTION_TIMEOUT } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
 import { useLoadPerfMark } from 'lib/load-perf';
@@ -89,15 +90,19 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
         setAttempt(1);
       } catch (err: any) {
         formAnalytics.trackSubmitFail();
-        if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
-        setAttempt(attempt + 1);
-        setTimeleft(getTimeLeft(Date.now(), LOCK_TIME * Math.floor((attempt + 1) / 3)));
+        // A lock that lands mid-unlock is not a wrong password, so it must not count towards the time-lock
+        const isInterruptedByLock = err?.message === UNLOCK_INTERRUPTED_BY_LOCK_ERROR;
+        if (!isInterruptedByLock) {
+          if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
+          setAttempt(attempt + 1);
+          setTimeleft(getTimeLeft(Date.now(), LOCK_TIME * Math.floor((attempt + 1) / 3)));
+        }
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', SUBMIT_ERROR_TYPE, isInterruptedByLock ? t('unlockInterruptedByLock') : err.message);
         focusPasswordField();
       }
     },

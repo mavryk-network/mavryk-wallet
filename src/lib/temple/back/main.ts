@@ -17,6 +17,7 @@ import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
 import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
+import { startPagePresenceTracking } from './page-presence';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
@@ -24,6 +25,7 @@ const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.
 
 export const start = async () => {
   startUIOwner();
+  startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
 

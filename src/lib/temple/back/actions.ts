@@ -254,7 +254,8 @@ export function registerNewWallet(password: string, mnemonic?: string) {
 async function lockWallet() {
   if (!store.getState().inited) initLocked = true;
   try {
-    await logoutAuth();
+    // Only the local token clean-up holds the lock; a stalled /auth/logout must not keep the vault unlocked
+    await logoutAuth({}, { awaitRevocation: false });
   } catch (err) {
     console.error(err);
   }

@@ -298,6 +298,8 @@ describe('actions lock serialization', () => {
 
     await lock();
     expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+    // A stalled logout request must not hold the lock, so the lock only waits for the local token clean-up
+    expect(mockedLogoutAuth).toHaveBeenCalledWith({}, { awaitRevocation: false });
 
     // The auth tokens saved by verifyAuthSignature land after the lock already logged out
     challengeDeferred.resolve({ nonce: 'nonce', challenge: 'challenge' });

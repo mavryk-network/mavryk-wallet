@@ -23,6 +23,8 @@ const BUILT_IN_CHAIN_NETWORKS = NETWORKS.filter(n => Array.from(NETWORK_IDS.valu
 const BRANCH_RECHECK_DELAY_MS = 14_000;
 /** Allowed gap between the local clock and block timestamps, including blocks a validator sends slightly early. */
 const CLOCK_TOLERANCE_MS = 2_000;
+/** A dApp RPC is asked for its chain id inside the shared dApp queue, so one that never answers must not stall it */
+export const DAPP_RPC_CHAIN_ID_TIMEOUT_MS = 10_000;
 
 /** `isDAppRpc` marks an RPC chosen by the dApp itself, which only ever serves a chain no built-in network serves. */
 export type ResolvedNetwork = { rpc: string; chainId?: string; isDAppRpc?: boolean };
@@ -64,7 +66,7 @@ async function resolveCustomNetwork(rawRpc: unknown): Promise<ResolvedNetwork> {
   const targetRpc = removeLastSlash(rawRpc);
   const current = await getCurrentTempleNetwork();
   const [chainId, currentChainId] = await Promise.all([
-    loadChainIdStrict(targetRpc).catch(() => null),
+    loadChainIdWithTimeout(targetRpc),
     loadChainId(current.rpcBaseURL).catch(() => null)
   ]);
 
@@ -79,6 +81,30 @@ async function resolveCustomNetwork(rawRpc: unknown): Promise<ResolvedNetwork> {
   const builtIn = BUILT_IN_CHAIN_NETWORKS.find(n => NETWORK_IDS.get(chainId) === n.id);
 
   return builtIn ? { rpc: builtIn.rpcBaseURL, chainId } : { rpc: targetRpc, chainId, isDAppRpc: true };
+}
+
+/** Resolves to null when the RPC fails or does not answer within DAPP_RPC_CHAIN_ID_TIMEOUT_MS. */
+function loadChainIdWithTimeout(rpc: string): Promise<string | null> {
+  return new Promise(resolve => {
+    const timer = setTimeout(() => resolve(null), DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+    loadChainIdStrict(rpc)
+      .then(resolve, () => resolve(null))
+      .finally(() => clearTimeout(timer));
+  });
+}
+
+/**
+ * The RPC shown with a dApp sign request. Signing a payload needs no RPC, so a custom-RPC session is mapped from its
+ * stored chain binding instead of asking the dApp's RPC, which could stall the sign flow and the shared dApp queue.
+ */
+export async function getSignRequestRpc(dApp: TempleDAppSession) {
+  if (typeof dApp.network === 'string') {
+    return getNetworkRPC(dApp.network);
+  }
+
+  const builtIn = BUILT_IN_CHAIN_NETWORKS.find(n => NETWORK_IDS.get(dApp.chainId ?? '') === n.id);
+
+  return builtIn ? builtIn.rpcBaseURL : removeLastSlash(dApp.network.rpc);
 }
 
 /** RpcClient appends paths to the raw URL, so a query, fragment or userinfo would let a page shape the request. */
@@ -97,7 +123,7 @@ export function isAllowedCustomRpcUrl(rpc: string) {
 export async function assertSessionChainId(dApp: TempleDAppSession, networkRpc: string) {
   if (typeof dApp.network === 'string') return;
 
-  const chainId = await loadChainIdStrict(networkRpc).catch(() => null);
+  const chainId = await loadChainIdWithTimeout(networkRpc);
 
   if (chainId !== dApp.chainId) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);

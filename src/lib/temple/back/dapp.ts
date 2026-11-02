@@ -37,6 +37,7 @@ import {
   assertSessionChainId,
   getDAppVisibleRpc,
   getNetworkRPC,
+  getSignRequestRpc,
   isAllowedCustomRpcUrl,
   removeLastSlash,
   resolveNetwork,
@@ -320,7 +321,7 @@ export async function requestSign(
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
-  const networkRpc = await getNetworkRPC(dApp.network);
+  const networkRpc = await getSignRequestRpc(dApp);
 
   return new Promise((resolve, reject) =>
     generatePromisifySign(resolve, reject, origin, dApp, networkRpc, signReq, preparedPayload)

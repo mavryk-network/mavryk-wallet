@@ -9,8 +9,16 @@ import { NETWORK_IDS, NETWORKS } from 'lib/temple/networks';
 import { TempleMessageType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 
-import { getAllDApps, getCurrentPermission, requestBroadcast, requestOperation, requestPermission } from './dapp';
-import { assertBranchNotOnBuiltInChain } from './dapp-network';
+import {
+  getAllDApps,
+  getCurrentPermission,
+  requestBroadcast,
+  requestOperation,
+  requestPermission,
+  requestSign
+} from './dapp';
+import { assertBranchNotOnBuiltInChain, DAPP_RPC_CHAIN_ID_TIMEOUT_MS } from './dapp-network';
+import { enqueueDAppForOrigin } from './dapp-queue';
 import { intercom } from './defaults';
 import { dryRunOpParams } from './dryrun';
 import { withUnlocked } from './store';
@@ -360,6 +368,96 @@ describe('dApp custom RPC chain binding', () => {
     const { sendOperations } = await approveOperation(requestOperation(ORIGIN, OPERATION_REQUEST));
 
     expect(sendOperations).toHaveBeenCalledWith(ACCOUNT_PKH, sandboxRpc, OPERATION_REQUEST.opParams, undefined);
+  });
+
+  describe('a dApp RPC that never answers', () => {
+    const OTHER_ORIGIN = 'https://other.example';
+    const neverAnswers = () => new Promise<string>(() => undefined);
+    const isDAppEnabled = async () => true;
+    const flushMicrotasks = async () => {
+      for (let i = 0; i < 100; i++) await Promise.resolve();
+    };
+
+    beforeEach(async () => {
+      await browser.storage.local.set({
+        dapp_sessions: {
+          [ORIGIN]: {
+            network: { name: 'Tarpit', rpc: 'https://tarpit.example' },
+            chainId: UNKNOWN_CHAIN_ID,
+            appMeta: APP_META,
+            pkh: ACCOUNT_PKH,
+            publicKey: ACCOUNT_PUBLIC_KEY
+          }
+        }
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      mockedLoadChainIdStrict.mockReset();
+    });
+
+    it.each([
+      ['its chain id lookup', () => mockedLoadChainIdStrict.mockImplementation(neverAnswers)],
+      [
+        'the session chain id check',
+        () => mockedLoadChainIdStrict.mockResolvedValueOnce(UNKNOWN_CHAIN_ID).mockImplementation(neverAnswers)
+      ]
+    ])('times out %s so requests from other origins queued behind it still proceed', async (_label, tarpit) => {
+      jest.useFakeTimers();
+      tarpit();
+      const stalled = enqueueDAppForOrigin(ORIGIN, () => requestOperation(ORIGIN, OPERATION_REQUEST), isDAppEnabled);
+      stalled.catch(() => undefined);
+      const otherOriginRequest = jest.fn().mockResolvedValue('served');
+      const queued = enqueueDAppForOrigin(OTHER_ORIGIN, otherOriginRequest, isDAppEnabled);
+
+      await flushMicrotasks();
+      expect(otherOriginRequest).not.toHaveBeenCalled();
+
+      for (let i = 0; i < 2; i++) {
+        jest.advanceTimersByTime(DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+        await flushMicrotasks();
+      }
+
+      await expect(stalled).rejects.toThrow(MavrykWalletDAppErrorType.InvalidParams);
+      await expect(queued).resolves.toBe('served');
+      expect(windowsCreate).not.toHaveBeenCalled();
+    });
+
+    it('opens a sign prompt without contacting the dApp RPC', async () => {
+      mockedLoadChainIdStrict.mockImplementation(neverAnswers);
+      const signing = requestSign(ORIGIN, { sourcePkh: ACCOUNT_PKH, payload: '05010000000568656c6c6f' } as any);
+      signing.catch(() => undefined);
+
+      const { id, token, handler } = await waitForConfirmWindow();
+      const { payload } = await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, {}, {});
+
+      expect(payload.networkRpc).toBe('https://tarpit.example');
+      expect(mockedLoadChainIdStrict).not.toHaveBeenCalled();
+    });
+
+    it("shows a sign prompt for a session bound to a built-in chain on that network's public RPC", async () => {
+      await browser.storage.local.set({
+        dapp_sessions: {
+          [ORIGIN]: {
+            network: { name: 'Proxy', rpc: 'https://proxy.example/' },
+            chainId: MAINNET_CHAIN_ID,
+            appMeta: APP_META,
+            pkh: ACCOUNT_PKH,
+            publicKey: ACCOUNT_PUBLIC_KEY
+          }
+        }
+      });
+      mockedLoadChainIdStrict.mockImplementation(neverAnswers);
+      const signing = requestSign(ORIGIN, { sourcePkh: ACCOUNT_PKH, payload: '05010000000568656c6c6f' } as any);
+      signing.catch(() => undefined);
+
+      const { id, token, handler } = await waitForConfirmWindow();
+      const { payload } = await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, {}, {});
+
+      expect(payload.networkRpc).toBe(MAINNET_RPC);
+      expect(mockedLoadChainIdStrict).not.toHaveBeenCalled();
+    });
   });
 
   describe('a custom-RPC session stored before chain binding', () => {

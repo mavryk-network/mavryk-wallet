@@ -5,6 +5,7 @@ import { encryptMessage, getSenderId } from 'lib/temple/beacon';
 import { TempleMessageType, type TempleRequest } from 'lib/temple/types';
 
 import * as Actions from './actions';
+import * as BeaconDApp from './beacon-dapp';
 import { intercom } from './defaults';
 import { start } from './main';
 
@@ -12,9 +13,12 @@ jest.mock('./actions', () => ({
   init: jest.fn(),
   unlockFromSession: jest.fn(),
   isDAppEnabled: jest.fn(),
-  getBeaconMessage: jest.fn(),
-  processBeacon: jest.fn(),
   processDApp: jest.fn()
+}));
+
+jest.mock('./beacon-dapp', () => ({
+  getBeaconMessage: jest.fn(),
+  processBeacon: jest.fn()
 }));
 
 jest.mock('./analytics', () => ({}));
@@ -51,6 +55,7 @@ jest.mock('lib/temple/beacon', () => ({
 }));
 
 const mockedActions = Actions as jest.Mocked<typeof Actions>;
+const mockedBeaconDApp = BeaconDApp as jest.Mocked<typeof BeaconDApp>;
 const mockedOnRequest = intercom.onRequest as jest.MockedFunction<typeof intercom.onRequest>;
 const mockedEncryptMessage = encryptMessage as jest.MockedFunction<typeof encryptMessage>;
 const mockedGetSenderId = getSenderId as jest.MockedFunction<typeof getSenderId>;
@@ -83,7 +88,7 @@ beforeAll(async () => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockedActions.isDAppEnabled.mockResolvedValue(true);
-  mockedActions.getBeaconMessage.mockResolvedValue({
+  mockedBeaconDApp.getBeaconMessage.mockResolvedValue({
     recipientPubKey: 'dapp-public-key',
     req: { id: 'beacon-request-id' } as any,
     payload: null
@@ -96,12 +101,12 @@ describe('background Acknowledge handling', () => {
 
     await expect(processRequest(acknowledgeRequest, {} as Runtime.Port, relayPortInfo)).resolves.toBeUndefined();
 
-    expect(mockedActions.getBeaconMessage).not.toHaveBeenCalled();
+    expect(mockedBeaconDApp.getBeaconMessage).not.toHaveBeenCalled();
     expect(mockedEncryptMessage).not.toHaveBeenCalled();
   });
 
   it('does not acknowledge a Beacon message that cannot be decoded', async () => {
-    mockedActions.getBeaconMessage.mockResolvedValue({
+    mockedBeaconDApp.getBeaconMessage.mockResolvedValue({
       recipientPubKey: 'dapp-public-key',
       req: null,
       payload: null
@@ -119,7 +124,7 @@ describe('background Acknowledge handling', () => {
       encrypted: true
     });
 
-    expect(mockedActions.getBeaconMessage).toHaveBeenCalledWith(DAPP_ORIGIN, 'encrypted-payload', true);
+    expect(mockedBeaconDApp.getBeaconMessage).toHaveBeenCalledWith(DAPP_ORIGIN, 'encrypted-payload', true);
     expect(mockedGetSenderId).toHaveBeenCalledWith(DAPP_ORIGIN);
     expect(mockedEncryptMessage).toHaveBeenCalledWith(DAPP_ORIGIN, expect.any(String), 'dapp-public-key');
   });
@@ -136,7 +141,7 @@ describe('background Acknowledge handling', () => {
     ).rejects.toThrow('Unauthorized intercom request source');
 
     expect(mockedActions.isDAppEnabled).not.toHaveBeenCalled();
-    expect(mockedActions.getBeaconMessage).not.toHaveBeenCalled();
+    expect(mockedBeaconDApp.getBeaconMessage).not.toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
   });
@@ -158,7 +163,7 @@ describe('background PageRequest relay port binding', () => {
 
   it('passes the relay port to processBeacon so queued Beacon requests are dropped when the page goes away', async () => {
     const port = {} as Runtime.Port;
-    mockedActions.processBeacon.mockResolvedValue(undefined);
+    mockedBeaconDApp.processBeacon.mockResolvedValue(undefined);
 
     await processRequest(
       {
@@ -172,6 +177,6 @@ describe('background PageRequest relay port binding', () => {
       relayPortInfo
     );
 
-    expect(mockedActions.processBeacon).toHaveBeenCalledWith(DAPP_ORIGIN, 'beacon-message', true, port);
+    expect(mockedBeaconDApp.processBeacon).toHaveBeenCalledWith(DAPP_ORIGIN, 'beacon-message', true, port);
   });
 });

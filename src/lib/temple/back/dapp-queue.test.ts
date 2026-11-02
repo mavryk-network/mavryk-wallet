@@ -5,7 +5,8 @@ import * as Beacon from 'lib/temple/beacon';
 
 import { TempleSharedStorageKey } from '../types';
 
-import { processBeacon, processDApp } from './actions';
+import { processDApp } from './actions';
+import { processBeacon } from './beacon-dapp';
 import { requestOperation, requestPermission, requestSign } from './dapp';
 import { DAPP_TOO_MANY_PENDING_REQUESTS_ERROR } from './dapp-queue';
 import { intercom } from './defaults';

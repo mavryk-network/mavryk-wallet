@@ -15,6 +15,7 @@ import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
+import { getBeaconMessage, processBeacon } from './beacon-dapp';
 import { intercom } from './defaults';
 import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
 import { startPagePresenceTracking } from './page-presence';
@@ -258,11 +259,7 @@ const processRequest = async (
     case TempleMessageType.Acknowledge: {
       const dAppEnabled = await Actions.isDAppEnabled();
       if (dAppEnabled && req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
-        const {
-          req: res,
-          recipientPubKey,
-          payload
-        } = await Actions.getBeaconMessage(req.origin, req.payload, req.encrypted);
+        const { req: res, recipientPubKey, payload } = await getBeaconMessage(req.origin, req.payload, req.encrypted);
         if (payload) {
           return;
         }
@@ -313,7 +310,7 @@ const processRequest = async (
             payload: resPayload ?? null
           };
         } else {
-          const res = await Actions.processBeacon(req.origin, req.payload, req.encrypted, port);
+          const res = await processBeacon(req.origin, req.payload, req.encrypted, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: res?.payload ?? null,

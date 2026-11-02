@@ -556,6 +556,29 @@ describe('dApp custom RPC chain binding', () => {
       expect(payload.networkRpc).toBe(MAINNET_RPC);
     });
 
+    it("never routes a testnet session to the wallet's mainnet RPC when the testnet chain id times out", async () => {
+      jest.useFakeTimers();
+      const basenetRpc = NETWORKS.find(n => n.id === 'basenet')!.rpcBaseURL;
+      await browser.storage.local.set({
+        dapp_sessions: {
+          [ORIGIN]: { network: 'basenet', appMeta: APP_META, pkh: ACCOUNT_PKH, publicKey: ACCOUNT_PUBLIC_KEY }
+        }
+      });
+      mockedLoadChainId.mockImplementation(rpc =>
+        rpc === basenetRpc ? neverAnswers() : Promise.resolve(MAINNET_CHAIN_ID)
+      );
+      const operation = requestOperation(ORIGIN, OPERATION_REQUEST);
+      operation.catch(() => undefined);
+
+      await flushMicrotasks();
+      jest.advanceTimersByTime(DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+      await flushMicrotasks();
+
+      const { id, token, handler } = await waitForConfirmWindow();
+      const { payload } = await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, {}, {});
+      expect(payload.networkRpc).toBe(basenetRpc);
+    });
+
     it('refuses to open a prompt once the time the page budgeted for it has passed', async () => {
       mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
 

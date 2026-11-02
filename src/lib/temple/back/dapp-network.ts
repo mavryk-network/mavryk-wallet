@@ -46,7 +46,8 @@ export async function resolveNetwork(net: MavrykWalletDAppNetwork): Promise<Reso
       withChainIdTimeout(loadChainId(targetRpc)).catch(() => null)
     ]);
 
-    return { rpc: targetChainId === null || currentChainId === targetChainId ? current.rpcBaseURL : targetRpc };
+    // Fails closed: the user's RPC is used only once both chain ids are known to match
+    return { rpc: targetChainId !== null && currentChainId === targetChainId ? current.rpcBaseURL : targetRpc };
   } catch {
     return { rpc: targetRpc };
   }

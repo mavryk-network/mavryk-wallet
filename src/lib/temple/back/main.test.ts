@@ -141,3 +141,37 @@ describe('background Acknowledge handling', () => {
     consoleErrorSpy.mockRestore();
   });
 });
+
+describe('background PageRequest relay port binding', () => {
+  it('passes the relay port to processDApp so queued requests are dropped when the page goes away', async () => {
+    const port = {} as Runtime.Port;
+    mockedActions.processDApp.mockResolvedValue(undefined);
+
+    await processRequest(
+      { type: TempleMessageType.PageRequest, origin: DAPP_ORIGIN, payload: { type: 'PERMISSION_REQUEST' } } as any,
+      port,
+      relayPortInfo
+    );
+
+    expect(mockedActions.processDApp).toHaveBeenCalledWith(DAPP_ORIGIN, { type: 'PERMISSION_REQUEST' }, port);
+  });
+
+  it('passes the relay port to processBeacon so queued Beacon requests are dropped when the page goes away', async () => {
+    const port = {} as Runtime.Port;
+    mockedActions.processBeacon.mockResolvedValue(undefined);
+
+    await processRequest(
+      {
+        type: TempleMessageType.PageRequest,
+        origin: DAPP_ORIGIN,
+        payload: 'beacon-message',
+        beacon: true,
+        encrypted: true
+      } as TempleRequest,
+      port,
+      relayPortInfo
+    );
+
+    expect(mockedActions.processBeacon).toHaveBeenCalledWith(DAPP_ORIGIN, 'beacon-message', true, port);
+  });
+});

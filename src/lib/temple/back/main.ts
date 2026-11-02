@@ -305,13 +305,13 @@ const processRequest = async (
         }
 
         if (!req.beacon) {
-          const resPayload = await Actions.processDApp(req.origin, req.payload);
+          const resPayload = await Actions.processDApp(req.origin, req.payload, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: resPayload ?? null
           };
         } else {
-          const res = await Actions.processBeacon(req.origin, req.payload, req.encrypted);
+          const res = await Actions.processBeacon(req.origin, req.payload, req.encrypted, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: res?.payload ?? null,

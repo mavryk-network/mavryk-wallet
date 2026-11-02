@@ -59,6 +59,7 @@ import {
   removeDAppSessionsForPkhs
 } from './dapp';
 import { DAppContactsResponse, isDAppContactsRequest, processDAppContactsRequest } from './dapp-contacts';
+import { DAPP_TOO_MANY_PENDING_REQUESTS_ERROR, enqueueDApp, enqueueDAppForOrigin } from './dapp-queue';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
@@ -74,6 +75,7 @@ import {
   withInited,
   withUnlocked
 } from './store';
+import { isTrustedNexusOrigin } from './trusted-origin.helpers';
 import { Vault } from './vault';
 
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,100}(?<! )$';
@@ -84,7 +86,6 @@ const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
 const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
 
-const enqueueDApp = createQueue();
 const enqueueUnlock = createQueue();
 
 const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
@@ -727,11 +728,16 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
 
 export async function processDApp(
   origin: string,
-  req: MavrykWalletDAppRequest | unknown
+  req: MavrykWalletDAppRequest | unknown,
+  relayPort?: Runtime.Port
 ): Promise<MavrykWalletDAppResponse | DAppContactsResponse | void> {
   if (isDAppContactsRequest(req)) {
+    if (!isTrustedNexusOrigin(origin)) {
+      throw new Error(MavrykWalletDAppErrorType.NotGranted);
+    }
+
     return withInited(() =>
-      enqueueDApp(() =>
+      enqueueDApp(async () =>
         withUnlocked(async ({ vault }) => {
           const [accounts, dApps] = await Promise.all([vault.fetchAccounts(), getAllDApps()]);
 
@@ -765,13 +771,19 @@ export async function processDApp(
       return withInited(() => getCurrentPermission(origin));
 
     case MavrykWalletDAppMessageType.PermissionRequest:
-      return withInited(() => enqueueDApp(() => requestPermission(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, () => requestPermission(origin, dAppReq), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.OperationRequest:
-      return withInited(() => enqueueDApp(() => requestOperation(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, () => requestOperation(origin, dAppReq), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.SignRequest:
-      return withInited(() => enqueueDApp(() => requestSign(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, () => requestSign(origin, dAppReq), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.BroadcastRequest:
       return withInited(() => requestBroadcast(origin, dAppReq));
@@ -831,7 +843,8 @@ type ProcessedBeaconMessage = {
 export async function processBeacon(
   origin: string,
   msg: string,
-  encrypted = false
+  encrypted = false,
+  relayPort?: Runtime.Port
 ): Promise<ProcessedBeaconMessage | undefined> {
   const { req, recipientPubKey, payload } = await getBeaconMessage(origin, msg, encrypted);
   if (payload) {
@@ -869,7 +882,7 @@ export async function processBeacon(
     };
   }
 
-  const res = await getBeaconResponse(req, resBase, origin);
+  const res = await getBeaconResponse(req, resBase, origin, relayPort);
   // const res = null;
 
   const resMsg = Beacon.encodeMessage<Beacon.Response>(res);
@@ -882,10 +895,15 @@ export async function processBeacon(
   return { payload: resMsg };
 }
 
-const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: string): Promise<Beacon.Response> => {
+const getBeaconResponse = async (
+  req: Beacon.Request,
+  resBase: any,
+  origin: string,
+  relayPort?: Runtime.Port
+): Promise<Beacon.Response> => {
   try {
     try {
-      return await formatTempleReq(getTempleReq(req), req, resBase, origin);
+      return await formatTempleReq(getTempleReq(req), req, resBase, origin, relayPort);
     } catch (err: any) {
       if (err instanceof MavrykOperationError) {
         throw err;
@@ -902,6 +920,9 @@ const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: stri
           case MavrykWalletDAppErrorType.NotFound:
           case MavrykWalletDAppErrorType.NotGranted:
             return req.beaconId ? Beacon.ErrorType.NOT_GRANTED_ERROR : Beacon.ErrorType.ABORTED_ERROR;
+
+          case DAPP_TOO_MANY_PENDING_REQUESTS_ERROR:
+            return Beacon.ErrorType.UNKNOWN_ERROR;
 
           default:
             return err?.message;
@@ -975,10 +996,11 @@ const formatTempleReq = async (
   templeReq: MavrykWalletDAppRequest | void,
   req: Beacon.Request,
   resBase: any,
-  origin: string
+  origin: string,
+  relayPort?: Runtime.Port
 ) => {
   if (templeReq) {
-    const templeRes = await processDApp(origin, templeReq);
+    const templeRes = await processDApp(origin, templeReq, relayPort);
 
     if (templeRes) {
       // Map Temple DApp response to Beacon response

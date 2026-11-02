@@ -792,7 +792,7 @@ export async function getBeaconMessage(origin: string, msg: string, encrypted = 
       if (!recipientPubKey) throw new Error('<stub>');
 
       try {
-        msg = await Beacon.decryptMessage(msg, recipientPubKey);
+        msg = await Beacon.decryptMessage(origin, msg, recipientPubKey);
       } catch (err: any) {
         await Beacon.removeDAppPublicKey(origin);
         throw err;
@@ -801,7 +801,7 @@ export async function getBeaconMessage(origin: string, msg: string, encrypted = 
       payload = {
         payload: Beacon.encodeMessage<Beacon.Response>({
           version: '2',
-          senderId: await Beacon.getSenderId(),
+          senderId: await Beacon.getSenderId(origin),
           id: 'stub',
           type: Beacon.MessageType.Disconnect
         })
@@ -850,13 +850,13 @@ export async function processBeacon(
   const resBase = {
     version: req.version,
     id: req.id,
-    ...(req.beaconId ? { beaconId: BEACON_ID } : { senderId: await Beacon.getSenderId() })
+    ...(req.beaconId ? { beaconId: BEACON_ID } : { senderId: await Beacon.getSenderId(origin) })
   };
 
   // Process handshake
   if (req.type === Beacon.MessageType.HandshakeRequest) {
     await Beacon.saveDAppPublicKey(origin, req.publicKey);
-    const keyPair = await Beacon.getOrCreateKeyPair();
+    const keyPair = await Beacon.getOrCreateKeyPair(origin);
     return {
       payload: await Beacon.sealCryptobox(
         JSON.stringify({
@@ -875,7 +875,7 @@ export async function processBeacon(
   const resMsg = Beacon.encodeMessage<Beacon.Response>(res);
   if (encrypted && recipientPubKey) {
     return {
-      payload: await Beacon.encryptMessage(resMsg, recipientPubKey),
+      payload: await Beacon.encryptMessage(origin, resMsg, recipientPubKey),
       encrypted: true
     };
   }

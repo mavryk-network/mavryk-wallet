@@ -275,14 +275,14 @@ const processRequest = async (
           senderId: string;
         } = {
           version: '2',
-          senderId: await getSenderId(),
+          senderId: await getSenderId(req.origin),
           id: res?.id ?? '',
           type: MessageType.Acknowledge
         };
 
         return {
           type: TempleMessageType.Acknowledge,
-          payload: await encryptMessage(encodeMessage<Response>(response), recipientPubKey ?? ''),
+          payload: await encryptMessage(req.origin, encodeMessage<Response>(response), recipientPubKey ?? ''),
           encrypted: true
         };
       }

@@ -1,7 +1,7 @@
 import type { Runtime } from 'webextension-polyfill';
 
 import { IntercomPortKind, type IntercomPortInfo } from 'lib/intercom';
-import { encryptMessage } from 'lib/temple/beacon';
+import { encryptMessage, getSenderId } from 'lib/temple/beacon';
 import { TempleMessageType, type TempleRequest } from 'lib/temple/types';
 
 import * as Actions from './actions';
@@ -53,6 +53,7 @@ jest.mock('lib/temple/beacon', () => ({
 const mockedActions = Actions as jest.Mocked<typeof Actions>;
 const mockedOnRequest = intercom.onRequest as jest.MockedFunction<typeof intercom.onRequest>;
 const mockedEncryptMessage = encryptMessage as jest.MockedFunction<typeof encryptMessage>;
+const mockedGetSenderId = getSenderId as jest.MockedFunction<typeof getSenderId>;
 
 const DAPP_ORIGIN = 'https://dapp.example';
 
@@ -119,7 +120,8 @@ describe('background Acknowledge handling', () => {
     });
 
     expect(mockedActions.getBeaconMessage).toHaveBeenCalledWith(DAPP_ORIGIN, 'encrypted-payload', true);
-    expect(mockedEncryptMessage).toHaveBeenCalledWith(expect.any(String), 'dapp-public-key');
+    expect(mockedGetSenderId).toHaveBeenCalledWith(DAPP_ORIGIN);
+    expect(mockedEncryptMessage).toHaveBeenCalledWith(DAPP_ORIGIN, expect.any(String), 'dapp-public-key');
   });
 
   it('rejects relay requests whose origin is not the port sender origin', async () => {

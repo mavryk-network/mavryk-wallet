@@ -4,8 +4,9 @@ import { WhitelistResponseToken } from 'lib/apis/temple/whitelist-tokens';
 import { buildTokenMetadataFromWhitelist } from 'lib/metadata/utils';
 import { requestOwnedUISnapshot, updateOwnedUI } from 'lib/store/zustand/ui-client';
 import { UICommand } from 'lib/store/zustand/ui-owner.contract';
+import { isValidContractAddress } from 'lib/temple/helpers';
 
-import { MAV_TOKEN_SLUG, toTokenSlug } from './utils';
+import { fromAssetSlug, MAV_TOKEN_SLUG, toTokenSlug } from './utils';
 
 /** Reserve ordering in the owner, across foregrounds and background restarts, before transport starts. */
 export async function beginAssetSync(requestKey: string) {
@@ -32,11 +33,17 @@ export async function syncSecurity(
   response: { kind: 'scamlist'; data: Record<string, boolean> } | { kind: 'whitelist'; data: WhitelistResponseToken[] }
 ) {
   if (response.kind === 'scamlist') {
-    await acknowledgeAssetSync({ kind: 'scamlist-sync', ...request, data: response.data });
+    const data = Object.fromEntries(
+      Object.entries(response.data).filter(([slug]) => isValidContractAddress(fromAssetSlug(slug)[0]))
+    );
+    await acknowledgeAssetSync({ kind: 'scamlist-sync', ...request, data });
   } else {
     const metadata: Extract<UICommand, { kind: 'whitelist-sync' }>['metadata'] = {};
     const data: string[] = [];
     for (const token of response.data) {
+      // Pinned upstream Temple list (Tezos tokens): keep 'mainnet' entries naming the native token or a KT1 contract.
+      if (token.network !== 'mainnet') continue;
+      if (token.contractAddress !== MAV_TOKEN_SLUG && !isValidContractAddress(token.contractAddress)) continue;
       const slug = toTokenSlug(token.contractAddress, token.fa2TokenId);
       if (token.contractAddress !== MAV_TOKEN_SLUG) data.push(slug);
       metadata[slug] = buildTokenMetadataFromWhitelist(token);

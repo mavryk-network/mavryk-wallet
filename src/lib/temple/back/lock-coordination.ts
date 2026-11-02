@@ -58,7 +58,7 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
     const state = await setupVault(isInterruptedByLock);
     if (isInterruptedByLock()) {
       // The setup may have saved the session pass hash or auth tokens after the lock cleared them, so it locks again
-      await lockWallet();
+      await lock();
       throw new Error(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
     }
 

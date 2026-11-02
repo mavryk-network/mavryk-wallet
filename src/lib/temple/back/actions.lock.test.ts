@@ -226,6 +226,38 @@ describe('actions lock serialization', () => {
     expect(mockedRequestAuthChallenge).not.toHaveBeenCalled();
   });
 
+  it('counts the re-lock of an interrupted unlock as a lock, so the autolock deadline does not repeat it', async () => {
+    const setupDeferred = createDeferred<any>();
+    const firstLogoutDeferred = createDeferred<void>();
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+
+    mockedVault.setup.mockReturnValue(setupDeferred.promise);
+    mockedLogoutAuth.mockReturnValueOnce(firstLogoutDeferred.promise as any).mockResolvedValue(undefined as any);
+
+    const unlockPromise = unlock('password');
+    await flushPromises();
+    const lockPromise = lock();
+    await flushPromises();
+
+    try {
+      // The unlock's setup ends while the interrupting lock is still logging out, so the unlock locks again itself
+      setupDeferred.resolve({ fetchAccounts, fetchSettings });
+      await expect(unlockPromise).rejects.toThrow(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
+      expect(mockedLogoutAuth).toHaveBeenCalledTimes(2);
+
+      await browser.storage.local.set({ last_page_closure_timestamp: Date.now() - WALLET_AUTOLOCK_TIME - 1 });
+      await enforceAutolock();
+
+      expect(mockedLogoutAuth).toHaveBeenCalledTimes(2);
+      expect(store.getState().status).toBe(TempleStatus.Locked);
+    } finally {
+      firstLogoutDeferred.resolve();
+      await lockPromise;
+    }
+    expect(store.getState().vault).toBeNull();
+  });
+
   it('keeps the wallet locked and rejects wallet creation when a lock lands while it is being set up', async () => {
     const setupDeferred = createDeferred<any>();
     const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);

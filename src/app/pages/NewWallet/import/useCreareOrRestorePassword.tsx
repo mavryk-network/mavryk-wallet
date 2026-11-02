@@ -11,7 +11,8 @@ import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
-import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
+import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
+import { t } from 'lib/i18n';
 import { putToStorage } from 'lib/storage';
 import { useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
@@ -149,7 +150,8 @@ export const useCreareOrRestorePassword = (
       } catch (err: any) {
         console.error(err);
 
-        alert(err.message);
+        // The wallet was created but a lock landed before it unlocked, so it only needs unlocking
+        alert(err?.message === UNLOCK_INTERRUPTED_BY_LOCK_ERROR ? t('unlockInterruptedByLock') : err.message);
       }
     },
     [

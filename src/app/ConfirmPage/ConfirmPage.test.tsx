@@ -43,7 +43,11 @@ jest.mock('lib/analytics', () => ({
   CustomRpcContext: jest.requireActual('react').createContext(undefined)
 }));
 jest.mock('app/atoms', () => ({
-  Alert: ({ description }: { description: React.ReactNode }) => <div data-testid="alert">{description}</div>,
+  Alert: ({ title, description }: { title?: string; description: React.ReactNode }) => (
+    <div data-testid="alert" data-title={title}>
+      {description}
+    </div>
+  ),
   FormSubmitButton: ({
     disabled,
     testID,
@@ -115,6 +119,7 @@ describe('ConfirmPage operation verification', () => {
     expect(mockGetDAppPayload).toHaveBeenCalledWith('payload-id', 'payload-token');
     expect(getConfirmButton()?.disabled).toBe(true);
     expect(queryByTestId('alert')?.textContent).toBe('operationCannotBeVerified');
+    expect(queryByTestId('alert')?.getAttribute('data-title')).toBe('error');
     expect(queryByTestId('alert-with-collapse')).toBeNull();
   });
 

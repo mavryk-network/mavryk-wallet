@@ -396,7 +396,7 @@ const ConfirmDAppForm: FC = () => {
               )}
 
               {unverifiedOperation && !payloadError && (
-                <Alert type="error" title="Error" description={t('operationCannotBeVerified')} className="mb-4" />
+                <Alert type="error" title={t('error')} description={t('operationCannotBeVerified')} className="mb-4" />
               )}
 
               {payloadError && (

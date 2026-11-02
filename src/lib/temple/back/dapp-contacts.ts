@@ -1,11 +1,12 @@
 import { MavrykWalletDAppErrorType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 
-import { CONTACTS_ENCRYPTION_VERSION, type ContactsCurrentKey } from 'lib/temple/contacts-crypto';
+import { type ContactsCurrentKey } from 'lib/temple/contacts-crypto';
 import {
   buildContactsSettingsPatch,
   buildContactsStorageKey,
   canReadLegacyContacts,
   getCachedContactsState,
+  getContactsLastSeenVersion,
   getStoredContactsAccountDataKey,
   normalizeContacts
 } from 'lib/temple/front/contacts-settings';
@@ -563,7 +564,7 @@ async function updateContactsSettings(
       state.recordId,
       state.typesByAddress,
       undefined,
-      state.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? state.encryptionVersion : undefined
+      getContactsLastSeenVersion(state)
     )
   );
 }

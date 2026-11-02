@@ -12,7 +12,7 @@ import { isBeaconPayloadWithinLimit } from 'lib/temple/beacon-payload';
 import { buildMavrykSignedMessagePayloadHex } from 'mavryk/api/auth-payload.helpers';
 
 import { processDApp } from './actions';
-import { removeDApp } from './dapp';
+import { DAPP_OPERATION_TIMEOUT_ERROR, removeDApp } from './dapp';
 import { DAPP_TOO_MANY_PENDING_REQUESTS_ERROR } from './dapp-queue';
 
 const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
@@ -136,8 +136,6 @@ const getBeaconResponse = async (
         throw err;
       }
 
-      console.log('err', err);
-
       // Map Temple DApp error to Beacon error
       const beaconErrorType = (() => {
         switch (err?.message) {
@@ -149,6 +147,7 @@ const getBeaconResponse = async (
             return req.beaconId ? Beacon.ErrorType.NOT_GRANTED_ERROR : Beacon.ErrorType.ABORTED_ERROR;
 
           case DAPP_TOO_MANY_PENDING_REQUESTS_ERROR:
+          case DAPP_OPERATION_TIMEOUT_ERROR:
             return Beacon.ErrorType.UNKNOWN_ERROR;
 
           default:
@@ -269,9 +268,9 @@ const formatTempleReq = async (
 };
 
 function getErrorData(err: any) {
-  if (err?.cause === DAPP_TOO_MANY_PENDING_REQUESTS_ERROR) {
-    // Beacon has no "busy" error type, so expose the reason for dApps to retry on
-    return DAPP_TOO_MANY_PENDING_REQUESTS_ERROR;
+  if (err?.cause === DAPP_TOO_MANY_PENDING_REQUESTS_ERROR || err?.cause === DAPP_OPERATION_TIMEOUT_ERROR) {
+    // Beacon has no "busy" or "may still be broadcast" error type, so expose the reason for dApps to act on
+    return err.cause;
   }
   return err instanceof MavrykOperationError ? err.errors.map(({ contract_code, ...rest }: any) => rest) : undefined;
 }

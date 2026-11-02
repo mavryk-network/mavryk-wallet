@@ -8,7 +8,7 @@ import { TempleSharedStorageKey } from '../types';
 
 import { processDApp } from './actions';
 import { processBeacon } from './beacon-dapp';
-import { requestOperation, requestPermission, requestSign } from './dapp';
+import { DAPP_OPERATION_TIMEOUT_ERROR, requestOperation, requestPermission, requestSign } from './dapp';
 import { DAPP_TOO_MANY_PENDING_REQUESTS_ERROR } from './dapp-queue';
 import { intercom } from './defaults';
 import { inited, locked } from './store';
@@ -207,6 +207,28 @@ describe('processDApp request queue gating', () => {
     first.resolve(permissionRes);
     await expect(Promise.all(queued)).resolves.toHaveLength(3);
     expect(mockedRequestPermission).toHaveBeenCalledTimes(3);
+  });
+
+  it('tells a Beacon dApp when an approved operation timed out and may still be broadcast', async () => {
+    mockedRequestOperation.mockRejectedValue(new Error(DAPP_OPERATION_TIMEOUT_ERROR));
+    mockedDecodeMessage.mockReturnValueOnce({
+      type: Beacon.MessageType.OperationRequest,
+      version: '2',
+      id: 'beacon-request-id',
+      beaconId: 'dapp-beacon-id',
+      sourceAddress: testPkh,
+      network: { type: 'mainnet' },
+      operationDetails: [{ kind: 'transaction', destination: testPkh, amount: '1' }]
+    } as any);
+
+    const res = await processBeacon(dAppOrigin, 'beacon-message');
+
+    expect(mockedRequestOperation).toHaveBeenCalledTimes(1);
+    expect(jest.requireActual('lib/temple/beacon').decodeMessage(res?.payload)).toMatchObject({
+      type: Beacon.MessageType.Error,
+      errorType: Beacon.ErrorType.UNKNOWN_ERROR,
+      errorData: DAPP_OPERATION_TIMEOUT_ERROR
+    });
   });
 
   it('refuses a queued request whose page has already given up on it, before it opens a prompt', async () => {

@@ -238,7 +238,7 @@ export function registerNewWallet(password: string, mnemonic?: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
       const accountPkh = await Vault.spawn(password, mnemonic);
-      const unlockedState = await setupUnlockedVaultState(password);
+      const unlockedState = await unlockAfterLocks(() => setupUnlockedVaultState(password));
       await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
       unlocked(unlockedState);
 

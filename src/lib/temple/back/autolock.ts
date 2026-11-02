@@ -15,10 +15,13 @@ const readAutolockState = async () => {
   };
 };
 
-/** Builds the autolock deadline checks around the wallet lock, which is passed in to avoid importing actions.ts */
-export function createAutolockEnforcer(lock: () => Promise<unknown>) {
+/**
+ * Builds the autolock deadline checks around the wallet lock, which is passed in to avoid importing actions.ts.
+ * `isLocked` reports a wallet already locked, so the deadline does not repeat the lock and its auth logout.
+ */
+export function createAutolockEnforcer(lock: () => Promise<unknown>, isLocked: () => boolean) {
   const lockAndConsumeClosure = async () => {
-    await lock();
+    if (!isLocked()) await lock();
     await browser.storage.local.remove(LAST_PAGE_CLOSURE_STORAGE_KEY);
   };
 

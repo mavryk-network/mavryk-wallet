@@ -1,9 +1,11 @@
 import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
+import { TempleStatus } from 'lib/temple/types';
 import { getAuthTokensFromStorage, isJwtExpiringSoon } from 'mavryk/api';
 
 import { createAutolockEnforcer } from './autolock';
 import { JWT_EXPIRING_SOON_THRESHOLD_MS } from './constants';
+import { store } from './store';
 import { Vault } from './vault';
 
 /**
@@ -15,11 +17,17 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
   let lockEpoch = 0;
   /** Settles once every lock in flight has finished, so an unlock started during a lock runs after it */
   let pendingLock: Promise<unknown> | undefined;
+  /**
+   * Set when a lock finishes and cleared when an unlock flow starts. The store alone cannot tell the wallet is locked:
+   * it also reads Locked while a password unlock or a session recovery is still in flight, which must be locked.
+   */
+  let hasLockedSinceUnlockStarted = false;
 
   const runLock = async () => {
     lockEpoch++;
     try {
       await lockWallet();
+      hasLockedSinceUnlockStarted = true;
     } finally {
       lockEpoch++;
     }
@@ -37,6 +45,7 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
 
   const waitForLocks = async () => {
     while (pendingLock) await pendingLock;
+    hasLockedSinceUnlockStarted = false;
     const epoch = lockEpoch;
 
     return () => epoch !== lockEpoch;
@@ -55,7 +64,9 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
     return unlockedState;
   };
 
-  return { lock, waitForLocks, unlockAfterLocks, ...createAutolockEnforcer(lock) };
+  const isLocked = () => hasLockedSinceUnlockStarted && store.getState().status !== TempleStatus.Ready;
+
+  return { lock, waitForLocks, unlockAfterLocks, ...createAutolockEnforcer(lock, isLocked) };
 }
 
 export const shouldLockOnSessionRecovery = async () => {

@@ -13,7 +13,15 @@ import {
 
 import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
 
-import { enforceAutolock, enforceAutolockOnPageOpen, lock, processDApp, unlock, unlockFromSession } from './actions';
+import {
+  enforceAutolock,
+  enforceAutolockOnPageOpen,
+  lock,
+  processDApp,
+  registerNewWallet,
+  unlock,
+  unlockFromSession
+} from './actions';
 import * as PagePresence from './page-presence';
 import { inited, locked, store, unlocked } from './store';
 import { Vault } from './vault';
@@ -40,6 +48,7 @@ jest.mock('lib/env', () => ({ ...jest.requireActual('lib/env'), BACKGROUND_IS_WO
 
 jest.mock('./vault', () => ({
   Vault: {
+    spawn: jest.fn(),
     setup: jest.fn(),
     recoverFromSession: jest.fn(),
     forgetSession: jest.fn()
@@ -211,6 +220,29 @@ describe('actions lock serialization', () => {
     expect(mockedRequestAuthChallenge).not.toHaveBeenCalled();
   });
 
+  it('keeps the wallet locked and rejects wallet creation when a lock lands while it is being set up', async () => {
+    const setupDeferred = createDeferred<any>();
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+
+    mockedVault.spawn.mockResolvedValue(testAccount.publicKeyHash);
+    mockedVault.setup.mockReturnValue(setupDeferred.promise);
+    mockedLogoutAuth.mockResolvedValue(undefined as any);
+
+    const registration = registerNewWallet('password');
+    await flushPromises();
+    expect(mockedVault.setup).toHaveBeenCalledTimes(1);
+
+    await lock();
+
+    setupDeferred.resolve({ fetchAccounts, fetchSettings });
+    await expect(registration).rejects.toThrow(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
+
+    expect(store.getState().status).toBe(TempleStatus.Locked);
+    expect(store.getState().vault).toBeNull();
+    expect(mockedRequestAuthChallenge).not.toHaveBeenCalled();
+  });
+
   it('forgets the session pass hash that an aborted password unlock saved after the lock', async () => {
     mockedEnv.BACKGROUND_IS_WORKER = true;
     try {
@@ -334,6 +366,21 @@ describe('background autolock deadline', () => {
 
     expect(store.getState().status).toBe(TempleStatus.Ready);
     expect(mockedLogoutAuth).not.toHaveBeenCalled();
+  });
+
+  it('does not repeat the lock and auth logout once the wallet is already locked', async () => {
+    await lock();
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+    await browser.storage.local.set({ last_page_closure_timestamp: Date.now() - WALLET_AUTOLOCK_TIME - 1 });
+
+    await enforceAutolock();
+
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+    expect(store.getState().status).toBe(TempleStatus.Locked);
+    const { last_page_closure_timestamp: consumedTimestamp } = await browser.storage.local.get(
+      'last_page_closure_timestamp'
+    );
+    expect(consumedTimestamp).toBeUndefined();
   });
 
   it('does not restore the session once the autolock deadline has passed', async () => {

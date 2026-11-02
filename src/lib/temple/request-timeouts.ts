@@ -25,7 +25,7 @@ export const IN_WALLET_OPERATION_REQUEST_TIMEOUT_MS =
   IN_WALLET_CONFIRMATION_REQUEST_TIMEOUT_MS + IN_WALLET_DECISION_REQUEST_TIMEOUT_MS;
 // A queued dApp request still waiting for its turn after this long is refused before its prompt opens.
 export const DAPP_QUEUE_WAIT_BUDGET_MS = DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS;
-// Before the prompt opens, resolveNetwork and assertSessionChainId may each wait for the dApp RPC's chain id.
+// Before the prompt opens, resolveNetwork and assertSessionChainId may each wait for chain ids, run side by side.
 export const DAPP_NETWORK_RESOLUTION_BUDGET_MS = 2 * DAPP_RPC_CHAIN_ID_TIMEOUT_MS;
 // dApp: queue wait and network resolution before the prompt opens, then deadline + grace, plus the dApp decision
 // request budget (DAppOps/Sign/PermConfirmationRequest), so an approval just before the deadline finishes in time.

@@ -42,8 +42,8 @@ export async function resolveNetwork(net: MavrykWalletDAppNetwork): Promise<Reso
   try {
     const current = await getCurrentTempleNetwork();
     const [currentChainId, targetChainId] = await Promise.all([
-      loadChainId(current.rpcBaseURL),
-      loadChainId(targetRpc).catch(() => null)
+      withChainIdTimeout(loadChainId(current.rpcBaseURL)),
+      withChainIdTimeout(loadChainId(targetRpc)).catch(() => null)
     ]);
 
     return { rpc: targetChainId === null || currentChainId === targetChainId ? current.rpcBaseURL : targetRpc };
@@ -66,7 +66,7 @@ async function resolveCustomNetwork(rawRpc: unknown): Promise<ResolvedNetwork> {
   const current = await getCurrentTempleNetwork();
   const [chainId, currentChainId] = await Promise.all([
     loadChainIdWithTimeout(targetRpc),
-    loadChainId(current.rpcBaseURL).catch(() => null)
+    withChainIdTimeout(loadChainId(current.rpcBaseURL)).catch(() => null)
   ]);
 
   if (!chainId) {
@@ -84,11 +84,14 @@ async function resolveCustomNetwork(rawRpc: unknown): Promise<ResolvedNetwork> {
 
 /** Resolves to null when the RPC fails or does not answer within DAPP_RPC_CHAIN_ID_TIMEOUT_MS. */
 function loadChainIdWithTimeout(rpc: string): Promise<string | null> {
-  return new Promise(resolve => {
-    const timer = setTimeout(() => resolve(null), DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
-    loadChainIdStrict(rpc)
-      .then(resolve, () => resolve(null))
-      .finally(() => clearTimeout(timer));
+  return withChainIdTimeout(loadChainIdStrict(rpc)).catch(() => null);
+}
+
+/** Every chain id lookup runs inside the shared dApp queue, so one that never settles is rejected after a while. */
+function withChainIdTimeout<T>(lookup: Promise<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Chain id lookup timed out')), DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+    lookup.then(resolve, reject).finally(() => clearTimeout(timer));
   });
 }
 

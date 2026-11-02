@@ -1,7 +1,7 @@
 import { MavrykWalletDAppErrorType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
 import { Runtime } from 'webextension-polyfill';
 
-import { DAPP_QUEUE_WAIT_BUDGET_MS } from 'lib/temple/request-timeouts';
+import { DAPP_NETWORK_RESOLUTION_BUDGET_MS, DAPP_QUEUE_WAIT_BUDGET_MS } from 'lib/temple/request-timeouts';
 import { createQueue } from 'lib/utils';
 
 import { intercom } from './defaults';
@@ -14,7 +14,7 @@ const pendingDAppRequests = new Map<string, number>();
 
 export const enqueueDAppForOrigin = async <T>(
   origin: string,
-  factory: () => Promise<T>,
+  factory: (promptDeadline: number) => Promise<T>,
   isDAppEnabled: () => Promise<boolean>,
   relayPort?: Runtime.Port
 ): Promise<T> => {
@@ -54,7 +54,8 @@ export const enqueueDAppForOrigin = async <T>(
       }
 
       hasStarted = true;
-      return factory();
+      // Network resolution has its own budget; a prompt that would open after it is refused, as the page gave up
+      return factory(deadline + DAPP_NETWORK_RESOLUTION_BUDGET_MS);
     });
   } finally {
     stopDisconnectListening?.();

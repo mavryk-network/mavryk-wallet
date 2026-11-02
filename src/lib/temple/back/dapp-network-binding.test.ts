@@ -425,6 +425,64 @@ describe('dApp custom RPC chain binding', () => {
       expect(windowsCreate).not.toHaveBeenCalled();
     });
 
+    it("bounds the wallet network's chain id lookup so the operation prompt still opens in time", async () => {
+      jest.useFakeTimers();
+      mockedLoadChainId.mockImplementation(neverAnswers);
+      mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
+      const operation = requestOperation(ORIGIN, OPERATION_REQUEST);
+      operation.catch(() => undefined);
+
+      await flushMicrotasks();
+      expect(windowsCreate).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+      await flushMicrotasks();
+
+      expect(windowsCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the built-in RPC when the wallet network never reports its chain id', async () => {
+      jest.useFakeTimers();
+      await browser.storage.local.set({
+        dapp_sessions: {
+          [ORIGIN]: { network: 'mainnet', appMeta: APP_META, pkh: ACCOUNT_PKH, publicKey: ACCOUNT_PUBLIC_KEY }
+        }
+      });
+      mockedLoadChainId.mockImplementation(neverAnswers);
+      const signing = requestSign(ORIGIN, { sourcePkh: ACCOUNT_PKH, payload: '05010000000568656c6c6f' } as any);
+      signing.catch(() => undefined);
+
+      await flushMicrotasks();
+      expect(windowsCreate).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(DAPP_RPC_CHAIN_ID_TIMEOUT_MS);
+      await flushMicrotasks();
+
+      expect(windowsCreate).toHaveBeenCalledTimes(1);
+      const { id, token, handler } = await waitForConfirmWindow();
+      const { payload } = await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, {}, {});
+      expect(payload.networkRpc).toBe(MAINNET_RPC);
+    });
+
+    it('refuses to open a prompt once the time the page budgeted for it has passed', async () => {
+      mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
+
+      await expect(requestOperation(ORIGIN, OPERATION_REQUEST, Date.now() - 1)).rejects.toThrow(
+        MavrykWalletDAppErrorType.NotGranted
+      );
+      await expect(
+        requestSign(ORIGIN, { sourcePkh: ACCOUNT_PKH, payload: '05010000000568656c6c6f' } as any, Date.now() - 1)
+      ).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+      await expect(
+        requestPermission(
+          ORIGIN,
+          { network: { name: 'Other', rpc: 'https://other.example' }, appMeta: APP_META } as any,
+          Date.now() - 1
+        )
+      ).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+      expect(windowsCreate).not.toHaveBeenCalled();
+    });
+
     it('opens a sign prompt without contacting the dApp RPC', async () => {
       mockedLoadChainIdStrict.mockImplementation(neverAnswers);
       const signing = requestSign(ORIGIN, { sourcePkh: ACCOUNT_PKH, payload: '05010000000568656c6c6f' } as any);

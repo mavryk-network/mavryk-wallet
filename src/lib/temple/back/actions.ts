@@ -745,17 +745,17 @@ export async function processDApp(
 
     case MavrykWalletDAppMessageType.PermissionRequest:
       return withInited(() =>
-        enqueueDAppForOrigin(origin, () => requestPermission(origin, dAppReq), isDAppEnabled, relayPort)
+        enqueueDAppForOrigin(origin, deadline => requestPermission(origin, dAppReq, deadline), isDAppEnabled, relayPort)
       );
 
     case MavrykWalletDAppMessageType.OperationRequest:
       return withInited(() =>
-        enqueueDAppForOrigin(origin, () => requestOperation(origin, dAppReq), isDAppEnabled, relayPort)
+        enqueueDAppForOrigin(origin, deadline => requestOperation(origin, dAppReq, deadline), isDAppEnabled, relayPort)
       );
 
     case MavrykWalletDAppMessageType.SignRequest:
       return withInited(() =>
-        enqueueDAppForOrigin(origin, () => requestSign(origin, dAppReq), isDAppEnabled, relayPort)
+        enqueueDAppForOrigin(origin, deadline => requestSign(origin, dAppReq, deadline), isDAppEnabled, relayPort)
       );
 
     case MavrykWalletDAppMessageType.BroadcastRequest:

@@ -3,7 +3,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 
 import * as Beacon from 'lib/temple/beacon';
 
-import { DAPP_QUEUE_WAIT_BUDGET_MS } from '../request-timeouts';
+import { DAPP_NETWORK_RESOLUTION_BUDGET_MS, DAPP_QUEUE_WAIT_BUDGET_MS } from '../request-timeouts';
 import { TempleSharedStorageKey } from '../types';
 
 import { processDApp } from './actions';
@@ -132,7 +132,24 @@ describe('processDApp request queue gating', () => {
     );
     await expect(processDApp(otherOrigin, permissionReq)).resolves.toBe(permissionRes);
 
-    expect(mockedRequestPermission).toHaveBeenCalledWith(otherOrigin, permissionReq);
+    expect(mockedRequestPermission).toHaveBeenCalledWith(otherOrigin, permissionReq, expect.any(Number));
+  });
+
+  it('gives each dApp request the time by which its prompt must open, after the queue wait and network budgets', async () => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(1_000_000);
+    mockedRequestPermission.mockResolvedValue(permissionRes);
+    mockedRequestOperation.mockResolvedValue({ type: MavrykWalletDAppMessageType.OperationResponse } as any);
+    mockedRequestSign.mockResolvedValue({ type: MavrykWalletDAppMessageType.SignResponse } as any);
+    const promptDeadline = 1_000_000 + DAPP_QUEUE_WAIT_BUDGET_MS + DAPP_NETWORK_RESOLUTION_BUDGET_MS;
+
+    await processDApp(dAppOrigin, permissionReq);
+    await processDApp(dAppOrigin, operationReq);
+    await processDApp(dAppOrigin, signReq);
+
+    expect(mockedRequestPermission).toHaveBeenCalledWith(dAppOrigin, permissionReq, promptDeadline);
+    expect(mockedRequestOperation).toHaveBeenCalledWith(dAppOrigin, operationReq, promptDeadline);
+    expect(mockedRequestSign).toHaveBeenCalledWith(dAppOrigin, signReq, promptDeadline);
   });
 
   it('caps pending dApp requests per origin across permission, operation and sign requests', async () => {

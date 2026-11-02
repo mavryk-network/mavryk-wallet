@@ -80,7 +80,8 @@ export async function getCurrentPermission(origin: string): Promise<MavrykWallet
 
 export async function requestPermission(
   origin: string,
-  req: MavrykWalletDAppPermissionRequest
+  req: MavrykWalletDAppPermissionRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppPermissionResponse> {
   if (![isAllowedNetwork(req?.network), typeof req?.appMeta?.name === 'string'].every(Boolean)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
@@ -105,6 +106,7 @@ export async function requestPermission(
 
     await requestConfirm({
       id,
+      promptDeadline,
       payload: {
         type: 'connect',
         origin,
@@ -162,7 +164,8 @@ export async function requestPermission(
 
 export async function requestOperation(
   origin: string,
-  req: MavrykWalletDAppOperationRequest
+  req: MavrykWalletDAppOperationRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppOperationResponse> {
   if (!isAddressValid(req?.sourcePkh)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
@@ -197,6 +200,7 @@ export async function requestOperation(
 
     await requestConfirm({
       id,
+      promptDeadline,
       payload: {
         type: 'confirm_operations',
         origin,
@@ -297,7 +301,8 @@ const safeGetChain = async (networkRpc: string, op: any) => {
 
 export async function requestSign(
   origin: string,
-  req: MavrykWalletDAppSignRequest
+  req: MavrykWalletDAppSignRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppSignResponse> {
   if (![isAddressValid(req?.sourcePkh), typeof req?.payload === 'string'].every(Boolean)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
@@ -324,7 +329,7 @@ export async function requestSign(
   const networkRpc = await getSignRequestRpc(dApp);
 
   return new Promise((resolve, reject) =>
-    generatePromisifySign(resolve, reject, origin, dApp, networkRpc, signReq, preparedPayload)
+    generatePromisifySign(resolve, reject, origin, dApp, networkRpc, signReq, preparedPayload, promptDeadline)
   );
 }
 
@@ -335,12 +340,14 @@ const generatePromisifySign = async (
   dApp: TempleDAppSession,
   networkRpc: string,
   req: MavrykWalletDAppSignRequest,
-  preparedPayload: PreparedDAppSignPayload
+  preparedPayload: PreparedDAppSignPayload,
+  promptDeadline?: number
 ) => {
   const id = nanoid();
 
   await requestConfirm({
     id,
+    promptDeadline,
     payload: {
       type: 'sign',
       origin,
@@ -490,6 +497,8 @@ const assertOperationPreviewVerified = (req: TempleRequest, payload: TempleDAppP
 
 type RequestConfirmParams = {
   id: string;
+  /** Past this time the page may have given up on the request, so the prompt is declined instead of opened. */
+  promptDeadline?: number;
   payload: TempleDAppPayload;
   /** Runs when the confirm UI first reads the payload; a failure declines and closes the prompt. */
   preparePayload?: (payload: TempleDAppPayload) => Promise<TempleDAppPayload>;
@@ -497,7 +506,19 @@ type RequestConfirmParams = {
   handleIntercomRequest: (req: TempleRequest, decline: () => void, isDeclineDeferred: () => boolean) => Promise<any>;
 };
 
-async function requestConfirm({ id, payload, preparePayload, onDecline, handleIntercomRequest }: RequestConfirmParams) {
+async function requestConfirm({
+  id,
+  promptDeadline,
+  payload,
+  preparePayload,
+  onDecline,
+  handleIntercomRequest
+}: RequestConfirmParams) {
+  if (promptDeadline !== undefined && Date.now() > promptDeadline) {
+    onDecline();
+    return;
+  }
+
   let closing = false;
   const close = async () => {
     if (closing) return;

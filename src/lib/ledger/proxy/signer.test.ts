@@ -1,15 +1,14 @@
-import browser from 'webextension-polyfill';
-
 import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
-
-jest.mock('../index', () => ({
-  createLedgerSigner: jest.fn()
-}));
+import browser from 'webextension-polyfill';
 
 import { createLedgerSigner } from '../index';
 import { TransportType } from '../types';
 
 import { TempleLedgerSignerProxy } from './signer';
+
+jest.mock('../index', () => ({
+  createLedgerSigner: jest.fn()
+}));
 
 const creatorArgs = {
   derivationPath: "44'/1969'/0'/0'",

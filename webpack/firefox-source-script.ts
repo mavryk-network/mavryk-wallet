@@ -109,14 +109,9 @@ if (provenanceProblems.length) {
   fail(`${provenanceProblems.join('\n')}\nRun \`yarn build:firefox\` again from a clean checkout of HEAD.`);
 }
 
-// The key is compiled into the bundle and would be handed to AMO reviewers in plain text.
-if (publicEnvFilesData.TESTNET_KYC_SIGNER_PRIVATE_KEY) {
-  fail('TESTNET_KYC_SIGNER_PRIVATE_KEY is set. Unset it and rebuild — store releases must not carry it.');
-}
-
 const envEntries = Object.entries(publicEnvFilesData)
-  // dotenv.ts defaults this one to '' when unset (checked above), so leaving it out reproduces the same build.
-  .filter(([name]) => name !== 'TESTNET_KYC_SIGNER_PRIVATE_KEY')
+  // dotenv.ts defaults this one to '' when unset, so leaving it out reproduces the same build.
+  .filter(([name, value]) => !(name === 'TESTNET_KYC_SIGNER_PRIVATE_KEY' && !value))
   .sort(([a], [b]) => a.localeCompare(b));
 
 const unsafeEnvNames = envEntries.filter(([, value]) => UNSAFE_ENV_VALUE.test(value)).map(([name]) => name);

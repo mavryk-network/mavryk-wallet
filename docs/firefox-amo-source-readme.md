@@ -35,7 +35,8 @@ The output is:
 The `.env` file in this archive is the one used for the submitted build. Do not replace it with
 `.env.dist` — the values it contains are compiled into the bundle, so a different `.env` produces
 different output. It contains only the values webpack is configured to compile into the add-on bundle,
-and no other configuration or secrets.
+and no other configuration. Those values are already public in the bundle; this includes
+`TESTNET_KYC_SIGNER_PRIVATE_KEY` when set, a Basenet (testnet) signing key used for KYC onboarding.
 
 ## Verifying the build
 

@@ -30,6 +30,19 @@ describe('createDecisionGate', () => {
     expect(declineAndClose).toHaveBeenCalledTimes(1);
   });
 
+  it('reports a decline deferred during a decision until it is applied on release', () => {
+    const gate = createDecisionGate(jest.fn());
+
+    gate.begin();
+    expect(gate.isDeclineDeferred()).toBe(false);
+
+    gate.declineOrDefer();
+    expect(gate.isDeclineDeferred()).toBe(true);
+
+    gate.release();
+    expect(gate.isDeclineDeferred()).toBe(false);
+  });
+
   it('does not decline on release when nothing was deferred', () => {
     const declineAndClose = jest.fn();
     const gate = createDecisionGate(declineAndClose);

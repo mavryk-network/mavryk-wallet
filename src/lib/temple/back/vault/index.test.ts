@@ -1,8 +1,13 @@
+import { MavrykToolkit, Signer } from '@mavrykdynamics/webmavryk';
+import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import browser from 'webextension-polyfill';
 
 import { WALLETS_SPECS_STORAGE_KEY } from 'lib/constants';
+import * as Helpers from 'lib/temple/helpers';
 import * as Passworder from 'lib/temple/passworder';
 import { TempleAccount, TempleAccountType, TempleChainKind } from 'lib/temple/types';
+
+import { PublicError } from '../PublicError';
 
 import { MIGRATIONS } from './migrations';
 import { createMemorySigner, mnemonicToTezosAccountCreds } from './misc';
@@ -421,5 +426,54 @@ describe('Vault legacy seed clean-up migration', () => {
 
     expect(await isStored(mnemonicStrgKey)).toBe(false);
     expect((await browser.storage.local.get(migrationLevelStrgKey))[migrationLevelStrgKey]).toBe(MIGRATIONS.length);
+  });
+});
+
+describe('Vault.sendOperations', () => {
+  const OP_BYTES = '00'.repeat(32) + '6c00';
+  const ACCOUNT_PKH = 'mv1HmdN1hRxhJW1aeLpGJdvAuBY48z38JjVq';
+  const RPC = 'https://rpc.example';
+  const accountSigner = {
+    sign: jest.fn().mockResolvedValue({ sbytes: 'signed', prefixSig: 'sig' }),
+    publicKey: jest.fn(),
+    publicKeyHash: jest.fn(),
+    secretKey: jest.fn()
+  };
+
+  beforeEach(() => {
+    accountSigner.sign.mockClear();
+    jest.spyOn(Vault.prototype as any, 'getSigner').mockResolvedValue({ signer: accountSigner, cleanup: jest.fn() });
+    // Stands in for the toolkit's batch send: it forges the operation and hands the bytes to the signer provider.
+    let signerProvider: Signer | undefined;
+    jest.spyOn(MavrykToolkit.prototype, 'setSignerProvider').mockImplementation(signer => {
+      signerProvider = signer;
+    });
+    jest
+      .spyOn(MavrykToolkit.prototype, 'contract', 'get')
+      .mockReturnValue({ batch: () => ({ send: () => signerProvider!.sign(OP_BYTES) }) } as any);
+    jest.spyOn(Helpers, 'loadFastRpcClient').mockReturnValue(new RpcClient(RPC) as any);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('does not reach the account signer when the beforeSign check refuses the operation bytes', async () => {
+    const refusal = new PublicError('This RPC serves an operation for a known Mavryk network. Signing was refused.');
+    const beforeSign = jest.fn().mockRejectedValue(refusal);
+
+    await expect(new Vault(passKey).sendOperations(ACCOUNT_PKH, RPC, [], beforeSign)).rejects.toThrow(refusal.message);
+
+    expect(beforeSign).toHaveBeenCalledWith(OP_BYTES);
+    expect(accountSigner.sign).not.toHaveBeenCalled();
+  });
+
+  it('signs the operation bytes once the beforeSign check passes', async () => {
+    const beforeSign = jest.fn().mockResolvedValue(undefined);
+
+    await new Vault(passKey).sendOperations(ACCOUNT_PKH, RPC, [], beforeSign);
+
+    expect(beforeSign).toHaveBeenCalledWith(OP_BYTES);
+    expect(accountSigner.sign).toHaveBeenCalledWith(OP_BYTES, undefined);
+    expect(beforeSign.mock.invocationCallOrder[0]).toBeLessThan(accountSigner.sign.mock.invocationCallOrder[0]);
   });
 });

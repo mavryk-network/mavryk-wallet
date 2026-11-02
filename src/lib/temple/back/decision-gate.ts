@@ -24,8 +24,14 @@ export function createDecisionGate(declineAndClose: () => void) {
 
   const release = () => {
     deciding = false;
-    if (declineDeferred) declineOrDefer();
+    if (declineDeferred) {
+      declineDeferred = false;
+      declineOrDefer();
+    }
   };
 
-  return { begin, release, declineOrDefer };
+  /** A decline arrived during the decision; a step that has not signed yet should stop rather than sign */
+  const isDeclineDeferred = () => declineDeferred;
+
+  return { begin, release, declineOrDefer, isDeclineDeferred };
 }

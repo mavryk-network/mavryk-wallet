@@ -193,7 +193,6 @@ export async function requestOperation(
 
   return new Promise(async (resolve, reject) => {
     const id = nanoid();
-    const beforeSign = isDAppRpc ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain) : undefined;
 
     await requestConfirm({
       id,
@@ -210,21 +209,33 @@ export async function requestOperation(
       onDecline: () => {
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
       },
-      handleIntercomRequest: (confirmReq, decline) =>
-        handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign)
+      handleIntercomRequest: (confirmReq, decline, isDeclineDeferred) => {
+        const beforeSign = isDAppRpc
+          ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain, isDeclineDeferred)
+          : undefined;
+
+        return handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign);
+      }
     });
   });
 }
 
-/** Tells the confirm window while the operation is verified before signing, which can take about one block. */
+/**
+ * Tells the confirm window while the operation is verified before signing, which can take about one block. Closing
+ * the window or the auto-decline deadline during that time is only deferred, so it is honoured here, before signing.
+ */
 const withVerifyingNotice =
-  (id: string, verify: (opBytes: string) => Promise<void>) =>
+  (id: string, verify: (opBytes: string) => Promise<void>, isDeclineDeferred: () => boolean) =>
   async (opBytes: string): Promise<void> => {
     intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: true });
     try {
       await verify(opBytes);
     } finally {
       intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: false });
+    }
+
+    if (isDeclineDeferred()) {
+      throw new Error(MavrykWalletDAppErrorType.NotGranted);
     }
   };
 
@@ -482,7 +493,7 @@ type RequestConfirmParams = {
   /** Runs when the confirm UI first reads the payload; a failure declines and closes the prompt. */
   preparePayload?: (payload: TempleDAppPayload) => Promise<TempleDAppPayload>;
   onDecline: () => void;
-  handleIntercomRequest: (req: TempleRequest, decline: () => void) => Promise<any>;
+  handleIntercomRequest: (req: TempleRequest, decline: () => void, isDeclineDeferred: () => boolean) => Promise<any>;
 };
 
 async function requestConfirm({ id, payload, preparePayload, onDecline, handleIntercomRequest }: RequestConfirmParams) {
@@ -559,7 +570,7 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
       try {
         if (isDecision) assertOperationPreviewVerified(req, payload);
 
-        const result = await handleIntercomRequest(req, onDecline);
+        const result = await handleIntercomRequest(req, onDecline, gate.isDeclineDeferred);
         if (result) {
           handled = true;
           close();

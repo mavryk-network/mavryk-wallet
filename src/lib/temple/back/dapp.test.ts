@@ -7,6 +7,7 @@ import { TempleMessageType } from 'lib/temple/types';
 
 import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import { consumeConfirmToken, getAllDApps, removeDAppSessionsForPkhs, requestOperation } from './dapp';
+import { assertBranchNotOnBuiltInChain } from './dapp-network';
 import { intercom } from './defaults';
 import { dryRunOpParams } from './dryrun';
 import { inited, locked, unlocked } from './store';
@@ -36,8 +37,16 @@ jest.mock('./dryrun', () => ({
   dryRunOpParams: jest.fn(() => Promise.resolve(VERIFIED_DRY_RUN))
 }));
 
+jest.mock('./dapp-network', () => ({
+  ...jest.requireActual('./dapp-network'),
+  assertBranchNotOnBuiltInChain: jest.fn(() => Promise.resolve())
+}));
+
 const mockedRemoveDAppPublicKey = Beacon.removeDAppPublicKey as jest.MockedFunction<typeof Beacon.removeDAppPublicKey>;
 const mockedDryRunOpParams = dryRunOpParams as jest.MockedFunction<typeof dryRunOpParams>;
+const mockedAssertBranchNotOnBuiltInChain = assertBranchNotOnBuiltInChain as jest.MockedFunction<
+  typeof assertBranchNotOnBuiltInChain
+>;
 
 describe('consumeConfirmToken', () => {
   it('accepts a matching token once', () => {
@@ -312,6 +321,58 @@ describe('requestConfirm decision finalisation', () => {
 
     expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
     expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
+  });
+
+  it.each([
+    ['the confirm window is closed', () => winRemovedListeners.forEach(listener => listener(CONFIRM_WIN_ID))],
+    ['the auto-decline deadline passes', () => jest.advanceTimersByTime(DAPP_CONFIRMATION_AUTODECLINE_MS + 1)]
+  ])('does not sign when %s while the operation is being verified', async (_label, declineDuringVerification) => {
+    const verification = createDeferred<void>();
+    mockedAssertBranchNotOnBuiltInChain.mockClear().mockReturnValueOnce(verification.promise);
+    const sign = jest.fn();
+    // Stands in for the vault: the signer only signs once beforeSign has passed the operation bytes.
+    const sendOperations = jest.fn(async (...args: any[]) => {
+      await args[3]('00'.repeat(32));
+      sign();
+      return { hash: 'opHash', results: [] };
+    });
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    const decision = deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    decision.catch(() => undefined);
+    await flushMicrotasks();
+    expect(mockedAssertBranchNotOnBuiltInChain).toHaveBeenCalledTimes(1);
+
+    declineDuringVerification();
+    verification.resolve();
+
+    await expect(decision).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+    await flushMicrotasks();
+
+    expect(sign).not.toHaveBeenCalled();
+    expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
+    expect(handlers).toHaveLength(0);
+  });
+
+  it('signs a verified operation when nothing declined it during verification', async () => {
+    const sign = jest.fn();
+    const sendOperations = jest.fn(async (...args: any[]) => {
+      await args[3]('00'.repeat(32));
+      sign();
+      return { hash: 'opHash', results: [] };
+    });
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    await deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    await flushMicrotasks();
+
+    expect(sign).toHaveBeenCalledTimes(1);
+    expect(outcome).toHaveBeenCalledWith('resolved', {
+      type: MavrykWalletDAppMessageType.OperationResponse,
+      opHash: 'opHash'
+    });
   });
 
   it('signs the confirmed operation when the dry-run produced the forged operation', async () => {

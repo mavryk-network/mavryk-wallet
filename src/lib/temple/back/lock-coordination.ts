@@ -1,12 +1,10 @@
 import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
-import { BACKGROUND_IS_WORKER } from 'lib/env';
 import { TempleStatus } from 'lib/temple/types';
 import { getAuthTokensFromStorage, isJwtExpiringSoon } from 'mavryk/api';
 
 import { createAutolockEnforcer } from './autolock';
 import { JWT_EXPIRING_SOON_THRESHOLD_MS } from './constants';
 import { store } from './store';
-import { Vault } from './vault';
 
 /**
  * Serialises wallet locks with unlock flows. The lock itself is passed in to avoid importing actions.ts.
@@ -52,12 +50,12 @@ export function createLockCoordinator(lockWallet: () => Promise<void>) {
   };
 
   /** Runs a password unlock's vault setup after every lock in flight, and rejects it if a lock lands meanwhile */
-  const unlockAfterLocks = async <T>(setupVault: () => Promise<T>) => {
+  const unlockAfterLocks = async <T>(setupVault: (isInterruptedByLock: () => boolean) => Promise<T>) => {
     const isInterruptedByLock = await waitForLocks();
-    const unlockedState = await setupVault();
+    const unlockedState = await setupVault(isInterruptedByLock);
     if (isInterruptedByLock()) {
-      // Vault.setup may have saved the session pass hash after the lock forgot it
-      if (BACKGROUND_IS_WORKER) await Vault.forgetSession();
+      // The setup may have saved the session pass hash or auth tokens after the lock cleared them, so it locks again
+      await lockWallet();
       throw new Error(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
     }
 

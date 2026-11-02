@@ -8,7 +8,8 @@ import {
   isJwtExpiringSoon,
   logoutAuth,
   refreshAuthTokens,
-  requestAuthChallenge
+  requestAuthChallenge,
+  verifyAuthSignature
 } from 'mavryk/api';
 
 import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
@@ -62,6 +63,7 @@ const mockedIsJwtExpiringSoon = isJwtExpiringSoon as jest.MockedFunction<typeof 
 const mockedRefreshAuthTokens = refreshAuthTokens as jest.MockedFunction<typeof refreshAuthTokens>;
 const mockedRequestAuthChallenge = requestAuthChallenge as jest.MockedFunction<typeof requestAuthChallenge>;
 const mockedLogoutAuth = logoutAuth as jest.MockedFunction<typeof logoutAuth>;
+const mockedVerifyAuthSignature = verifyAuthSignature as jest.MockedFunction<typeof verifyAuthSignature>;
 
 const testAccount: TempleAccount = {
   id: 'account-1',
@@ -241,6 +243,37 @@ describe('actions lock serialization', () => {
     expect(store.getState().status).toBe(TempleStatus.Locked);
     expect(store.getState().vault).toBeNull();
     expect(mockedRequestAuthChallenge).not.toHaveBeenCalled();
+  });
+
+  it('keeps the wallet locked and rejects wallet creation when a lock lands during its auth challenge', async () => {
+    const challengeDeferred = createDeferred<any>();
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    const fetchSettings = jest.fn().mockResolvedValue({});
+
+    mockedVault.spawn.mockResolvedValue(testAccount.publicKeyHash);
+    mockedVault.setup.mockResolvedValue({ fetchAccounts, fetchSettings } as any);
+    mockedRequestAuthChallenge.mockReturnValue(challengeDeferred.promise);
+    mockedVerifyAuthSignature.mockResolvedValue(undefined as any);
+    mockedLogoutAuth.mockResolvedValue(undefined as any);
+
+    const registration = registerNewWallet('password');
+    await flushPromises();
+    expect(mockedRequestAuthChallenge).toHaveBeenCalledTimes(1);
+
+    await lock();
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
+
+    // The auth tokens saved by verifyAuthSignature land after the lock already logged out
+    challengeDeferred.resolve({ nonce: 'nonce', challenge: 'challenge' });
+    await expect(registration).rejects.toThrow(UNLOCK_INTERRUPTED_BY_LOCK_ERROR);
+
+    expect(store.getState().status).toBe(TempleStatus.Locked);
+    expect(store.getState().vault).toBeNull();
+    expect(mockedVerifyAuthSignature).toHaveBeenCalledTimes(1);
+    expect(mockedLogoutAuth).toHaveBeenCalledTimes(2);
+    expect(mockedLogoutAuth.mock.invocationCallOrder[1]).toBeGreaterThan(
+      mockedVerifyAuthSignature.mock.invocationCallOrder[0]
+    );
   });
 
   it('forgets the session pass hash that an aborted password unlock saved after the lock', async () => {

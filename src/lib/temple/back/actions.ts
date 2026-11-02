@@ -238,8 +238,12 @@ export function registerNewWallet(password: string, mnemonic?: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
       const accountPkh = await Vault.spawn(password, mnemonic);
-      const unlockedState = await unlockAfterLocks(() => setupUnlockedVaultState(password));
-      await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
+      // Auth runs inside the guarded setup, so a lock landing during its network calls still aborts the creation
+      const unlockedState = await unlockAfterLocks(async isInterruptedByLock => {
+        const state = await setupUnlockedVaultState(password);
+        if (!isInterruptedByLock()) await performAuthForAccount(state.vault, accountPkh, state.accounts);
+        return state;
+      });
       unlocked(unlockedState);
 
       return accountPkh;

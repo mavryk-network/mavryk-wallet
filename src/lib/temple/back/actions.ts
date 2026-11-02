@@ -60,6 +60,7 @@ import {
 } from './dapp';
 import { DAppContactsResponse, isDAppContactsRequest, processDAppContactsRequest } from './dapp-contacts';
 import { DAPP_TOO_MANY_PENDING_REQUESTS_ERROR, enqueueDApp, enqueueDAppForOrigin } from './dapp-queue';
+import { createDecisionGate } from './decision-gate';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
@@ -567,35 +568,19 @@ const promisableUnlock = async (
   });
 
   let closing = false;
-  // While a decision is being processed, auto-decline and disconnect are deferred, never applied mid-sign.
-  let deciding = false;
-  let declineDeferred = false;
 
   const decline = () => {
     reject(new Error('Declined'));
   };
-  const declineAndClose = () => {
-    if (deciding) {
-      declineDeferred = true;
-      return;
-    }
-
+  const gate = createDecisionGate(() => {
     decline();
     closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
-  };
-  const releaseDecision = () => {
-    deciding = false;
-    if (declineDeferred) declineAndClose();
-  };
+  });
 
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
     if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
       assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
-
-      if (deciding) {
-        throw new Error('Confirmation is already being processed');
-      }
-      deciding = true;
+      gate.begin();
 
       if (req.confirmed) {
         try {
@@ -614,7 +599,7 @@ const promisableUnlock = async (
           if (err instanceof MavrykOperationError) {
             reject(err);
           } else {
-            releaseDecision();
+            gate.release();
             throw err;
           }
         }
@@ -631,10 +616,10 @@ const promisableUnlock = async (
     return undefined;
   });
 
-  const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
+  const stopDisconnectListening = intercom.onDisconnect(port, gate.declineOrDefer);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
+  const t = setTimeout(gate.declineOrDefer, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
 };
 
@@ -664,42 +649,26 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
         });
 
         let closing = false;
-        // While a decision is being processed, auto-decline and disconnect are deferred, never applied mid-sign.
-        let deciding = false;
-        let declineDeferred = false;
 
         const decline = () => {
           reject(new Error('Declined'));
         };
-        const declineAndClose = () => {
-          if (deciding) {
-            declineDeferred = true;
-            return;
-          }
-
+        const gate = createDecisionGate(() => {
           decline();
           closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
-        };
-        const releaseDecision = () => {
-          deciding = false;
-          if (declineDeferred) declineAndClose();
-        };
+        });
 
         const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
           if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
             assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
-
-            if (deciding) {
-              throw new Error('Confirmation is already being processed');
-            }
-            deciding = true;
+            gate.begin();
 
             if (req.confirmed) {
               try {
                 const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
                 resolve(result);
               } catch (err) {
-                releaseDecision();
+                gate.release();
                 throw err;
               }
             } else {
@@ -715,10 +684,10 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
           return undefined;
         });
 
-        const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
+        const stopDisconnectListening = intercom.onDisconnect(port, gate.declineOrDefer);
 
         // Decline after timeout
-        const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
+        const t = setTimeout(gate.declineOrDefer, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
         const stopTimeout = () => clearTimeout(t);
       })
   );

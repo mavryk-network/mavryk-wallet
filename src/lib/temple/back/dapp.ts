@@ -42,6 +42,7 @@ import {
   resolveNetwork,
   type ResolvedNetwork
 } from './dapp-network';
+import { createDecisionGate } from './decision-gate';
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
@@ -499,24 +500,10 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
     } catch (_err) {}
   };
 
-  // While a decision is being processed, auto-decline and window removal are deferred, never applied mid-sign.
-  let deciding = false;
-  let declineDeferred = false;
-
-  const declineAndClose = () => {
-    if (deciding) {
-      declineDeferred = true;
-      return;
-    }
-
+  const gate = createDecisionGate(() => {
     onDecline();
     close();
-  };
-
-  const releaseDecision = () => {
-    deciding = false;
-    if (declineDeferred) declineAndClose();
-  };
+  });
 
   const initialConfirmToken = nanoid();
   let confirmToken: string | null = initialConfirmToken;
@@ -536,7 +523,7 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
         try {
           payload = await preparePayload(payload);
         } catch (err) {
-          declineAndClose();
+          gate.declineOrDefer();
           throw err;
         }
       }
@@ -566,12 +553,7 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
       assertConfirmUiPortInfo(portInfo);
 
       const isDecision = isDAppDecisionRequest(req, id);
-      if (isDecision) {
-        if (deciding) {
-          throw new Error('Confirmation is already being processed');
-        }
-        deciding = true;
-      }
+      if (isDecision) gate.begin();
 
       let handled = false;
       try {
@@ -585,7 +567,7 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
         }
       } finally {
         // A decision the handler did not take (wrong type, or it threw) must not keep auto-decline suspended.
-        if (isDecision && !handled) releaseDecision();
+        if (isDecision && !handled) gate.release();
       }
     }
   });
@@ -603,14 +585,14 @@ async function requestConfirm({ id, payload, preparePayload, onDecline, handleIn
 
   const handleWinRemoved = (winId: number) => {
     if (winId === confirmWin?.id) {
-      declineAndClose();
+      gate.declineOrDefer();
     }
   };
   browser.windows.onRemoved.addListener(handleWinRemoved);
   const stopWinRemovedListening = () => browser.windows.onRemoved.removeListener(handleWinRemoved);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, DAPP_CONFIRMATION_AUTODECLINE_MS);
+  const t = setTimeout(gate.declineOrDefer, DAPP_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
 }
 

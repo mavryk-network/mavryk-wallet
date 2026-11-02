@@ -1,12 +1,25 @@
+import { num2PaddedHex } from '@mavrykdynamics/webmavryk-utils';
+
 import {
   buildAuthChallengePayloadHex,
   buildLegacyAuthChallengePayloadHex,
   buildMavrykSignedMessagePayloadHex,
   buildMichelineStringPayloadHex,
-  MICHELINE_WATERMARK
+  MICHELINE_WATERMARK,
+  utf8ToHex
 } from 'mavryk/api/auth-payload.helpers';
 
 import { prepareDAppSignPayload } from './sign-payload.helpers';
+
+const MICHELINE_BYTES_TAG = '0a';
+const MICHELINE_SEQUENCE_TAG = '02';
+const MICHELINE_PAIR_PRIM = '0707';
+
+const lengthPrefixed = (hex: string) => `${num2PaddedHex(hex.length / 2, 32)}${hex}`;
+const stringNode = (message: string) => `01${lengthPrefixed(utf8ToHex(message))}`;
+const bytesNode = (message: string) => `${MICHELINE_BYTES_TAG}${lengthPrefixed(utf8ToHex(message))}`;
+const sequenceNode = (...nodes: string[]) => `${MICHELINE_SEQUENCE_TAG}${lengthPrefixed(nodes.join(''))}`;
+const pairNode = (left: string, right: string) => `${MICHELINE_PAIR_PRIM}${left}${right}`;
 
 describe('prepareDAppSignPayload', () => {
   const backendAuthChallenge =
@@ -109,6 +122,67 @@ describe('prepareDAppSignPayload', () => {
     expect(prepareDAppSignPayload(`0x${payload}`)).toEqual({
       payload,
       preview: 'hello',
+      bytesToSign: payload.slice(MICHELINE_WATERMARK.length),
+      watermark: MICHELINE_WATERMARK
+    });
+  });
+
+  it('rejects payloads with trailing bytes after the previewed Micheline value', () => {
+    expect(() => prepareDAppSignPayload(`${MICHELINE_WATERMARK}${stringNode('benign')}deadbeef`)).toThrow(
+      'displayable Micheline preview'
+    );
+  });
+
+  it('rejects payloads whose declared length overruns the available bytes', () => {
+    expect(() => prepareDAppSignPayload(`${MICHELINE_WATERMARK}0100000010${utf8ToHex('short')}`)).toThrow(
+      'displayable Micheline preview'
+    );
+  });
+
+  it('rejects wallet auth challenges framed as a Micheline bytes literal', () => {
+    expect(() =>
+      prepareDAppSignPayload(`${MICHELINE_WATERMARK}${bytesNode(backendAuthChallenge)}`, 'https://example.com')
+    ).toThrow('Auth challenge payloads cannot be signed by dApps');
+  });
+
+  it('rejects wallet auth challenges wrapped in a Micheline sequence', () => {
+    expect(() =>
+      prepareDAppSignPayload(
+        `${MICHELINE_WATERMARK}${sequenceNode(stringNode(backendAuthChallenge))}`,
+        'https://example.com'
+      )
+    ).toThrow('Auth challenge payloads cannot be signed by dApps');
+  });
+
+  it('rejects wallet auth challenges nested inside a Pair', () => {
+    expect(() =>
+      prepareDAppSignPayload(
+        `${MICHELINE_WATERMARK}${pairNode(stringNode('hello'), bytesNode(backendAuthChallenge))}`,
+        'https://example.com'
+      )
+    ).toThrow('Auth challenge payloads cannot be signed by dApps');
+  });
+
+  it('rejects legacy Tezos signed message framing nested in a bytes literal', () => {
+    expect(() =>
+      prepareDAppSignPayload(`${MICHELINE_WATERMARK}${sequenceNode(bytesNode('Tezos Signed Message: hello'))}`)
+    ).toThrow('Mavryk Signed Message framing');
+  });
+
+  it('allows wallet auth challenges wrapped in a sequence from a trusted origin', () => {
+    const payload = `${MICHELINE_WATERMARK}${sequenceNode(stringNode(backendAuthChallenge))}`;
+
+    expect(prepareDAppSignPayload(payload, 'https://nexus.mavryk.org').bytesToSign).toBe(
+      payload.slice(MICHELINE_WATERMARK.length)
+    );
+  });
+
+  it('allows displayable Pair payloads', () => {
+    const payload = `${MICHELINE_WATERMARK}${pairNode(stringNode('hello'), '0001')}`;
+
+    expect(prepareDAppSignPayload(payload)).toEqual({
+      payload,
+      preview: 'Pair "hello" 1',
       bytesToSign: payload.slice(MICHELINE_WATERMARK.length),
       watermark: MICHELINE_WATERMARK
     });

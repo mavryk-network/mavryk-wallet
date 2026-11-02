@@ -2543,6 +2543,9 @@
   "txIsLikelyToFail": {
     "message": "Warning! Transaction is likely to fail."
   },
+  "operationCannotBeVerified": {
+    "message": "This operation could not be simulated on the network, so the wallet cannot verify what you would sign. It cannot be confirmed. Cancel it and try again later."
+  },
   "copyErrorLogs": {
     "message": "Copy Error Logs"
   },

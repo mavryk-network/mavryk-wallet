@@ -141,6 +141,8 @@ const ConfirmDAppForm: FC = () => {
 
   const payload = data!;
   const payloadError = data!.error;
+  // Without the locally forged operation the preview cannot be trusted to match what would be signed.
+  const unverifiedOperation = payload.type === 'confirm_operations' && !payload.rawToSign;
 
   const connectedAccount = useMemo(
     () =>
@@ -374,6 +376,10 @@ const ConfirmDAppForm: FC = () => {
                 </>
               )}
 
+              {unverifiedOperation && !payloadError && (
+                <Alert type="error" title="Error" description={t('operationCannotBeVerified')} className="mb-4" />
+              )}
+
               {payloadError && (
                 <AlertWithCollapse
                   wrapperClassName="w-full mb-4 mt-0"
@@ -384,7 +390,7 @@ const ConfirmDAppForm: FC = () => {
                   }
                   description={
                     <span>
-                      <T id="txIsLikelyToFail" />
+                      <T id={unverifiedOperation ? 'operationCannotBeVerified' : 'txIsLikelyToFail'} />
                     </span>
                   }
                 >
@@ -426,6 +432,7 @@ const ConfirmDAppForm: FC = () => {
               type="button"
               className="justify-center w-full"
               loading={confirming}
+              disabled={unverifiedOperation}
               onClick={handleConfirmClick}
               testID={content.confirmActionTestID}
               testIDProperties={{ operationType: payload.type }}

@@ -8,6 +8,7 @@ import { TempleMessageType } from 'lib/temple/types';
 import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import { consumeConfirmToken, getAllDApps, removeDAppSessionsForPkhs, requestOperation } from './dapp';
 import { intercom } from './defaults';
+import { dryRunOpParams } from './dryrun';
 import { inited, locked, unlocked } from './store';
 
 jest.mock('lib/temple/beacon', () => ({
@@ -20,12 +21,22 @@ jest.mock('lib/temple/helpers', () => ({
   loadChainId: jest.fn(() => Promise.reject(new Error('offline')))
 }));
 
+const VERIFIED_DRY_RUN = {
+  result: {
+    bytesToSign: 'deadbeef',
+    rawToSign: { branch: 'BL', contents: [] },
+    estimates: [],
+    opParams: []
+  }
+};
+
 jest.mock('./dryrun', () => ({
   ...jest.requireActual('./dryrun'),
-  dryRunOpParams: jest.fn(() => Promise.resolve(null))
+  dryRunOpParams: jest.fn(() => Promise.resolve(VERIFIED_DRY_RUN))
 }));
 
 const mockedRemoveDAppPublicKey = Beacon.removeDAppPublicKey as jest.MockedFunction<typeof Beacon.removeDAppPublicKey>;
+const mockedDryRunOpParams = dryRunOpParams as jest.MockedFunction<typeof dryRunOpParams>;
 
 describe('consumeConfirmToken', () => {
   it('accepts a matching token once', () => {
@@ -276,5 +287,43 @@ describe('requestConfirm decision finalisation', () => {
     expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
     expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
     expect(handlers).toHaveLength(0);
+  });
+  it.each([
+    ['an error', { error: [new Error('estimate failed')] }],
+    ['nothing', null]
+  ])('refuses to sign when the dry-run returned %s instead of the forged operation', async (_label, dryRun) => {
+    mockedDryRunOpParams.mockResolvedValueOnce(dryRun);
+    const sendOperations = jest.fn();
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    await expect(deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true })).rejects.toThrow(
+      MavrykWalletDAppErrorType.InvalidParams
+    );
+    await flushMicrotasks();
+
+    expect(sendOperations).not.toHaveBeenCalled();
+    expect(outcome).not.toHaveBeenCalled();
+
+    await deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: false });
+    await flushMicrotasks();
+
+    expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
+    expect(windowsApi.remove.mock.calls.map(([winId]: [number]) => winId)).toEqual([CONFIRM_WIN_ID]);
+  });
+
+  it('signs the confirmed operation when the dry-run produced the forged operation', async () => {
+    const sendOperations = jest.fn(() => Promise.resolve({ hash: 'opHash', results: [] }));
+    unlocked({ vault: { sendOperations } as any, accounts: [], settings: {} });
+
+    const { id, outcome } = await startOperationRequest();
+    await deliver({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true });
+    await flushMicrotasks();
+
+    expect(sendOperations).toHaveBeenCalledTimes(1);
+    expect(outcome).toHaveBeenCalledWith('resolved', {
+      type: MavrykWalletDAppMessageType.OperationResponse,
+      opHash: 'opHash'
+    });
   });
 });

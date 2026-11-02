@@ -417,6 +417,18 @@ const DAPP_DECISION_REQUEST_TYPES = new Set<TempleMessageType>([
 const isDAppDecisionRequest = (req: TempleRequest, id: string) =>
   DAPP_DECISION_REQUEST_TYPES.has(req?.type) && 'id' in req && req.id === id;
 
+// An operation may only be approved when the preview was built from the locally forged operation (rawToSign).
+const assertOperationPreviewVerified = (req: TempleRequest, payload: TempleDAppPayload) => {
+  if (
+    req?.type === TempleMessageType.DAppOpsConfirmationRequest &&
+    req.confirmed &&
+    payload.type === 'confirm_operations' &&
+    !payload.rawToSign
+  ) {
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
+  }
+};
+
 type RequestConfirmParams = {
   id: string;
   payload: TempleDAppPayload;
@@ -506,6 +518,8 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
 
       let handled = false;
       try {
+        if (isDecision) assertOperationPreviewVerified(req, payload);
+
         const result = await handleIntercomRequest(req, onDecline);
         if (result) {
           handled = true;

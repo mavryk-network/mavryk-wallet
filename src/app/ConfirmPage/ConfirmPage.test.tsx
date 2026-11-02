@@ -5,6 +5,8 @@ import { act } from 'react-dom/test-utils';
 import { SWRConfig } from 'swr';
 
 import { confirmOperationsMock } from 'app/mocks/confirmPage.mock';
+import { intercom } from 'lib/temple/front/client';
+import { TempleMessageType } from 'lib/temple/types';
 
 import ConfirmPage from './ConfirmPage';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
@@ -29,6 +31,9 @@ jest.mock('lib/temple/front', () => ({
   useAccount: () => ({ publicKeyHash: 'mv1source' }),
   useRelevantAccounts: () => [],
   useChainIdValue: () => 'NetXchainid'
+}));
+jest.mock('lib/temple/front/client', () => ({
+  intercom: { subscribe: jest.fn(() => () => undefined) }
 }));
 jest.mock('lib/woozie', () => ({
   useLocation: () => ({ search: '?id=payload-id&token=payload-token' }),
@@ -129,5 +134,24 @@ describe('ConfirmPage operation verification', () => {
 
     expect(getConfirmButton()?.disabled).toBe(false);
     expect(container.textContent).not.toContain('operationCannotBeVerified');
+  });
+});
+
+describe('ConfirmPage operation branch verification notice', () => {
+  const mockedSubscribe = intercom.subscribe as jest.MockedFunction<typeof intercom.subscribe>;
+  const notify = (msg: object) => act(() => mockedSubscribe.mock.calls.forEach(([listener]) => listener(msg)));
+
+  it('shows a verifying state only while the background verifies this operation', async () => {
+    await renderWithPayload(confirmOperationsMock);
+    expect(container.textContent).not.toContain('verifyingOperation');
+
+    notify({ type: TempleMessageType.DAppOpsVerifying, id: 'other-id', verifying: true });
+    expect(container.textContent).not.toContain('verifyingOperation');
+
+    notify({ type: TempleMessageType.DAppOpsVerifying, id: 'payload-id', verifying: true });
+    expect(container.textContent).toContain('verifyingOperation');
+
+    notify({ type: TempleMessageType.DAppOpsVerifying, id: 'payload-id', verifying: false });
+    expect(container.textContent).not.toContain('verifyingOperation');
   });
 });

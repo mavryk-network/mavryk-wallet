@@ -18,7 +18,8 @@ jest.mock('lib/temple/beacon', () => ({
 
 jest.mock('lib/temple/helpers', () => ({
   ...jest.requireActual('lib/temple/helpers'),
-  loadChainId: jest.fn(() => Promise.reject(new Error('offline')))
+  loadChainId: jest.fn(() => Promise.reject(new Error('offline'))),
+  loadChainIdStrict: jest.fn(() => Promise.resolve('NetXunknownChain'))
 }));
 
 const VERIFIED_DRY_RUN = {
@@ -165,6 +166,7 @@ describe('requestConfirm decision finalisation', () => {
       dapp_sessions: {
         [ORIGIN]: {
           network: { name: 'Custom', rpc: 'https://rpc.example' },
+          chainId: 'NetXunknownChain',
           appMeta: { name: 'dApp' },
           pkh: PKH,
           publicKey: 'edpk'

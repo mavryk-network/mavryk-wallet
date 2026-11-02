@@ -1353,6 +1353,12 @@
   "unknownNetwork": {
     "message": "Unknown:"
   },
+  "unknownNetworkChainId": {
+    "message": "Chain ID:"
+  },
+  "verifyingOperation": {
+    "message": "Verifying operation..."
+  },
   "backupNewSeedPhrase": {
     "message": "Backup new Seed Phrase"
   },

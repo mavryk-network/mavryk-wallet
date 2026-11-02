@@ -84,6 +84,7 @@ import {
   legacyMigrationLevelStrgKey,
   walletMnemonicStrgKey
 } from './storage-keys';
+import { withBeforeSign } from './with-before-sign';
 
 const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
@@ -986,11 +987,16 @@ export class Vault {
     );
   }
 
-  async sendOperations(accPublicKeyHash: string, rpc: string, opParams: any[]) {
+  async sendOperations(
+    accPublicKeyHash: string,
+    rpc: string,
+    opParams: any[],
+    beforeSign?: (opBytes: string) => Promise<void>
+  ) {
     return this.withSigner(accPublicKeyHash, async signer => {
       const batch = await withError('Failed to send operations', async () => {
         const tezos = new MavrykToolkit(loadFastRpcClient(rpc));
-        tezos.setSignerProvider(signer);
+        tezos.setSignerProvider(beforeSign ? withBeforeSign(signer, beforeSign) : signer);
         tezos.setForgerProvider(new CompositeForger([tezos.getFactory(RpcForger)(), localForger]));
         tezos.setPackerProvider(michelEncoder);
         return tezos.contract.batch(opParams.map(formatOpParamsBeforeSend));

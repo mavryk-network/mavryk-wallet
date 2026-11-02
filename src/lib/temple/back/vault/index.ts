@@ -84,6 +84,7 @@ import {
   legacyMigrationLevelStrgKey,
   walletMnemonicStrgKey
 } from './storage-keys';
+import { fetchSyncPayloadData, fetchWalletMnemonic, removeOrphanedWalletMnemonic } from './wallet-mnemonics';
 import { withBeforeSign } from './with-before-sign';
 
 const TEMPLE_SYNC_PREFIX = 'templesync';
@@ -293,15 +294,7 @@ export class Vault {
 
   static async revealMnemonic(walletId: string, password: string) {
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to reveal seed phrase', async doThrow => {
-      const walletsSpecs = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
-
-      if (!(walletId in walletsSpecs)) {
-        throw doThrow();
-      }
-
-      return fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey);
-    });
+    return withError('Failed to reveal seed phrase', () => fetchWalletMnemonic(walletId, passKey));
   }
   static async generateSyncPayload(password: string) {
     let WasmThemis: typeof WasmThemisPackageInterface;
@@ -313,22 +306,8 @@ export class Vault {
     }
 
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to generate sync payload', async doThrow => {
-      const walletsSpecs = (await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {};
-      const [walletId] = Object.keys(walletsSpecs);
-
-      if (!walletId) {
-        throw doThrow();
-      }
-
-      const [mnemonic, allAccounts] = await Promise.all([
-        fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey),
-        fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey)
-      ]);
-
-      const hdAccounts = getSameGroupAccounts(allAccounts, TempleAccountType.HD, walletId);
-
-      const data = [mnemonic, hdAccounts.length];
+    return withError('Failed to generate sync payload', async () => {
+      const data = await fetchSyncPayloadData(passKey);
 
       const payload = Uint8Array.from(Buffer.from(JSON.stringify(data)));
       const cell = WasmThemis.SecureCellSeal.withPassphrase(password);
@@ -402,10 +381,7 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
       await savePlain(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
       await Vault.removeAccountsKeys([acc]);
-
-      if (acc.type === TempleAccountType.HD && !(acc.walletId in newWalletsSpecs)) {
-        await removeMany([walletMnemonicStrgKey(acc.walletId)]);
-      }
+      if (acc.type === TempleAccountType.HD) await removeOrphanedWalletMnemonic(acc.walletId, newWalletsSpecs);
 
       return { newAccounts, newWalletsSpecs };
     });

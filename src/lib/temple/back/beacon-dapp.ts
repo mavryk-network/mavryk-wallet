@@ -156,7 +156,7 @@ const getBeaconResponse = async (
         }
       })();
 
-      throw new Error(beaconErrorType);
+      throw new Error(beaconErrorType, { cause: err?.message });
     }
   } catch (err: any) {
     return {
@@ -269,6 +269,10 @@ const formatTempleReq = async (
 };
 
 function getErrorData(err: any) {
+  if (err?.cause === DAPP_TOO_MANY_PENDING_REQUESTS_ERROR) {
+    // Beacon has no "busy" error type, so expose the reason for dApps to retry on
+    return DAPP_TOO_MANY_PENDING_REQUESTS_ERROR;
+  }
   return err instanceof MavrykOperationError ? err.errors.map(({ contract_code, ...rest }: any) => rest) : undefined;
 }
 

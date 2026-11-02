@@ -182,7 +182,8 @@ describe('processDApp request queue gating', () => {
 
     expect(jest.requireActual('lib/temple/beacon').decodeMessage(res?.payload)).toMatchObject({
       type: Beacon.MessageType.Error,
-      errorType: Beacon.ErrorType.UNKNOWN_ERROR
+      errorType: Beacon.ErrorType.UNKNOWN_ERROR,
+      errorData: DAPP_TOO_MANY_PENDING_REQUESTS_ERROR
     });
 
     first.resolve(permissionRes);

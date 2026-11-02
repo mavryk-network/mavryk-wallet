@@ -24,7 +24,7 @@ import { assertBranchNotOnBuiltInChain } from './dapp-network';
 import { enqueueDAppForOrigin } from './dapp-queue';
 import { intercom } from './defaults';
 import { dryRunOpParams } from './dryrun';
-import { withUnlocked } from './store';
+import { locked, unlocked, withUnlocked } from './store';
 
 jest.mock('lib/temple/helpers', () => ({
   ...jest.requireActual('lib/temple/helpers'),
@@ -328,6 +328,21 @@ describe('dApp custom RPC chain binding', () => {
         { type: TempleMessageType.DAppOpsVerifying, id, verifying: false }
       ]);
     });
+
+    it('refuses to sign once the wallet was locked after the operation was approved', async () => {
+      mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
+      unlocked({ vault: {} as any, accounts: [], settings: {} });
+      try {
+        const { sendOperations } = await approveOperation(requestOperation(ORIGIN, OPERATION_REQUEST));
+        locked();
+        mockBuiltInHeads(1_000);
+        getBlockHash.mockReset().mockRejectedValue(notFound());
+
+        await expect(sendOperations.mock.calls[0][3](OP_BYTES)).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+      } finally {
+        locked();
+      }
+    });
   });
 
   it('signs for a custom-RPC session bound to mainnet through the public RPC, with no branch guard', async () => {
@@ -459,6 +474,47 @@ describe('dApp custom RPC chain binding', () => {
       await expect(stalled).rejects.toThrow(DAPP_OPERATION_TIMEOUT_ERROR);
       await expect(decision).resolves.toEqual({ type: TempleMessageType.DAppOpsConfirmationResponse });
       await expect(queued).resolves.toBe('served');
+    });
+
+    it('refuses to sign an operation the dApp was told timed out once its stalled RPC answers', async () => {
+      jest.useFakeTimers();
+      mockedLoadChainIdStrict.mockResolvedValue(UNKNOWN_CHAIN_ID);
+      let answerRpc!: () => void;
+      const rpcAnswer = new Promise<void>(resolve => (answerRpc = resolve));
+      const sign = jest.fn();
+      const sendOperations = jest.fn(async (...args: any[]) => {
+        await rpcAnswer;
+        await args[3](OP_BYTES);
+        sign();
+        return { hash: 'ooHash', results: [] };
+      });
+      mockedWithUnlocked.mockImplementation(fn => (fn as any)({ vault: { sendOperations } }));
+      const operation = requestOperation(ORIGIN, OPERATION_REQUEST);
+      operation.catch(() => undefined);
+      await flushMicrotasks();
+
+      const { id, token, handler } = await waitForConfirmWindow();
+      const port = {};
+      await handler({ type: TempleMessageType.DAppGetPayloadRequest, id, token }, port, {});
+      handler({ type: TempleMessageType.DAppOpsConfirmationRequest, id, confirmed: true }, port, {});
+      await flushMicrotasks();
+      jest.advanceTimersByTime(DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS);
+      await flushMicrotasks();
+      await expect(operation).rejects.toThrow(DAPP_OPERATION_TIMEOUT_ERROR);
+
+      // The branch is unknown to every built-in network, so only the abandoned request can refuse the signature
+      mockBuiltInHeads(1_000);
+      getBlockHash.mockReset().mockRejectedValue(notFound());
+      mockedBroadcast.mockClear();
+      answerRpc();
+
+      await expect(sendOperations.mock.results[0].value).rejects.toThrow(MavrykWalletDAppErrorType.NotGranted);
+      expect(sign).not.toHaveBeenCalled();
+      // Refused up front: the closed prompt is not told about a verification and the branch is not looked up
+      expect(getBlockHash).not.toHaveBeenCalled();
+      expect(mockedBroadcast).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: TempleMessageType.DAppOpsVerifying })
+      );
     });
 
     it("bounds the wallet network's chain id lookup so the operation prompt still opens in time", async () => {

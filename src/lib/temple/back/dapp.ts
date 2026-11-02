@@ -49,7 +49,7 @@ import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
 import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
-import { withUnlocked } from './store';
+import { store, withUnlocked } from './store';
 
 /** Not NotGranted: an operation that timed out may still be broadcast, since its RPC call was left in flight */
 export const DAPP_OPERATION_TIMEOUT_ERROR = 'OPERATION_TIMED_OUT';
@@ -219,12 +219,18 @@ export async function requestOperation(
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
       },
       handleIntercomRequest: (confirmReq, decline, isDeclineDeferred) => {
-        const beforeSign = isDAppRpc
-          ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain, isDeclineDeferred)
-          : undefined;
+        // Once the ceiling has failed the request, or the wallet locked, a stalled dApp RPC answering later must not sign
+        let isAbandoned = false;
+        const abandon = (err: Error) => {
+          isAbandoned = true;
+          reject(err);
+        };
+        const { vault: approvedVault } = store.getState();
+        const isRefused = () => isDeclineDeferred() || isAbandoned || store.getState().vault !== approvedVault;
+        const beforeSign = isDAppRpc ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain, isRefused) : undefined;
         const sent = handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign);
 
-        return isDAppRpc ? withDecisionCeiling(sent, reject) : sent;
+        return isDAppRpc ? withDecisionCeiling(sent, abandon) : sent;
       }
     });
   });
@@ -233,20 +239,23 @@ export async function requestOperation(
 /**
  * Tells the confirm window while the operation is verified before signing, which can take about one block. Closing
  * the window or the auto-decline deadline during that time is only deferred, so it is honoured here, before signing.
+ * A request already refused (declined, timed out or locked) is refused before the verification too.
  */
 const withVerifyingNotice =
-  (id: string, verify: (opBytes: string) => Promise<void>, isDeclineDeferred: () => boolean) =>
+  (id: string, verify: (opBytes: string) => Promise<void>, isRefused: () => boolean) =>
   async (opBytes: string): Promise<void> => {
+    const assertNotRefused = () => {
+      if (isRefused()) throw new Error(MavrykWalletDAppErrorType.NotGranted);
+    };
+
+    assertNotRefused();
     intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: true });
     try {
       await verify(opBytes);
     } finally {
       intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: false });
     }
-
-    if (isDeclineDeferred()) {
-      throw new Error(MavrykWalletDAppErrorType.NotGranted);
-    }
+    assertNotRefused();
   };
 
 /**

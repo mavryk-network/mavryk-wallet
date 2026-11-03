@@ -89,4 +89,4 @@ for (const [name, value] of Object.entries(publicEnvFilesData)) {
   }
 }
 
-export { envFilesData, publicEnvFilesData };
+export { dotenvFilesPaths, envFilesData, publicEnvFilesData };

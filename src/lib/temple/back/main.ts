@@ -11,9 +11,11 @@ import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
+import { getBeaconMessage, processBeacon } from './beacon-dapp';
 import { intercom } from './defaults';
 import { handleE2eResetMessage } from './e2e-reset-listener';
 import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
+import { startPagePresenceTracking } from './page-presence';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
@@ -21,6 +23,7 @@ const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.
 
 export const start = async () => {
   startUIOwner();
+  startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
 
@@ -251,16 +254,13 @@ const processRequest = async (
       };
 
     case TempleMessageType.Acknowledge: {
-      if (req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
-        const {
-          req: res,
-          recipientPubKey,
-          payload
-        } = await Actions.getBeaconMessage(req.origin, req.payload, req.encrypted);
+      const dAppEnabled = await Actions.isDAppEnabled();
+      if (dAppEnabled && req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
+        const { req: res, recipientPubKey, payload } = await getBeaconMessage(req.origin, req.payload, req.encrypted);
         if (payload) {
           return;
         }
-        if (!req) {
+        if (!res) {
           return;
         }
 
@@ -271,14 +271,14 @@ const processRequest = async (
           senderId: string;
         } = {
           version: '2',
-          senderId: await getSenderId(),
+          senderId: await getSenderId(req.origin),
           id: res?.id ?? '',
           type: MessageType.Acknowledge
         };
 
         return {
           type: TempleMessageType.Acknowledge,
-          payload: await encryptMessage(encodeMessage<Response>(response), recipientPubKey ?? ''),
+          payload: await encryptMessage(req.origin, encodeMessage<Response>(response), recipientPubKey ?? ''),
           encrypted: true
         };
       }
@@ -301,13 +301,13 @@ const processRequest = async (
         }
 
         if (!req.beacon) {
-          const resPayload = await Actions.processDApp(req.origin, req.payload);
+          const resPayload = await Actions.processDApp(req.origin, req.payload, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: resPayload ?? null
           };
         } else {
-          const res = await Actions.processBeacon(req.origin, req.payload, req.encrypted);
+          const res = await processBeacon(req.origin, req.payload, req.encrypted, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: res?.payload ?? null,

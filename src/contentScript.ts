@@ -2,6 +2,7 @@ import { MavrykWalletPageMessage, MavrykWalletPageMessageType } from '@mavrykdyn
 
 import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
+import { isBeaconPayloadWithinLimit } from 'lib/temple/beacon-payload';
 import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
@@ -108,12 +109,15 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
 function beaconRequest(evt: MessageEvent) {
   const { origin, data } = evt;
   const encrypted = Boolean(data.encryptedPayload);
+  const payload = data.encryptedPayload ?? data.payload;
+  if (!isBeaconPayloadWithinLimit(payload)) return;
+
   getIntercom()
     .request(
       {
         type: TempleMessageType.PageRequest,
         origin: origin,
-        payload: data.encryptedPayload ?? data.payload,
+        payload,
         beacon: true,
         encrypted: Boolean(data.encryptedPayload)
       },
@@ -144,7 +148,7 @@ function beaconRequest(evt: MessageEvent) {
     .request({
       type: TempleMessageType.Acknowledge,
       origin: origin,
-      payload: data.encryptedPayload ?? data.payload,
+      payload,
       beacon: true,
       encrypted: encrypted
     })

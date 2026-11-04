@@ -204,7 +204,8 @@ export const Toolbar: FC<ToolbarProps> = ({
     if ('IntersectionObserver' in window && toolbarEl) {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          setSticked(entry.boundingClientRect.y < entry.rootBounds!.y);
+          // rootBounds is null when the observer cannot measure the viewport (e.g. a hidden or detached page)
+          if (entry.rootBounds) setSticked(entry.boundingClientRect.y < entry.rootBounds.y);
         },
         { threshold: [1] }
       );

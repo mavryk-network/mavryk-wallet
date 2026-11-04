@@ -69,7 +69,24 @@ const publicEnvFilesData: Record<string, string> = Object.fromEntries(
 );
 
 // Basenet test releases also use production optimization. This optional key is public in every bundle.
+// Owner-accepted by design (bdb77b1b, AGENTS.md, confirmed in the security audit): it is a Basenet-only, low-value
+// registrar key and must stay a dedicated, minimally funded key that never controls mainnet funds or contracts.
 publicEnvFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] =
   envFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] ?? '';
+
+// Blocking by name alone cannot stop a blocked value from shipping under an allowed name.
+// Only effective when the blocked value is present at build time (local .env files or process env). The deploy
+// workflow never supplies SUPER_ADMIN_PRIVATE_KEY, so this does not guard Chrome Web Store release builds.
+const blockedPublicEnvVarValues = new Set(
+  BLOCKED_PUBLIC_ENV_VAR_NAMES.flatMap(name => [rawEnvFilesData[name]?.trim(), process.env[name]?.trim()]).filter(
+    isTruthy
+  )
+);
+
+for (const [name, value] of Object.entries(publicEnvFilesData)) {
+  if (blockedPublicEnvVarValues.has(value.trim())) {
+    throw new Error(`[.env] Public \`${name}\` reuses a blocked private value and must not be bundled`);
+  }
+}
 
 export { dotenvFilesPaths, envFilesData, publicEnvFilesData };

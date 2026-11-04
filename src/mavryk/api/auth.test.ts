@@ -279,4 +279,27 @@ describe('auth refresh', () => {
 
     consoleErrorSpy.mockRestore();
   });
+
+  it('clears local auth tokens without waiting for revocation when asked not to', async () => {
+    const adapter = jest.fn(() => new Promise<never>(() => undefined));
+
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage(
+      {
+        accessToken: buildJwt(Date.now() + 60_000),
+        refreshToken: 'mainnet-refresh-token'
+      },
+      authContext
+    );
+
+    await expect(logoutAuth({}, { awaitRevocation: false })).resolves.toBeUndefined();
+    // The revocation is still sent; it just isn't awaited
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(adapter).toHaveBeenCalledTimes(1);
+
+    await expect(getAuthTokensFromStorage(authContext)).resolves.toEqual({
+      accessToken: null,
+      refreshToken: null
+    });
+  });
 });

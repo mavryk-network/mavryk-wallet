@@ -1,4 +1,4 @@
-import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { FC, Fragment, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -19,7 +19,14 @@ import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
-import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
+import { intercom } from 'lib/temple/front/client';
+import {
+  TempleAccountType,
+  TempleDAppPayload,
+  TempleChainId,
+  TempleMessageType,
+  TempleNotification
+} from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { Link, useLocation } from 'lib/woozie';
@@ -141,6 +148,8 @@ const ConfirmDAppForm: FC = () => {
 
   const payload = data!;
   const payloadError = data!.error;
+  // Without the locally forged operation the preview cannot be trusted to match what would be signed.
+  const unverifiedOperation = payload.type === 'confirm_operations' && !payload.rawToSign;
 
   const connectedAccount = useMemo(
     () =>
@@ -167,6 +176,18 @@ const ConfirmDAppForm: FC = () => {
   const [error, setError] = useSafeState<any>(null);
   const [confirming, setConfirming] = useSafeState(false);
   const [declining, setDeclining] = useSafeState(false);
+  // Set while the background checks the operation's branch before signing, which can take about one block.
+  const [verifying, setVerifying] = useSafeState(false);
+
+  useEffect(
+    () =>
+      intercom.subscribe((msg: TempleNotification) => {
+        if (msg?.type === TempleMessageType.DAppOpsVerifying && msg.id === id) {
+          setVerifying(msg.verifying);
+        }
+      }),
+    [id, setVerifying]
+  );
 
   const revealFee = useMemo(() => {
     if (
@@ -355,7 +376,7 @@ const ConfirmDAppForm: FC = () => {
           ) : (
             <>
               <Divider color="bg-divider" className="mb-4" />
-              <NetworkBanner rpc={payload.networkRpc} />
+              <NetworkBanner rpc={payload.networkRpc} chainId={payload.chainId} />
               {payload.type !== 'connect' && connectedAccount && (
                 <>
                   <div className="w-full bg-primary-card rounded-lg px-4 py-3">
@@ -374,6 +395,10 @@ const ConfirmDAppForm: FC = () => {
                 </>
               )}
 
+              {unverifiedOperation && !payloadError && (
+                <Alert type="error" title={t('error')} description={t('operationCannotBeVerified')} className="mb-4" />
+              )}
+
               {payloadError && (
                 <AlertWithCollapse
                   wrapperClassName="w-full mb-4 mt-0"
@@ -384,7 +409,7 @@ const ConfirmDAppForm: FC = () => {
                   }
                   description={
                     <span>
-                      <T id="txIsLikelyToFail" />
+                      <T id={unverifiedOperation ? 'operationCannotBeVerified' : 'txIsLikelyToFail'} />
                     </span>
                   }
                 >
@@ -426,6 +451,7 @@ const ConfirmDAppForm: FC = () => {
               type="button"
               className="justify-center w-full"
               loading={confirming}
+              disabled={unverifiedOperation}
               onClick={handleConfirmClick}
               testID={content.confirmActionTestID}
               testIDProperties={{ operationType: payload.type }}
@@ -434,7 +460,20 @@ const ConfirmDAppForm: FC = () => {
             </FormSubmitButton>
           </div>
         </div>
-        <ConfirmLedgerOverlay displayed={confirming && connectedAccount?.type === TempleAccountType.Ledger} />
+        {verifying && (
+          <div
+            role="status"
+            className="absolute inset-0 p-8 flex flex-col items-center justify-center bg-primary-bg text-secondary-white"
+          >
+            <Spinner theme="primary" className="w-20" />
+            <p className="mt-6 text-base text-center">
+              <T id="verifyingOperation" />
+            </p>
+          </div>
+        )}
+        <ConfirmLedgerOverlay
+          displayed={confirming && !verifying && connectedAccount?.type === TempleAccountType.Ledger}
+        />
       </div>
     </CustomRpcContext.Provider>
   );

@@ -27,9 +27,6 @@ export class InternalConfirmationPage extends Page {
     } catch (error) {
       await this.confirmButton.waitForDisplayed(LONG_TIMEOUT);
       await this.declineButton.waitForDisplayed();
-      await this.bytesTab.waitForDisplayed();
-      await this.rawTab.waitForDisplayed();
-      await this.previewTab.waitForDisplayed();
     }
   }
 }

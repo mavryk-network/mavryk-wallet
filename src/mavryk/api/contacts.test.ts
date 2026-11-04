@@ -559,6 +559,28 @@ describe('contacts account data encryption', () => {
     expect(fetched.shouldReencrypt).toBe(true);
   });
 
+  it('refuses public-key-derived legacy records once the caller has migrated and passes no legacy key material', async () => {
+    const forgedRecords = [
+      await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY),
+      await encryptCurrentPayload(
+        GROUPED_CONTACTS,
+        await deriveSharedAccountDataKey(PUBLIC_KEY),
+        undefined,
+        CONTACTS_LEGACY_GCM_ENCRYPTION_VERSION
+      )
+    ];
+
+    for (const encryptedValue of forgedRecords) {
+      mavrykApi.defaults.adapter = jest.fn(async (config: AxiosRequestConfig) =>
+        createResponse(config, buildRecord(encryptedValue))
+      );
+
+      await expect(
+        fetchContactsRecord({ contactsKey: CONTACTS_KEY, legacyContactsKeys: [], authContext: AUTH_CONTEXT })
+      ).rejects.toThrow(CurrentContactsRecordDecryptionError);
+    }
+  });
+
   it('rewrites a fetched legacy v1 contacts record as current AES-GCM on save', async () => {
     const encryptedLegacyValue = await encryptLegacyPayload(GROUPED_CONTACTS, PUBLIC_KEY);
     const savedEncryptedValues: EncryptedValue[] = [];

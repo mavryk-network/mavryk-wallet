@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef } from 'react';
 
 import { isEqual } from 'lodash';
 
-import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
 import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 import { getAuthTokensFromStorage } from 'mavryk/api/storage';
 
@@ -16,6 +15,7 @@ import {
   canReadLegacyContacts,
   getCachedContactsState,
   getContactsBookScope,
+  getContactsLastSeenVersion,
   getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
 } from './contacts-settings';
@@ -182,8 +182,7 @@ export function useContactsSync(
           contactsStorageKey,
           contacts: syncedState.contacts,
           recordId: syncedState.recordId,
-          lastSeenVersion:
-            syncedState.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? syncedState.encryptionVersion : undefined,
+          lastSeenVersion: getContactsLastSeenVersion(syncedState),
           typesByAddress: syncedState.typesByAddress
         };
 

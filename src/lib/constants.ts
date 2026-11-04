@@ -5,6 +5,13 @@ export const AD_CATEGORIES_PARAM_NAME = 'categories';
 /** @deprecated */
 export const ACCOUNT_PKH_STORAGE_KEY = 'account_publickeyhash';
 
+/** Background mirrors of the page-side autolock state, read by the background to enforce the deadline */
+export const LOCK_UP_ENABLED_STORAGE_KEY = 'lock_up_enabled';
+export const LAST_PAGE_CLOSURE_STORAGE_KEY = 'last_page_closure_timestamp';
+
+/** Error message the background unlock rejects with when a lock lands while the unlock is in flight */
+export const UNLOCK_INTERRUPTED_BY_LOCK_ERROR = 'UNLOCK_INTERRUPTED_BY_LOCK';
+
 /** @deprecated */
 export const ADS_VIEWER_ADDRESS_STORAGE_KEY = 'ADS_VIEWER_ADDRESS';
 

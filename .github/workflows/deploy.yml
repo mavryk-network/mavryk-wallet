@@ -8,14 +8,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Gates nothing until a repo admin configures it in GitHub: create `chrome-web-store` with required reviewers,
+    # limit deployment refs to tags matching `v*`, move the four CHROME_* secrets into it as environment secrets,
+    # then delete the repo-level copies.
+    environment: chrome-web-store
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22.11.0
           cache: yarn
@@ -75,7 +81,7 @@ jobs:
           unzip -p dist/chrome.zip manifest.json | head -n 20
 
       - name: Deploy to Chrome Web Store
-        uses: trmcnvn/chrome-addon@v2
+        uses: trmcnvn/chrome-addon@7fc5a5ad3ff597dc64d6a13de7dcaa8515328be7 # v2
         with:
           extension: ${{ secrets.CHROME_EXTENSION_ID }}
           zip: dist/chrome.zip

@@ -1,5 +1,9 @@
 import browser from 'webextension-polyfill';
 
+import {
+  DAPP_CONFIRMATION_AUTODECLINE_MS,
+  IN_WALLET_CONFIRMATION_AUTODECLINE_MS
+} from 'lib/temple/confirmation-timeouts';
 import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleMessageType } from 'lib/temple/types';
 
@@ -108,6 +112,33 @@ describe('IntercomClient', () => {
     await assertion;
     expect(hasRejected).toBe(true);
   });
+
+  it.each([
+    [TempleMessageType.OperationsRequest, IN_WALLET_CONFIRMATION_AUTODECLINE_MS, TempleMessageType.ConfirmationRequest],
+    [TempleMessageType.SignRequest, IN_WALLET_CONFIRMATION_AUTODECLINE_MS, TempleMessageType.ConfirmationRequest],
+    [TempleMessageType.PageRequest, DAPP_CONFIRMATION_AUTODECLINE_MS, TempleMessageType.DAppOpsConfirmationRequest]
+  ])(
+    'delivers the %s result when the decision lands just before auto-decline and finishes after the grace window',
+    async (outerType, autodeclineMs, decisionType) => {
+      const client = new IntercomClient();
+      const promise = client.request({ type: outerType }, { timeoutMs: getTempleRequestTimeoutMs(outerType) });
+      const sentMessage = ports[0].postMessage.mock.calls[0][0];
+      let outcome: unknown;
+      promise.then(
+        res => (outcome = res),
+        err => (outcome = err)
+      );
+
+      // Confirmed at deadline - 1; the vault then uses its whole decision budget (e.g. slow Ledger review).
+      jest.advanceTimersByTime(autodeclineMs - 1 + getTempleRequestTimeoutMs(decisionType) - 1);
+      await Promise.resolve();
+      expect(outcome).toBeUndefined();
+
+      ports[0].onMessage.emit({ type: MessageType.Res, reqId: sentMessage.reqId, data: { opHash: 'oo1' } });
+
+      await expect(promise).resolves.toEqual({ opHash: 'oo1' });
+    }
+  );
 
   it('clears timeout and request listener when a response settles the request', async () => {
     const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');

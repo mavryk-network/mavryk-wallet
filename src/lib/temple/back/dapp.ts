@@ -20,12 +20,9 @@ import browser, { Runtime } from 'webextension-polyfill';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { loadChainId, isAddressValid } from 'lib/temple/helpers';
-import {
-  migrateLegacyAtlasnetStorage,
-  normalizeLegacyAtlasnetNetworkSnapshot,
-  normalizeNetworkId
-} from 'lib/temple/network-storage';
+import { normalizeNetworkId } from 'lib/temple/network-storage';
 import { NETWORKS } from 'lib/temple/networks';
+import { DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS } from 'lib/temple/request-timeouts';
 import {
   TempleMessageType,
   TempleRequest,
@@ -36,11 +33,26 @@ import {
 } from 'lib/temple/types';
 
 import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
+import {
+  assertBranchNotOnBuiltInChain,
+  assertSessionChainId,
+  getDAppVisibleRpc,
+  getNetworkRPC,
+  getSignRequestRpc,
+  isAllowedCustomRpcUrl,
+  removeLastSlash,
+  resolveNetwork,
+  type ResolvedNetwork
+} from './dapp-network';
+import { createDecisionGate } from './decision-gate';
 import { intercom } from './defaults';
 import { buildFinalOpParmas, dryRunOpParams, validateOpParams } from './dryrun';
 import { assertConfirmUiPortInfo } from './intercom-permissions';
 import { prepareDAppSignPayload, type PreparedDAppSignPayload } from './sign-payload.helpers';
-import { withUnlocked } from './store';
+import { store, withUnlocked } from './store';
+
+/** Not NotGranted: an operation that timed out may still be broadcast, since its RPC call was left in flight */
+export const DAPP_OPERATION_TIMEOUT_ERROR = 'OPERATION_TIMED_OUT';
 
 const CONFIRM_WINDOW_WIDTH = 400;
 const CONFIRM_WINDOW_HEIGHT = 604;
@@ -59,7 +71,7 @@ export async function getCurrentPermission(origin: string): Promise<MavrykWallet
   const dApp = await getDApp(origin);
   const permission = dApp
     ? {
-        rpc: await getNetworkRPC(dApp.network),
+        rpc: await getDAppVisibleRpc(dApp.network),
         pkh: dApp.pkh,
         publicKey: dApp.publicKey
       }
@@ -72,19 +84,20 @@ export async function getCurrentPermission(origin: string): Promise<MavrykWallet
 
 export async function requestPermission(
   origin: string,
-  req: MavrykWalletDAppPermissionRequest
+  req: MavrykWalletDAppPermissionRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppPermissionResponse> {
   if (![isAllowedNetwork(req?.network), typeof req?.appMeta?.name === 'string'].every(Boolean)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
   }
 
-  const networkRpc = await getNetworkRPC(req.network);
+  const dAppRpc = await getDAppVisibleRpc(req.network);
   const dApp = await getDApp(origin);
 
   if (!req.force && dApp && isNetworkEquals(req.network, dApp.network) && req.appMeta.name === dApp.appMeta.name) {
     return {
       type: MavrykWalletDAppMessageType.PermissionResponse,
-      rpc: networkRpc,
+      rpc: dAppRpc,
       pkh: dApp.pkh,
       publicKey: dApp.publicKey
     };
@@ -92,14 +105,27 @@ export async function requestPermission(
 
   return new Promise(async (resolve, reject) => {
     const id = nanoid();
+    // Resolved only once the prompt is on screen, so a page cannot make the wallet probe an RPC of its choice silently.
+    let network: ResolvedNetwork | undefined;
 
     await requestConfirm({
       id,
+      promptDeadline,
       payload: {
         type: 'connect',
         origin,
-        networkRpc,
+        networkRpc: dAppRpc,
         appMeta: req.appMeta
+      },
+      preparePayload: async payload => {
+        try {
+          network = await resolveNetwork(req.network);
+        } catch (err) {
+          reject(new Error(MavrykWalletDAppErrorType.InvalidParams));
+          throw err;
+        }
+
+        return { ...payload, networkRpc: network.rpc, chainId: network.chainId };
       },
       onDecline: () => {
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
@@ -107,9 +133,10 @@ export async function requestPermission(
       handleIntercomRequest: async (confirmReq, decline) => {
         if (confirmReq?.type === TempleMessageType.DAppPermConfirmationRequest && confirmReq?.id === id) {
           const { confirmed, accountPublicKeyHash, accountPublicKey } = confirmReq;
-          if (confirmed && accountPublicKeyHash && accountPublicKey) {
+          if (confirmed && accountPublicKeyHash && accountPublicKey && network) {
             await setDApp(origin, {
               network: req.network,
+              ...(network.chainId ? { chainId: network.chainId } : {}),
               appMeta: req.appMeta,
               pkh: accountPublicKeyHash,
               publicKey: accountPublicKey
@@ -118,7 +145,7 @@ export async function requestPermission(
               type: MavrykWalletDAppMessageType.PermissionResponse,
               pkh: accountPublicKeyHash,
               publicKey: accountPublicKey,
-              rpc: networkRpc
+              rpc: dAppRpc
             });
             const broadcastMsg: TempleNotification = {
               type: TempleMessageType.SelectedAccountChanged,
@@ -141,7 +168,8 @@ export async function requestPermission(
 
 export async function requestOperation(
   origin: string,
-  req: MavrykWalletDAppOperationRequest
+  req: MavrykWalletDAppOperationRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppOperationResponse> {
   if (!isAddressValid(req?.sourcePkh)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
@@ -167,16 +195,21 @@ export async function requestOperation(
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
+  // Resolved before the Promise executor so a failure rejects the request instead of leaving it pending.
+  const { rpc: networkRpc, isDAppRpc } = await resolveNetwork(dApp.network);
+  await assertSessionChainId(dApp, networkRpc);
+
   return new Promise(async (resolve, reject) => {
     const id = nanoid();
-    const networkRpc = await getNetworkRPC(dApp.network);
 
     await requestConfirm({
       id,
+      promptDeadline,
       payload: {
         type: 'confirm_operations',
         origin,
         networkRpc,
+        ...(dApp.chainId ? { chainId: dApp.chainId } : {}),
         appMeta: dApp.appMeta,
         sourcePkh: req.sourcePkh,
         sourcePublicKey: dApp.publicKey,
@@ -185,11 +218,59 @@ export async function requestOperation(
       onDecline: () => {
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
       },
-      handleIntercomRequest: (confirmReq, decline) =>
-        handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject)
+      handleIntercomRequest: (confirmReq, decline, isDeclineDeferred) => {
+        // Once the ceiling has failed the request, or the wallet locked, a stalled dApp RPC answering later must not sign
+        let isAbandoned = false;
+        const abandon = (err: Error) => {
+          isAbandoned = true;
+          reject(err);
+        };
+        const { vault: approvedVault } = store.getState();
+        const isRefused = () => isDeclineDeferred() || isAbandoned || store.getState().vault !== approvedVault;
+        const beforeSign = isDAppRpc ? withVerifyingNotice(id, assertBranchNotOnBuiltInChain, isRefused) : undefined;
+        const sent = handleIntercomRequest(confirmReq, decline, id, dApp, networkRpc, req, resolve, reject, beforeSign);
+
+        return isDAppRpc ? withDecisionCeiling(sent, abandon) : sent;
+      }
     });
   });
 }
+
+/**
+ * Tells the confirm window while the operation is verified before signing, which can take about one block. Closing
+ * the window or the auto-decline deadline during that time is only deferred, so it is honoured here, before signing.
+ * A request already refused (declined, timed out or locked) is refused before the verification too.
+ */
+const withVerifyingNotice =
+  (id: string, verify: (opBytes: string) => Promise<void>, isRefused: () => boolean) =>
+  async (opBytes: string): Promise<void> => {
+    const assertNotRefused = () => {
+      if (isRefused()) throw new Error(MavrykWalletDAppErrorType.NotGranted);
+    };
+
+    assertNotRefused();
+    intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: true });
+    try {
+      await verify(opBytes);
+    } finally {
+      intercom.broadcast({ type: TempleMessageType.DAppOpsVerifying, id, verifying: false });
+    }
+    assertNotRefused();
+  };
+
+/**
+ * A dApp-chosen RPC can hold a call open with no end (webmavryk's timeout stops once response headers arrive), and the
+ * decision gate defers every auto-decline until the decision settles. Once the decision outlasts the time the page
+ * budgets for it, the request fails so the shared dApp queue moves on, and the prompt is closed.
+ */
+const withDecisionCeiling = <T>(handling: Promise<T>, reject: (err: Error) => void) =>
+  new Promise<T | { type: TempleMessageType.DAppOpsConfirmationResponse }>((resolve, rejectHandling) => {
+    const timer = setTimeout(() => {
+      reject(new Error(DAPP_OPERATION_TIMEOUT_ERROR));
+      resolve({ type: TempleMessageType.DAppOpsConfirmationResponse });
+    }, DAPP_CONFIRMATION_REQUEST_TIMEOUT_MS);
+    handling.then(resolve, rejectHandling).finally(() => clearTimeout(timer));
+  });
 
 const handleIntercomRequest = async (
   confirmReq: TempleRequest,
@@ -199,7 +280,8 @@ const handleIntercomRequest = async (
   networkRpc: string,
   req: MavrykWalletDAppOperationRequest,
   resolve: any,
-  reject: any
+  reject: any,
+  beforeSign?: (opBytes: string) => Promise<void>
 ) => {
   if (confirmReq?.type === TempleMessageType.DAppOpsConfirmationRequest && confirmReq?.id === id) {
     if (confirmReq.confirmed) {
@@ -208,7 +290,8 @@ const handleIntercomRequest = async (
           vault.sendOperations(
             dApp.pkh,
             networkRpc,
-            buildFinalOpParmas(req.opParams, confirmReq.modifiedTotalFee, confirmReq.modifiedStorageLimit)
+            buildFinalOpParmas(req.opParams, confirmReq.modifiedTotalFee, confirmReq.modifiedStorageLimit),
+            beforeSign
           )
         );
 
@@ -246,7 +329,8 @@ const safeGetChain = async (networkRpc: string, op: any) => {
 
 export async function requestSign(
   origin: string,
-  req: MavrykWalletDAppSignRequest
+  req: MavrykWalletDAppSignRequest,
+  promptDeadline?: number
 ): Promise<MavrykWalletDAppSignResponse> {
   if (![isAddressValid(req?.sourcePkh), typeof req?.payload === 'string'].every(Boolean)) {
     throw new Error(MavrykWalletDAppErrorType.InvalidParams);
@@ -270,8 +354,10 @@ export async function requestSign(
     throw new Error(MavrykWalletDAppErrorType.NotFound);
   }
 
+  const networkRpc = await getSignRequestRpc(dApp);
+
   return new Promise((resolve, reject) =>
-    generatePromisifySign(resolve, reject, origin, dApp, signReq, preparedPayload)
+    generatePromisifySign(resolve, reject, origin, dApp, networkRpc, signReq, preparedPayload, promptDeadline)
   );
 }
 
@@ -280,14 +366,16 @@ const generatePromisifySign = async (
   reject: any,
   origin: string,
   dApp: TempleDAppSession,
+  networkRpc: string,
   req: MavrykWalletDAppSignRequest,
-  preparedPayload: PreparedDAppSignPayload
+  preparedPayload: PreparedDAppSignPayload,
+  promptDeadline?: number
 ) => {
   const id = nanoid();
-  const networkRpc = await getNetworkRPC(dApp.network);
 
   await requestConfirm({
     id,
+    promptDeadline,
     payload: {
       type: 'sign',
       origin,
@@ -337,8 +425,11 @@ export async function requestBroadcast(
     throw new Error(MavrykWalletDAppErrorType.NotGranted);
   }
 
+  const networkRpc = await getNetworkRPC(dApp.network);
+  await assertSessionChainId(dApp, networkRpc);
+
   try {
-    const rpc = new RpcClient(await getNetworkRPC(dApp.network));
+    const rpc = new RpcClient(networkRpc);
     const opHash = await rpc.injectOperation(req.signedOpBytes);
     return {
       type: MavrykWalletDAppMessageType.BroadcastResponse,
@@ -359,8 +450,11 @@ export async function getAllDApps() {
   return dAppsSessions;
 }
 
+/** A custom-RPC session stored before chain binding has no chainId: it is treated as absent so the dApp reconnects. */
 async function getDApp(origin: string): Promise<TempleDAppSession | undefined> {
-  return (await getAllDApps())[origin];
+  const dApp = (await getAllDApps())[origin];
+
+  return dApp && (typeof dApp.network === 'string' || dApp.chainId) ? dApp : undefined;
 }
 
 async function setDApp(origin: string, permissions: TempleDAppSession) {
@@ -391,18 +485,68 @@ export async function removeAllDApps(origins: string[]) {
   };
 }
 
+export async function removeDAppSessionsForPkhs(pkhs: string[]) {
+  const removedPkhs = new Set(pkhs);
+  const sessions = Object.entries(await getAllDApps());
+  const removedOrigins = sessions.filter(([, session]) => removedPkhs.has(session.pkh)).map(([origin]) => origin);
+
+  if (removedOrigins.length === 0) {
+    return;
+  }
+
+  await setDApps(Object.fromEntries(sessions.filter(([, session]) => !removedPkhs.has(session.pkh))));
+  await Promise.all(removedOrigins.map(origin => Beacon.removeDAppPublicKey(origin)));
+}
+
 function setDApps(newDApps: TempleDAppSessions) {
   return browser.storage.local.set({ [STORAGE_KEY]: newDApps });
 }
 
-type RequestConfirmParams = {
-  id: string;
-  payload: TempleDAppPayload;
-  onDecline: () => void;
-  handleIntercomRequest: (req: TempleRequest, decline: () => void) => Promise<any>;
+const DAPP_DECISION_REQUEST_TYPES = new Set<TempleMessageType>([
+  TempleMessageType.DAppPermConfirmationRequest,
+  TempleMessageType.DAppOpsConfirmationRequest,
+  TempleMessageType.DAppSignConfirmationRequest
+]);
+
+const isDAppDecisionRequest = (req: TempleRequest, id: string) =>
+  DAPP_DECISION_REQUEST_TYPES.has(req?.type) && 'id' in req && req.id === id;
+
+// An operation may only be approved when the preview was built from the locally forged operation (rawToSign).
+const assertOperationPreviewVerified = (req: TempleRequest, payload: TempleDAppPayload) => {
+  if (
+    req?.type === TempleMessageType.DAppOpsConfirmationRequest &&
+    req.confirmed &&
+    payload.type === 'confirm_operations' &&
+    !payload.rawToSign
+  ) {
+    throw new Error(MavrykWalletDAppErrorType.InvalidParams);
+  }
 };
 
-async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }: RequestConfirmParams) {
+type RequestConfirmParams = {
+  id: string;
+  /** Past this time the page may have given up on the request, so the prompt is declined instead of opened. */
+  promptDeadline?: number;
+  payload: TempleDAppPayload;
+  /** Runs when the confirm UI first reads the payload; a failure declines and closes the prompt. */
+  preparePayload?: (payload: TempleDAppPayload) => Promise<TempleDAppPayload>;
+  onDecline: () => void;
+  handleIntercomRequest: (req: TempleRequest, decline: () => void, isDeclineDeferred: () => boolean) => Promise<any>;
+};
+
+async function requestConfirm({
+  id,
+  promptDeadline,
+  payload,
+  preparePayload,
+  onDecline,
+  handleIntercomRequest
+}: RequestConfirmParams) {
+  if (promptDeadline !== undefined && Date.now() > promptDeadline) {
+    onDecline();
+    return;
+  }
+
   let closing = false;
   const close = async () => {
     if (closing) return;
@@ -417,10 +561,10 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
     } catch (_err) {}
   };
 
-  const declineAndClose = () => {
+  const gate = createDecisionGate(() => {
     onDecline();
     close();
-  };
+  });
 
   const initialConfirmToken = nanoid();
   let confirmToken: string | null = initialConfirmToken;
@@ -435,6 +579,15 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
       }
       confirmToken = tokenResult.nextToken;
       knownPort = port;
+
+      if (preparePayload) {
+        try {
+          payload = await preparePayload(payload);
+        } catch (err) {
+          gate.declineOrDefer();
+          throw err;
+        }
+      }
 
       if (payload.type === 'confirm_operations') {
         const dryrunResult = await dryRunOpParams({
@@ -460,10 +613,22 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
       if (knownPort !== port) return;
       assertConfirmUiPortInfo(portInfo);
 
-      const result = await handleIntercomRequest(req, onDecline);
-      if (result) {
-        close();
-        return result;
+      const isDecision = isDAppDecisionRequest(req, id);
+      if (isDecision) gate.begin();
+
+      let handled = false;
+      try {
+        if (isDecision) assertOperationPreviewVerified(req, payload);
+
+        const result = await handleIntercomRequest(req, onDecline, gate.isDeclineDeferred);
+        if (result) {
+          handled = true;
+          close();
+          return result;
+        }
+      } finally {
+        // A decision the handler did not take (wrong type, or it threw) must not keep auto-decline suspended.
+        if (isDecision && !handled) gate.release();
       }
     }
   });
@@ -481,56 +646,21 @@ async function requestConfirm({ id, payload, onDecline, handleIntercomRequest }:
 
   const handleWinRemoved = (winId: number) => {
     if (winId === confirmWin?.id) {
-      declineAndClose();
+      gate.declineOrDefer();
     }
   };
   browser.windows.onRemoved.addListener(handleWinRemoved);
   const stopWinRemovedListening = () => browser.windows.onRemoved.removeListener(handleWinRemoved);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, DAPP_CONFIRMATION_AUTODECLINE_MS);
+  const t = setTimeout(gate.declineOrDefer, DAPP_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
-}
-
-async function getNetworkRPC(net: MavrykWalletDAppNetwork) {
-  const networkId = typeof net === 'string' ? normalizeNetworkId(net) : net;
-  const targetRpc =
-    typeof networkId === 'string' ? NETWORKS.find(n => n.id === networkId)!.rpcBaseURL : removeLastSlash(networkId.rpc);
-
-  if (typeof networkId === 'string') {
-    try {
-      const current = await getCurrentTempleNetwork();
-      const [currentChainId, targetChainId] = await Promise.all([
-        loadChainId(current.rpcBaseURL),
-        loadChainId(targetRpc).catch(() => null)
-      ]);
-
-      return targetChainId === null || currentChainId === targetChainId ? current.rpcBaseURL : targetRpc;
-    } catch {
-      return targetRpc;
-    }
-  } else {
-    return targetRpc;
-  }
-}
-
-async function getCurrentTempleNetwork() {
-  await migrateLegacyAtlasnetStorage();
-
-  const { network_id: networkId, custom_networks_snapshot: customNetworksSnapshot } = await browser.storage.local.get([
-    'network_id',
-    'custom_networks_snapshot'
-  ]);
-  const normalizedNetworkId = normalizeNetworkId(networkId);
-  const normalizedCustomNetworksSnapshot = normalizeLegacyAtlasnetNetworkSnapshot(customNetworksSnapshot);
-
-  return [...NETWORKS, ...normalizedCustomNetworksSnapshot].find(n => n.id === normalizedNetworkId) ?? NETWORKS[0];
 }
 
 function isAllowedNetwork(net: MavrykWalletDAppNetwork) {
   return typeof net === 'string'
     ? NETWORKS.some(n => !n.disabled && n.id === normalizeNetworkId(net))
-    : Boolean(net?.rpc);
+    : typeof net?.rpc === 'string' && isAllowedCustomRpcUrl(net.rpc);
 }
 
 function isNetworkEquals(fNet: MavrykWalletDAppNetwork, sNet: MavrykWalletDAppNetwork) {
@@ -541,10 +671,6 @@ function isNetworkEquals(fNet: MavrykWalletDAppNetwork, sNet: MavrykWalletDAppNe
   return typeof fNet !== 'string' && typeof sNet !== 'string'
     ? removeLastSlash(fNet.rpc) === removeLastSlash(sNet.rpc)
     : false;
-}
-
-function removeLastSlash(str: string) {
-  return str.endsWith('/') ? str.slice(0, -1) : str;
 }
 
 async function createConfirmationWindow(confirmationId: string, token: string) {

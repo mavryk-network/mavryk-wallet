@@ -9,9 +9,7 @@ import browser, { Runtime } from 'webextension-polyfill';
 
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
-import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { addLocalOperation } from 'lib/temple/activity';
-import * as Beacon from 'lib/temple/beacon';
 import {
   buildAuthWalletAddressesMap,
   canAccountSignAuth,
@@ -40,12 +38,11 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
-import { buildMavrykSignedMessagePayloadHex } from 'mavryk/api/auth-payload.helpers';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
 import { shouldPerformInteractiveAuthChallenge } from './auth.helpers';
-import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS } from './constants';
+import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS, JWT_EXPIRING_SOON_THRESHOLD_MS } from './constants';
 import {
   getCurrentPermission,
   requestPermission,
@@ -54,13 +51,17 @@ import {
   requestBroadcast,
   getAllDApps,
   removeDApp,
-  removeAllDApps
+  removeAllDApps,
+  removeDAppSessionsForPkhs
 } from './dapp';
 import { DAppContactsResponse, isDAppContactsRequest, processDAppContactsRequest } from './dapp-contacts';
+import { enqueueDApp, enqueueDAppForOrigin } from './dapp-queue';
+import { createDecisionGate } from './decision-gate';
 import { intercom } from './defaults';
 import type { DryRunResult } from './dryrun';
 import { buildFinalOpParmas, dryRunOpParams } from './dryrun';
 import { assertExtensionUiPortInfo } from './intercom-permissions';
+import { createLockCoordinator, shouldLockOnSessionRecovery } from './lock-coordination';
 import {
   toFront,
   store,
@@ -72,18 +73,18 @@ import {
   withInited,
   withUnlocked
 } from './store';
+import { isTrustedNexusOrigin } from './trusted-origin.helpers';
 import { Vault } from './vault';
 
 export const ACCOUNT_NAME_PATTERN_STR = '^(?! )[\\p{L}\\p{N}\\p{Emoji} .\\-]{1,100}(?<! )$';
 export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
-const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;
-const BEACON_ID = `temple_wallet_${PUBLIC_EXTENSION_ID}`;
 let initLocked = false;
 
-const enqueueDApp = createQueue();
 const enqueueUnlock = createQueue();
+const { waitForLocks, unlockAfterLocks, ...lockActions } = createLockCoordinator(lockWallet);
+export const { lock, enforceAutolock, enforceAutolockOnPageOpen } = lockActions;
 
 const findNewAccount = (prev: TempleAccount[], next: TempleAccount[]) => {
   const prevIds = new Set(prev.map(acc => acc.id));
@@ -98,10 +99,30 @@ const updateAccountsAndSyncAuth = async (accounts: TempleAccount[]) => {
   await syncAuthWalletAddresses(accounts);
 };
 
+const removeDAppSessionsOfRemovedAccounts = (prevAccounts: TempleAccount[], newAccounts: TempleAccount[]) => {
+  const remainingPkhs = new Set(newAccounts.map(acc => acc.publicKeyHash));
+
+  return removeDAppSessionsForPkhs(prevAccounts.map(acc => acc.publicKeyHash).filter(pkh => !remainingPkhs.has(pkh)));
+};
+
+// Sweeps sessions orphaned by account removals made before removal clean-up existed (or any later drift),
+// so a re-imported or re-derived pkh never inherits an old dApp session without a new prompt.
+const removeOrphanedDAppSessions = async (accounts: TempleAccount[]) => {
+  try {
+    const accountPkhs = new Set(accounts.map(acc => acc.publicKeyHash));
+    const sessions = Object.values(await getAllDApps());
+
+    await removeDAppSessionsForPkhs(sessions.map(session => session.pkh).filter(pkh => !accountPkhs.has(pkh)));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const setupUnlockedVaultState = async (password: string) => {
   const vault = await Vault.setup(password, BACKGROUND_IS_WORKER);
   const [accounts, settings] = await Promise.all([vault.fetchAccounts(), vault.fetchSettings()]);
   await syncAuthWalletAddresses(accounts);
+  await removeOrphanedDAppSessions(accounts);
 
   return { vault, accounts, settings };
 };
@@ -178,13 +199,6 @@ const ensureAuthorizedForAccount = async (
   }
 };
 
-const shouldLockOnSessionRecovery = async () => {
-  const { accessToken } = await getAuthTokensFromStorage();
-  if (!accessToken) return true;
-
-  return isJwtExpiringSoon(accessToken, JWT_EXPIRING_SOON_THRESHOLD_MS);
-};
-
 export async function init() {
   const vaultExist = await Vault.isExist();
   inited(vaultExist);
@@ -224,8 +238,12 @@ export function registerNewWallet(password: string, mnemonic?: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
       const accountPkh = await Vault.spawn(password, mnemonic);
-      const unlockedState = await setupUnlockedVaultState(password);
-      await performAuthForAccount(unlockedState.vault, accountPkh, unlockedState.accounts);
+      // Auth runs inside the guarded setup, so a lock landing during its network calls still aborts the creation
+      const { state: unlockedState } = await unlockAfterLocks(async isInterruptedByLock => {
+        const state = await setupUnlockedVaultState(password);
+        if (!isInterruptedByLock()) await performAuthForAccount(state.vault, accountPkh, state.accounts);
+        return state;
+      });
       unlocked(unlockedState);
 
       return accountPkh;
@@ -233,10 +251,11 @@ export function registerNewWallet(password: string, mnemonic?: string) {
   );
 }
 
-export async function lock() {
+async function lockWallet() {
   if (!store.getState().inited) initLocked = true;
   try {
-    await logoutAuth();
+    // Only the local token clean-up holds the lock; a stalled /auth/logout must not keep the vault unlocked
+    await logoutAuth({}, { awaitRevocation: false });
   } catch (err) {
     console.error(err);
   }
@@ -249,7 +268,9 @@ export async function lock() {
 export function unlock(password: string) {
   return withInited(() =>
     enqueueUnlock(async () => {
-      const unlockedState = await setupUnlockedVaultState(password);
+      const { state: unlockedState, isInterruptedByLock } = await unlockAfterLocks(() =>
+        setupUnlockedVaultState(password)
+      );
       const { vault, accounts } = unlockedState;
       unlocked(unlockedState);
 
@@ -257,18 +278,23 @@ export function unlock(password: string) {
         getStoredSelectedAccountPkh(),
         getSelectedNetworkIdFromStorage()
       ]);
+      if (isInterruptedByLock()) return;
 
       try {
         await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
       } catch (error) {
         console.error(error);
       }
+
+      // A lock landing during the auth calls logged out first, so the tokens the auth saved after it are cleared again
+      if (isInterruptedByLock()) await lock();
     })
   );
 }
 
 export async function unlockFromSession() {
   await enqueueUnlock(async () => {
+    const isInterruptedByLock = await waitForLocks();
     const recovered = await Vault.recoverFromSession();
     if (recovered == null) return;
 
@@ -279,8 +305,11 @@ export async function unlockFromSession() {
 
     const { vault, accounts } = recovered;
     const settings = await vault.fetchSettings();
+    await enforceAutolock();
+    if (isInterruptedByLock()) return;
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);
+    await removeOrphanedDAppSessions(accounts);
   });
 }
 
@@ -328,14 +357,16 @@ export function deriveContactsKey(accPublicKeyHash: string) {
 }
 
 export function removeAccount(id: string, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
     try {
       await logoutAuth();
     } catch (err) {
       console.error(err);
     }
+    const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await Vault.removeAccount(id, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 
@@ -428,21 +459,30 @@ export function updateSettings(settings: Partial<TempleSettings>) {
 }
 
 export function removeHdWallet(id: string, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
     try {
       await logoutAuth();
     } catch (err) {
       console.error(err);
     }
+    const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await Vault.removeHdWallet(id, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 
 export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
-  return withUnlocked(async () => {
+  return withUnlocked(async ({ vault }) => {
+    try {
+      await logoutAuth();
+    } catch (err) {
+      console.error(err);
+    }
+    const prevAccounts = await vault.fetchAccounts();
     const newAccounts = await Vault.removeAccountsByType(type, password);
     await updateAccountsAndSyncAuth(newAccounts);
+    await removeDAppSessionsOfRemovedAccounts(prevAccounts, newAccounts);
   });
 }
 
@@ -538,14 +578,15 @@ const promisableUnlock = async (
   const decline = () => {
     reject(new Error('Declined'));
   };
-  const declineAndClose = () => {
+  const gate = createDecisionGate(() => {
     decline();
     closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
-  };
+  });
 
   const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
     if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
       assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+      gate.begin();
 
       if (req.confirmed) {
         try {
@@ -564,6 +605,7 @@ const promisableUnlock = async (
           if (err instanceof MavrykOperationError) {
             reject(err);
           } else {
+            gate.release();
             throw err;
           }
         }
@@ -580,10 +622,10 @@ const promisableUnlock = async (
     return undefined;
   });
 
-  const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
+  const stopDisconnectListening = intercom.onDisconnect(port, gate.declineOrDefer);
 
   // Decline after timeout
-  const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
+  const t = setTimeout(gate.declineOrDefer, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
   const stopTimeout = () => clearTimeout(t);
 };
 
@@ -617,18 +659,24 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
         const decline = () => {
           reject(new Error('Declined'));
         };
-        const declineAndClose = () => {
+        const gate = createDecisionGate(() => {
           decline();
           closing = close(closing, port, id, stopTimeout, stopRequestListening, stopDisconnectListening);
-        };
+        });
 
         const stopRequestListening = intercom.onRequest(async (req: TempleRequest, reqPort) => {
           if (reqPort === port && req?.type === TempleMessageType.ConfirmationRequest && req?.id === id) {
             assertExtensionUiPortInfo(intercom.getPortInfo(reqPort));
+            gate.begin();
 
             if (req.confirmed) {
-              const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
-              resolve(result);
+              try {
+                const result = await withUnlocked(({ vault }) => vault.sign(sourcePkh, bytes, watermark));
+                resolve(result);
+              } catch (err) {
+                gate.release();
+                throw err;
+              }
             } else {
               decline();
             }
@@ -642,10 +690,10 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
           return undefined;
         });
 
-        const stopDisconnectListening = intercom.onDisconnect(port, declineAndClose);
+        const stopDisconnectListening = intercom.onDisconnect(port, gate.declineOrDefer);
 
         // Decline after timeout
-        const t = setTimeout(declineAndClose, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
+        const t = setTimeout(gate.declineOrDefer, IN_WALLET_CONFIRMATION_AUTODECLINE_MS);
         const stopTimeout = () => clearTimeout(t);
       })
   );
@@ -653,11 +701,17 @@ export function sign(port: Runtime.Port, id: string, sourcePkh: string, bytes: s
 
 export async function processDApp(
   origin: string,
-  req: MavrykWalletDAppRequest | unknown
+  req: MavrykWalletDAppRequest | unknown,
+  relayPort?: Runtime.Port
 ): Promise<MavrykWalletDAppResponse | DAppContactsResponse | void> {
   if (isDAppContactsRequest(req)) {
+    if (!isTrustedNexusOrigin(origin)) {
+      throw new Error(MavrykWalletDAppErrorType.NotGranted);
+    }
+    await enforceAutolock();
+
     return withInited(() =>
-      enqueueDApp(() =>
+      enqueueDApp(async () =>
         withUnlocked(async ({ vault }) => {
           const [accounts, dApps] = await Promise.all([vault.fetchAccounts(), getAllDApps()]);
 
@@ -691,255 +745,24 @@ export async function processDApp(
       return withInited(() => getCurrentPermission(origin));
 
     case MavrykWalletDAppMessageType.PermissionRequest:
-      return withInited(() => enqueueDApp(() => requestPermission(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, deadline => requestPermission(origin, dAppReq, deadline), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.OperationRequest:
-      return withInited(() => enqueueDApp(() => requestOperation(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, deadline => requestOperation(origin, dAppReq, deadline), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.SignRequest:
-      return withInited(() => enqueueDApp(() => requestSign(origin, dAppReq)));
+      return withInited(() =>
+        enqueueDAppForOrigin(origin, deadline => requestSign(origin, dAppReq, deadline), isDAppEnabled, relayPort)
+      );
 
     case MavrykWalletDAppMessageType.BroadcastRequest:
       return withInited(() => requestBroadcast(origin, dAppReq));
   }
 }
-
-export async function getBeaconMessage(origin: string, msg: string, encrypted = false) {
-  let recipientPubKey: string | null = null;
-  let payload = null;
-
-  if (encrypted) {
-    try {
-      recipientPubKey = await Beacon.getDAppPublicKey(origin);
-      if (!recipientPubKey) throw new Error('<stub>');
-
-      try {
-        msg = await Beacon.decryptMessage(msg, recipientPubKey);
-      } catch (err: any) {
-        await Beacon.removeDAppPublicKey(origin);
-        throw err;
-      }
-    } catch {
-      payload = {
-        payload: Beacon.encodeMessage<Beacon.Response>({
-          version: '2',
-          senderId: await Beacon.getSenderId(),
-          id: 'stub',
-          type: Beacon.MessageType.Disconnect
-        })
-      };
-    }
-  }
-
-  let req: Beacon.Request | null;
-  try {
-    req = Beacon.decodeMessage<Beacon.Request>(msg);
-  } catch {
-    req = null;
-  }
-
-  return {
-    recipientPubKey,
-    req,
-    payload
-  };
-}
-
-type ProcessedBeaconMessage = {
-  payload: string;
-  encrypted?: boolean;
-};
-
-export async function processBeacon(
-  origin: string,
-  msg: string,
-  encrypted = false
-): Promise<ProcessedBeaconMessage | undefined> {
-  const { req, recipientPubKey, payload } = await getBeaconMessage(origin, msg, encrypted);
-  if (payload) {
-    return payload;
-  }
-  if (!req) {
-    return;
-  }
-
-  // Process Disconnect
-  if (req.type === Beacon.MessageType.Disconnect) {
-    await removeDApp(origin);
-    return;
-  }
-
-  const resBase = {
-    version: req.version,
-    id: req.id,
-    ...(req.beaconId ? { beaconId: BEACON_ID } : { senderId: await Beacon.getSenderId() })
-  };
-
-  // Process handshake
-  if (req.type === Beacon.MessageType.HandshakeRequest) {
-    await Beacon.saveDAppPublicKey(origin, req.publicKey);
-    const keyPair = await Beacon.getOrCreateKeyPair();
-    return {
-      payload: await Beacon.sealCryptobox(
-        JSON.stringify({
-          ...resBase,
-          ...Beacon.PAIRING_RESPONSE_BASE,
-          publicKey: Beacon.toHex(keyPair.publicKey)
-        }),
-        Beacon.fromHex(req.publicKey)
-      )
-    };
-  }
-
-  const res = await getBeaconResponse(req, resBase, origin);
-  // const res = null;
-
-  const resMsg = Beacon.encodeMessage<Beacon.Response>(res);
-  if (encrypted && recipientPubKey) {
-    return {
-      payload: await Beacon.encryptMessage(resMsg, recipientPubKey),
-      encrypted: true
-    };
-  }
-  return { payload: resMsg };
-}
-
-const getBeaconResponse = async (req: Beacon.Request, resBase: any, origin: string): Promise<Beacon.Response> => {
-  try {
-    try {
-      return await formatTempleReq(getTempleReq(req), req, resBase, origin);
-    } catch (err: any) {
-      if (err instanceof MavrykOperationError) {
-        throw err;
-      }
-
-      console.log('err', err);
-
-      // Map Temple DApp error to Beacon error
-      const beaconErrorType = (() => {
-        switch (err?.message) {
-          case MavrykWalletDAppErrorType.InvalidParams:
-            return Beacon.ErrorType.PARAMETERS_INVALID_ERROR;
-
-          case MavrykWalletDAppErrorType.NotFound:
-          case MavrykWalletDAppErrorType.NotGranted:
-            return req.beaconId ? Beacon.ErrorType.NOT_GRANTED_ERROR : Beacon.ErrorType.ABORTED_ERROR;
-
-          default:
-            return err?.message;
-        }
-      })();
-
-      throw new Error(beaconErrorType);
-    }
-  } catch (err: any) {
-    return {
-      ...resBase,
-      type: Beacon.MessageType.Error,
-      errorType: (() => {
-        switch (true) {
-          case err instanceof MavrykOperationError:
-            return Beacon.ErrorType.TRANSACTION_INVALID_ERROR;
-
-          case err?.message in Beacon.ErrorType:
-            return err.message;
-
-          default:
-            return Beacon.ErrorType.UNKNOWN_ERROR;
-        }
-      })(),
-      errorData: getErrorData(err)
-    };
-  }
-};
-
-const getTempleReq = (req: Beacon.Request): MavrykWalletDAppRequest | void => {
-  switch (req.type) {
-    case Beacon.MessageType.PermissionRequest:
-      const network =
-        req.network.type === 'custom'
-          ? {
-              name: req.network.name!,
-              rpc: req.network.rpcUrl!
-            }
-          : req.network.type;
-
-      return {
-        type: MavrykWalletDAppMessageType.PermissionRequest,
-        network: network as any,
-        appMeta: req.appMetadata,
-        force: true
-      };
-
-    case Beacon.MessageType.OperationRequest:
-      return {
-        type: MavrykWalletDAppMessageType.OperationRequest,
-        sourcePkh: req.sourceAddress,
-        opParams: req.operationDetails.map(Beacon.formatOpParams)
-      };
-
-    case Beacon.MessageType.SignPayloadRequest:
-      return {
-        type: MavrykWalletDAppMessageType.SignRequest,
-        sourcePkh: req.sourceAddress,
-        payload: req.signingType === Beacon.SigningType.RAW ? generateRawPayloadBytes(req.payload) : req.payload
-      };
-
-    case Beacon.MessageType.BroadcastRequest:
-      return {
-        type: MavrykWalletDAppMessageType.BroadcastRequest,
-        signedOpBytes: req.signedTransaction
-      };
-  }
-};
-
-const formatTempleReq = async (
-  templeReq: MavrykWalletDAppRequest | void,
-  req: Beacon.Request,
-  resBase: any,
-  origin: string
-) => {
-  if (templeReq) {
-    const templeRes = await processDApp(origin, templeReq);
-
-    if (templeRes) {
-      // Map Temple DApp response to Beacon response
-      switch (templeRes.type) {
-        case MavrykWalletDAppMessageType.PermissionResponse:
-          return {
-            ...resBase,
-            type: Beacon.MessageType.PermissionResponse,
-            publicKey: (templeRes as any).publicKey,
-            network: (req as Beacon.PermissionRequest).network,
-            scopes: [Beacon.PermissionScope.OPERATION_REQUEST, Beacon.PermissionScope.SIGN]
-          };
-
-        case MavrykWalletDAppMessageType.OperationResponse:
-          return {
-            ...resBase,
-            type: Beacon.MessageType.OperationResponse,
-            transactionHash: templeRes.opHash
-          };
-
-        case MavrykWalletDAppMessageType.SignResponse:
-          return {
-            ...resBase,
-            type: Beacon.MessageType.SignPayloadResponse,
-            signature: templeRes.signature
-          };
-
-        case MavrykWalletDAppMessageType.BroadcastResponse:
-          return {
-            ...resBase,
-            type: Beacon.MessageType.BroadcastResponse,
-            transactionHash: templeRes.opHash
-          };
-      }
-    }
-  }
-
-  throw new Error(Beacon.ErrorType.UNKNOWN_ERROR);
-};
 
 async function createCustomNetworksSnapshot(settings: TempleSettings) {
   try {
@@ -949,14 +772,6 @@ async function createCustomNetworksSnapshot(settings: TempleSettings) {
       });
     }
   } catch {}
-}
-
-function getErrorData(err: any) {
-  return err instanceof MavrykOperationError ? err.errors.map(({ contract_code, ...rest }: any) => rest) : undefined;
-}
-
-function generateRawPayloadBytes(payload: string) {
-  return buildMavrykSignedMessagePayloadHex(payload);
 }
 
 const close = (

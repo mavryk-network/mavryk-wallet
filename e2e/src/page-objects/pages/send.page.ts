@@ -13,7 +13,6 @@ export class SendPage extends Page {
   contactHashValue = createPageElement(SendFormSelectors.contactHashValue);
 
   async isVisible() {
-    await this.assetDropDown.waitForDisplayed();
     await this.recipientInput.waitForDisplayed();
     await this.amountInput.waitForDisplayed();
   }

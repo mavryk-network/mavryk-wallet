@@ -965,6 +965,9 @@
   "unlockPasswordErrorDelay": {
     "message": "You have entered the wrong password three times. Your wallet is being blocked for"
   },
+  "unlockInterruptedByLock": {
+    "message": "The wallet was locked while it was unlocking. Please enter your password again."
+  },
   "unlock": {
     "message": "Unlock"
   },
@@ -1352,6 +1355,12 @@
   },
   "unknownNetwork": {
     "message": "Unknown:"
+  },
+  "unknownNetworkChainId": {
+    "message": "Chain ID:"
+  },
+  "verifyingOperation": {
+    "message": "Verifying operation..."
   },
   "backupNewSeedPhrase": {
     "message": "Backup new Seed Phrase"
@@ -2542,6 +2551,9 @@
   },
   "txIsLikelyToFail": {
     "message": "Warning! Transaction is likely to fail."
+  },
+  "operationCannotBeVerified": {
+    "message": "This operation could not be simulated on the network, so the wallet cannot verify what you would sign. It cannot be confirmed. Cancel it and try again later."
   },
   "copyErrorLogs": {
     "message": "Copy Error Logs"

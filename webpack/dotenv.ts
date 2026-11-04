@@ -72,4 +72,4 @@ const publicEnvFilesData: Record<string, string> = Object.fromEntries(
 publicEnvFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] =
   envFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] ?? '';
 
-export { envFilesData, publicEnvFilesData };
+export { dotenvFilesPaths, envFilesData, publicEnvFilesData };

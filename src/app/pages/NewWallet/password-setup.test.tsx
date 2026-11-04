@@ -281,6 +281,27 @@ it('guards the actual selected password before any onboarding side effects even 
   expect(hook!.isPasswordError).toBe(true);
 });
 
+it('onboarding never persists a website-tracking flag, even with analytics and ads on', async () => {
+  let hook: ReturnType<typeof useCreareOrRestorePassword>;
+  function Harness() {
+    hook = useCreareOrRestorePassword(false, 'seed');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    await hook.onSubmit({
+      password: 'Abcdefg1!',
+      repeatPassword: 'Abcdefg1!',
+      termsAccepted: true,
+      betaAgreement: true,
+      analytics: true,
+      viewAds: true
+    });
+  });
+  expect(mockRegisterWallet).toHaveBeenCalled();
+  expect(mockStorage).not.toHaveBeenCalledWith('WEBSITES_ANALYTICS_ENABLED', expect.anything());
+});
+
 it('keeps untouched punctuation neutral, invalid punctuation red and valid punctuation green', async () => {
   for (const [password, isPasswordError, color] of [
     ['Abcdefg1', false, ''],

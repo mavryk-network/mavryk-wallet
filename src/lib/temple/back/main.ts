@@ -1,21 +1,18 @@
 import browser, { Runtime } from 'webextension-polyfill';
 
-import { ACCOUNT_PKH_STORAGE_KEY, ContentScriptType } from 'lib/constants';
-import { E2eMessageType } from 'lib/e2e/types';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
 import type { IntercomPortInfo } from 'lib/intercom';
 import { startUIOwner } from 'lib/store/zustand/ui-owner';
 import { UI_OWNER_CHANNEL } from 'lib/store/zustand/ui-owner.contract';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
-import { clearAsyncStorages } from 'lib/temple/reset';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
-import { getTrackedCashbackServiceDomain, getTrackedUrl } from 'lib/utils/url-track/url-track.utils';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
 import { intercom } from './defaults';
+import { handleE2eResetMessage } from './e2e-reset-listener';
 import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
 import { store, toFront } from './store';
 
@@ -322,52 +319,8 @@ const processRequest = async (
   }
 };
 
-const getCurrentAccountPkh = async (): Promise<string | undefined> => {
-  const { [ACCOUNT_PKH_STORAGE_KEY]: accountPkhFromStorage } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
-
-  if (accountPkhFromStorage) {
-    return accountPkhFromStorage;
-  }
-
-  const frontState = await Actions.getFrontState();
-
-  return frontState.accounts[0]?.publicKeyHash;
-};
-
 browser.runtime.onMessage.addListener(msg => {
   // An async catch-all listener would claim the owner's response channel before migration finishes.
   if (msg?.channel === UI_OWNER_CHANNEL) return;
-  return (async () => {
-    try {
-      switch (msg?.type) {
-        case E2eMessageType.ResetRequest:
-          if (!isE2eResetEnabled) return;
-
-          return clearAsyncStorages().then(() => ({ type: E2eMessageType.ResetResponse }));
-      }
-
-      const accountPkh = await getCurrentAccountPkh();
-
-      switch (msg?.type) {
-        case ContentScriptType.ExternalLinksActivity:
-          const trackedCashbackServiceDomain = getTrackedCashbackServiceDomain(msg.url);
-
-          if (trackedCashbackServiceDomain) {
-            await Analytics.client.track('External Cashback Links Activity', { domain: trackedCashbackServiceDomain });
-          }
-
-          const trackedUrl = getTrackedUrl(msg.url);
-
-          if (trackedUrl) {
-            await Analytics.client.track('External links activity', { url: trackedUrl, accountPkh });
-          }
-
-          break;
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    return;
-  })();
+  return handleE2eResetMessage(msg, isE2eResetEnabled);
 });

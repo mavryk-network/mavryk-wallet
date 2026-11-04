@@ -17,6 +17,8 @@ import WebExtensionTargetPlugin from 'webpack-target-webextension';
 import WebpackBar from 'webpackbar';
 
 import { buildBaseConfig } from './webpack/base.config';
+import { createBuildStartSnapshotPlugin } from './webpack/build-provenance';
+import { envFilesData, publicEnvFilesData } from './webpack/dotenv';
 import {
   DEVELOPMENT_ENV,
   PRODUCTION_ENV,
@@ -140,8 +142,9 @@ const mainConfig = (() => {
                 - HTML files are taken care of by the `html-webpack-plugin`. Copying them here leads to:
                   `ERROR in Conflict: Multiple assets emit different content to the same filename [name].html`
                 - Manifest file is copied next, along with transformation of it.
+                - macOS metadata (`.DS_Store`, `__MACOSX/`) gets flagged by the Firefox Add-ons (AMO) validator.
               */
-              ignore: ['**/*.html']
+              ignore: ['**/*.html', '**/.DS_Store', '**/__MACOSX/**']
             }
           },
           /*
@@ -276,6 +279,12 @@ const backgroundConfig = (() => {
 })();
 
 const configurations = [mainConfig, scriptsConfig, backgroundConfig];
+
+if (PRODUCTION_ENV) {
+  // Lets zip-script tell whether this compile succeeded and its inputs stayed unchanged until packing.
+  const buildStartSnapshot = createBuildStartSnapshotPlugin(configurations.length, publicEnvFilesData, envFilesData);
+  configurations.forEach(config => config.plugins!.push(buildStartSnapshot));
+}
 
 export default configurations;
 export const parallelism = 3;

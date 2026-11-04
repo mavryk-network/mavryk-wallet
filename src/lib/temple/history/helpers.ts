@@ -176,6 +176,8 @@ export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allo
   const diffs: MoneyDiff[] = [];
 
   for (const oper of historyItem.operations) {
+    // A reveal moves no funds; its zero diff would otherwise take the single preview slot of a reveal+transfer group
+    if (oper.type === HistoryItemOpTypeEnum.Reveal) continue;
     if (oper.displayMoneyDiff) {
       diffs.push(oper.displayMoneyDiff);
       continue;

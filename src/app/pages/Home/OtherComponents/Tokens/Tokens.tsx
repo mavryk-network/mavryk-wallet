@@ -4,11 +4,16 @@ import { ChainIds } from '@mavrykdynamics/webmavryk';
 import clsx from 'clsx';
 
 import { Alert, SyncSpinner } from 'app/atoms';
+import { AssetsLoadErrorAlert } from 'app/atoms/AssetsLoadErrorAlert';
 import { useAppEnv } from 'app/env';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
+import {
+  useAreAssetsLoading,
+  useHasAssetsLoadFailed,
+  useMainnetTokensScamlistSelector
+} from 'app/store/assets/selectors';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,
@@ -48,6 +53,7 @@ export const TokensTab: FC = () => {
   const { publicKeyHash, type } = useAccount();
 
   const isSyncing = useAreAssetsLoading('tokens');
+  const hasLoadFailed = useHasAssetsLoadFailed('tokens');
   const { popup } = useAppEnv();
 
   const slugs = useEnabledAccountTokensSlugs(true);
@@ -239,6 +245,8 @@ export const TokensTab: FC = () => {
           <StakeTezosTag />
         </div>
       )}
+
+      {hasLoadFailed && !isSyncing && <AssetsLoadErrorAlert className={clsx('mb-4', popup && 'mx-4')} />}
 
       {sortedSlugs.length === 0 ? (
         <div className="pt-20 pb-8 flex flex-col items-center justify-center text-white">

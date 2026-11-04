@@ -1,5 +1,5 @@
 import { getAccountAssetsStoreKey } from 'lib/assets/account-assets-key';
-import { useAssetsFetching } from 'lib/assets/use-assets-query';
+import { useAssetsFetching, useAssetsLoadFailed } from 'lib/assets/use-assets-query';
 import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
 export type AssetsType = 'collectibles' | 'tokens' | 'rwas';
@@ -18,6 +18,8 @@ export const useAccountRwasSelector = (account: string, chainId: string) =>
   useOwnedUI(state => state.assets.rwas[getAccountAssetsStoreKey(account, chainId)] ?? ACCOUNT_ASSETS_EMPTY);
 
 export const useAreAssetsLoading = (type: AssetsType) => useAssetsFetching(type);
+
+export const useHasAssetsLoadFailed = (type: AssetsType) => useAssetsLoadFailed(type);
 
 const EMPTY_WHITELIST: string[] = [];
 

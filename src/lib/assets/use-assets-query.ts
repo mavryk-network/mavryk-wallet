@@ -28,6 +28,19 @@ export function useAssetsQuery(category: AssetsType) {
   });
 }
 
+/**
+ * Whether the latest asset request for the selected scope failed (e.g. a 403 for an account the backend hasn't
+ * linked). Reads the driver's Query state through a disabled observer, so it never starts a request itself.
+ */
+export function useAssetsLoadFailed(category: AssetsType) {
+  const scope = useDetailScope();
+  const { isError } = useQuery({
+    queryKey: assetsKeys.account(category, scope.account, scope.chainId, scope.networkId),
+    enabled: false
+  });
+  return isError;
+}
+
 /** Loading follows the selected request scope, never a durable asset flag. */
 export function useAssetsFetching(category: AssetsType) {
   const scope = useDetailScope();

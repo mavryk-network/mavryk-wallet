@@ -1,9 +1,10 @@
-import React, { FC, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { FC, Suspense, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 import CSSTransition from 'react-transition-group/CSSTransition';
 
 import DocBg from 'app/a11y/DocBg';
+import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import styles from 'app/layouts/pageLayout.module.css';
 import InternalConfirmation from 'app/templates/InternalConfirmation';
@@ -59,18 +60,30 @@ const ConfirmationOverlay: FC = () => {
           unmountOnExit
         >
           <div ref={nodeRef} className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
-            {confirmation && (
-              <InternalConfirmation
-                payload={confirmation.payload}
-                error={confirmation.error}
-                onConfirm={handleConfirm}
-              />
-            )}
+            {/*
+              InternalConfirmation suspends on first open. Without its own boundary the suspension hides this
+              CSSTransition too, which then re-mounts as `exited` with `in` set and loops on unmountOnExit.
+            */}
+            <Suspense fallback={<SpinnerSection />}>
+              {confirmation && (
+                <InternalConfirmation
+                  payload={confirmation.payload}
+                  error={confirmation.error}
+                  onConfirm={handleConfirm}
+                />
+              )}
+            </Suspense>
           </div>
         </CSSTransition>
       </Portal>
     </>
   );
 };
+
+const SpinnerSection: FC = () => (
+  <div className="flex justify-center mt-24">
+    <Spinner className="w-20" />
+  </div>
+);
 
 export default ConfirmationOverlay;

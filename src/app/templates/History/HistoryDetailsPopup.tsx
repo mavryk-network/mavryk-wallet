@@ -45,6 +45,7 @@ import {
   getHistoryOperationAddress,
   getMoneyDiffForMultiple,
   getMoneyDiffsForSwap,
+  isNetworkFeePaidByAccount,
   isVisibleMoneyDiff
 } from './utils';
 
@@ -276,76 +277,78 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         {!isSwapOperation && !isMultipleOperation && <TxAddressBlock historyItem={historyItem} />}
 
-        <CardContainer className={clsx('text-sm text-white flex flex-col')}>
-          <div className="flex justify-between items-start text-base-plus">
-            <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
-              <T id="networkFees" />
-              <ArrowIcon
-                className={clsx(
-                  'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
-                  showFeeDetails && 'transform rotate-180'
-                )}
-              />
-            </div>
+        {isNetworkFeePaidByAccount(historyItem, publicKeyHash) && (
+          <CardContainer className={clsx('text-sm text-white flex flex-col')}>
+            <div className="flex justify-between items-start text-base-plus">
+              <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
+                <T id="networkFees" />
+                <ArrowIcon
+                  className={clsx(
+                    'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
+                    showFeeDetails && 'transform rotate-180'
+                  )}
+                />
+              </div>
 
-            <div className="flex flex-col items-end">
-              <FiatBalance
-                assetSlug={MAV_TOKEN_SLUG}
-                value={fees.networkFee}
-                showEqualSymbol={false}
-                className="text-base-plus"
-                roundingMode={BigNumber.ROUND_CEIL}
-                customSymbol="-"
-              />
+              <div className="flex flex-col items-end">
+                <FiatBalance
+                  assetSlug={MAV_TOKEN_SLUG}
+                  value={fees.networkFee}
+                  showEqualSymbol={false}
+                  className="text-base-plus"
+                  roundingMode={BigNumber.ROUND_CEIL}
+                  customSymbol="-"
+                />
 
-              <div className="text-sm text-secondary-white">
-                <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
+                <div className="text-sm text-secondary-white">
+                  <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
+                </div>
               </div>
             </div>
-          </div>
-          <div
-            className={clsx(
-              'flex flex-col gap-2',
-              'transition ease-in-out duration-200',
-              showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
-            )}
-          >
-            {showFeeDetails && <Divider color="bg-divider" className="mt-2" ignoreParent={!popup} />}
-            <div className="flex justify-between items-center">
-              <span>
-                <T id="gasFee" />
-              </span>
-              <FeeAmount
-                value={fees.gasFee}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white flex items-center capitalize"
-              />
+            <div
+              className={clsx(
+                'flex flex-col gap-2',
+                'transition ease-in-out duration-200',
+                showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
+              )}
+            >
+              {showFeeDetails && <Divider color="bg-divider" className="mt-2" ignoreParent={!popup} />}
+              <div className="flex justify-between items-center">
+                <span>
+                  <T id="gasFee" />
+                </span>
+                <FeeAmount
+                  value={fees.gasFee}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white flex items-center capitalize"
+                />
+              </div>
+              <div className="flex justify-between items-center capitalize">
+                <span>
+                  <T id="storageFee" />
+                </span>
+                <FeeAmount
+                  value={fees.storageFee}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white flex items-center"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <span>
+                  <T id="burnedFromFees" />
+                </span>
+                <FeeAmount
+                  value={fees.burnedFromFees}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white"
+                />
+              </div>
             </div>
-            <div className="flex justify-between items-center capitalize">
-              <span>
-                <T id="storageFee" />
-              </span>
-              <FeeAmount
-                value={fees.storageFee}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white flex items-center"
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span>
-                <T id="burnedFromFees" />
-              </span>
-              <FeeAmount
-                value={fees.burnedFromFees}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white"
-              />
-            </div>
-          </div>
-        </CardContainer>
+          </CardContainer>
+        )}
 
         {(operStack.length > 1 || mainOperation?.displayMoneyDiff || historyItem.isPartialTransfers) && (
           <>

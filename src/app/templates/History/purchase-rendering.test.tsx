@@ -335,3 +335,40 @@ it('labels a contract call without an entrypoint as an interaction with the cont
   expect(content).not.toContain('Called');
   expect(content).not.toContain('interactionOnContract');
 });
+
+it('shows network fees for outgoing transfers but not for incoming transfers paid by the sender', () => {
+  const counterparty = 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX';
+  const transfer = (isIncoming: boolean) => {
+    const [from, to] = isIncoming ? [counterparty, PURCHASE_WALLET] : [PURCHASE_WALLET, counterparty];
+    const [group] = groupMavrykHistoryOperations([
+      {
+        hash: isIncoming ? 'opIncoming' : 'opOutgoing',
+        type: 'transaction',
+        status: 'applied',
+        sender: from,
+        target: to,
+        networkFees: { totalFee: 0.000293, gasFee: 0.000293, storageFee: 0, burnedFromFees: 0.06425 },
+        details: {
+          type: 'transaction',
+          transferType: isIncoming ? 'received' : 'sent',
+          amount: 3,
+          from,
+          to,
+          currency: 'MVRK',
+          entrypoint: 'transfer'
+        }
+      }
+    ]);
+    return mavrykHistoryGroupToHistoryItem(group!, { address: PURCHASE_WALLET });
+  };
+
+  const incoming = transfer(true);
+  expect(incoming.type).toBe(HistoryItemOpTypeEnum.TransferFrom);
+  const incomingPopup = text(<HistoryDetailsPopup historyItem={incoming} isOpen />);
+  expect(incomingPopup).not.toContain('networkFees');
+  expect(incomingPopup).not.toContain('burnedFromFees');
+
+  const outgoingPopup = text(<HistoryDetailsPopup historyItem={transfer(false)} isOpen />);
+  expect(outgoingPopup).toContain('networkFees');
+  expect(outgoingPopup).toContain('burnedFromFees');
+});

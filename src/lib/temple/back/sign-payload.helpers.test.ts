@@ -28,8 +28,7 @@ describe('prepareDAppSignPayload', () => {
     'https://basenet.nexus.mavryk.org',
     'https://nexus.mavryk.org',
     'https://app.equiteez.com',
-    'https://app.equiteez.com/path',
-    'https://equiteez-app.pages.dev'
+    'https://app.equiteez.com/path'
   ];
 
   it.each(['01abcdef', '02abcdef', '03abcdef'])('rejects forbidden payload prefix %s', payload => {
@@ -85,7 +84,8 @@ describe('prepareDAppSignPayload', () => {
     'https://mavryk-nexus.pages.dev.evil.com',
     'https://localhost.evil.com',
     'http://127.0.0.2:3000',
-    // Loopback and preview deployments are trusted in development builds only
+    // Loopback, preview deployments and the Equiteez Pages host are trusted in development builds only
+    'https://equiteez-app.pages.dev',
     'http://localhost:3000',
     'https://localhost:3000',
     'http://127.0.0.1:3000',

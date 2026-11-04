@@ -796,6 +796,8 @@ interface TempleOperationsRequest extends TempleMessageBase {
 interface TempleOperationsResponse extends TempleMessageBase {
   type: TempleMessageType.OperationsResponse;
   opHash: string;
+  /** Total applied fee of the injected group in mumav, reveal included. Absent when unknown. */
+  feeMumav?: string;
 }
 
 interface TempleSignRequest extends TempleMessageBase {

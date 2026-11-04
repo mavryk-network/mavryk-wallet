@@ -219,10 +219,17 @@ const processRequest = async (
       };
 
     case TempleMessageType.OperationsRequest:
-      const { opHash } = await Actions.sendOperations(port, req.id, req.sourcePkh, req.networkRpc, req.opParams);
+      const { opHash, feeMumav } = await Actions.sendOperations(
+        port,
+        req.id,
+        req.sourcePkh,
+        req.networkRpc,
+        req.opParams
+      );
       return {
         type: TempleMessageType.OperationsResponse,
-        opHash
+        opHash,
+        feeMumav
       };
 
     case TempleMessageType.SignRequest:

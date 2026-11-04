@@ -16,6 +16,7 @@ import {
   loadChainId,
   resolveAuthWalletAddress
 } from 'lib/temple/helpers';
+import { sumOperationFeesMumav } from 'lib/temple/operation-fee.helpers';
 import {
   DerivationType,
   TempleState,
@@ -523,13 +524,25 @@ export function removeDAppSession(origin: string) {
   return removeDApp(origin);
 }
 
+type SentOperationsResult = { opHash: string; feeMumav?: string };
+
+/**
+ * Builds the in-wallet send result from the injected batch.
+ * `feeMumav` is the fee actually applied (reveal included, after any Minimal/Fast change in the confirmation),
+ * so the success screen doesn't have to guess it. It is omitted when the batch has no preapplied contents.
+ */
+const toSentOperationsResult = (op: { hash: string; results?: ReadonlyArray<object> }): SentOperationsResult =>
+  op.results && op.results.length > 0
+    ? { opHash: op.hash, feeMumav: sumOperationFeesMumav(op.results).toFixed() }
+    : { opHash: op.hash };
+
 export function sendOperations(
   port: Runtime.Port,
   id: string,
   sourcePkh: string,
   networkRpc: string,
   opParams: any[]
-): Promise<{ opHash: string }> {
+): Promise<SentOperationsResult> {
   assertExtensionUiPortInfo(intercom.getPortInfo(port));
 
   return withUnlocked(async () => {
@@ -551,7 +564,7 @@ export function sendOperations(
 }
 
 const promisableUnlock = async (
-  resolve: (arg: { opHash: string }) => void,
+  resolve: (arg: SentOperationsResult) => void,
   reject: (err: Error) => void,
   port: Runtime.Port,
   id: string,
@@ -600,7 +613,7 @@ const promisableUnlock = async (
 
           await safeAddLocalOperation(networkRpc, op);
 
-          resolve({ opHash: op.hash });
+          resolve(toSentOperationsResult(op));
         } catch (err: any) {
           if (err instanceof MavrykOperationError) {
             reject(err);

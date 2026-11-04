@@ -415,6 +415,31 @@ describe('in-wallet confirmation decision finalisation', () => {
     expect(outcome).toHaveBeenCalledWith('resolved', { opHash: 'opHash' });
   });
 
+  it('returns the applied fee of the whole group, reveal included', async () => {
+    const vaultSendOperations = jest.fn(() =>
+      Promise.resolve({
+        hash: 'opHash',
+        results: [
+          { kind: 'reveal', fee: '331' },
+          { kind: 'transaction', fee: '287' }
+        ]
+      })
+    );
+    unlockWithVault({ revealPublicKey: jest.fn(() => Promise.resolve('edpk')), sendOperations: vaultSendOperations });
+
+    const outcome = settleOutcome(
+      sendOperations(uiPort, confirmationId, testAccount.publicKeyHash, networkRpc, [
+        { kind: 'transaction', to: testAccount.publicKeyHash, amount: 1 }
+      ])
+    );
+    await flushMicrotasks();
+
+    await deliver(decisionReq);
+    await flushMicrotasks();
+
+    expect(outcome).toHaveBeenCalledWith('resolved', { opHash: 'opHash', feeMumav: '618' });
+  });
+
   it('rejects a repeated operations decision for the same id while the first is in flight', async () => {
     const sendResult = createDeferred<{ hash: string; results: any[] }>();
     const vaultSendOperations = jest.fn(() => sendResult.promise);

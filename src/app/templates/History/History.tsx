@@ -12,12 +12,13 @@ import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
 import { ComponentTheme } from 'app/types/appTheme.types';
 import { ExtendedGetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 import { t, T } from 'lib/i18n/react';
-import { useAccount, useChainId } from 'lib/temple/front';
+import { useAccount, useChainId, useNetwork } from 'lib/temple/front';
 import { UserHistoryItem } from 'lib/temple/history';
-import { fetchUserOperationByHash } from 'lib/temple/history/fetch';
+import { fetchUserOperationByHash, isFullOperationHash, isWatchOnlyAccount } from 'lib/temple/history/fetch';
 import { createOpParams, mergeOpParams } from 'lib/temple/history/filterParams';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 import { usePurchaseMetadata } from 'lib/temple/history/use-purchase-metadata';
+import { useRetryCountdown } from 'lib/temple/history/use-retry-countdown';
 import { isKnownChainId } from 'lib/temple/types';
 
 import useHistory from '../../../lib/temple/history/hook';
@@ -62,7 +63,10 @@ export const HistoryComponent: React.FC<Props> = memo(
     scrollableTarget
   }) => {
     const { popup } = useAppEnv();
-    const { publicKeyHash: accountAddress } = useAccount();
+    const account = useAccount();
+    const { publicKeyHash: accountAddress } = account;
+    const isWatchOnly = isWatchOnlyAccount(account);
+    const { id: networkId } = useNetwork();
     const chainId = useChainId();
     const resolvePurchaseDecimals = usePurchaseMetadata();
 
@@ -166,6 +170,8 @@ export const HistoryComponent: React.FC<Props> = memo(
       list: userHistory,
       error: userHistoryError,
       equiteezStatus,
+      retryAvailableAt,
+      isAssetHistoryUnsupported,
       loadMore
     } = useHistory(INITIAL_NUMBER, assetSlug, historyFilterParams, undefined, tokenAddress);
 
@@ -175,6 +181,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     const [isSearchingByHash, setIsSearchingByHash] = useState(false);
 
     const loading = userHistoryLoading || isSearchingByHash;
+    const retrySecondsLeft = useRetryCountdown(retryAvailableAt);
 
     // debounced search ****************************************************
     const [searchValue, setSearchValue] = useState('');
@@ -219,6 +226,12 @@ export const HistoryComponent: React.FC<Props> = memo(
       let isCancelled = false;
       async function fetchOperationData() {
         setIsSearchingByHash(true);
+        // Watch only search shares the one-per-minute history allowance: only complete hashes are sent.
+        if (isWatchOnly && (isAssetHistoryUnsupported || !isFullOperationHash(searchValueForFilter))) {
+          setFilteredHistory([]);
+          setIsSearchingByHash(false);
+          return;
+        }
         if (chainId && isKnownChainId(chainId) && searchValueForFilter !== '') {
           try {
             const arr = await fetchUserOperationByHash(
@@ -227,7 +240,8 @@ export const HistoryComponent: React.FC<Props> = memo(
               searchValueForFilter,
               assetSlug,
               resolvePurchaseDecimals,
-              tokenAddress
+              tokenAddress,
+              isWatchOnly ? networkId : undefined
             );
             if (isCancelled) return;
             setIsSearchingByHash(false);
@@ -248,7 +262,17 @@ export const HistoryComponent: React.FC<Props> = memo(
       return () => {
         isCancelled = true;
       };
-    }, [searchValueForFilter, chainId, accountAddress, assetSlug, resolvePurchaseDecimals, tokenAddress]);
+    }, [
+      searchValueForFilter,
+      chainId,
+      accountAddress,
+      assetSlug,
+      resolvePurchaseDecimals,
+      tokenAddress,
+      isWatchOnly,
+      isAssetHistoryUnsupported,
+      networkId
+    ]);
 
     // popup states
     const [isOpen, setIsOpen] = useState(false);
@@ -274,7 +298,7 @@ export const HistoryComponent: React.FC<Props> = memo(
     const loadNext =
       searchValue.length !== 0 ? () => {} : userHistory.length === 0 ? retryInitialLoad : loadMoreActivities;
 
-    const onScroll = loading || reachedTheEnd ? undefined : buildOnScroll(loadNext);
+    const onScroll = loading || reachedTheEnd || retrySecondsLeft > 0 ? undefined : buildOnScroll(loadNext);
 
     const searchbtnStyles = useMemo(() => (theme === DARK_LIGHT_THEME ? cleanBtnStyles : {}), [theme]);
 
@@ -347,7 +371,14 @@ export const HistoryComponent: React.FC<Props> = memo(
         )}
 
         <div className="flex flex-col" style={{ minHeight: LIST_MIN_HEIGHT }}>
-          {!historyToshow.length && !loading && !userHistoryError ? (
+          {isAssetHistoryUnsupported ? (
+            <div className="flex flex-1 flex-col items-center justify-center py-16 text-white">
+              <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
+              <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
+                <T id="watchOnlyAssetHistoryUnavailable" />
+              </h3>
+            </div>
+          ) : !historyToshow.length && !loading && !userHistoryError ? (
             <div className="flex flex-1 flex-col items-center justify-center py-16 text-white">
               <LayersIcon className="w-16 h-auto mb-2 stroke-current" />
               <h3 className="text-base-plus text-white text-center" style={{ maxWidth: '20rem' }}>
@@ -384,9 +415,15 @@ export const HistoryComponent: React.FC<Props> = memo(
               {userHistoryError && !loading && !searchValueForFilter && (
                 <div className="flex items-center justify-center gap-2 py-4 text-sm text-white">
                   <T id="historyLoadError" />
-                  <button type="button" className="text-accent-blue hover:underline" onClick={loadNext}>
-                    <T id="retry" />
-                  </button>
+                  {retrySecondsLeft > 0 ? (
+                    <span className="text-secondary-white">
+                      <T id="retryInSeconds" substitutions={[String(retrySecondsLeft)]} />
+                    </span>
+                  ) : (
+                    <button type="button" className="text-accent-blue hover:underline" onClick={loadNext}>
+                      <T id="retry" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

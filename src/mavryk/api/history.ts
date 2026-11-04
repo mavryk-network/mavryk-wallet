@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { mavrykApi } from './client';
-import { extractMavrykApiErrorMessage } from './errors';
+import { mavrykApi, type MavrykApiRequestConfig } from './client';
+import { toMavrykApiError } from './errors';
 import { getWalletAddressFromStorage } from './storage';
 
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
@@ -110,7 +110,7 @@ const HistoryOperationDetailsSchema = HistoryOperationDetailsBaseSchema.extend({
 export const EQUITEEZ_HISTORY_STATUSES = ['available', 'stale', 'unavailable'] as const;
 
 /** Enrichment availability; a future unknown status is kept as `unknown` instead of rejecting history. */
-const EquiteezHistorySchema = z
+export const EquiteezHistorySchema = z
   .object({
     status: z
       .string()
@@ -134,7 +134,7 @@ const HistoryParameterSchema = z
   })
   .passthrough();
 
-const HistoryOperationSchema = z.object({
+export const HistoryOperationSchema = z.object({
   id: NumberLikeSchema.optional(),
   hash: z.string(),
   type: z.string(),
@@ -226,15 +226,16 @@ export function parseHistoryResponse(data: unknown) {
   return HistoryResponseSchema.parse(data) as MavrykHistoryResponse;
 }
 
-async function fetchHistory(path: string, params: FetchHistoryRequest = {}) {
+async function fetchHistory(path: string, params: FetchHistoryRequest = {}, config: MavrykApiRequestConfig = {}) {
   try {
     const { data } = await mavrykApi.get<MavrykHistoryResponse>(path, {
+      ...config,
       params: buildHistoryParams(params)
     });
 
     return parseHistoryResponse(data);
   } catch (error) {
-    throw new Error(extractMavrykApiErrorMessage(error));
+    throw toMavrykApiError(error);
   }
 }
 
@@ -242,6 +243,20 @@ export async function fetchWalletHistory(params: FetchHistoryRequest = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
   return fetchHistory(`/wallets/${address}/history`, params);
+}
+
+/**
+ * Public general history of a Watch only address on the given API network. Sends no credentials and never
+ * triggers auth recovery; per-asset history has no public route.
+ */
+export async function fetchWatchOnlyWalletHistory(
+  walletAddress: string,
+  networkId: string,
+  params: Omit<FetchHistoryRequest, 'walletAddress' | 'tokenId'> = {}
+) {
+  return fetchHistory(`/watch-only/wallets/${encodeURIComponent(walletAddress)}/history`, params, {
+    publicRead: { networkId }
+  } as MavrykApiRequestConfig);
 }
 
 export async function fetchTokenHistory(tokenAddress: string, params: FetchHistoryRequest = {}) {

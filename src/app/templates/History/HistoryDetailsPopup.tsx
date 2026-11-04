@@ -69,12 +69,20 @@ const createEmptyHistoryFeeTotals = (): HistoryFeeTotals => ({
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
+  /** Address whose point of view decides direction and roles; defaults to the active account. */
+  perspectiveAddress?: string;
 };
 
-export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
+export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({
+  historyItem,
+  isOpen,
+  perspectiveAddress,
+  ...props
+}) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
   const { popup } = useAppEnv();
-  const { publicKeyHash } = useAccount();
+  const { publicKeyHash: activeAccountAddress } = useAccount();
+  const publicKeyHash = perspectiveAddress ?? activeAccountAddress;
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const mainAssetDecimals = mainAssetMetadata?.decimals ?? DEFAULT_FEE_DECIMALS;

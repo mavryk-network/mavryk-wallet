@@ -4168,5 +4168,50 @@
   },
   "assetSecurityUnavailable": {
     "message": "Token security data is unavailable. Assets have not been checked for scam labels."
+  },
+  "recentOperations": {
+    "message": "Recent Operations"
+  },
+  "recentOperationsPreparing": {
+    "message": "Preparing recent operations…"
+  },
+  "recentOperationsEmpty": {
+    "message": "No recent operations yet"
+  },
+  "recentOperationsUpdating": {
+    "message": "Updating… Last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsStaleEmpty": {
+    "message": "Updating recent operations…"
+  },
+  "recentOperationsLoadError": {
+    "message": "Could not load recent operations"
+  },
+  "recentOperationsOutdated": {
+    "message": "Showing operations last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsUnsupported": {
+    "message": "History for contract contacts is not supported yet"
+  },
+  "retryInSeconds": {
+    "message": "Retry in $seconds$s",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "watchOnlyAssetHistoryUnavailable": {
+    "message": "Asset history isn't available for watch-only accounts"
   }
 }

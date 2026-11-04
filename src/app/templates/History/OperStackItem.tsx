@@ -153,7 +153,8 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
       const opInteract = item as HistoryItemTransactionOp;
       const interactionAddress = getHistoryOperationAddress(opInteract, originalHistoryItem);
 
-      return (
+      // Without an entrypoint "Called <entrypoint> on <contract>" would read "Called  on <contract>"
+      return opInteract.entrypoint ? (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
@@ -163,6 +164,12 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
               args={[<span className="text-accent-blue">{opInteract.entrypoint}</span>, interactionAddress]}
             />
           }
+        />
+      ) : (
+        <Component
+          {...componentBaseProps}
+          titleNode="Interaction"
+          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[interactionAddress]} />}
         />
       );
     case HistoryItemOpTypeEnum.Multiple:

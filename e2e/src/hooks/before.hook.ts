@@ -18,6 +18,16 @@ Before({ timeout: MEDIUM_TIMEOUT }, async () => {
     try {
       const response = await page.goto(url);
       if (response == null || !response.ok) throw new Error('Failed to open page');
+      // The extension opens its own tab on install; a background tab never runs rAF, which hangs element clicks
+      await page.bringToFront();
+      if (process.env.E2E_PAGE_ERRORS) {
+        // eslint-disable-next-line no-console
+        page.on('pageerror', (err: unknown) => console.log('PAGEERROR:', String(err instanceof Error ? err.stack : err).slice(0, 1500)));
+        page.on('console', msg => {
+          // eslint-disable-next-line no-console
+          if (msg.type() === 'error') console.log('CONSOLE-ERROR:', msg.text().slice(0, 1500));
+        });
+      }
       return page;
     } catch (error) {
       await page.close();

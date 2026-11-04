@@ -4,6 +4,7 @@ import browser from 'webextension-polyfill';
 import { ACCOUNT_PKH_STORAGE_KEY, UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { WALLET_AUTOLOCK_TIME } from 'lib/fixed-times';
 import {
+  clearStoredAuthTokens,
   getAuthTokensFromStorage,
   getSelectedNetworkIdFromStorage,
   isJwtExpiringSoon,
@@ -16,6 +17,7 @@ import {
 import { TempleAccount, TempleAccountType, TempleStatus } from '../types';
 
 import {
+  clearAuthTokensIfStartedLocked,
   enforceAutolock,
   enforceAutolockOnPageOpen,
   lock,
@@ -31,6 +33,7 @@ import { Vault } from './vault';
 jest.mock(
   'mavryk/api',
   () => ({
+    clearStoredAuthTokens: jest.fn(),
     getAuthTokensFromStorage: jest.fn(),
     getSelectedNetworkIdFromStorage: jest.fn(),
     isJwtExpiringSoon: jest.fn(),
@@ -66,6 +69,7 @@ const mockedGetSelectedNetworkIdFromStorage = getSelectedNetworkIdFromStorage as
 const mockedIsJwtExpiringSoon = isJwtExpiringSoon as jest.MockedFunction<typeof isJwtExpiringSoon>;
 const mockedRefreshAuthTokens = refreshAuthTokens as jest.MockedFunction<typeof refreshAuthTokens>;
 const mockedRequestAuthChallenge = requestAuthChallenge as jest.MockedFunction<typeof requestAuthChallenge>;
+const mockedClearStoredAuthTokens = clearStoredAuthTokens as jest.MockedFunction<typeof clearStoredAuthTokens>;
 const mockedLogoutAuth = logoutAuth as jest.MockedFunction<typeof logoutAuth>;
 const mockedVerifyAuthSignature = verifyAuthSignature as jest.MockedFunction<typeof verifyAuthSignature>;
 
@@ -399,6 +403,30 @@ describe('actions lock serialization', () => {
     } finally {
       mockedEnv.BACKGROUND_IS_WORKER = false;
     }
+  });
+});
+
+describe('startup auth token cleanup', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    locked();
+    inited(true);
+  });
+
+  it('clears every stored auth token when the background starts locked', async () => {
+    await clearAuthTokensIfStartedLocked();
+
+    expect(mockedClearStoredAuthTokens).toHaveBeenCalledTimes(1);
+    expect(mockedClearStoredAuthTokens).toHaveBeenCalledWith();
+    expect(mockedLogoutAuth).not.toHaveBeenCalled();
+  });
+
+  it('keeps the auth tokens when the session restored an unlocked wallet', async () => {
+    unlocked({ vault: {} as any, accounts: [testAccount], settings: {} });
+
+    await clearAuthTokensIfStartedLocked();
+
+    expect(mockedClearStoredAuthTokens).not.toHaveBeenCalled();
   });
 });
 

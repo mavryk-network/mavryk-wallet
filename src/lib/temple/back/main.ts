@@ -29,6 +29,7 @@ export const start = async () => {
   await Actions.init();
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
+  await Actions.clearAuthTokensIfStartedLocked().catch(error => console.error(toSafeLogError(error)));
 
   const syncAuthWalletAddresses = (accounts = store.getState().accounts) => {
     setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts)).catch(error => console.error(error));

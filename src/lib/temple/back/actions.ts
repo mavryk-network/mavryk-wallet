@@ -27,10 +27,12 @@ import {
   TempleChainKind,
   SaveLedgerAccountInput,
   TempleAccountType,
-  TempleAccount
+  TempleAccount,
+  TempleStatus
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
 import {
+  clearStoredAuthTokens,
   getAuthTokensFromStorage,
   getSelectedNetworkIdFromStorage,
   isJwtExpiringSoon,
@@ -312,6 +314,20 @@ export async function unlockFromSession() {
     unlocked({ vault, accounts, settings });
     await syncAuthWalletAddresses(accounts);
     await removeOrphanedDAppSessions(accounts);
+  });
+}
+
+/**
+ * Clears every stored auth token when the background has started with the wallet locked.
+ * After a browser restart `storage.session` is wiped, so the vault comes back locked and `unlockFromSession`
+ * recovers nothing, while the long-lived refresh token would otherwise stay on disk until the next unlock.
+ * Local only: no revocation request at startup, and the next unlock authenticates again.
+ * Runs in the unlock queue so it never clears tokens written by an unlock that started meanwhile.
+ */
+export function clearAuthTokensIfStartedLocked() {
+  return enqueueUnlock(async () => {
+    if (store.getState().status === TempleStatus.Ready) return;
+    await clearStoredAuthTokens();
   });
 }
 

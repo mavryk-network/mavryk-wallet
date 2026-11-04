@@ -12,6 +12,7 @@ import { start } from './main';
 jest.mock('./actions', () => ({
   init: jest.fn(),
   unlockFromSession: jest.fn(),
+  clearAuthTokensIfStartedLocked: jest.fn(() => Promise.resolve()),
   isDAppEnabled: jest.fn(),
   processDApp: jest.fn()
 }));
@@ -75,10 +76,15 @@ const acknowledgeRequest = {
 type ProcessRequest = (req: TempleRequest, port: Runtime.Port, portInfo: IntercomPortInfo) => Promise<unknown>;
 
 let processRequest: ProcessRequest;
+let startupCallOrder: { init?: number; clearAuthTokens?: number } = {};
 
 beforeAll(async () => {
   await start();
   processRequest = mockedOnRequest.mock.calls[0][0] as ProcessRequest;
+  startupCallOrder = {
+    init: mockedActions.init.mock.invocationCallOrder[0],
+    clearAuthTokens: mockedActions.clearAuthTokensIfStartedLocked.mock.invocationCallOrder[0]
+  };
 });
 
 beforeEach(() => {
@@ -88,6 +94,13 @@ beforeEach(() => {
     recipientPubKey: 'dapp-public-key',
     req: { id: 'beacon-request-id' } as any,
     payload: null
+  });
+});
+
+describe('background start', () => {
+  it('clears auth tokens left from a locked start once init has run', () => {
+    expect(startupCallOrder.clearAuthTokens).toBeDefined();
+    expect(startupCallOrder.clearAuthTokens!).toBeGreaterThan(startupCallOrder.init!);
   });
 });
 

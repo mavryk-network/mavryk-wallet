@@ -2,14 +2,11 @@ import type { Action } from 'redux';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
 
-import { abTestingEpics } from './ab-testing/epics';
 import type { RootState } from './root-state.type';
 // import { swapEpics } from './swap/epics';
 
-const allEpics = combineEpics(
-  // swapEpics,
-  abTestingEpics
-);
+const allEpics = combineEpics<Action, Action, RootState>();
+// const allEpics = combineEpics(swapEpics);
 
 export const epicMiddleware = createEpicMiddleware<Action, Action, RootState>();
 

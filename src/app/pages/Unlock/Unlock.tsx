@@ -2,7 +2,6 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 
 import classNames from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
@@ -17,9 +16,6 @@ import { useLocalStorage } from 'lib/ui/local-storage';
 import { delay } from 'lib/utils';
 import { Link } from 'lib/woozie';
 
-import { ABTestGroup } from '../../../lib/apis/temple';
-import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
-import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import PageWithImageBg from '../../templates/PageWithImageBg/PageWithImageBg';
 
 import { UnlockSelectors } from './Unlock.selectors';
@@ -48,7 +44,6 @@ const getTimeLeft = (start: number, end: number) => {
 
 const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   const { unlock } = useTempleClient();
-  const dispatch = useDispatch();
   const { popup } = useAppEnv();
   const formAnalytics = useFormAnalytics('UnlockWallet');
   useLoadPerfMark('unlock-painted');
@@ -58,14 +53,6 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   const lockLevel = LOCK_TIME * Math.floor(attempt / 3);
 
   const [timeleft, setTimeleft] = useState(getTimeLeft(timelock, lockLevel));
-
-  const testGroupName = useUserTestingGroupNameSelector();
-
-  useEffect(() => {
-    if (testGroupName === ABTestGroup.Unknown) {
-      dispatch(getUserTestingGroupNameActions.submit());
-    }
-  }, [testGroupName]);
 
   const formRef = useRef<HTMLFormElement>(null);
 

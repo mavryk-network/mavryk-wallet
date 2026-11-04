@@ -8,6 +8,7 @@ import {
   type AuthVerifyResponse
 } from './auth.schema';
 import { getMavrykApiBaseUrl, mavrykApi, type MavrykApiRequestConfig, refreshStoredAuthTokensOrThrow } from './client';
+import { toSafeLogError } from './errors';
 import {
   clearStoredAuthTokens,
   collectStoredRefreshTokens,
@@ -137,7 +138,7 @@ export async function logoutAuth(params: AuthRefreshRequest = {}, { awaitRevocat
 
         await mavrykApi.post('/auth/logout', { refreshToken }, logoutRequestConfig);
       } catch (error) {
-        console.error(error);
+        console.error(toSafeLogError(error));
       }
     })
   );

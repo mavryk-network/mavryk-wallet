@@ -39,6 +39,7 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
+import { toSafeLogError } from 'mavryk/api/errors';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
@@ -284,7 +285,7 @@ export function unlock(password: string) {
       try {
         await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
       } catch (error) {
-        console.error(error);
+        console.error(toSafeLogError(error));
       }
 
       // A lock landing during the auth calls logged out first, so the tokens the auth saved after it are cleared again

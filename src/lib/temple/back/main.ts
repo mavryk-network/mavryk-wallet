@@ -7,6 +7,7 @@ import { UI_OWNER_CHANNEL } from 'lib/store/zustand/ui-owner.contract';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
+import { toSafeLogError } from 'mavryk/api/errors';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
@@ -45,7 +46,7 @@ export const start = async () => {
 
 const processRequestWithErrorsLogged = (...args: Parameters<typeof processRequest>) =>
   processRequest(...args).catch(error => {
-    console.error(error);
+    console.error(toSafeLogError(error));
     throw error;
   });
 

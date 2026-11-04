@@ -44,7 +44,10 @@ jest.mock('lib/env', () => ({ BACKGROUND_IS_WORKER: false }));
 jest.mock('lib/store/zustand/ui-owner', () => ({ startUIOwner: jest.fn() }));
 jest.mock('lib/temple/helpers', () => ({ buildAuthWalletAddressesMap: jest.fn() }));
 jest.mock('lib/temple/reset', () => ({ clearAsyncStorages: jest.fn() }));
-jest.mock('mavryk/api/storage', () => ({ setAuthWalletAddressesMapToStorage: jest.fn().mockResolvedValue(undefined) }));
+jest.mock('mavryk/api/storage', () => ({
+  migrateAuthTokensToSessionStorage: jest.fn().mockResolvedValue(undefined),
+  setAuthWalletAddressesMapToStorage: jest.fn().mockResolvedValue(undefined)
+}));
 jest.mock('lib/temple/beacon', () => ({
   ...jest.requireActual('lib/temple/beacon'),
   encryptMessage: jest.fn().mockResolvedValue('encrypted-ack'),

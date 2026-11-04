@@ -8,7 +8,7 @@ import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } fro
 import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
 import { toSafeLogError } from 'mavryk/api/errors';
-import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
+import { migrateAuthTokensToSessionStorage, setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
@@ -27,6 +27,7 @@ export const start = async () => {
   startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
+  await migrateAuthTokensToSessionStorage().catch(error => console.error(toSafeLogError(error)));
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
   await Actions.clearAuthTokensIfStartedLocked().catch(error => console.error(toSafeLogError(error)));

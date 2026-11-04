@@ -1,7 +1,6 @@
-import browser from 'webextension-polyfill';
-
+import { browser } from 'lib/browser';
 import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
-import { fetchFromStorage, putToStorage, removeFromStorage } from 'lib/storage';
+import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { migrateLegacyAtlasnetStorage, NETWORK_ID_STORAGE_KEY, normalizeNetworkId } from 'lib/temple/network-storage';
 
 export { NETWORK_ID_STORAGE_KEY };
@@ -34,6 +33,73 @@ export type StoredMavrykRefreshToken = ResolvedMavrykAuthStorageContext & {
 };
 
 const AUTH_TOKEN_STORAGE_KEY_PATTERN = /^\[([^\]]+)\]\[([^\]]+)\](\[refresh\])?$/;
+const LEGACY_AUTH_TOKEN_STORAGE_KEYS = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
+
+type StorageArea = typeof browser.storage.local;
+type SessionStorageArea = StorageArea & {
+  setAccessLevel?: (accessInfo: {
+    accessLevel: 'TRUSTED_CONTEXTS' | 'TRUSTED_AND_UNTRUSTED_CONTEXTS';
+  }) => Promise<void>;
+};
+
+/**
+ * Auth tokens live in `storage.session`: it is wiped when the browser closes and, at `TRUSTED_CONTEXTS`, is not
+ * readable by content scripts. Extension pages still read it directly through the shared API client.
+ * Falls back to `storage.local` only where `storage.session` doesn't exist.
+ */
+function getAuthTokenStorageArea(): StorageArea {
+  return browser.storage.session ?? browser.storage.local;
+}
+
+/** Every area that may hold auth tokens, so clean-up and revocation also catch copies left in `storage.local`. */
+function getAuthTokenStorageAreas(): StorageArea[] {
+  const area = getAuthTokenStorageArea();
+  return area === browser.storage.local ? [area] : [area, browser.storage.local];
+}
+
+const isAuthTokenStorageKey = (storageKey: string) =>
+  LEGACY_AUTH_TOKEN_STORAGE_KEYS.includes(storageKey) || parseAuthTokenStorageKey(storageKey) !== null;
+
+/**
+ * One-time move of auth tokens from `storage.local` to `storage.session`, run by the background at start.
+ * Restricts `storage.session` to trusted contexts first. A key already present in session storage is newer than
+ * the local copy and is kept. Local copies are deleted either way.
+ */
+export async function migrateAuthTokensToSessionStorage() {
+  const sessionArea: SessionStorageArea | undefined = browser.storage.session;
+  if (!sessionArea) return;
+
+  try {
+    await sessionArea.setAccessLevel?.({ accessLevel: 'TRUSTED_CONTEXTS' });
+  } catch (error) {
+    console.error(error);
+  }
+
+  const localItems = await browser.storage.local.get(null);
+  const localTokenKeys = Object.keys(localItems).filter(isAuthTokenStorageKey);
+  if (localTokenKeys.length === 0) return;
+
+  const sessionItems = await sessionArea.get(localTokenKeys);
+  const valuesToMove = Object.fromEntries(
+    localTokenKeys
+      .filter(key => !(key in sessionItems) && typeof localItems[key] === 'string')
+      .map(key => [key, localItems[key]])
+  );
+
+  if (Object.keys(valuesToMove).length > 0) await sessionArea.set(valuesToMove);
+  await browser.storage.local.remove(localTokenKeys);
+}
+
+async function fetchAuthTokenFromStorage(key: string): Promise<string | null> {
+  const items = await getAuthTokenStorageArea().get([key]);
+  return typeof items[key] === 'string' ? items[key] : null;
+}
+
+async function getAllAuthTokenStorageItems(): Promise<Record<string, unknown>> {
+  const itemsByArea = await Promise.all(getAuthTokenStorageAreas().map(area => area.get(null)));
+  // The primary area wins over leftovers in storage.local
+  return Object.assign({}, ...itemsByArea.reverse());
+}
 
 export async function getWalletAddressFromStorage(): Promise<string | null> {
   return fetchFromStorage<string>(ACCOUNT_PKH_STORAGE_KEY);
@@ -96,23 +162,19 @@ export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext
     return { accessToken: null, refreshToken: null };
   }
 
-  const [storedAccessToken, storedRefreshToken] = await Promise.all([
-    fetchFromStorage<string>(buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId)),
-    fetchFromStorage<string>(buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId))
+  const [accessToken, refreshToken] = await Promise.all([
+    fetchAuthTokenFromStorage(buildAccessTokenStorageKey(authContext.walletAddress, authContext.networkId)),
+    fetchAuthTokenFromStorage(buildRefreshTokenStorageKey(authContext.walletAddress, authContext.networkId))
   ]);
-  const accessToken = storedAccessToken ?? null;
-  const refreshToken = storedRefreshToken ?? null;
 
   if (accessToken !== null || refreshToken !== null) {
     return { accessToken, refreshToken };
   }
 
-  const [storedLegacyAccessToken, storedLegacyRefreshToken] = await Promise.all([
-    fetchFromStorage<string>(MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY),
-    fetchFromStorage<string>(MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY)
+  const [legacyAccessToken, legacyRefreshToken] = await Promise.all([
+    fetchAuthTokenFromStorage(MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY),
+    fetchAuthTokenFromStorage(MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY)
   ]);
-  const legacyAccessToken = storedLegacyAccessToken ?? null;
-  const legacyRefreshToken = storedLegacyRefreshToken ?? null;
 
   if (legacyAccessToken === null && legacyRefreshToken === null) {
     return { accessToken, refreshToken };
@@ -125,7 +187,7 @@ export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext
     },
     authContext
   );
-  await removeFromStorage([MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY]);
+  await removeAuthTokensFromStorage(LEGACY_AUTH_TOKEN_STORAGE_KEYS);
 
   return { accessToken: legacyAccessToken, refreshToken: legacyRefreshToken };
 }
@@ -150,13 +212,17 @@ export async function setAuthTokensToStorage(tokens: MavrykAuthTokens, context: 
   }
 
   if (Object.keys(valuesToSet).length > 0) {
-    await browser.storage.local.set(valuesToSet);
+    await getAuthTokenStorageArea().set(valuesToSet);
   }
+}
+
+async function removeAuthTokensFromStorage(keys: string[]) {
+  await Promise.all(getAuthTokenStorageAreas().map(area => area.remove(keys)));
 }
 
 export async function clearAuthTokensFromStorage(context: MavrykAuthStorageContext = {}) {
   const authContext = await getCurrentAuthStorageContext(context);
-  const keysToRemove = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
+  const keysToRemove = [...LEGACY_AUTH_TOKEN_STORAGE_KEYS];
 
   if (authContext.walletAddress) {
     keysToRemove.push(
@@ -165,7 +231,7 @@ export async function clearAuthTokensFromStorage(context: MavrykAuthStorageConte
     );
   }
 
-  await removeFromStorage(keysToRemove);
+  await removeAuthTokensFromStorage(keysToRemove);
 }
 
 export async function clearAllAuthTokensFromStorage(context: MavrykAuthStorageContext = {}) {
@@ -183,7 +249,7 @@ export async function collectStoredRefreshTokens(
   context?: MavrykAuthStorageContext
 ): Promise<StoredMavrykRefreshToken[]> {
   const authContext = await resolveOptionalAuthTokenContext(context);
-  const storageItems = await browser.storage.local.get(null);
+  const storageItems = await getAllAuthTokenStorageItems();
   const refreshTokens: StoredMavrykRefreshToken[] = [];
 
   Object.entries(storageItems).forEach(([storageKey, value]) => {
@@ -214,8 +280,8 @@ export async function collectStoredRefreshTokens(
 
 export async function clearStoredAuthTokens(context?: MavrykAuthStorageContext) {
   const authContext = await resolveOptionalAuthTokenContext(context);
-  const storageItems = await browser.storage.local.get(null);
-  const keysToRemove = [MAVRYK_API_ACCESS_TOKEN_STORAGE_KEY, MAVRYK_API_REFRESH_TOKEN_STORAGE_KEY];
+  const storageItems = await getAllAuthTokenStorageItems();
+  const keysToRemove = [...LEGACY_AUTH_TOKEN_STORAGE_KEYS];
 
   keysToRemove.push(
     ...Object.keys(storageItems).filter(storageKey => {
@@ -225,7 +291,7 @@ export async function clearStoredAuthTokens(context?: MavrykAuthStorageContext) 
     })
   );
 
-  await removeFromStorage(Array.from(new Set(keysToRemove)));
+  await removeAuthTokensFromStorage(Array.from(new Set(keysToRemove)));
 }
 
 export async function getLastChallengeFromStorage(): Promise<string | null> {

@@ -105,12 +105,17 @@ export type SafeLogError = { status?: number; message: string };
 /**
  * Reduces an error to fields that are safe to log.
  * Axios errors carry the request `config` (body, headers), so logging them raw can leak refresh tokens,
- * signatures or bearer headers. Only the HTTP status and a readable message are kept.
+ * signatures or bearer headers. A `MavrykApiError` keeps that AxiosError as its `cause`, so it is reduced the same way.
+ * Only the HTTP status and a readable message are kept.
  *
  * @param error any thrown value
  * @returns `{ status, message }` without request data
  */
 export function toSafeLogError(error: unknown): SafeLogError {
+  if (error instanceof MavrykApiError) {
+    return error.status === undefined ? { message: error.message } : { status: error.status, message: error.message };
+  }
+
   const message = extractMavrykApiErrorMessage(error);
 
   if (axios.isAxiosError(error) && typeof error.response?.status === 'number') {

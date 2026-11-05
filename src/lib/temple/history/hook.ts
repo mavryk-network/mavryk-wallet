@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { GetOperationsTransactionsParams, isKnownChainId } from 'lib/apis/tzkt/api';
 import { useAccount, useChainId, useNetwork, useTezos } from 'lib/temple/front';
 import { useDidMount, useDidUpdate, useSafeState, useStopper } from 'lib/ui/hooks';
-import { MavrykApiError } from 'mavryk/api/errors';
+import { MavrykApiError, toSafeLogError } from 'mavryk/api/errors';
 
 import { TempleAccount } from '../types';
 
@@ -128,7 +128,8 @@ export default function useHistory(
             : WATCH_ONLY_DEFAULT_RETRY_AFTER_SECONDS;
         setRetryAvailableAt(Date.now() + retryAfterSeconds * 1000);
       }
-      console.error('History hook fetch error:', fetchError);
+      // The raw error's cause holds the request config, including the bearer access token.
+      console.error('History hook fetch error:', toSafeLogError(fetchError));
       return;
     }
 

@@ -223,4 +223,29 @@ describe('mavrykApi auth interceptor', () => {
       `Bearer ${accessToken}`
     );
   });
+
+  it('sends public reads without Authorization, on the requested network, and never refreshes or clears tokens', async () => {
+    const accessToken = buildJwt(Date.now() + 60_000);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      throw createAxiosError(config, 401, { message: 'Unauthorized' });
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage({ accessToken, refreshToken: 'refresh-token' }, authContext);
+
+    await expect(
+      mavrykApi.get('/watch-only/wallets/mv1-watched/history', {
+        publicRead: { networkId: 'basenet' }
+      } as MavrykApiRequestConfig)
+    ).rejects.toBeTruthy();
+
+    expect(adapter).toHaveBeenCalledTimes(1);
+    const requestConfig = adapter.mock.calls[0][0];
+    expect((requestConfig.headers as Record<string, string> | undefined)?.Authorization).toBeUndefined();
+    expect(requestConfig.baseURL).toBe('https://basenet.wallet.mavryk.network/api/v1');
+    await expect(getAuthTokensFromStorage(authContext)).resolves.toEqual({
+      accessToken,
+      refreshToken: 'refresh-token'
+    });
+  });
 });

@@ -31,6 +31,11 @@ export type MavrykApiRequestConfig = AxiosRequestConfig & {
   _authContext?: ResolvedMavrykAuthStorageContext;
   _retry?: boolean;
   skipAuthRefresh?: boolean;
+  /**
+   * Unauthenticated public read (Watch only routes) against the given API network. Skips auth-context
+   * resolution, never attaches or refreshes tokens, and never clears stored sessions on failure.
+   */
+  publicRead?: { networkId: string };
 };
 
 export const getMavrykApiBaseUrl = (networkId?: string | null) =>
@@ -190,6 +195,19 @@ function getAuthorizationAccessToken(headers: AxiosRequestConfig['headers']) {
 
 mavrykApi.interceptors.request.use(async rawConfig => {
   const config: MavrykApiRequestConfig = rawConfig;
+
+  if (config.publicRead) {
+    if (!config.baseURL || config.baseURL === mavrykApi.defaults.baseURL) {
+      config.baseURL = getMavrykApiBaseUrl(config.publicRead.networkId);
+    }
+    if (config.headers) {
+      delete (config.headers as Record<string, unknown>).Authorization;
+      delete (config.headers as Record<string, unknown>).authorization;
+    }
+
+    return rawConfig;
+  }
+
   const authContext = config._authContext ?? (await getCurrentAuthStorageContext());
   const { accessToken } = await getAuthTokensFromStorage(authContext);
   const instanceBaseUrl = mavrykApi.defaults.baseURL;
@@ -221,6 +239,7 @@ mavrykApi.interceptors.response.use(
       !requestConfig ||
       requestConfig._retry ||
       requestConfig.skipAuthRefresh ||
+      requestConfig.publicRead ||
       !isAuthRefreshCandidate(requestConfig.url)
     ) {
       return Promise.reject(error);

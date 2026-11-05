@@ -6,10 +6,12 @@ import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
+import { isSupportedHistoryAction } from 'lib/temple/history/actions';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
+import { HistoryActionsLabel } from './HistoryActions';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
@@ -30,14 +32,18 @@ interface Props {
   address: string;
   last?: boolean;
   slug?: string;
-  handleItemClick: (hash: string) => void;
+  handleItemClick: (id: string) => void;
 }
 
 export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, address }) => {
   const [expanded, setExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const { hash, addedAt, status } = historyItem;
+  const { id, addedAt, status } = historyItem;
+  const hasSupportedActions = useMemo(
+    () => (historyItem.actions ?? []).some(isSupportedHistoryAction),
+    [historyItem.actions]
+  );
 
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
   const isInteractionOperation =
@@ -104,14 +110,18 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
+      <div onClick={() => handleItemClick(id)} className="flex items-start justify-between gap-1">
         <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
             style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
             className="flex flex-col gap-1 items-start justify-center  flex-wrap"
           >
-            <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+            {hasSupportedActions ? (
+              <HistoryActionsLabel historyItem={historyItem} />
+            ) : (
+              <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+            )}
 
             <div>
               <div className="flex items-start gap-x-1">

@@ -3,9 +3,11 @@ import { GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
 import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
 import { fetchFromStorage, putToStorage } from 'lib/storage';
 import { ReactiveTezosToolkit } from 'lib/temple/front';
-import { TempleAccount } from 'lib/temple/types';
-import { extractMavrykApiErrorMessage, fetchTokenHistory, fetchWalletHistory } from 'mavryk/api/history';
-import type { MavrykHistoryOperation } from 'mavryk/api/history';
+import { TempleAccount, TempleAccountType } from 'lib/temple/types';
+import { MavrykApiError } from 'mavryk/api/errors';
+import { fetchTokenHistory, fetchWalletHistory, fetchWatchOnlyWalletHistory } from 'mavryk/api/history';
+import type { MavrykEquiteezHistoryStatus, MavrykHistoryOperation } from 'mavryk/api/history';
+import { getSelectedNetworkIdFromStorage } from 'mavryk/api/storage';
 
 import { hasHistoryMovement } from './bridge';
 import { MVRK_HISTORY_TOKEN_ADDRESS } from './consts';
@@ -27,6 +29,8 @@ export type FetchUserHistoryResult = {
   items: UserHistoryItem[];
   cursor?: number;
   hasMore: boolean;
+  /** Equiteez enrichment status of this page; undefined on the legacy response path. */
+  equiteezStatus?: MavrykEquiteezHistoryStatus;
 };
 
 type PendingOperationGroupable = {
@@ -71,14 +75,29 @@ function getTokenAddressFromSlug(assetSlug?: string) {
   return assetSlug.split('_')[0];
 }
 
-async function normalizeBackendHistoryItems(
-  operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
+/** Error code for a per-asset history request from a Watch only account, which has no public route. */
+export const WATCH_ONLY_ASSET_HISTORY_UNSUPPORTED = 'watch_only_asset_history_unsupported';
+
+/** Full operation hash accepted by Watch only history search (51-character base58, `oo`/`op` prefix). */
+const FULL_OPERATION_HASH_REGEX = /^o[op][1-9A-HJ-NP-Za-km-z]{49}$/;
+
+export const isFullOperationHash = (value: string) => FULL_OPERATION_HASH_REGEX.test(value);
+
+export const isWatchOnlyAccount = (account: Pick<TempleAccount, 'type'>) =>
+  account.type === TempleAccountType.WatchOnly;
+
+function throwWatchOnlyAssetHistoryUnsupported(): never {
+  throw new MavrykApiError('Asset history is not available for watch-only accounts', {
+    code: WATCH_ONLY_ASSET_HISTORY_UNSUPPORTED
+  });
+}
+
+async function historyGroupsToItems(
+  groups: ReturnType<typeof groupMavrykHistoryOperations>,
   accountAddress: string,
-  requestedTypes: HistoryItemOpTypeEnum[],
   assetSlug?: string,
   resolveDecimals?: PurchaseDecimalsResolver
 ) {
-  const groups = groupMavrykHistoryOperations(operations);
   const rawAmountSlugs = groups.flatMap(group =>
     [group.summaryOperation, ...group.operations].flatMap(operation => {
       const details = operation?.details;
@@ -105,16 +124,46 @@ async function normalizeBackendHistoryItems(
     ])
   ];
   const decimals = slugs.length && resolveDecimals ? await resolveDecimals(slugs) : {};
+  return groups.map(group =>
+    mavrykHistoryGroupToHistoryItem(group, {
+      address: accountAddress,
+      assetSlug,
+      decimals
+    })
+  );
+}
+
+async function normalizeBackendHistoryItems(
+  operations: ReturnType<typeof groupMavrykHistoryOperations>[number]['operations'],
+  accountAddress: string,
+  requestedTypes: HistoryItemOpTypeEnum[],
+  assetSlug?: string,
+  resolveDecimals?: PurchaseDecimalsResolver
+) {
+  const groups = groupMavrykHistoryOperations(operations, { preserveTopLevelGroups: true });
+
   return applyLocalTypeFilter(
-    groups.map(group =>
-      mavrykHistoryGroupToHistoryItem(group, {
-        address: accountAddress,
-        assetSlug,
-        decimals
-      })
-    ),
+    await historyGroupsToItems(groups, accountAddress, assetSlug, resolveDecimals),
     requestedTypes
   );
+}
+
+/**
+ * Adapts a recent-operations snapshot from `perspectiveAddress`'s point of view. Each returned group stays its
+ * own card in server order (no cross-card hash grouping, no pending merge); ids are prefixed with the ordinal
+ * so same-hash cards keep distinct identities within the snapshot.
+ */
+export async function normalizeRecentOperationsItems(
+  operations: MavrykHistoryOperation[],
+  perspectiveAddress: string,
+  resolveDecimals?: PurchaseDecimalsResolver
+) {
+  const groups = operations.flatMap(operation =>
+    groupMavrykHistoryOperations([operation], { preserveTopLevelGroups: true }).slice(0, 1)
+  );
+  const items = await historyGroupsToItems(groups, perspectiveAddress, undefined, resolveDecimals);
+
+  return items.map((item, index) => ({ ...item, id: `${index}:${item.id}` }));
 }
 
 async function fetchPendingHistoryItems(chainId: TzktApiChainId, account: TempleAccount) {
@@ -154,111 +203,111 @@ export async function fetchUserOperationByHash(
   hash: string,
   assetSlug?: string,
   resolveDecimals?: PurchaseDecimalsResolver,
-  tokenAddress = getTokenAddressFromSlug(assetSlug)
+  tokenAddress = getTokenAddressFromSlug(assetSlug),
+  watchOnlyNetworkId?: string
 ) {
-  try {
-    const response = tokenAddress
-      ? await fetchTokenHistory(tokenAddress, {
-          walletAddress: accountAddress,
-          tokenId: assetSlug?.split('_')[1],
-          search: hash
-        })
-      : await fetchWalletHistory({
-          walletAddress: accountAddress,
-          search: hash
-        });
+  if (watchOnlyNetworkId !== undefined) {
+    if (tokenAddress) throwWatchOnlyAssetHistoryUnsupported();
 
-    return await normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
-  } catch (error) {
-    console.error('Error while fetching user operation by hash:', error);
-    return [];
+    const watchOnlyResponse = await fetchWatchOnlyWalletHistory(accountAddress, watchOnlyNetworkId, { search: hash });
+
+    return normalizeBackendHistoryItems(watchOnlyResponse.operations, accountAddress, [], undefined, resolveDecimals);
   }
+
+  const response = tokenAddress
+    ? await fetchTokenHistory(tokenAddress, {
+        walletAddress: accountAddress,
+        tokenId: assetSlug?.split('_')[1],
+        search: hash
+      })
+    : await fetchWalletHistory({
+        walletAddress: accountAddress,
+        search: hash
+      });
+
+  return normalizeBackendHistoryItems(response.operations, accountAddress, [], assetSlug, resolveDecimals);
 }
 
 export default async function fetchUserHistory(
   chainId: TzktApiChainId,
   account: TempleAccount,
   assetSlug: string | undefined,
-  pseudoLimit: number,
+  _pseudoLimit: number,
   _tezos: ReactiveTezosToolkit,
   cursor?: number,
   operationParams?: GetOperationsTransactionsParams,
   resolveDecimals?: PurchaseDecimalsResolver,
-  tokenAddress = getTokenAddressFromSlug(assetSlug)
+  tokenAddress = getTokenAddressFromSlug(assetSlug),
+  networkId?: string
 ): Promise<FetchUserHistoryResult> {
+  const isWatchOnly = isWatchOnlyAccount(account);
+  if (isWatchOnly && tokenAddress) throwWatchOnlyAssetHistoryUnsupported();
+
   const requestedTypes = getHistoryItemTypesFromParams(account.publicKeyHash, operationParams);
   const backendFilter = getBackendHistoryFilters(account.publicKeyHash, operationParams);
   const localRequestedTypes = shouldApplyLocalTypeFilter(operationParams) ? requestedTypes : [];
   const isFirstPage = cursor == null;
 
-  try {
-    const response = tokenAddress
-      ? await fetchTokenHistory(tokenAddress, {
-          walletAddress: account.publicKeyHash,
-          cursor,
-          tokenId: assetSlug?.split('_')[1],
-          filter: backendFilter
-        })
-      : await fetchWalletHistory({
-          walletAddress: account.publicKeyHash,
-          cursor,
-          filter: backendFilter
-        });
+  const response = isWatchOnly
+    ? await fetchWatchOnlyWalletHistory(account.publicKeyHash, networkId ?? (await getSelectedNetworkIdFromStorage()), {
+        cursor,
+        filter: backendFilter
+      })
+    : tokenAddress
+    ? await fetchTokenHistory(tokenAddress, {
+        walletAddress: account.publicKeyHash,
+        cursor,
+        tokenId: assetSlug?.split('_')[1],
+        filter: backendFilter
+      })
+    : await fetchWalletHistory({
+        walletAddress: account.publicKeyHash,
+        cursor,
+        filter: backendFilter
+      });
+  const hasMore = response.hasMore;
+  const nextCursor = response.cursor ?? undefined;
 
-    const normalizedItems = await normalizeBackendHistoryItems(
-      response.operations,
-      account.publicKeyHash,
-      localRequestedTypes,
-      assetSlug,
-      resolveDecimals
-    );
-    const visibleCollected = normalizedItems.slice(0, pseudoLimit);
-    const nextCursor = response.cursor ?? undefined;
-    const hasMore = response.hasMore;
-
-    if (!isFirstPage) {
-      return {
-        items: visibleCollected,
-        cursor: nextCursor,
-        hasMore
-      };
-    }
-
-    const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
-    if (!pendingItems.length) {
-      return {
-        items: visibleCollected,
-        cursor: nextCursor,
-        hasMore
-      };
-    }
-
-    const confirmedHashes = new Set(visibleCollected.map(item => item.hash));
-    const filteredPendingOperations = pendingOperations.filter(
-      operation => !confirmedHashes.has(operation?.hash ?? '')
-    );
-
-    if (filteredPendingOperations.length !== pendingOperations.length) {
-      await putToStorage(storageKey, filteredPendingOperations);
-    }
-
-    const filteredPendingItems = applyLocalTypeFilter(
-      pendingItems.filter(item => !confirmedHashes.has(item.hash)),
-      requestedTypes
-    );
-
-    return {
-      items: [...filteredPendingItems, ...visibleCollected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
-      cursor: nextCursor,
-      hasMore
-    };
-  } catch (error) {
-    console.error('Error while fetching user history:', extractMavrykApiErrorMessage(error));
-
-    return {
-      items: [],
-      cursor,
-      hasMore: false
-    };
+  if (hasMore && (nextCursor === undefined || nextCursor === cursor)) {
+    throw new Error('History response has more pages but no advancing cursor');
   }
+
+  // The whole page is kept: groups sharing a boundary may exceed the requested limit, and the cursor already
+  // points past all of them, so trimming here would lose rows permanently.
+  const collected = await normalizeBackendHistoryItems(
+    response.operations,
+    account.publicKeyHash,
+    localRequestedTypes,
+    assetSlug,
+    resolveDecimals
+  );
+  const pageResult = { cursor: nextCursor, hasMore, equiteezStatus: response.equiteezHistory?.status };
+
+  // Watch only accounts never submit local transactions, so they have no pending operations to merge.
+  if (!isFirstPage || isWatchOnly) {
+    return { items: collected, ...pageResult };
+  }
+
+  const { storageKey, pendingItems, pendingOperations } = await fetchPendingHistoryItems(chainId, account);
+  if (!pendingItems.length) {
+    return { items: collected, ...pageResult };
+  }
+
+  // A confirmed hash retires its pending placeholder; every confirmed group under that hash stays.
+  const confirmedHashes = new Set(collected.map(item => item.hash));
+  const filteredPendingOperations = pendingOperations.filter(operation => !confirmedHashes.has(operation?.hash ?? ''));
+
+  if (filteredPendingOperations.length !== pendingOperations.length) {
+    await putToStorage(storageKey, filteredPendingOperations);
+  }
+
+  const filteredPendingItems = applyLocalTypeFilter(
+    pendingItems.filter(item => !confirmedHashes.has(item.hash)),
+    requestedTypes
+  );
+
+  return {
+    items: [...filteredPendingItems, ...collected].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
+    ...pageResult
+  };
 }

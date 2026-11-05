@@ -57,7 +57,9 @@ export function useContactRecentOperations(contactAddress: string | undefined) {
   const account = useAccount();
   const allAccounts = useAllAccounts();
   const { id: networkId } = useNetwork();
-  const resolvePurchaseDecimals = usePurchaseMetadata(contactAddress);
+  // Token decimals are resolved in the active wallet's metadata scope: the scoped metadata request is cancelled
+  // whenever its account differs from the selected wallet, so a contact-scoped lookup could never succeed.
+  const resolvePurchaseDecimals = usePurchaseMetadata();
 
   const bookScope = useMemo(
     () => getContactsBookScope(allAccounts, account.publicKeyHash),

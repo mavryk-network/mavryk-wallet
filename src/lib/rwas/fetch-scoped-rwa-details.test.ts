@@ -79,3 +79,33 @@ it('propagates transport failures and rejects a cancelled late response', async 
   });
   await expect(fetchScopedRwaDetails(scope, controller.signal)).rejects.toMatchObject({ revert: true });
 });
+
+it.each([
+  [
+    'the selected account is rewritten with the scope account',
+    ACCOUNT_PKH_STORAGE_KEY,
+    { oldValue: 'z', newValue: 'a' }
+  ],
+  ['the selected network is rewritten with the scope network', NETWORK_ID_STORAGE_KEY, { newValue: 'mainnet' }],
+  ['another account joins the auth wallet map', 'auth-map', { oldValue: {}, newValue: { a: 'a', other: 'w' } }]
+])('keeps the result when %s', async (_case, key, change) => {
+  fetchAssets.mockImplementation(async () => {
+    const listener = (
+      browser.storage.onChanged.addListener as jest.MockedFunction<typeof browser.storage.onChanged.addListener>
+    ).mock.calls[0][0];
+    listener({ [key]: change }, 'local');
+    return [];
+  });
+  await expect(fetchScopedRwaDetails(scope)).resolves.toEqual({});
+});
+
+it('rejects the result when the scope account starts authenticating as another wallet', async () => {
+  fetchAssets.mockImplementation(async () => {
+    const listener = (
+      browser.storage.onChanged.addListener as jest.MockedFunction<typeof browser.storage.onChanged.addListener>
+    ).mock.calls[0][0];
+    listener({ 'auth-map': { oldValue: {}, newValue: { a: 'w' } } }, 'local');
+    return [];
+  });
+  await expect(fetchScopedRwaDetails(scope)).rejects.toMatchObject({ revert: true });
+});

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
 import { toMavrykApiError } from './errors';
-import { getWalletAddressFromStorage } from './storage';
+import { getAuthStorageContextForAccount, getWalletAddressFromStorage } from './storage';
 
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
 
@@ -242,7 +242,9 @@ async function fetchHistory(path: string, params: FetchHistoryRequest = {}, conf
 export async function fetchWalletHistory(params: FetchHistoryRequest = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
-  return fetchHistory(`/wallets/${address}/history`, params);
+  return fetchHistory(`/wallets/${address}/history`, params, {
+    _authContext: await getAuthStorageContextForAccount(address)
+  } as MavrykApiRequestConfig);
 }
 
 /**
@@ -262,7 +264,9 @@ export async function fetchWatchOnlyWalletHistory(
 export async function fetchTokenHistory(tokenAddress: string, params: FetchHistoryRequest = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
-  return fetchHistory(`/wallets/${address}/tokens/${tokenAddress}/history`, params);
+  return fetchHistory(`/wallets/${address}/tokens/${tokenAddress}/history`, params, {
+    _authContext: await getAuthStorageContextForAccount(address)
+  } as MavrykApiRequestConfig);
 }
 
 export { extractMavrykApiErrorMessage } from './errors';

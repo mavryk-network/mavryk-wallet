@@ -230,6 +230,7 @@ it('validates movement IDs without rounding and passes token ID to token history
   expect(response.operations[0].details!.tokenId).toBe('900719925474099312345');
   expect(response.operations[0].details!.transfers![1].tokenId).toBeUndefined();
   expect(mavrykApi.get).toHaveBeenLastCalledWith(`/wallets/${BRIDGE_WALLET}/tokens/${BRIDGE_TOKEN}/history`, {
+    _authContext: expect.objectContaining({ walletAddress: BRIDGE_WALLET }),
     params: { cursor: undefined, filter: undefined, search: undefined, limit: 20, token_id: '900719925474099312345' }
   });
 });

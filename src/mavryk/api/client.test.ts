@@ -1,8 +1,17 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import browser from 'webextension-polyfill';
 
+import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
+
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
-import { getAuthTokensFromStorage, setAuthTokensToStorage } from './storage';
+import { fetchTokenHistory, fetchWalletHistory } from './history';
+import { fetchWalletRwaAssets } from './rwas';
+import {
+  getAuthTokensFromStorage,
+  MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY,
+  setAuthTokensToStorage
+} from './storage';
+import { fetchWalletTokens } from './tokens';
 
 jest.mock('@vespaiach/axios-fetch-adapter', () => jest.fn());
 
@@ -247,5 +256,55 @@ describe('mavrykApi auth interceptor', () => {
       accessToken,
       refreshToken: 'refresh-token'
     });
+  });
+});
+
+describe('wallet-scoped reads after an account switch', () => {
+  const PREVIOUS = 'mv1-previous-account';
+  const NEXT = 'mv1-next-account';
+  const WATCH_ONLY = 'mv1-watch-only';
+  const authorizationOf = (config: AxiosRequestConfig) =>
+    (config.headers as Record<string, string> | undefined)?.Authorization;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    await browser.storage.local.clear();
+    // Storage still selects the previous account, as it does while the switch write is in flight.
+    await browser.storage.local.set({
+      [ACCOUNT_PKH_STORAGE_KEY]: PREVIOUS,
+      [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: {}
+    });
+    await setAuthTokensToStorage({ accessToken: 'previous-token' }, { walletAddress: PREVIOUS, networkId: 'mainnet' });
+    await setAuthTokensToStorage({ accessToken: 'next-token' }, { walletAddress: NEXT, networkId: 'mainnet' });
+  });
+
+  it.each([
+    ['history', () => fetchWalletHistory({ walletAddress: NEXT })],
+    ['token history', () => fetchTokenHistory('KT1Token', { walletAddress: NEXT })],
+    ['tokens', () => fetchWalletTokens({ walletAddress: NEXT })],
+    ['RWA assets', () => fetchWalletRwaAssets({ walletAddress: NEXT })]
+  ])('authenticates a %s read as the requested account, not the selected one', async (_name, read) => {
+    const adapter = jest.fn(async (config: AxiosRequestConfig) =>
+      createResponse(
+        config,
+        String(config.url).includes('history') ? { walletAddress: NEXT, operations: [], hasMore: false } : []
+      )
+    );
+    mavrykApi.defaults.adapter = adapter;
+
+    await read();
+
+    expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
+  });
+
+  it('uses the auth wallet linked to the requested account', async () => {
+    await browser.storage.local.set({ [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: { [WATCH_ONLY]: NEXT } });
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, []));
+    mavrykApi.defaults.adapter = adapter;
+
+    await fetchWalletRwaAssets({ walletAddress: WATCH_ONLY });
+
+    expect(adapter.mock.calls[0][0].url).toBe(`/wallets/${WATCH_ONLY}/assets`);
+    expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
   });
 });

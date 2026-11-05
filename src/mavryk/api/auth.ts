@@ -8,6 +8,7 @@ import {
   type AuthVerifyResponse
 } from './auth.schema';
 import { getMavrykApiBaseUrl, mavrykApi, type MavrykApiRequestConfig, refreshStoredAuthTokensOrThrow } from './client';
+import { toSafeLogError } from './errors';
 import {
   clearStoredAuthTokens,
   collectStoredRefreshTokens,
@@ -108,7 +109,7 @@ export async function refreshAuthTokens(params: AuthRefreshRequest = {}) {
   return refreshStoredAuthTokensOrThrow({ context, refreshToken: params.refreshToken });
 }
 
-export async function logoutAuth(params: AuthRefreshRequest = {}) {
+export async function logoutAuth(params: AuthRefreshRequest = {}, { awaitRevocation = true } = {}) {
   const hasExplicitScope = params.walletAddress !== undefined || params.networkId !== undefined;
   const context = hasExplicitScope ? await getAuthContext(params) : undefined;
   // Lock/logout without an explicit scope must revoke every stored refresh token across wallets and networks.
@@ -126,21 +127,24 @@ export async function logoutAuth(params: AuthRefreshRequest = {}) {
 
   await clearStoredAuthTokens(context);
 
-  await Promise.all(
+  const revocation = Promise.all(
     refreshTokens.map(async ({ refreshToken, networkId, walletAddress }) => {
-      const logoutRequestConfig: MavrykApiRequestConfig = {
-        baseURL: getMavrykApiBaseUrl(networkId),
-        _authContext: { walletAddress, networkId },
-        skipAuthRefresh: true
-      };
-
       try {
+        const logoutRequestConfig: MavrykApiRequestConfig = {
+          baseURL: getMavrykApiBaseUrl(networkId),
+          _authContext: { walletAddress, networkId },
+          skipAuthRefresh: true
+        };
+
         await mavrykApi.post('/auth/logout', { refreshToken }, logoutRequestConfig);
       } catch (error) {
-        console.error(error);
+        console.error(toSafeLogError(error));
       }
     })
   );
+
+  // Each request handles its own error, so a revocation left running never rejects
+  if (awaitRevocation) await revocation;
 }
 
 async function getAuthContext(

@@ -33,6 +33,8 @@ export interface ReadyTempleState extends TempleState {
 
 export interface TempleDAppSession {
   network: MavrykWalletDAppNetwork;
+  /** Chain id verified for a dApp-supplied custom RPC at permission time; absent for built-in networks */
+  chainId?: string;
   appMeta: MavrykWalletDAppMetadata;
   pkh: string;
   publicKey: string;
@@ -254,6 +256,8 @@ interface TempleDAppPayloadBase {
   type: string;
   origin: string;
   networkRpc: string;
+  /** Chain id the backend bound to a dApp-supplied custom RPC, shown next to an unknown network */
+  chainId?: string;
   appMeta: DappMetadata;
   error?: any;
 }
@@ -293,6 +297,7 @@ export enum TempleMessageType {
   ConfirmationRequested = 'TEMPLE_CONFIRMATION_REQUESTED',
   ConfirmationExpired = 'TEMPLE_CONFIRMATION_EXPIRED',
   SelectedAccountChanged = 'TEMPLE_SELECTED_ACCOUNT_CHANGED',
+  DAppOpsVerifying = 'TEMPLE_DAPP_OPS_VERIFYING',
   // Request-Response pairs
   GetStateRequest = 'TEMPLE_GET_STATE_REQUEST',
   GetStateResponse = 'TEMPLE_GET_STATE_RESPONSE',
@@ -378,7 +383,8 @@ export type TempleNotification =
   | TempleStateUpdated
   | TempleConfirmationRequested
   | TempleConfirmationExpired
-  | TempleSelectedAccountChanged;
+  | TempleSelectedAccountChanged
+  | TempleDAppOpsVerifying;
 
 export type TempleRequest =
   | TempleAcknowledgeRequest
@@ -487,6 +493,13 @@ interface TempleConfirmationExpired extends TempleMessageBase {
 interface TempleSelectedAccountChanged extends TempleMessageBase {
   type: TempleMessageType.SelectedAccountChanged;
   accountPublicKeyHash: string;
+}
+
+/** Sent while a dApp operation's branch is checked against built-in networks before signing */
+interface TempleDAppOpsVerifying extends TempleMessageBase {
+  type: TempleMessageType.DAppOpsVerifying;
+  id: string;
+  verifying: boolean;
 }
 
 interface TempleGetStateRequest extends TempleMessageBase {
@@ -783,6 +796,8 @@ interface TempleOperationsRequest extends TempleMessageBase {
 interface TempleOperationsResponse extends TempleMessageBase {
   type: TempleMessageType.OperationsResponse;
   opHash: string;
+  /** Total applied fee of the injected group in mumav, reveal included. Absent when unknown. */
+  feeMumav?: string;
 }
 
 interface TempleSignRequest extends TempleMessageBase {

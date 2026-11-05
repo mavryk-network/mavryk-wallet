@@ -1,8 +1,6 @@
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import axios, { type AxiosRequestConfig } from 'axios';
 
-import { normalizeNetworkId } from 'lib/temple/network-storage';
-
 import { AuthRefreshResponseSchema } from './auth.schema';
 import { isTerminalMavrykAuthError } from './errors';
 import { isJwtExpiringSoon } from './jwt';
@@ -16,6 +14,9 @@ import {
   type MavrykAuthStorageContext,
   type ResolvedMavrykAuthStorageContext
 } from './storage';
+import { getMavrykApiUrl, MAINNET_MAVRYK_API_URL } from './urls';
+
+export { getMavrykApiUrl, MAVRYK_API_URLS } from './urls';
 
 const MAVRYK_API_BASE_PATHNAME = '/api/v1';
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = ['/auth/challenge', '/auth/verify', '/auth/refresh', '/auth/logout'] as const;
@@ -26,14 +27,6 @@ const AUTH_PATHNAMES_WITHOUT_REFRESH = new Set<string>(
   }, [])
 );
 const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
-const MAINNET_MAVRYK_API_URL = 'https://wallet.mavryk.network';
-const BASENET_MAVRYK_API_URL = 'https://basenet.wallet.mavryk.network';
-
-export const MAVRYK_API_URLS: Record<string, string> = {
-  mainnet: MAINNET_MAVRYK_API_URL,
-  basenet: BASENET_MAVRYK_API_URL
-};
-
 export type MavrykApiRequestConfig = AxiosRequestConfig & {
   _authContext?: ResolvedMavrykAuthStorageContext;
   _retry?: boolean;
@@ -43,16 +36,6 @@ export type MavrykApiRequestConfig = AxiosRequestConfig & {
    * resolution, never attaches or refreshes tokens, and never clears stored sessions on failure.
    */
   publicRead?: { networkId: string };
-};
-
-export const getMavrykApiUrl = (networkId?: string | null) => {
-  const normalizedNetworkId = normalizeNetworkId(networkId);
-
-  if (!normalizedNetworkId) {
-    return MAINNET_MAVRYK_API_URL;
-  }
-
-  return MAVRYK_API_URLS[normalizedNetworkId] ?? MAINNET_MAVRYK_API_URL;
 };
 
 export const getMavrykApiBaseUrl = (networkId?: string | null) =>

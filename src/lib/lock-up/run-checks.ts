@@ -5,6 +5,7 @@
 
 import browser from 'webextension-polyfill';
 
+import { LAST_PAGE_CLOSURE_STORAGE_KEY, LOCK_UP_ENABLED_STORAGE_KEY } from 'lib/constants';
 import { WALLET_AUTOLOCK_TIME } from 'lib/fixed-times';
 import { request, assertResponse } from 'lib/temple/front';
 import { TempleMessageType } from 'lib/temple/types';
@@ -25,12 +26,21 @@ if (getIsLockUpEnabled() && isSinglePageOpened()) {
   if (closureTimestamp && Date.now() - closureTimestamp >= WALLET_AUTOLOCK_TIME) lock();
 }
 
-// Saving last time, when all pages are closed
+// Mirroring the lock-up state for the background, which enforces the deadline. The background clears its closure
+// record itself once it has checked it (page-presence), so this page must not remove it first.
+
+browser.storage.local.set({ [LOCK_UP_ENABLED_STORAGE_KEY]: getIsLockUpEnabled() }).catch(err => console.error(err));
+
+// Saving last time, when all pages are closed. The background records it too (page-presence); this is a backup
 
 window.addEventListener(
   'pagehide',
   () => {
-    if (isSinglePageOpened()) localStorage.setItem(CLOSURE_STORAGE_KEY, Date.now().toString());
+    if (!isSinglePageOpened()) return;
+
+    const closureTimestamp = Date.now();
+    localStorage.setItem(CLOSURE_STORAGE_KEY, closureTimestamp.toString());
+    browser.storage.local.set({ [LAST_PAGE_CLOSURE_STORAGE_KEY]: closureTimestamp }).catch(err => console.error(err));
   },
   true
 );

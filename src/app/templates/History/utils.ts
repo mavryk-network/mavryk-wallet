@@ -20,6 +20,15 @@ import {
 export const getMainHistoryOperation = (historyItem: UserHistoryItem | null | undefined) =>
   historyItem?.mainOperation ?? historyItem?.operations[0];
 
+/**
+ * The sender pays the network fees of a transfer, so an incoming transfer shows none as the viewed account's cost.
+ *
+ * @returns false only for incoming transfers sent by someone other than `address`
+ */
+export const isNetworkFeePaidByAccount = (historyItem: UserHistoryItem | null | undefined, address: string) =>
+  historyItem?.type !== HistoryItemOpTypeEnum.TransferFrom ||
+  getMainHistoryOperation(historyItem)?.source.address === address;
+
 export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
   const mainOperation = getMainHistoryOperation(historyItem);
 

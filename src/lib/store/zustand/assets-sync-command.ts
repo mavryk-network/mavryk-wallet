@@ -1,5 +1,7 @@
+import { validateAddress, ValidationResult } from '@mavrykdynamics/webmavryk-utils';
 import { z } from 'zod';
 
+import { fromAssetSlug } from 'lib/assets/utils';
 import { WHITELIST_METADATA_SCOPE_KEY } from 'lib/metadata/metadata-scope';
 
 import { applyAssetsCommand } from './assets-command';
@@ -12,6 +14,13 @@ import { SAFE_KEY_SCHEMA } from './validation';
 
 const requestSchema = z.object({ requestKey: SAFE_KEY_SCHEMA, requestId: SAFE_KEY_SCHEMA });
 const metadataSchema = z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA);
+
+// Not lib/temple/helpers: importing it here would start RPC-cache storage reads inside the owner.
+const isContractSlug = (slug: string) => {
+  const [contract] = fromAssetSlug(slug);
+  return contract.startsWith('KT') && validateAddress(contract) === ValidationResult.VALID;
+};
+
 export const ASSETS_SYNC_COMMAND_SCHEMA = z.union([
   requestSchema.extend({ kind: z.literal('assets-sync-start') }).strict(),
   requestSchema
@@ -50,7 +59,11 @@ export function applyAssetsSyncCommand(
     assets.persistence
       .prepare(draft => {
         if (command.kind === 'scamlist-sync') draft.mainnetScamlist = command.data;
-        else draft.mainnetWhitelist = Array.from(new Set([...(draft.mainnetWhitelist ?? []), ...command.data]));
+        // Drop saved slugs that are not contract tokens (e.g. the upstream native `tez_0`) before merging.
+        else
+          draft.mainnetWhitelist = Array.from(new Set([...(draft.mainnetWhitelist ?? []), ...command.data])).filter(
+            isContractSlug
+          );
       })
       .commit();
     if (command.kind === 'scamlist-sync') return;

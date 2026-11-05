@@ -75,11 +75,9 @@ export const isValidContractAddress = (address: string) => isAddressValid(addres
 
 export function formatOpParamsBeforeSend(params: any) {
   if (params.kind === 'origination' && params.script) {
-    const newParams = { ...params, ...params.script };
-    newParams.init = newParams.storage;
-    delete newParams.script;
-    delete newParams.storage;
-    return newParams;
+    // Only code and storage come from the script: nested keys must never override the confirmed top-level fields.
+    const { script, storage: _storage, ...rest } = params;
+    return { ...rest, code: script.code, init: script.storage };
   }
   return params;
 }

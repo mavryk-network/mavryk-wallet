@@ -11,8 +11,8 @@ import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
-import { WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
-import { putToStorage } from 'lib/storage';
+import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
+import { t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -117,20 +117,15 @@ export const useCreareOrRestorePassword = (
         const shouldEnableAnalytics = Boolean(data.analytics);
         setAdsViewEnabled(data.viewAds);
         setAnalyticsEnabled(shouldEnableAnalytics);
-        const shouldEnableWebsiteAnalytics = data.viewAds && shouldEnableAnalytics;
-        await putToStorage(WEBSITES_ANALYTICS_ENABLED, shouldEnableWebsiteAnalytics);
 
         setOnboardingCompleted(data.skipOnboarding!);
-        const accountPkh = await registerWallet(password, formatMnemonic(seedPhrase));
+        await registerWallet(password, formatMnemonic(seedPhrase));
         trackEvent(
           data.skipOnboarding ? 'OnboardingSkipped' : 'OnboardingNotSkipped',
           AnalyticsEventCategory.General,
           undefined,
           data.analytics
         );
-        if (shouldEnableWebsiteAnalytics) {
-          trackEvent('AnalyticsAndAdsEnabled', AnalyticsEventCategory.General, { accountPkh }, data.analytics);
-        }
 
         if (popup) {
           await delay();
@@ -149,7 +144,8 @@ export const useCreareOrRestorePassword = (
       } catch (err: any) {
         console.error(err);
 
-        alert(err.message);
+        // The wallet was created but a lock landed before it unlocked, so it only needs unlocking
+        alert(err?.message === UNLOCK_INTERRUPTED_BY_LOCK_ERROR ? t('unlockInterruptedByLock') : err.message);
       }
     },
     [

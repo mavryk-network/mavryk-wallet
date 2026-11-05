@@ -35,7 +35,9 @@ const whitelistResponseSchema = z.array(
   })
 );
 
-const WHITELIST_TOKENS_BASE_URL = 'https://raw.githubusercontent.com/madfish-solutions/tokens-whitelist/master/';
+// Upstream Temple (madfish-solutions) list, pinned 2026-11-02 to a master commit so it cannot change without review.
+const WHITELIST_TOKENS_BASE_URL =
+  'https://raw.githubusercontent.com/madfish-solutions/tokens-whitelist/3df9b1a3920a7d07a4eaa13120e8ccd1bb9a53fb/';
 
 const api = axios.create({ baseURL: WHITELIST_TOKENS_BASE_URL });
 

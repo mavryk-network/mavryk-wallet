@@ -1,16 +1,13 @@
 import { MavrykWalletPageMessage, MavrykWalletPageMessageType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import browser from 'webextension-polyfill';
 
-import { ContentScriptType, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
 import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
+import { isBeaconPayloadWithinLimit } from 'lib/temple/beacon-payload';
 import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
 import { isProcessablePageMessage } from './content-scripts/page-message.helpers';
 import { getIntercom } from './intercom-client';
-
-const TRACK_URL_CHANGE_INTERVAL = 5000;
 
 enum BeaconMessageTarget {
   Page = 'toPage',
@@ -41,32 +38,6 @@ type BeaconMessage =
 type BeaconPageMessage = BeaconMessage | { message: BeaconMessage; sender: { id: string } };
 
 const isTopFrame = () => window.top === window;
-
-// Prevents analytics from running in an iframe
-if (isTopFrame()) {
-  browser.storage.local.get(WEBSITES_ANALYTICS_ENABLED).then(storage => {
-    if (storage[WEBSITES_ANALYTICS_ENABLED]) {
-      let oldHref = '';
-
-      const trackUrlChange = () => {
-        const newHref = window.location.href;
-        if (oldHref !== newHref) {
-          oldHref = newHref;
-
-          browser.runtime.sendMessage({
-            type: ContentScriptType.ExternalLinksActivity,
-            url: newHref
-          });
-        }
-      };
-
-      trackUrlChange();
-
-      // Track url changes without page reload
-      setInterval(trackUrlChange, TRACK_URL_CHANGE_INTERVAL);
-    }
-  });
-}
 
 const SENDER = {
   id: PUBLIC_EXTENSION_ID,
@@ -138,12 +109,15 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
 function beaconRequest(evt: MessageEvent) {
   const { origin, data } = evt;
   const encrypted = Boolean(data.encryptedPayload);
+  const payload = data.encryptedPayload ?? data.payload;
+  if (!isBeaconPayloadWithinLimit(payload)) return;
+
   getIntercom()
     .request(
       {
         type: TempleMessageType.PageRequest,
         origin: origin,
-        payload: data.encryptedPayload ?? data.payload,
+        payload,
         beacon: true,
         encrypted: Boolean(data.encryptedPayload)
       },
@@ -174,7 +148,7 @@ function beaconRequest(evt: MessageEvent) {
     .request({
       type: TempleMessageType.Acknowledge,
       origin: origin,
-      payload: data.encryptedPayload ?? data.payload,
+      payload,
       beacon: true,
       encrypted: encrypted
     })

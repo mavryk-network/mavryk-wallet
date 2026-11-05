@@ -45,6 +45,14 @@ const transactionSchema = z
         path: ['to']
       });
     }
+
+    if (op.to && op.destination && op.to !== op.destination) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Transaction operation has conflicting destination addresses',
+        path: ['destination']
+      });
+    }
   });
 
 const delegationSchema = z
@@ -69,7 +77,7 @@ const originationSchema = z
     kind: z.literal('origination'),
     balance: nonNegativeIntegerLikeSchema.optional(),
     delegate: optionalMavrykAddressSchema,
-    script: requiredUnknownSchema.optional(),
+    script: z.object({ code: requiredUnknownSchema, storage: requiredUnknownSchema }).strict().optional(),
     code: requiredUnknownSchema.optional(),
     storage: requiredUnknownSchema.optional(),
     init: requiredUnknownSchema.optional(),

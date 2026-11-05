@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
 import { getMessage } from 'lib/i18n';
-import { CONTACTS_ENCRYPTION_VERSION } from 'lib/temple/contacts-crypto';
 import { TempleContact, TempleContactApiType } from 'lib/temple/types';
 import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
 
@@ -19,6 +18,7 @@ import {
   canUseEncryptedContacts,
   getCachedContactsState,
   getContactsBookScope,
+  getContactsLastSeenVersion,
   getStoredContactsAccountDataKey,
   getStoredContactsRecordId,
   getStoredContactsTypesByAddress,
@@ -271,8 +271,7 @@ export function useContactsActions() {
 
         nextRecordId = saved.recordId;
         nextTypesByAddress = saved.typesByAddress;
-        nextLastSeenVersion =
-          saved.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? saved.encryptionVersion : undefined;
+        nextLastSeenVersion = getContactsLastSeenVersion(saved);
       } else {
         nextRecordId = null;
         nextTypesByAddress = undefined;

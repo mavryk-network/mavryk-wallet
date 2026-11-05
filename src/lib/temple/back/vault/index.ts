@@ -77,7 +77,6 @@ import * as SessionStore from './session-store';
 import {
   checkStrgKey,
   migrationLevelStrgKey,
-  mnemonicStrgKey,
   accPrivKeyStrgKey,
   accPubKeyStrgKey,
   accountsStrgKey,
@@ -85,6 +84,8 @@ import {
   legacyMigrationLevelStrgKey,
   walletMnemonicStrgKey
 } from './storage-keys';
+import { fetchSyncPayloadData, fetchWalletMnemonic, removeOrphanedWalletMnemonic } from './wallet-mnemonics';
+import { withBeforeSign } from './with-before-sign';
 
 const TEMPLE_SYNC_PREFIX = 'templesync';
 const DEFAULT_SETTINGS: TempleSettings = {};
@@ -293,9 +294,7 @@ export class Vault {
 
   static async revealMnemonic(walletId: string, password: string) {
     const { passKey } = await Vault.toValidPassKey(password);
-    return withError('Failed to reveal seed phrase', () =>
-      fetchAndDecryptOne<string>(walletMnemonicStrgKey(walletId), passKey)
-    );
+    return withError('Failed to reveal seed phrase', () => fetchWalletMnemonic(walletId, passKey));
   }
   static async generateSyncPayload(password: string) {
     let WasmThemis: typeof WasmThemisPackageInterface;
@@ -308,14 +307,7 @@ export class Vault {
 
     const { passKey } = await Vault.toValidPassKey(password);
     return withError('Failed to generate sync payload', async () => {
-      const [mnemonic, allAccounts] = await Promise.all([
-        fetchAndDecryptOne<string>(mnemonicStrgKey, passKey),
-        fetchAndDecryptOne<TempleAccount[]>(accountsStrgKey, passKey)
-      ]);
-
-      const hdAccounts = allAccounts.filter(acc => acc.type === TempleAccountType.HD);
-
-      const data = [mnemonic, hdAccounts.length];
+      const data = await fetchSyncPayloadData(passKey);
 
       const payload = Uint8Array.from(Buffer.from(JSON.stringify(data)));
       const cell = WasmThemis.SecureCellSeal.withPassphrase(password);
@@ -389,6 +381,7 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
       await savePlain(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
       await Vault.removeAccountsKeys([acc]);
+      if (acc.type === TempleAccountType.HD) await removeOrphanedWalletMnemonic(acc.walletId, newWalletsSpecs);
 
       return { newAccounts, newWalletsSpecs };
     });
@@ -416,6 +409,7 @@ export class Vault {
       await encryptAndSaveMany([[accountsStrgKey, newAccounts]], passKey);
       await savePlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY, newWalletsSpecs);
       await Vault.removeAccountsKeys(accountsToRemove);
+      await removeMany([walletMnemonicStrgKey(id)]);
 
       return { newAccounts, newWalletsSpecs };
     });
@@ -969,11 +963,16 @@ export class Vault {
     );
   }
 
-  async sendOperations(accPublicKeyHash: string, rpc: string, opParams: any[]) {
+  async sendOperations(
+    accPublicKeyHash: string,
+    rpc: string,
+    opParams: any[],
+    beforeSign?: (opBytes: string) => Promise<void>
+  ) {
     return this.withSigner(accPublicKeyHash, async signer => {
       const batch = await withError('Failed to send operations', async () => {
         const tezos = new MavrykToolkit(loadFastRpcClient(rpc));
-        tezos.setSignerProvider(signer);
+        tezos.setSignerProvider(beforeSign ? withBeforeSign(signer, beforeSign) : signer);
         tezos.setForgerProvider(new CompositeForger([tezos.getFactory(RpcForger)(), localForger]));
         tezos.setPackerProvider(michelEncoder);
         return tezos.contract.batch(opParams.map(formatOpParamsBeforeSend));

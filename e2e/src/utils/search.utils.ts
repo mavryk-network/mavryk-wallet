@@ -60,8 +60,17 @@ class PageElement {
   }
 
   async click(timeout?: number, errorTitle?: string) {
+    // Some form controls remount on every render, so a held handle can detach mid-click; click by position instead
     const element = await this.findElement(timeout, errorTitle);
-    await element.click();
+    await element.scrollIntoView();
+    const isLabel = await element.evaluate(e => e.tagName === 'LABEL');
+    const box = await element.boundingBox();
+    if (!box) throw new Error(`${this.selector} has no box to click`);
+    // A checkbox label's centre can land on an inline link (e.g. Terms of Use), so labels are clicked at the box
+    const { x, y } = isLabel
+      ? { x: box.x + Math.min(12, box.width / 2), y: box.y + box.height / 2 }
+      : await element.clickablePoint();
+    await BrowserContext.page.mouse.click(x, y);
   }
 
   async type(text: string) {

@@ -74,6 +74,40 @@ describe('operation parameter validation', () => {
     expect(() => validateOpParams([{ kind: 'transaction', amount: 1 }])).toThrow('Invalid operation parameters');
     expect(() => validateOpParams([{ kind: 'origination', balance: 0 }])).toThrow('Invalid operation parameters');
   });
+
+  it('rejects a transaction whose to and destination disagree', () => {
+    expect(() =>
+      validateOpParams([{ kind: 'transaction', to: ACCOUNT_ADDRESS, destination: CONTRACT_ADDRESS, amount: 1 }])
+    ).toThrow('Invalid operation parameters');
+  });
+
+  it('accepts a transaction whose to and destination agree', () => {
+    expect(() =>
+      validateOpParams([{ kind: 'transaction', to: ACCOUNT_ADDRESS, destination: ACCOUNT_ADDRESS, amount: 1 }])
+    ).not.toThrow();
+    expect(() => validateOpParams([{ kind: 'transaction', destination: ACCOUNT_ADDRESS, amount: 1 }])).not.toThrow();
+  });
+
+  it.each([
+    ['fee', 999999],
+    ['storageLimit', 60000],
+    ['gasLimit', 1040000],
+    ['balance', '1000'],
+    ['delegate', ACCOUNT_ADDRESS]
+  ])('rejects an origination script carrying %s', (key, value) => {
+    expect(() =>
+      validateOpParams([{ kind: 'origination', script: { code: [], storage: { prim: 'Unit' }, [key]: value } }])
+    ).toThrow('Invalid operation parameters');
+  });
+
+  it('rejects an origination script without code or storage', () => {
+    expect(() => validateOpParams([{ kind: 'origination', script: { code: [] } }])).toThrow(
+      'Invalid operation parameters'
+    );
+    expect(() => validateOpParams([{ kind: 'origination', script: 'parameter unit;' }])).toThrow(
+      'Invalid operation parameters'
+    );
+  });
 });
 
 describe('buildFinalOpParmas', () => {

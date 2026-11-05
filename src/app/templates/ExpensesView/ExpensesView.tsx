@@ -11,6 +11,7 @@ import { TProps, T, t } from 'lib/i18n';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
 import { RawOperationAssetExpense, RawOperationExpenses, useAllAccounts } from 'lib/temple/front';
 import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
+import { getExpenseReceivers } from 'lib/temple/front/expenses';
 import { TempleAccount } from 'lib/temple/types';
 
 import { ExpenseOpIcon } from './ExpenseOpIcon';
@@ -107,6 +108,8 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
         return `${t('transfer')}`;
       case 'approve':
         return t('approveToken');
+      case 'origination':
+        return t('origination');
       case 'delegation':
         return t('delegating');
       case 'staking':
@@ -123,13 +126,11 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
   }, [effectiveType, item.isEntrypointInteraction, item.type]);
 
   const { argumentDisplayProps } = useMemo<{ argumentDisplayProps?: OperationArgumentDisplayProps }>(() => {
-    const receivers = [
-      ...new Set(
-        item.expenses
-          .map(({ to }) => to)
-          .filter(value => (item.contractAddress ? value !== item.contractAddress : !!value))
-      )
-    ];
+    const receivers = getExpenseReceivers({
+      type: item.type,
+      expenses: item.expenses,
+      contractAddress: item.contractAddress
+    });
 
     const alteredReceivers = receivers.map(receiver => {
       if (savedAccountsRecord[receiver]) return <TinySavedAccountInfo account={savedAccountsRecord[receiver]} />;
@@ -178,6 +179,7 @@ const ExpenseViewItem: FC<ExpenseViewItemProps> = ({ item, last, mainnet, accoun
     item.delegate,
     item.expenses,
     item.isEntrypointInteraction,
+    item.type,
     savedAccountsRecord
   ]);
 

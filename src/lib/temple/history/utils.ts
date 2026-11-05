@@ -435,12 +435,38 @@ const buildBackendTransactionOperation = (
   return historyTxOp;
 };
 
+const isBackendRevealOperation = (operation: MavrykHistoryOperation) => getBackendOperationType(operation) === 'reveal';
+
+/**
+ * A first send from an unrevealed account is a `[reveal, transaction]` group, and the backend may pick the reveal as
+ * the group summary. The reveal says nothing about what the user did, so it only summarises reveal-only groups.
+ *
+ * @returns the group without a reveal summary when it also holds non-reveal operations, else the group unchanged
+ */
+const withoutRevealSummary = (group: MavrykHistoryOperationsGroup): MavrykHistoryOperationsGroup =>
+  group.summaryOperation &&
+  isBackendRevealOperation(group.summaryOperation) &&
+  group.operations.some(operation => !isBackendRevealOperation(operation))
+    ? { ...group, summaryOperation: undefined }
+    : group;
+
+/** Drops reveal items unless the group is reveal-only, so the remaining operations decide its type and preview. */
+const withoutRevealItems = (items: IndividualHistoryItem[]) => {
+  const nonRevealItems = items.filter(item => item.type !== HistoryItemOpTypeEnum.Reveal);
+  return nonRevealItems.length ? nonRevealItems : items;
+};
+
 const deriveBackendItemType = (
-  group: MavrykHistoryOperationsGroup,
-  items: IndividualHistoryItem[],
+  sourceGroup: MavrykHistoryOperationsGroup,
+  sourceItems: IndividualHistoryItem[],
   address: string,
   mainOperation?: IndividualHistoryItem
 ): HistoryItemOpTypeEnum => {
+  const nonRevealOperations = sourceGroup.operations.filter(operation => !isBackendRevealOperation(operation));
+  const group = nonRevealOperations.length
+    ? { ...withoutRevealSummary(sourceGroup), operations: nonRevealOperations }
+    : sourceGroup;
+  const items = withoutRevealItems(sourceItems);
   const summaryOperation = group.summaryOperation;
   const summaryType = summaryOperation?.details?.type;
   const summaryEntrypoint = summaryOperation?.details?.entrypoint;
@@ -700,9 +726,10 @@ const reduceOneBackendOperation = (
 };
 
 export function mavrykHistoryGroupToHistoryItem(
-  group: MavrykHistoryOperationsGroup,
+  sourceGroup: MavrykHistoryOperationsGroup,
   context: BackendHistoryNormalizationContext
 ): UserHistoryItem {
+  const group = withoutRevealSummary(sourceGroup);
   const primaryOperation = group.summaryOperation ?? group.operations[0];
   const isMovementGroup = hasHistoryMovement(primaryOperation?.details);
   const operations =
@@ -710,7 +737,7 @@ export function mavrykHistoryGroupToHistoryItem(
       ? expandHistoryMovements(primaryOperation, group.operations, context.decimals)
       : [...group.operations];
   // API parent operations carry the main details for top-level history UI; nested child ops are low-level stack entries.
-  const mainOperation =
+  const summaryMainOperation =
     group.summaryOperation?.details != null ||
     primaryOperation?.details?.transfers?.length ||
     primaryOperation?.details?.partialTransfers
@@ -779,6 +806,12 @@ export function mavrykHistoryGroupToHistoryItem(
           ? historyItemOperations
           : [{ status: primaryOperation ? stringToHistoryItemStatus(primaryOperation.status) : 'failed' }]
       );
+  // A leading reveal must not become the collapsed preview of a group that also transfers or calls something
+  const mainOperation =
+    summaryMainOperation ??
+    (historyItemOperations[0]?.type === HistoryItemOpTypeEnum.Reveal
+      ? withoutRevealItems(historyItemOperations)[0]
+      : undefined);
   const type = deriveBackendItemType(group, historyItemOperations, context.address, mainOperation);
   const summaryDiffs = buildBackendSummaryDisplayMoneyDiffs(group, type, context);
   const payment =
@@ -829,7 +862,7 @@ export function mavrykHistoryGroupToHistoryItem(
     hideOperationMoneyDiffs: displayMoneyDiffs ? true : undefined,
     isPartialTransfers: primaryOperation?.details?.partialTransfers,
     highlightedOperationIndex: 0,
-    isGroupedOp: Boolean(group.summaryOperation) || historyItemOperations.length > 1,
+    isGroupedOp: Boolean(sourceGroup.summaryOperation) || historyItemOperations.length > 1,
     firstOperation,
     oldestOperation
   };

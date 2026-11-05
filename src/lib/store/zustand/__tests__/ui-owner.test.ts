@@ -325,6 +325,21 @@ it('orders security refreshes across contexts, persists successful empty respons
   expect(read().mainnetScamlist).toEqual({});
 });
 
+it('prunes saved whitelist slugs that are not contract addresses when the whitelist syncs', async () => {
+  const kept = 'KT1SLHVU9YHqtNyyVfqK8cULCYbr3aAYebR6_0';
+  const added = 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ_3';
+  const s = setup();
+  await s.request();
+  const saved = JSON.parse(s.records['zustand-assets'] as string);
+  saved.state.mainnetWhitelist = ['tez_0', 'mv1MmzUmDpKRTe5rbuqvsD3bBWrewNX58AGX_0', kept];
+  const restart = setup({ ...s.records, 'zustand-assets': JSON.stringify(saved) });
+  await restart.request();
+  const send = (command: object) => restart.request({ command });
+  await send({ kind: 'assets-sync-start', requestKey: 'whitelist', requestId: 'one' });
+  await send({ kind: 'whitelist-sync', requestKey: 'whitelist', requestId: 'one', data: [added], metadata: {} });
+  expect(JSON.parse(restart.records['zustand-assets'] as string).state.mainnetWhitelist).toEqual([kept, added]);
+});
+
 it('reconciles fetched lists with durable choices, rejects superseded/user-edited requests and preserves metadata on late scopes', async () => {
   const s = setup();
   await s.request();

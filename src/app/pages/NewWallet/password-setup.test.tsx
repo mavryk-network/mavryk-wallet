@@ -4,6 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 
 import { getPasswordValidation, isPasswordValid, PASSWORD_PATTERN } from 'app/defaults';
+import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
 import { useCreareOrRestorePassword } from './import/useCreareOrRestorePassword';
@@ -279,6 +280,50 @@ it('guards the actual selected password before any onboarding side effects even 
   });
   expectNoWrites();
   expect(hook!.isPasswordError).toBe(true);
+});
+
+it('explains a wallet creation interrupted by a lock instead of showing the raw error code', async () => {
+  const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => undefined);
+  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  try {
+    mockRegisterWallet.mockRejectedValueOnce(new Error(UNLOCK_INTERRUPTED_BY_LOCK_ERROR));
+    let hook: ReturnType<typeof useCreareOrRestorePassword>;
+    const Harness = () => {
+      hook = useCreareOrRestorePassword(false, 'seed');
+      return null;
+    };
+    await render(<Harness />);
+    await act(async () => {
+      await hook.onSubmit({ password: 'Abcdefg1!', termsAccepted: true, betaAgreement: true, viewAds: false });
+    });
+
+    expect(mockRegisterWallet).toHaveBeenCalledWith('Abcdefg1!', 'seed');
+    expect(alertSpy).toHaveBeenCalledWith('unlockInterruptedByLock');
+  } finally {
+    alertSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  }
+});
+
+it('onboarding never persists a website-tracking flag, even with analytics and ads on', async () => {
+  let hook: ReturnType<typeof useCreareOrRestorePassword>;
+  function Harness() {
+    hook = useCreareOrRestorePassword(false, 'seed');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    await hook.onSubmit({
+      password: 'Abcdefg1!',
+      repeatPassword: 'Abcdefg1!',
+      termsAccepted: true,
+      betaAgreement: true,
+      analytics: true,
+      viewAds: true
+    });
+  });
+  expect(mockRegisterWallet).toHaveBeenCalled();
+  expect(mockStorage).not.toHaveBeenCalledWith('WEBSITES_ANALYTICS_ENABLED', expect.anything());
 });
 
 it('keeps untouched punctuation neutral, invalid punctuation red and valid punctuation green', async () => {

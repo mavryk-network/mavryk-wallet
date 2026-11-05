@@ -122,6 +122,21 @@ export async function getAuthWalletAddressFromStorage(): Promise<string | null> 
 }
 
 /**
+ * Auth context for a wallet-scoped read of `accountAddress`: its own auth wallet (via the account → auth wallet
+ * map) on the selected network. Unlike the default context it never follows the selected account, so a read
+ * started right after an account switch cannot carry the previous account's token.
+ */
+export async function getAuthStorageContextForAccount(
+  accountAddress: string
+): Promise<ResolvedMavrykAuthStorageContext> {
+  const authWalletByAccount = await fetchFromStorage<Record<string, string>>(
+    MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY
+  );
+
+  return getCurrentAuthStorageContext({ walletAddress: authWalletByAccount?.[accountAddress] ?? accountAddress });
+}
+
+/**
  * Persists the lookup from account address to auth wallet address.
  */
 export async function setAuthWalletAddressesMapToStorage(authWalletByAccount: Record<string, string>) {

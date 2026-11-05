@@ -49,6 +49,7 @@ it.each([
       { sender: PURCHASE_WALLET }
     );
     expect(mavrykApi.get).toHaveBeenLastCalledWith(`/wallets/${PURCHASE_WALLET}/${endpoint}`, {
+      _authContext: expect.objectContaining({ walletAddress: PURCHASE_WALLET }),
       params: { cursor, search: undefined, filter: 'sent', limit: 20, token_id: assetSlug?.split('_')[1] }
     });
     expect(result).toEqual({ items: [], cursor: 123, hasMore: true });
@@ -56,6 +57,7 @@ it.each([
 
   await fetchUserOperationByHash(TempleChainId.Basenet, PURCHASE_WALLET, 'operation-hash', assetSlug);
   expect(mavrykApi.get).toHaveBeenLastCalledWith(`/wallets/${PURCHASE_WALLET}/${endpoint}`, {
+    _authContext: expect.objectContaining({ walletAddress: PURCHASE_WALLET }),
     params: {
       cursor: undefined,
       search: 'operation-hash',
@@ -93,6 +95,7 @@ it('parses the real envelope and enriches both paginated wallet history and hash
     { assetSlug: `${PURCHASE_ASSET}_0`, diff: '0.2' }
   ]);
   expect(mavrykApi.get).toHaveBeenLastCalledWith(`/wallets/${PURCHASE_WALLET}/history`, {
+    _authContext: expect.objectContaining({ walletAddress: PURCHASE_WALLET }),
     params: { cursor: undefined, search: purchaseFixture().hash, filter: undefined, limit: 20, token_id: undefined }
   });
 });
@@ -142,12 +145,18 @@ it('uses the popup token address even without an asset slug, for pagination and 
   expect(mavrykApi.get).toHaveBeenNthCalledWith(
     1,
     `/wallets/${PURCHASE_WALLET}/tokens/mv2ZZZZZZZZZZZZZZZZZZZZZZZZZZZDXMF2d/history`,
-    { params: { cursor: 123, search: undefined, filter: undefined, limit: 20, token_id: undefined } }
+    {
+      _authContext: expect.objectContaining({ walletAddress: PURCHASE_WALLET }),
+      params: { cursor: 123, search: undefined, filter: undefined, limit: 20, token_id: undefined }
+    }
   );
   expect(mavrykApi.get).toHaveBeenNthCalledWith(
     2,
     `/wallets/${PURCHASE_WALLET}/tokens/mv2ZZZZZZZZZZZZZZZZZZZZZZZZZZZDXMF2d/history`,
-    { params: { cursor: undefined, search: 'test-hash', filter: undefined, limit: 20, token_id: undefined } }
+    {
+      _authContext: expect.objectContaining({ walletAddress: PURCHASE_WALLET }),
+      params: { cursor: undefined, search: 'test-hash', filter: undefined, limit: 20, token_id: undefined }
+    }
   );
 });
 

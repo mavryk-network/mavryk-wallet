@@ -1,8 +1,17 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import browser from 'webextension-polyfill';
 
+import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
+
 import { mavrykApi, type MavrykApiRequestConfig } from './client';
-import { getAuthTokensFromStorage, setAuthTokensToStorage } from './storage';
+import { fetchTokenHistory, fetchWalletHistory } from './history';
+import { fetchWalletRwaAssets } from './rwas';
+import {
+  getAuthTokensFromStorage,
+  MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY,
+  setAuthTokensToStorage
+} from './storage';
+import { fetchWalletTokens } from './tokens';
 
 jest.mock('@vespaiach/axios-fetch-adapter', () => jest.fn());
 
@@ -247,5 +256,115 @@ describe('mavrykApi auth interceptor', () => {
       accessToken,
       refreshToken: 'refresh-token'
     });
+  });
+});
+
+describe('wallet-scoped reads after an account switch', () => {
+  const PREVIOUS = 'mv1-previous-account';
+  const NEXT = 'mv1-next-account';
+  const WATCH_ONLY = 'mv1-watch-only';
+  const authorizationOf = (config: AxiosRequestConfig) =>
+    (config.headers as Record<string, string> | undefined)?.Authorization;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    await browser.storage.local.clear();
+    // Storage still selects the previous account, as it does while the switch write is in flight.
+    await browser.storage.local.set({
+      [ACCOUNT_PKH_STORAGE_KEY]: PREVIOUS,
+      [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: {}
+    });
+    await setAuthTokensToStorage({ accessToken: 'previous-token' }, { walletAddress: PREVIOUS, networkId: 'mainnet' });
+    await setAuthTokensToStorage({ accessToken: 'next-token' }, { walletAddress: NEXT, networkId: 'mainnet' });
+  });
+
+  it.each([
+    ['history', () => fetchWalletHistory({ walletAddress: NEXT })],
+    ['token history', () => fetchTokenHistory('KT1Token', { walletAddress: NEXT })],
+    ['tokens', () => fetchWalletTokens({ walletAddress: NEXT })],
+    ['RWA assets', () => fetchWalletRwaAssets({ walletAddress: NEXT })]
+  ])('authenticates a %s read as the requested account, not the selected one', async (_name, read) => {
+    const adapter = jest.fn(async (config: AxiosRequestConfig) =>
+      createResponse(
+        config,
+        String(config.url).includes('history') ? { walletAddress: NEXT, operations: [], hasMore: false } : []
+      )
+    );
+    mavrykApi.defaults.adapter = adapter;
+
+    await read();
+
+    expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
+  });
+
+  it('uses the auth wallet linked to the requested account', async () => {
+    await browser.storage.local.set({ [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: { [WATCH_ONLY]: NEXT } });
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, []));
+    mavrykApi.defaults.adapter = adapter;
+
+    await fetchWalletRwaAssets({ walletAddress: WATCH_ONLY });
+
+    expect(adapter.mock.calls[0][0].url).toBe(`/wallets/${WATCH_ONLY}/assets`);
+    expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
+  });
+});
+
+describe('auth recovery while sign-in is in progress', () => {
+  const authorizationOf = (config: AxiosRequestConfig) =>
+    (config.headers as Record<string, string> | undefined)?.Authorization;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    await browser.storage.local.clear();
+  });
+
+  it('retries a request sent without a token with the token stored since, without refreshing', async () => {
+    const signedInToken = buildJwt(Date.now() + 10 * 60_000);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      if (authorizationOf(config) === `Bearer ${signedInToken}`) return createResponse(config, { ok: true });
+      // Sign-in completes while the token-less request is being rejected.
+      await setAuthTokensToStorage({ accessToken: signedInToken, refreshToken: 'refresh-token' }, authContext);
+      throw createAxiosError(config, 401, { error: 'Authorization header required' });
+    });
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      mavrykApi.get('/wallets/data', { _authContext: authContext } as MavrykApiRequestConfig)
+    ).resolves.toMatchObject({ data: { ok: true } });
+
+    expect(adapter.mock.calls.filter(([config]) => config.url === '/auth/refresh')).toHaveLength(0);
+  });
+
+  it('keeps stored tokens when the refresh cannot be attempted', async () => {
+    const accessToken = buildJwt(Date.now() - 60_000);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      throw createAxiosError(config, 401, { error: 'expired' });
+    });
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage({ accessToken }, authContext);
+
+    await expect(
+      mavrykApi.get('/wallets/data', { _authContext: authContext } as MavrykApiRequestConfig)
+    ).rejects.toThrow('No refresh token in storage');
+
+    await expect(getAuthTokensFromStorage(authContext)).resolves.toEqual({ accessToken, refreshToken: null });
+  });
+
+  it('clears stored tokens when the server rejects the refresh', async () => {
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      throw createAxiosError(config, 401, { error: 'invalid refresh token' });
+    });
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage(
+      { accessToken: buildJwt(Date.now() - 60_000), refreshToken: 'refresh-token' },
+      authContext
+    );
+
+    await expect(
+      mavrykApi.get('/wallets/data', { _authContext: authContext } as MavrykApiRequestConfig)
+    ).rejects.toMatchObject({ response: { status: 401 } });
+
+    expect(adapter.mock.calls.filter(([config]) => config.url === '/auth/refresh')).toHaveLength(1);
+    await expect(getAuthTokensFromStorage(authContext)).resolves.toEqual({ accessToken: null, refreshToken: null });
   });
 });

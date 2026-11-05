@@ -170,6 +170,22 @@ const performAuthForAccount = async (
   await verifyAuthSignature({ nonce, signature, walletAddress: authWalletAddress, networkId });
 };
 
+/**
+ * Signs the newly added account in to the Wallet API before the foreground learns about it. The UI selects a new
+ * account as soon as it appears, so publishing first let its first history/asset requests run without a token.
+ * Accounts are published even when auth fails (e.g. offline); the auth error still reaches the caller.
+ */
+const publishNewAccountAfterAuth = async (vault: Vault, prevAccounts: TempleAccount[], accounts: TempleAccount[]) => {
+  await syncAuthWalletAddresses(accounts);
+  const newAccount = findNewAccount(prevAccounts, accounts);
+
+  try {
+    if (newAccount) await performAuthForAccount(vault, newAccount.publicKeyHash, accounts);
+  } finally {
+    accountsUpdated(accounts);
+  }
+};
+
 const ensureAuthorizedForAccount = async (
   vault: Vault,
   accountPkh?: string,
@@ -346,11 +362,7 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
 
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.createHDAccount(walletId, name, hdIndex);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -411,11 +423,7 @@ export function importAccount(chainId: string, chain: TempleChainKind, privateKe
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importAccount(chain, chainId, privateKey, encPassword);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -423,11 +431,7 @@ export function importMnemonicAccount(mnemonic: string, chainId: string, passwor
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importMnemonicAccount(mnemonic, chainId, password, derivationPath);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -449,11 +453,7 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importWatchOnlyAccount(chain, address, chainId, name);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -508,11 +508,7 @@ export function createOrImportWallet(mnemonic?: string) {
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await vault.createOrImportWallet(mnemonic);
-    await updateAccountsAndSyncAuth(newAccounts);
-    const newAccount = findNewAccount(prevAccounts, newAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, newAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, newAccounts);
   });
 }
 

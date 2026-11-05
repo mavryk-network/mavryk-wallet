@@ -8,6 +8,7 @@ import { MavrykApiError } from 'mavryk/api/errors';
 import { fetchRecentOperations } from 'mavryk/api/recent-operations';
 
 import { useContactRecentOperations } from './use-contact-recent-operations';
+import { usePurchaseMetadata } from './use-purchase-metadata';
 
 const ACTIVE = 'mv1-active';
 const BOOK_OWNER = 'mv1-book-owner';
@@ -21,7 +22,7 @@ jest.mock('lib/temple/front', () => ({
 }));
 jest.mock('lib/temple/front/contacts-settings', () => ({ getContactsBookScope: jest.fn() }));
 jest.mock('mavryk/api/recent-operations', () => ({ fetchRecentOperations: jest.fn() }));
-jest.mock('./use-purchase-metadata', () => ({ usePurchaseMetadata: () => undefined }));
+jest.mock('./use-purchase-metadata', () => ({ usePurchaseMetadata: jest.fn(() => undefined) }));
 jest.mock('./fetch', () => ({
   normalizeRecentOperationsItems: async (operations: { hash: string }[]) =>
     operations.map((operation, index) => ({ id: `${index}:${operation.hash}`, hash: operation.hash }))
@@ -98,6 +99,17 @@ it('authenticates as the book owner, follows preparing hints, then stops polling
 
   await advance(120_000);
   expect(fetchMock).toHaveBeenCalledTimes(3);
+});
+
+it('resolves token decimals in the active wallet scope, never the contact scope', async () => {
+  // A contact-scoped metadata request is always cancelled by the selected-wallet scope guard,
+  // which turned every contact card that needs decimals into a load error.
+  fetchMock.mockResolvedValueOnce(response({ status: 'ready', operations: [{ hash: 'a' }] as never }));
+
+  await render(CONTACT);
+
+  expect(usePurchaseMetadata).toHaveBeenCalledWith();
+  expect(result.status).toBe('ready');
 });
 
 it('does not request before the contact or the address book owner resolve', async () => {

@@ -126,12 +126,23 @@ const HOST_PERMISSIONS: string[] = ['http://localhost:8732/'];
  */
 const MAVRYK_API_HOST_PERMISSIONS = ['https://wallet.mavryk.network/*', 'https://basenet.wallet.mavryk.network/*'];
 
+/**
+ * The RWA GraphQL endpoint (`EXTERNAL_API`, served by the Equiteez Hasura cache worker) allow-lists
+ * origins the same way. Its host comes from the env value the bundle is built with, so the
+ * permission always matches the endpoint the build calls.
+ */
+const buildExternalApiHostPermissions = () => {
+  const externalApi = envFilesData.EXTERNAL_API;
+
+  return externalApi ? [`${new URL(externalApi).origin}/*`] : [];
+};
+
 /** Vendors whose extension origin is generated per install and therefore cannot be allow-listed. */
 const RANDOM_ORIGIN_VENDORS: Vendor[] = ['firefox', 'safari'];
 
 const buildHostPermissions = (vendor: string) =>
   RANDOM_ORIGIN_VENDORS.includes(vendor as Vendor)
-    ? [...HOST_PERMISSIONS, ...MAVRYK_API_HOST_PERMISSIONS]
+    ? [...HOST_PERMISSIONS, ...MAVRYK_API_HOST_PERMISSIONS, ...buildExternalApiHostPermissions()]
     : HOST_PERMISSIONS;
 
 const OPTIONS_UI = {

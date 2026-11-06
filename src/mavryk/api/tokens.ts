@@ -3,8 +3,8 @@ import { z } from 'zod';
 import type { TokenMetadataResponse } from 'lib/apis/temple';
 import { fromAssetSlug, toTokenSlug } from 'lib/assets/utils';
 
-import { mavrykApi } from './client';
-import { getWalletAddressFromStorage } from './storage';
+import { mavrykApi, type MavrykApiRequestConfig } from './client';
+import { getAuthStorageContextForAccount, getWalletAddressFromStorage } from './storage';
 
 const WalletTokenSortSchema = z.enum(['value_desc', 'value_asc', 'name']);
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
@@ -42,11 +42,12 @@ export async function fetchWalletTokens(params: FetchWalletTokensRequest = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
   const { data } = await mavrykApi.get<WalletToken[]>(`/wallets/${address}/tokens`, {
+    _authContext: await getAuthStorageContextForAccount(address),
     params: {
       sort: params.sort,
       search: params.search
     }
-  });
+  } as MavrykApiRequestConfig);
 
   return WalletTokensResponseSchema.parse(data);
 }

@@ -203,6 +203,61 @@ describe('mavrykHistoryGroupToHistoryItem', () => {
   });
 });
 
+describe('reveal groups', () => {
+  const revealOperation = buildOperation({
+    id: 1,
+    type: 'reveal',
+    target: undefined,
+    details: { type: 'reveal', from: ACCOUNT_ADDRESS }
+  });
+  const sentOperation = buildOperation({
+    id: 2,
+    target: RECIPIENT_ADDRESS,
+    details: {
+      type: 'transaction',
+      transferType: 'sent',
+      amount: 0.1,
+      from: ACCOUNT_ADDRESS,
+      to: RECIPIENT_ADDRESS,
+      currency: 'MVRK',
+      entrypoint: 'transfer'
+    }
+  });
+
+  const expectSentPreview = (historyItem: ReturnType<typeof buildHistoryItem>) => {
+    expect(historyItem.type).toBe(HistoryItemOpTypeEnum.TransferTo);
+    expect(getMainHistoryOperation(historyItem)?.type).toBe(HistoryItemOpTypeEnum.TransferTo);
+    expect(getHistoryOperationAddress(getMainHistoryOperation(historyItem), historyItem)).toBe(RECIPIENT_ADDRESS);
+    expect(buildHistoryMoneyDiffs(historyItem, true)).toEqual([{ assetSlug: MAV_TOKEN_SLUG, diff: '-0.1' }]);
+    expect(historyItem.operations.map(operation => operation.type)).toEqual([
+      HistoryItemOpTypeEnum.Reveal,
+      HistoryItemOpTypeEnum.TransferTo
+    ]);
+  };
+
+  it('summarises a reveal followed by a sent transfer as the transfer', () => {
+    expectSentPreview(buildHistoryItem([revealOperation, sentOperation]));
+  });
+
+  it('ignores a reveal picked as the backend group summary when a transfer follows', () => {
+    const revealSummary = buildOperation({
+      type: 'reveal',
+      target: undefined,
+      details: { type: 'reveal', from: ACCOUNT_ADDRESS },
+      operations: [revealOperation, sentOperation]
+    });
+
+    const historyItem = buildHistoryItem([revealSummary]);
+
+    expectSentPreview(historyItem);
+    expect(historyItem.isGroupedOp).toBe(true);
+  });
+
+  it('keeps reveal-only groups as Reveal', () => {
+    expect(buildHistoryItem([revealOperation]).type).toBe(HistoryItemOpTypeEnum.Reveal);
+  });
+});
+
 describe('History UI helpers', () => {
   it('prefers the summary-derived main operation for grouped history previews and addresses', () => {
     const historyItem = buildHistoryItem([

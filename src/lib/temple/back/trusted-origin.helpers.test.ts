@@ -23,7 +23,8 @@ const LOOPBACK_ORIGINS = [
 
 const PREVIEW_ORIGINS = [
   'https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev',
-  'https://x.equiteez-app.pages.dev'
+  'https://x.equiteez-app.pages.dev',
+  'https://equiteez-app.pages.dev'
 ];
 
 describe('trusted origin helpers (production build)', () => {
@@ -55,7 +56,7 @@ describe('trusted origin helpers (production build)', () => {
     expect(isTrustedAuthChallengeSignerOrigin(origin)).toBe(false);
   });
 
-  it.each(['https://nexus.mavryk.org', 'https://app.equiteez.com', 'https://equiteez-app.pages.dev'])(
+  it.each(['https://basenet.nexus.mavryk.org', 'https://nexus.mavryk.org', 'https://app.equiteez.com'])(
     'allows auth challenge signer origin %s',
     origin => {
       expect(isTrustedAuthChallengeSignerOrigin(origin)).toBe(true);
@@ -80,6 +81,13 @@ describe('trusted origin helpers (development build)', () => {
     expect(isTrustedNexusOrigin('https://mav-3957-auth-2-for-contacts.mavryk-nexus.pages.dev')).toBe(true);
     expect(isTrustedAuthChallengeSignerOrigin('https://x.equiteez-app.pages.dev')).toBe(true);
     expect(isTrustedNexusOrigin('https://x.equiteez-app.pages.dev')).toBe(false);
+  });
+
+  it('trusts the Equiteez Pages host for auth challenge signing only', () => {
+    expect(isTrustedAuthChallengeSignerOrigin('https://equiteez-app.pages.dev')).toBe(true);
+    expect(isTrustedNexusOrigin('https://equiteez-app.pages.dev')).toBe(false);
+    expect(isTrustedAuthChallengeSignerOrigin('http://equiteez-app.pages.dev')).toBe(false);
+    expect(isTrustedAuthChallengeSignerOrigin('https://equiteez-app.pages.dev:444')).toBe(false);
   });
 
   it('still rejects lookalike origins', () => {

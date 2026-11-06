@@ -7,7 +7,8 @@ import { UI_OWNER_CHANNEL } from 'lib/store/zustand/ui-owner.contract';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
 import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
-import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
+import { toSafeLogError } from 'mavryk/api/errors';
+import { migrateAuthTokensToSessionStorage, setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
@@ -26,8 +27,10 @@ export const start = async () => {
   startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
+  await migrateAuthTokensToSessionStorage().catch(error => console.error(toSafeLogError(error)));
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
+  await Actions.clearAuthTokensIfStartedLocked().catch(error => console.error(toSafeLogError(error)));
 
   const syncAuthWalletAddresses = (accounts = store.getState().accounts) => {
     setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts)).catch(error => console.error(error));
@@ -45,7 +48,7 @@ export const start = async () => {
 
 const processRequestWithErrorsLogged = (...args: Parameters<typeof processRequest>) =>
   processRequest(...args).catch(error => {
-    console.error(error);
+    console.error(toSafeLogError(error));
     throw error;
   });
 
@@ -219,10 +222,17 @@ const processRequest = async (
       };
 
     case TempleMessageType.OperationsRequest:
-      const { opHash } = await Actions.sendOperations(port, req.id, req.sourcePkh, req.networkRpc, req.opParams);
+      const { opHash, feeMumav } = await Actions.sendOperations(
+        port,
+        req.id,
+        req.sourcePkh,
+        req.networkRpc,
+        req.opParams
+      );
       return {
         type: TempleMessageType.OperationsResponse,
-        opHash
+        opHash,
+        feeMumav
       };
 
     case TempleMessageType.SignRequest:

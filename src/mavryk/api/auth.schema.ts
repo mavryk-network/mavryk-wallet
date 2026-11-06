@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AUTH_CHALLENGE_MAX_LENGTH, AUTH_CHALLENGE_NONCE_PATTERN } from './auth-payload.helpers';
-import { getJwtExpMs, isJwtExpired } from './jwt';
+import { CLOCK_SKEW_TOLERANCE_MS, getJwtExpMs, isJwtExpired } from './jwt';
 
 const MAX_REFRESH_TOKEN_LENGTH = 4096;
 
@@ -9,7 +9,7 @@ const AccessTokenSchema = z
   .string()
   .refine(token => token.split('.').length === 3, 'Access token must be a JWT')
   .refine(token => getJwtExpMs(token) !== null, 'Access token must include a parseable exp claim')
-  .refine(token => !isJwtExpired(token), 'Access token is expired');
+  .refine(token => !isJwtExpired(token, Date.now(), CLOCK_SKEW_TOLERANCE_MS), 'Access token is expired');
 
 const RefreshTokenSchema = z.string().trim().min(1).max(MAX_REFRESH_TOKEN_LENGTH);
 

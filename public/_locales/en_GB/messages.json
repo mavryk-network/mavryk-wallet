@@ -1808,6 +1808,9 @@
   "noAssetsFound": {
     "message": "No assets found"
   },
+  "assetsLoadError": {
+    "message": "Couldn't load this list. It will retry automatically."
+  },
   "tokenNotFound": {
     "message": "Token not found..."
   },

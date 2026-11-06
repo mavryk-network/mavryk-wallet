@@ -12,7 +12,7 @@ import { deferred } from 'lib/store/zustand/test-support/helpers';
 import { requestOwnedUISnapshot, updateOwnedUI, useOwnedUIStatus } from 'lib/store/zustand/ui-client';
 import { getSelectedNetworkIdFromStorage, getWalletAddressFromStorage } from 'mavryk/api/storage';
 
-import { useAssetsFetching, useAssetsQuery } from './use-assets-query';
+import { useAssetsFetching, useAssetsLoadFailed, useAssetsQuery } from './use-assets-query';
 
 jest.mock('lib/metadata/use-metadata-scope', () => ({
   useMetadataScope: () => ({
@@ -139,6 +139,74 @@ it('deduplicates transport, uses fetching without a feedback loop, preserves eff
   await settle();
   expect(requestOwnedUISnapshot).toHaveBeenCalledTimes(publications);
   expect(client.getQueryData(oldKey)).toBe(true);
+  await act(async () => root.unmount());
+  client.clear();
+});
+
+it('reports a failed asset request (e.g. a 403 for an unlinked account) without fetching from the reader', async () => {
+  jest.clearAllMocks();
+  const scope = { account: 'watch-only', chainId: 'chain', networkId: 'mainnet' };
+  (useDetailScope as jest.Mock).mockImplementation(() => scope);
+  (getWalletAddressFromStorage as jest.Mock).mockResolvedValue(scope.account);
+  (getSelectedNetworkIdFromStorage as jest.Mock).mockResolvedValue(scope.networkId);
+  (useOwnedUIStatus as jest.Mock).mockReturnValue({ isReady: true });
+  (updateOwnedUI as jest.Mock).mockResolvedValue(undefined);
+  (requestOwnedUISnapshot as jest.Mock).mockImplementation(async value => ({
+    assets: { syncRequests: { [value.requestKey]: value.requestId } }
+  }));
+  const forbidden = Object.assign(new Error('Request failed with status code 403'), {
+    isAxiosError: true,
+    response: { status: 403, data: { message: 'Forbidden' } }
+  });
+  (loadAccountTokens as jest.Mock).mockRejectedValueOnce(forbidden);
+  const client = new QueryClient({ logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } });
+  const root = createRoot(document.createElement('div'));
+  let hasFailed: boolean | undefined;
+  const settle = () =>
+    act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 30));
+    });
+
+  function Reader() {
+    hasFailed = useAssetsLoadFailed('tokens');
+    return null;
+  }
+  function Driver() {
+    useAssetsQuery('tokens');
+    return null;
+  }
+
+  // The reader alone never starts the request
+  await act(async () => {
+    root.render(
+      <QueryClientProvider client={client}>
+        <Reader />
+      </QueryClientProvider>
+    );
+  });
+  await settle();
+  expect(loadAccountTokens).not.toHaveBeenCalled();
+  expect(hasFailed).toBe(false);
+
+  await act(async () => {
+    root.render(
+      <QueryClientProvider client={client}>
+        <Reader />
+        <Driver />
+      </QueryClientProvider>
+    );
+  });
+  await settle();
+  expect(loadAccountTokens).toHaveBeenCalledTimes(1);
+  expect(hasFailed).toBe(true);
+
+  (loadAccountTokens as jest.Mock).mockResolvedValueOnce({ slugs: [], balances: {}, newMeta: {} });
+  await act(async () => {
+    await client.invalidateQueries(assetsKeys.account('tokens', scope.account, scope.chainId, scope.networkId));
+  });
+  await settle();
+  expect(hasFailed).toBe(false);
+
   await act(async () => root.unmount());
   client.clear();
 });

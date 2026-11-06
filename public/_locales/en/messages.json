@@ -1808,6 +1808,9 @@
   "noAssetsFound": {
     "message": "No assets found"
   },
+  "assetsLoadError": {
+    "message": "Couldn't load this list. It will retry automatically."
+  },
   "tokenNotFound": {
     "message": "Token not found..."
   },
@@ -3695,6 +3698,35 @@
   "networkFees": {
     "message": "Network Fees"
   },
+  "historyLoadError": {
+    "message": "Couldn't load history."
+  },
+  "historyEnrichmentUpdating": {
+    "message": "Order details are updating and may be incomplete."
+  },
+  "historyEnrichmentUnavailable": {
+    "message": "Order details are temporarily unavailable. Transactions are still shown."
+  },
+  "gasless": {
+    "message": "Gasless"
+  },
+  "feePaidBy": {
+    "message": "Paid by"
+  },
+  "feePaidByMultiple": {
+    "message": "Paid by: multiple"
+  },
+  "historyActions": {
+    "message": "Actions"
+  },
+  "orderNumber": {
+    "message": "Order #$orderId$",
+    "placeholders": {
+      "orderId": {
+        "content": "$1"
+      }
+    }
+  },
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
   },
@@ -4151,5 +4183,50 @@
   },
   "assetSecurityUnavailable": {
     "message": "Token security data is unavailable. Assets have not been checked for scam labels."
+  },
+  "recentOperations": {
+    "message": "Recent Operations"
+  },
+  "recentOperationsPreparing": {
+    "message": "Preparing recent operations…"
+  },
+  "recentOperationsEmpty": {
+    "message": "No recent operations yet"
+  },
+  "recentOperationsUpdating": {
+    "message": "Updating… Last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsStaleEmpty": {
+    "message": "Updating recent operations…"
+  },
+  "recentOperationsLoadError": {
+    "message": "Could not load recent operations"
+  },
+  "recentOperationsOutdated": {
+    "message": "Showing operations last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsUnsupported": {
+    "message": "History for contract contacts is not supported yet"
+  },
+  "retryInSeconds": {
+    "message": "Retry in $seconds$s",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "watchOnlyAssetHistoryUnavailable": {
+    "message": "Asset history isn't available for watch-only accounts"
   }
 }

@@ -280,6 +280,37 @@ describe('auth refresh', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  it('never logs the refresh token when logout revocation fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      const response = { ...createResponse(config, { message: 'revocation failed' }), status: 500 };
+      throw Object.assign(new Error('Request failed with status code 500'), {
+        isAxiosError: true,
+        config,
+        request: { body: config.data },
+        response,
+        toJSON: () => ({ config })
+      });
+    });
+
+    mavrykApi.defaults.adapter = adapter;
+    await setAuthTokensToStorage(
+      { accessToken: buildJwt(Date.now() + 60_000), refreshToken: 'rt-secret' },
+      authContext
+    );
+
+    await expect(logoutAuth()).resolves.toBeUndefined();
+
+    expect(adapter).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify((adapter.mock.calls[0][0] as MavrykApiRequestConfig).data)).toContain('rt-secret');
+    expect(consoleErrorSpy).toHaveBeenCalledWith({ status: 500, message: 'revocation failed' });
+    for (const args of consoleErrorSpy.mock.calls) {
+      expect(JSON.stringify(args)).not.toContain('rt-secret');
+    }
+
+    consoleErrorSpy.mockRestore();
+  });
+
   it('clears local auth tokens without waiting for revocation when asked not to', async () => {
     const adapter = jest.fn(() => new Promise<never>(() => undefined));
 

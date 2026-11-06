@@ -12,6 +12,7 @@ import { start } from './main';
 jest.mock('./actions', () => ({
   init: jest.fn(),
   unlockFromSession: jest.fn(),
+  clearAuthTokensIfStartedLocked: jest.fn(() => Promise.resolve()),
   isDAppEnabled: jest.fn(),
   processDApp: jest.fn()
 }));
@@ -43,7 +44,10 @@ jest.mock('lib/env', () => ({ BACKGROUND_IS_WORKER: false }));
 jest.mock('lib/store/zustand/ui-owner', () => ({ startUIOwner: jest.fn() }));
 jest.mock('lib/temple/helpers', () => ({ buildAuthWalletAddressesMap: jest.fn() }));
 jest.mock('lib/temple/reset', () => ({ clearAsyncStorages: jest.fn() }));
-jest.mock('mavryk/api/storage', () => ({ setAuthWalletAddressesMapToStorage: jest.fn().mockResolvedValue(undefined) }));
+jest.mock('mavryk/api/storage', () => ({
+  migrateAuthTokensToSessionStorage: jest.fn().mockResolvedValue(undefined),
+  setAuthWalletAddressesMapToStorage: jest.fn().mockResolvedValue(undefined)
+}));
 jest.mock('lib/temple/beacon', () => ({
   ...jest.requireActual('lib/temple/beacon'),
   encryptMessage: jest.fn().mockResolvedValue('encrypted-ack'),
@@ -75,10 +79,15 @@ const acknowledgeRequest = {
 type ProcessRequest = (req: TempleRequest, port: Runtime.Port, portInfo: IntercomPortInfo) => Promise<unknown>;
 
 let processRequest: ProcessRequest;
+let startupCallOrder: { init?: number; clearAuthTokens?: number } = {};
 
 beforeAll(async () => {
   await start();
   processRequest = mockedOnRequest.mock.calls[0][0] as ProcessRequest;
+  startupCallOrder = {
+    init: mockedActions.init.mock.invocationCallOrder[0],
+    clearAuthTokens: mockedActions.clearAuthTokensIfStartedLocked.mock.invocationCallOrder[0]
+  };
 });
 
 beforeEach(() => {
@@ -88,6 +97,13 @@ beforeEach(() => {
     recipientPubKey: 'dapp-public-key',
     req: { id: 'beacon-request-id' } as any,
     payload: null
+  });
+});
+
+describe('background start', () => {
+  it('clears auth tokens left from a locked start once init has run', () => {
+    expect(startupCallOrder.clearAuthTokens).toBeDefined();
+    expect(startupCallOrder.clearAuthTokens!).toBeGreaterThan(startupCallOrder.init!);
   });
 });
 

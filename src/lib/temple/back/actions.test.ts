@@ -17,6 +17,7 @@ import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 import { TempleAccount, TempleAccountType, TempleChainKind, TempleMessageType, TempleStatus } from '../types';
 
 import {
+  importAccount,
   registerNewWallet,
   removeAccount,
   removeAccountsByType,
@@ -29,7 +30,7 @@ import {
 import { IN_WALLET_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import { getAllDApps } from './dapp';
 import { intercom } from './defaults';
-import { inited, locked, store, unlocked } from './store';
+import { accountsUpdated, inited, locked, store, unlocked } from './store';
 import { Vault } from './vault';
 
 jest.mock(
@@ -216,6 +217,67 @@ describe('actions auth sequencing', () => {
     expect(fetchSettings).toHaveBeenCalledTimes(1);
     expect(store.getState().status).toBe(TempleStatus.Ready);
     expect(store.getState().accounts).toEqual([testAccount]);
+  });
+});
+
+describe('actions new account publication', () => {
+  const importedAccount: TempleAccount = {
+    id: 'account-imported',
+    type: TempleAccountType.Imported,
+    name: 'Imported',
+    publicKeyHash: 'mv1HmdN1hRxhJW1aeLpGJdvAuBY48z38JjVq',
+    chain: TempleChainKind.Tezos,
+    isKYC: undefined
+  };
+
+  let importAccountMock: jest.Mock;
+  let publishedAccounts: TempleAccount[][];
+  let unsubscribe: () => void;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    locked();
+    inited(true);
+    importAccountMock = jest.fn().mockResolvedValue([testAccount, importedAccount]);
+    const fetchAccounts = jest.fn().mockResolvedValue([testAccount]);
+    unlocked({
+      vault: { fetchAccounts, importAccount: importAccountMock } as any,
+      accounts: [testAccount],
+      settings: {}
+    });
+    publishedAccounts = [];
+    unsubscribe = accountsUpdated.watch(accounts => publishedAccounts.push(accounts));
+    mockedRequestAuthChallenge.mockResolvedValue({ nonce: 'nonce', challenge: 'challenge', expiresAt: '2030-01-01' });
+    mockedSignAuthChallengeWithVault.mockResolvedValue('signature');
+  });
+
+  afterEach(() => unsubscribe());
+
+  it('publishes an imported account only after it is signed in to the Wallet API', async () => {
+    const verifyDeferred = createDeferred<{ accessToken: string; refreshToken: string }>();
+    mockedVerifyAuthSignature.mockReturnValue(verifyDeferred.promise);
+
+    const importPromise = importAccount('chain-id', TempleChainKind.Tezos, 'edsk-key');
+    await flushPromises();
+
+    expect(mockedSetAuthWalletAddressesMapToStorage).toHaveBeenCalledTimes(1);
+    expect(mockedVerifyAuthSignature).toHaveBeenCalledWith(
+      expect.objectContaining({ walletAddress: importedAccount.publicKeyHash })
+    );
+    expect(publishedAccounts).toHaveLength(0);
+
+    verifyDeferred.resolve({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    await importPromise;
+
+    expect(publishedAccounts).toEqual([[testAccount, importedAccount]]);
+  });
+
+  it('still publishes the imported account when sign-in fails', async () => {
+    mockedRequestAuthChallenge.mockRejectedValue(new Error('offline'));
+
+    await expect(importAccount('chain-id', TempleChainKind.Tezos, 'edsk-key')).rejects.toThrow('offline');
+
+    expect(publishedAccounts).toEqual([[testAccount, importedAccount]]);
   });
 });
 
@@ -413,6 +475,31 @@ describe('in-wallet confirmation decision finalisation', () => {
 
     expect(outcome).toHaveBeenCalledTimes(1);
     expect(outcome).toHaveBeenCalledWith('resolved', { opHash: 'opHash' });
+  });
+
+  it('returns the applied fee of the whole group, reveal included', async () => {
+    const vaultSendOperations = jest.fn(() =>
+      Promise.resolve({
+        hash: 'opHash',
+        results: [
+          { kind: 'reveal', fee: '331' },
+          { kind: 'transaction', fee: '287' }
+        ]
+      })
+    );
+    unlockWithVault({ revealPublicKey: jest.fn(() => Promise.resolve('edpk')), sendOperations: vaultSendOperations });
+
+    const outcome = settleOutcome(
+      sendOperations(uiPort, confirmationId, testAccount.publicKeyHash, networkRpc, [
+        { kind: 'transaction', to: testAccount.publicKeyHash, amount: 1 }
+      ])
+    );
+    await flushMicrotasks();
+
+    await deliver(decisionReq);
+    await flushMicrotasks();
+
+    expect(outcome).toHaveBeenCalledWith('resolved', { opHash: 'opHash', feeMumav: '618' });
   });
 
   it('rejects a repeated operations decision for the same id while the first is in flight', async () => {

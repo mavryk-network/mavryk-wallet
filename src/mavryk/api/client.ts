@@ -31,6 +31,11 @@ export type MavrykApiRequestConfig = AxiosRequestConfig & {
   _authContext?: ResolvedMavrykAuthStorageContext;
   _retry?: boolean;
   skipAuthRefresh?: boolean;
+  /**
+   * Unauthenticated public read (Watch only routes) against the given API network. Skips auth-context
+   * resolution, never attaches or refreshes tokens, and never clears stored sessions on failure.
+   */
+  publicRead?: { networkId: string };
 };
 
 export const getMavrykApiBaseUrl = (networkId?: string | null) =>
@@ -75,6 +80,10 @@ const isAuthRefreshCandidate = (url?: string) => {
   return !pathname || !AUTH_PATHNAMES_WITHOUT_REFRESH.has(pathname);
 };
 
+/** Whether `/auth/refresh` itself answered with an auth rejection (as opposed to never being sent or failing). */
+const isRejectedRefreshError = (error: unknown) =>
+  axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403);
+
 const isMavrykApiRequestConfig = (config: unknown): config is MavrykApiRequestConfig =>
   Boolean(config && typeof config === 'object');
 
@@ -98,7 +107,12 @@ function getFreshStoredAuthTokens(
     return null;
   }
 
-  if (options.forceRefresh && (!options.staleAccessToken || tokens.accessToken === options.staleAccessToken)) {
+  // `null` means the rejected request carried no token (e.g. it started before sign-in finished): a token stored
+  // since then was never rejected and is used as is. `undefined` (no stale token given) always forces a refresh.
+  const isStoredTokenRejected =
+    options.staleAccessToken === undefined || tokens.accessToken === options.staleAccessToken;
+
+  if (options.forceRefresh && isStoredTokenRejected) {
     return null;
   }
 
@@ -190,6 +204,19 @@ function getAuthorizationAccessToken(headers: AxiosRequestConfig['headers']) {
 
 mavrykApi.interceptors.request.use(async rawConfig => {
   const config: MavrykApiRequestConfig = rawConfig;
+
+  if (config.publicRead) {
+    if (!config.baseURL || config.baseURL === mavrykApi.defaults.baseURL) {
+      config.baseURL = getMavrykApiBaseUrl(config.publicRead.networkId);
+    }
+    if (config.headers) {
+      delete (config.headers as Record<string, unknown>).Authorization;
+      delete (config.headers as Record<string, unknown>).authorization;
+    }
+
+    return rawConfig;
+  }
+
   const authContext = config._authContext ?? (await getCurrentAuthStorageContext());
   const { accessToken } = await getAuthTokensFromStorage(authContext);
   const instanceBaseUrl = mavrykApi.defaults.baseURL;
@@ -221,6 +248,7 @@ mavrykApi.interceptors.response.use(
       !requestConfig ||
       requestConfig._retry ||
       requestConfig.skipAuthRefresh ||
+      requestConfig.publicRead ||
       !isAuthRefreshCandidate(requestConfig.url)
     ) {
       return Promise.reject(error);
@@ -248,7 +276,11 @@ mavrykApi.interceptors.response.use(
 
       return mavrykApi.request(requestConfig);
     } catch (refreshError) {
-      await clearAuthTokensFromStorage(requestConfig._authContext);
+      // Only a refresh the server rejected proves the stored session is dead. A missing refresh token or a
+      // transport failure must not clear storage: sign-in may be saving fresh tokens for this wallet right now.
+      if (isRejectedRefreshError(refreshError)) {
+        await clearAuthTokensFromStorage(requestConfig._authContext);
+      }
 
       return Promise.reject(refreshError);
     }

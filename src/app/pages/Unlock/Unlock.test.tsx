@@ -13,7 +13,6 @@ const mockTrackSubmitFail = jest.fn();
 
 jest.mock('app/env', () => ({ useAppEnv: () => ({ popup: true }) }));
 jest.mock('lib/temple/front', () => ({ useTempleClient: () => ({ unlock: mockUnlock }) }));
-jest.mock('react-redux', () => ({ useDispatch: () => jest.fn() }));
 jest.mock('lib/analytics', () => ({
   useFormAnalytics: () => ({
     trackSubmit: jest.fn(),
@@ -28,9 +27,6 @@ jest.mock('lib/i18n', () => ({
 }));
 jest.mock('lib/utils', () => ({ delay: () => Promise.resolve() }));
 jest.mock('lib/woozie', () => ({ Link: ({ children }: React.PropsWithChildren<{}>) => children }));
-jest.mock('../../../lib/apis/temple', () => ({ ABTestGroup: { Unknown: 'Unknown', A: 'A' } }));
-jest.mock('../../store/ab-testing/actions', () => ({ getUserTestingGroupNameActions: { submit: jest.fn() } }));
-jest.mock('../../store/ab-testing/selectors', () => ({ useUserTestingGroupNameSelector: () => 'A' }));
 jest.mock('../../templates/PageWithImageBg/PageWithImageBg', () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren<{}>) => children

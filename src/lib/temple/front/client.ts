@@ -585,6 +585,31 @@ export const createFinalizeUnstakeOperation = ({ source, fee, gasLimit, storageL
   });
 };
 
+const APPLIED_FEES_CACHE_LIMIT = 20;
+const appliedFeesByOpHash = new Map<string, string>();
+
+const rememberAppliedFee = (opHash: string, feeMumav?: string) => {
+  if (feeMumav === undefined) return;
+  appliedFeesByOpHash.set(opHash, feeMumav);
+  if (appliedFeesByOpHash.size > APPLIED_FEES_CACHE_LIMIT) {
+    const oldest = appliedFeesByOpHash.keys().next().value;
+    if (oldest !== undefined) appliedFeesByOpHash.delete(oldest);
+  }
+};
+
+/**
+ * Returns, once, the fee the background applied to an operation this foreground sent in-wallet.
+ * The wallet provider interface only carries the hash, so the fee travels beside it.
+ *
+ * @param opHash hash of the injected operation group
+ * @returns the total applied fee in mumav (reveal included), or `undefined` when unknown
+ */
+export const takeAppliedOperationFeeMumav = (opHash: string): string | undefined => {
+  const feeMumav = appliedFeesByOpHash.get(opHash);
+  appliedFeesByOpHash.delete(opHash);
+  return feeMumav;
+};
+
 class TaquitoWallet implements WalletProvider {
   constructor(private pkh: string, private rpc: string, private opts: TaquitoWalletOps = {}) {}
 
@@ -645,6 +670,7 @@ class TaquitoWallet implements WalletProvider {
       opParams: opParams.map(formatOpParams)
     });
     assertResponse(res.type === TempleMessageType.OperationsResponse);
+    rememberAppliedFee(res.opHash, res.feeMumav);
     return res.opHash;
   }
 

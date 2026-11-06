@@ -16,6 +16,7 @@ import {
   loadChainId,
   resolveAuthWalletAddress
 } from 'lib/temple/helpers';
+import { sumOperationFeesMumav } from 'lib/temple/operation-fee.helpers';
 import {
   DerivationType,
   TempleState,
@@ -26,10 +27,12 @@ import {
   TempleChainKind,
   SaveLedgerAccountInput,
   TempleAccountType,
-  TempleAccount
+  TempleAccount,
+  TempleStatus
 } from 'lib/temple/types';
 import { createQueue, delay } from 'lib/utils';
 import {
+  clearStoredAuthTokens,
   getAuthTokensFromStorage,
   getSelectedNetworkIdFromStorage,
   isJwtExpiringSoon,
@@ -38,6 +41,7 @@ import {
   requestAuthChallenge,
   verifyAuthSignature
 } from 'mavryk/api';
+import { toSafeLogError } from 'mavryk/api/errors';
 import { setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 import { signAuthChallengeWithVault } from 'mavryk/api/utils';
 
@@ -166,6 +170,22 @@ const performAuthForAccount = async (
   await verifyAuthSignature({ nonce, signature, walletAddress: authWalletAddress, networkId });
 };
 
+/**
+ * Signs the newly added account in to the Wallet API before the foreground learns about it. The UI selects a new
+ * account as soon as it appears, so publishing first let its first history/asset requests run without a token.
+ * Accounts are published even when auth fails (e.g. offline); the auth error still reaches the caller.
+ */
+const publishNewAccountAfterAuth = async (vault: Vault, prevAccounts: TempleAccount[], accounts: TempleAccount[]) => {
+  await syncAuthWalletAddresses(accounts);
+  const newAccount = findNewAccount(prevAccounts, accounts);
+
+  try {
+    if (newAccount) await performAuthForAccount(vault, newAccount.publicKeyHash, accounts);
+  } finally {
+    accountsUpdated(accounts);
+  }
+};
+
 const ensureAuthorizedForAccount = async (
   vault: Vault,
   accountPkh?: string,
@@ -283,7 +303,7 @@ export function unlock(password: string) {
       try {
         await ensureAuthorizedForAccount(vault, selectedAccountPkh, networkId, accounts);
       } catch (error) {
-        console.error(error);
+        console.error(toSafeLogError(error));
       }
 
       // A lock landing during the auth calls logged out first, so the tokens the auth saved after it are cleared again
@@ -313,6 +333,20 @@ export async function unlockFromSession() {
   });
 }
 
+/**
+ * Clears every stored auth token when the background has started with the wallet locked.
+ * After a browser restart `storage.session` is wiped, so the vault comes back locked and `unlockFromSession`
+ * recovers nothing, while the long-lived refresh token would otherwise stay on disk until the next unlock.
+ * Local only: no revocation request at startup, and the next unlock authenticates again.
+ * Runs in the unlock queue so it never clears tokens written by an unlock that started meanwhile.
+ */
+export function clearAuthTokensIfStartedLocked() {
+  return enqueueUnlock(async () => {
+    if (store.getState().status === TempleStatus.Ready) return;
+    await clearStoredAuthTokens();
+  });
+}
+
 export function findFreeHDAccountIndex(walletId: string) {
   return withUnlocked(({ vault }) => vault.findFreeHDAccountIndex(walletId));
 }
@@ -328,11 +362,7 @@ export function createHDAccount(walletId: string, name?: string, hdIndex?: numbe
 
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.createHDAccount(walletId, name, hdIndex);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -393,11 +423,7 @@ export function importAccount(chainId: string, chain: TempleChainKind, privateKe
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importAccount(chain, chainId, privateKey, encPassword);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -405,11 +431,7 @@ export function importMnemonicAccount(mnemonic: string, chainId: string, passwor
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importMnemonicAccount(mnemonic, chainId, password, derivationPath);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -431,11 +453,7 @@ export function importWatchOnlyAccount(address: string, chain: TempleChainKind, 
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const updatedAccounts = await vault.importWatchOnlyAccount(chain, address, chainId, name);
-    await updateAccountsAndSyncAuth(updatedAccounts);
-    const newAccount = findNewAccount(prevAccounts, updatedAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, updatedAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, updatedAccounts);
   });
 }
 
@@ -490,11 +508,7 @@ export function createOrImportWallet(mnemonic?: string) {
   return withUnlocked(async ({ vault }) => {
     const prevAccounts = await vault.fetchAccounts();
     const { newAccounts } = await vault.createOrImportWallet(mnemonic);
-    await updateAccountsAndSyncAuth(newAccounts);
-    const newAccount = findNewAccount(prevAccounts, newAccounts);
-    if (newAccount) {
-      await performAuthForAccount(vault, newAccount.publicKeyHash, newAccounts);
-    }
+    await publishNewAccountAfterAuth(vault, prevAccounts, newAccounts);
   });
 }
 
@@ -523,13 +537,25 @@ export function removeDAppSession(origin: string) {
   return removeDApp(origin);
 }
 
+type SentOperationsResult = { opHash: string; feeMumav?: string };
+
+/**
+ * Builds the in-wallet send result from the injected batch.
+ * `feeMumav` is the fee actually applied (reveal included, after any Minimal/Fast change in the confirmation),
+ * so the success screen doesn't have to guess it. It is omitted when the batch has no preapplied contents.
+ */
+const toSentOperationsResult = (op: { hash: string; results?: ReadonlyArray<object> }): SentOperationsResult =>
+  op.results && op.results.length > 0
+    ? { opHash: op.hash, feeMumav: sumOperationFeesMumav(op.results).toFixed() }
+    : { opHash: op.hash };
+
 export function sendOperations(
   port: Runtime.Port,
   id: string,
   sourcePkh: string,
   networkRpc: string,
   opParams: any[]
-): Promise<{ opHash: string }> {
+): Promise<SentOperationsResult> {
   assertExtensionUiPortInfo(intercom.getPortInfo(port));
 
   return withUnlocked(async () => {
@@ -551,7 +577,7 @@ export function sendOperations(
 }
 
 const promisableUnlock = async (
-  resolve: (arg: { opHash: string }) => void,
+  resolve: (arg: SentOperationsResult) => void,
   reject: (err: Error) => void,
   port: Runtime.Port,
   id: string,
@@ -600,7 +626,7 @@ const promisableUnlock = async (
 
           await safeAddLocalOperation(networkRpc, op);
 
-          resolve({ opHash: op.hash });
+          resolve(toSentOperationsResult(op));
         } catch (err: any) {
           if (err instanceof MavrykOperationError) {
             reject(err);

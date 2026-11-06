@@ -136,6 +136,23 @@ export async function getAuthStorageContextForAccount(
   return getCurrentAuthStorageContext({ walletAddress: authWalletByAccount?.[accountAddress] ?? accountAddress });
 }
 
+export type WalletReadAccess =
+  | { kind: 'authenticated'; authContext: ResolvedMavrykAuthStorageContext }
+  | { kind: 'public'; networkId: string };
+
+/**
+ * How a wallet-scoped read of `accountAddress` reaches the Wallet API on the selected network. `/wallets/{address}/*`
+ * is served only to that address's own session, so an account mapped to another auth wallet (Watch only, Managed
+ * KT: it cannot sign in) reads through the public Watch only routes instead of borrowing that wallet's token.
+ */
+export async function getWalletReadAccessForAccount(accountAddress: string): Promise<WalletReadAccess> {
+  const authContext = await getAuthStorageContextForAccount(accountAddress);
+
+  return authContext.walletAddress === accountAddress
+    ? { kind: 'authenticated', authContext }
+    : { kind: 'public', networkId: authContext.networkId };
+}
+
 /**
  * Persists the lookup from account address to auth wallet address.
  */
@@ -205,6 +222,28 @@ export async function getAuthTokensFromStorage(context: MavrykAuthStorageContext
   await removeAuthTokensFromStorage(LEGACY_AUTH_TOKEN_STORAGE_KEYS);
 
   return { accessToken: legacyAccessToken, refreshToken: legacyRefreshToken };
+}
+
+const STORED_ACCESS_TOKEN_POLL_INTERVAL_MS = 250;
+
+/**
+ * Resolves with the access token stored for `context` once one is there (saved by a sign-in still running in the
+ * background), or null after `timeoutMs`. Polls instead of listening to `storage.onChanged`, which doesn't reliably
+ * reach every extension page for `storage.session` writes.
+ */
+export async function waitForStoredAccessToken(
+  context: ResolvedMavrykAuthStorageContext,
+  timeoutMs: number
+): Promise<string | null> {
+  const deadline = Date.now() + timeoutMs;
+
+  for (;;) {
+    const { accessToken } = await getAuthTokensFromStorage(context);
+    if (accessToken) return accessToken;
+    if (Date.now() >= deadline) return null;
+
+    await new Promise(resolve => setTimeout(resolve, STORED_ACCESS_TOKEN_POLL_INTERVAL_MS));
+  }
 }
 
 export async function setAuthTokensToStorage(tokens: MavrykAuthTokens, context: MavrykAuthStorageContext = {}) {

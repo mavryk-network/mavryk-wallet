@@ -6,8 +6,9 @@ import { toTokenSlug } from 'lib/assets';
 import type { FetchedMetadataRecord } from 'lib/metadata/fetch';
 import { tokensToAtoms } from 'lib/temple/helpers';
 
-import { mavrykApi, type MavrykApiRequestConfig } from './client';
-import { getAuthStorageContextForAccount, getWalletAddressFromStorage } from './storage';
+import { mavrykApi } from './client';
+import { getWalletAddressFromStorage } from './storage';
+import { getWalletReadRequest } from './wallet-read';
 
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
 
@@ -113,9 +114,8 @@ const toShouldPreferSymbol = (value: unknown) => {
 export async function fetchWalletRwaAssets(params: { walletAddress?: string } = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
-  const { data } = await mavrykApi.get<WalletRwaAsset[]>(`/wallets/${address}/assets`, {
-    _authContext: await getAuthStorageContextForAccount(address)
-  } as MavrykApiRequestConfig);
+  const { url, config } = await getWalletReadRequest(address, 'assets');
+  const { data } = await mavrykApi.get<WalletRwaAsset[]>(url, config);
 
   return parseWalletRwaAssets(data);
 }

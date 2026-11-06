@@ -9,7 +9,8 @@ import { fetchWalletRwaAssets } from './rwas';
 import {
   getAuthTokensFromStorage,
   MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY,
-  setAuthTokensToStorage
+  setAuthTokensToStorage,
+  waitForStoredAccessToken
 } from './storage';
 import { fetchWalletTokens } from './tokens';
 
@@ -297,14 +298,34 @@ describe('wallet-scoped reads after an account switch', () => {
     expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
   });
 
-  it('uses the auth wallet linked to the requested account', async () => {
-    await browser.storage.local.set({ [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: { [WATCH_ONLY]: NEXT } });
+  it.each([
+    ['RWA assets', 'assets', () => fetchWalletRwaAssets({ walletAddress: WATCH_ONLY })],
+    ['tokens', 'tokens', () => fetchWalletTokens({ walletAddress: WATCH_ONLY })]
+  ])(
+    'reads %s of an account that signs in as another wallet through the public Watch only route',
+    async (_name, resource, read) => {
+      // Watch only accounts map to a signable wallet; that wallet's session is answered 403 "not linked".
+      await browser.storage.local.set({ [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: { [WATCH_ONLY]: NEXT } });
+      const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, []));
+      mavrykApi.defaults.adapter = adapter;
+
+      await read();
+
+      const [config] = adapter.mock.calls[0];
+      expect(config.url).toBe(`/watch-only/wallets/${WATCH_ONLY}/${resource}`);
+      expect(config.baseURL).toBe('https://wallet.mavryk.network/api/v1');
+      expect(authorizationOf(config)).toBeUndefined();
+    }
+  );
+
+  it('authenticates an account mapped to itself (HD sub-accounts included) with its own session', async () => {
+    await browser.storage.local.set({ [MAVRYK_API_AUTH_WALLET_BY_ACCOUNT_STORAGE_KEY]: { [NEXT]: NEXT } });
     const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, []));
     mavrykApi.defaults.adapter = adapter;
 
-    await fetchWalletRwaAssets({ walletAddress: WATCH_ONLY });
+    await fetchWalletRwaAssets({ walletAddress: NEXT });
 
-    expect(adapter.mock.calls[0][0].url).toBe(`/wallets/${WATCH_ONLY}/assets`);
+    expect(adapter.mock.calls[0][0].url).toBe(`/wallets/${NEXT}/assets`);
     expect(authorizationOf(adapter.mock.calls[0][0])).toBe('Bearer next-token');
   });
 });
@@ -333,6 +354,35 @@ describe('auth recovery while sign-in is in progress', () => {
     ).resolves.toMatchObject({ data: { ok: true } });
 
     expect(adapter.mock.calls.filter(([config]) => config.url === '/auth/refresh')).toHaveLength(0);
+  });
+
+  it('waits for a sign-in that finishes after a token-less read was rejected, then retries once', async () => {
+    const signedInToken = buildJwt(Date.now() + 10 * 60_000);
+    let isSignInStarted = false;
+    const adapter = jest.fn(async (config: AxiosRequestConfig) => {
+      if (authorizationOf(config) === `Bearer ${signedInToken}`) return createResponse(config, { ok: true });
+      // First visit to a network: no token and no refresh token yet; the background sign-in lands later.
+      if (!isSignInStarted) {
+        isSignInStarted = true;
+        setTimeout(
+          () => void setAuthTokensToStorage({ accessToken: signedInToken, refreshToken: 'refresh-token' }, authContext),
+          300
+        );
+      }
+      throw createAxiosError(config, 401, { error: 'Authorization header required' });
+    });
+    mavrykApi.defaults.adapter = adapter;
+
+    await expect(
+      mavrykApi.get('/wallets/data', { _authContext: authContext } as MavrykApiRequestConfig)
+    ).resolves.toMatchObject({ data: { ok: true } });
+
+    expect(adapter.mock.calls.filter(([config]) => config.url === '/wallets/data')).toHaveLength(2);
+    expect(adapter.mock.calls.filter(([config]) => config.url === '/auth/refresh')).toHaveLength(0);
+  });
+
+  it('gives up waiting for a sign-in that never stores a token', async () => {
+    await expect(waitForStoredAccessToken(authContext, 300)).resolves.toBeNull();
   });
 
   it('keeps stored tokens when the refresh cannot be attempted', async () => {

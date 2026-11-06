@@ -10,6 +10,7 @@ import {
   getAuthTokensFromStorage,
   getCurrentAuthStorageContext,
   setAuthTokensToStorage,
+  waitForStoredAccessToken,
   DEFAULT_NETWORK_ID,
   type MavrykAuthStorageContext,
   type ResolvedMavrykAuthStorageContext
@@ -27,6 +28,8 @@ const AUTH_PATHNAMES_WITHOUT_REFRESH = new Set<string>(
   }, [])
 );
 const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
+/** How long a token-less read that raced the first sign-in waits for it (challenge + signature + verify). */
+const PENDING_SIGN_IN_WAIT_TIMEOUT_MS = 10_000;
 export type MavrykApiRequestConfig = AxiosRequestConfig & {
   _authContext?: ResolvedMavrykAuthStorageContext;
   _retry?: boolean;
@@ -261,12 +264,13 @@ mavrykApi.interceptors.response.use(
     }
 
     requestConfig._retry = true;
+    const staleAccessToken = getAuthorizationAccessToken(requestConfig.headers);
 
     try {
       const { accessToken } = await refreshStoredAuthTokensOrThrow({
         context: requestConfig._authContext,
         forceRefresh: true,
-        staleAccessToken: getAuthorizationAccessToken(requestConfig.headers)
+        staleAccessToken
       });
 
       requestConfig.headers = {
@@ -280,6 +284,27 @@ mavrykApi.interceptors.response.use(
       // transport failure must not clear storage: sign-in may be saving fresh tokens for this wallet right now.
       if (isRejectedRefreshError(refreshError)) {
         await clearAuthTokensFromStorage(requestConfig._authContext);
+
+        return Promise.reject(refreshError);
+      }
+
+      // A read sent before this wallet/network's first sign-in finished carries no token, and there is no refresh
+      // token to recover with yet (first visit to a network, or a just-selected account). Wait for the background
+      // sign-in to store one and retry once instead of failing the read; `_retry` keeps it to a single retry.
+      if (staleAccessToken === null && requestConfig._authContext) {
+        const signedInAccessToken = await waitForStoredAccessToken(
+          requestConfig._authContext,
+          PENDING_SIGN_IN_WAIT_TIMEOUT_MS
+        );
+
+        if (signedInAccessToken) {
+          requestConfig.headers = {
+            ...requestConfig.headers,
+            Authorization: `Bearer ${signedInAccessToken}`
+          };
+
+          return mavrykApi.request(requestConfig);
+        }
       }
 
       return Promise.reject(refreshError);

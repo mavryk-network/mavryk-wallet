@@ -1,4 +1,10 @@
-export { IntercomClient } from './client';
+export {
+  DEFAULT_INTERCOM_REQUEST_TIMEOUT_MS,
+  IntercomClient,
+  IntercomDisconnectedError,
+  IntercomTimeoutError
+} from './client';
+export type { IntercomRequestOptions } from './client';
 export {
   IntercomServer,
   IntercomPortKind,

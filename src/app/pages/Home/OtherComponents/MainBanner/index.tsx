@@ -11,7 +11,7 @@ import { useFiatCurrency } from 'lib/fiat-currency';
 import { HomeSelectors } from '../../Home.selectors';
 
 import styles from './MainBanner.module.css';
-import { useTotalBalance } from './use-total-balance';
+import { useLoadedTotalBalanceWithStaking } from './use-total-balance';
 
 interface Props {
   assetSlug?: string | null;
@@ -49,7 +49,7 @@ const TotalVolumeBanner: FC<TotalVolumeBannerProps> = ({ accountPkh }) => {
 };
 
 const BalanceInfo: FC = () => {
-  const totalBalanceInFiat = useTotalBalance(true);
+  const totalBalanceInFiat = useLoadedTotalBalanceWithStaking();
 
   const {
     selectedFiatCurrency: { symbol: fiatSymbol }
@@ -57,9 +57,16 @@ const BalanceInfo: FC = () => {
 
   return (
     <div className="flex flex-col justify-between items-start">
-      <div className="flex items-center text-3xl-plus">
-        <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
-      </div>
+      {totalBalanceInFiat === undefined ? (
+        // Keeps the line height while staking stats load.
+        <div className="flex items-center text-3xl-plus invisible" aria-hidden>
+          ≈
+        </div>
+      ) : (
+        <div className="flex items-center text-3xl-plus">
+          <BalanceFiat volume={totalBalanceInFiat} currency={fiatSymbol} />
+        </div>
+      )}
     </div>
   );
 };

@@ -5,16 +5,11 @@
 
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { chunk } from 'lodash';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { forkJoin, from, map, of, switchMap } from 'rxjs';
 
 import { fromFa2TokenSlug } from 'lib/assets/utils';
 
-import { apolloObjktClient, MAX_OBJKT_QUERY_RESPONSE_ITEMS, OBJKT_CONTRACT } from './constants';
-import {
-  buildGetCollectibleExtraQuery,
-  buildGetCollectiblesQuery,
-  buildGetGalleriesAttributesCountsQuery
-} from './queries';
+import { MAX_OBJKT_QUERY_RESPONSE_ITEMS, OBJKT_CONTRACT } from './constants';
 import type {
   FxHashContractInterface,
   UserObjktCollectible,
@@ -25,6 +20,9 @@ import type {
 
 export type { UserObjktCollectible, ObjktGalleryAttributeCount } from './types';
 export { objktCurrencies } from './constants';
+
+/** Apollo client and GraphQL queries (~230 KB) load on the first objkt request, not with the page bundle. */
+const loadObjktClient = () => import('./client');
 
 export const fetchObjktCollectibles$ = (slugs: string[]) =>
   forkJoin(
@@ -56,15 +54,19 @@ export const fetchObjktCollectibles$ = (slugs: string[]) =>
   );
 
 const fetchObjktCollectiblesChunk$ = (slugs: string[]) =>
-  apolloObjktClient.fetch$<{ token: UserObjktCollectible[] }>(buildGetCollectiblesQuery(), {
-    where: {
-      _or: slugs.map(slug => {
-        const { contract, id } = fromFa2TokenSlug(slug);
+  from(loadObjktClient()).pipe(
+    switchMap(({ apolloObjktClient, buildGetCollectiblesQuery }) =>
+      apolloObjktClient.fetch$<{ token: UserObjktCollectible[] }>(buildGetCollectiblesQuery(), {
+        where: {
+          _or: slugs.map(slug => {
+            const { contract, id } = fromFa2TokenSlug(slug);
 
-        return { fa_contract: { _eq: contract }, token_id: { _eq: String(id) } };
+            return { fa_contract: { _eq: contract }, token_id: { _eq: String(id) } };
+          })
+        }
       })
-    }
-  });
+    )
+  );
 
 interface GetAttribute {
   id: number;
@@ -85,23 +87,29 @@ const fetchObjktGalleriesAttributesCounts$ = (attributes: GetAttribute[]) =>
     : of([]);
 
 const fetchObjktGalleriesAttributesCountsChunk$ = (attributes: GetAttribute[]) =>
-  apolloObjktClient.fetch$<{ gallery_attribute_count: ObjktGalleryAttributeCount[] }>(
-    buildGetGalleriesAttributesCountsQuery(),
-    {
-      where: {
-        _or: attributes.map(({ id, galleryPk }) => ({
-          attribute_id: { _eq: id },
-          gallery_pk: { _eq: galleryPk }
-        }))
-      }
-    }
+  from(loadObjktClient()).pipe(
+    switchMap(({ apolloObjktClient, buildGetGalleriesAttributesCountsQuery }) =>
+      apolloObjktClient.fetch$<{ gallery_attribute_count: ObjktGalleryAttributeCount[] }>(
+        buildGetGalleriesAttributesCountsQuery(),
+        {
+          where: {
+            _or: attributes.map(({ id, galleryPk }) => ({
+              attribute_id: { _eq: id },
+              gallery_pk: { _eq: galleryPk }
+            }))
+          }
+        }
+      )
+    )
   );
 
 export const fetchCollectibleExtraDetails = (contract: string, id: string) =>
-  apolloObjktClient
-    .fetch<{ token: [ObjktCollectibleExtra] | [] }>(buildGetCollectibleExtraQuery(), {
-      where: { fa_contract: { _eq: contract }, token_id: { _eq: id } }
-    })
+  loadObjktClient()
+    .then(({ apolloObjktClient, buildGetCollectibleExtraQuery }) =>
+      apolloObjktClient.fetch<{ token: [ObjktCollectibleExtra] | [] }>(buildGetCollectibleExtraQuery(), {
+        where: { fa_contract: { _eq: contract }, token_id: { _eq: id } }
+      })
+    )
     .then(data => data?.token[0] ?? null);
 
 export const getObjktMarketplaceContract = (tezos: MavrykToolkit, address?: string) =>

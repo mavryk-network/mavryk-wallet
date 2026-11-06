@@ -1,17 +1,20 @@
+import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
 import { AnalyticsEventCategory } from 'lib/temple/analytics-types';
 import { assertResponse, request } from 'lib/temple/front/client';
 import { TempleMessageType } from 'lib/temple/types';
 
 export const sendTrackEvent = async (
-  userId: string,
+  _userId: string,
   rpc: string | undefined,
   event: string,
   category: AnalyticsEventCategory = AnalyticsEventCategory.General,
   properties?: object
 ) => {
+  const { ui } = getOwnedUISnapshot();
+  if (!ui.legacyMigrated || !ui.isAnalyticsEnabled || !ui.userId) return;
   const res = await request({
     type: TempleMessageType.SendTrackEventRequest,
-    userId,
+    userId: ui.userId,
     rpc,
     event,
     category,
@@ -21,15 +24,17 @@ export const sendTrackEvent = async (
 };
 
 export const sendPageEvent = async (
-  userId: string,
+  _userId: string,
   rpc: string | undefined,
   path: string,
   search: string,
   additionalProperties = {}
 ) => {
+  const { ui } = getOwnedUISnapshot();
+  if (!ui.legacyMigrated || !ui.isAnalyticsEnabled || !ui.userId) return;
   const res = await request({
     type: TempleMessageType.SendPageEventRequest,
-    userId,
+    userId: ui.userId,
     rpc,
     path,
     search,

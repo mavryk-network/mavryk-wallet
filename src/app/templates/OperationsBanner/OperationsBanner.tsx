@@ -63,7 +63,8 @@ const OperationsBanner = memo<OperationsBannerProps>(
             {...setTestID(OperationsBannerSelectors.errorValue)}
           >
             {typeof opParams === 'string' ? (
-              <div className={classNames('p-1', 'text-base-plus text-white whitespace-pre-line')}>{opParams}</div>
+              // Right padding keeps the signed text clear of the absolutely positioned copy button (and its "Copied" label).
+              <div className={classNames('p-1 pr-12', 'text-base-plus text-white whitespace-pre-line')}>{opParams}</div>
             ) : (
               <ReactJson
                 src={opParams}

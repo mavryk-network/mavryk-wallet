@@ -9,6 +9,7 @@ import { setAnotherSelector } from 'lib/analytics';
 import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
@@ -19,6 +20,9 @@ import { upgradeBalanceWithStakingBalance } from '../../MainBanner/use-total-bal
 import styles from '../Tokens.module.css';
 
 import { CryptoBalance, FiatBalance } from './Balance';
+
+// Row height: 44px icon + py-3.
+const ROW_PLACEHOLDER_STYLE = { minHeight: 68 };
 
 interface Props {
   onClick: (assetSlug: string) => void;
@@ -31,8 +35,10 @@ interface Props {
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
-  const { data: accStats } = useDelegate(publicKeyHash);
+  // Non-suspending: delegate/staking figures belong to the MAV row only, which shows a placeholder until they load.
+  const { data: accStats } = useDelegate(publicKeyHash, false);
   const myBakerPkh = accStats?.delegate?.address ?? null;
+  useLoadPerfMark('token-row-painted', metadata != null);
 
   const { delegatedBalance, stakedBalance } = useMemo(() => {
     const stakedBalance = accStats?.stakedBalance ?? ZERO;
@@ -99,6 +105,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   }, [accStats, balance, isMavToken]);
 
   if (metadata == null) return null;
+  if (isMavToken && accStats === undefined) return <div style={ROW_PLACEHOLDER_STYLE} />;
 
   return (
     <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>

@@ -9,10 +9,12 @@ import { useAllNetworks } from 'lib/temple/front';
 
 type NetworkBannerProps = {
   rpc: string;
+  /** Chain id reported by an unknown RPC, shown so the user sees which chain it claims to serve */
+  chainId?: string;
   narrow?: boolean;
 };
 
-const NetworkBanner: FC<NetworkBannerProps> = ({ rpc, narrow = false }) => {
+const NetworkBanner: FC<NetworkBannerProps> = ({ rpc, chainId, narrow = false }) => {
   const allNetworks = useAllNetworks();
   const knownNetwork = useMemo(() => allNetworks.find(n => n.rpcBaseURL === rpc), [allNetworks, rpc]);
 
@@ -54,6 +56,16 @@ const NetworkBanner: FC<NetworkBannerProps> = ({ rpc, narrow = false }) => {
             <Name className="text-xs font-mono italic text-gray-900" style={{ maxWidth: '15rem' }}>
               {rpc}
             </Name>
+          </div>
+        )}
+
+        {!knownNetwork && chainId && (
+          <div className="w-full mb-1 flex items-center text-xs">
+            <span className="flex-shrink-0 mr-2 font-medium uppercase text-primary-error">
+              <T id="unknownNetworkChainId" />
+            </span>
+
+            <span className="font-mono text-gray-900">{chainId}</span>
           </div>
         )}
       </h2>

@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 
-import { TempleAccountType, TempleStatus } from '../types';
+import { TempleAccountType, TempleChainKind, TempleStatus } from '../types';
 
 import { accountsUpdated, inited as initEvent, locked, settingsUpdated, store, unlocked } from './store';
 import { Vault } from './vault';
@@ -46,6 +46,8 @@ describe('Store tests', () => {
     accountsUpdated([
       {
         name: 'testName',
+        id: 'test-account',
+        chain: TempleChainKind.Tezos,
         type: TempleAccountType.Imported,
         publicKeyHash: 'testHashKey',
         isKYC: false

@@ -128,6 +128,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const { data: resolvedAddress } = useTezosAddressByDomainName(toValue);
 
   const toFieldRef = useRef<HTMLTextAreaElement>(null);
+  const myBakerPkhAtSubmitRef = useRef<string | null>(null);
 
   const toFilled = useMemo(
     () => (resolvedAddress ? toFilledWithDomain : toFilledWithAddress),
@@ -180,6 +181,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
     []
   );
 
+  // Syncs the stake toolbar action with this route; cleanup removes route-scoped toolbar content on exit.
   useEffect(() => {
     if (isStakeScreenWithBakersList) {
       setToolbarRightSidedComponent(AllValidatorsComponent);
@@ -272,8 +274,9 @@ const DelegateForm: FC<DelegateFormProps> = ({
   const [submitError, setSubmitError] = useSafeState<ReactNode>(null, `${tezos.checksum}_${toResolved}`);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
 
+  // Navigates once a delegation operation resolves; no cleanup is needed for this one-shot navigation side effect.
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
       // navigate to success screen
       const hash = operation.hash || operation.opHash;
 
@@ -281,7 +284,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         hash,
         assetSlug: MAV_TOKEN_SLUG,
         amount: atomsToTokens(balanceNum ?? 0, MAVEN_METADATA.decimals).toNumber(),
-        oldValidatorAddress: myBakerPkh,
+        oldValidatorAddress: myBakerPkhAtSubmitRef.current,
         validatorAddress: operation.to
       };
 
@@ -309,7 +312,7 @@ const DelegateForm: FC<DelegateFormProps> = ({
         });
       }
     }
-  }, [balanceNum, isReDelegationActive, myBakerPkh, operation, unfamiliarWithDelegation, toResolved]);
+  }, [balanceNum, isReDelegationActive, operation, unfamiliarWithDelegation, toResolved]);
 
   // useEffect(() => {
   //   navigate<SuccessStateType>('/success', undefined, {
@@ -336,6 +339,8 @@ const DelegateForm: FC<DelegateFormProps> = ({
       setSubmitError(null);
       setOperation(null);
 
+      myBakerPkhAtSubmitRef.current = myBakerPkh;
+
       const analyticsProperties = { bakerAddress: to };
 
       formAnalytics.trackSubmit(analyticsProperties);
@@ -344,7 +349,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
         const addFee = tzToMumav(feeVal ?? 0);
         const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
         let op: WalletOperation | TransactionOperation;
-        let opHash = '';
         if (acc.type === TempleAccountType.ManagedKT) {
           const contract = await loadContract(tezos, acc.publicKeyHash);
           op = await contract.methods.do(setDelegate(to)).send({ amount: 0 });
@@ -356,8 +360,6 @@ const DelegateForm: FC<DelegateFormProps> = ({
               fee
             } as any)
             .send();
-
-          opHash = op.opHash;
         }
 
         // create pending delegate operation

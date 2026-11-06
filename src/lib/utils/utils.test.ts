@@ -45,6 +45,17 @@ describe('Queue', () => {
 
     expect(result).toStrictEqual([1, 2, 3, 4]);
   });
+
+  it('rejects a synchronously throwing factory and keeps serving later tasks', async () => {
+    const enqueue = createQueue();
+
+    await expect(
+      enqueue(() => {
+        throw new Error('boom');
+      })
+    ).rejects.toThrow('boom');
+    await expect(enqueue(async () => 42)).resolves.toBe(42);
+  });
 });
 
 describe('fifoResolve', () => {

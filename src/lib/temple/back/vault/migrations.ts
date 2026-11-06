@@ -32,7 +32,10 @@ import {
   encryptAndSaveManyLegacy,
   fetchAndDecryptOne,
   fetchAndDecryptOneLegacy,
+  getPlain,
   getPlainLegacy,
+  isStored,
+  removeMany,
   removeManyLegacy
 } from './safe-storage';
 import {
@@ -257,6 +260,19 @@ export const MIGRATIONS = [
 
     if (migratedSettings !== settings) {
       await encryptAndSaveMany([[settingsStrgKey, migratedSettings]], passKey);
+    }
+  },
+
+  // [9] Remove the pre-EVM seed entry. Migration 5 copies it into a wallet seed entry, so once wallets exist
+  // the legacy copy is either redundant or the leftover seed of a removed HD wallet.
+  // It is kept unless every listed wallet has its own seed entry, since migration 5 writes the specs before the
+  // wallet seed and a failed run can leave the legacy entry as the only copy.
+  async () => {
+    const walletIds = Object.keys((await getPlain<StringRecord<WalletSpecs>>(WALLETS_SPECS_STORAGE_KEY)) ?? {});
+    const walletSeedsStored = await Promise.all(walletIds.map(id => isStored(walletMnemonicStrgKey(id))));
+
+    if (walletIds.length > 0 && walletSeedsStored.every(Boolean)) {
+      await removeMany([mnemonicStrgKey]);
     }
   }
 ];

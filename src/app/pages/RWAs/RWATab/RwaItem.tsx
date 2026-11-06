@@ -4,11 +4,11 @@ import clsx from 'clsx';
 
 import { Divider, Money } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { useAllRwasDetailsLoadingSelector, useRwaDetailsSelector } from 'app/store/rwas/selectors';
 import { useRwaMetadataSelector } from 'app/store/rwas-metadata/selectors';
 import InFiat from 'app/templates/InFiat';
 import { isTzbtcAsset } from 'lib/assets';
 import { useBalance } from 'lib/balances';
+import { useAreRwaDetailsLoading, useRwaDetails } from 'lib/rwas/use-rwas-details.query';
 import { ZERO } from 'lib/utils/numbers';
 import { Link } from 'lib/woozie';
 
@@ -27,8 +27,8 @@ export const RwaItem = memo<Props>(({ assetSlug, accountPkh }) => {
   const { value: balance = ZERO } = useBalance(assetSlug, accountPkh);
   const toDisplayRef = useRef<HTMLDivElement>(null);
 
-  const areDetailsLoading = useAllRwasDetailsLoadingSelector();
-  const details = useRwaDetailsSelector(assetSlug);
+  const areDetailsLoading = useAreRwaDetailsLoading();
+  const details = useRwaDetails(assetSlug);
 
   const isTzBTC = isTzbtcAsset(assetSlug);
 

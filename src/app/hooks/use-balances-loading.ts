@@ -1,11 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 
-import { isDefined } from '@rnw-community/shared';
-import { noop } from 'lodash';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { loadGasBalanceActions, loadAssetsBalancesActions, putTokensBalancesAction } from 'app/store/balances/actions';
-import { useBalancesErrorSelector, useBalancesLoadingSelector } from 'app/store/balances/selectors';
 import { fixBalances } from 'app/store/balances/utils';
 import {
   TzktSubscriptionChannel,
@@ -13,175 +9,98 @@ import {
   TzktSubscriptionStateMessageType,
   TzktAccountsSubscriptionMessage,
   TzktTokenBalancesSubscriptionMessage,
-  TzktAccountType,
   isKnownChainId,
   calcTzktAccountSpendableTezBalance
 } from 'lib/apis/tzkt';
-import { toTokenSlug } from 'lib/assets';
-import { useAccount, useChainId, useOnBlock, useTzktConnection } from 'lib/temple/front';
-import { useDidUpdate } from 'lib/ui/hooks';
+import { MAV_TOKEN_SLUG, toTokenSlug } from 'lib/assets';
+import { refreshBalances } from 'lib/balances/balance-query';
+import { syncBalances } from 'lib/balances/sync-balances';
+import { useBalancesQuery } from 'lib/balances/use-balances-query';
+import { useLoadPerfSettledMark } from 'lib/load-perf';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
+import { balancesKeys } from 'lib/query-keys';
+import { BALANCE_RECORD_SCHEMA } from 'lib/store/zustand/balances-state.schema';
+import { parseData } from 'lib/store/zustand/validation';
+import { useTzktConnection } from 'lib/temple/front';
 
+/** One mounted driver owns account subscriptions; block/confirmation refresh uses the shared Query client. */
 export const useBalancesLoading = () => {
-  const chainId = useChainId(true)!;
-  const { publicKeyHash } = useAccount();
-
-  const isLoading = useBalancesLoadingSelector(publicKeyHash, chainId);
-  const isLoadingRef = useRef(false);
-
-  useDidUpdate(() => {
-    // Persisted `isLoading` value might be `true`.
-    // Using initial `false` & only updating on further changes.
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  const storedError = useBalancesErrorSelector(publicKeyHash, chainId);
-  const isStoredError = isDefined(storedError);
-
+  const scope = useMetadataScope();
+  const client = useQueryClient();
+  const { isLoading, error } = useBalancesQuery(scope.account);
+  useLoadPerfSettledMark('balances-fresh', isLoading, !!error);
   const { connection, connectionReady } = useTzktConnection();
-  const [tokensSubscriptionConfirmed, setTokensSubscriptionConfirmed] = useState(false);
-  const [accountsSubscriptionConfirmed, setAccountsSubscriptionConfirmed] = useState(false);
 
-  const dispatch = useDispatch();
-
-  const tokenBalancesListener = useCallback(
-    (msg: TzktTokenBalancesSubscriptionMessage) => {
-      const skipDispatch = isLoadingRef.current || !isKnownChainId(chainId);
-
-      switch (msg.type) {
-        case TzktSubscriptionStateMessageType.Reorg:
-          if (skipDispatch) return;
-          dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
-          break;
-        case TzktSubscriptionStateMessageType.Data:
-          if (skipDispatch) return;
-          const balances: StringRecord = {};
-          msg.data.forEach(({ account, token, balance }) => {
-            if (account.address !== publicKeyHash) return;
-
-            balances[toTokenSlug(token.contract.address, token.tokenId)] = balance;
+  // Attach scoped socket listeners; abort queued publications and remove both listeners on disconnect/scope change.
+  useEffect(() => {
+    if (!connection || !connectionReady || !isKnownChainId(scope.chainId)) return;
+    const controller = new AbortController();
+    let queue = Promise.resolve();
+    const enqueue = (
+      category: 'native' | 'tokens',
+      level: number,
+      isReorg: boolean,
+      load: () => Record<string, string>
+    ) => {
+      queue = queue
+        .then(async () => {
+          if (controller.signal.aborted) return;
+          await client.fetchQuery({
+            queryKey: balancesKeys.request(scope, `subscription-${category}`),
+            queryFn: () => syncBalances(scope, async () => load(), controller.signal, { category, level, isReorg }),
+            staleTime: 0,
+            cacheTime: 5 * 60_000,
+            retry: false
           });
-          fixBalances(balances);
-          if (Object.keys(balances).length > 0) {
-            dispatch(putTokensBalancesAction({ publicKeyHash, chainId, balances }));
-          }
-          break;
-        default:
-          setTokensSubscriptionConfirmed(true);
+          if (isReorg) void refreshBalances(client, scope, category);
+        })
+        .catch(() => {
+          // Query retains the error; block fallback remains active and cached owner balances survive.
+          if (!controller.signal.aborted) void refreshBalances(client, scope, category);
+        });
+    };
+    const tokens = (msg: TzktTokenBalancesSubscriptionMessage) => {
+      if (msg.type === TzktSubscriptionStateMessageType.Subscribed) {
+        void refreshBalances(client, scope, 'tokens');
+        return;
       }
-    },
-    [publicKeyHash, chainId, isLoadingRef, dispatch]
-  );
-
-  const accountsListener = useCallback(
-    (msg: TzktAccountsSubscriptionMessage) => {
-      const skipDispatch = isLoadingRef.current || !isKnownChainId(chainId);
-
-      switch (msg.type) {
-        case TzktSubscriptionStateMessageType.Reorg:
-          if (skipDispatch) return;
-          dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
-          break;
-        case TzktSubscriptionStateMessageType.Data:
-          if (skipDispatch) return;
-          const matchingAccount = msg.data.find(acc => acc.address === publicKeyHash);
-          if (
-            matchingAccount?.type === TzktAccountType.Contract ||
-            matchingAccount?.type === TzktAccountType.Delegate ||
-            matchingAccount?.type === TzktAccountType.User
-          ) {
-            const balance = calcTzktAccountSpendableTezBalance(matchingAccount);
-
-            dispatch(
-              loadGasBalanceActions.success({
-                publicKeyHash,
-                chainId,
-                balance
-              })
-            );
-          } else if (matchingAccount) {
-            dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
+      enqueue('tokens', msg.state, msg.type === TzktSubscriptionStateMessageType.Reorg, () => {
+        const records: Record<string, string> = {};
+        if (msg.type === TzktSubscriptionStateMessageType.Data) {
+          for (const { account, token, balance } of msg.data) {
+            if (account.address === scope.account)
+              records[toTokenSlug(token.contract.address, token.tokenId)] = balance;
           }
-          break;
-        default:
-          setAccountsSubscriptionConfirmed(true);
+        }
+        return fixBalances(parseData(BALANCE_RECORD_SCHEMA, records));
+      });
+    };
+    const accounts = (msg: TzktAccountsSubscriptionMessage) => {
+      if (msg.type === TzktSubscriptionStateMessageType.Subscribed) {
+        void refreshBalances(client, scope, 'native');
+        return;
       }
-    },
-    [publicKeyHash, chainId, isLoadingRef, dispatch]
-  );
-
-  useEffect(() => {
-    if (connection && connectionReady) {
-      connection.on(TzktSubscriptionChannel.TokenBalances, tokenBalancesListener);
-      connection.on(TzktSubscriptionChannel.Accounts, accountsListener);
-
-      Promise.all([
-        connection.invoke(TzktSubscriptionMethod.SubscribeToAccounts, { addresses: [publicKeyHash] }),
-        connection.invoke(TzktSubscriptionMethod.SubscribeToTokenBalances, { account: publicKeyHash })
-      ]).catch(e => console.error(e));
-
-      return () => {
-        setAccountsSubscriptionConfirmed(false);
-        setTokensSubscriptionConfirmed(false);
-        connection.off(TzktSubscriptionChannel.TokenBalances, tokenBalancesListener);
-        connection.off(TzktSubscriptionChannel.Accounts, accountsListener);
-      };
-    }
-
-    return noop;
-  }, [accountsListener, tokenBalancesListener, connection, connectionReady, publicKeyHash]);
-
-  const dispatchLoadGasBalanceAction = useCallback(() => {
-    if (isLoadingRef.current === false && isKnownChainId(chainId)) {
-      dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
-    }
-  }, [publicKeyHash, chainId, isLoadingRef, dispatch]);
-
-  useEffect(dispatchLoadGasBalanceAction, [dispatchLoadGasBalanceAction]);
-  useOnBlock(dispatchLoadGasBalanceAction, undefined, accountsSubscriptionConfirmed && isStoredError === false);
-
-  const dispatchLoadAssetsBalancesActions = useCallback(() => {
-    if (isLoadingRef.current === false && isKnownChainId(chainId)) {
-      dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
-    }
-  }, [publicKeyHash, chainId, isLoadingRef, dispatch]);
-
-  useEffect(dispatchLoadAssetsBalancesActions, [dispatchLoadAssetsBalancesActions]);
-  useOnBlock(dispatchLoadAssetsBalancesActions, undefined, tokensSubscriptionConfirmed && isStoredError === false);
+      enqueue('native', msg.state, msg.type === TzktSubscriptionStateMessageType.Reorg, (): Record<string, string> => {
+        if (msg.type !== TzktSubscriptionStateMessageType.Data) return {};
+        const account = msg.data.find(value => value.address === scope.account);
+        if (!account) return {};
+        return { [MAV_TOKEN_SLUG]: calcTzktAccountSpendableTezBalance(account) };
+      });
+    };
+    connection.on(TzktSubscriptionChannel.TokenBalances, tokens);
+    connection.on(TzktSubscriptionChannel.Accounts, accounts);
+    void Promise.all([
+      connection.invoke(TzktSubscriptionMethod.SubscribeToAccounts, { addresses: [scope.account] }),
+      connection.invoke(TzktSubscriptionMethod.SubscribeToTokenBalances, { account: scope.account })
+    ]).catch(() => {
+      if (!controller.signal.aborted) void refreshBalances(client, scope);
+    });
+    return () => {
+      controller.abort();
+      connection.off(TzktSubscriptionChannel.TokenBalances, tokens);
+      connection.off(TzktSubscriptionChannel.Accounts, accounts);
+    };
+  }, [client, scope, connection, connectionReady]);
 };
 
-export const useBalancesLoadingOnce = (publicKeyHash: string) => {
-  const chainId = useChainId(true)!;
-
-  const isLoading = useBalancesLoadingSelector(publicKeyHash, chainId);
-  const isLoadingRef = useRef(false);
-
-  // keep latest loading flag (same idea as your hook)
-  useDidUpdate(() => {
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  const storedError = useBalancesErrorSelector(publicKeyHash, chainId);
-  const isStoredError = isDefined(storedError);
-
-  const dispatch = useDispatch();
-
-  // run only once per mount (and only for that PKH+chainId)
-  const didRunRef = useRef(false);
-
-  useEffect(() => {
-    if (didRunRef.current) return;
-    didRunRef.current = true;
-
-    if (!publicKeyHash || !isKnownChainId(chainId)) return;
-
-    // initial load (no subscriptions, no polling)
-    if (isLoadingRef.current === false && isStoredError === false) {
-      dispatch(loadGasBalanceActions.submit({ publicKeyHash, chainId }));
-      dispatch(loadAssetsBalancesActions.submit({ publicKeyHash, chainId }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally empty: once
-
-  // optional: expose info if you want
-  return { isLoading, isStoredError };
-};
+export const useBalancesLoadingOnce = (publicKeyHash: string) => useBalancesQuery(publicKeyHash);

@@ -56,7 +56,7 @@ const ReadyClientTzktConnectionProvider: FC<PropsWithChildren> = ({ children }) 
     };
 
     async function startConnection() {
-      if (isDisposed || isStarting) return;
+      if (!connection || isDisposed || isStarting) return;
 
       isStarting = true;
       markConnectionNotReady();

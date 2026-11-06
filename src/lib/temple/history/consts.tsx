@@ -1,3 +1,5 @@
+export const MVRK_HISTORY_TOKEN_ADDRESS = 'mv2ZZZZZZZZZZZZZZZZZZZZZZZZZZZDXMF2d';
+
 export const HistoryItemOpTypeTexts = {
   0: 'Sent',
   1: 'Received',

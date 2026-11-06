@@ -10,6 +10,10 @@ import {
   TempleContactsAccountState,
   TempleSettings
 } from 'lib/temple/types';
+import { getMavrykApiUrl } from 'mavryk/api/urls';
+
+// `[bookAddr][networkId]`, as built by buildContactsStorageKey. A book address never contains `]`.
+const CONTACTS_STORAGE_KEY_PATTERN = /^\[([^\]]+)\]\[(.+)\]$/;
 
 export type ContactsBookScope =
   | {
@@ -140,8 +144,46 @@ export function getStoredContactsLastSeenVersion(settings: TempleSettings, conta
   return getCachedContactsState(settings, contactsStorageKey)?.lastSeenVersion;
 }
 
+function parseContactsStorageKey(contactsStorageKey: string) {
+  const match = CONTACTS_STORAGE_KEY_PATTERN.exec(contactsStorageKey);
+
+  return match ? { bookAddr: match[1], networkId: match[2] } : null;
+}
+
+function isSameContactsRecord(contactsStorageKey: string, otherContactsStorageKey: string) {
+  if (contactsStorageKey === otherContactsStorageKey) return true;
+
+  const scope = parseContactsStorageKey(contactsStorageKey);
+  const otherScope = parseContactsStorageKey(otherContactsStorageKey);
+
+  return Boolean(
+    scope &&
+      otherScope &&
+      scope.bookAddr === otherScope.bookAddr &&
+      getMavrykApiUrl(scope.networkId) === getMavrykApiUrl(otherScope.networkId)
+  );
+}
+
+/**
+ * Legacy formats are read once per remote record, then refused. Local networks without their own API
+ * (custom RPCs) share a record with the network their API URL resolves to, so a migration seen under
+ * any of them closes the latch for all of them.
+ * The latch is per-device: a fresh install or second device accepts legacy formats until it has seen a
+ * current-format record. Accepted residual risk; legacy public-key formats will be removed in a later release.
+ */
 export function canReadLegacyContacts(settings: TempleSettings, contactsStorageKey: string) {
-  return getStoredContactsLastSeenVersion(settings, contactsStorageKey) !== CONTACTS_ENCRYPTION_VERSION;
+  return !Object.entries(settings.contactsApi?.accounts ?? {}).some(
+    ([storageKey, state]) =>
+      state.lastSeenVersion === CONTACTS_ENCRYPTION_VERSION && isSameContactsRecord(contactsStorageKey, storageKey)
+  );
+}
+
+/**
+ * The version to latch after fetching or saving the remote record. Only a record in the current format closes the
+ * legacy-read latch; a 404 / empty record leaves it open so a legacy record seen later is still migrated.
+ */
+export function getContactsLastSeenVersion(state: { encryptionVersion?: string }) {
+  return state.encryptionVersion === CONTACTS_ENCRYPTION_VERSION ? CONTACTS_ENCRYPTION_VERSION : undefined;
 }
 
 export function getCurrentAccountStoredContacts(settings: TempleSettings, contactsStorageKey: string) {

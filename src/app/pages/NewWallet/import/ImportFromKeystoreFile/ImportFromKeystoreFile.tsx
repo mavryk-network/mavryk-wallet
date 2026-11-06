@@ -4,13 +4,15 @@ import classNames from 'clsx';
 import { Controller, FieldError, NestDataObject, useForm } from 'react-hook-form';
 
 import { FileInputProps, FileInput, FormField, FormSubmitButton } from 'app/atoms';
-import { ToggleButton, Toggle, ToggleOn, useToggle, ToggleContext } from 'app/compound/Toggle';
+import { ToggleButton, Toggle, ToggleOn, useToggle } from 'app/compound/Toggle';
+import { getPasswordValidation } from 'app/defaults';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as CloseIcon } from 'app/icons/close.svg';
 import { ReactComponent as FileIcon } from 'app/icons/file.svg';
 import { T, t } from 'lib/i18n';
 import { decryptKukaiSeedPhrase } from 'lib/temple/front';
 import { AlertFn, useAlert } from 'lib/ui';
+import PasswordStrengthIndicator from 'lib/ui/PasswordStrengthIndicator';
 
 import { ImportPartialFormCheckboxes } from '../importPartialFormCheckboxes/ImportPartialFormCheckboxes';
 import { useCreareOrRestorePassword } from '../useCreareOrRestorePassword';
@@ -52,8 +54,14 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     onSubmit: secondarySubmit,
     handleSubmit: secondaryHandleSubmit,
     submitting: secondarySubmitting,
-    disabled
-  } = useCreareOrRestorePassword(true, seedPhrase, keystorePassword);
+    disabled,
+    isKeystorePasswordWeak,
+    isPasswordError
+  } = useCreareOrRestorePassword(
+    true,
+    seedPhrase,
+    on ? { shouldUseKeystorePassword: true, keystorePassword } : { shouldUseKeystorePassword: false }
+  );
 
   const { fullPage } = useAppEnv();
 
@@ -62,7 +70,6 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     mode: 'onChange'
   });
   const submitting = formState.isSubmitting || secondarySubmitting;
-  const isKeystoreFileSubmitted = formState.isSubmitted;
 
   const clearKeystoreFileInput = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     event.stopPropagation();
@@ -73,9 +80,9 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
   const watchedKeystoreFile = watch('keystoreFile');
   const watchedKeystorePassword = watch('keystorePassword');
 
-  const isNextButtonDisabled = isKeystoreFileSubmitted
-    ? disabled
-    : watchedKeystorePassword?.trim().length === 0 || !watchedKeystoreFile?.item(0);
+  const isNextButtonDisabled = isSeedEntered
+    ? on && (disabled || isKeystorePasswordWeak)
+    : !watchedKeystorePassword?.length || !watchedKeystoreFile?.item(0);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -92,7 +99,8 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     [setSeedPhrase, setKeystorePassword, setIsSeedEntered, submitting, customAlert]
   );
 
-  const handleUpdateKeystorePasswordSubmit = () => {
+  const handleUpdateKeystorePasswordSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     setIsFromKeystoreFileWithUpdatedPassword(true);
   };
 
@@ -103,84 +111,88 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
     : handleSubmit(onSubmit);
 
   return (
-    <ToggleContext.Consumer>
-      {value => (
-        <form
-          className={classNames(
-            'w-full h-auto mx-auto flex flex-col no-scrollbar flex-1',
-            fullPage ? 'pt-8 pb-11' : 'pt-4 pb-8'
-          )}
-          style={{ height: 'calc(100% - 48px)' }}
-          onSubmit={handleFinalSubmit}
-        >
-          <label className="mb-4 leading-tight flex flex-col">
-            <span className="text-base-plus text-white">
-              <T id="uploadFile" />
-            </span>
-          </label>
-
-          <div className={classNames('w-full', fullPage ? 'mb-8' : 'mb-4')}>
-            <Controller
-              control={control}
-              name="keystoreFile"
-              as={KeystoreFileInput}
-              rules={{
-                required: t('required'),
-                validate: validateKeystoreFile
-              }}
-              clearKeystoreFileInput={clearKeystoreFileInput}
-            />
-            <ErrorKeystoreComponent errors={errors} />
-          </div>
-
-          <FormField
-            ref={register({
-              required: t('required')
-            })}
-            label={t('filePassword')}
-            placeholder={t('filePasswordInputPlaceholder')}
-            id="keystore-password"
-            type="password"
-            name="keystorePassword"
-            fieldWrapperBottomMargin={false}
-            errorCaption={errors.keystorePassword?.message}
-            testID={ImportFromKeystoreFileSelectors.filePasswordInput}
-          />
-          {isSeedEntered && !isFromKeystoreFileWithUpdatedPassword && (
-            <>
-              <div className=" w-full flex justify-between items-center mb-2 mt-4">
-                <div className="text-base-plus text-white">
-                  <T id="useSamePassword" />
-                </div>
-                <ToggleButton />
-              </div>
-              <>
-                <ToggleOn>
-                  <div className={classNames(fullPage && 'mt-6')}>
-                    <ImportPartialFormCheckboxes
-                      control={secondaryControl}
-                      errors={secondaryErrors}
-                      register={secondaryRegister}
-                    />
-                  </div>
-                </ToggleOn>
-              </>
-            </>
-          )}
-
-          <div className="flex-grow" />
-
-          <FormSubmitButton
-            loading={submitting}
-            disabled={value.on ? isNextButtonDisabled : false}
-            className="w-full mt-8 mx-auto"
-            testID={ImportFromKeystoreFileSelectors.nextButton}
-          >
-            <T id="next" />
-          </FormSubmitButton>
-        </form>
+    <form
+      className={classNames(
+        'w-full h-auto mx-auto flex flex-col no-scrollbar flex-1',
+        fullPage ? 'pt-8 pb-11' : 'pt-4 pb-8'
       )}
-    </ToggleContext.Consumer>
+      style={{ height: 'calc(100% - 48px)' }}
+      onSubmit={handleFinalSubmit}
+    >
+      <label className="mb-4 leading-tight flex flex-col">
+        <span className="text-base-plus text-white">
+          <T id="uploadFile" />
+        </span>
+      </label>
+
+      <div className={classNames('w-full', fullPage ? 'mb-8' : 'mb-4')}>
+        <Controller
+          control={control}
+          name="keystoreFile"
+          as={KeystoreFileInput}
+          rules={{
+            required: t('required'),
+            validate: validateKeystoreFile
+          }}
+          clearKeystoreFileInput={clearKeystoreFileInput}
+        />
+        <ErrorKeystoreComponent errors={errors} />
+      </div>
+
+      <FormField
+        ref={register({
+          required: t('required')
+        })}
+        label={t('filePassword')}
+        placeholder={t('filePasswordInputPlaceholder')}
+        id="keystore-password"
+        type="password"
+        name="keystorePassword"
+        fieldWrapperBottomMargin={false}
+        errorCaption={errors.keystorePassword?.message}
+        testID={ImportFromKeystoreFileSelectors.filePasswordInput}
+      />
+      {isSeedEntered && !isFromKeystoreFileWithUpdatedPassword && (
+        <>
+          <div className=" w-full flex justify-between items-center mb-2 mt-4">
+            <div className="text-base-plus text-white">
+              <T id="useSamePassword" />
+            </div>
+            <ToggleButton />
+          </div>
+          <>
+            <ToggleOn>
+              <div className={classNames(fullPage && 'mt-6')}>
+                {(isKeystorePasswordWeak || isPasswordError) && (
+                  <div role="alert">
+                    <PasswordStrengthIndicator validation={getPasswordValidation(keystorePassword)} isPasswordError />
+                    <p className="text-sm text-primary-error">
+                      <T id="weakKeystorePassword" />
+                    </p>
+                  </div>
+                )}
+                <ImportPartialFormCheckboxes
+                  control={secondaryControl}
+                  errors={secondaryErrors}
+                  register={secondaryRegister}
+                />
+              </div>
+            </ToggleOn>
+          </>
+        </>
+      )}
+
+      <div className="flex-grow" />
+
+      <FormSubmitButton
+        loading={submitting}
+        disabled={isNextButtonDisabled}
+        className="w-full mt-8 mx-auto"
+        testID={ImportFromKeystoreFileSelectors.nextButton}
+      >
+        <T id="next" />
+      </FormSubmitButton>
+    </form>
   );
 };
 

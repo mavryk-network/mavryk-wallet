@@ -1,14 +1,14 @@
 import { useCallback, useMemo } from 'react';
 
-import { emptyFn } from '@rnw-community/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import memoizee from 'memoizee';
 
 import { useBalancesLoadingOnce } from 'app/hooks/use-balances-loading';
-import { useAllAccountBalancesSelector, useAllBalancesSelector } from 'app/store/balances/selectors';
-import { getKeyForBalancesRecord } from 'app/store/balances/utils';
+import { useAllAccountBalancesSelector } from 'app/store/balances/selectors';
 import { isKnownChainId } from 'lib/apis/tzkt';
 import { useAssetMetadata, useGetTokenOrGasMetadata } from 'lib/metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { useTypedSWR } from 'lib/swr';
 import {
   useTezos,
@@ -20,7 +20,9 @@ import {
 } from 'lib/temple/front';
 import { michelEncoder, loadFastRpcClient, atomsToTokens } from 'lib/temple/helpers';
 
+import { refreshBalances } from './balance-query';
 import { fetchRawBalance as fetchRawBalanceFromBlockchain } from './fetch';
+import { useBalancesQuery } from './use-balances-query';
 import { getBalanceSWRKey } from './utils';
 
 export const useCurrentAccountBalances = () => {
@@ -87,29 +89,20 @@ export function useRawBalance(
   const chainIdSwrRes = useChainIdLoading(rpcUrl);
   const chainId = chainIdSwrRes.data;
 
-  const allBalances = useAllBalancesSelector();
-
-  const balances = useMemo(() => {
-    if (!chainId) return null;
-
-    const key = getKeyForBalancesRecord(address, chainId);
-
-    return allBalances[key];
-  }, [allBalances, chainId, address]);
-
-  /** Only using store for currently selected account - most used case
-   * and with a refresh mechanism in useBalancesLoading hook.
-   * Other addresses' balances (e.g. of other user's accounts or contacts)
-   * are loaded via SWR from chain.
-   */
-  const usingStore = address === currentAccountAddress && isKnownChainId(chainId);
+  const scope = useMetadataScope();
+  const queryClient = useQueryClient();
+  const balances = useAllAccountBalancesSelector(address, chainId ?? '', networkRpc);
+  const usingStore = address === currentAccountAddress && !networkRpc && isKnownChainId(chainId);
+  const request = useBalancesQuery(address, usingStore);
+  const refreshStored = useCallback(() => {
+    void refreshBalances(queryClient, { ...scope, account: address });
+  }, [queryClient, scope, address]);
 
   const tezos = useMemo(() => (networkRpc ? buildTezosToolkit(networkRpc) : nativeTezos), [networkRpc, nativeTezos]);
 
   const onChainBalanceSwrRes = useTypedSWR(
-    getBalanceSWRKey(tezos, assetSlug, address),
+    usingStore || !chainId ? null : getBalanceSWRKey(tezos, assetSlug, address),
     () => {
-      // if (!chainId || usingStore) return;
       return fetchRawBalanceFromBlockchain(tezos, assetSlug, address).then(res => res.toString());
     },
     {
@@ -133,14 +126,10 @@ export function useRawBalance(
 
   if (usingStore)
     return {
-      value: balances?.data[assetSlug],
-      isSyncing: balances?.isLoading ?? false,
-      error: balances?.error,
-      /**
-       * Stored balances are already being refreshed as frequently as possible
-       * in `useBalancesLoading` hook.
-       */
-      refresh: emptyFn
+      value: balances[assetSlug],
+      isSyncing: request.isLoading,
+      error: request.error,
+      refresh: refreshStored
     };
 
   return {

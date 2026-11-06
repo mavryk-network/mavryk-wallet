@@ -3,13 +3,11 @@ import React, { FC, Suspense, useEffect, useMemo, useState } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { useDispatch } from 'react-redux';
 
 import { Alert, FormSubmitButton } from 'app/atoms';
 import ErrorBoundary from 'app/ErrorBoundary';
 import { ReactComponent as ArrowDownIcon } from 'app/icons/arrow-down.svg';
 import PageLayout from 'app/layouts/PageLayout';
-import { loadAllCurrenciesActions, updatePairLimitsActions } from 'app/store/buy-with-credit-card/actions';
 import { useCurrenciesLoadingSelector } from 'app/store/buy-with-credit-card/selectors';
 import { PaymentProviderInput } from 'app/templates/PaymentProviderInput';
 import { SpinnerSection } from 'app/templates/SendForm/SpinnerSection';
@@ -39,7 +37,6 @@ const fitFiatIconFn = (currency: TopUpInputInterface) =>
   !currency.icon.startsWith(MOONPAY_ASSETS_BASE_URL) && currency.icon !== FIAT_ICONS_SRC.UAH;
 
 export const BuyWithCreditCard: FC = () => {
-  const dispatch = useDispatch();
   const [formIsLoading, setFormIsLoading] = useState(false);
   const form = useBuyWithCreditCardForm();
   const {
@@ -94,12 +91,6 @@ export const BuyWithCreditCard: FC = () => {
     isDefined(errors.topUpProvider) &&
     shouldShowFieldError('topUpProvider', formState) &&
     paymentProvidersToDisplay.length > 0;
-
-  useEffect(() => void dispatch(loadAllCurrenciesActions.submit()), []);
-
-  useEffect(() => {
-    dispatch(updatePairLimitsActions.submit({ fiatSymbol: inputCurrency.code, cryptoSymbol: outputToken.code }));
-  }, [dispatch, inputCurrency.code, outputToken.code, allFiatCurrencies.length, allCryptoCurrencies.length]);
 
   useEffect(() => {
     const newInputAsset = allFiatCurrencies.find(({ code }) => code === inputCurrency.code);

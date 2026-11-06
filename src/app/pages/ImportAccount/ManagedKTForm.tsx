@@ -120,7 +120,7 @@ export const ManagedKTForm: FC<ImportformProps> = ({ className }) => {
         }
 
         const chain = await tezos.rpc.getChainId();
-        await importKTManagedAccount(address, chain, owner, chainId!);
+        await importKTManagedAccount(address, chain, owner);
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {

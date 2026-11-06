@@ -1,4 +1,5 @@
 import type { TzktAlias, TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';
+import type { MavrykHistoryAction } from 'mavryk/api/history';
 
 import type { AssetMetadataBase } from '../../metadata';
 
@@ -10,15 +11,32 @@ export interface OperationsGroup {
   operations: TzktOperation[];
 }
 
+/**
+ * Who paid the group's network fee, from complete action evidence only.
+ * `wallet`: the viewed account; `other`: one different address; `mixed`: actions exist but evidence is mixed/incomplete.
+ * Absent when no supported actions are present (legacy rendering).
+ */
+export type HistoryNetworkFeePayer = { kind: 'wallet' } | { kind: 'other'; address: string } | { kind: 'mixed' };
+
 export interface UserHistoryItem {
+  /** Local card identity within the loaded scope; several cards may share one hash. */
+  id: string;
   type: HistoryItemOpTypeEnum;
   hash: string;
+  /** Semantic actions of this group, deduplicated by action ID, in API order. */
+  actions?: MavrykHistoryAction[];
+  networkFeePayer?: HistoryNetworkFeePayer;
+  /** True when any action ran through a permit (gasless) relay; says nothing about who paid. */
+  isGasless?: boolean;
+  /** Total child operations reported by the API; the `operations` preview may be capped below it. */
+  operationsCount?: number;
   addedAt: string;
   status: HistoryItemStatus;
   operations: IndividualHistoryItem[];
   mainOperation?: IndividualHistoryItem;
   displayMoneyDiffs?: HistoryDisplayMoneyDiff[];
   hideOperationMoneyDiffs?: boolean;
+  isPartialTransfers?: boolean;
   highlightedOperationIndex: number; // Index of the highlighted operation within the group
   isGroupedOp: boolean;
   firstOperation?: IndividualHistoryItem;
@@ -26,8 +44,14 @@ export interface UserHistoryItem {
 }
 
 export interface HistoryDisplayMoneyDiff {
+  symbol?: string;
   assetSlug: string;
   diff: string;
+  usdAmount?: number | null;
+  isNeutral?: boolean;
+  /** Direction remains known even when the token amount is unavailable. */
+  isNegative?: boolean;
+  isAmountUnavailable?: boolean;
 }
 
 export interface HistoryOperationNetworkFees {
@@ -64,9 +88,15 @@ export enum StakingActions {
 
 export interface HistoryItemOperationBase extends PickedPropsFromTzktOperation {
   contractAddress?: string;
+  calledContract?: string;
+  movementKind?: 'mint' | 'burn';
+  displayMoneyDiff?: HistoryDisplayMoneyDiff;
   source: HistoryMember;
   status: HistoryItemStatus;
   amountSigned: string;
+  /** Raw purchase quantity; never used as a display-unit amount. */
+  atomicAmount?: string;
+  isAmountUnavailable?: boolean;
   addedAt: string;
   isHighlighted: boolean;
   opIndex: number;
@@ -150,7 +180,7 @@ export interface HistoryItemTokenTransfer extends PickedPropsFromTzktTokenTransf
   recipients?: RecipientInfo[];
   totalAmount: string;
   tokenContractAddress: string;
-  tokenId: number;
+  tokenId: number | string;
   tokenType: TokenType;
   assetSlug: string;
   assetMetadata?: AssetMetadataBase;

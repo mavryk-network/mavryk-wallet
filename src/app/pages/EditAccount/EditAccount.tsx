@@ -1,8 +1,8 @@
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 
-import { Anchor, HashChip, Name, SyncSpinner } from 'app/atoms';
+import { Anchor, HashChip, Name } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as EditIcon } from 'app/icons/edit-title.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
@@ -13,8 +13,6 @@ import { BTN_ERROR, ButtonRounded } from 'app/molecules/ButtonRounded';
 import { ContactAvatar } from 'app/molecules/ContactAvatar';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import AccountBanner from 'app/templates/AccountBanner';
-import { HistoryDetailsPopup } from 'app/templates/History/HistoryDetailsPopup';
-import { HistoryItem } from 'app/templates/History/HistoryItem';
 import { usePopupState } from 'app/templates/PopupModalWithTitle/hooks/usePopupState';
 import { T, t } from 'lib/i18n';
 import {
@@ -26,13 +24,12 @@ import {
   getContactsUnavailableMessage,
   useSetAccountPkh
 } from 'lib/temple/front';
-import { UserHistoryItem } from 'lib/temple/history';
-import useHistory from 'lib/temple/history/hook';
-import { TempleAccount, TempleAccountType } from 'lib/temple/types';
+import { TempleAccountType } from 'lib/temple/types';
 import { useAlert } from 'lib/ui';
 import { useConfirm } from 'lib/ui/dialog';
 import { goBack, navigate } from 'lib/woozie';
 
+import { ContactRecentOperations } from './components/contact-recent-operations.block';
 import { useAccountOwnership } from './hooks';
 import { EditAccountNamePopup } from './popups/EditAccountNamePopup';
 import { RemoveAccountPopup } from './popups/RemoveAccountPopup';
@@ -65,7 +62,14 @@ export const EditOwnAccount: FC<EditAccountProps> = ({ accHash }) => {
     () => [
       { i18nKey: 'editName', Icon: EditIcon, onClick: editNamePopup.open, fillIcon: true },
       ...(account.type !== TempleAccountType.WatchOnly
-        ? [{ linkTo: '/settings/reveal-private-key', i18nKey: 'revealPrivateKey', Icon: KeyIcon, fillIcon: false }]
+        ? [
+            {
+              linkTo: '/settings/reveal-private-key',
+              i18nKey: 'revealPrivateKey' as const,
+              Icon: KeyIcon,
+              fillIcon: false
+            }
+          ]
         : [])
     ],
     [account.type, editNamePopup.open]
@@ -144,14 +148,8 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
     [accHash, accToChange, account.name]
   );
 
-  const accountObj: TempleAccount = useMemo(
-    () => ({ publicKeyHash: accountHash, name: accountName, isKYC: false, type: TempleAccountType.WatchOnly }),
-    [accountHash, accountName]
-  );
-
-  const { loading: userHistoryLoading, list: userHistory } = useHistory(3, undefined, undefined, accountObj);
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeHistoryItem, setActiveHistoryItem] = useState<UserHistoryItem | null>(null);
+  /** The contact's own address; never the active wallet as a stand-in while the contact is unresolved. */
+  const contactAddress = accToChange?.address ?? accHash ?? undefined;
 
   const editNamePopup = usePopupState(false);
 
@@ -165,10 +163,6 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
   );
 
   // handlers --------------------------------------------
-
-  const handleRequestClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
 
   const handleRemoveContactClick = useCallback(async () => {
     if (isOwn) {
@@ -201,14 +195,6 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
     await removeContact(accountHash);
     goBack();
   }, [accountHash, confirm, customAlert, isOwn, removeContact, setAccountPkh, unavailableMessage]);
-
-  const handleItemClick = useCallback(
-    (hash: string) => {
-      setIsOpen(true);
-      setActiveHistoryItem(userHistory.find(item => item.hash === hash) ?? null);
-    },
-    [userHistory]
-  );
 
   return (
     <PageLayout pageTitle={<span>{t('contactInfo')}</span>} isTopbarVisible={false}>
@@ -256,35 +242,7 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
             </div>
           </div>
 
-          <p className="mb-2 text-white text-base-plus font-bold">
-            <T id="recentTransfers" />
-          </p>
-
-          <section>
-            {userHistoryLoading ? (
-              <>
-                <SyncSpinner className="mt-4" />
-              </>
-            ) : !userHistory.length ? (
-              <div
-                style={{ height: popup ? 200 : 300 }}
-                className="text-sm text-secondary-white flex items-center justify-center "
-              >
-                No recent transfers yet
-              </div>
-            ) : (
-              userHistory.map((historyItem, idx) => (
-                <Fragment key={historyItem.hash + idx}>
-                  <HistoryItem
-                    address={accountHash}
-                    historyItem={historyItem}
-                    handleItemClick={handleItemClick}
-                    last={false}
-                  />
-                </Fragment>
-              ))
-            )}
-          </section>
+          <ContactRecentOperations contactAddress={contactAddress} />
         </section>
         <div className="flex-1 min-h-8"></div>
         <div>
@@ -308,7 +266,6 @@ export const EditContact: FC<EditAccountProps> = ({ accHash }) => {
         isOwn={isOwn}
         accToChange={accToChange}
       />
-      <HistoryDetailsPopup isOpen={isOpen} onRequestClose={handleRequestClose} historyItem={activeHistoryItem} />
     </PageLayout>
   );
 };

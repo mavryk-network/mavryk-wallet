@@ -4,8 +4,6 @@ import { useImagesStackLoading } from 'lib/ui/use-images-stack-loading';
 
 export interface ImageStackedProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /**
-   * (!) Memoize.
-   *
    * (i) Don't let empty string (`''`) get inside. Filter to not get endless loader.
    */
   sources: string[];

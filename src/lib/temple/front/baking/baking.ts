@@ -166,11 +166,12 @@ export function useAccountDelegatePeriodStats(
               const [{ currentCycle, cycleDurationMs }, setDelegateParameters, unstakeRequests] = await Promise.all([
                 getCurrentCycleData(tezos),
                 fetchBakerDelegateParameters(accStats?.delegate?.address, chainId),
-                tezos.rpc.getUnstakeRequests(accountAddress)
+                tezos.rpc.getUnstakeRequests(accountAddress).catch(() => null)
               ]);
 
               const delegateCycle = setDelegateParameters?.activationCycle ?? -1;
-              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 0;
+              // Default to allowed when baker has not published set_delegate_parameters.
+              const limitOfStakingOverBaking = setDelegateParameters?.limitOfStakingOverBaking ?? 1;
 
               const delegationWaitTime = getDelegationWaitTime(cycleDurationMs, accStats?.delegationTime || '');
               const costakeWaitTime = getCoStakeWaitTime(

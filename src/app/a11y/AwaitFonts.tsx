@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 
 import FontFaceObserver from 'fontfaceobserver';
 
+import { markLoad } from 'lib/load-perf';
 import { useTypedSWR } from 'lib/swr';
 
 interface AwaitFontsProps extends PropsWithChildren {
@@ -31,5 +32,6 @@ async function awaitFonts([name, weights, className]: [string, number[], string]
   } catch (err: any) {
     console.error(err);
   }
+  markLoad('fonts');
   return null;
 }

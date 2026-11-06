@@ -1,3 +1,4 @@
+import 'lib/store/zustand/start-owned-ui';
 import './main.css';
 
 import React, { FC, useCallback } from 'react';

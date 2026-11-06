@@ -1,4 +1,5 @@
 import { IntercomClient } from 'lib/intercom/client';
+import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleRequest, TempleResponse } from 'lib/temple/types';
 
 export const intercomClient = new IntercomClient();
@@ -12,7 +13,7 @@ export function getIntercom() {
 }
 
 export async function makeIntercomRequest(req: TempleRequest) {
-  const res = await intercomClient.request(req);
+  const res = await intercomClient.request(req, { timeoutMs: getTempleRequestTimeoutMs(req.type) });
   assertResponse('type' in res);
 
   return res as TempleResponse;

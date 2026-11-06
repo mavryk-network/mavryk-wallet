@@ -5,6 +5,7 @@ import { fromAssetSlug, toTokenSlug } from 'lib/assets/utils';
 
 import { mavrykApi } from './client';
 import { getWalletAddressFromStorage } from './storage';
+import { getWalletReadRequest } from './wallet-read';
 
 const WalletTokenSortSchema = z.enum(['value_desc', 'value_asc', 'name']);
 const NumberLikeSchema = z.union([z.number(), z.string()]).pipe(z.coerce.number());
@@ -41,7 +42,9 @@ async function getWalletAddressOrThrow(walletAddress?: string) {
 export async function fetchWalletTokens(params: FetchWalletTokensRequest = {}) {
   const address = await getWalletAddressOrThrow(params.walletAddress);
 
-  const { data } = await mavrykApi.get<WalletToken[]>(`/wallets/${address}/tokens`, {
+  const { url, config } = await getWalletReadRequest(address, 'tokens');
+  const { data } = await mavrykApi.get<WalletToken[]>(url, {
+    ...config,
     params: {
       sort: params.sort,
       search: params.search

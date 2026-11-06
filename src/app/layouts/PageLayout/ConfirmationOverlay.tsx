@@ -1,9 +1,10 @@
-import React, { FC, useCallback, useLayoutEffect, useMemo } from 'react';
+import React, { FC, Suspense, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
 import clsx from 'clsx';
 import CSSTransition from 'react-transition-group/CSSTransition';
 
 import DocBg from 'app/a11y/DocBg';
+import Spinner from 'app/atoms/Spinner/Spinner';
 import { useAppEnv } from 'app/env';
 import styles from 'app/layouts/pageLayout.module.css';
 import InternalConfirmation from 'app/templates/InternalConfirmation';
@@ -40,6 +41,7 @@ const ConfirmationOverlay: FC = () => {
   );
 
   const memoizedBgClassname = useMemo(() => (popup ? 'bg-primary-bg' : styles.fullpageBg), [popup]);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -47,28 +49,41 @@ const ConfirmationOverlay: FC = () => {
 
       <Portal>
         <CSSTransition
+          nodeRef={nodeRef}
           in={displayed}
           timeout={200}
-          clsx={{
+          classNames={{
             enter: 'opacity-0',
             enterActive: clsx('opacity-100', 'transition ease-out duration-200'),
             exit: clsx('opacity-0', 'transition ease-in duration-200')
           }}
           unmountOnExit
         >
-          <div className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
-            {confirmation && (
-              <InternalConfirmation
-                payload={confirmation.payload}
-                error={confirmation.error}
-                onConfirm={handleConfirm}
-              />
-            )}
+          <div ref={nodeRef} className={clsx('fixed inset-0 z-30 overflow-y-auto', memoizedBgClassname)}>
+            {/*
+              InternalConfirmation suspends on first open. Without its own boundary the suspension hides this
+              CSSTransition too, which then re-mounts as `exited` with `in` set and loops on unmountOnExit.
+            */}
+            <Suspense fallback={<SpinnerSection />}>
+              {confirmation && (
+                <InternalConfirmation
+                  payload={confirmation.payload}
+                  error={confirmation.error}
+                  onConfirm={handleConfirm}
+                />
+              )}
+            </Suspense>
           </div>
         </CSSTransition>
       </Portal>
     </>
   );
 };
+
+const SpinnerSection: FC = () => (
+  <div className="flex justify-center mt-24">
+    <Spinner className="w-20" />
+  </div>
+);
 
 export default ConfirmationOverlay;

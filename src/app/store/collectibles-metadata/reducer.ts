@@ -1,20 +1,15 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { enableMapSet } from 'immer';
-import { persistReducer } from 'redux-persist';
-import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 
-import { tokenToSlug } from 'lib/assets';
 import { fromAssetSlug } from 'lib/assets/utils';
-import { TokenMetadata } from 'lib/metadata';
 import { buildTokenMetadataFromFetched } from 'lib/metadata/utils';
-import { storageConfig, createTransformsBeforePersist, createTransformsBeforeHydrate } from 'lib/store';
 
 import {
   putCollectiblesMetadataAction,
   loadCollectiblesMetadataAction,
   resetCollectiblesMetadataLoadingAction
 } from './actions';
-import { collectiblesMetadataInitialState, SliceState } from './state';
+import { collectiblesMetadataInitialState } from './state';
 
 /** See: https://immerjs.github.io/immer/map-set */
 enableMapSet();
@@ -45,36 +40,5 @@ const collectiblesMetadataReducer = createReducer(collectiblesMetadataInitialSta
   });
 });
 
-export const collectiblesMetadataPersistedReducer = persistReducer<SliceState>(
-  {
-    key: 'root.collectiblesMetadata',
-    ...storageConfig,
-    stateReconciler: hardSet,
-    blacklist: ['isLoading'] as (keyof SliceState)[],
-    transforms: [
-      /*
-        # Persistance. Applied in direct order
-      */
-      createTransformsBeforePersist<SliceState>({
-        records: nonSerializibleRecords => {
-          // Converting `records` from `Map` to `Array`
-          const serializibleRecords = Array.from(nonSerializibleRecords.values());
-
-          return serializibleRecords as unknown as typeof nonSerializibleRecords;
-        }
-      }),
-      /*
-        # Hydration. Applied in reverse order
-      */
-      createTransformsBeforeHydrate<SliceState>({
-        // Converting `records` from `Array` back to `Map`
-        records: subState => {
-          const serializibleRecords = subState as unknown as TokenMetadata[];
-
-          return new Map(serializibleRecords.map(meta => [tokenToSlug(meta), meta]));
-        }
-      })
-    ]
-  },
-  collectiblesMetadataReducer
-);
+// Retained legacy payloads are read only; active unrelated Redux data persists in the task11 root.
+export const collectiblesMetadataPersistedReducer = collectiblesMetadataReducer;

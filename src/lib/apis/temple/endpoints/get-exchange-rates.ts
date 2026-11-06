@@ -60,25 +60,7 @@ export async function getCoingeckoPrice(id = COINGECKO_MVRK_ID, currency = 'USD'
 // api rwa metadata utils
 export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => {
   try {
-    const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: DEX_STORAGE_QUERY
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
-    }
-
-    const { data } = await response.json();
-
-    const parsedData = DodoStorageSchema.parse(data);
-
-    const rwasAssetsPricesPair = getDodoMavTokenPrices(parsedData.dodo_mav);
+    const rwasAssetsPricesPair = await fetchFreshRWAToUsdtRates();
 
     await putToStorage(RWA_ASSET_PRICES, rwasAssetsPricesPair);
 
@@ -89,4 +71,35 @@ export const fetchRWAToUsdtRates = async (): Promise<Record<string, string>> => 
     // @ts-expect-error // null as price won't esist
     return cachedPrices ?? {};
   }
+};
+
+/** Fetch current prices without storage writes or fallback so Query can retain and report refresh failures. */
+export const fetchFreshUsdToTokenRates = async (): Promise<Record<string, string>> => {
+  const rates = await fetchCoingeckoRates(COINGECKO_MVRK_ID, ['usd']);
+  return { mav: String(rates.usd ?? 0) };
+};
+
+/** Reuse the validated Dodo mapping without the legacy persistence/cache layer. */
+export const fetchFreshRWAToUsdtRates = async (): Promise<Record<string, string>> => {
+  const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query: DEX_STORAGE_QUERY
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`GraphQL request failed: ${response.statusText}`);
+  }
+
+  const { data } = await response.json();
+
+  const parsedData = DodoStorageSchema.parse(data);
+
+  const rwasAssetsPricesPair = getDodoMavTokenPrices(parsedData.dodo_mav);
+
+  return { ...rwasAssetsPricesPair };
 };

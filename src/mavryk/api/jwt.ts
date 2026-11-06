@@ -1,5 +1,11 @@
 type JwtPayload = Record<string, unknown>;
 
+/**
+ * How far the local clock may drift from the backend's before a token or challenge expiry is judged by it.
+ * Applied only to validation; the refresh-ahead thresholds stay as they are.
+ */
+export const CLOCK_SKEW_TOLERANCE_MS = 120_000;
+
 function decodeBase64Url(input: string) {
   const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
   const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
@@ -43,11 +49,15 @@ export function getJwtExpMs(token: string): number | null {
   return toExpMs(payload.exp);
 }
 
-export function isJwtExpired(token: string, nowMs = Date.now()) {
+/**
+ * @param toleranceMs grace after `exp` during which the token still counts as valid (local clock skew)
+ * @returns true when the token has no parseable `exp`, or `exp` is more than `toleranceMs` before `nowMs`
+ */
+export function isJwtExpired(token: string, nowMs = Date.now(), toleranceMs = 0) {
   const expMs = getJwtExpMs(token);
   if (!expMs) return true;
 
-  return expMs <= nowMs;
+  return expMs + toleranceMs <= nowMs;
 }
 
 export function isJwtExpiringSoon(token: string, thresholdMs: number, nowMs = Date.now()) {

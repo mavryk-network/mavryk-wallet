@@ -229,28 +229,28 @@ export function formatOpParams(op: any) {
 export const PAIRING_RESPONSE_BASE: Partial<PostMessagePairingResponse> = {
   type: MessageType.HandshakeResponse,
   name: 'Mavryk Wallet',
-  icon: 'https://mavryk.org/logo.png',
-  appUrl: browser.runtime.getURL('fullpage.html')
+  icon: 'https://mavryk.org/logo.png'
+  // appUrl is optional and omitted: on Firefox/Safari it would expose the per-install extension UUID to web content
 };
 
 const KEYPAIR_SEED_STORAGE_KEY = 'beacon_keypair_seed';
 
-export async function getSenderId(): Promise<string> {
+export async function getSenderId(origin: string): Promise<string> {
   await ready;
-  const keyPair = await getOrCreateKeyPair();
+  const keyPair = await getOrCreateKeyPair(origin);
   const buffer = Buffer.from(crypto_generichash(5, keyPair.publicKey));
   return bs58check.encode(buffer);
 }
 
-export async function encryptMessage(message: string, recipientPublicKey: string): Promise<string> {
-  const keyPair = await getOrCreateKeyPair();
+export async function encryptMessage(origin: string, message: string, recipientPublicKey: string): Promise<string> {
+  const keyPair = await getOrCreateKeyPair(origin);
   const { sharedTx } = await createCryptoBoxClient(recipientPublicKey, keyPair);
 
   return encryptCryptoboxPayload(message, sharedTx);
 }
 
-export async function decryptMessage(payload: string, senderPublicKey: string) {
-  const keyPair = await getOrCreateKeyPair();
+export async function decryptMessage(origin: string, payload: string, senderPublicKey: string) {
+  const keyPair = await getOrCreateKeyPair(origin);
   const { sharedRx } = await createCryptoBoxServer(senderPublicKey, keyPair);
 
   const hexPayload = Buffer.from(payload, 'hex');
@@ -320,7 +320,7 @@ export async function createCryptoBox(
   return [Buffer.from(kxSelfPublicKey), Buffer.from(kxSelfPrivateKey), Buffer.from(kxOtherPublicKey)];
 }
 
-export const getOrCreateKeyPair = memoizee(
+const getKeyPairSeedHash = memoizee(
   async () => {
     const items = await browser.storage.local.get([KEYPAIR_SEED_STORAGE_KEY]);
     const exist = KEYPAIR_SEED_STORAGE_KEY in items;
@@ -335,7 +335,20 @@ export const getOrCreateKeyPair = memoizee(
     }
 
     await ready;
-    return crypto_sign_seed_keypair(crypto_generichash(32, from_string(seed)));
+    return crypto_generichash(32, from_string(seed));
+  },
+  { maxAge: 60_000, promise: true }
+);
+
+/**
+ * One transport keypair per dApp origin, keyed off the install seed, so the public key and
+ * senderId handed to one site cannot be linked to those handed to another.
+ * Changing this derivation makes every paired dApp pair again (its stored wallet key stops decrypting).
+ */
+export const getOrCreateKeyPair = memoizee(
+  async (origin: string) => {
+    const seedHash = await getKeyPairSeedHash();
+    return crypto_sign_seed_keypair(crypto_generichash(32, from_string(origin), seedHash));
   },
   { maxAge: 60_000, promise: true }
 );

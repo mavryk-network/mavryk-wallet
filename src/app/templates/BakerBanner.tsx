@@ -280,12 +280,11 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
       <div className="flex items-center gap-2 mb-4">
         <Identicon type="bottts" hash={baker.address} size={32} className="shadow-xs rounded-full flex-shrink-0" />
 
-        <div className="flex flex-col items-start flex-1 relative gap-1">
+        <div className="flex flex-col items-start flex-1 relative gap-1 min-w-0">
           <Name
-            style={{
-              maxWidth: '8rem'
-            }}
-            className="text-base-plus text-white"
+            style={{ maxWidth: '100%' }}
+            className="text-base-plus text-white truncate"
+            title={baker.name || baker.address}
             testID={BakingSectionSelectors.delegatedBakerName}
           >
             {baker.name || baker.address}

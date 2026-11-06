@@ -17,6 +17,8 @@ import WebExtensionTargetPlugin from 'webpack-target-webextension';
 import WebpackBar from 'webpackbar';
 
 import { buildBaseConfig } from './webpack/base.config';
+import { createBuildStartSnapshotPlugin } from './webpack/build-provenance';
+import { envFilesData, publicEnvFilesData } from './webpack/dotenv';
 import {
   DEVELOPMENT_ENV,
   PRODUCTION_ENV,
@@ -105,6 +107,9 @@ const mainConfig = (() => {
         ({ name, filename, path }) =>
           new HtmlWebpackPlugin({
             template: path,
+            templateParameters: {
+              documentBackground: require('./tailwind.config.js').theme.colors['primary-bg']
+            },
             filename,
             chunks: liveReload ? [name, 'live_reload'] : [name],
             inject: 'body',
@@ -137,8 +142,9 @@ const mainConfig = (() => {
                 - HTML files are taken care of by the `html-webpack-plugin`. Copying them here leads to:
                   `ERROR in Conflict: Multiple assets emit different content to the same filename [name].html`
                 - Manifest file is copied next, along with transformation of it.
+                - macOS metadata (`.DS_Store`, `__MACOSX/`) gets flagged by the Firefox Add-ons (AMO) validator.
               */
-              ignore: ['**/*.html']
+              ignore: ['**/*.html', '**/.DS_Store', '**/__MACOSX/**']
             }
           },
           /*
@@ -166,7 +172,12 @@ const mainConfig = (() => {
     chunks: 'all',
     maxSize: MAX_JS_CHUNK_SIZE_IN_BYTES,
     enforceSizeThreshold: MAX_JS_CHUNK_SIZE_IN_BYTES,
-    name: (_: any, chunks: any) => chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+    // Shared chunks of named (entry) chunks keep their entry-combination names. Splits of unnamed async chunks
+    // (lazy pages, dynamic imports) stay unnamed: one shared name would merge every async split into one chunk.
+    name: (_: any, chunks: any) =>
+      chunks.every((chunk: any) => chunk.name)
+        ? chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+        : undefined
   };
 
   config.optimization!.minimizer!.push(
@@ -268,6 +279,12 @@ const backgroundConfig = (() => {
 })();
 
 const configurations = [mainConfig, scriptsConfig, backgroundConfig];
+
+if (PRODUCTION_ENV) {
+  // Lets zip-script tell whether this compile succeeded and its inputs stayed unchanged until packing.
+  const buildStartSnapshot = createBuildStartSnapshotPlugin(configurations.length, publicEnvFilesData, envFilesData);
+  configurations.forEach(config => config.plugins!.push(buildStartSnapshot));
+}
 
 export default configurations;
 export const parallelism = 3;

@@ -1,18 +1,17 @@
 import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import { InMemorySigner } from '@mavrykdynamics/webmavryk-signer';
 
-import { EnvVars } from 'lib/env';
 import { KYC_CONTRACTS } from 'lib/route3/constants';
 import { loadContract } from 'lib/temple/contract';
-import { isKnownChainId } from 'lib/temple/types';
+import { isKnownChainId, TempleChainId } from 'lib/temple/types';
 import { parseTransferParamsToParamsWithKind } from 'lib/utils/parse-transfer-params';
-
-const { SUPER_ADMIN_PRIVATE_KEY } = EnvVars;
 
 const MEMBER_KYC_ACTION = 'addMemberKyc';
 const DEFAULT_MEMBERSHIP_TIER = 'Starter';
 const DEFAULT_KYC_FIELD_VALUE = 'NIL';
 const CONFIRMATIONS_COUNT = 1;
+const TESTNET_KYC_SIGNING_ONLY_ERROR = 'Frontend KYC signing is only available on Basenet testnet.';
+const TESTNET_KYC_SIGNER_KEY_MISSING_ERROR = 'Testnet KYC signer key is not configured for this frontend build.';
 
 type BigMapLookup = {
   get: (key: string) => Promise<unknown>;
@@ -46,16 +45,31 @@ const getKYCContractAddress = (chainId: string | null | undefined) => {
   return kycAddress;
 };
 
-export const signerTezos = (rpcUrl: string) => {
-  const TezToolkit = createTezosToolkit(rpcUrl);
-
-  if (!SUPER_ADMIN_PRIVATE_KEY) {
-    throw new Error('No SUPER_ADMIN_PRIVATE_KEY defined.');
+const getTestnetKYCSignerPrivateKey = (chainId: string | null | undefined) => {
+  if (!chainId || !isKnownChainId(chainId)) {
+    throw new Error('Unknown chain Id');
   }
+
+  if (chainId !== TempleChainId.Basenet) {
+    throw new Error(TESTNET_KYC_SIGNING_ONLY_ERROR);
+  }
+
+  const testnetSignerPrivateKey = process.env.TESTNET_KYC_SIGNER_PRIVATE_KEY?.trim();
+
+  if (!testnetSignerPrivateKey) {
+    throw new Error(TESTNET_KYC_SIGNER_KEY_MISSING_ERROR);
+  }
+
+  return testnetSignerPrivateKey;
+};
+
+export const signerTezos = (rpcUrl: string, chainId: string | null | undefined) => {
+  const TezToolkit = createTezosToolkit(rpcUrl);
+  const testnetSignerPrivateKey = getTestnetKYCSignerPrivateKey(chainId);
 
   // Create signer
   TezToolkit.setProvider({
-    signer: new InMemorySigner(SUPER_ADMIN_PRIVATE_KEY)
+    signer: new InMemorySigner(testnetSignerPrivateKey)
   });
 
   return TezToolkit;
@@ -75,7 +89,7 @@ export const getKYCStatusFromContract = async (rpcUrl: string, address: string, 
 };
 
 export const signKYCAction = async (rpcUrl: string, address: string, chainId: string | null | undefined) => {
-  const tezos = signerTezos(rpcUrl);
+  const tezos = signerTezos(rpcUrl, chainId);
   const kycAddress = getKYCContractAddress(chainId);
   const contract = await loadContract(tezos, kycAddress);
 

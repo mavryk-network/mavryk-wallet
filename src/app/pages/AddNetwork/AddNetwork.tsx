@@ -79,7 +79,9 @@ export const AddNetworkScreen: FC = () => {
         chainId = await loadChainIdStrict(rpcBaseURL);
 
         if (isKnownChainId(chainId)) {
-          const currentBlockExplorerId = BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(chainId))?.id ?? 'tzkt';
+          const knownChainId = chainId;
+          const currentBlockExplorerId =
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(knownChainId))?.id ?? 'tzkt';
 
           setExplorerId(currentBlockExplorerId);
         } else {

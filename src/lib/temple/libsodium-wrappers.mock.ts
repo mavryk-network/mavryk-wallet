@@ -2,7 +2,7 @@ export const MOCK_PK_KEY = Buffer.from([109, 111, 99, 107, 32, 101, 100, 112, 10
 export const MOCK_SK_KEY = 'mock edsksig';
 
 export const mockSodiumUtil = {
-  crypto_generichash: jest.fn(() => 'mock string'),
+  crypto_generichash: jest.fn<string, [number, Uint8Array]>(() => 'mock string'),
   crypto_sign_seed_keypair: jest.fn(() => ({
     privateKey: 'mock privateKey',
     publicKey: Buffer.from('444e1f4ab90c304a5ac003d367747aab63815f583ff2330ce159d12c1ecceba1'),

@@ -2,22 +2,23 @@ import { useCallback, useState } from 'react';
 
 import { useDidUpdate } from 'lib/ui/hooks';
 
-/**
- * @arg sources // Memoize
- */
+/** Preserve the selected fallback until the ordered image URLs change. */
 export const useImagesStackLoading = (sources: string[]) => {
   const emptyStack = sources.length < 1;
 
   const [isLoading, setIsLoading] = useState(emptyStack === false);
   const [isStackFailed, setIsStackFailed] = useState(emptyStack);
 
+  const sourcesKey = JSON.stringify(sources);
+
+  // Reset loading only for changed URLs; metadata snapshot replacement needs no cleanup.
   useDidUpdate(() => {
     const emptyStack = sources.length < 1;
 
     setIndex(emptyStack ? -1 : 0);
     setIsLoading(emptyStack === false);
     setIsStackFailed(emptyStack);
-  }, [sources]);
+  }, [sourcesKey]);
 
   const [index, setIndex] = useState(emptyStack ? -1 : 0);
 

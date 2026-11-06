@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, InputHTMLAttributes, useCallback } from 'react';
+import React, { forwardRef, InputHTMLAttributes, useCallback } from 'react';
 
 import classNames from 'clsx';
 

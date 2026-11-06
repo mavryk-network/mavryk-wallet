@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Model3DViewer } from 'app/atoms/Model3DViewer';
-import { AssetImage } from 'app/templates/AssetImage';
-import { isSvgDataUriInUtf8Encoding, buildObjktCollectibleArtifactUri } from 'lib/images-uri';
+import { isSvgDataUriInUtf8Encoding, buildObjktCollectibleArtifactUri, buildRwaImagesStack } from 'lib/images-uri';
 import { TokenMetadata } from 'lib/metadata';
+import { ImageStacked } from 'lib/ui/ImageStacked';
 import { useLocalStorage } from 'lib/ui/local-storage';
 
 import { AudioCollectible } from '../components/AudioCollectible';
@@ -25,18 +25,20 @@ interface Props {
 export const RwaPageImage = memo<Props>(
   ({ metadata, mime, objktArtifactUri, className, areDetailsLoading, isAdultContent = false }) => {
     const [adultBlur] = useLocalStorage(LOCAL_STORAGE_ADULT_BLUR_TOGGLE_KEY, true);
+    const sources = useMemo(() => buildRwaImagesStack(metadata, true), [metadata]);
     const blurred = isAdultContent && adultBlur;
 
     const [isRenderFailedOnce, setIsRenderFailedOnce] = useState(false);
 
     const [shouldShowBlur, setShouldShowBlur] = useState(blurred);
+    // Synchronize the local reveal state with the adult preference; no external resources need cleanup.
     useEffect(() => setShouldShowBlur(blurred), [blurred]);
 
     const handleBlurClick = useCallback(() => setShouldShowBlur(false), []);
 
     const handleError = useCallback(() => setIsRenderFailedOnce(true), []);
 
-    if (areDetailsLoading) {
+    if (areDetailsLoading && !metadata) {
       return <CollectibleImageLoader large />;
     }
 
@@ -84,12 +86,13 @@ export const RwaPageImage = memo<Props>(
     }
 
     return (
-      <AssetImage
-        metadata={metadata}
-        fullViewCollectible
+      <ImageStacked
+        sources={sources}
+        alt={metadata?.name}
         loader={<CollectibleImageLoader large />}
         fallback={<RwaImageFallback symbol={metadata?.symbol} large />}
         className={className}
+        style={{ objectFit: 'contain', maxWidth: '100%', maxHeight: '100%' }}
       />
     );
   }

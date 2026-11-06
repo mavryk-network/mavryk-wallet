@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
 import { onInited } from 'lib/i18n';
+import { markLoad } from 'lib/load-perf';
 import { useTypedSWR } from 'lib/swr';
 import { delay } from 'lib/utils';
 
@@ -23,5 +24,6 @@ async function awaitI18n() {
   } catch (err: any) {
     console.error(err);
   }
+  markLoad('i18n');
   return null;
 }

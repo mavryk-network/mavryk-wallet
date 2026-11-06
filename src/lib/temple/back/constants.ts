@@ -1,0 +1,6 @@
+export {
+  DAPP_CONFIRMATION_AUTODECLINE_MS,
+  IN_WALLET_CONFIRMATION_AUTODECLINE_MS
+} from 'lib/temple/confirmation-timeouts';
+
+export const JWT_EXPIRING_SOON_THRESHOLD_MS = 60_000;

@@ -33,7 +33,7 @@ export type FormData = {
   derivationPath: LedgerDerivationPathType;
 };
 
-const DERIVATION_PATHS = [
+const DERIVATION_PATHS: { type: LedgerDerivationPathType; name: string }[] = [
   {
     type: 'default',
     name: t('defaultAccount')

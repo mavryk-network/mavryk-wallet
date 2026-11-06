@@ -54,8 +54,9 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
         currentChainId = await loadChainIdStrict(rpcUrl);
 
         if (currentChainId && isKnownChainId(currentChainId)) {
+          const knownChainId = currentChainId;
           const currentBlockExplorerId =
-            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(currentChainId))?.id ?? 'tzkt';
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(knownChainId))?.id ?? 'tzkt';
 
           if (currentChainId !== chainId) {
             setExplorerId(currentBlockExplorerId);

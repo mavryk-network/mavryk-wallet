@@ -1,54 +1,24 @@
-import { useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useDispatch } from 'react-redux';
-
-import { refreshTokensMetadataAction } from 'app/store/tokens-metadata/actions';
-import { useAllTokensMetadataSelector } from 'app/store/tokens-metadata/selectors';
-import { ALL_PREDEFINED_METADATAS_RECORD } from 'lib/assets/known-tokens';
-import { useChainId } from 'lib/temple/front';
+import { refreshMetadata } from 'lib/metadata/refresh-metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
+import { metadataKeys } from 'lib/query-keys';
+import { useOwnedUIStatus } from 'lib/store/zustand/ui-client';
 import { TempleChainId } from 'lib/temple/types';
-import { useLocalStorage } from 'lib/ui/local-storage';
-import { fetchWalletTokens, mapWalletTokensToFetchedMetadataRecord } from 'mavryk/api';
 
-const STORAGE_KEY = 'METADATA_REFRESH';
-
-type RefreshRecords = Record<string, number>;
-
-const REFRESH_VERSION = 1;
-
+/** Versioned media refresh retains its mainnet gate and exposes failures through Query. */
 export const useMetadataRefresh = () => {
-  const chainId = useChainId()!;
-  const dispatch = useDispatch();
-
-  const [records, setRecords] = useLocalStorage<RefreshRecords>(STORAGE_KEY, {});
-
-  const tokensMetadata = useAllTokensMetadataSelector();
-  const slugsOnAppLoad = useMemo(
-    () => Object.keys(tokensMetadata).filter(slug => !ALL_PREDEFINED_METADATAS_RECORD[slug]),
-    []
-  );
-
-  useEffect(() => {
-    const lastVersion = records[chainId];
-    const setLastVersion = () => setRecords(r => ({ ...r, [chainId]: REFRESH_VERSION }));
-
-    const needToSetVersion = !lastVersion || lastVersion < REFRESH_VERSION;
-
-    if (!slugsOnAppLoad.length) {
-      if (needToSetVersion) setLastVersion();
-
-      return;
-    }
-
-    if (!needToSetVersion || chainId !== TempleChainId.Mainnet) return;
-
-    fetchWalletTokens().then(
-      tokens => {
-        const record = mapWalletTokensToFetchedMetadataRecord(slugsOnAppLoad, tokens);
-        dispatch(refreshTokensMetadataAction(record));
-        setLastVersion();
-      },
-      error => console.error(error)
-    );
-  }, [chainId]);
+  const client = useQueryClient();
+  const scope = useMetadataScope();
+  const { isReady } = useOwnedUIStatus();
+  useQuery({
+    queryKey: [...metadataKeys.scope('tokens', scope), 'versioned-refresh'],
+    enabled: isReady && !!scope.account && !!scope.networkId && scope.chainId === TempleChainId.Mainnet,
+    queryFn: ({ signal }) => refreshMetadata(client, scope, signal).then(() => true),
+    staleTime: Infinity,
+    cacheTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  });
 };

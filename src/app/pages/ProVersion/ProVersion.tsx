@@ -11,6 +11,7 @@ import { FooterSocials } from 'app/templates/Socials/FooterSocials';
 import { T, TID, t } from 'lib/i18n';
 import { useAccount, useChainId, useNetwork, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
+import { isNumeric } from 'lib/utils/numbers';
 import { navigate } from 'lib/woozie';
 
 import { SuccessStateType } from '../SuccessScreen/SuccessScreen';
@@ -130,8 +131,9 @@ const GetProVersionScreen: FC<GetProVersionScreenProps> = ({ setNavigateToForm }
     } catch (e: unknown) {
       // show err on ui
       const errorMessage = e instanceof Error ? e.message : String(e);
+      const errorDescription = isNumeric(errorMessage) ? getErrorMsgByCode(errorMessage) : errorMessage;
 
-      setFormState({ submitting: false, error: getErrorMsgByCode(errorMessage) });
+      setFormState({ submitting: false, error: errorDescription });
     }
   }, [formState.submitting, publicKeyHash, rpcUrl, setNavigateToForm, updateAccountKYCStatus, chainId]);
 

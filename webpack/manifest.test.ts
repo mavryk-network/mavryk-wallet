@@ -2,6 +2,7 @@ jest.mock('./dotenv', () => ({
   envFilesData: {}
 }));
 
+import { envFilesData } from './dotenv';
 import { buildManifest } from './manifest';
 
 describe('extension manifest hardening', () => {
@@ -45,6 +46,25 @@ describe('extension manifest hardening', () => {
     expect(hostsOf('safari')).toEqual(apiHosts);
     expect(hostsOf('chrome')).toEqual([]);
     expect(hostsOf('opera')).toEqual([]);
+  });
+
+  it('grants the EXTERNAL_API host only to browsers with random extension origins', () => {
+    const hostsOf = (vendor: string) => {
+      const manifest = buildManifest(vendor) as { permissions?: string[]; host_permissions?: string[] };
+      return [...(manifest.permissions ?? []), ...(manifest.host_permissions ?? [])].filter(p =>
+        p.includes('equiteez')
+      );
+    };
+
+    envFilesData.EXTERNAL_API = 'https://basenet.api.equiteez.com/v1';
+    try {
+      expect(hostsOf('firefox')).toEqual(['https://basenet.api.equiteez.com/*']);
+      expect(hostsOf('safari')).toEqual(['https://basenet.api.equiteez.com/*']);
+      expect(hostsOf('chrome')).toEqual([]);
+      expect(hostsOf('opera')).toEqual([]);
+    } finally {
+      delete envFilesData.EXTERNAL_API;
+    }
   });
 
   it('requires Firefox versions with built-in data consent', () => {

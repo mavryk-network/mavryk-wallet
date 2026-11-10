@@ -1,3 +1,4 @@
+import { encodeAddress } from '@mavrykdynamics/webmavryk-utils';
 import BigNumber from 'bignumber.js';
 
 import { OperationsPreview } from 'lib/temple/types';
@@ -138,7 +139,7 @@ const extendExpenses = (type: any, operation: any, expenses: RawOperationAssetEx
           tokenAddress: operation.to,
           amount: new BigNumber(transfer.args[1].args[1].int),
           tokenId: Number(transfer.args[1].args[0].int),
-          to: transfer.args[0].string
+          to: readMichelsonAddress(transfer.args[0])
         });
       });
     });
@@ -151,7 +152,7 @@ const extendExpenses = (type: any, operation: any, expenses: RawOperationAssetEx
     while (args?.[1]?.prim) {
       args = args?.[1]?.args;
     }
-    const to = args?.[0]?.string;
+    const to = readMichelsonAddress(args?.[0]);
     const amount = args?.[1]?.int;
     if ([tokenAddress, to, amount].every(value => typeof value === 'string')) {
       expenses.push({
@@ -162,6 +163,23 @@ const extendExpenses = (type: any, operation: any, expenses: RawOperationAssetEx
     }
   }
 };
+
+/**
+ * Read a Michelson address node in either readable (`string`) or optimized (`bytes`) form. A dApp can encode the
+ * recipient as bytes; reading only strings would hide the transfer from the preview.
+ *
+ * @returns the base58 address, or undefined when the node is not a decodable address
+ */
+function readMichelsonAddress(node: any): string | undefined {
+  if (typeof node?.string === 'string') return node.string;
+  if (typeof node?.bytes !== 'string' || !/^[0-9a-fA-F]{44,}$/.test(node.bytes)) return undefined;
+  try {
+    // The first 22 bytes are the address; any remainder is an entrypoint suffix.
+    return encodeAddress(node.bytes.slice(0, 44));
+  } catch {
+    return undefined;
+  }
+}
 
 function getParameters(op: any) {
   return op?.parameters ?? op?.parameter;

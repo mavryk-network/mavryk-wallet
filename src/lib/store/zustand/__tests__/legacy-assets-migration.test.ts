@@ -122,20 +122,49 @@ it.each([
   { tokens: { data: { 'bad@@key': { a: { status: 'enabled' } } } } },
   { tokens: { data: { 'a@b': { a: { status: 'missing' } } } } },
   { tokens: { data: { 'a@b': { a: { status: 'idle', manual: 0 } } } } }
-])('rejects invalid asset keys/status/manual scalars', overrides => {
-  expect(() =>
-    parseLegacyAssetsSources({ ...fixture, 'persist:root.assets': { ...fixture['persist:root.assets'], ...overrides } })
-  ).toThrow();
+])('skips invalid asset keys/status/manual scalars and keeps the valid records', overrides => {
+  const result = parseLegacyAssetsSources({
+    ...fixture,
+    'persist:root.assets': {
+      ...fixture['persist:root.assets'],
+      tokens: { data: { ...fixture['persist:root.assets'].tokens.data, ...overrides.tokens.data } }
+    }
+  });
+  expect(result.assets?.tokens.data).toEqual({
+    ...fixture['persist:root.assets'].tokens.data,
+    ...('a@b' in overrides.tokens.data ? { 'a@b': {} } : {})
+  });
 });
 
-it('rejects invalid flags, timestamps, metadata and unsafe ignored graphs', () => {
+it('skips invalid flags, timestamps and metadata records but keeps the valid ones', () => {
+  const valid = { val: true, ts: 1 };
+  const result = parseLegacyAssetsSources({
+    ...fixture,
+    'persist:root.collectibles': { adultFlags: { nft: { val: 'false', ts: 1 }, ok: valid } },
+    'persist:root.rwas': { adultFlags: { nft: { val: false, ts: Infinity }, ok: valid } },
+    'persist:root.partnersPromotion': { shouldShowPromotion: false, promotionHidingTimestamps: { x: NaN, y: 1 } },
+    'persist:root.collectiblesMetadata': { records: [{ ...metadata, decimals: -1 }, metadata] },
+    'persist:root.rwasMetadata': {
+      records: [
+        { ...metadata, address: 'a'.repeat(513), id: '0' },
+        { ...metadata, thumbnailUri: `data:image/png;base64,${'A'.repeat(9000)}` },
+        { ...metadata, id: '9'.repeat(600) },
+        { ...metadata, id: '2' }
+      ]
+    }
+  });
+  expect(result.collectibleAdultFlags).toEqual({ ok: valid });
+  expect(result.rwaAdultFlags).toEqual({ ok: valid });
+  expect(result.promotion).toEqual({ shouldShowPromotion: false, promotionHidingTimestamps: { y: 1 } });
+  expect(result.collectiblesMetadata).toEqual({ KT1example_0: metadata });
+  expect(result.rwasMetadata).toEqual({ KT1example_2: { ...metadata, id: '2' } });
+});
+
+it('still rejects corrupt slice structures and unsafe graphs', () => {
   for (const [key, value] of [
-    ['persist:root.collectibles', { adultFlags: { nft: { val: 'false', ts: 1 } } }],
-    ['persist:root.rwas', { adultFlags: { nft: { val: false, ts: Infinity } } }],
     ['persist:root.partnersPromotion', { shouldShowPromotion: 1, promotionHidingTimestamps: {} }],
-    ['persist:root.partnersPromotion', { shouldShowPromotion: false, promotionHidingTimestamps: { x: NaN } }],
-    ['persist:root.collectiblesMetadata', { records: [{ ...metadata, decimals: -1 }] }],
-    ['persist:root.rwasMetadata', { records: [{ ...metadata, address: 'a'.repeat(513), id: '0' }] }],
+    ['persist:root.collectibles', { adultFlags: [] }],
+    ['persist:root.collectiblesMetadata', { records: {} }],
     ['persist:root.assets', { ...fixture['persist:root.assets'], ignored: JSON.parse('{"__proto__":{}}') }]
   ])
     expect(() => parseLegacyAssetsSources({ ...fixture, [key as string]: value })).toThrow();
@@ -259,10 +288,10 @@ it('uses the production slug helper for metadata arrays and preserves last-recor
   });
   expect(result.collectiblesMetadata.KT1example_0.name).toBe('Last');
   expect(result.collectiblesMetadata.KT1example_100.id).toBe('1e+2');
-  expect(() =>
+  expect(
     parseLegacyAssetsSources({
       ...fixture,
       'persist:root.rwasMetadata': { records: [{ ...metadata, id: 'not-a-number' }] }
-    })
-  ).toThrow();
+    }).rwasMetadata
+  ).toEqual({});
 });

@@ -2,12 +2,12 @@ import { z } from 'zod';
 
 import { TOKEN_METADATA_SCHEMA } from './metadata-state.schema';
 import { UI_SCHEMA, UI_PREFERENCES_SCHEMA } from './ui-state.schema';
-import { assertSafeData, parseData, SAFE_KEY_SCHEMA } from './validation';
+import { assertSafeData, parseData, pickValidRecords, reportDroppedLegacyRecords, SAFE_KEY_SCHEMA } from './validation';
 
 export const LEGACY_UI_ROOT_KEY = 'persist:temple-root';
 export const ANALYTICS_ID_SCHEMA = UI_SCHEMA.shape.userId.unwrap();
 const preferencesSchema = UI_PREFERENCES_SCHEMA.extend({ userId: UI_SCHEMA.shape.userId.optional() });
-const metadataSchema = z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA);
+const PREFERENCE_FIELD_SCHEMAS = new Map<string, z.ZodTypeAny>(Object.entries(preferencesSchema.shape));
 const objectSchema = z.record(z.unknown());
 
 /** Decode only supported object roots/slices; absence is handled by the caller, never by parse failure. */
@@ -46,8 +46,23 @@ export function parseLegacyUIRoot(raw: unknown) {
   copy('newsletter', 'shouldShowNewsletterModal');
   copy('notifications', 'isNewsEnabled');
   copy('advertising', 'lastSeenPromotionName');
-  const preferences = parseData(preferencesSchema, values);
-  const metadata = slices.tokensMetadata ? parseData(metadataSchema, slices.tokensMetadata.metadataRecord) : {};
+  let dropped = 0;
+  const onDrop = () => void dropped++;
+  // Each preference is validated on its own: an invalid one keeps its destination default instead of blocking unlock.
+  const preferences = parseData(
+    preferencesSchema,
+    Object.fromEntries(
+      Object.entries(values).filter(([field, value]) => {
+        const isValid = PREFERENCE_FIELD_SCHEMAS.get(field)?.safeParse(value).success === true;
+        if (!isValid) onDrop();
+        return isValid;
+      })
+    )
+  );
+  const metadata = slices.tokensMetadata
+    ? pickValidRecords(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA, slices.tokensMetadata.metadataRecord, onDrop)
+    : {};
+  reportDroppedLegacyRecords('preference/metadata', dropped);
   // Fiat currency, privacy, caches, nested assets/adult flags/promotion, collectible/RWA metadata stay with their owners.
   return { preferences, metadata };
 }

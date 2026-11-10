@@ -633,7 +633,16 @@ async function requestConfirm({
     }
   });
 
-  const confirmWin = await createConfirmationWindow(id, initialConfirmToken);
+  let confirmWin: browser.Windows.Window;
+  try {
+    confirmWin = await createConfirmationWindow(id, initialConfirmToken);
+  } catch {
+    // No prompt can appear (e.g. Firefox Android has no windows API): decline so the request settles and the shared
+    // dApp queue moves on, instead of leaving it pending forever.
+    stopRequestListening();
+    onDecline();
+    return;
+  }
 
   const closeWindow = async () => {
     if (confirmWin.id) {

@@ -42,6 +42,13 @@ it('foreground waits for the background before reading fallback and never owns a
   await client.updateOwnedUI({ kind: 'preferences', values: { isNewsEnabled: true } });
   expect(client.getOwnedUISnapshot().ui.isNewsEnabled).toBe(true);
   expect(JSON.parse(memory.records['zustand-ui'] as string).state.isNewsEnabled).toBe(true);
+  // A rejected command reaches its caller only; the follow-up read keeps the UI up.
+  await expect(
+    client.updateOwnedUI({ kind: 'preferences', values: { balanceMode: 'invalid' } } as never)
+  ).rejects.toThrow('could not save');
+  await client.updateOwnedUI();
+  expect(client.getOwnedUISnapshot().ui.isNewsEnabled).toBe(true);
+  // A failed snapshot read still closes the gate until an explicit retry.
   (memory.storage.get as jest.Mock).mockRejectedValueOnce(new Error('storage unavailable'));
   await expect(client.updateOwnedUI()).rejects.toThrow('retry');
   expect(() => client.getOwnedUISnapshot()).toThrow('retry');

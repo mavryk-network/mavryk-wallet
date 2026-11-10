@@ -388,6 +388,8 @@ export function deriveContactsKey(accPublicKeyHash: string) {
 
 export function removeAccount(id: string, password: string) {
   return withUnlocked(async ({ vault }) => {
+    // A wrong password must not end the API session as a side effect.
+    await Vault.verifyPassword(password);
     try {
       await logoutAuth();
     } catch (err) {
@@ -478,6 +480,8 @@ export function updateSettings(settings: Partial<TempleSettings>) {
 
 export function removeHdWallet(id: string, password: string) {
   return withUnlocked(async ({ vault }) => {
+    // A wrong password must not end the API session as a side effect.
+    await Vault.verifyPassword(password);
     try {
       await logoutAuth();
     } catch (err) {
@@ -492,6 +496,8 @@ export function removeHdWallet(id: string, password: string) {
 
 export function removeAccountsByType(type: Exclude<TempleAccountType, TempleAccountType.HD>, password: string) {
   return withUnlocked(async ({ vault }) => {
+    // A wrong password must not end the API session as a side effect.
+    await Vault.verifyPassword(password);
     try {
       await logoutAuth();
     } catch (err) {

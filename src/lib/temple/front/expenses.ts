@@ -65,6 +65,10 @@ const mapExpensesArray = (operation: any, accountAddress: string, isForged: bool
       expenses: []
     };
   }
+  if (kind === 'increase_paid_storage') {
+    // `amount` is a storage size in bytes, not mumav: it must never be shown as a MVRK amount or expense.
+    return { amount: undefined, type, isEntrypointInteraction: false, expenses: [] };
+  }
   if (kind === 'origination') {
     const balance = getOriginationBalance(operation, isForged);
     return {

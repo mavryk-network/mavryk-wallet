@@ -96,6 +96,14 @@ describe('Expenses', () => {
       }
     ]);
   });
+  it('never shows the byte amount of increase_paid_storage as MVRK', () => {
+    const [preview] = tryParseExpenses(
+      [{ kind: 'increase_paid_storage', amount: '4000000', destination: CONTRACT }] as any,
+      ACCOUNT
+    );
+    expect(preview).toMatchObject({ amount: undefined, expenses: [] });
+  });
+
   describe('origination', () => {
     it('shows the balance of a forged origination as an MVRK expense', () => {
       const [expense] = tryParseExpenses(

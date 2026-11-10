@@ -1,4 +1,4 @@
-import { pickValidAssets } from './load-account-assets';
+import { pickValidAssets } from './load-account-assets.helpers';
 
 const LONG_SLUG = `KT1spam_${'9'.repeat(600)}`;
 

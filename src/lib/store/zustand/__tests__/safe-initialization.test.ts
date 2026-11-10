@@ -92,6 +92,7 @@ it('activates scoped read-only consumers without foreground destination adapters
       'app/store/owned-assets.middleware.ts',
       'app/store/ab-testing/selectors.ts',
       'app/store/advertising/selectors.ts',
+      'lib/assets/load-account-assets.helpers.ts',
       'lib/assets/load-account-assets.ts',
       'lib/assets/sync-security.ts',
       'lib/assets/use-assets-query.ts',

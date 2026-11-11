@@ -3,12 +3,12 @@ import { z } from 'zod';
 
 import { tokenToSlug } from 'lib/assets';
 
-import { ADULT_FLAGS_SCHEMA, ASSET_RECORDS_SCHEMA } from './assets-state.schema';
+import { ADULT_FLAGS_SCHEMA, STORED_ASSET_SCHEMA } from './assets-state.schema';
 import { decodeLegacyUIRoot } from './legacy-ui-source';
 import { TOKEN_METADATA_SCHEMA } from './metadata-state.schema';
 import { BrowserStorage } from './persist-storage';
 import { UI_SCHEMA } from './ui-state.schema';
-import { parseData, SAFE_KEY_SCHEMA } from './validation';
+import { parseData, pickValidRecords, reportDroppedLegacyRecords, SAFE_KEY_SCHEMA } from './validation';
 
 export const LEGACY_ASSETS_KEYS = [
   'persist:root.assets',
@@ -19,48 +19,86 @@ export const LEGACY_ASSETS_KEYS = [
   'persist:root.rwasMetadata'
 ] as const;
 export type LegacyAssetsKey = (typeof LEGACY_ASSETS_KEYS)[number];
-const sourceSchema = z.object({
-  tokens: z.object({ data: ASSET_RECORDS_SCHEMA }),
-  collectibles: z.object({ data: ASSET_RECORDS_SCHEMA }),
-  rwas: z.object({ data: ASSET_RECORDS_SCHEMA })
+const ASSET_KEY_SCHEMA = SAFE_KEY_SCHEMA.refine(value => /^[^@]+@[^@]+$/.test(value));
+const sliceSchema = z.object({ data: z.unknown() });
+const sourceSchema = z.object({ tokens: sliceSchema, collectibles: sliceSchema, rwas: sliceSchema });
+const flagsSchema = z.object({ adultFlags: z.unknown() });
+const promotionSchema = UI_SCHEMA.pick({ shouldShowPromotion: true }).extend({
+  promotionHidingTimestamps: z.unknown()
 });
-const flagsSchema = z.object({ adultFlags: ADULT_FLAGS_SCHEMA });
-const promotionSchema = UI_SCHEMA.pick({ shouldShowPromotion: true, promotionHidingTimestamps: true });
-const metadataSchema = z.object({
-  records: z.array(
-    TOKEN_METADATA_SCHEMA.refine(metadata => {
-      const id = new BigNumber(metadata.id);
-      return metadata.address.length > 0 && id.isInteger() && id.gte(0);
-    }, 'Invalid legacy metadata identifier')
-  )
-});
+const metadataSchema = z.object({ records: z.array(z.unknown()) });
+const LEGACY_METADATA_SCHEMA = TOKEN_METADATA_SCHEMA.refine(metadata => {
+  const id = new BigNumber(metadata.id);
+  return metadata.address.length > 0 && id.isInteger() && id.gte(0);
+}, 'Invalid legacy metadata identifier');
+const ADULT_FLAG_SCHEMA = ADULT_FLAGS_SCHEMA.valueSchema;
+const TIMESTAMP_SCHEMA = UI_SCHEMA.shape.promotionHidingTimestamps.valueSchema;
 
-/** Decode all six sources before preparing any writes. Present incomplete/malformed slices fail closed. */
+/**
+ * Decode all six sources before preparing any writes. A present slice with a corrupt structure fails closed; invalid
+ * individual records (fetched third-party content) are skipped so they can never lock the wallet after an update.
+ */
 export function parseLegacyAssetsSources(raw: Partial<Record<LegacyAssetsKey, unknown>>) {
+  let dropped = 0;
+  const onDrop = () => void dropped++;
   const decode = (key: LegacyAssetsKey) => (raw[key] === undefined ? undefined : decodeLegacyUIRoot(raw[key]));
   const assets = decode(LEGACY_ASSETS_KEYS[0]);
   const collectibles = decode(LEGACY_ASSETS_KEYS[1]);
   const rwas = decode(LEGACY_ASSETS_KEYS[2]);
   const promotion = decode(LEGACY_ASSETS_KEYS[3]);
+  const parseAssetRecords = (data: unknown) => {
+    const accounts = pickValidRecords(ASSET_KEY_SCHEMA, z.record(z.unknown()), data, onDrop);
+    return Object.fromEntries(
+      Object.entries(accounts).map(([key, records]) => [
+        key,
+        pickValidRecords(SAFE_KEY_SCHEMA, STORED_ASSET_SCHEMA, records, onDrop)
+      ])
+    );
+  };
   const convertMetadata = (key: LegacyAssetsKey) => {
     const decoded = decode(key);
     const records: Record<string, z.infer<typeof TOKEN_METADATA_SCHEMA>> = {};
     if (decoded !== undefined) {
-      for (const metadata of parseData(metadataSchema, decoded).records) {
+      for (const item of parseData(metadataSchema, decoded).records) {
+        const metadata = LEGACY_METADATA_SCHEMA.safeParse(item);
+        const slug = metadata.success ? SAFE_KEY_SCHEMA.safeParse(tokenToSlug(metadata.data)) : undefined;
         // Match the legacy Map conversion: the last occurrence of a slug wins.
-        records[parseData(SAFE_KEY_SCHEMA, tokenToSlug(metadata))] = metadata;
+        if (metadata.success && slug?.success) records[slug.data] = metadata.data;
+        else onDrop();
       }
     }
     return records;
   };
-  return {
-    assets: assets === undefined ? undefined : parseData(sourceSchema, assets),
-    collectibleAdultFlags: collectibles === undefined ? {} : parseData(flagsSchema, collectibles).adultFlags,
-    rwaAdultFlags: rwas === undefined ? {} : parseData(flagsSchema, rwas).adultFlags,
-    promotion: promotion === undefined ? undefined : parseData(promotionSchema, promotion),
+  const assetSlices = assets === undefined ? undefined : parseData(sourceSchema, assets);
+  const promotionSlice = promotion === undefined ? undefined : parseData(promotionSchema, promotion);
+  const result = {
+    assets: assetSlices && {
+      tokens: { data: parseAssetRecords(assetSlices.tokens.data) },
+      collectibles: { data: parseAssetRecords(assetSlices.collectibles.data) },
+      rwas: { data: parseAssetRecords(assetSlices.rwas.data) }
+    },
+    collectibleAdultFlags:
+      collectibles === undefined
+        ? {}
+        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, parseData(flagsSchema, collectibles).adultFlags, onDrop),
+    rwaAdultFlags:
+      rwas === undefined
+        ? {}
+        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, parseData(flagsSchema, rwas).adultFlags, onDrop),
+    promotion: promotionSlice && {
+      shouldShowPromotion: promotionSlice.shouldShowPromotion,
+      promotionHidingTimestamps: pickValidRecords(
+        SAFE_KEY_SCHEMA,
+        TIMESTAMP_SCHEMA,
+        promotionSlice.promotionHidingTimestamps,
+        onDrop
+      )
+    },
     collectiblesMetadata: convertMetadata(LEGACY_ASSETS_KEYS[4]),
     rwasMetadata: convertMetadata(LEGACY_ASSETS_KEYS[5])
   };
+  reportDroppedLegacyRecords('asset', dropped);
+  return result;
 }
 
 /** Browser reads must succeed with absence before the foreground may inspect a serialized fallback. */

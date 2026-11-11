@@ -215,6 +215,26 @@ describe('requestConfirm decision finalisation', () => {
     locked();
   });
 
+  it('declines instead of hanging when the confirmation window cannot be opened', async () => {
+    windowsApi.create = jest.fn(() => {
+      throw new Error('windows API unavailable');
+    });
+    const outcome = jest.fn();
+    requestOperation(ORIGIN, {
+      type: MavrykWalletDAppMessageType.OperationRequest,
+      sourcePkh: PKH,
+      opParams: [{ kind: 'transaction', to: PKH, amount: 1 }]
+    }).then(
+      res => outcome('resolved', res),
+      err => outcome('rejected', err.message)
+    );
+    await flushMicrotasks();
+
+    expect(windowsApi.create).toHaveBeenCalledTimes(2);
+    expect(outcome).toHaveBeenCalledWith('rejected', MavrykWalletDAppErrorType.NotGranted);
+    expect(handlers).toHaveLength(0);
+  });
+
   it('does not decline a confirmed operation while the vault is still signing and broadcasting', async () => {
     const sendResult = createDeferred<{ hash: string; results: any[] }>();
     const sendOperations = jest.fn(() => sendResult.promise);

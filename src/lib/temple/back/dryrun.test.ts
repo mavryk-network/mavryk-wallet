@@ -38,14 +38,15 @@ describe('operation parameter validation', () => {
         },
         {
           kind: 'finalize_unstake'
-        },
-        {
-          kind: 'increase_paid_storage',
-          amount: 1,
-          destination: CONTRACT_ADDRESS
         }
       ])
     ).not.toThrow();
+  });
+
+  it('rejects increase_paid_storage, whose byte amount would preview as MVRK', () => {
+    expect(() =>
+      validateOpParams([{ kind: 'increase_paid_storage', amount: 4_000_000, destination: CONTRACT_ADDRESS }])
+    ).toThrow('Invalid operation parameters');
   });
 
   it('rejects unknown operation kinds', () => {

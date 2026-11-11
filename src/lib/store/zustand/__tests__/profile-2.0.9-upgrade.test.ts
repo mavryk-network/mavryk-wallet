@@ -143,3 +143,50 @@ it('keeps 2.0.9 choices when /assets reclassifies older tokens and stays stable 
   expect(snapshot.metadata).toEqual(loaded.metadata);
   for (const key of LEGACY_KEYS) expect(restarted.records[key]).toEqual(LEGACY[key]);
 });
+
+it('a 2.0.9 profile with an airdropped spam token still unlocks and keeps every other record', async () => {
+  const legacy = JSON.parse(JSON.stringify(LEGACY));
+  const root = legacy['persist:temple-root'];
+  const longId = '9'.repeat(600);
+  const longSlug = `KT1Spam1xxxxxxxxxxxxxxxxxxxxxxxxxx_${longId}`;
+  const hugeThumbnail = `data:image/svg+xml;base64,${'A'.repeat(9000)}`;
+  root.tokensMetadata.metadataRecord['KT1Spam2xxxxxxxxxxxxxxxxxxxxxxxxxx_0'] = {
+    address: 'KT1Spam2xxxxxxxxxxxxxxxxxxxxxxxxxx',
+    id: '0',
+    name: 'Claim reward',
+    symbol: 'SPAM',
+    decimals: 0,
+    thumbnailUri: hugeThumbnail
+  };
+  root.tokensMetadata.metadataRecord[longSlug] = {
+    address: 'KT1Spam1xxxxxxxxxxxxxxxxxxxxxxxxxx',
+    id: longId,
+    name: 'x',
+    symbol: 'x',
+    decimals: 0
+  };
+  legacy['persist:root.assets'].tokens.data[KEY][longSlug] = { status: 'idle' };
+  const [balanceKey] = Object.keys(root.balances.balancesAtomic);
+  root.balances.balancesAtomic[balanceKey].data[longSlug] = '1';
+  legacy['persist:root.rwasMetadata'].records.push({
+    address: 'KT1Spam3xxxxxxxxxxxxxxxxxxxxxxxxxx',
+    id: '0',
+    name: 'x',
+    symbol: 'x',
+    decimals: 0,
+    thumbnailUri: hugeThumbnail
+  });
+
+  const snapshot = await boot(legacy).request();
+
+  expect(snapshot.ui).toMatchObject({ legacyMigrated: true, legacyAssetsMigrated: true });
+  expect(snapshot.balances.isBalancesAdopted).toBe(true);
+  expect(Object.keys(snapshot.metadata.tokensMetadata).some(slug => slug.startsWith('KT1Spam'))).toBe(false);
+  expect(Object.keys(snapshot.metadata.rwasMetadata).some(slug => slug.startsWith('KT1Spam'))).toBe(false);
+  expect(snapshot.assets.tokens[KEY]).not.toHaveProperty(longSlug);
+  expect(snapshot.balances.legacy[balanceKey]).not.toHaveProperty(longSlug);
+  for (const slug of Object.keys(LEGACY['persist:temple-root'].tokensMetadata.metadataRecord))
+    expect(snapshot.metadata.tokensMetadata).toHaveProperty([slug]);
+  for (const [slug, record] of Object.entries(legacyAssets.tokens.data[KEY]))
+    expect(snapshot.assets.tokens[KEY][slug].status).toBe(record.status);
+});

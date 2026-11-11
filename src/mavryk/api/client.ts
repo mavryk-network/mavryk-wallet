@@ -205,6 +205,20 @@ function getAuthorizationAccessToken(headers: AxiosRequestConfig['headers']) {
     : null;
 }
 
+/**
+ * Whether a request resolves to the origin of the auth context's wallet API. An absolute or protocol-relative `url`
+ * overrides `baseURL` in axios, so the access token is attached only after checking the final origin.
+ */
+function isRequestToApiOrigin(config: AxiosRequestConfig, apiBaseUrl: string) {
+  try {
+    const expected = new URL(apiBaseUrl).origin;
+    const base = config.baseURL ?? apiBaseUrl;
+    return new URL(config.url ?? '', base.endsWith('/') ? base : `${base}/`).origin === expected;
+  } catch {
+    return false;
+  }
+}
+
 mavrykApi.interceptors.request.use(async rawConfig => {
   const config: MavrykApiRequestConfig = rawConfig;
 
@@ -230,7 +244,7 @@ mavrykApi.interceptors.request.use(async rawConfig => {
   }
   config._authContext = authContext;
 
-  if (accessToken && isAuthRefreshCandidate(config.url)) {
+  if (accessToken && isAuthRefreshCandidate(config.url) && isRequestToApiOrigin(config, networkBaseUrl)) {
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${accessToken}`

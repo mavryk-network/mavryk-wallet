@@ -429,6 +429,11 @@ export class Vault {
     });
   }
 
+  /** Reject a wrong password before any side effect of the caller (e.g. API logout) runs. */
+  static async verifyPassword(password: string) {
+    await Vault.toValidPassKey(password);
+  }
+
   private static toValidPassKey(password: string) {
     return withError('Invalid password', async doThrow => {
       const passHash = await Passworder.generateHash(password);

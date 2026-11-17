@@ -4,24 +4,28 @@ import { z } from 'zod';
 import { awaitStoresHydrated } from './await-stores-hydrated';
 import { BALANCE_VALUE_SCHEMA, BALANCES_SCHEMA } from './balances-state.schema';
 import type { createBalancesStore } from './balances.store';
-import { decodeLegacyUIRoot } from './legacy-ui-source';
+import { decodeLegacySlices } from './legacy-ui-source';
 import { OwnerFallbackKey } from './owner-fallback';
 import { BrowserStorage } from './persist-storage';
-import { parseData, pickValidRecords, reportDroppedLegacyRecords, SAFE_KEY_SCHEMA } from './validation';
+import {
+  parseData,
+  pickValidRecordMaps,
+  pickValidRecords,
+  reportDroppedLegacyRecords,
+  SAFE_KEY_SCHEMA
+} from './validation';
 
 const sourceSchema = z.object({ balancesAtomic: z.unknown() });
 type LegacyBalances = Record<string, Record<string, string>>;
 
-/** Keep valid account/chain balances; one oversized slug (an airdropped token) must not block adoption. */
+/**
+ * Keep valid account/chain balances; one oversized or unsafe slug (an airdropped token) must not block adoption. Each
+ * container is checked shallowly and each balance on its own, so one bad entry drops only itself.
+ */
 function parseLegacyBalances(raw: unknown): LegacyBalances {
   let dropped = 0;
   const onDrop = () => void dropped++;
-  const entities = pickValidRecords(
-    SAFE_KEY_SCHEMA,
-    z.object({ data: z.unknown() }),
-    parseData(sourceSchema, raw).balancesAtomic,
-    onDrop
-  );
+  const entities = pickValidRecordMaps(SAFE_KEY_SCHEMA, sourceSchema.parse(raw).balancesAtomic, onDrop);
   const balances = Object.fromEntries(
     Object.entries(entities).map(([key, entity]) => [
       key,
@@ -59,7 +63,7 @@ export function createBalancesMigration(options: {
           const result = await storage.get(key);
           const raw = result[key] === undefined ? await readFallback(key) : result[key];
           if (raw === null && result[key] === undefined) continue;
-          const root = decodeLegacyUIRoot(raw);
+          const root = decodeLegacySlices(raw, ['balances']);
           if (root.balances !== undefined) {
             source = parseLegacyBalances(root.balances);
             break;

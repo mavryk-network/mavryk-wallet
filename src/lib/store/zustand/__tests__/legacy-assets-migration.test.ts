@@ -160,14 +160,43 @@ it('skips invalid flags, timestamps and metadata records but keeps the valid one
   expect(result.rwasMetadata).toEqual({ KT1example_2: { ...metadata, id: '2' } });
 });
 
-it('still rejects corrupt slice structures and unsafe graphs', () => {
+it('still rejects corrupt slice structures', () => {
   for (const [key, value] of [
     ['persist:root.partnersPromotion', { shouldShowPromotion: 1, promotionHidingTimestamps: {} }],
     ['persist:root.collectibles', { adultFlags: [] }],
     ['persist:root.collectiblesMetadata', { records: {} }],
-    ['persist:root.assets', { ...fixture['persist:root.assets'], ignored: JSON.parse('{"__proto__":{}}') }]
+    ['persist:root.assets', { ...fixture['persist:root.assets'], tokens: { data: [] } }]
   ])
     expect(() => parseLegacyAssetsSources({ ...fixture, [key as string]: value })).toThrow();
+});
+
+it('ignores unsafe content outside the migrated fields and skips only the unsafe records', () => {
+  // Storage keeps `__proto__` as an own key; define it last, since a compiled spread would assign the prototype.
+  const tokens: Record<string, unknown> = {
+    ...fixture['persist:root.assets'].tokens.data['alice@mainnet'],
+    unsafe: { status: 'idle', constructor: {} }
+  };
+  Object.defineProperty(tokens, '__proto__', { value: { status: 'enabled' }, enumerable: true });
+  const result = parseLegacyAssetsSources({
+    ...fixture,
+    'persist:root.assets': {
+      ...fixture['persist:root.assets'],
+      ignored: JSON.parse('{"__proto__":{}}'),
+      mainnetScamlist: { data: { constructor: { prototype: {} } } },
+      tokens: { data: { 'alice@mainnet': tokens } }
+    },
+    'persist:root.partnersPromotion': {
+      ...fixture['persist:root.partnersPromotion'],
+      promotion: { data: { constructor: {} } }
+    },
+    'persist:root.rwasMetadata': {
+      records: [...fixture['persist:root.rwasMetadata'].records, { ...metadata, id: '7', prototype: {} }]
+    }
+  });
+  expect(result.assets?.tokens.data).toEqual(fixture['persist:root.assets'].tokens.data);
+  expect(Object.keys(result.assets?.tokens.data['alice@mainnet'] ?? {})).not.toContain('__proto__');
+  expect(result.promotion?.promotionHidingTimestamps).toEqual({ '/home': 123 });
+  expect(result.rwasMetadata).toEqual({ KT1example_1: { ...metadata, id: '1', name: 'RWA' } });
 });
 
 it('never turns a failed browser read into fallback or a fresh installation', async () => {

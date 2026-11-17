@@ -78,10 +78,8 @@ describe('legacy UI migration', () => {
     '{invalid',
     { settings: [] },
     { tokensMetadata: { metadataRecord: [] } },
-    JSON.parse('{"settings":{"__proto__":{"polluted":true}}}'),
-    { settings: '{"constructor":{}}' },
-    { ignored: '{"nested":{"prototype":{}}}' }
-  ])('fails closed before all writes on malformed/unsafe source %#', async root => {
+    { settings: '{invalid' }
+  ])('fails closed before all writes on malformed source %#', async root => {
     const s = session({ [LEGACY_UI_ROOT_KEY]: root });
     await expect(s.migration.initialize()).rejects.toBeDefined();
     expect(s.storage.set).not.toHaveBeenCalled();
@@ -89,6 +87,35 @@ describe('legacy UI migration', () => {
     expect(s.ui.getState().userId).toBeNull();
     expect(s.migration.isReady()).toBe(false);
     expect(s.readFallback).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    JSON.parse('{"settings":{"__proto__":{"polluted":true},"balanceMode":"gas"}}'),
+    { settings: '{"constructor":{},"balanceMode":"gas"}', ignored: '{invalid' },
+    { settings: { balanceMode: 'gas' }, ignored: '{"nested":{"prototype":{}}}' },
+    { settings: { balanceMode: 'gas' }, advertising: { activePromotion: { constructor: {} } } }
+  ])('migrates the selected fields and ignores unsafe or corrupt content elsewhere %#', async root => {
+    const s = session({ [LEGACY_UI_ROOT_KEY]: root });
+    await s.migration.initialize();
+    expect(s.migration.isReady()).toBe(true);
+    expect(s.ui.getState()).toMatchObject({ balanceMode: 'gas', legacyMigrated: true });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it('skips a token metadata record holding an unsafe or too deeply nested value and keeps the rest', async () => {
+    let deep: unknown = 'leaf';
+    for (let level = 0; level < 5000; level++) deep = { next: deep };
+    const metadataRecord = {
+      ...fixture.tokensMetadata.metadataRecord,
+      KT1unsafe_0: { ...Object.values(fixture.tokensMetadata.metadataRecord)[0], thumbnailUri: { constructor: 'x' } },
+      KT1deep_0: { ...Object.values(fixture.tokensMetadata.metadataRecord)[0], displayUri: deep }
+    };
+    const s = session({ [LEGACY_UI_ROOT_KEY]: { ...fixture, tokensMetadata: { metadataRecord } } });
+    await s.migration.initialize();
+    const { tokensMetadata } = s.metadata.getState();
+    expect(tokensMetadata).toMatchObject(fixture.tokensMetadata.metadataRecord);
+    expect(tokensMetadata).not.toHaveProperty(['KT1unsafe_0']);
+    expect(tokensMetadata).not.toHaveProperty(['KT1deep_0']);
   });
 
   it.each(['', 123, 'bad id', 'x'.repeat(257)])('does not replace invalid durable identities %#', async id => {

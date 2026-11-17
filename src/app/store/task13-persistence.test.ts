@@ -1,5 +1,7 @@
 import { memoryStorage } from 'lib/store/zustand/test-support/helpers';
 
+import { advertisingInitialState } from './advertising/state';
+
 jest.mock('lib/apis/temple', () => require('lib/apis/temple/ab-test-group.enum'));
 jest.mock('@redux-devtools/remote', () => ({ devToolsEnhancer: jest.fn() }));
 
@@ -92,5 +94,24 @@ it('keeps Redux persistence stopped on a rejected security source read and allow
   (s.storage.get as jest.Mock).mockResolvedValue({});
   await start(s.app);
   expect(s.app.persistor.getState().bootstrapped).toBe(true);
+  s.app.persistor.pause();
+});
+
+it('drops an unsafe or too deeply nested Redux slice to its initial state instead of blocking startup', async () => {
+  let deep: unknown = 'leaf';
+  for (let level = 0; level < 5000; level++) deep = { next: deep };
+  const s = setup({
+    'persist:temple-root-task11': {
+      settings: { balanceMode: 'gas' },
+      advertising: { activePromotion: JSON.parse('{"constructor":{"prototype":{}}}'), lastSeenPromotionName: 'seen' },
+      tokensMetadata: { metadataRecord: { KT1deep_0: { displayUri: deep } } }
+    }
+  });
+  await start(s.app);
+  const state = s.app.store.getState();
+  expect(state.settings.balanceMode).toBe('gas');
+  expect(state.advertising).toEqual(advertisingInitialState);
+  expect(state.tokensMetadata.metadataRecord).not.toHaveProperty(['KT1deep_0']);
+  expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   s.app.persistor.pause();
 });

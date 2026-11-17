@@ -65,22 +65,8 @@ function boot(initial: Record<string, unknown>) {
   return { ...memory, request };
 }
 
-afterEach(() => {
-  jest.dontMock('webextension-polyfill');
-});
-
-it('migrates a real 2.0.9 profile without losing records or touching rollback sources', async () => {
-  const s = boot(JSON.parse(JSON.stringify(LEGACY)));
-  const snapshot = await s.request();
-
-  expect(snapshot.ui).toMatchObject({
-    legacyMigrated: true,
-    legacyAssetsMigrated: true,
-    balanceMode: 'fiat',
-    isAnalyticsEnabled: false,
-    userId: 'fixture-analytics-id'
-  });
-
+/** Every 2.0.9 asset status, adult flag, metadata record and balance carries over to the owner snapshot. */
+function expectEveryLegacyRecord(snapshot: Snapshot) {
   // Every asset record and status carries over per category, account and chain.
   for (const category of ['tokens', 'collectibles', 'rwas'] as const) {
     for (const [key, records] of Object.entries(legacyAssets[category].data)) {
@@ -114,6 +100,25 @@ it('migrates a real 2.0.9 profile without losing records or touching rollback so
   for (const [key, entity] of Object.entries(LEGACY['persist:temple-root'].balances.balancesAtomic)) {
     expect(snapshot.balances.legacy[key]).toMatchObject(entity.data);
   }
+}
+
+afterEach(() => {
+  jest.dontMock('webextension-polyfill');
+});
+
+it('migrates a real 2.0.9 profile without losing records or touching rollback sources', async () => {
+  const s = boot(JSON.parse(JSON.stringify(LEGACY)));
+  const snapshot = await s.request();
+
+  expect(snapshot.ui).toMatchObject({
+    legacyMigrated: true,
+    legacyAssetsMigrated: true,
+    balanceMode: 'fiat',
+    isAnalyticsEnabled: false,
+    userId: 'fixture-analytics-id'
+  });
+
+  expectEveryLegacyRecord(snapshot);
 
   // 2.0.9 keys stay byte-identical so a manual republish of 2.0.9 still reads them.
   for (const key of LEGACY_KEYS) expect(s.records[key]).toEqual(LEGACY[key]);
@@ -189,4 +194,115 @@ it('a 2.0.9 profile with an airdropped spam token still unlocks and keeps every 
     expect(snapshot.metadata.tokensMetadata).toHaveProperty([slug]);
   for (const [slug, record] of Object.entries(legacyAssets.tokens.data[KEY]))
     expect(snapshot.assets.tokens[KEY][slug].status).toBe(record.status);
+});
+
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const UNSAFE_ADDRESS = 'KT1Unsafe1xxxxxxxxxxxxxxxxxxxxxxxxx';
+const UNSAFE_SLUG = `${UNSAFE_ADDRESS}_0`;
+const PROMOTION = 'fixture-promotion';
+type Legacy = Record<string, Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+const unsafeMetadata = (extra: object) => ({
+  address: UNSAFE_ADDRESS,
+  id: '0',
+  name: 'Claim reward',
+  symbol: 'SPAM',
+  decimals: 0,
+  ...extra
+});
+/** Build a value nested `depth` levels deep without recursion. */
+function nest(depth: number): unknown {
+  let value: unknown = 'leaf';
+  for (let level = 0; level < depth; level++) value = { next: value };
+  return value;
+}
+/** Define an own enumerable key; an object literal `__proto__` would set the prototype instead. */
+const setOwn = (target: object, key: string, value: unknown) =>
+  Object.defineProperty(target, key, { value, enumerable: true, configurable: true, writable: true });
+
+/** Fail when any own unsafe key is present anywhere in a snapshot or destination record. */
+function expectNoUnsafeKeys(root: unknown) {
+  const pending = [root];
+  while (pending.length) {
+    const value = pending.pop();
+    if (typeof value === 'string' && value.startsWith('{')) pending.push(JSON.parse(value));
+    if (value === null || typeof value !== 'object') continue;
+    for (const key of Object.keys(value)) {
+      expect(UNSAFE_KEYS.has(key)).toBe(false);
+      pending.push((value as Record<string, unknown>)[key]);
+    }
+  }
+}
+
+it.each<[string, (legacy: Legacy) => void]>([
+  [
+    'a nested constructor key in one token metadata record',
+    legacy => {
+      legacy['persist:temple-root'].tokensMetadata.metadataRecord[UNSAFE_SLUG] = unsafeMetadata({
+        thumbnailUri: { constructor: 'x' }
+      });
+    }
+  ],
+  [
+    'an own __proto__ key in an account asset map and inside one asset record',
+    legacy => {
+      const records = legacy['persist:root.assets'].tokens.data[KEY];
+      setOwn(records, '__proto__', { status: 'enabled' });
+      records[UNSAFE_SLUG] = JSON.parse('{"status":"enabled","__proto__":{"polluted":true}}');
+    }
+  ],
+  [
+    'a prototype key in an RWA metadata record and an RWA asset record',
+    legacy => {
+      legacy['persist:root.rwasMetadata'].records.push(unsafeMetadata({ prototype: { polluted: true } }));
+      legacy['persist:root.assets'].rwas.data[KEY][UNSAFE_SLUG] = { status: 'enabled', prototype: {} };
+    }
+  ],
+  [
+    'an unsafe key in the stored ad payload',
+    legacy => {
+      legacy['persist:temple-root'].advertising.activePromotion = { constructor: { prototype: { polluted: true } } };
+    }
+  ],
+  [
+    'a value nested 5,000 levels deep',
+    legacy => {
+      legacy['persist:temple-root'].tokensMetadata.metadataRecord[UNSAFE_SLUG] = unsafeMetadata({
+        displayUri: nest(5000)
+      });
+      legacy['persist:temple-root'].advertising.activePromotion = nest(5000);
+    }
+  ]
+])('a 2.0.9 profile with %s still unlocks and keeps every other record', async (_, inject) => {
+  const legacy: Legacy = JSON.parse(JSON.stringify(LEGACY));
+  legacy['persist:temple-root'].advertising.lastSeenPromotionName = PROMOTION;
+  inject(legacy);
+
+  const s = boot(legacy);
+  const snapshot = await s.request();
+  // A restart over the migrated storage serves the same records instead of failing on the retained sources.
+  const restarted = await boot(s.records).request();
+
+  expect(snapshot.ui).toMatchObject({
+    legacyMigrated: true,
+    legacyAssetsMigrated: true,
+    userId: 'fixture-analytics-id',
+    lastSeenPromotionName: PROMOTION
+  });
+  expectEveryLegacyRecord(snapshot);
+  expect(restarted.assets).toEqual(snapshot.assets);
+  expect(restarted.metadata).toEqual(snapshot.metadata);
+
+  // The unsafe record is dropped; no unsafe key reaches the snapshot or any destination store.
+  for (const category of ['tokensMetadata', 'collectiblesMetadata', 'rwasMetadata'] as const)
+    expect(snapshot.metadata[category]).not.toHaveProperty([UNSAFE_SLUG]);
+  for (const category of ['tokens', 'rwas'] as const)
+    expect(snapshot.assets[category][KEY]).not.toHaveProperty([UNSAFE_SLUG]);
+  expectNoUnsafeKeys(snapshot);
+  for (const key of Object.keys(s.records).filter(key => key.startsWith('zustand-')))
+    expectNoUnsafeKeys(s.records[key]);
+  expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+
+  // Rollback sources are never rewritten.
+  for (const key of LEGACY_KEYS) expect(s.records[key]).toBe(legacy[key]);
 });

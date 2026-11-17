@@ -4,11 +4,17 @@ import { z } from 'zod';
 import { tokenToSlug } from 'lib/assets';
 
 import { ADULT_FLAGS_SCHEMA, STORED_ASSET_SCHEMA } from './assets-state.schema';
-import { decodeLegacyUIRoot } from './legacy-ui-source';
+import { decodeLegacySlices } from './legacy-ui-source';
 import { TOKEN_METADATA_SCHEMA } from './metadata-state.schema';
 import { BrowserStorage } from './persist-storage';
 import { UI_SCHEMA } from './ui-state.schema';
-import { parseData, pickValidRecords, reportDroppedLegacyRecords, SAFE_KEY_SCHEMA } from './validation';
+import {
+  hasSafeData,
+  pickValidRecordMaps,
+  pickValidRecords,
+  reportDroppedLegacyRecords,
+  SAFE_KEY_SCHEMA
+} from './validation';
 
 export const LEGACY_ASSETS_KEYS = [
   'persist:root.assets',
@@ -35,19 +41,21 @@ const ADULT_FLAG_SCHEMA = ADULT_FLAGS_SCHEMA.valueSchema;
 const TIMESTAMP_SCHEMA = UI_SCHEMA.shape.promotionHidingTimestamps.valueSchema;
 
 /**
- * Decode all six sources before preparing any writes. A present slice with a corrupt structure fails closed; invalid
- * individual records (fetched third-party content) are skipped so they can never lock the wallet after an update.
+ * Decode the migrated slices of all six sources before preparing any writes. A present slice with a corrupt structure
+ * fails closed; invalid or unsafe individual records (fetched third-party content) are skipped so they can never lock
+ * the wallet after an update. Slices that are not migrated (security lists, `_persist`) are never decoded here.
  */
 export function parseLegacyAssetsSources(raw: Partial<Record<LegacyAssetsKey, unknown>>) {
   let dropped = 0;
   const onDrop = () => void dropped++;
-  const decode = (key: LegacyAssetsKey) => (raw[key] === undefined ? undefined : decodeLegacyUIRoot(raw[key]));
-  const assets = decode(LEGACY_ASSETS_KEYS[0]);
-  const collectibles = decode(LEGACY_ASSETS_KEYS[1]);
-  const rwas = decode(LEGACY_ASSETS_KEYS[2]);
-  const promotion = decode(LEGACY_ASSETS_KEYS[3]);
+  const decode = <K extends string>(key: LegacyAssetsKey, slices: readonly K[]) =>
+    raw[key] === undefined ? undefined : decodeLegacySlices(raw[key], slices);
+  const assets = decode(LEGACY_ASSETS_KEYS[0], ['tokens', 'collectibles', 'rwas']);
+  const collectibles = decode(LEGACY_ASSETS_KEYS[1], ['adultFlags']);
+  const rwas = decode(LEGACY_ASSETS_KEYS[2], ['adultFlags']);
+  const promotion = decode(LEGACY_ASSETS_KEYS[3], ['shouldShowPromotion', 'promotionHidingTimestamps']);
   const parseAssetRecords = (data: unknown) => {
-    const accounts = pickValidRecords(ASSET_KEY_SCHEMA, z.record(z.unknown()), data, onDrop);
+    const accounts = pickValidRecordMaps(ASSET_KEY_SCHEMA, data, onDrop);
     return Object.fromEntries(
       Object.entries(accounts).map(([key, records]) => [
         key,
@@ -56,21 +64,21 @@ export function parseLegacyAssetsSources(raw: Partial<Record<LegacyAssetsKey, un
     );
   };
   const convertMetadata = (key: LegacyAssetsKey) => {
-    const decoded = decode(key);
+    const decoded = decode(key, ['records']);
     const records: Record<string, z.infer<typeof TOKEN_METADATA_SCHEMA>> = {};
     if (decoded !== undefined) {
-      for (const item of parseData(metadataSchema, decoded).records) {
-        const metadata = LEGACY_METADATA_SCHEMA.safeParse(item);
-        const slug = metadata.success ? SAFE_KEY_SCHEMA.safeParse(tokenToSlug(metadata.data)) : undefined;
+      for (const item of metadataSchema.parse(decoded).records) {
+        const metadata = hasSafeData(item) ? LEGACY_METADATA_SCHEMA.safeParse(item) : undefined;
+        const slug = metadata?.success ? SAFE_KEY_SCHEMA.safeParse(tokenToSlug(metadata.data)) : undefined;
         // Match the legacy Map conversion: the last occurrence of a slug wins.
-        if (metadata.success && slug?.success) records[slug.data] = metadata.data;
+        if (metadata?.success && slug?.success) records[slug.data] = metadata.data;
         else onDrop();
       }
     }
     return records;
   };
-  const assetSlices = assets === undefined ? undefined : parseData(sourceSchema, assets);
-  const promotionSlice = promotion === undefined ? undefined : parseData(promotionSchema, promotion);
+  const assetSlices = assets === undefined ? undefined : sourceSchema.parse(assets);
+  const promotionSlice = promotion === undefined ? undefined : promotionSchema.parse(promotion);
   const result = {
     assets: assetSlices && {
       tokens: { data: parseAssetRecords(assetSlices.tokens.data) },
@@ -80,11 +88,11 @@ export function parseLegacyAssetsSources(raw: Partial<Record<LegacyAssetsKey, un
     collectibleAdultFlags:
       collectibles === undefined
         ? {}
-        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, parseData(flagsSchema, collectibles).adultFlags, onDrop),
+        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, flagsSchema.parse(collectibles).adultFlags, onDrop),
     rwaAdultFlags:
       rwas === undefined
         ? {}
-        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, parseData(flagsSchema, rwas).adultFlags, onDrop),
+        : pickValidRecords(SAFE_KEY_SCHEMA, ADULT_FLAG_SCHEMA, flagsSchema.parse(rwas).adultFlags, onDrop),
     promotion: promotionSlice && {
       shouldShowPromotion: promotionSlice.shouldShowPromotion,
       promotionHidingTimestamps: pickValidRecords(

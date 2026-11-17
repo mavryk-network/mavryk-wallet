@@ -77,16 +77,9 @@ describe('legacy UI migration', () => {
     '[]',
     '{invalid',
     { settings: [] },
-    { settings: { balanceMode: 'invalid' } },
-    { abTesting: { groupName: 'invalid' } },
-    { settings: { isAnalyticsEnabled: 'true' } },
-    { newsletter: { shouldShowNewsletterModal: 1 } },
     { tokensMetadata: { metadataRecord: [] } },
-    { tokensMetadata: { metadataRecord: { slug: { decimals: Infinity } } } },
-    JSON.parse('{"settings":{"__proto__":{"polluted":true}}}'),
-    { settings: '{"constructor":{}}' },
-    { ignored: '{"nested":{"prototype":{}}}' }
-  ])('fails closed before all writes on malformed/unsafe source %#', async root => {
+    { settings: '{invalid' }
+  ])('fails closed before all writes on malformed source %#', async root => {
     const s = session({ [LEGACY_UI_ROOT_KEY]: root });
     await expect(s.migration.initialize()).rejects.toBeDefined();
     expect(s.storage.set).not.toHaveBeenCalled();
@@ -94,6 +87,35 @@ describe('legacy UI migration', () => {
     expect(s.ui.getState().userId).toBeNull();
     expect(s.migration.isReady()).toBe(false);
     expect(s.readFallback).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    JSON.parse('{"settings":{"__proto__":{"polluted":true},"balanceMode":"gas"}}'),
+    { settings: '{"constructor":{},"balanceMode":"gas"}', ignored: '{invalid' },
+    { settings: { balanceMode: 'gas' }, ignored: '{"nested":{"prototype":{}}}' },
+    { settings: { balanceMode: 'gas' }, advertising: { activePromotion: { constructor: {} } } }
+  ])('migrates the selected fields and ignores unsafe or corrupt content elsewhere %#', async root => {
+    const s = session({ [LEGACY_UI_ROOT_KEY]: root });
+    await s.migration.initialize();
+    expect(s.migration.isReady()).toBe(true);
+    expect(s.ui.getState()).toMatchObject({ balanceMode: 'gas', legacyMigrated: true });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it('skips a token metadata record holding an unsafe or too deeply nested value and keeps the rest', async () => {
+    let deep: unknown = 'leaf';
+    for (let level = 0; level < 5000; level++) deep = { next: deep };
+    const metadataRecord = {
+      ...fixture.tokensMetadata.metadataRecord,
+      KT1unsafe_0: { ...Object.values(fixture.tokensMetadata.metadataRecord)[0], thumbnailUri: { constructor: 'x' } },
+      KT1deep_0: { ...Object.values(fixture.tokensMetadata.metadataRecord)[0], displayUri: deep }
+    };
+    const s = session({ [LEGACY_UI_ROOT_KEY]: { ...fixture, tokensMetadata: { metadataRecord } } });
+    await s.migration.initialize();
+    const { tokensMetadata } = s.metadata.getState();
+    expect(tokensMetadata).toMatchObject(fixture.tokensMetadata.metadataRecord);
+    expect(tokensMetadata).not.toHaveProperty(['KT1unsafe_0']);
+    expect(tokensMetadata).not.toHaveProperty(['KT1deep_0']);
   });
 
   it.each(['', 123, 'bad id', 'x'.repeat(257)])('does not replace invalid durable identities %#', async id => {
@@ -241,20 +263,51 @@ it('independently verifies completion and can recover a failed completion read o
   expect(s.migration.isReady()).toBe(true);
 });
 
-it('validates all metadata before staging any preference changes and retains predefined overrides', async () => {
-  const invalid = JSON.parse(JSON.stringify(fixture));
-  invalid.tokensMetadata.metadataRecord.KT1sanitized_0.name = 'x'.repeat(8193);
-  const s = session({ [LEGACY_UI_ROOT_KEY]: invalid });
-  await expect(s.migration.initialize()).rejects.toThrow();
-  expect(s.ui.getState().shouldShowNewsletterModal).toBe(true);
-  expect(s.storage.set).not.toHaveBeenCalled();
+it.each([
+  { settings: { balanceMode: 'invalid' } },
+  { abTesting: { groupName: 'invalid' } },
+  { settings: { isAnalyticsEnabled: 'true' } },
+  { newsletter: { shouldShowNewsletterModal: 1 } }
+])('keeps the destination default for one invalid legacy preference %#', async root => {
+  const s = session({ [LEGACY_UI_ROOT_KEY]: root });
+  const defaults = s.ui.getState();
+  await s.migration.initialize();
+  expect(s.migration.isReady()).toBe(true);
+  for (const field of ['balanceMode', 'abTestGroupName', 'isAnalyticsEnabled', 'shouldShowNewsletterModal'] as const)
+    expect(s.ui.getState()[field]).toEqual(defaults[field]);
+});
+
+it('skips invalid metadata records (e.g. a spam token) and migrates every other record and preference', async () => {
+  const source = JSON.parse(JSON.stringify(fixture));
+  const [validSlug] = Object.keys(source.tokensMetadata.metadataRecord);
+  const spamSlug = 'KT1spam_1';
+  source.tokensMetadata.metadataRecord[spamSlug] = { ...source.tokensMetadata.metadataRecord[validSlug], id: '1' };
+  source.tokensMetadata.metadataRecord[spamSlug].thumbnailUri = `data:image/svg+xml;base64,${'A'.repeat(9000)}`;
+  source.tokensMetadata.metadataRecord[`KT1spam_${'9'.repeat(600)}`] = { decimals: 0, name: 'x', symbol: 'x' };
+  source.tokensMetadata.metadataRecord.broken = { decimals: Infinity };
+  const s = session({ [LEGACY_UI_ROOT_KEY]: source });
+  await s.migration.initialize();
+  expect(s.migration.isReady()).toBe(true);
+  expect(s.ui.getState()).toMatchObject({ balanceMode: 'gas', legacyMigrated: true });
+  const migrated = s.metadata.getState().tokensMetadata;
+  expect(migrated[validSlug]).toEqual(fixture.tokensMetadata.metadataRecord[validSlug as never]);
+  expect(migrated).not.toHaveProperty(spamSlug);
+  expect(migrated).not.toHaveProperty('broken');
+  expect(Object.keys(migrated).some(slug => slug.startsWith('KT1spam_'))).toBe(false);
+  // The source stays intact for rollback.
+  expect(s.records[LEGACY_UI_ROOT_KEY]).toEqual(source);
+});
+
+it('retains predefined metadata overrides from the legacy source', async () => {
+  const s = session({ [LEGACY_UI_ROOT_KEY]: fixture });
+  await s.migration.initialize();
   const slug = Object.keys(s.metadata.getState().tokensMetadata)[0];
   const source = JSON.parse(JSON.stringify(fixture));
   source.tokensMetadata.metadataRecord[slug] = {
     ...s.metadata.getState().tokensMetadata[slug],
     name: 'Legacy override'
   };
-  s.records[LEGACY_UI_ROOT_KEY] = source;
-  await s.migration.initialize();
-  expect(s.metadata.getState().tokensMetadata[slug].name).toBe('Legacy override');
+  const next = session({ [LEGACY_UI_ROOT_KEY]: source });
+  await next.migration.initialize();
+  expect(next.metadata.getState().tokensMetadata[slug].name).toBe('Legacy override');
 });

@@ -52,7 +52,7 @@ it('does not revive historical data when the active source is a valid empty map'
   expect(s.balances.getState().legacy).toEqual({});
 });
 
-it.each([null, 'invalid', { balances: null }, { balances: {} }, source({ token: '-1' }), source({ token: 'NaN' })])(
+it.each([null, 'invalid', { balances: null }, { balances: { balancesAtomic: [] } }])(
   'rejects malformed present sources without completion: %p',
   async raw => {
     const s = await setup({ 'persist:temple-root-task11': raw });
@@ -61,6 +61,14 @@ it.each([null, 'invalid', { balances: null }, { balances: {} }, source({ token: 
     expect(s.readFallback).not.toHaveBeenCalled();
   }
 );
+
+it('skips invalid balance entries (e.g. an oversized airdropped slug) and adopts the rest', async () => {
+  const raw = source({ mav: '10', bad: '-1', nan: 'NaN', [`KT1spam_${'9'.repeat(600)}`]: '1' });
+  const s = await setup({ 'persist:temple-root-task11': raw });
+  await s.migration.initialize();
+  expect(s.migration.isReady()).toBe(true);
+  expect(Object.values(s.balances.getState().legacy)).toEqual([{ mav: '10' }]);
+});
 
 it.each(['read', 'write', 'readback'])('retries %s failures without deleting source data', async failure => {
   const s = await setup({ 'persist:temple-root-task11': source({ mav: '7' }) });

@@ -27,8 +27,13 @@ it('exposes storage and invalid security-cache errors', async () => {
   const read = jest.spyOn(BROWSER_STORAGE, 'get').mockRejectedValue(new Error('offline read failure'));
   expect((await restoreAssetSecurity(undefined)).mainnetScamlist.data).toEqual({});
   expect(read).not.toHaveBeenCalled();
-  await expect(
-    restoreAssetSecurity({ mainnetWhitelist: { data: [] }, mainnetScamlist: { data: { scam: 'false' } } })
-  ).rejects.toThrow();
+  await expect(restoreAssetSecurity({ mainnetWhitelist: { data: [] }, mainnetScamlist: [] })).rejects.toThrow();
+  // Individual invalid entries are skipped, never block restoration.
+  const restored = await restoreAssetSecurity({
+    mainnetWhitelist: { data: ['ok', 'x'.repeat(600)] },
+    mainnetScamlist: { data: { scam: 'false', real: true } }
+  });
+  expect(restored.mainnetWhitelist.data).toEqual(['ok']);
+  expect(restored.mainnetScamlist.data).toEqual({ real: true });
   read.mockRestore();
 });

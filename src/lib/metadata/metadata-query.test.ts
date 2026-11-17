@@ -119,7 +119,15 @@ it('keeps all source inputs distinct and uses wallet mapping for tokens only', a
     name: 'Unknown Token',
     symbol: '???'
   });
-  expect(() => normalizeMetadata('tokens', ['KT1test_0'], { KT1test_0: { decimals: NaN } })).toThrow();
+  // One malformed or oversized record is skipped like a miss; the rest of the batch still publishes.
+  const batch = normalizeMetadata('tokens', ['KT1test_0', 'KT1test_1', 'KT1test_2', `KT1test_${'9'.repeat(600)}`], {
+    KT1test_0: { decimals: NaN },
+    KT1test_1: { decimals: 0, thumbnailUri: `data:image/png;base64,${'A'.repeat(9000)}` },
+    KT1test_2: { decimals: 0, name: 'Kept' },
+    [`KT1test_${'9'.repeat(600)}`]: { decimals: 0 }
+  });
+  expect(Object.keys(batch)).toEqual(['KT1test_2']);
+  expect(() => normalizeMetadata('tokens', ['KT1test_0'], {})).toThrow('Incomplete');
   expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: raw }).KT1test_0.symbol).toBe('T');
   expect(normalizeMetadata('rwas', ['KT1test_0'], { KT1test_0: { ...raw, symbol: 'OCEAN' } }).KT1test_0.symbol).toBe(
     'OCEAN'

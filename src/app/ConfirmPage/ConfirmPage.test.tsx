@@ -10,6 +10,7 @@ import { TempleMessageType } from 'lib/temple/types';
 
 import ConfirmPage from './ConfirmPage';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
+import { CONFIRM_ARM_DELAY_MS } from './hooks/use-confirm-arm-delay';
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -79,6 +80,7 @@ jest.mock('app/templates/OperationView', () => () => null);
 jest.mock('app/ConfirmPage/components/AccountDropdown', () => ({ AccountDropdown: () => null }));
 
 let container: HTMLDivElement;
+let hasFocus: jest.SpyInstance<boolean, []>;
 let root: Root;
 
 const renderWithPayload = async (payload: object) => {
@@ -98,9 +100,16 @@ const getConfirmButton = () =>
     `[data-testid="${ConfirmPageSelectors.ConfirmOperationsAction_ConfirmButton}"]`
   );
 
+/** Wait out the click-through guard of a visible, focused prompt. */
+const armConfirm = () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve, CONFIRM_ARM_DELAY_MS + 50));
+  });
+
 const queryByTestId = (testId: string) => container.querySelector(`[data-testid="${testId}"]`);
 
 beforeEach(() => {
+  hasFocus = jest.spyOn(document, 'hasFocus').mockReturnValue(true);
   container = document.createElement('div');
   root = createRoot(container);
 });
@@ -136,9 +145,34 @@ describe('ConfirmPage operation verification', () => {
 
   it('enables Confirm when the payload carries the locally forged rawToSign', async () => {
     await renderWithPayload(confirmOperationsMock);
+    await armConfirm();
 
     expect(getConfirmButton()?.disabled).toBe(false);
     expect(container.textContent).not.toContain('operationCannotBeVerified');
+  });
+});
+
+describe('ConfirmPage click-through guard', () => {
+  it('keeps Confirm disabled right after the prompt renders and while the window is not focused', async () => {
+    await renderWithPayload(confirmOperationsMock);
+    expect(getConfirmButton()?.disabled).toBe(true);
+
+    await armConfirm();
+    expect(getConfirmButton()?.disabled).toBe(false);
+
+    hasFocus.mockReturnValue(false);
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+    expect(getConfirmButton()?.disabled).toBe(true);
+
+    hasFocus.mockReturnValue(true);
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(getConfirmButton()?.disabled).toBe(true);
+    await armConfirm();
+    expect(getConfirmButton()?.disabled).toBe(false);
   });
 });
 

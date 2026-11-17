@@ -1,5 +1,4 @@
 import { CancelledError } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import type { AssetsType } from 'app/store/assets/selectors';
 import { loadAccountCollectibles, loadAccountRwas, loadAccountTokens } from 'app/store/assets/utils';
@@ -7,18 +6,12 @@ import { fixBalances } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
 import { DetailScope } from 'lib/asset-details/details.types';
 import { getMetadataScopeKey } from 'lib/metadata/metadata-scope';
-import { normalizeMetadata } from 'lib/metadata/sync-metadata';
 import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
-import { parseData, SAFE_KEY_SCHEMA } from 'lib/store/zustand/validation';
 
 import { getAccountAssetsSyncKey } from './account-assets-sync-key';
+import { pickAccountAssetsSync } from './load-account-assets.helpers';
 import { withScopedWalletRequest } from './scoped-wallet-request';
 import { acknowledgeAssetSync, beginAssetSync } from './sync-security';
-
-const loadedSchema = z.object({
-  slugs: z.array(SAFE_KEY_SCHEMA),
-  balances: z.record(SAFE_KEY_SCHEMA, z.string().regex(/^\d+(\.\d+)?$/))
-});
 
 /** One publication path for asset records and their existing coupled metadata/balance effects. */
 export async function syncAccountAssets(
@@ -30,10 +23,7 @@ export async function syncAccountAssets(
 ) {
   const { chainId } = scope;
   if (!isKnownChainId(chainId)) throw new Error('Unsupported asset chain');
-  const { slugs, balances } = parseData(loadedSchema, response);
-  if (slugs.some(slug => !Object.prototype.hasOwnProperty.call(balances, slug)))
-    throw new Error('Incomplete asset balances');
-  const metadata = normalizeMetadata(category, Object.keys(response.newMeta), response.newMeta);
+  const { slugs, balances, metadata } = pickAccountAssetsSync(category, response);
   await assertScope();
   await acknowledgeAssetSync({
     kind: 'assets-sync',

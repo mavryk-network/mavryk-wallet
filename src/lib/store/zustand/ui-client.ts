@@ -49,17 +49,28 @@ async function send(command?: UICommand) {
   return snapshot;
 }
 
-/** Queue commands without optimistic defaults; failures close the consumer gate and remain explicitly retryable. */
+/**
+ * Queue commands without optimistic defaults. A failed snapshot read closes the consumer gate and remains explicitly
+ * retryable. A failed command (e.g. a token with invalid metadata) rejects only its caller; the owner is then read
+ * again, and the gate closes only if that read fails too, so one rejected command never takes the whole UI down.
+ */
 export function requestOwnedUISnapshot(command?: UICommand): Promise<UISnapshot> {
-  return enqueue(() => send(command));
+  return enqueue(() => send(command), command !== undefined);
 }
 
-function enqueue(request: () => Promise<UISnapshot>): Promise<UISnapshot> {
+const SNAPSHOT_ERROR_MESSAGE = 'Preferences could not be restored or saved. Please retry.';
+
+function enqueue(request: () => Promise<UISnapshot>, isCommand = false): Promise<UISnapshot> {
   // An idle queue sends synchronously, so the page-entry request leaves before the app bundle finishes evaluating.
   const sent = queuedCount === 0 ? request() : queue.then(request);
   queuedCount++;
   const run = sent.catch(() => {
-    error = new Error('Preferences could not be restored or saved. Please retry.');
+    if (isCommand) {
+      // The owner may have kept earlier staged writes; re-reading it decides whether the snapshot is still usable.
+      refreshOwnedUI();
+      throw new Error('The wallet could not save this change. Please retry.');
+    }
+    error = new Error(SNAPSHOT_ERROR_MESSAGE);
     notify();
     throw error;
   });

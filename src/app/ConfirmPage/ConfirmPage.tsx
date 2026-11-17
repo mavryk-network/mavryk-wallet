@@ -36,6 +36,7 @@ import { ButtonRounded } from '../molecules/ButtonRounded';
 
 import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
+import { useConfirmArmDelay } from './hooks/use-confirm-arm-delay';
 
 const APP_POPUP_LIMIT = 604;
 const APP_POPUP_WIDTH_LIMIT = 400;
@@ -227,13 +228,15 @@ const ConfirmDAppForm: FC = () => {
     [onConfirm, setError, modifiedTotalFeeValue, modifiedStorageLimitValue, revealFee]
   );
 
+  const isConfirmArmed = useConfirmArmDelay();
+
   const handleConfirmClick = useCallback(async () => {
-    if (confirming || declining) return;
+    if (confirming || declining || !isConfirmArmed) return;
 
     setConfirming(true);
     await confirm(true);
     setConfirming(false);
-  }, [confirming, declining, setConfirming, confirm]);
+  }, [confirming, declining, isConfirmArmed, setConfirming, confirm]);
 
   const handleDeclineClick = useCallback(async () => {
     if (confirming || declining) return;
@@ -451,7 +454,7 @@ const ConfirmDAppForm: FC = () => {
               type="button"
               className="justify-center w-full"
               loading={confirming}
-              disabled={unverifiedOperation}
+              disabled={unverifiedOperation || !isConfirmArmed}
               onClick={handleConfirmClick}
               testID={content.confirmActionTestID}
               testIDProperties={{ operationType: payload.type }}

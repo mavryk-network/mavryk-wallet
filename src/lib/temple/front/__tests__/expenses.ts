@@ -96,6 +96,83 @@ describe('Expenses', () => {
       }
     ]);
   });
+  describe('bytes-encoded token recipients', () => {
+    const RECIPIENT = 'mv1DXLvsp4T7X6gXLHn7szGN7WLooy14fQ3G';
+    const RECIPIENT_BYTES = '00003c7d8a2e6a631be1fc109f798af2bb119ce29ee9';
+
+    it('shows an FA1.2 transfer to an optimized (bytes) address', () => {
+      const [preview] = tryParseExpenses(
+        [
+          {
+            kind: 'transaction',
+            to: CONTRACT,
+            amount: 0,
+            parameter: {
+              entrypoint: 'transfer',
+              value: {
+                prim: 'Pair',
+                args: [
+                  { bytes: RECIPIENT_BYTES },
+                  { prim: 'Pair', args: [{ bytes: RECIPIENT_BYTES }, { int: '1000000' }] }
+                ]
+              }
+            }
+          }
+        ] as any,
+        ACCOUNT
+      );
+      expect(preview.expenses).toContainEqual({
+        tokenAddress: CONTRACT,
+        amount: new BigNumber('1000000'),
+        to: RECIPIENT
+      });
+    });
+
+    it('shows the recipient of an FA2 transfer to a bytes address', () => {
+      const [preview] = tryParseExpenses(
+        [
+          {
+            kind: 'transaction',
+            to: CONTRACT,
+            amount: 0,
+            parameter: {
+              entrypoint: 'transfer',
+              value: [
+                {
+                  prim: 'Pair',
+                  args: [
+                    { string: ACCOUNT },
+                    [
+                      {
+                        prim: 'Pair',
+                        args: [{ bytes: RECIPIENT_BYTES }, { prim: 'Pair', args: [{ int: '0' }, { int: '5' }] }]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        ] as any,
+        ACCOUNT
+      );
+      expect(preview.expenses).toContainEqual({
+        tokenAddress: CONTRACT,
+        tokenId: 0,
+        amount: new BigNumber('5'),
+        to: RECIPIENT
+      });
+    });
+  });
+
+  it('never shows the byte amount of increase_paid_storage as MVRK', () => {
+    const [preview] = tryParseExpenses(
+      [{ kind: 'increase_paid_storage', amount: '4000000', destination: CONTRACT }] as any,
+      ACCOUNT
+    );
+    expect(preview).toMatchObject({ amount: undefined, expenses: [] });
+  });
+
   describe('origination', () => {
     it('shows the balance of a forged origination as an MVRK expense', () => {
       const [expense] = tryParseExpenses(

@@ -234,6 +234,23 @@ describe('mavrykApi auth interceptor', () => {
     );
   });
 
+  it.each(['https://attacker.example/account/data', '//attacker.example/account/data'])(
+    'never attaches Authorization to a request that leaves the wallet API origin (%s)',
+    async url => {
+      const adapter = jest.fn(async (config: AxiosRequestConfig) => createResponse(config, { ok: true }));
+
+      mavrykApi.defaults.adapter = adapter;
+      await setAuthTokensToStorage(
+        { accessToken: buildJwt(Date.now() + 60_000), refreshToken: 'refresh-token' },
+        authContext
+      );
+
+      await mavrykApi.get(url, { _authContext: authContext } as MavrykApiRequestConfig);
+
+      expect((adapter.mock.calls[0][0].headers as Record<string, string> | undefined)?.Authorization).toBeUndefined();
+    }
+  );
+
   it('sends public reads without Authorization, on the requested network, and never refreshes or clears tokens', async () => {
     const accessToken = buildJwt(Date.now() + 60_000);
     const adapter = jest.fn(async (config: AxiosRequestConfig) => {

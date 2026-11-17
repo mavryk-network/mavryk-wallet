@@ -87,7 +87,8 @@ jest.mock('./vault', () => ({
     isExist: jest.fn(),
     removeAccount: jest.fn(),
     removeHdWallet: jest.fn(),
-    removeAccountsByType: jest.fn()
+    removeAccountsByType: jest.fn(),
+    verifyPassword: jest.fn()
   }
 }));
 
@@ -323,6 +324,21 @@ describe('actions account removal clean-up', () => {
 
     expect(mockedLogoutAuth).toHaveBeenCalledTimes(1);
     expect(mockedVault.removeAccountsByType).toHaveBeenCalledWith(TempleAccountType.Imported, 'password');
+  });
+
+  it.each([
+    ['removeAccount', () => removeAccount(removedAccount.id, 'wrong')],
+    ['removeHdWallet', () => removeHdWallet('wallet-1', 'wrong')],
+    ['removeAccountsByType', () => removeAccountsByType(TempleAccountType.Imported, 'wrong')]
+  ])('%s keeps the API session when the password is wrong', async (_name, remove) => {
+    mockedVault.verifyPassword.mockRejectedValueOnce(new Error('Invalid password'));
+
+    await expect(remove()).rejects.toThrow('Invalid password');
+
+    expect(mockedLogoutAuth).not.toHaveBeenCalled();
+    expect(mockedVault.removeAccount).not.toHaveBeenCalled();
+    expect(mockedVault.removeHdWallet).not.toHaveBeenCalled();
+    expect(mockedVault.removeAccountsByType).not.toHaveBeenCalled();
   });
 
   it('drops the dApp sessions of a removed account and keeps the others', async () => {

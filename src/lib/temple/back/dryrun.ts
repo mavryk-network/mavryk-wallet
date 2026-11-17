@@ -135,15 +135,6 @@ const finalizeUnstakeSchema = z
   })
   .passthrough();
 
-const increasePaidStorageSchema = z
-  .object({
-    kind: z.literal('increase_paid_storage'),
-    amount: nonNegativeIntegerLikeSchema,
-    destination: mavrykAddressSchema,
-    ...operationBaseFields
-  })
-  .passthrough();
-
 const activationSchema = z
   .object({
     kind: z.literal('activation'),
@@ -224,7 +215,8 @@ const opParamSchema = z.union([
   stakeSchema,
   unstakeSchema,
   finalizeUnstakeSchema,
-  increasePaidStorageSchema,
+  // increase_paid_storage is not accepted from dApps: its `amount` is bytes, and the burn (bytes x cost per byte) can be
+  // orders of magnitude larger than the number the user sees. No supported dApp flow needs it.
   activationSchema,
   registerGlobalConstantSchema,
   transferTicketSchema,

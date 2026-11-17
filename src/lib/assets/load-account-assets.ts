@@ -6,11 +6,10 @@ import { fixBalances } from 'app/store/balances/utils';
 import { isKnownChainId } from 'lib/apis/tzkt';
 import { DetailScope } from 'lib/asset-details/details.types';
 import { getMetadataScopeKey } from 'lib/metadata/metadata-scope';
-import { normalizeMetadata } from 'lib/metadata/sync-metadata';
 import { getOwnedUISnapshot } from 'lib/store/zustand/ui-client';
 
 import { getAccountAssetsSyncKey } from './account-assets-sync-key';
-import { pickValidAssets } from './load-account-assets.helpers';
+import { pickAccountAssetsSync } from './load-account-assets.helpers';
 import { withScopedWalletRequest } from './scoped-wallet-request';
 import { acknowledgeAssetSync, beginAssetSync } from './sync-security';
 
@@ -24,8 +23,7 @@ export async function syncAccountAssets(
 ) {
   const { chainId } = scope;
   if (!isKnownChainId(chainId)) throw new Error('Unsupported asset chain');
-  const { slugs, balances } = pickValidAssets(response);
-  const metadata = normalizeMetadata(category, Object.keys(response.newMeta), response.newMeta);
+  const { slugs, balances, metadata } = pickAccountAssetsSync(category, response);
   await assertScope();
   await acknowledgeAssetSync({
     kind: 'assets-sync',

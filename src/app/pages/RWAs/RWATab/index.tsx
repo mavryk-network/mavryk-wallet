@@ -3,6 +3,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { SyncSpinner } from 'app/atoms';
+import { AssetsLoadErrorAlert } from 'app/atoms/AssetsLoadErrorAlert';
 import { ScrollBackUpButton } from 'app/atoms/ScrollBackUpButton';
 import { SimpleInfiniteScroll } from 'app/atoms/SimpleInfiniteScroll';
 import { useAppEnv } from 'app/env';
@@ -10,6 +11,7 @@ import { useRWAListingLogic } from 'app/hooks/use-rwa-listing-logic';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { AssetsSelectors } from 'app/pages/Home/OtherComponents/Assets.selectors';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
+import { useHasAssetsLoadFailed } from 'app/store/assets/selectors';
 import {
   SearchExplorer,
   SearchExplorerClosed,
@@ -78,6 +80,7 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
 
   const { displayedSlugs, isSyncing, isInSearchMode, paginatedSlugs, loadNext, searchValue, setSearchValue } =
     useRWAListingLogic(sortedAssets);
+  const hasLoadFailed = useHasAssetsLoadFailed('rwas');
 
   const clearInput = useCallback(() => {
     setSearchValue('');
@@ -143,6 +146,8 @@ export const RWATab = memo<Props>(({ scrollToTheTabsBar }) => {
             </SearchExplorerClosed>
           </>
         </SearchExplorer>
+
+        {hasLoadFailed && !isSyncing && <AssetsLoadErrorAlert className="mb-4" />}
 
         {displayedSlugs.length === 0 ? (
           buildEmptySection(isSyncing)

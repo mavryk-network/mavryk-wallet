@@ -38,6 +38,7 @@ import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
 import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { transferImplicit, transferToContract } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -50,10 +51,11 @@ import {
   useTezosDomainsClient,
   useFilteredContacts,
   validateRecipient,
-  useChainId
+  useChainId,
+  takeAppliedOperationFeeMumav
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
-import { hasManager, isAddressValid, isKTAddress, mumavToTz, tokensToAtoms, tzToMumav } from 'lib/temple/helpers';
+import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
 import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
@@ -91,6 +93,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const { registerBackHandler } = useAppEnv();
 
   const assetMetadata = useAssetMetadata(assetSlug);
+  const metadataScope = useMetadataScope();
   const assetPrice = useAssetFiatCurrencyPrice(assetSlug);
 
   const assetSymbol = useMemo(() => getAssetSymbol(assetMetadata), [assetMetadata]);
@@ -165,6 +168,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
   const toValue = watch('to');
   const amountValue = watch('amount');
   const [finalAmount, setFinalAmount] = useSafeState('0');
+  const [appliedFeeMumav, setAppliedFeeMumav] = useSafeState<string | undefined>(undefined);
   const feeValue = watch('fee') ?? RECOMMENDED_ADD_FEE;
 
   const amountFieldRef = useRef<HTMLInputElement>(null);
@@ -231,11 +235,11 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         assetSlug,
         amount: finalAmount,
         address: receiverAddressToPass,
-        fees: feeValue
+        feeMumav: appliedFeeMumav
       }
     }),
     // @ts-expect-error
-    [finalAmount, assetSlug, feeValue, operation?.hash, operation?.opHash, receiverAddressToPass]
+    [finalAmount, assetSlug, appliedFeeMumav, operation?.hash, operation?.opHash, receiverAddressToPass]
   );
 
   // @ts-expect-error
@@ -382,6 +386,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
         if (!assetMetadata) throw new Error('Metadata not found');
 
         let op: TransactionWalletOperation | TransactionOperation;
+        let localFeeMumav: number | undefined;
         if (isKTAddress(acc.publicKeyHash)) {
           const michelsonLambda = isKTAddress(toResolved) ? transferToContract : transferImplicit;
 
@@ -400,6 +405,7 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
           const estmtn = await tezos.estimate.transfer(transferParams);
           const addFee = tzToMumav(feeVal ?? 0);
           const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
+          localFeeMumav = fee;
           op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
 
           // create pending delegate operation
@@ -411,11 +417,14 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
             amount: actualAmount,
             to: toResolved,
             assetSlug,
-            feeMumav: fee
+            feeMumav: fee,
+            metadataScope
           });
           if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }
 
+        const opHash = 'opHash' in op ? op.opHash : op.hash;
+        setAppliedFeeMumav(takeAppliedOperationFeeMumav(opHash) ?? localFeeMumav?.toString());
         setFinalAmount(amount);
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
@@ -441,8 +450,10 @@ export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddC
       tezos,
       assetSlug,
       assetMetadata,
+      metadataScope,
       setSubmitError,
       setOperation,
+      setAppliedFeeMumav,
       reset,
       accountPkh,
       toResolved,

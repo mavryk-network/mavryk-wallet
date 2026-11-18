@@ -2,12 +2,13 @@ import React, { memo } from 'react';
 
 import classNames from 'clsx';
 
-import { IndividualHistoryItem, UserHistoryItem } from 'lib/temple/history/types';
+import { UserHistoryItem } from 'lib/temple/history/types';
 
 import { OpertionStackItem } from './OperStackItem';
+import type { buildHistoryPreviewOperations } from './utils';
 
 interface Props {
-  base: IndividualHistoryItem[];
+  base: ReturnType<typeof buildHistoryPreviewOperations>;
   className?: string;
   historyItem?: UserHistoryItem;
   userAddress: string;

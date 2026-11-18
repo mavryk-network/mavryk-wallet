@@ -1,25 +1,13 @@
-import { isEqual } from 'lodash';
-
-import { dispatch } from 'app/store';
-import { loadRwasDetailsActions } from 'app/store/rwas/actions';
+import { useDetailScope } from 'lib/asset-details/use-detail-scope';
 import { useAccountRwas } from 'lib/assets/hooks/rwas';
-import { RWAS_DETAILS_SYNC_INTERVAL } from 'lib/fixed-times';
-import { useAccount, useChainId } from 'lib/temple/front';
-import { useInterval, useMemoWithCompare } from 'lib/ui/hooks';
+import { rwaDetailHooks } from 'lib/rwas/use-rwas-details.query';
 
-export const useRWAsDetailsLoading = () => {
-  const chainId = useChainId()!;
-  const { publicKeyHash } = useAccount();
-  const rwas = useAccountRwas(publicKeyHash, chainId);
-
-  const slugs = useMemoWithCompare(() => rwas.map(({ slug }) => slug).sort(), [rwas], isEqual);
-
-  useInterval(
-    () => {
-      // Is it necessary for collectibles on non-Mainnet networks too?
-      if (slugs.length) dispatch(loadRwasDetailsActions.submit({ slugs, walletAddress: publicKeyHash }));
-    },
-    RWAS_DETAILS_SYNC_INTERVAL,
-    [publicKeyHash, slugs]
+/** Register the current account's asset set with its shared detail batch. */
+export const useRwasDetailsBatch = () => {
+  const scope = useDetailScope();
+  const assets = useAccountRwas(scope.account, scope.chainId);
+  rwaDetailHooks.useBatch(
+    scope,
+    assets.map(({ slug }) => slug)
   );
 };

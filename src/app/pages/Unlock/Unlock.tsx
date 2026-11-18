@@ -2,22 +2,20 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 
 import classNames from 'clsx';
 import { OnSubmit, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import { useAppEnv } from 'app/env';
 import { useFormAnalytics } from 'lib/analytics';
+import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { USER_ACTION_TIMEOUT } from 'lib/fixed-times';
 import { T, t } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { useTempleClient } from 'lib/temple/front';
 import { TempleSharedStorageKey } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { delay } from 'lib/utils';
 import { Link } from 'lib/woozie';
 
-import { ABTestGroup } from '../../../lib/apis/temple';
-import { getUserTestingGroupNameActions } from '../../store/ab-testing/actions';
-import { useUserTestingGroupNameSelector } from '../../store/ab-testing/selectors';
 import PageWithImageBg from '../../templates/PageWithImageBg/PageWithImageBg';
 
 import { UnlockSelectors } from './Unlock.selectors';
@@ -46,23 +44,15 @@ const getTimeLeft = (start: number, end: number) => {
 
 const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
   const { unlock } = useTempleClient();
-  const dispatch = useDispatch();
   const { popup } = useAppEnv();
   const formAnalytics = useFormAnalytics('UnlockWallet');
+  useLoadPerfMark('unlock-painted');
 
   const [attempt, setAttempt] = useLocalStorage<number>(TempleSharedStorageKey.PasswordAttempts, 1);
   const [timelock, setTimeLock] = useLocalStorage<number>(TempleSharedStorageKey.TimeLock, 0);
   const lockLevel = LOCK_TIME * Math.floor(attempt / 3);
 
   const [timeleft, setTimeleft] = useState(getTimeLeft(timelock, lockLevel));
-
-  const testGroupName = useUserTestingGroupNameSelector();
-
-  useEffect(() => {
-    if (testGroupName === ABTestGroup.Unknown) {
-      dispatch(getUserTestingGroupNameActions.submit());
-    }
-  }, [testGroupName]);
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -87,15 +77,19 @@ const Unlock: FC<UnlockProps> = ({ canImportNew = true }) => {
         setAttempt(1);
       } catch (err: any) {
         formAnalytics.trackSubmitFail();
-        if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
-        setAttempt(attempt + 1);
-        setTimeleft(getTimeLeft(Date.now(), LOCK_TIME * Math.floor((attempt + 1) / 3)));
+        // A lock that lands mid-unlock is not a wrong password, so it must not count towards the time-lock
+        const isInterruptedByLock = err?.message === UNLOCK_INTERRUPTED_BY_LOCK_ERROR;
+        if (!isInterruptedByLock) {
+          if (attempt >= LAST_ATTEMPT) setTimeLock(Date.now());
+          setAttempt(attempt + 1);
+          setTimeleft(getTimeLeft(Date.now(), LOCK_TIME * Math.floor((attempt + 1) / 3)));
+        }
 
         console.error(err);
 
         // Human delay.
         await delay();
-        setError('password', SUBMIT_ERROR_TYPE, err.message);
+        setError('password', SUBMIT_ERROR_TYPE, isInterruptedByLock ? t('unlockInterruptedByLock') : err.message);
         focusPasswordField();
       }
     },

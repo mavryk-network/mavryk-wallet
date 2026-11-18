@@ -11,6 +11,8 @@ const config = {
     '^mavryk/(.*)$': '<rootDir>/src/mavryk/$1'
   },
   testEnvironment: 'jsdom',
+  // `.claude/` holds local agent-tooling tests (gitignored); some never exit and would hang the suite
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/.claude/'],
   transform: {
     '.+\\.ts$': 'ts-jest',
     '.+\\.tsx$': 'ts-jest'

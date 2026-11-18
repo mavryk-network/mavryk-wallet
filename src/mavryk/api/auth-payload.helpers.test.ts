@@ -1,4 +1,5 @@
 import {
+  AUTH_CHALLENGE_MAX_TTL_MS,
   buildAuthChallengeMessage,
   buildAuthChallengePayloadHex,
   buildLegacyAuthChallengePayloadHex,
@@ -16,6 +17,7 @@ import {
   validateAuthChallengeForSigning
 } from './auth-payload.helpers';
 import { buildCurrentBackendAuthChallengeMessage } from './auth-test.helpers';
+import { CLOCK_SKEW_TOLERANCE_MS } from './jwt';
 
 describe('auth payload helpers', () => {
   it('builds standard Micheline string payloads', () => {
@@ -73,6 +75,36 @@ describe('auth payload helpers', () => {
         nowMs
       )
     ).toEqual({ challenge, nonce, expiresAt });
+  });
+
+  describe('challenge expiry with local clock skew', () => {
+    const expiresAt = '2030-01-01T00:05:00.000Z';
+    const expiresAtMs = Date.parse(expiresAt);
+    const nonce = 'nonce-1234567890';
+    const context = { walletAddress: 'mv1-auth-wallet', networkId: 'mainnet' };
+    const challenge = buildStructuredAuthChallengeMessage({ ...context, nonce, expiresAt });
+    const validateAt = (nowMs: number) =>
+      validateAuthChallengeForSigning({ challenge, nonce, expiresAt }, context, nowMs);
+
+    it('accepts a challenge that expired within the tolerance (local clock ahead)', () => {
+      expect(validateAt(expiresAtMs + CLOCK_SKEW_TOLERANCE_MS - 1000)).toEqual({ challenge, nonce, expiresAt });
+    });
+
+    it('rejects a challenge that expired beyond the tolerance', () => {
+      expect(() => validateAt(expiresAtMs + CLOCK_SKEW_TOLERANCE_MS)).toThrow('Auth challenge is expired');
+    });
+
+    it('accepts a challenge up to the tolerance past the max TTL (local clock behind)', () => {
+      const nowMs = expiresAtMs - AUTH_CHALLENGE_MAX_TTL_MS - CLOCK_SKEW_TOLERANCE_MS;
+
+      expect(validateAt(nowMs)).toEqual({ challenge, nonce, expiresAt });
+    });
+
+    it('rejects a challenge further ahead than the max TTL plus the tolerance', () => {
+      const nowMs = expiresAtMs - AUTH_CHALLENGE_MAX_TTL_MS - CLOCK_SKEW_TOLERANCE_MS - 1000;
+
+      expect(() => validateAt(nowMs)).toThrow('Auth challenge expiration is too far in the future');
+    });
   });
 
   it('rejects auth challenges that do not match the request context', () => {

@@ -17,6 +17,7 @@ import { AssetMetadataBase, getAssetSymbol, useAssetMetadata, useMultipleAssetsM
 import { useAccount } from 'lib/temple/front';
 import { getPredefinedBaker } from 'lib/temple/front/baking/utils';
 import { UserHistoryItem } from 'lib/temple/history';
+import { isSupportedHistoryAction } from 'lib/temple/history/actions';
 import { HistoryItemOpTypeTexts, HistoryItemTypeLabels } from 'lib/temple/history/consts';
 import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import {
@@ -33,6 +34,7 @@ import {
 import { AssetImage } from '../AssetImage';
 import { OpenInExplorerChip } from '../OpenInExplorerChip';
 
+import { GaslessTag, HistoryActionsLabel, HistoryActionsList } from './HistoryActions';
 import { HistoryTime } from './HistoryTime';
 import { AssetIconPlaceholder, HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
@@ -44,7 +46,9 @@ import {
   getMainHistoryOperation,
   getHistoryOperationAddress,
   getMoneyDiffForMultiple,
-  getMoneyDiffsForSwap
+  getMoneyDiffsForSwap,
+  isNetworkFeePaidByAccount,
+  isVisibleMoneyDiff
 } from './utils';
 
 const TX_HISTORY_PREVIEW_IDX = 2;
@@ -66,12 +70,20 @@ const createEmptyHistoryFeeTotals = (): HistoryFeeTotals => ({
 
 export type HistoryDetailsPopupProps = PopupModalWithTitlePropsProps & {
   historyItem: UserHistoryItem | null;
+  /** Address whose point of view decides direction and roles; defaults to the active account. */
+  perspectiveAddress?: string;
 };
 
-export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem, isOpen, ...props }) => {
+export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({
+  historyItem,
+  isOpen,
+  perspectiveAddress,
+  ...props
+}) => {
   const { hash = '', addedAt = '', status = 'skipped' } = historyItem ?? {};
   const { popup } = useAppEnv();
-  const { publicKeyHash } = useAccount();
+  const { publicKeyHash: activeAccountAddress } = useAccount();
+  const publicKeyHash = perspectiveAddress ?? activeAccountAddress;
 
   const mainAssetMetadata = useAssetMetadata(MAV_TOKEN_SLUG);
   const mainAssetDecimals = mainAssetMetadata?.decimals ?? DEFAULT_FEE_DECIMALS;
@@ -105,7 +117,10 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
   const fees = useMemo(
     () =>
-      historyItem?.operations.reduce<HistoryFeeTotals>((acc, item) => {
+      (historyItem?.mainOperation?.networkFees
+        ? [historyItem.mainOperation]
+        : historyItem?.operations
+      )?.reduce<HistoryFeeTotals>((acc, item) => {
         acc.gasFee = acc.gasFee.plus(item.networkFees?.gasFee ?? 0);
         acc.storageFee = acc.storageFee.plus(item.networkFees?.storageFee ?? 0);
         acc.networkFee = acc.networkFee.plus(item.networkFees?.totalFee ?? 0);
@@ -113,7 +128,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         return acc;
       }, createEmptyHistoryFeeTotals()) ?? createEmptyHistoryFeeTotals(),
-    [historyItem?.operations]
+    [historyItem?.operations, historyItem?.mainOperation]
   );
 
   const operStack = useMemo(() => (historyItem ? buildHistoryOperStack(historyItem) : []), [historyItem]);
@@ -123,6 +138,7 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
   const isInteractionOperation = historyItem?.type === HistoryItemOpTypeEnum.Interaction;
   const entrypointToShow =
     (isInteractionOperation || isMultipleOperation) && mainOperation?.entrypoint ? mainOperation.entrypoint : undefined;
+  const hasInteractionDiffs = isInteractionOperation && Boolean(historyItem?.displayMoneyDiffs?.length);
   const showDiffs =
     historyItem?.type === HistoryItemOpTypeEnum.TransferTo || historyItem?.type === HistoryItemOpTypeEnum.TransferFrom;
 
@@ -156,6 +172,16 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
     [isMultipleOperation, tokensMetadata]
   );
 
+  const hasSupportedActions = useMemo(
+    () => (historyItem?.actions ?? []).some(isSupportedHistoryAction),
+    [historyItem?.actions]
+  );
+  const feePayer = historyItem?.networkFeePayer;
+  // Only a fee the wallet itself paid (or legacy rows without payer evidence) is shown as a debit.
+  const isFeeDebit = !feePayer || feePayer.kind === 'wallet';
+  // Rows with payer evidence label who paid; legacy rows hide fees the viewed account did not pay (incoming transfers).
+  const shouldShowNetworkFee = feePayer !== undefined || isNetworkFeePaidByAccount(historyItem, publicKeyHash);
+
   const [, statusTextColor] = useMemo(() => deriveStatusColorClassName(status), [status]);
   if (!historyItem) return null;
 
@@ -170,22 +196,42 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
               isSwapOperation ? 'text-xl leading-6 tracking-tight mb-1 text-white' : 'text-sm text-secondary-white'
             )}
           >
-            {HistoryItemOpTypeTexts[historyItem.type]}{' '}
-            {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
+            {hasSupportedActions ? (
+              <HistoryActionsLabel historyItem={historyItem} />
+            ) : mainOperation?.movementKind === 'mint' && !isInteractionOperation ? (
+              <OpertionStackItem item={mainOperation} userAddress={publicKeyHash} />
+            ) : (
+              <>
+                {mainOperation?.movementKind === 'burn' && !isInteractionOperation
+                  ? 'Burned'
+                  : HistoryItemOpTypeTexts[historyItem.type]}{' '}
+                {entrypointToShow ? <span className="text-accent-blue">{entrypointToShow}</span> : ''}
+              </>
+            )}
           </div>
-          {showDiffs && (
+          {(showDiffs || hasInteractionDiffs || mainOperation?.entrypoint === 'purchase') && (
             <div className="flex flex-col">
-              {moneyDiffs.slice(0, 1).map(({ assetSlug, diff }, i) => (
-                <MoneyDiffView
-                  key={i}
-                  assetId={assetSlug}
-                  diff={diff}
-                  pending={status === 'pending'}
-                  className="flex flex-col items-center"
-                  moneyClassname="text-xl leading-6 tracking-tight"
-                  isColored={false}
-                />
-              ))}
+              {(isInteractionOperation || historyItem.displayMoneyDiffs || mainOperation?.entrypoint === 'purchase'
+                ? moneyDiffs
+                : moneyDiffs.slice(0, 1)
+              )
+                .filter(isVisibleMoneyDiff)
+                .map(({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => (
+                  <MoneyDiffView
+                    key={i}
+                    assetId={assetSlug}
+                    diff={diff}
+                    symbol={symbol}
+                    usdAmount={usdAmount}
+                    isNeutral={isNeutral}
+                    isNegative={isNegative}
+                    isAmountUnavailable={isAmountUnavailable}
+                    pending={status === 'pending'}
+                    className="flex flex-col items-center"
+                    moneyClassname="text-xl leading-6 tracking-tight"
+                    isColored={false}
+                  />
+                ))}
             </div>
           )}
 
@@ -253,81 +299,104 @@ export const HistoryDetailsPopup: FC<HistoryDetailsPopupProps> = ({ historyItem,
 
         {!isSwapOperation && !isMultipleOperation && <TxAddressBlock historyItem={historyItem} />}
 
-        <CardContainer className={clsx('text-sm text-white flex flex-col')}>
-          <div className="flex justify-between items-start text-base-plus">
-            <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
-              <T id="networkFees" />
-              <ArrowIcon
-                className={clsx(
-                  'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
-                  showFeeDetails && 'transform rotate-180'
-                )}
-              />
+        {hasSupportedActions && (
+          <CardContainer className="mb-6 text-white">
+            <HistoryActionsList historyItem={historyItem} />
+          </CardContainer>
+        )}
+
+        {shouldShowNetworkFee && (
+          <CardContainer className={clsx('text-sm text-white flex flex-col')}>
+            <div className="flex justify-between items-start text-base-plus">
+              <div className="flex items-center gap-1" onClick={toggleFeesDropdown}>
+                <T id="networkFees" />
+                {historyItem.isGasless && <GaslessTag />}
+                <ArrowIcon
+                  className={clsx(
+                    'w-6 h-auto stroke-white stroke-1 transition ease-in-out duration-200 cursor-pointer',
+                    showFeeDetails && 'transform rotate-180'
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-col items-end">
+                <FiatBalance
+                  assetSlug={MAV_TOKEN_SLUG}
+                  value={fees.networkFee}
+                  showEqualSymbol={false}
+                  className="text-base-plus"
+                  roundingMode={BigNumber.ROUND_CEIL}
+                  customSymbol={isFeeDebit ? '-' : undefined}
+                />
+
+                <div className="text-sm text-secondary-white">
+                  <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
+                </div>
+              </div>
+              {feePayer?.kind === 'other' && (
+                <div className="flex items-center gap-1 text-xs text-secondary-white">
+                  <T id="feePaidBy" />
+                  <HashChip hash={feePayer.address} small showIcon={false} />
+                </div>
+              )}
+              {feePayer?.kind === 'mixed' && (
+                <div className="text-xs text-secondary-white">
+                  <T id="feePaidByMultiple" />
+                </div>
+              )}
             </div>
-
-            <div className="flex flex-col items-end">
-              <FiatBalance
-                assetSlug={MAV_TOKEN_SLUG}
-                value={fees.networkFee}
-                showEqualSymbol={false}
-                className="text-base-plus"
-                roundingMode={BigNumber.ROUND_CEIL}
-                customSymbol="-"
-              />
-
-              <div className="text-sm text-secondary-white">
-                <FeeAmount value={fees.networkFee} symbol={mainAssetSymbol} decimals={mainAssetDecimals} />
+            <div
+              className={clsx(
+                'flex flex-col gap-2',
+                'transition ease-in-out duration-200',
+                showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
+              )}
+            >
+              {showFeeDetails && <Divider color="bg-divider" className="mt-2" ignoreParent={!popup} />}
+              <div className="flex justify-between items-center">
+                <span>
+                  <T id="gasFee" />
+                </span>
+                <FeeAmount
+                  value={fees.gasFee}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white flex items-center capitalize"
+                />
+              </div>
+              <div className="flex justify-between items-center capitalize">
+                <span>
+                  <T id="storageFee" />
+                </span>
+                <FeeAmount
+                  value={fees.storageFee}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white flex items-center"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <span>
+                  <T id="burnedFromFees" />
+                </span>
+                <FeeAmount
+                  value={fees.burnedFromFees}
+                  symbol={mainAssetSymbol}
+                  decimals={mainAssetDecimals}
+                  className="text-secondary-white"
+                />
               </div>
             </div>
-          </div>
-          <div
-            className={clsx(
-              'flex flex-col gap-2',
-              'transition ease-in-out duration-200',
-              showFeeDetails ? 'max-h-40' : 'max-h-0 overflow-hidden'
-            )}
-          >
-            {showFeeDetails && <Divider color="bg-divider" className="mt-2" ignoreParent={!popup} />}
-            <div className="flex justify-between items-center">
-              <span>
-                <T id="gasFee" />
-              </span>
-              <FeeAmount
-                value={fees.gasFee}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white flex items-center capitalize"
-              />
-            </div>
-            <div className="flex justify-between items-center capitalize">
-              <span>
-                <T id="storageFee" />
-              </span>
-              <FeeAmount
-                value={fees.storageFee}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white flex items-center"
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span>
-                <T id="burnedFromFees" />
-              </span>
-              <FeeAmount
-                value={fees.burnedFromFees}
-                symbol={mainAssetSymbol}
-                decimals={mainAssetDecimals}
-                className="text-secondary-white"
-              />
-            </div>
-          </div>
-        </CardContainer>
+          </CardContainer>
+        )}
 
-        {operStack.length > 1 && (
+        {(operStack.length > 1 || mainOperation?.displayMoneyDiff || historyItem.isPartialTransfers) && (
           <>
             <h4 className="text-base-plus text-white mt-6 mb-4">
               <T id="transactionDetails" />
+              {historyItem.isPartialTransfers && (
+                <span className="text-sm text-secondary-white"> — Incomplete breakdown</span>
+              )}
             </h4>
 
             <CardContainer className="text-white flex flex-col">
@@ -491,7 +560,7 @@ const TxAddressBlock: FC<{ historyItem: UserHistoryItem }> = ({ historyItem }) =
     }
   }, [historyItem.type, item, swappedOpItem]);
 
-  if (!getTxOpDisplayData) return null;
+  if (!getTxOpDisplayData?.address) return null;
 
   return (
     <CardContainer className="mb-6 text-base-plus text-white">

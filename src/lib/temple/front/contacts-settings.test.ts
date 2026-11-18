@@ -7,6 +7,7 @@ import {
   canReadLegacyContacts,
   canAccountUseContacts,
   getContactsBookScope,
+  getContactsLastSeenVersion,
   getStoredContactsLastSeenVersion,
   getStoredContactsAccountDataKey,
   hasContactsSettingsAccountPatchMismatch
@@ -258,5 +259,52 @@ describe('contacts-settings', () => {
     const storageKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
 
     expect(canReadLegacyContacts({}, storageKey)).toBe(true);
+  });
+
+  describe('one-time legacy migration latch', () => {
+    const migratedSettings = (storageKey: string): TempleSettings => ({
+      contactsApi: { accounts: { [storageKey]: { contacts: [], lastSeenVersion: CONTACTS_ENCRYPTION_VERSION } } }
+    });
+    const mainnetKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'mainnet');
+
+    it('refuses legacy contacts on a custom network that shares the already-migrated mainnet API record', () => {
+      const customNetworkKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'custom-rpc-id');
+
+      expect(canReadLegacyContacts(migratedSettings(mainnetKey), customNetworkKey)).toBe(false);
+    });
+
+    it('refuses legacy contacts on mainnet once a custom network migrated the shared API record', () => {
+      const customNetworkKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'custom-rpc-id');
+
+      expect(canReadLegacyContacts(migratedSettings(customNetworkKey), mainnetKey)).toBe(false);
+    });
+
+    it('keeps legacy contacts readable for a network with its own API record', () => {
+      const basenetKey = buildContactsStorageKey(mainAccount.publicKeyHash, 'basenet');
+
+      expect(canReadLegacyContacts(migratedSettings(mainnetKey), basenetKey)).toBe(true);
+    });
+
+    it('leaves the latch open when the API has no record for the book (404)', () => {
+      const lastSeenVersion = getContactsLastSeenVersion({});
+      const patch = buildContactsSettingsPatch({}, mainnetKey, [], null, undefined, undefined, lastSeenVersion);
+
+      expect(lastSeenVersion).toBeUndefined();
+      expect(canReadLegacyContacts(patch as TempleSettings, mainnetKey)).toBe(true);
+    });
+
+    it('keeps the latch open after reading a remote record that is not yet in the current format', () => {
+      expect(getContactsLastSeenVersion({ encryptionVersion: 'AES-256-GCM-2' })).toBeUndefined();
+      expect(getContactsLastSeenVersion({})).toBeUndefined();
+      expect(getContactsLastSeenVersion({ encryptionVersion: CONTACTS_ENCRYPTION_VERSION })).toBe(
+        CONTACTS_ENCRYPTION_VERSION
+      );
+    });
+
+    it('keeps legacy contacts readable for a different contacts book', () => {
+      const otherBookKey = buildContactsStorageKey(importedAccount.publicKeyHash, 'mainnet');
+
+      expect(canReadLegacyContacts(migratedSettings(mainnetKey), otherBookKey)).toBe(true);
+    });
   });
 });

@@ -1,10 +1,13 @@
-import { useSelector } from '../root-state.selector';
+import { useMemo } from 'react';
 
-export const useAllCollectiblesMetadataSelector = () =>
-  useSelector(({ collectiblesMetadata }) => collectiblesMetadata.records);
+import { useMetadataFetching } from 'lib/metadata/use-metadata-query';
+import { useOwnedMetadata } from 'lib/metadata/use-owned-metadata';
 
-export const useCollectibleMetadataSelector = (slug: string) =>
-  useSelector(state => state.collectiblesMetadata.records.get(slug));
+export const useCollectibleMetadataSelector = (slug: string) => useOwnedMetadata('collectibles')[slug];
 
-export const useCollectiblesMetadataLoadingSelector = () =>
-  useSelector(({ collectiblesMetadata }) => collectiblesMetadata.isLoading);
+export const useAllCollectiblesMetadataSelector = () => {
+  const records = useOwnedMetadata('collectibles');
+  return useMemo(() => new Map(Object.entries(records)), [records]);
+};
+
+export const useCollectiblesMetadataLoadingSelector = () => useMetadataFetching('collectibles');

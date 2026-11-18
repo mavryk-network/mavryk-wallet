@@ -1,6 +1,6 @@
 export { useStorage } from './storage';
 
-export { useTempleClient, request, assertResponse } from './client';
+export { useTempleClient, request, assertResponse, takeAppliedOperationFeeMumav } from './client';
 
 export {
   ReactiveTezosToolkit,

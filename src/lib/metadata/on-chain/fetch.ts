@@ -117,8 +117,6 @@ export async function fetchTokenMetadata(
 
     return detailedMetadata;
   } catch (error) {
-    console.error(error);
-
     throw new TokenMetadataNotFoundError();
   }
 }

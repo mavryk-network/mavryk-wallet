@@ -6,6 +6,10 @@
 >
   <head>
     <meta charset="utf-8" />
+    <!-- Paint the document canvas before CSS/JS loads; route backgrounds can override this fallback. -->
+    <style>
+      :where(html) { background-color: <%= documentBackground %>; }
+    </style>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"

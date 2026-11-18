@@ -75,11 +75,9 @@ export const isValidContractAddress = (address: string) => isAddressValid(addres
 
 export function formatOpParamsBeforeSend(params: any) {
   if (params.kind === 'origination' && params.script) {
-    const newParams = { ...params, ...params.script };
-    newParams.init = newParams.storage;
-    delete newParams.script;
-    delete newParams.storage;
-    return newParams;
+    // Only code and storage come from the script: nested keys must never override the confirmed top-level fields.
+    const { script, storage: _storage, ...rest } = params;
+    return { ...rest, code: script.code, init: script.storage };
   }
   return params;
 }
@@ -95,39 +93,22 @@ export function canAccountSignAuth(account: TempleAccount) {
 }
 
 /**
- * Resolves the canonical auth wallet address for the provided account.
- * HD sub-accounts share the index-0 address of the same wallet.
- */
-export function getAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash: string) {
-  const account = allAccounts.find(acc => acc.publicKeyHash === accountPublicKeyHash);
-
-  if (!account || account.type !== TempleAccountType.HD) {
-    return accountPublicKeyHash;
-  }
-
-  const mainHdAccount = allAccounts.find(
-    acc => acc.type === TempleAccountType.HD && acc.walletId === account.walletId && acc.hdIndex === 0
-  );
-
-  return mainHdAccount?.publicKeyHash ?? account.publicKeyHash;
-}
-
-/**
  * Resolves the wallet address that should own Mavryk API auth for the provided account.
- * Non-signable accounts reuse the first signable wallet available in the vault.
+ * A signable account (HD sub-accounts included) signs in as itself: the Wallet API serves `/wallets/{address}/*`
+ * only to that address's own session and answers 403 "not linked" to a sibling's token.
+ * Non-signable accounts reuse the first signable wallet available in the vault; their wallet reads go through the
+ * public Watch only routes instead (see `getWalletReadAccessForAccount`).
  */
 export function resolveAuthWalletAddress(allAccounts: TempleAccount[], accountPublicKeyHash?: string | null) {
   if (accountPublicKeyHash) {
     const selectedAccount = allAccounts.find(account => account.publicKeyHash === accountPublicKeyHash);
 
     if (selectedAccount && canAccountSignAuth(selectedAccount)) {
-      return getAuthWalletAddress(allAccounts, selectedAccount.publicKeyHash);
+      return selectedAccount.publicKeyHash;
     }
   }
 
-  const fallbackAccount = allAccounts.find(canAccountSignAuth);
-
-  return fallbackAccount ? getAuthWalletAddress(allAccounts, fallbackAccount.publicKeyHash) : null;
+  return allAccounts.find(canAccountSignAuth)?.publicKeyHash ?? null;
 }
 
 /**

@@ -33,7 +33,11 @@ const importWalletOptions: {
   }
 ];
 
-export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', ownMnemonic }) => {
+export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', ...props }) => (
+  <ImportWalletForm key={tabSlug} tabSlug={tabSlug} {...props} />
+);
+
+const ImportWalletForm: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', ownMnemonic }) => {
   const { locked, ready } = useTempleClient();
   const { fullPage } = useAppEnv();
 
@@ -70,7 +74,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', o
       {isImportFromSeedPhrase ? (
         isSeedEntered ? (
           <div className={clsx(fullPage && 'mt-8 mb-11')}>
-            <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+            <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} />
           </div>
         ) : (
           <ImportFromSeedPhrase
@@ -81,7 +85,7 @@ export const ImportWallet: FC<ImportWalletProps> = ({ tabSlug = 'seed-phrase', o
         )
       ) : isSeedEntered && isFromKeystoreFileWithUpdatedPassword ? (
         <div className={clsx(fullPage && 'mt-8 mb-11')}>
-          <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} keystorePassword={keystorePassword} />
+          <SetWalletPassword ownMnemonic={ownMnemonic} seedPhrase={seedPhrase} />
         </div>
       ) : (
         <ImportFromKeystoreFile

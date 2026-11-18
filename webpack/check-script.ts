@@ -8,6 +8,7 @@ import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { BUILD_START_PATH } from './build-provenance';
 import { MAX_JS_CHUNK_SIZE_IN_BYTES } from './env';
 import { PATHS } from './paths';
 
@@ -25,6 +26,8 @@ for (const relPath of filesOverLimit) {
 
 if (filesOverLimit.length) {
   console.info('Chunk size limit is', MAX_JS_CHUNK_SIZE_IN_BYTES, 'bytes');
+  // A later zip-only run must not record provenance for output that failed this check.
+  fs.rmSync(BUILD_START_PATH, { force: true });
 
   process.exit(1);
 }

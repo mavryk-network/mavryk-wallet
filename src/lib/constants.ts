@@ -1,26 +1,16 @@
-export enum ContentScriptType {
-  ExternalLinksActivity = 'ExternalLinksActivity',
-  ExternalPageLocation = 'ExternalPageLocation',
-  FetchReferralsRules = 'FetchReferralsRules',
-  FetchTakeAdsReferrals = 'FetchTakeAdsReferrals',
-  ReferralClick = 'ReferralClick',
-  FetchTempleReferralLinkItems = 'FetchTempleReferralLinkItems'
-}
-
 export const APP_TITLE = 'Temple Wallet';
 
 export const AD_CATEGORIES_PARAM_NAME = 'categories';
 
-export const ORIGIN_SEARCH_PARAM_NAME = 'o';
-
-export const ADS_META_SEARCH_PARAM_NAME = 'ads-meta';
-
-export const WEBSITES_ANALYTICS_ENABLED = 'WEBSITES_ANALYTICS_ENABLED';
-
-export const REPLACE_REFERRALS_ENABLED = 'REPLACE_REFERRALS_ENABLED';
-
 /** @deprecated */
 export const ACCOUNT_PKH_STORAGE_KEY = 'account_publickeyhash';
+
+/** Background mirrors of the page-side autolock state, read by the background to enforce the deadline */
+export const LOCK_UP_ENABLED_STORAGE_KEY = 'lock_up_enabled';
+export const LAST_PAGE_CLOSURE_STORAGE_KEY = 'last_page_closure_timestamp';
+
+/** Error message the background unlock rejects with when a lock lands while the unlock is in flight */
+export const UNLOCK_INTERRUPTED_BY_LOCK_ERROR = 'UNLOCK_INTERRUPTED_BY_LOCK';
 
 /** @deprecated */
 export const ADS_VIEWER_ADDRESS_STORAGE_KEY = 'ADS_VIEWER_ADDRESS';

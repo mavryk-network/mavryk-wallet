@@ -16,7 +16,20 @@ export class ImportExistingWalletPage extends Page {
 
   async enterSeedPhrase(seedPhrase: string) {
     const wordsArray = seedPhrase.split(' ');
-    const wordsInputs = await findElements(ImportFromSeedPhraseSelectors.wordInput);
+    let wordsInputs = await findElements(ImportFromSeedPhraseSelectors.wordInput);
+
+    // The form shows 12 inputs by default; pasting the whole phrase switches it to the matching length
+    if (wordsArray.length > wordsInputs.length) {
+      await wordsInputs[0].evaluate((input, text) => {
+        const clipboardData = new DataTransfer();
+        clipboardData.setData('text', text);
+        input.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }));
+      }, seedPhrase);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      wordsInputs = await findElements(ImportFromSeedPhraseSelectors.wordInput);
+      if (wordsInputs.length >= wordsArray.length) return;
+      throw new Error(`Seed form shows ${wordsInputs.length} inputs for a ${wordsArray.length}-word phrase`);
+    }
 
     for (let i = 0; i < wordsArray.length; i++) {
       const word = wordsArray[i];

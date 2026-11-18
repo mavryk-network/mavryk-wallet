@@ -6,10 +6,12 @@ import { ListItemDivider } from 'app/atoms/Divider';
 import { OP_STACK_PREVIEW_MULTIPLE_SIZE, OP_STACK_PREVIEW_SIZE } from 'app/defaults';
 import { T } from 'lib/i18n';
 import { UserHistoryItem } from 'lib/temple/history';
-import { buildHistoryMoneyDiffs, buildHistoryOperStack, isZero, MoneyDiff } from 'lib/temple/history/helpers';
+import { isSupportedHistoryAction } from 'lib/temple/history/actions';
+import { buildHistoryMoneyDiffs, buildHistoryOperStack, MoneyDiff } from 'lib/temple/history/helpers';
 import { HistoryItemOpTypeEnum } from 'lib/temple/history/types';
 
 import styles from './history.module.css';
+import { HistoryActionsLabel } from './HistoryActions';
 import { HistoryTime } from './HistoryTime';
 import { HistoryTokenIcon } from './HistoryTokenIcon';
 import { MoneyDiffView } from './MoneyDiffView';
@@ -21,7 +23,8 @@ import {
   getHistoryPreviewStackOffset,
   getMainHistoryOperation,
   getMoneyDiffForMultiple,
-  getMoneyDiffsForSwap
+  getMoneyDiffsForSwap,
+  isVisibleMoneyDiff
 } from './utils';
 
 interface Props {
@@ -29,14 +32,18 @@ interface Props {
   address: string;
   last?: boolean;
   slug?: string;
-  handleItemClick: (hash: string) => void;
+  handleItemClick: (id: string) => void;
 }
 
 export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, address }) => {
   const [expanded, setExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const { hash, addedAt, status } = historyItem;
+  const { id, addedAt, status } = historyItem;
+  const hasSupportedActions = useMemo(
+    () => (historyItem.actions ?? []).some(isSupportedHistoryAction),
+    [historyItem.actions]
+  );
 
   const isSwapOperation = historyItem.type === HistoryItemOpTypeEnum.Swap;
   const isInteractionOperation =
@@ -67,12 +74,14 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
 
   const moneyDiffsBase = useMemo(
     () =>
-      isSwapOperation
+      historyItem.isPartialTransfers || moneyDiffs.some(diff => diff.usdAmount !== undefined)
+        ? moneyDiffs
+        : isSwapOperation
         ? getMoneyDiffsForSwap(moneyDiffs)
         : isInteractionOperation
         ? getMoneyDiffForMultiple(moneyDiffs, OP_STACK_PREVIEW_MULTIPLE_SIZE)
         : moneyDiffs.filter((_, i) => i < OP_STACK_PREVIEW_SIZE),
-    [isInteractionOperation, isSwapOperation, moneyDiffs]
+    [historyItem.isPartialTransfers, isInteractionOperation, isSwapOperation, moneyDiffs]
   );
 
   // 0 to show all operations
@@ -82,11 +91,7 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
   );
 
   const filteredMoneyDiffBase = useMemo(
-    () =>
-      moneyDiffsBase.reduce<MoneyDiff[]>((acc, item) => {
-        if (!isZero(item.diff)) acc.push(item);
-        return acc;
-      }, []),
+    () => moneyDiffsBase.filter((item): item is MoneyDiff => Boolean(item) && isVisibleMoneyDiff(item)),
     [moneyDiffsBase]
   );
 
@@ -105,14 +110,18 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         !expanded && 'hover:bg-primary-card-hover'
       )}
     >
-      <div onClick={() => handleItemClick(hash)} className="flex items-start justify-between gap-1">
+      <div onClick={() => handleItemClick(id)} className="flex items-start justify-between gap-1">
         <div className="flex items-start gap-3">
           <HistoryTokenIcon historyItem={historyItem} />
           <div
             style={{ maxWidth: !filteredMoneyDiffBase.length ? 'auto' : 240 }}
             className="flex flex-col gap-1 items-start justify-center  flex-wrap"
           >
-            <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+            {hasSupportedActions ? (
+              <HistoryActionsLabel historyItem={historyItem} />
+            ) : (
+              <OperationStack historyItem={historyItem} base={base} userAddress={address} />
+            )}
 
             <div>
               <div className="flex items-start gap-x-1">
@@ -145,18 +154,26 @@ export const HistoryItem = memo<Props>(({ historyItem, last, handleItemClick, ad
         </div>
 
         <div className="flex flex-col justify-center items-end gap-1">
-          {filteredMoneyDiffBase.map(({ assetSlug, diff }, i) => {
-            return (
-              <MoneyDiffView
-                key={i}
-                className="gap-1 flex-col"
-                assetId={assetSlug}
-                diff={diff}
-                pending={status === 'pending'}
-                showFiatBalance={!isSwapOperation && !isInteractionOperation}
-              />
-            );
-          })}
+          {historyItem.isPartialTransfers && <span className="text-xs text-secondary-white">Incomplete breakdown</span>}
+          {filteredMoneyDiffBase.map(
+            ({ assetSlug, diff, symbol, usdAmount, isNeutral, isNegative, isAmountUnavailable }, i) => {
+              return (
+                <MoneyDiffView
+                  key={i}
+                  className="gap-1 flex-col"
+                  assetId={assetSlug}
+                  diff={diff}
+                  symbol={symbol}
+                  usdAmount={usdAmount}
+                  isNeutral={isNeutral}
+                  isNegative={isNegative}
+                  isAmountUnavailable={isAmountUnavailable}
+                  pending={status === 'pending'}
+                  showFiatBalance={usdAmount !== undefined || (!isSwapOperation && !isInteractionOperation)}
+                />
+              );
+            }
+          )}
         </div>
       </div>
 

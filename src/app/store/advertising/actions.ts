@@ -8,3 +8,5 @@ export const loadAdvertisingPromotionActions = createActions<void, AdvertisingPr
 );
 
 export const skipAdvertisingPromotionAction = createAction<void>('advertising/SKIP_PROMOTION');
+
+export const dismissAdvertisingPromotionAction = createAction<{ name?: string }>('advertising/DISMISS_PROMOTION');

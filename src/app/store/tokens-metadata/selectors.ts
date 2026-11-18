@@ -1,11 +1,11 @@
-import type { TokenMetadata } from 'lib/metadata';
+import { useMetadataFetching } from 'lib/metadata/use-metadata-query';
+import { useOwnedMetadata } from 'lib/metadata/use-owned-metadata';
 
-import { useSelector } from '../root-state.selector';
+export const useTokenMetadataSelector = (slug: string) => useOwnedMetadata('tokens')[slug];
 
-export const useTokenMetadataSelector = (slug: string): TokenMetadata | undefined =>
-  useSelector(state => state.tokensMetadata.metadataRecord[slug]);
+export const useAllTokensMetadataSelector = () => {
+  const records = useOwnedMetadata('tokens');
+  return records;
+};
 
-export const useAllTokensMetadataSelector = () => useSelector(({ tokensMetadata }) => tokensMetadata.metadataRecord);
-
-export const useTokensMetadataLoadingSelector = () =>
-  useSelector(({ tokensMetadata }) => tokensMetadata.metadataLoading);
+export const useTokensMetadataLoadingSelector = () => useMetadataFetching('tokens');

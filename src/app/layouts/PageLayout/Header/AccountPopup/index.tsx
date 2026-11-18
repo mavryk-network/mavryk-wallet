@@ -22,7 +22,7 @@ type AccountPopupProps = {
 const LIST_HEIGHT = 350;
 const isShowSearch = true;
 
-const AccountPopup: FC<AccountPopupProps> = ({ opened, setOpened }) => {
+const AccountPopup: FC<AccountPopupProps> = ({ setOpened }) => {
   const allAccounts = useRelevantAccounts();
   const { popup } = useAppEnv();
   const account = useAccount();

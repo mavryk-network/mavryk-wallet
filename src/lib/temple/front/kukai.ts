@@ -1,5 +1,4 @@
 import { entropyToMnemonic } from 'bip39';
-import * as forge from 'node-forge';
 import scryptsy from 'scryptsy';
 
 import { t } from 'lib/i18n';
@@ -12,6 +11,9 @@ interface ScryptsyCorrectType extends ScryptsyType {
 const scrypt: ScryptsyCorrectType = scryptsy as any;
 
 async function decrypt(chipher: string, password: string, salt: string) {
+  // node-forge (~300 KB) is only needed here, so it stays out of the eager page bundle.
+  const forge = await import('node-forge');
+
   try {
     if (!password || !salt) {
       throw new Error('Missing password or salt');

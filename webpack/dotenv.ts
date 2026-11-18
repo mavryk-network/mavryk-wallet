@@ -7,17 +7,34 @@ import { isTruthy } from './utils';
 
 const PATH_CWD = fs.realpathSync(process.cwd());
 
+const BLOCKED_PUBLIC_ENV_VAR_NAMES = ['SUPER_ADMIN_PRIVATE_KEY'] as const;
+
+const OPTIONAL_PUBLIC_ENV_VAR_NAMES = [
+  'ENABLE_REDUX_DEVTOOLS',
+  'REDUX_DEVTOOLS_PORT',
+  'LOCAL_METADATA_API_URL',
+  'SCROLL_DOCUMENT',
+  'GITHUB_ACTION_RUN_ENV'
+] as const;
+
+const TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME = 'TESTNET_KYC_SIGNER_PRIVATE_KEY';
+
+const blockedPublicEnvVarNames = new Set<string>(BLOCKED_PUBLIC_ENV_VAR_NAMES);
+
 const readDotEnvFile = (path: string) => {
   if (!fs.existsSync(path)) return null;
   const contentString = fs.readFileSync(path, { encoding: 'utf-8' });
   return Dotenv.parse(contentString);
 };
 
+const omitBlockedPublicEnvVars = (data: Record<string, string>) =>
+  Object.fromEntries(Object.entries(data).filter(([name]) => !blockedPublicEnvVarNames.has(name)));
+
 const dotenvDistPath = path.resolve(PATH_CWD, '.env.dist');
 
 const distDotEnvFileData = readDotEnvFile(dotenvDistPath);
 
-const requiredEnvFileVarsNames = Object.keys(distDotEnvFileData!);
+const requiredEnvFileVarsNames = Object.keys(distDotEnvFileData!).filter(name => !blockedPublicEnvVarNames.has(name));
 
 const dotenvPath = path.resolve(PATH_CWD, '.env');
 
@@ -34,13 +51,42 @@ const dotenvFilesPaths = [
   dotenvPath
 ].filter(isTruthy);
 
-const envFilesData: Record<string, string> = dotenvFilesPaths.reduce(
+const rawEnvFilesData: Record<string, string> = dotenvFilesPaths.reduce(
   (data, path) => ({ ...data, ...readDotEnvFile(path) }),
   {}
 );
+
+const envFilesData = omitBlockedPublicEnvVars(rawEnvFilesData);
 
 for (const name of requiredEnvFileVarsNames) {
   if (!envFilesData[name]) throw new Error(`[.env] Required \`${name}\` value is not set in .env files`);
 }
 
-export { envFilesData };
+const publicEnvVarNames = new Set<string>([...requiredEnvFileVarsNames, ...OPTIONAL_PUBLIC_ENV_VAR_NAMES]);
+
+const publicEnvFilesData: Record<string, string> = Object.fromEntries(
+  Object.entries(envFilesData).filter(([name]) => publicEnvVarNames.has(name) && !blockedPublicEnvVarNames.has(name))
+);
+
+// Basenet test releases also use production optimization. This optional key is public in every bundle.
+// Owner-accepted by design (bdb77b1b, AGENTS.md, confirmed in the security audit): it is a Basenet-only, low-value
+// registrar key and must stay a dedicated, minimally funded key that never controls mainnet funds or contracts.
+publicEnvFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] =
+  envFilesData[TESTNET_KYC_SIGNER_PRIVATE_KEY_ENV_NAME] ?? '';
+
+// Blocking by name alone cannot stop a blocked value from shipping under an allowed name.
+// Only effective when the blocked value is present at build time (local .env files or process env). The deploy
+// workflow never supplies SUPER_ADMIN_PRIVATE_KEY, so this does not guard Chrome Web Store release builds.
+const blockedPublicEnvVarValues = new Set(
+  BLOCKED_PUBLIC_ENV_VAR_NAMES.flatMap(name => [rawEnvFilesData[name]?.trim(), process.env[name]?.trim()]).filter(
+    isTruthy
+  )
+);
+
+for (const [name, value] of Object.entries(publicEnvFilesData)) {
+  if (blockedPublicEnvVarValues.has(value.trim())) {
+    throw new Error(`[.env] Public \`${name}\` reuses a blocked private value and must not be bundled`);
+  }
+}
+
+export { dotenvFilesPaths, envFilesData, publicEnvFilesData };

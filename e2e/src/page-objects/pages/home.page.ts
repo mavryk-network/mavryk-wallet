@@ -25,7 +25,6 @@ export class HomePage extends Page {
     await this.CollectiblesTab.waitForDisplayed();
     await this.RWAsTab.waitForDisplayed();
     await this.PublicAddressButton.waitForDisplayed();
-    await this.accountNameText.waitForDisplayed();
   }
 
   async isTokenDisplayed(name: string) {

@@ -7,41 +7,32 @@ import { TzktRWAAssetMetadata } from '../tzkt/types';
 import { fetchWithTimeout } from '../tzkt/utils';
 
 import { MAX_RWA_QUERY_RESPONSE_ITEMS } from './consts';
-import { MOCK_RWA_CONFIG, MOCKED_RWA_ASSETS } from './mock';
 import { RWA_ASSETS_CONTRACTS_QUERY, RWA_TOKEN_METADATA_QUERY } from './queries';
 import { dodoAssetsContractsSchema } from './rwa.schema';
 
+/**
+ * Load the RWA contract catalog. Fails closed: an unavailable or invalid response throws, so callers keep their last
+ * known data or surface an error instead of classifying assets against placeholder contracts.
+ */
 export async function fetchRwaAssetsContracts() {
-  try {
-    const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query: RWA_ASSETS_CONTRACTS_QUERY
-      })
-    });
+  const response = await fetchWithTimeout(`${process.env.EXTERNAL_API}/graphql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query: RWA_ASSETS_CONTRACTS_QUERY
+    })
+  });
 
-    if (!response.ok) {
-      console.error(`GraphQL request failed: ${response.statusText}`);
+  if (!response.ok) throw new Error(`RWA contracts request failed: ${response.status}`);
+  const { data } = await response.json();
+  const parsedAssetsResponse = dodoAssetsContractsSchema.validateSync(data, { abortEarly: false });
 
-      return MOCK_RWA_CONFIG.dodo_mav.reduce<string[]>((acc, item) => {
-        acc.push(item.base_token.address);
-        return acc;
-      }, []);
-    }
-    const { data } = await response.json();
-    const parsedAssetsResponse = dodoAssetsContractsSchema.validateSync(data, { abortEarly: false });
-
-    return parsedAssetsResponse.dodo_mav.reduce<string[]>((acc, item) => {
-      acc.push(item.base_token.address);
-      return acc;
-    }, []);
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
+  return parsedAssetsResponse.dodo_mav.reduce<string[]>((acc, item) => {
+    acc.push(item.base_token.address);
+    return acc;
+  }, []);
 }
 
 // api rwa metadata utils
@@ -61,10 +52,8 @@ export async function fetchRwaAssetsMetadata$(contracts: string[]): Promise<any[
     })
   });
 
-  if (!response.ok) {
-    console.error(`GraphQL request failed: ${response.statusText}`);
-    return MOCKED_RWA_ASSETS;
-  }
+  // Fail closed: never show placeholder RWA details when the API is unavailable.
+  if (!response.ok) throw new Error(`RWA metadata request failed: ${response.status}`);
   // TODO add zod schema // HERE
   const { data } = await response.json();
 

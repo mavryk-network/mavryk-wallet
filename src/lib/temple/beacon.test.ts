@@ -37,6 +37,7 @@ browser.storage.local = { ...browser.storage.local, ...mockBrowserStorageLocal }
 global.crypto = { ...crypto, ...mockCryptoUtil };
 
 const MOCK_PUBLIC_KEY = '444e1f4ab90c304a5ac003d367747aab63815f583ff2330ce159d12c1ecceba1';
+const MOCK_ORIGIN = 'https://dapp.example';
 
 describe('Beacon', () => {
   const MOCK_ORIGINAL_KEY = 'something';
@@ -103,12 +104,20 @@ describe('Beacon', () => {
   });
   describe('getOrCreateKeyPair', () => {
     it('called with correct arguments', async () => {
-      await getOrCreateKeyPair();
+      await getOrCreateKeyPair(MOCK_ORIGIN);
       expect(mockSodiumUtil.crypto_sign_seed_keypair).toBeCalledWith('mock string');
-      expect(mockSodiumUtil.crypto_generichash).toBeCalledWith(32, new Uint8Array(new Array(64).fill(48)));
+      const [hashLength, seedBytes] = mockSodiumUtil.crypto_generichash.mock.calls[0];
+      expect(hashLength).toBe(32);
+      // libsodium's TextEncoder uses the Node realm; compare the exact bytes across realms.
+      expect(Object.prototype.toString.call(seedBytes)).toBe('[object Uint8Array]');
+      expect(Array.from(seedBytes)).toEqual(new Array(64).fill(48));
+      const [keyLength, originBytes, seedHashKey] = mockSodiumUtil.crypto_generichash.mock.calls[1] as unknown[];
+      expect(keyLength).toBe(32);
+      expect(Buffer.from(originBytes as Uint8Array).toString()).toBe(MOCK_ORIGIN);
+      expect(seedHashKey).toBe('mock string');
     });
     it('Generates new valid seed', async () => {
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       expect(keyPair).toHaveProperty('keyType');
       expect(keyPair).toHaveProperty('privateKey');
       expect(keyPair).toHaveProperty('publicKey');
@@ -126,7 +135,7 @@ describe('Beacon', () => {
   });
   describe('createCryptoBox', () => {
     it('Generates valid box from keypair and public key', async () => {
-      const selfKeyPair = await getOrCreateKeyPair();
+      const selfKeyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const buffers = await createCryptoBox(MOCK_PUBLIC_KEY, selfKeyPair);
       expect(buffers.length).toEqual(3);
       expect(mockSodiumUtil.crypto_sign_ed25519_sk_to_curve25519).toBeCalledWith(Buffer.from(selfKeyPair.privateKey));
@@ -137,7 +146,7 @@ describe('Beacon', () => {
   });
   describe('createCryptoBoxClient', () => {
     it('To have valid properties', async () => {
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const cryptoClient = await createCryptoBoxClient(MOCK_PUBLIC_KEY, keyPair);
       expect(cryptoClient).toHaveProperty('sharedRx');
       expect(cryptoClient).toHaveProperty('sharedTx');
@@ -150,7 +159,7 @@ describe('Beacon', () => {
   });
   describe('createCryptoBoxServer', () => {
     it('To have valid properties', async () => {
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const cryptoClient = await createCryptoBoxServer(MOCK_PUBLIC_KEY, keyPair);
       expect(cryptoClient).toHaveProperty('sharedRx');
       expect(cryptoClient).toHaveProperty('sharedTx');
@@ -163,7 +172,7 @@ describe('Beacon', () => {
   });
   describe('decryptCryptoboxPayload', () => {
     it('To be able decrypt payload', async () => {
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const { sharedRx } = await createCryptoBoxServer(MOCK_PUBLIC_KEY, keyPair);
       const payload = 'mock payload';
       const hexPayload = Buffer.from(payload, 'hex');
@@ -183,7 +192,7 @@ describe('Beacon', () => {
   });
   describe('encryptCryptoboxPayload', () => {
     it('To be able encrypt payload', async () => {
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const { sharedTx } = await createCryptoBoxClient(MOCK_PUBLIC_KEY, keyPair);
       const message = 'mock payload';
       const payload = await encryptCryptoboxPayload(message, sharedTx);
@@ -201,11 +210,11 @@ describe('Beacon', () => {
       const msg =
         '2s7MQwsWc93RsbS7VtKyK7Ln1gSHiAxLAttfL22sFreVaB3qEdy63bV6WSsAMAWi5XLVyn6sDKhju4p4XDDDATMpk7wHmPMYG2G13Eas1ens89zDyZkmZsV7DKdLaNW9aB6pup4WuAJruEpj4u6Y4seeui9qCtTw1V3tXLM9k95ze4s6ofxTyuNdy9PgRxLvsMrTbBoA7ETK1SWKh3ZduoTpgaCnexb4yq';
       const req: Request = decodeMessage<PostMessagePairingRequest>(msg);
-      const keyPair = await getOrCreateKeyPair();
+      const keyPair = await getOrCreateKeyPair(MOCK_ORIGIN);
       const resBase = {
         version: req.version,
         id: req.id,
-        ...(req.beaconId ? { beaconId: 'id' } : { senderId: await getSenderId() })
+        ...(req.beaconId ? { beaconId: 'id' } : { senderId: await getSenderId(MOCK_ORIGIN) })
       };
       const result = await sealCryptobox(
         JSON.stringify({
@@ -225,7 +234,7 @@ describe('Beacon', () => {
         const message = 'mock payload';
         const encMessage = Buffer.from(message, 'hex').toString();
         try {
-          await decryptMessage(encMessage, MOCK_PUBLIC_KEY);
+          await decryptMessage(MOCK_ORIGIN, encMessage, MOCK_PUBLIC_KEY);
         } catch (e) {
           expect(e).toBeInstanceOf(Error);
         }
@@ -236,13 +245,13 @@ describe('Beacon', () => {
   describe('encryptMessage', () => {
     it('To be able decrypt sample message', async () => {
       const message = 'mock payload';
-      const payload = await encryptMessage(message, MOCK_PUBLIC_KEY);
+      const payload = await encryptMessage(MOCK_ORIGIN, message, MOCK_PUBLIC_KEY);
       expect(payload).toBe('6d6f636b2072616e646f6d62797465736d6f636b20736563726574626f782065617379');
     });
   });
   describe('getSenderId', () => {
     it('To be valid payload', async () => {
-      const message = await getSenderId();
+      const message = await getSenderId(MOCK_ORIGIN);
       expect(message).toBe('44aQjTPHmtoriWAoTuz1e');
     });
   });
@@ -291,7 +300,7 @@ describe('Beacon', () => {
     it('To be valid payload', async () => {
       const resMsg = encodeMessage<Response>({
         version: '2',
-        senderId: await getSenderId(),
+        senderId: await getSenderId(MOCK_ORIGIN),
         id: 'stub',
         type: MessageType.Disconnect
       });

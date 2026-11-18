@@ -1,5 +1,7 @@
 import { char2Bytes, num2PaddedHex } from '@mavrykdynamics/webmavryk-utils';
 
+import { CLOCK_SKEW_TOLERANCE_MS } from './jwt';
+
 export const MICHELINE_WATERMARK = '05';
 export const MICHELINE_STRING_TAG = '01';
 export const MAVRYK_SIGNED_MESSAGE_PREFIX = 'Mavryk Signed Message: ';
@@ -113,11 +115,12 @@ export function validateAuthChallengeForSigning(
     throw new Error('Auth challenge expiration must be an ISO timestamp');
   }
 
-  if (expiresAtMs <= nowMs) {
+  // Both bounds allow for local clock skew, so a slightly wrong clock can still authenticate
+  if (expiresAtMs + CLOCK_SKEW_TOLERANCE_MS <= nowMs) {
     throw new Error('Auth challenge is expired');
   }
 
-  if (expiresAtMs - nowMs > AUTH_CHALLENGE_MAX_TTL_MS) {
+  if (expiresAtMs - nowMs > AUTH_CHALLENGE_MAX_TTL_MS + CLOCK_SKEW_TOLERANCE_MS) {
     throw new Error('Auth challenge expiration is too far in the future');
   }
 

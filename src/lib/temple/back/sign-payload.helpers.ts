@@ -16,7 +16,7 @@ const TEZOS_SIGNED_MESSAGE_PREFIX = 'Tezos Signed Message: ';
 
 type MichelinePreview = {
   preview: string;
-  decodedString?: string;
+  texts: string[];
 };
 
 export type PreparedDAppSignPayload = {
@@ -54,14 +54,13 @@ export function prepareDAppSignPayload(payload: string, origin?: string): Prepar
   }
 
   if (
-    michelinePreview.decodedString &&
-    isAuthChallengeMessageOrHex(michelinePreview.decodedString) &&
+    michelinePreview.texts.some(text => isAuthChallengeMessageOrHex(text)) &&
     !isTrustedAuthChallengeSignerOrigin(origin)
   ) {
     throw new Error('Auth challenge payloads cannot be signed by dApps');
   }
 
-  if (michelinePreview.decodedString?.startsWith(TEZOS_SIGNED_MESSAGE_PREFIX)) {
+  if (michelinePreview.texts.some(text => text.startsWith(TEZOS_SIGNED_MESSAGE_PREFIX))) {
     throw new Error('RAW payloads must use Mavryk Signed Message framing');
   }
 
@@ -75,12 +74,20 @@ export function prepareDAppSignPayload(payload: string, origin?: string): Prepar
 
 function getMichelinePreview(payload: string): MichelinePreview | null {
   try {
-    const value = valueDecoder(Uint8ArrayConsumer.fromHexString(getMichelinePayloadBytes(payload)));
+    const consumer = Uint8ArrayConsumer.fromHexString(getMichelinePayloadBytes(payload));
+    const value = valueDecoder(consumer);
+
+    // Every signed byte must belong to the previewed value: reject trailing bytes and length overruns.
+    if (consumer.length() !== 0) {
+      return null;
+    }
+
+    const texts = collectMichelineTexts(value);
     const decodedString = getDecodedString(value);
 
     if (decodedString !== undefined) {
       return {
-        decodedString,
+        texts,
         preview: decodedString
       };
     }
@@ -90,7 +97,7 @@ function getMichelinePreview(payload: string): MichelinePreview | null {
       newline: '\n'
     }).slice(1, -1);
 
-    return parsed.length > 0 ? { preview: parsed } : null;
+    return parsed.length > 0 ? { preview: parsed, texts } : null;
   } catch {
     return null;
   }
@@ -104,4 +111,25 @@ function getDecodedString(value: unknown) {
   }
 
   return undefined;
+}
+
+/** Every string and UTF-8-decoded bytes literal in the value, so policy checks cover nested and non-string framings. */
+function collectMichelineTexts(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap(collectMichelineTexts);
+  }
+
+  if (!value || typeof value !== 'object') {
+    return [];
+  }
+
+  if ('string' in value && typeof value.string === 'string') {
+    return [value.string];
+  }
+
+  if ('bytes' in value && typeof value.bytes === 'string') {
+    return [Buffer.from(value.bytes, 'hex').toString('utf8')];
+  }
+
+  return 'args' in value && Array.isArray(value.args) ? value.args.flatMap(collectMichelineTexts) : [];
 }

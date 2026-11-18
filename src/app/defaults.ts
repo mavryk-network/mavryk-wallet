@@ -14,19 +14,35 @@ export const ACCOUNT_NAME_PATTERN = new RegExp(ACCOUNT_NAME_PATTERN_STR, 'u');
 
 export const ACCOUNT_OR_GROUP_NAME_PATTERN = /^[^!@#$%^&*()_+\-=\]{};':"\\|,.<>?]{1,16}$/;
 
-export const PASSWORD_PATTERN = new RegExp(
-  [
-    '^',
-    '(?=.*[a-z])', // Must contain at least 1 lowercase alphabetical character
-    '(?=.*[A-Z])', // Must contain at least 1 uppercase alphabetical character
-    '(?=.*[0-9])', // Must contain at least 1 numeric character
-    '(?=.{8,})' // Must be eight characters or longer
-  ].join('')
-);
-
 export const uppercaseLowercaseMixtureRegx = /(?=.*[a-z])(?=.*[A-Z])/;
 export const lettersNumbersMixtureRegx = /(?=.*\d)(?=.*[A-Za-z])/;
 export const specialCharacterRegx = /[!@#$%^&*()_+\-=\]{};':"\\|,.<>?]/;
+const MIN_PASSWORD_LENGTH_PATTERN = /(?=.{8,})/;
+
+export const PASSWORD_PATTERN = new RegExp(
+  [
+    '^',
+    uppercaseLowercaseMixtureRegx.source,
+    lettersNumbersMixtureRegx.source,
+    `(?=.*${specialCharacterRegx.source})`,
+    MIN_PASSWORD_LENGTH_PATTERN.source
+  ].join('')
+);
+
+/** Returns the displayed requirements for a new vault password. */
+export function getPasswordValidation(password: string) {
+  return {
+    minChar: MIN_PASSWORD_LENGTH_PATTERN.test(password),
+    cases: uppercaseLowercaseMixtureRegx.test(password),
+    number: lettersNumbersMixtureRegx.test(password),
+    specialChar: specialCharacterRegx.test(password)
+  };
+}
+
+/** Checks the complete new-vault policy; never use this for existing credentials. */
+export function isPasswordValid(password: string) {
+  return Object.values(getPasswordValidation(password)).every(Boolean);
+}
 
 export const URL_PATTERN =
   /(^(https:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$)|(^http(s)?:\/\/localhost:[0-9]+$)/;

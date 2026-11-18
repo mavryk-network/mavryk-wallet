@@ -17,7 +17,7 @@ import { defaultNumberOfWords } from './constants';
 import { ImportAccountSelectors, ImportAccountFormType } from './selectors';
 import { ImportformProps } from './types';
 
-const DERIVATION_PATHS = [
+const DERIVATION_PATHS: { type: ByMnemonicFormData['derivationPath']; name: string }[] = [
   {
     type: 'default',
     name: t('defaultAccount')

@@ -16,7 +16,7 @@ import WebPack from 'webpack';
 import packageJSON from '../package.json';
 import tsConfig from '../tsconfig.json';
 
-import { envFilesData } from './dotenv';
+import { publicEnvFilesData } from './dotenv';
 import {
   NODE_ENV,
   WEBPACK_MODE,
@@ -28,7 +28,8 @@ import {
   MANIFEST_VERSION,
   BACKGROUND_IS_WORKER,
   IMAGE_INLINE_SIZE_LIMIT_ENV,
-  PRODUCTION_EXTENSION_ID
+  PRODUCTION_EXTENSION_ID,
+  LOAD_PERF_MARKS
 } from './env';
 import { PATHS } from './paths';
 
@@ -246,12 +247,13 @@ export const buildBaseConfig = (): WebPack.Configuration & Pick<WebPack.WebpackO
       'process.env.BACKGROUND_IS_WORKER': JSON.stringify(String(BACKGROUND_IS_WORKER)),
       'process.env.TARGET_BROWSER': JSON.stringify(TARGET_BROWSER),
       ...Object.fromEntries(
-        Object.entries(envFilesData).map(([name, value]) => {
+        Object.entries(publicEnvFilesData).map(([name, value]) => {
           const key = `process.env.${name}`;
           return [key, JSON.stringify(value)];
         })
       ),
-      'process.env.PRODUCTION_EXTENSION_ID': JSON.stringify(PRODUCTION_EXTENSION_ID ?? '')
+      'process.env.PRODUCTION_EXTENSION_ID': JSON.stringify(PRODUCTION_EXTENSION_ID ?? ''),
+      'process.env.LOAD_PERF_MARKS': JSON.stringify(String(LOAD_PERF_MARKS))
     }),
 
     new ForkTsCheckerWebpackPlugin({

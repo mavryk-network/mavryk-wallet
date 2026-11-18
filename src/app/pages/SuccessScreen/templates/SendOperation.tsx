@@ -8,7 +8,8 @@ import { AssetIcon } from 'app/templates/AssetIcon';
 import { OpenInExplorerChip } from 'app/templates/OpenInExplorerChip';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T } from 'lib/i18n';
-import { useAssetMetadata } from 'lib/metadata';
+import { useAssetMetadata, useGasTokenMetadata } from 'lib/metadata';
+import { mumavToTz } from 'lib/temple/helpers';
 
 import styles from '../successScreen.module.css';
 
@@ -17,11 +18,13 @@ export type SendOperationProps = {
   assetSlug: string;
   hash: string;
   address: string;
-  fees: number;
+  /** Applied network fee in mumav, reveal included. The fee row is hidden when it is unknown. */
+  feeMumav?: string;
 };
 
-export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash, address, fees }) => {
+export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash, address, feeMumav }) => {
   const assetMetadata = useAssetMetadata(assetSlug ?? MAV_TOKEN_SLUG);
+  const gasMetadata = useGasTokenMetadata();
   const { popup } = useAppEnv();
 
   return (
@@ -43,15 +46,17 @@ export const SendOperation: FC<SendOperationProps> = ({ amount, assetSlug, hash,
           </span>
           <HashChip hash={address} small trim={false} className={clsx(popup && styles.breakHash)} />
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <div className="text-secondary-white">Fees</div>
-          <div>
-            <Money smallFractionFont={false} cryptoDecimals={assetMetadata?.decimals}>
-              {fees}
-            </Money>
-            &nbsp;{assetMetadata?.symbol}
+        {feeMumav !== undefined && (
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-secondary-white">Fees</div>
+            <div>
+              <Money smallFractionFont={false} cryptoDecimals={gasMetadata.decimals}>
+                {mumavToTz(feeMumav)}
+              </Money>
+              &nbsp;{gasMetadata.symbol}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="mt-3 mb-2">
         You can track this transaction’s status in the History tab or&nbsp;

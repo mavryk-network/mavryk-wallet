@@ -53,7 +53,7 @@ export const createQueue = () => {
 
   return <T>(factory: () => Promise<T>): Promise<T> =>
     new Promise((res, rej) => {
-      worker = worker.then(() => factory().then(res).catch(rej));
+      worker = worker.then(() => Promise.resolve().then(factory).then(res, rej));
     });
 };
 

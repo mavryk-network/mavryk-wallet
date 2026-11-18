@@ -2,7 +2,7 @@ import { createActions } from 'lib/store';
 
 import { ExchangeRateRecord } from './state';
 
-interface ExchangeRateInterface {
+export interface ExchangeRateInterface {
   usdToTokenRates: ExchangeRateRecord;
   fiatToTezosRates: ExchangeRateRecord<number>;
 }

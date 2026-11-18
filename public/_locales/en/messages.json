@@ -965,6 +965,9 @@
   "unlockPasswordErrorDelay": {
     "message": "You have entered the wrong password three times. Your wallet is being blocked for"
   },
+  "unlockInterruptedByLock": {
+    "message": "The wallet was locked while it was unlocking. Please enter your password again."
+  },
   "unlock": {
     "message": "Unlock"
   },
@@ -1352,6 +1355,12 @@
   },
   "unknownNetwork": {
     "message": "Unknown:"
+  },
+  "unknownNetworkChainId": {
+    "message": "Chain ID:"
+  },
+  "verifyingOperation": {
+    "message": "Verifying operation..."
   },
   "backupNewSeedPhrase": {
     "message": "Backup new Seed Phrase"
@@ -1798,6 +1807,9 @@
   },
   "noAssetsFound": {
     "message": "No assets found"
+  },
+  "assetsLoadError": {
+    "message": "Couldn't load this list. It will retry automatically."
   },
   "tokenNotFound": {
     "message": "Token not found..."
@@ -2542,6 +2554,9 @@
   },
   "txIsLikelyToFail": {
     "message": "Warning! Transaction is likely to fail."
+  },
+  "operationCannotBeVerified": {
+    "message": "This operation could not be simulated on the network, so the wallet cannot verify what you would sign. It cannot be confirmed. Cancel it and try again later."
   },
   "copyErrorLogs": {
     "message": "Copy Error Logs"
@@ -3683,6 +3698,35 @@
   "networkFees": {
     "message": "Network Fees"
   },
+  "historyLoadError": {
+    "message": "Couldn't load history."
+  },
+  "historyEnrichmentUpdating": {
+    "message": "Order details are updating and may be incomplete."
+  },
+  "historyEnrichmentUnavailable": {
+    "message": "Order details are temporarily unavailable. Transactions are still shown."
+  },
+  "gasless": {
+    "message": "Gasless"
+  },
+  "feePaidBy": {
+    "message": "Paid by"
+  },
+  "feePaidByMultiple": {
+    "message": "Paid by: multiple"
+  },
+  "historyActions": {
+    "message": "Actions"
+  },
+  "orderNumber": {
+    "message": "Order #$orderId$",
+    "placeholders": {
+      "orderId": {
+        "content": "$1"
+      }
+    }
+  },
   "burnedFromFees": {
     "message": "Burned From Fees 🔥"
   },
@@ -4136,5 +4180,53 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "assetSecurityUnavailable": {
+    "message": "Token security data is unavailable. Assets have not been checked for scam labels."
+  },
+  "recentOperations": {
+    "message": "Recent Operations"
+  },
+  "recentOperationsPreparing": {
+    "message": "Preparing recent operations…"
+  },
+  "recentOperationsEmpty": {
+    "message": "No recent operations yet"
+  },
+  "recentOperationsUpdating": {
+    "message": "Updating… Last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsStaleEmpty": {
+    "message": "Updating recent operations…"
+  },
+  "recentOperationsLoadError": {
+    "message": "Could not load recent operations"
+  },
+  "recentOperationsOutdated": {
+    "message": "Showing operations last checked $time$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "recentOperationsUnsupported": {
+    "message": "History for contract contacts is not supported yet"
+  },
+  "retryInSeconds": {
+    "message": "Retry in $seconds$s",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "watchOnlyAssetHistoryUnavailable": {
+    "message": "Asset history isn't available for watch-only accounts"
   }
 }

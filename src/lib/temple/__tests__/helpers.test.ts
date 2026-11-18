@@ -33,14 +33,44 @@ describe('Helpers', () => {
 
     params = {
       kind: 'origination',
-      script: { a: 'A' },
-      storage: { b: 'B' }
+      script: { code: [], storage: { b: 'B' } },
+      storage: { c: 'C' }
     };
     expect(Helpers.formatOpParamsBeforeSend(params)).toStrictEqual({
       kind: 'origination',
-      a: 'A',
+      code: [],
       init: { b: 'B' }
     });
+  });
+
+  it('formatOpParamsBeforeSend keeps the confirmed top-level fields over keys nested in an origination script', () => {
+    const params = {
+      kind: 'origination',
+      fee: 100,
+      storageLimit: 200,
+      balance: '0',
+      script: {
+        code: [],
+        storage: {},
+        fee: 999999,
+        storageLimit: 60000,
+        gasLimit: 1040000,
+        balance: '1000',
+        mumav: false,
+        delegate: 'mv1N3KY1vXdYX2x568MGmNBRLEK7k7uc2zEM'
+      }
+    };
+    const snapshot = JSON.parse(JSON.stringify(params));
+
+    expect(Helpers.formatOpParamsBeforeSend(params)).toStrictEqual({
+      kind: 'origination',
+      fee: 100,
+      storageLimit: 200,
+      balance: '0',
+      code: [],
+      init: {}
+    });
+    expect(params).toEqual(snapshot);
   });
 
   it('isAddressValid', async () => {

@@ -44,10 +44,7 @@ const buildManifestV3 = (vendor: string): Manifest.WebExtensionManifest => {
     ],
     js: ['scripts/keepBackgroundWorkerAlive.js'],
     run_at: 'document_start',
-    all_frames: true,
-    match_about_blank: true,
-    // @ts-expect-error
-    match_origin_as_fallback: true
+    all_frames: false
   });
 
   return {
@@ -64,7 +61,7 @@ const buildManifestV3 = (vendor: string): Manifest.WebExtensionManifest => {
     ],
 
     permissions: PERMISSIONS,
-    host_permissions: HOST_PERMISSIONS,
+    host_permissions: buildHostPermissions(vendor),
 
     content_security_policy: {
       extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
@@ -88,12 +85,9 @@ const buildManifestV2 = (vendor: string): Manifest.WebExtensionManifest => {
 
     ...buildManifestCommons(vendor),
 
-    permissions: [...PERMISSIONS, ...HOST_PERMISSIONS],
+    permissions: [...PERMISSIONS, ...buildHostPermissions(vendor)],
 
-    /** `blob:` was added due to 3D-models not working in Firefox otherwise. See:
-     * https://github.com/madfish-solutions/templewallet-extension/commit/7f170d058e9d628709f0da0759cfee44a0667480
-     */
-    content_security_policy: "script-src 'self' 'unsafe-eval' blob:; object-src 'self'",
+    content_security_policy: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
 
     // Required for dynamic imports `import()`
     web_accessible_resources: WEB_ACCCESSIBLE_RESOURSES,
@@ -117,6 +111,39 @@ const AUTHOR_URL = 'https://mavryk.org/wallet';
 const PERMISSIONS = ['storage', 'unlimitedStorage', 'clipboardWrite', 'activeTab'];
 
 const HOST_PERMISSIONS: string[] = ['http://localhost:8732/'];
+
+/**
+ * The Mavryk API allow-lists extension origins for CORS. Chromium builds pin their origin through
+ * the manifest `key`, so `chrome-extension://<id>` can be allow-listed server-side. Firefox and
+ * Safari instead mint a random per-install origin (`moz-extension://<uuid>`,
+ * `safari-web-extension://<uuid>`) that the server cannot know in advance, so it answers the CORS
+ * preflight with 403 and every API call fails as a bare "Network Error" (first hit: the auth
+ * challenge during wallet import). Host permissions make those browsers treat the requests as
+ * extension-privileged and skip the preflight entirely.
+ *
+ * Kept off Chromium on purpose: adding a required host permission there would disable the
+ * published extension until the user re-accepts the new permission, and Chromium does not need it.
+ */
+const MAVRYK_API_HOST_PERMISSIONS = ['https://wallet.mavryk.network/*', 'https://basenet.wallet.mavryk.network/*'];
+
+/**
+ * The RWA GraphQL endpoint (`EXTERNAL_API`, served by the Equiteez Hasura cache worker) allow-lists
+ * origins the same way. Its host comes from the env value the bundle is built with, so the
+ * permission always matches the endpoint the build calls.
+ */
+const buildExternalApiHostPermissions = () => {
+  const externalApi = envFilesData.EXTERNAL_API;
+
+  return externalApi ? [`${new URL(externalApi).origin}/*`] : [];
+};
+
+/** Vendors whose extension origin is generated per install and therefore cannot be allow-listed. */
+const RANDOM_ORIGIN_VENDORS: Vendor[] = ['firefox', 'safari'];
+
+const buildHostPermissions = (vendor: string) =>
+  RANDOM_ORIGIN_VENDORS.includes(vendor as Vendor)
+    ? [...HOST_PERMISSIONS, ...MAVRYK_API_HOST_PERMISSIONS, ...buildExternalApiHostPermissions()]
+    : HOST_PERMISSIONS;
 
 const OPTIONS_UI = {
   page: 'options.html',
@@ -164,9 +191,15 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
       browser_specific_settings: {
         gecko: {
           id: '{c0abd1ce-af67-42b6-a5a9-a4dfb36d46f8}',
+          /** First versions with built-in data consent; older ones would need a custom consent screen */
+          strict_min_version: '140.0',
+          /** Addresses, balances and transactions are sent to RPC nodes, the indexer and the Mavryk API */
           data_collection_permissions: {
-            required: ['none']
+            required: ['financialAndPaymentInfo']
           }
+        },
+        gecko_android: {
+          strict_min_version: '142.0'
         }
       }
     }),

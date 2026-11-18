@@ -3,10 +3,42 @@ import browser, { Runtime } from 'webextension-polyfill';
 import { deserealizeError } from './helpers';
 import { MessageType, RequestMessage } from './types';
 
+export const DEFAULT_INTERCOM_REQUEST_TIMEOUT_MS = 30_000;
+
+export type IntercomRequestOptions = {
+  timeoutMs?: number;
+};
+
+type InFlightRequest = {
+  port: Runtime.Port;
+  listener: (msg: any) => void;
+  timeout: ReturnType<typeof setTimeout>;
+  reject: (error: Error) => void;
+};
+
+export class IntercomTimeoutError extends Error {
+  name = 'IntercomTimeoutError';
+
+  constructor(timeoutMs: number) {
+    super(`Intercom request timed out after ${timeoutMs}ms`);
+    Object.setPrototypeOf(this, IntercomTimeoutError.prototype);
+  }
+}
+
+export class IntercomDisconnectedError extends Error {
+  name = 'IntercomDisconnectedError';
+
+  constructor() {
+    super('Intercom disconnected');
+    Object.setPrototypeOf(this, IntercomDisconnectedError.prototype);
+  }
+}
+
 export class IntercomClient {
   private port: Runtime.Port;
   private reqId: number;
   private subscribers: ((data: any) => void)[] = [];
+  private inFlightRequests = new Map<number, InFlightRequest>();
 
   constructor() {
     this.port = this.buildPort();
@@ -16,30 +48,68 @@ export class IntercomClient {
   /**
    * Makes a request to background process and returns a response promise
    */
-  async request(payload: any): Promise<any> {
+  async request(
+    payload: any,
+    { timeoutMs = DEFAULT_INTERCOM_REQUEST_TIMEOUT_MS }: IntercomRequestOptions = {}
+  ): Promise<any> {
     const reqId = this.reqId++;
+    const port = this.port;
 
-    this.send({ type: MessageType.Req, data: payload, reqId });
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new Error('Intercom request timeout must be a positive finite number');
+    }
 
     return new Promise((resolve, reject) => {
-      const listener = (msg: any) => {
+      let settled = false;
+      const inFlightRequests = this.inFlightRequests;
+      const timeout = setTimeout(() => rejectRequest(new IntercomTimeoutError(timeoutMs)), timeoutMs);
+
+      function cleanup() {
+        if (settled) return;
+        settled = true;
+
+        clearTimeout(timeout);
+        port.onMessage.removeListener(listener);
+        inFlightRequests.delete(reqId);
+      }
+
+      function settle(handler: () => void) {
+        cleanup();
+        handler();
+      }
+
+      function listener(msg: any) {
         switch (true) {
           case msg?.reqId !== reqId:
             return;
 
           case msg?.type === MessageType.Res:
-            resolve(msg.data);
+            settle(() => resolve(msg.data));
             break;
 
           case msg?.type === MessageType.Err:
-            reject(deserealizeError(msg.data));
+            settle(() => reject(deserealizeError(msg.data)));
             break;
         }
+      }
 
-        this.port.onMessage.removeListener(listener);
-      };
+      function rejectRequest(error: Error) {
+        settle(() => reject(error));
+      }
 
-      this.port.onMessage.addListener(listener);
+      this.inFlightRequests.set(reqId, {
+        port,
+        listener,
+        timeout,
+        reject: rejectRequest
+      });
+      port.onMessage.addListener(listener);
+
+      try {
+        this.send(port, { type: MessageType.Req, data: payload, reqId });
+      } catch (err: any) {
+        rejectRequest(err);
+      }
     });
   }
 
@@ -59,8 +129,8 @@ export class IntercomClient {
     this.port.disconnect();
   }
 
-  private send(msg: RequestMessage) {
-    this.port.postMessage(msg);
+  private send(port: Runtime.Port, msg: RequestMessage) {
+    port.postMessage(msg);
   }
 
   private onMessage(message: any) {
@@ -79,9 +149,18 @@ export class IntercomClient {
     const port = browser.runtime.connect({ name: 'INTERCOM' });
     port.onMessage.addListener(this.onMessage.bind(this));
     port.onDisconnect.addListener(() => {
+      this.rejectInFlightRequests(port, new IntercomDisconnectedError());
       this.port = this.buildPort();
     });
 
     return port;
+  }
+
+  private rejectInFlightRequests(port: Runtime.Port, error: IntercomDisconnectedError) {
+    this.inFlightRequests.forEach(request => {
+      if (request.port === port) {
+        request.reject(error);
+      }
+    });
   }
 }

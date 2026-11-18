@@ -1,3 +1,3 @@
-import { useSelector } from '../root-state.selector';
+import { useOwnedUI } from 'lib/store/zustand/ui-client';
 
-export const useUserTestingGroupNameSelector = () => useSelector(({ abTesting }) => abTesting.groupName);
+export const useUserTestingGroupNameSelector = () => useOwnedUI(({ ui }) => ui.abTestGroupName);

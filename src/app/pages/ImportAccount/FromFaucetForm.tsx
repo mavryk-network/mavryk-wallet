@@ -61,7 +61,8 @@ export const FromFaucetForm: FC<ImportformProps> = ({ className }) => {
       }
 
       try {
-        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '));
+        const chainId = await tezos.rpc.getChainId();
+        await importFundraiserAccount(data.email, data.password, data.mnemonic.join(' '), chainId);
       } catch (err: any) {
         if (/Account already exists/.test(err?.message)) {
           setAccountPkh(data.pkh);

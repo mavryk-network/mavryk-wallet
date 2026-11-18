@@ -12,7 +12,8 @@ import { BellIcon } from 'lib/icons';
 import { useTimeout } from 'lib/ui/hooks';
 import { navigate } from 'lib/woozie';
 
-import { viewAllNotificationsAction } from '../../store/actions';
+import { useNotificationsQuery } from '../../hooks/use-notifications.query';
+import { viewNotificationsAction } from '../../store/actions';
 import { useNotificationsSelector } from '../../store/selectors';
 
 import { NotificationPreviewItem } from './preview-item';
@@ -22,9 +23,13 @@ const VIEW_ALL_NOTIFICATIONS_TIMEOUT = 5 * 1000;
 export const Notifications = () => {
   const dispatch = useDispatch();
   const notifications = useNotificationsSelector();
+  const allNotifications = useNotificationsQuery().data;
   const shouldShowPartnersPromoState = useShouldShowPartnersPromoSelector();
 
-  const viewAllNotifications = useCallback(() => void dispatch(viewAllNotificationsAction()), [dispatch]);
+  const viewAllNotifications = useCallback(
+    () => void dispatch(viewNotificationsAction((allNotifications ?? []).map(item => item.id))),
+    [dispatch, allNotifications]
+  );
 
   useTimeout(viewAllNotifications, VIEW_ALL_NOTIFICATIONS_TIMEOUT, true, [notifications]);
   useLoadPartnersPromo();

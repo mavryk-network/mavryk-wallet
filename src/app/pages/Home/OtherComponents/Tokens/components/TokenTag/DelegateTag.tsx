@@ -62,7 +62,8 @@ export const DelegateTezosTag: FC = () => {
 
 export const StakeTezosTag: FC = () => {
   const acc = useAccount();
-  const { data: accStats } = useDelegate(acc.publicKeyHash);
+  // Non-suspending so Home is not held back; the tag appears once delegate data has loaded.
+  const { data: accStats } = useDelegate(acc.publicKeyHash, false);
   const myBakerPkh = accStats?.delegate?.address ?? null;
   const { trackEvent } = useAnalytics();
 
@@ -91,6 +92,8 @@ export const StakeTezosTag: FC = () => {
     [handleTagClick, myBakerPkh]
   );
 
+  if (accStats === undefined) return null;
+
   return myBakerPkh ? StakedButton : NotStakedButton;
 };
 
@@ -100,7 +103,7 @@ type BakerBannerProps = {
 };
 
 const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
-  const { data: baker } = useKnownBaker(myBakerPkh ?? null);
+  const { data: baker, isLoading } = useKnownBaker(myBakerPkh ?? null, false);
 
   const renderBakerData = () => {
     if (myBakerPkh) {
@@ -146,6 +149,8 @@ const BakerBanner: FC<BakerBannerProps> = ({ myBakerPkh, handleTagClick }) => {
       </div>
     );
   };
+
+  if (isLoading) return null;
 
   return (
     <AlertWithAction btnLabel={t('details')} onClick={handleTagClick}>

@@ -1,6 +1,7 @@
 import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
 import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
+import { z } from 'zod';
 
 import { toTokenSlug } from 'lib/assets';
 import { KYC_CONTRACTS } from 'lib/route3/constants';
@@ -63,10 +64,16 @@ api.interceptors.response.use(
   }
 );
 
-async function fetchGet<R>(chainId: TzktApiChainId, endpoint: string, params?: Record<string, unknown>) {
+async function fetchGet<R>(
+  chainId: TzktApiChainId,
+  endpoint: string,
+  params?: Record<string, unknown>,
+  headers?: Record<string, string>
+) {
   const { data } = await api.get<R>(endpoint, {
     baseURL: TZKT_API_BASE_URLS[chainId],
-    params
+    params,
+    headers
   });
 
   return data;
@@ -140,14 +147,15 @@ export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `parameter.${'to' | 'in' | '[*].in' | '[*].txs.[*].to_'}`]?: string;
 } & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
-} & { type?: TzktOperationType };
-
-export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+} & {
   type?: TzktOperationType;
   hasInternals?: boolean;
-  entrypoint?: string;
   'entrypoint.null'?: boolean;
   'entrypoint.ne'?: string;
+};
+
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  entrypoint?: string;
   'parameter.originatedContract.null'?: boolean;
   'sender.eq'?: string;
   'target.eq'?: string;
@@ -186,6 +194,7 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
 
   const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
     const data = await fetchTzktAccountAssetsPage(account, chainId, offset, fungible);
+    if (!Array.isArray(data)) throw new Error('Invalid account assets page');
     if (!data.length) return accum;
 
     if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
@@ -305,14 +314,22 @@ export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundIn
   }
 }
 
+/**
+ * Fresh spendable native balance. Bypasses the HTTP cache: Chrome otherwise holds this request behind an identical
+ * in-flight `/accounts/{address}` request (the delegate lookup on Home) until that response arrives.
+ */
 export const fetchTezosBalanceFromTzkt = async (account: string, chainId: TzktApiChainId) =>
-  getAccountStatsFromTzkt(account, chainId).then(calcTzktAccountSpendableTezBalance);
+  fetchGet<TzktAccount>(chainId, `/accounts/${account}`, undefined, { 'Cache-Control': 'no-cache' }).then(
+    calcTzktAccountSpendableTezBalance
+  );
 
 export const fetchAllAssetsBalancesFromTzkt = async (account: string, chainId: TzktApiChainId) => {
   const balances: StringRecord = {};
 
   await (async function recourse(offset: number) {
-    const data = await fetchAssetsBalancesFromTzktOnce(account, chainId, offset);
+    const data = z
+      .array(z.tuple([z.string().min(1), z.string().regex(/^\d+$/), z.string().regex(/^\d+$/)]))
+      .parse(await fetchAssetsBalancesFromTzktOnce(account, chainId, offset));
 
     for (const [address, tokenId, balance] of data) {
       const slug = toTokenSlug(address, tokenId);

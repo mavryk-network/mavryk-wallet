@@ -79,8 +79,19 @@ const buildSignerCallResponse = async (
 interface KeptSignerState {
   signer: TempleLedgerSigner;
   transportType: TransportType;
+  creatorArgs: CreatorArguments;
   enqueue: ReturnType<typeof createQueue>;
 }
+
+/* Instance ids restart with every background worker, so a kept signer must also match the requested account */
+const isSameLedgerSignerIdentity = (a: CreatorArguments, b: CreatorArguments) =>
+  a.derivationPath === b.derivationPath &&
+  a.derivationType === b.derivationType &&
+  a.publicKey === b.publicKey &&
+  a.publicKeyHash === b.publicKeyHash;
+
+const canReuseKeptSigner = (state: KeptSignerState, creatorArgs: CreatorArguments, transportType: TransportType) =>
+  state.transportType === transportType && isSameLedgerSignerIdentity(state.creatorArgs, creatorArgs);
 
 const keptSigners = new Map<number, Promise<KeptSignerState> | KeptSignerState>();
 
@@ -92,7 +103,11 @@ const createKeptLedgerSigner = async (
   const cachedSigner = keptSigners.get(instanceId);
   let signerQueue: ReturnType<typeof createQueue> | undefined;
 
-  if (cachedSigner && !(cachedSigner instanceof Promise) && cachedSigner.transportType === transportType) {
+  if (
+    cachedSigner &&
+    !(cachedSigner instanceof Promise) &&
+    canReuseKeptSigner(cachedSigner, creatorArgs, transportType)
+  ) {
     return cachedSigner;
   }
 
@@ -100,7 +115,7 @@ const createKeptLedgerSigner = async (
     const pendingState = await cachedSigner;
     signerQueue = pendingState.enqueue;
 
-    if (pendingState.transportType === transportType) {
+    if (canReuseKeptSigner(pendingState, creatorArgs, transportType)) {
       return pendingState;
     }
   } else {
@@ -121,6 +136,7 @@ const createKeptLedgerSigner = async (
     return {
       signer,
       transportType,
+      creatorArgs,
       enqueue: signerQueue ?? createQueue()
     };
   })();

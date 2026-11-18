@@ -4,6 +4,7 @@
     "baseUrl": "./src",
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node", "react", "react-dom", "jest", "w3c-web-hid", "chrome"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

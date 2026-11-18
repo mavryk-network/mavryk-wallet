@@ -76,8 +76,9 @@ export const IncreaseStake = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
+  // Navigates once an increase-stake operation resolves; no cleanup is needed for this one-shot navigation side effect.
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
       const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'coStake',

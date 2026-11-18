@@ -1,8 +1,4 @@
-import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
-
-import { templeWalletApi } from './templewallet.api';
-
+/** Shape of the retained advertising promotion. The Temple `/advertising-info` endpoint is no longer called. */
 export interface AdvertisingPromotion {
   name: string;
   url: string;
@@ -12,10 +8,3 @@ export interface AdvertisingPromotion {
   popupLogoUrl: string;
   mobileBannerUrl: string;
 }
-
-interface GetAdvertisingInfoResponse {
-  data?: AdvertisingPromotion;
-}
-
-export const getAdvertisingInfo$ = () =>
-  from(templeWalletApi.get<GetAdvertisingInfoResponse>('/advertising-info')).pipe(map(response => response.data.data));

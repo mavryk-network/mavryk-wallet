@@ -221,10 +221,10 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
   },
 
   mv1PyBXFwSuRWezsLKjpuXDdSuNzcZAB47Nx: {
-    logo: 'https://insights.tienthuattoan.com/assets/logo/TTT-1024.png',
+    logo: 'https://raw.githubusercontent.com/ttt-labs/brand-kits/refs/heads/main/TTT-1024.png',
     name: 'TTT',
     fee: 0.1,
-    links: [{ link: 'https://tienthuattoan.com', icon: 'website' }],
+    links: [{ link: 'https://ttt.zone', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   },
@@ -234,6 +234,15 @@ export const PREDEFINED_BAKERS_NAMES_MAINNET: StringRecord<PredefinedBakerData> 
     name: 'Crosnest',
     fee: 0.1,
     links: [{ link: 'https://www.cros-nest.com/', icon: 'website' }],
+    minDelegation: 10000000,
+    minPayout: 1000
+  },
+
+  mv1C78fFrhakNQx58Xz2ZcFtmvsdzw9t7TMh: {
+    logo: 'https://img.stakely.io/logos/stakely.png',
+    name: 'Stakely',
+    fee: 0.15,
+    links: [{ link: 'https://stakely.io', icon: 'website' }],
     minDelegation: 10000000,
     minPayout: 1000
   }

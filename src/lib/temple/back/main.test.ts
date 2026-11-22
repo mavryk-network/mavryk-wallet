@@ -22,7 +22,11 @@ jest.mock('./beacon-dapp', () => ({
   processBeacon: jest.fn()
 }));
 
-jest.mock('./analytics', () => ({}));
+jest.mock('./analytics', () => ({
+  startNetworkSwitchTracking: jest.fn(),
+  trackBackgroundEvent: jest.fn(),
+  trackOperationError: jest.fn()
+}));
 
 jest.mock('./defaults', () => ({
   intercom: {

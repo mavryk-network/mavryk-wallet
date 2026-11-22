@@ -31,7 +31,8 @@ describe('extension manifest hardening', () => {
     const manifest = buildManifest('firefox') as { browser_specific_settings?: { gecko?: Record<string, unknown> } };
 
     expect(manifest.browser_specific_settings?.gecko?.data_collection_permissions).toEqual({
-      required: ['financialAndPaymentInfo']
+      required: ['financialAndPaymentInfo'],
+      optional: ['technicalAndInteraction']
     });
   });
 

@@ -17,6 +17,7 @@ const mockDispatch = jest.fn();
 const mockStorage = jest.fn();
 const mockOnboarding = jest.fn();
 const mockTrack = jest.fn();
+const mockTrackAnalyticsEvent = jest.fn();
 let mockFullPage = true;
 
 jest.mock('app/env', () => ({ useAppEnv: () => ({ fullPage: mockFullPage, popup: !mockFullPage }) }));
@@ -29,6 +30,9 @@ jest.mock('lib/storage', () => ({ putToStorage: (...args: unknown[]) => mockStor
 jest.mock('lib/analytics', () => ({
   useAnalytics: () => ({ trackEvent: mockTrack }),
   AnalyticsEventCategory: { General: 'general' }
+}));
+jest.mock('lib/analytics/send-events.utils', () => ({
+  trackAnalyticsEvent: (...args: unknown[]) => mockTrackAnalyticsEvent(...args)
 }));
 jest.mock('lib/utils', () => ({ delay: () => Promise.resolve() }));
 jest.mock('lib/woozie', () => ({ navigate: jest.fn() }));
@@ -324,6 +328,31 @@ it('onboarding never persists a website-tracking flag, even with analytics and a
   });
   expect(mockRegisterWallet).toHaveBeenCalled();
   expect(mockStorage).not.toHaveBeenCalledWith('WEBSITES_ANALYTICS_ENABLED', expect.anything());
+});
+
+it('emits one anonymous onboarding event after the wallet is registered', async () => {
+  const submit = async (ownMnemonic: boolean, importMethod?: 'seed' | 'keystore') => {
+    let hook: ReturnType<typeof useCreareOrRestorePassword>;
+    function Harness() {
+      hook = useCreareOrRestorePassword(ownMnemonic, 'seed', undefined, importMethod);
+      return null;
+    }
+    await render(<Harness />);
+    await act(async () => {
+      await hook.onSubmit({ password: 'Abcdefg1!', termsAccepted: true, betaAgreement: true, viewAds: false });
+    });
+  };
+
+  mockTrackAnalyticsEvent.mockClear();
+  await submit(false);
+  await submit(true);
+  await submit(true, 'keystore');
+
+  expect(mockTrackAnalyticsEvent.mock.calls).toEqual([
+    ['wallet_created', {}],
+    ['wallet_imported', { method: 'seed' }],
+    ['wallet_imported', { method: 'keystore' }]
+  ]);
 });
 
 it('keeps untouched punctuation neutral, invalid punctuation red and valid punctuation green', async () => {

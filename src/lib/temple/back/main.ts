@@ -1,5 +1,6 @@
 import browser, { Runtime } from 'webextension-polyfill';
 
+import { classifyOperations } from 'lib/analytics/analytics.helpers';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
 import type { IntercomPortInfo } from 'lib/intercom';
 import { startUIOwner } from 'lib/store/zustand/ui-owner';
@@ -24,6 +25,7 @@ const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.
 
 export const start = async () => {
   startUIOwner();
+  Analytics.startNetworkSwitchTracking();
   startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
@@ -83,6 +85,7 @@ const processRequest = async (
 
     case TempleMessageType.UnlockRequest:
       await Actions.unlock(req.password);
+      void Analytics.trackBackgroundEvent('wallet_unlocked', {});
       return { type: TempleMessageType.UnlockResponse };
 
     case TempleMessageType.EnsureAuthorizedRequest:
@@ -102,6 +105,7 @@ const processRequest = async (
 
     case TempleMessageType.CreateAccountRequest:
       await Actions.createHDAccount(req.walletId, req.name, req.hdIndex);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'hd' });
       return { type: TempleMessageType.CreateAccountResponse };
 
     case TempleMessageType.RevealPublicKeyRequest:
@@ -157,30 +161,35 @@ const processRequest = async (
 
     case TempleMessageType.ImportAccountRequest:
       await Actions.importAccount(req.chainId, req.chain, req.privateKey, req.encPassword);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'imported' });
       return {
         type: TempleMessageType.ImportAccountResponse
       };
 
     case TempleMessageType.ImportMnemonicAccountRequest:
       await Actions.importMnemonicAccount(req.mnemonic, req.chainId, req.password, req.derivationPath);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'imported' });
       return {
         type: TempleMessageType.ImportMnemonicAccountResponse
       };
 
     case TempleMessageType.ImportFundraiserAccountRequest:
       await Actions.importFundraiserAccount(req.email, req.password, req.mnemonic, req.chainId);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'imported' });
       return {
         type: TempleMessageType.ImportFundraiserAccountResponse
       };
 
     case TempleMessageType.ImportManagedKTAccountRequest:
       await Actions.importManagedKTAccount(req.address, req.chainId, req.owner);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'watch_only' });
       return {
         type: TempleMessageType.ImportManagedKTAccountResponse
       };
 
     case TempleMessageType.ImportWatchOnlyAccountRequest:
       await Actions.importWatchOnlyAccount(req.address, req.chain, req.chainId, req.name);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'watch_only' });
       return {
         type: TempleMessageType.ImportWatchOnlyAccountResponse
       };
@@ -193,6 +202,7 @@ const processRequest = async (
 
     case TempleMessageType.CreateLedgerAccountRequest:
       await Actions.createLedgerAccount(req.input);
+      void Analytics.trackBackgroundEvent('account_added', { type: 'ledger' });
       return {
         type: TempleMessageType.CreateLedgerAccountResponse
       };
@@ -217,23 +227,37 @@ const processRequest = async (
 
     case TempleMessageType.CreateOrImportWalletRequest:
       await Actions.createOrImportWallet(req.mnemonic);
+      void Analytics.trackBackgroundEvent('account_added', { type: req.mnemonic ? 'imported' : 'hd' });
       return {
         type: TempleMessageType.CreateOrImportWalletResponse
       };
 
-    case TempleMessageType.OperationsRequest:
-      const { opHash, feeMumav } = await Actions.sendOperations(
-        port,
-        req.id,
-        req.sourcePkh,
-        req.networkRpc,
-        req.opParams
-      );
-      return {
-        type: TempleMessageType.OperationsResponse,
-        opHash,
-        feeMumav
-      };
+    case TempleMessageType.OperationsRequest: {
+      const operationKind = classifyOperations(req.opParams);
+      try {
+        const { opHash, feeMumav } = await Actions.sendOperations(
+          port,
+          req.id,
+          req.sourcePkh,
+          req.networkRpc,
+          req.opParams
+        );
+        void Analytics.trackBackgroundEvent(
+          'tx_confirmed',
+          { ...operationKind, source: 'wallet' },
+          { networkRpc: req.networkRpc }
+        );
+        return {
+          type: TempleMessageType.OperationsResponse,
+          opHash,
+          feeMumav
+        };
+      } catch (error) {
+        const isRejection = error instanceof Error && error.message === 'Declined';
+        Analytics.trackOperationError(error, operationKind, 'wallet', req.networkRpc, isRejection);
+        throw error;
+      }
+    }
 
     case TempleMessageType.SignRequest:
       const result = await Actions.sign(port, req.id, req.sourcePkh, req.bytes, req.watermark);

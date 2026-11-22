@@ -60,7 +60,8 @@ export const ImportFromKeystoreFileComponent: FC<ImportFromKeystoreFileProps> = 
   } = useCreareOrRestorePassword(
     true,
     seedPhrase,
-    on ? { shouldUseKeystorePassword: true, keystorePassword } : { shouldUseKeystorePassword: false }
+    on ? { shouldUseKeystorePassword: true, keystorePassword } : { shouldUseKeystorePassword: false },
+    'keystore'
   );
 
   const { fullPage } = useAppEnv();

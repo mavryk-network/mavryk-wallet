@@ -195,7 +195,9 @@ const buildManifestCommons = (vendor: string): Omit<Manifest.WebExtensionManifes
           strict_min_version: '140.0',
           /** Addresses, balances and transactions are sent to RPC nodes, the indexer and the Mavryk API */
           data_collection_permissions: {
-            required: ['financialAndPaymentInfo']
+            required: ['financialAndPaymentInfo'],
+            /** Opt-in anonymous product analytics (PostHog), requested from the in-app analytics opt-in */
+            optional: ['technicalAndInteraction']
           }
         },
         gecko_android: {

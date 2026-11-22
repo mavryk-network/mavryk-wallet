@@ -277,6 +277,18 @@ export const getReadyAnalyticsIdentity = () =>
     ? uiStore.getState().userId
     : null;
 
+const MAX_ANALYTICS_IDENTITY_WAITS = 3;
+
+/**
+ * Waits for in-flight owner commands (e.g. a just-sent consent change) before reading the analytics identity,
+ * so an event emitted right after an opt-in is not dropped. Never rejects: the owner queue swallows its errors.
+ */
+export async function waitForAnalyticsIdentity() {
+  for (let i = 0; i < MAX_ANALYTICS_IDENTITY_WAITS && pendingOperations > 0; i++) await queue;
+
+  return getReadyAnalyticsIdentity();
+}
+
 /** Register synchronously before background awaits wallet initialization. Extension pages alone can send commands. */
 export function startUIOwner() {
   if (isStarted) return;

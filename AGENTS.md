@@ -101,6 +101,7 @@ Basenet KYC signing supports development and production builds when `TESTNET_KYC
 - `yarn start`
 - `yarn build`
 - `yarn build:firefox`
+- PostHog analytics is opt-in and off unless `POSTHOG_KEY` is set. Events must pass the strict whitelist in `src/lib/analytics/analytics-events.schema.ts` and go through the background gate; never connect the legacy `useAnalytics`/`testID` tracking. See `docs/analytics-posthog.md`.
 - `LOAD_PERF_MARKS=true yarn build`: opt-in load-time marks in `window.__WE_LOAD__` (`src/lib/load-perf`); method and results in `docs/load-performance.md`. Never enabled by default.
 
 Tasks 15–19 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.

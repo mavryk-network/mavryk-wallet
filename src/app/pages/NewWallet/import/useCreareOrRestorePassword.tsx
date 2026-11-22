@@ -11,6 +11,7 @@ import { shouldShowNewsletterModalAction } from 'app/store/newsletter/newsletter
 import { togglePartnersPromotionAction } from 'app/store/partners-promotion/actions';
 import { setIsAnalyticsEnabledAction, setOnRampPossibilityAction } from 'app/store/settings/actions';
 import { AnalyticsEventCategory, TestIDProps, useAnalytics } from 'lib/analytics';
+import { trackAnalyticsEvent } from 'lib/analytics/send-events.utils';
 import { UNLOCK_INTERRUPTED_BY_LOCK_ERROR } from 'lib/constants';
 import { t } from 'lib/i18n';
 import { useTempleClient } from 'lib/temple/front';
@@ -37,7 +38,8 @@ export interface FormData extends TestIDProps {
 export const useCreareOrRestorePassword = (
   ownMnemonic: boolean,
   seedPhrase: string,
-  options: PasswordOptions = { shouldUseKeystorePassword: false }
+  options: PasswordOptions = { shouldUseKeystorePassword: false },
+  importMethod: 'seed' | 'keystore' = 'seed'
 ) => {
   const { registerWallet } = useTempleClient();
   const { popup } = useAppEnv();
@@ -71,7 +73,8 @@ export const useCreareOrRestorePassword = (
 
   const { control, watch, register, handleSubmit, errors, setError, triggerValidation, formState } = useForm<FormData>({
     defaultValues: {
-      analytics: true,
+      // Analytics is opt-in: the user has to tick the checkbox explicitly.
+      analytics: false,
       viewAds: false,
       skipOnboarding: false
     },
@@ -120,6 +123,8 @@ export const useCreareOrRestorePassword = (
 
         setOnboardingCompleted(data.skipOnboarding!);
         await registerWallet(password, formatMnemonic(seedPhrase));
+        if (ownMnemonic) trackAnalyticsEvent('wallet_imported', { method: importMethod });
+        else trackAnalyticsEvent('wallet_created', {});
         trackEvent(
           data.skipOnboarding ? 'OnboardingSkipped' : 'OnboardingNotSkipped',
           AnalyticsEventCategory.General,
@@ -153,6 +158,7 @@ export const useCreareOrRestorePassword = (
       shouldUseKeystorePassword,
       setError,
       ownMnemonic,
+      importMethod,
       keystorePassword,
       setAdsViewEnabled,
       setAnalyticsEnabled,

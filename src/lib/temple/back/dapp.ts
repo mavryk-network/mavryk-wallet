@@ -17,6 +17,7 @@ import { RpcClient } from '@mavrykdynamics/webmavryk-rpc';
 import { nanoid } from 'nanoid';
 import browser, { Runtime } from 'webextension-polyfill';
 
+import { classifyOperations } from 'lib/analytics/analytics.helpers';
 import { addLocalOperation } from 'lib/temple/activity';
 import * as Beacon from 'lib/temple/beacon';
 import { loadChainId, isAddressValid } from 'lib/temple/helpers';
@@ -32,6 +33,7 @@ import {
   TempleNotification
 } from 'lib/temple/types';
 
+import { trackBackgroundEvent, trackOperationError } from './analytics';
 import { DAPP_CONFIRMATION_AUTODECLINE_MS } from './constants';
 import {
   assertBranchNotOnBuiltInChain,
@@ -129,6 +131,7 @@ export async function requestPermission(
       },
       onDecline: () => {
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
+        void trackBackgroundEvent('dapp_connection_rejected', {});
       },
       handleIntercomRequest: async (confirmReq, decline) => {
         if (confirmReq?.type === TempleMessageType.DAppPermConfirmationRequest && confirmReq?.id === id) {
@@ -147,6 +150,7 @@ export async function requestPermission(
               publicKey: accountPublicKey,
               rpc: dAppRpc
             });
+            void trackBackgroundEvent('dapp_connected', {});
             const broadcastMsg: TempleNotification = {
               type: TempleMessageType.SelectedAccountChanged,
               accountPublicKeyHash
@@ -217,6 +221,7 @@ export async function requestOperation(
       },
       onDecline: () => {
         reject(new Error(MavrykWalletDAppErrorType.NotGranted));
+        trackOperationError(null, classifyOperations(req.opParams), 'dapp', networkRpc, true);
       },
       handleIntercomRequest: (confirmReq, decline, isDeclineDeferred) => {
         // Once the ceiling has failed the request, or the wallet locked, a stalled dApp RPC answering later must not sign
@@ -296,6 +301,11 @@ const handleIntercomRequest = async (
         );
 
         safeGetChain(networkRpc, op);
+        void trackBackgroundEvent(
+          'tx_confirmed',
+          { ...classifyOperations(req.opParams), source: 'dapp' },
+          { networkRpc }
+        );
 
         resolve({
           type: MavrykWalletDAppMessageType.OperationResponse,
@@ -303,6 +313,7 @@ const handleIntercomRequest = async (
         });
       } catch (err: any) {
         if (err instanceof MavrykOperationError) {
+          trackOperationError(err, classifyOperations(req.opParams), 'dapp', networkRpc, false);
           err.message = MavrykWalletDAppErrorType.TezosOperation;
           reject(err);
         } else {

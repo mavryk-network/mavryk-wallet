@@ -5,6 +5,7 @@ import { Control, Controller, FieldError, NestDataObject } from 'react-hook-form
 
 import { FormCheckbox } from 'app/atoms';
 import { useAppEnv } from 'app/env';
+import { requestBrowserAnalyticsConsent } from 'lib/analytics/browser-consent';
 import { T, t } from 'lib/i18n';
 
 import { setWalletPasswordSelectors } from '../../setWalletPassword/SetWalletPassword.selectors';
@@ -16,6 +17,13 @@ type ImportPartialFormCheckboxesProps = {
   control: Control<FormData>;
   register: (...args: any) => any;
   errors: NestDataObject<FormData, FieldError>;
+};
+
+/** Firefox shows its own data consent prompt, which must be requested from the click itself. */
+const handleAnalyticsChange = ([isChecked]: unknown[]) => {
+  if (isChecked === true) void requestBrowserAnalyticsConsent();
+
+  return isChecked;
 };
 
 export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> = ({ control, register, errors }) => {
@@ -34,6 +42,7 @@ export const ImportPartialFormCheckboxes: FC<ImportPartialFormCheckboxesProps> =
         control={control}
         name="analytics"
         as={FormCheckbox}
+        onChange={handleAnalyticsChange}
         label={
           <T
             id="analyticsInputDescription"

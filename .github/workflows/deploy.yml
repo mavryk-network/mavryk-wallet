@@ -40,6 +40,9 @@ jobs:
           TESTNET_KYC_SIGNER_PRIVATE_KEY=${{ secrets.TESTNET_KYC_SIGNER_PRIVATE_KEY }}
           COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
           COINGECKO_API=${{ secrets.COINGECKO_API }}
+          POSTHOG_KEY=${{ secrets.POSTHOG_KEY }}
+          POSTHOG_HOST=${{ secrets.POSTHOG_HOST }}
+          POSTHOG_ENVIRONMENT=production
           EOF
 
       - name: Build extension

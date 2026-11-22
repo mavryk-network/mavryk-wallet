@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ACCOUNT_NAME_PATTERN } from 'app/defaults';
+import { trackAnalyticsEvent } from 'lib/analytics/send-events.utils';
 import { getMessage } from 'lib/i18n';
 import { TempleContact, TempleContactApiType } from 'lib/temple/types';
 import { CurrentContactsRecordDecryptionError, fetchContactsRecord, saveContactsRecord } from 'mavryk/api/contacts';
@@ -315,6 +316,7 @@ export function useContactsActions() {
 
         return [contact, ...sourceContacts];
       });
+      trackAnalyticsEvent('contact_added', { method: 'manual' });
     },
     [allContacts, mutateContacts, resolveContact]
   );
@@ -367,6 +369,7 @@ export function useContactsActions() {
 
         return [...unique, ...sourceContacts];
       });
+      trackAnalyticsEvent('contact_added', { method: 'import' });
     },
     [allContacts, mutateContacts, resolveContact]
   );

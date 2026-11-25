@@ -9,6 +9,10 @@ export class setWalletPage extends Page {
   analyticsCheckbox = createPageElement(setWalletPasswordSelectors.analyticsCheckBox);
   skipOnboarding = createPageElement(setWalletPasswordSelectors.skipOnboardingCheckbox);
   acceptTerms = createPageElement(setWalletPasswordSelectors.acceptTermsCheckbox);
+  betaAgreement = createPageElement(setWalletPasswordSelectors.betaAgreementCheckbox);
+  createButton = createPageElement(setWalletPasswordSelectors.createButton);
+  restoreButton = createPageElement(setWalletPasswordSelectors.restoreButton);
+  importButton = this.createButton;
 
   async isVisible() {
     await this.passwordField.waitForDisplayed();
@@ -16,5 +20,6 @@ export class setWalletPage extends Page {
     await this.analyticsCheckbox.waitForDisplayed();
     await this.skipOnboarding.waitForDisplayed();
     await this.acceptTerms.waitForDisplayed();
+    await this.betaAgreement.waitForDisplayed();
   }
 }

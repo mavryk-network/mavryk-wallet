@@ -1,0 +1,112 @@
+# App Agent Guide
+
+## Sources of Truth
+
+Before enforcing versions, scripts, or conventions, verify in `package.json` and local config files.
+Current pinned stack in manifest includes:
+
+- TypeScript `4.9.5`
+- React `18.2.0`
+- TanStack Query `4.41.0` (Tasks 15/16 server data and Tasks 17–19 asset/security/metadata/balance request orchestration; TypeScript 4.9.5 is the Task 20 user-approved compatibility pin)
+- Zustand `5.0.11` (Tasks 11/13/19 activate preferences, assets, adult flags, metadata and balances through one background owner; see `docs/task-13-legacy-assets-handoff.md`)
+- `@mavrykdynamics/webmavryk*` family `2.0.1`
+
+## Architecture and Boundaries
+
+- Keep `src/*.ts(x)` for entrypoints and globals; put feature logic in existing domain folders.
+- `src/app/` owns React presentation and app orchestration; `src/lib/` owns shared domain services and infrastructure.
+- Keep content scripts thin and browser-specific. Keep API transport in provider clients and orchestration above them.
+- `src/mavryk/` owns Mavryk-specific integrations; preserve task-specific restrictions on `src/mavryk/api/**`.
+- Tasks 11/13 own UI preferences, promotion choices, asset records/statuses, adult flags and metadata through one background owner. Foregrounds use read-only snapshots and commands. Do not add competing destination adapters or Redux synchronization loops. Page entries send the first owner snapshot request at module start (`lib/store/zustand/start-owned-ui`); StoreProvider adopts it once and keeps gating on it. Owner snapshots are structurally shared and `useOwnedUI` selects inside `useSyncExternalStore`: selectors must return snapshot slices, primitives or module constants, never freshly built objects (derive with `useMemo` instead).
+- Query owns fetched collectible/RWA details and their loading/errors through one in-memory client per foreground StoreProvider. Batch drivers alone fetch; disabled per-slug observers read reactively. Account, chain and API network scope every detail key; see `docs/task-15-reactive-details-handoff.md`.
+- Task 16 Query owns exchange rates and card-provider catalogs/limits/output estimates. Notifications, swap lists, advertising and partner decisions use dormant Query readers; their endpoints remain disabled. Retained Redux fetched fields are read-only upgrade/compatibility sources. Notification read/viewed choices remain Redux-persisted; promotion/news preferences remain background-owner commands. See `docs/task-16-query-only-server-domains-handoff.md`.
+- Task 17 keeps asset records/statuses and scamlist/whitelist in the existing background-owned `zustand-assets`. Query owns request lifecycle only; named sync functions await owner flush/read-back. Security adoption has its own `isSecurityAdopted` marker; null means unknown, and validated empty responses differ from failures. See `docs/task-17-assets-security-ownership-handoff.md`.
+- Task 18 metadata stays in the existing background owner. Query batches return synchronization receipts; scoped account/chain/API-network/RPC records override retained unscoped fallback records. Owner-issued revisions protect newer writes; versioned media refresh completion follows durable acknowledgement. See `docs/task-18-metadata-ownership-handoff.md`.
+- Task 19 balances live in background-owned `zustand-balances`; foreground Query holds request receipts/loading/errors only. Exact account/chain/API-network/RPC records override retained legacy account/chain fallback per slug. Asset payloads publish balances in the same acknowledged owner operation; see `docs/task-19-balances-ownership-handoff.md`.
+- Redux retains unrelated loading/errors and unrelated domains. Retained balance fields are read-only upgrade sources. Security fields in `persist:temple-root-task11` and the six nested legacy keys are read-only compatibility sources, never refreshed from Query. Task 14 retains verified per-record IndexedDB cleanup and separate `assets-migrations@3.0.0` history; see `docs/task-14-indexeddb-assets-handoff.md`.
+- For unfamiliar paths, consult only the relevant section of [the local directory reference](docs/agent-directory-map.local.md). Do not load it by default. If absent in another checkout, inspect the relevant directories instead; it is optional navigation context.
+
+## Context and Verification Efficiency
+
+- Read explicitly required documents once. Afterward, retrieve only relevant sections unless the file changed or an unresolved question requires rereading.
+- Search for symbols/paths first, then read bounded excerpts. Avoid bulk file dumps, truncated tool output, and repeated full logs.
+- Keep command logs outside the repository and report concise results; inspect detailed output only for failures or unresolved concerns.
+- Complete implementation review and targeted verification before starting full checks. Honor any explicitly required pre-change baseline first.
+- After full verification, rerun only checks affected by subsequent changes, failures, or unresolved concerns. Do not repeat passing checks without a concrete reason.
+- For documentation/comment-only changes, check formatting, references, and `git diff --check`; skip runtime tests/builds unless executable behavior changed or the user explicitly requires them.
+- In handoffs, reference existing task documents and include only new decisions, exact refs, blockers, and verification results; avoid restating the full history.
+- These efficiency rules do not waive required checks, safety boundaries, or task scope.
+
+## File and Naming Rules
+
+- Use English for file names and identifiers.
+- Keep existing naming style in touched modules; do not mass-rename unrelated files.
+- File names are lowercase kebab-case by default; use established suffixes by role:
+  - `*.screen.tsx`: screen/page entry
+  - `*.block.tsx`: UI block/component
+  - `*.provider.tsx`: provider/context orchestration
+  - `*.method.ts`: API method boundary
+  - `*.schema.ts` / `*.schema.tsx`: runtime schemas (usually zod)
+  - `*.types.ts` / `*.types.tsx`: type declarations
+  - `*.const.ts` / `*.consts.ts`: constants
+  - `*.helpers.ts`: pure helpers
+- Hook files and hook functions should start with `use` (`use-*.ts`, `useSomething`).
+- Boolean names must use `is/has/can/should` prefixes.
+- Handler names should use `handle*`; mutating actions should use clear verbs (`create`, `update`, `delete`, `set`).
+- Exported immutable constants should use `UPPER_SNAKE_CASE`; regular variables and functions use `camelCase`; components/types use `PascalCase`.
+
+## Module Structure Rules
+
+- One domain/feature per folder; keep domain files colocated.
+- Prefer this structure when adding or expanding modules:
+  - `components/` for UI
+  - `hooks/` for composition/state logic
+  - `utils/` or `helpers/` for pure utilities
+  - local `*.types`, `*.schema`, `*.const(s)` files for contracts
+- Keep business logic out of render-heavy components; move to app/hooks.
+- Avoid cyclic dependencies and deep cross-domain imports; use a domain’s public entrypoint when it exists.
+
+## JSDoc and Effect Comments
+
+- Follow existing codebase practice: use JSDoc for exported functions, provider/service methods, and non-trivial helpers.
+- JSDoc blocks should describe intent and contract (what/why), including `@param` and `@returns` when not obvious from the signature.
+- Do not add boilerplate comments for trivial one-liners.
+- Each `useEffect` must have a short comment directly above it explaining:
+  - why the effect exists,
+  - what external side effect it manages (subscription, timer, request, sync, analytics, DOM/native bridge),
+  - expected cleanup behavior (or why cleanup is not needed).
+- Effect comments should explain intent, not restate code line-by-line.
+
+## Coding and Safety Rules
+
+- Change only task-relevant logic; avoid incidental refactors.
+- No silent API/contract changes.
+- State assumptions when behavior is ambiguous.
+- Keep side effects in hooks/services, not render paths.
+- Prefer strict typing and narrowing over `any`; avoid `@ts-ignore` unless justified.
+- Do not add new production dependencies without approval.
+
+## Logging and Errors
+
+- Never log PII.
+
+## Quick Commands
+
+CI runs frozen install, blocking `yarn ts` and blocking `yarn test` for PRs targeting `dev`, `MAV-3974/architecture` and `MAV-3979/book-scoping`. Tests run after a successful install even when type-check fails; neither gate is advisory. Lint retains its existing advisory status.
+
+`basenet_kyc_onboard.spec.ts` tests the wallet KYC onboarding contract with mocked chain transport. It does not provision an admin, submit live transactions, or replace installed-extension/Basenet acceptance.
+
+Basenet KYC signing supports development and production builds when `TESTNET_KYC_SIGNER_PRIVATE_KEY` is configured. This optional test registrar key is public in the bundle; never use a Mainnet or production/admin key. The deploy workflow reads the corresponding optional GitHub secret. Mainnet signing remains disabled. See `docs/token-history-kyc-investigation.md`.
+
+- `yarn start`
+- `yarn build`
+- `yarn build:firefox`
+- `LOAD_PERF_MARKS=true yarn build`: opt-in load-time marks in `window.__WE_LOAD__` (`src/lib/load-perf`); method and results in `docs/load-performance.md`. Never enabled by default.
+
+Tasks 15–19 hook tests use the real QueryClient/provider and React DOM test utilities, mocking transport/owner boundaries. No new test framework is required.
+
+IndexedDB migration tests use pinned development-only `fake-indexeddb` with real Dexie transactions and destination adapters. LocalStorage migration history requires cross-context Web Locks; never replace it with an unlocked writer.
+
+## AGENTS Maintenance Protocol
+
+When `package.json` scripts, versions, folder conventions, or testing workflow change, update this file and relevant child AGENTS in the same PR.

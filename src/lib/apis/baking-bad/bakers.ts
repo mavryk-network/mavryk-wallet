@@ -25,9 +25,13 @@ const bakingBadGetKnownBakers = buildQuery<Omit<BakingBadGetBakerParams, 'addres
 
 export const getBakerSpace = (baker: BakingBadGetBakerResponse) => {
   if (baker) {
-    const stakedBalance = new BigNumber(baker.stakedBalance).multipliedBy(5);
-    const delegationBalance = stakedBalance.multipliedBy(9);
-    return stakedBalance.plus(delegationBalance);
+    const stakedBalance = new BigNumber(baker.stakedBalance);
+
+    const costakingCapacity = stakedBalance.multipliedBy(5);
+    const delegationCapacity = stakedBalance.multipliedBy(9);
+    const totalCapacity = costakingCapacity.plus(delegationCapacity);
+
+    return totalCapacity.minus(baker?.stakedBalance ?? 0).minus(baker?.delegatedBalance ?? 0);
   }
 
   return new BigNumber(0);
@@ -58,14 +62,102 @@ type BakingBadGetBakerParams = {
 };
 
 export type BakingBadBaker = {
+  id: number;
+  type: string; // delegate
   address: string;
+  active: boolean;
+  publicKey: string;
+  revealed: boolean;
   balance: number;
+  rollupBonds: number;
+  smartRollupBonds: number;
   stakedBalance: number;
+  stakedPseudotokens: number;
+  unstakedBalance: number;
+  unstakedBaker: {
+    address: string;
+  };
+  externalStakedBalance: number;
+  externalUnstakedBalance: number;
+  totalStakedBalance: number;
+  issuedPseudotokens: number;
+  stakersCount: number;
+  lostBalance: number;
+  counter: number;
+  activationLevel: number;
+  activationTime: string;
+  stakingBalance: number;
   delegatedBalance: number;
+  numContracts: number;
+  rollupsCount: number;
+  smartRollupsCount: number;
+  activeTokensCount: number;
+  tokenBalancesCount: number;
+  tokenTransfersCount: number;
+  activeTicketsCount: number;
+  ticketBalancesCount: number;
+  ticketTransfersCount: number;
+  numDelegators: number;
+  numBlocks: number;
+  numEndorsements: number;
+  numPreendorsements: number;
+  numBallots: number;
+  numProposals: number;
+  numActivations: number;
+  numDoubleBaking: number;
+  numDoubleEndorsing: number;
+  numDoublePreendorsing: number;
+  numNonceRevelations: number;
+  vdfRevelationsCount: number;
+  numRevelationPenalties: number;
+  numEndorsingRewards: number;
+  numDelegations: number;
+  numOriginations: number;
+  numTransactions: number;
+  numReveals: number;
+  numRegisterConstants: number;
+  numSetDepositsLimits: number;
+  numMigrations: number;
+  txRollupOriginationCount: number;
+  txRollupSubmitBatchCount: number;
+  txRollupCommitCount: number;
+  txRollupReturnBondCount: number;
+  txRollupFinalizeCommitmentCount: number;
+  txRollupRemoveCommitmentCount: number;
+  txRollupRejectionCount: number;
+  txRollupDispatchTicketsCount: number;
+  transferTicketCount: number;
+  increasePaidStorageCount: number;
+  updateConsensusKeyCount: number;
+  drainDelegateCount: number;
+  smartRollupAddMessagesCount: number;
+  smartRollupCementCount: number;
+  smartRollupExecuteCount: number;
+  smartRollupOriginateCount: number;
+  smartRollupPublishCount: number;
+  smartRollupRecoverBondCount: number;
+  smartRollupRefuteCount: number;
+  refutationGamesCount: number;
+  activeRefutationGamesCount: number;
+  stakingOpsCount: number;
+  autostakingOpsCount: number;
+  firstActivity: number;
+  firstActivityTime: string;
+  lastActivity: number;
+  lastActivityTime: string;
+  software: {
+    date: string;
+  };
+  frozenDeposit: number;
+  frozenDeposits: number;
+  frozenRewards: number;
+  frozenFees: number;
+
+  // not from the response at the moment, so they are added later on as hardcoded values
+  fee?: number;
   estimatedRoi?: number;
   minDelegation?: number;
   freeSpace?: number;
-  fee?: number;
   name?: string;
 };
 

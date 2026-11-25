@@ -30,7 +30,3 @@ export interface FiatCurrencyOption {
   apiLabel: string;
   symbol: string;
 }
-
-export interface CoingeckoFiatInterface {
-  tezos: Record<string, number>;
-}

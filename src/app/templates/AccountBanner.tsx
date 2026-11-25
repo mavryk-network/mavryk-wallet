@@ -32,7 +32,7 @@ const AccountBanner = memo<AccountBannerProps>(
     showMVRK = false,
     className
   }) => {
-    const totalBalanceInFiat = useTotalBalance();
+    const totalBalanceInFiat = useTotalBalance(true);
     // const { value: gasBalance } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
 
     const {
@@ -51,7 +51,6 @@ const AccountBanner = memo<AccountBannerProps>(
             <AccountPopupButton
               account={account}
               iconSize={32}
-              onlyAccSelect
               restrictAccountSelect={restrictAccountSelect}
               child={
                 <div className="flex items-center mt-1">

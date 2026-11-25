@@ -3,7 +3,8 @@ import React, { useMemo } from 'react';
 import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Identicon, Money } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+import { RadioButton } from 'app/atoms/RadioButton';
+import { ReactComponent as KeyIcon } from 'app/icons/acc-key.svg';
 import { useOtherAccountTotalBalance } from 'app/pages/Home/OtherComponents/MainBanner/use-total-balance';
 import { useFiatCurrency } from 'lib/fiat-currency';
 import { TempleAccount } from 'lib/temple/types';
@@ -11,18 +12,19 @@ import { useScrollIntoViewOnMount } from 'lib/ui/use-scroll-into-view';
 
 import { setAnotherSelector, setTestID } from '../../../../../lib/analytics';
 import { AccountDropdownSelectors } from '../selectors';
-
 interface AccountItemProps {
   account: TempleAccount;
   selected: boolean;
   gasTokenName: string;
   attractSelf: boolean;
   onClick: () => void;
+  keyColor?: string;
+  showBadge?: boolean;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick }) => {
+export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, attractSelf, onClick, keyColor }) => {
   const { name, publicKeyHash, type } = account;
-  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash);
+  const totalBalanceInDollar = useOtherAccountTotalBalance(publicKeyHash, true);
 
   const {
     selectedFiatCurrency: { symbol: fiatSymbol }
@@ -33,10 +35,10 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
   const classNameMemo = useMemo(
     () =>
       classNames(
-        'block w-full px-4 py-3 flex items-center',
+        'block w-full px-2 py-3 flex items-center',
         'text-white overflow-hidden',
         'transition ease-in-out duration-200',
-        selected ? 'bg-list-item-selected' : 'hover:bg-primary-card-hover'
+        selected ? 'bg-list-item-selected' : 'hover:bg-list-item-selected'
       ),
     [selected]
   );
@@ -49,6 +51,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
       testID={AccountDropdownSelectors.accountItemButton}
       testIDProperties={{ accountTypeEnum: type }}
     >
+      <RadioButton id={publicKeyHash} checked={selected} bg="transparent" />
       <Identicon
         type="bottts"
         hash={publicKeyHash}
@@ -59,7 +62,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, selected, att
       <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
         <div className="flex items-center gap-1">
           <Name className="text-base">{name}</Name>
-          <AccountTypeBadge account={account} />
+          {keyColor && <KeyIcon style={{ fill: keyColor }} />}
         </div>
 
         <div

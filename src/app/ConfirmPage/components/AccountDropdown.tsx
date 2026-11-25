@@ -3,7 +3,7 @@ import React, { FC, memo, useMemo } from 'react';
 import clsx from 'clsx';
 
 import { HashShortView, Identicon, Name } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+// import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import { FiatBalance } from 'app/pages/Home/OtherComponents/Tokens/components/Balance';
 import Balance from 'app/templates/Balance';
 import { DropdownSelect, SelectOptionsPropsBase } from 'app/templates/DropdownSelect/DropdownSelect';
@@ -76,7 +76,7 @@ const AccountOptionContent = memo<{ item: TempleAccount; selected: boolean; isFa
         <div style={{ marginLeft: '12px' }} className="flex flex-col items-start">
           <div className="flex items-center gap-1">
             <Name className="text-base">{acc.name}</Name>
-            <AccountTypeBadge account={acc} />
+            {/* <AccountTypeBadge account={acc} /> */}
           </div>
 
           <div className="text-sm text-blue-200 mt-1">

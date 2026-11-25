@@ -9,15 +9,20 @@ import { setAnotherSelector } from 'lib/analytics';
 import { isTzbtcAsset, MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { T } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { getAssetName, getAssetSymbol, MAVEN_METADATA } from 'lib/metadata';
 import { useDelegate } from 'lib/temple/front';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { ZERO } from 'lib/utils/numbers';
 
 import { AssetsSelectors } from '../../Assets.selectors';
+import { upgradeBalanceWithStakingBalance } from '../../MainBanner/use-total-balance';
 import styles from '../Tokens.module.css';
 
 import { CryptoBalance, FiatBalance } from './Balance';
+
+// Row height: 44px icon + py-3.
+const ROW_PLACEHOLDER_STYLE = { minHeight: 68 };
 
 interface Props {
   onClick: (assetSlug: string) => void;
@@ -30,8 +35,10 @@ interface Props {
 export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick }) => {
   const { popup } = useAppEnv();
   const { value: balance = ZERO, assetMetadata: metadata } = useBalance(assetSlug, publicKeyHash);
-  const { data: accStats } = useDelegate(publicKeyHash);
+  // Non-suspending: delegate/staking figures belong to the MAV row only, which shows a placeholder until they load.
+  const { data: accStats } = useDelegate(publicKeyHash, false);
   const myBakerPkh = accStats?.delegate?.address ?? null;
+  useLoadPerfMark('token-row-painted', metadata != null);
 
   const { delegatedBalance, stakedBalance } = useMemo(() => {
     const stakedBalance = accStats?.stakedBalance ?? ZERO;
@@ -64,6 +71,8 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
   const additionalDelegateBlock = useMemo(() => {
     const rows: { Column1: React.ReactNode; Column2: React.ReactNode }[] = [];
 
+    if (!isMavToken) return [];
+
     if (isDelegated && !delegatedBalance.isZero()) {
       rows.push({
         Column1: (
@@ -89,9 +98,14 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
     }
 
     return rows.length > 0 ? rows : null;
-  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals]);
+  }, [isDelegated, stakedBalance, delegatedBalance, metadata?.decimals, isMavToken]);
+
+  const balanceToDisplay = useMemo(() => {
+    return isMavToken ? upgradeBalanceWithStakingBalance(balance, accStats) : balance;
+  }, [accStats, balance, isMavToken]);
 
   if (metadata == null) return null;
+  if (isMavToken && accStats === undefined) return <div style={ROW_PLACEHOLDER_STYLE} />;
 
   return (
     <div className={classNameMemo} {...setAnotherSelector('name', assetName)} onClick={() => onClick(assetSlug)}>
@@ -104,7 +118,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
             {isDelegated && <DelegatePeriodBanner />}
           </div>
           <CryptoBalance
-            value={balance}
+            value={balanceToDisplay ?? ZERO}
             cryptoDecimals={isTzBTC ? metadata.decimals : undefined}
             testID={AssetsSelectors.assetItemCryptoBalanceButton}
             testIDProperties={{ assetSlug }}
@@ -122,7 +136,7 @@ export const ListItem = memo<Props>(({ active, assetSlug, publicKeyHash, onClick
           <div className="flex flex-col items-end gap-1">
             <FiatBalance
               assetSlug={assetSlug}
-              value={balance}
+              value={balanceToDisplay ?? ZERO}
               testID={AssetsSelectors.assetItemFiatBalanceButton}
               testIDProperties={{ assetSlug }}
             />

@@ -11,8 +11,6 @@ import LockUpSettings from 'app/templates/SettingsGeneral/Components/LockUpSetti
 import PopupSettings from 'app/templates/SettingsGeneral/Components/PopupSettings';
 import { NotificationsSettings } from 'lib/notifications/components';
 
-import { PartnersPromotionSettings } from './Components/partners-promotion-settings';
-
 const GeneralSettings: FC = () => {
   const { popup } = useAppEnv();
 
@@ -31,8 +29,6 @@ const GeneralSettings: FC = () => {
       <AnalyticsSettings />
 
       <NotificationsSettings />
-
-      <PartnersPromotionSettings />
     </div>
   );
 };

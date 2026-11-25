@@ -15,9 +15,10 @@ import {
   TransferParams,
   Estimate,
   TransactionWalletOperation,
-  TransactionOperation
-} from '@mavrykdynamics/taquito';
-import { ManagerKeyResponse } from '@mavrykdynamics/taquito-rpc';
+  TransactionOperation,
+  WalletOperation
+} from '@mavrykdynamics/webmavryk';
+import { ManagerKeyResponse } from '@mavrykdynamics/webmavryk-rpc';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { Controller, FieldError, useForm } from 'react-hook-form';
@@ -26,6 +27,7 @@ import { FormSubmitButton, Money, NoSpaceField } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { ArtificialError, NotEnoughFundsError, ZeroBalanceError, ZeroTEZBalanceError } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import { useOperationStatus } from 'app/hooks/use-operation-status';
 import InFiat from 'app/templates/InFiat';
 import { useFormAnalytics } from 'lib/analytics';
 import { isMavSlug, MAV_TOKEN_SLUG, toPenny } from 'lib/assets';
@@ -36,6 +38,7 @@ import { useAssetFiatCurrencyPrice, useFiatCurrency } from 'lib/fiat-currency';
 import { BLOCK_DURATION } from 'lib/fixed-times';
 import { toLocalFixed, T, t } from 'lib/i18n';
 import { AssetMetadataBase, useAssetMetadata, getAssetSymbol } from 'lib/metadata';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { transferImplicit, transferToContract } from 'lib/michelson';
 import { useTypedSWR } from 'lib/swr';
 import { loadContract } from 'lib/temple/contract';
@@ -47,10 +50,13 @@ import {
   useTezos,
   useTezosDomainsClient,
   useFilteredContacts,
-  validateRecipient
+  validateRecipient,
+  useChainId,
+  takeAppliedOperationFeeMumav
 } from 'lib/temple/front';
 import { useTezosAddressByDomainName } from 'lib/temple/front/tzdns';
 import { hasManager, isAddressValid, isKTAddress, mumavToTz, tzToMumav } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType, TempleAccount, TempleNetworkType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { useScrollIntoView } from 'lib/ui/use-scroll-into-view';
@@ -79,21 +85,24 @@ const amountStyle = {
 type FormProps = {
   assetSlug: string;
   setOperation: Dispatch<any>;
+  operation: WalletOperation | null;
   onAddContactRequested: (address: string) => void;
 };
 
-export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactRequested }) => {
+export const Form: FC<FormProps> = ({ assetSlug, operation, setOperation, onAddContactRequested }) => {
   const { registerBackHandler } = useAppEnv();
 
   const assetMetadata = useAssetMetadata(assetSlug);
+  const metadataScope = useMetadataScope();
   const assetPrice = useAssetFiatCurrencyPrice(assetSlug);
 
   const assetSymbol = useMemo(() => getAssetSymbol(assetMetadata), [assetMetadata]);
 
-  const { allContacts } = useFilteredContacts();
+  const { allContacts, canMutateContacts } = useFilteredContacts();
   const network = useNetwork();
   const acc = useAccount();
   const tezos = useTezos();
+  const chainId = useChainId();
   const domainsClient = useTezosDomainsClient();
   const { popup } = useAppEnv();
 
@@ -158,6 +167,8 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
   const toValue = watch('to');
   const amountValue = watch('amount');
+  const [finalAmount, setFinalAmount] = useSafeState('0');
+  const [appliedFeeMumav, setAppliedFeeMumav] = useSafeState<string | undefined>(undefined);
   const feeValue = watch('fee') ?? RECOMMENDED_ADD_FEE;
 
   const amountFieldRef = useRef<HTMLInputElement>(null);
@@ -179,7 +190,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
   );
 
   const toResolved = useMemo(() => resolvedAddress || toValue, [resolvedAddress, toValue]);
-
+  const lastValidReceiver = useRef<string | null>(null);
   const toFilledWithKTAddress = useMemo(() => isAddressValid(toResolved) && isKTAddress(toResolved), [toResolved]);
 
   const filledContact = useMemo(
@@ -194,6 +205,12 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
 
   const toFieldRef = useScrollIntoView<HTMLTextAreaElement>(Boolean(toFilled), { block: 'center' });
 
+  useEffect(() => {
+    if (toResolved) {
+      lastValidReceiver.current = toResolved;
+    }
+  }, [toResolved]);
+
   useLayoutEffect(() => {
     if (toFilled) {
       return registerBackHandler(() => {
@@ -202,7 +219,31 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       });
     }
     return undefined;
-  }, [toFilled, registerBackHandler, cleanToField]);
+  }, [toFilled, registerBackHandler, cleanToField, toResolved]);
+
+  const receiverAddressToPass = lastValidReceiver.current;
+
+  const navigateProps = useMemo(
+    () => ({
+      pageTitle: 'send',
+      btnText: 'viewHistoryTab',
+      contentId: 'SendOperation',
+      btnLink: '?tab=history',
+      contentIdFnProps: {
+        // @ts-expect-error
+        hash: operation?.opHash ?? operation?.hash,
+        assetSlug,
+        amount: finalAmount,
+        address: receiverAddressToPass,
+        feeMumav: appliedFeeMumav
+      }
+    }),
+    // @ts-expect-error
+    [finalAmount, assetSlug, appliedFeeMumav, operation?.hash, operation?.opHash, receiverAddressToPass]
+  );
+
+  // @ts-expect-error
+  useOperationStatus(operation, navigateProps);
 
   const estimateBaseFee = useCallback(async () => {
     try {
@@ -345,6 +386,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         if (!assetMetadata) throw new Error('Metadata not found');
 
         let op: TransactionWalletOperation | TransactionOperation;
+        let localFeeMumav: number | undefined;
         if (isKTAddress(acc.publicKeyHash)) {
           const michelsonLambda = isKTAddress(toResolved) ? transferToContract : transferImplicit;
 
@@ -363,8 +405,27 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           const estmtn = await tezos.estimate.transfer(transferParams);
           const addFee = tzToMumav(feeVal ?? 0);
           const fee = addFee.plus(estmtn.suggestedFeeMumav).toNumber();
+          localFeeMumav = fee;
           op = await tezos.wallet.transfer({ ...transferParams, fee }).send();
+
+          // create pending delegate operation
+          const pendingOpObject = await buildPendingOperationObject({
+            operation: op,
+            type: 'transaction',
+            sender: acc.publicKeyHash,
+            estimation: estmtn,
+            amount: actualAmount,
+            to: toResolved,
+            assetSlug,
+            feeMumav: fee,
+            metadataScope
+          });
+          if (pendingOpObject) await putOperationIntoStorage(chainId, acc.publicKeyHash, pendingOpObject);
         }
+
+        const opHash = 'opHash' in op ? op.opHash : op.hash;
+        setAppliedFeeMumav(takeAppliedOperationFeeMumav(opHash) ?? localFeeMumav?.toString());
+        setFinalAmount(amount);
         setOperation(op);
         reset({ to: '', fee: RECOMMENDED_ADD_FEE });
 
@@ -389,14 +450,17 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
       tezos,
       assetSlug,
       assetMetadata,
+      metadataScope,
       setSubmitError,
       setOperation,
+      setAppliedFeeMumav,
       reset,
       accountPkh,
       toResolved,
       shoudUseFiat,
       toAssetAmount,
-      formAnalytics
+      formAnalytics,
+      chainId
     ]
   );
 
@@ -504,7 +568,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
         </div>
       )}
 
-      {toFilled && !filledContact ? (
+      {canMutateContacts && toFilled && !filledContact ? (
         <div className="mb-4 -mt-3 text-xs font-light text-gray-600 flex flex-wrap items-center">
           <button
             type="button"
@@ -578,6 +642,7 @@ export const Form: FC<FormProps> = ({ assetSlug, setOperation, onAddContactReque
           restFormDisplayed={restFormDisplayed}
           submitError={submitError}
           estimationError={estimationError}
+          assetMetadata={assetMetadata}
           toResolved={toResolved}
           toFilledWithKTAddress={toFilledWithKTAddress}
           control={control}

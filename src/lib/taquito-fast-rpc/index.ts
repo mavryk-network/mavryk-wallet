@@ -1,4 +1,4 @@
-import { EntrypointsResponse, RpcClient, RPCOptions } from '@mavrykdynamics/taquito-rpc';
+import { EntrypointsResponse, RpcClient, RPCOptions } from '@mavrykdynamics/webmavryk-rpc';
 import retry from 'async-retry';
 import memoizee from 'memoizee';
 
@@ -48,7 +48,7 @@ export class FastRpcClient extends RpcClient {
     } catch (e) {
       console.error(e);
       console.error('Failed to get chain ID, falling back to Taquito RPC client...');
-      return TempleChainId.Atlas;
+      return TempleChainId.Basenet;
     }
   }
 

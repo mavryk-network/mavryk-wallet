@@ -1,0 +1,39 @@
+import { z } from 'zod';
+
+import { TokenMetadata, TokenStandardsEnum } from 'lib/metadata/types';
+
+import { SAFE_KEY_SCHEMA } from './validation';
+
+export const TOKEN_METADATA_SCHEMA: z.ZodType<TokenMetadata> = z.object({
+  name: z.string().max(8192),
+  symbol: z.string().max(8192),
+  decimals: z.number().finite().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  address: z.string().max(8192),
+  id: z.string().max(8192),
+  standard: z.nativeEnum(TokenStandardsEnum).optional(),
+  thumbnailUri: z.string().max(8192).optional(),
+  displayUri: z.string().max(8192).optional(),
+  artifactUri: z.string().max(8192).optional()
+});
+export const METADATA_SCOPE_KEY_SCHEMA = z
+  .string()
+  .min(1)
+  .max(32768)
+  .refine(key => !['__proto__', 'constructor', 'prototype'].includes(key));
+export const METADATA_RECORD_SCHEMA = z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA);
+export const SCOPED_METADATA_SCHEMA = z.object({
+  tokensMetadata: METADATA_RECORD_SCHEMA,
+  collectiblesMetadata: METADATA_RECORD_SCHEMA,
+  rwasMetadata: METADATA_RECORD_SCHEMA,
+  revisions: z.record(METADATA_SCOPE_KEY_SCHEMA, z.number().int().nonnegative())
+});
+export const METADATA_SCHEMA = z.object({
+  scoped: z.record(METADATA_SCOPE_KEY_SCHEMA, SCOPED_METADATA_SCHEMA).optional(),
+  revision: z.number().int().nonnegative().optional(),
+  lastReceipt: z.string().optional(),
+  tokensMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
+  collectiblesMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA),
+  rwasMetadata: z.record(SAFE_KEY_SCHEMA, TOKEN_METADATA_SCHEMA)
+});
+
+export type MetadataState = z.infer<typeof METADATA_SCHEMA>;

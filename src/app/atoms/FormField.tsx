@@ -62,6 +62,7 @@ export interface FormFieldProps extends TestIDProperty, Omit<FormFieldAttrs, 'ty
   fieldWrapperBottomMargin?: boolean;
   labelClassname?: string;
   copyable?: boolean;
+  cleanBtnBottomOffset?: string;
   testIDs?: {
     inputSection?: string;
     input?: string;
@@ -107,6 +108,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
       testIDs,
       childForInputWrapper,
       labelClassname,
+      cleanBtnBottomOffset,
       ...rest
     },
     ref
@@ -205,7 +207,7 @@ export const FormField = forwardRef<FormFieldElement, FormFieldProps>(
 
           {secretCovered && <SecretCover onClick={handleSecretBannerClick} />}
 
-          <Cleanable cleanable={cleanable} handleCleanClick={handleCleanClick} />
+          <Cleanable cleanable={cleanable} handleCleanClick={handleCleanClick} bottomOffset={cleanBtnBottomOffset} />
           <Copyable value={value} copy={copy} cleanable={cleanable} copyable={copyable} />
         </div>
 
@@ -251,10 +253,11 @@ const ExtraInner: React.FC<ExtraInnerProps> = ({ useDefaultWrapper, innerCompone
 interface CleanableProps {
   handleCleanClick: () => void;
   cleanable: React.ReactNode;
+  bottomOffset?: string;
 }
 
-const Cleanable: React.FC<CleanableProps> = ({ cleanable, handleCleanClick }) =>
-  cleanable ? <CleanButton onClick={handleCleanClick} /> : null;
+const Cleanable: React.FC<CleanableProps> = ({ cleanable, handleCleanClick, bottomOffset }) =>
+  cleanable ? <CleanButton bottomOffset={bottomOffset} onClick={handleCleanClick} /> : null;
 
 interface CopyableProps {
   value: React.ReactNode;

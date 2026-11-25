@@ -1,7 +1,7 @@
 import { AccDelegatePeriodStats } from '../baking';
 import { CO_STAKE, FINALIZE_UNLOCK, UNLOCK_STAKE, UNLOCKING } from '../const';
 
-export const getDelegateLabel = (data: AccDelegatePeriodStats) => {
+export const getDelegateLabel = (data: AccDelegatePeriodStats['data']) => {
   if (!data) return CO_STAKE;
 
   if (data.isDelegated && data.stakedBalance === 0 && data.unlockWaitTime === null) {

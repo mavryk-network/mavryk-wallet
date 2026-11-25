@@ -1,7 +1,9 @@
+import { Mutex } from 'async-mutex';
+
 import { removeMFromDerivationPath } from './helpers';
 import { TempleLedgerSigner } from './signer';
 import { TransportType, TempleLedgerTransport } from './transport';
-import type { CreatorArgumentsTuple } from './types';
+import type { CreatorArgumentsTuple, LedgerCleanup } from './types';
 
 export const createLedgerSigner = async (
   transportType: TransportType,
@@ -18,20 +20,39 @@ export const createLedgerSigner = async (
     publicKeyHash
   );
 
-  // Ledger Live is not available but we still don't close transport
-  // Probably we do not need to close it
-  // But if we need, we can close it after not use timeout
-  const cleanup = () => {};
+  // Keep the shared transport alive across operations to avoid reopening the device.
+  const cleanup: LedgerCleanup = () => {};
 
   return { signer, cleanup };
 };
 
-let keptTransport: TempleLedgerTransport;
+let keptTransport: TempleLedgerTransport | undefined;
+let pendingTransport: Promise<TempleLedgerTransport> | undefined;
+const transportMutex = new Mutex();
 
 const createLedgerTransport = async (transportType: TransportType) => {
-  if (keptTransport) await keptTransport.close();
+  return transportMutex.runExclusive(async () => {
+    if (keptTransport) {
+      keptTransport.updateTransportType(transportType);
+      return keptTransport;
+    }
 
-  keptTransport = new TempleLedgerTransport(transportType);
+    if (!pendingTransport) {
+      pendingTransport = Promise.resolve().then(() => {
+        const transport = new TempleLedgerTransport(transportType);
+        keptTransport = transport;
 
-  return keptTransport;
+        return transport;
+      });
+    }
+
+    try {
+      const transport = await pendingTransport;
+      transport.updateTransportType(transportType);
+
+      return transport;
+    } finally {
+      pendingTransport = undefined;
+    }
+  });
 };

@@ -3,7 +3,6 @@
   https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/config/webpack.config.js
 */
 
-import SaveRemoteFilePlugin from '@temple-wallet/save-remote-file-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import CreateFileWebpack from 'create-file-webpack';
@@ -18,6 +17,8 @@ import WebExtensionTargetPlugin from 'webpack-target-webextension';
 import WebpackBar from 'webpackbar';
 
 import { buildBaseConfig } from './webpack/base.config';
+import { createBuildStartSnapshotPlugin } from './webpack/build-provenance';
+import { envFilesData, publicEnvFilesData } from './webpack/dotenv';
 import {
   DEVELOPMENT_ENV,
   PRODUCTION_ENV,
@@ -50,11 +51,23 @@ const HTML_TEMPLATES = PAGES_NAMES.map(name => {
   })
 );
 
-const CONTENT_SCRIPTS = ['contentScript', 'replaceAds'];
+const CONTENT_SCRIPTS = ['contentScript'];
 if (BACKGROUND_IS_WORKER) CONTENT_SCRIPTS.push('keepBackgroundWorkerAlive');
 
 const mainConfig = (() => {
   const config = buildBaseConfig();
+
+  config.resolve = {
+    ...(config.resolve || {}),
+    alias: {
+      ...(config.resolve?.alias || {}),
+      '@mavrykdynamics/taquito': '@taquito/taquito',
+      '@mavrykdynamics/taquito-michelson-encoder': '@taquito/michelson-encoder',
+      '@mavrykdynamics/taquito-michel-codec': '@taquito/michel-codec',
+      '@mavrykdynamics/taquito-rpc': '@taquito/rpc',
+      '@mavrykdynamics/taquito-tzip16': '@taquito/tzip16'
+    }
+  };
 
   /* Page reloading in development mode */
   const liveReload = DEVELOPMENT_ENV && usePagesLiveReload(RELOADER_PORTS.PAGES);
@@ -94,6 +107,9 @@ const mainConfig = (() => {
         ({ name, filename, path }) =>
           new HtmlWebpackPlugin({
             template: path,
+            templateParameters: {
+              documentBackground: require('./tailwind.config.js').theme.colors['primary-bg']
+            },
             filename,
             chunks: liveReload ? [name, 'live_reload'] : [name],
             inject: 'body',
@@ -126,8 +142,9 @@ const mainConfig = (() => {
                 - HTML files are taken care of by the `html-webpack-plugin`. Copying them here leads to:
                   `ERROR in Conflict: Multiple assets emit different content to the same filename [name].html`
                 - Manifest file is copied next, along with transformation of it.
+                - macOS metadata (`.DS_Store`, `__MACOSX/`) gets flagged by the Firefox Add-ons (AMO) validator.
               */
-              ignore: ['**/*.html']
+              ignore: ['**/*.html', '**/.DS_Store', '**/__MACOSX/**']
             }
           },
           /*
@@ -137,10 +154,6 @@ const mainConfig = (() => {
           { from: PATHS.LIBTHEMIS_WASM_FILE, to: PATHS.OUTPUT_WASM }
         ]
       }),
-
-      new SaveRemoteFilePlugin([
-        { url: 'https://api.hypelab.com/v1/scripts/hp-sdk.js?v=0', filepath: 'scripts/hypelab.embed.js', hash: false }
-      ]),
 
       new CreateFileWebpack({
         path: PATHS.OUTPUT,
@@ -159,7 +172,12 @@ const mainConfig = (() => {
     chunks: 'all',
     maxSize: MAX_JS_CHUNK_SIZE_IN_BYTES,
     enforceSizeThreshold: MAX_JS_CHUNK_SIZE_IN_BYTES,
-    name: (_: any, chunks: any) => chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+    // Shared chunks of named (entry) chunks keep their entry-combination names. Splits of unnamed async chunks
+    // (lazy pages, dynamic imports) stay unnamed: one shared name would merge every async split into one chunk.
+    name: (_: any, chunks: any) =>
+      chunks.every((chunk: any) => chunk.name)
+        ? chunks.map((chunk: any) => chunk.name).join('-') + '.split-chunk'
+        : undefined
   };
 
   config.optimization!.minimizer!.push(
@@ -177,8 +195,7 @@ const scriptsConfig = (() => {
   config.output!.chunkFormat = 'module';
 
   config.entry = {
-    contentScript: Path.join(PATHS.SOURCE, 'contentScript.ts'),
-    replaceAds: Path.join(PATHS.SOURCE, 'replaceAds.ts')
+    contentScript: Path.join(PATHS.SOURCE, 'contentScript.ts')
   };
 
   if (BACKGROUND_IS_WORKER)
@@ -262,6 +279,12 @@ const backgroundConfig = (() => {
 })();
 
 const configurations = [mainConfig, scriptsConfig, backgroundConfig];
+
+if (PRODUCTION_ENV) {
+  // Lets zip-script tell whether this compile succeeded and its inputs stayed unchanged until packing.
+  const buildStartSnapshot = createBuildStartSnapshotPlugin(configurations.length, publicEnvFilesData, envFilesData);
+  configurations.forEach(config => config.plugins!.push(buildStartSnapshot));
+}
 
 export default configurations;
 export const parallelism = 3;

@@ -16,7 +16,7 @@ import {
   useNetwork,
   useSetNetworkId
 } from 'lib/temple/front';
-import { loadChainId } from 'lib/temple/helpers';
+import { loadChainIdStrict } from 'lib/temple/helpers';
 import { TempleNetwork, isKnownChainId } from 'lib/temple/types';
 
 import { networkIcons } from './network.const';
@@ -33,7 +33,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
   const setNetworkId = useSetNetworkId();
   const { popup } = useAppEnv();
 
-  const chainId = useChainId(true)!;
+  const chainId = useChainId(true);
 
   const { setExplorerId } = useBlockExplorer();
   const [isNetworkSwitching, setisNetworkSwitching] = useState(false);
@@ -46,13 +46,17 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
         setOpened(false);
         return;
       }
+
+      let currentChainId: string;
+
       try {
         setisNetworkSwitching(true);
-        const currentChainId = await loadChainId(rpcUrl);
+        currentChainId = await loadChainIdStrict(rpcUrl);
 
         if (currentChainId && isKnownChainId(currentChainId)) {
+          const knownChainId = currentChainId;
           const currentBlockExplorerId =
-            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(currentChainId))?.id ?? 'tzkt';
+            BLOCK_EXPLORERS.find(explorer => explorer.baseUrls.get(knownChainId))?.id ?? 'tzkt';
 
           if (currentChainId !== chainId) {
             setExplorerId(currentBlockExplorerId);
@@ -63,6 +67,7 @@ export const NetworkPopup: FC<NetworkPopupProps> = ({ setOpened }) => {
       } catch (error) {
         setisNetworkSwitching(false);
         console.error(error);
+        return;
       }
 
       setNetworkId(netId);

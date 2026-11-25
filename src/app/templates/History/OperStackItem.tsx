@@ -5,9 +5,9 @@ import clsx from 'clsx';
 import { HashChip } from 'app/atoms';
 import { TID, T } from 'lib/i18n';
 import { useMultipleAssetsMetadata } from 'lib/metadata';
-import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { HistoryItemOpTypeTexts } from 'lib/temple/history/consts';
-import { MoneyDiff, isZero } from 'lib/temple/history/helpers';
+import { MoneyDiff } from 'lib/temple/history/helpers';
 import {
   IndividualHistoryItem,
   HistoryItemOpTypeEnum,
@@ -20,10 +20,17 @@ import {
 } from 'lib/temple/history/types';
 
 import { MoneyDiffView } from './MoneyDiffView';
-import { getAssetsFromOperations, getStakingMessage } from './utils';
+import {
+  buildHistoryPreviewOperations,
+  getAssetsFromOperations,
+  getHistoryOperationAddress,
+  getMultipleInteractionMessageData,
+  getStakingMessage,
+  isVisibleMoneyDiff
+} from './utils';
 
 interface Props {
-  item: IndividualHistoryItem;
+  item: IndividualHistoryItem | ReturnType<typeof buildHistoryPreviewOperations>[number];
   isTiny?: boolean;
   moneyDiff?: MoneyDiff;
   originalHistoryItem?: UserHistoryItem;
@@ -36,12 +43,33 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
   const componentBaseProps = {
     status: item.status,
-    moneyDiff,
+    moneyDiff:
+      item.displayMoneyDiff ??
+      (item.entrypoint === 'mint' && item.atomicAmount !== undefined && item.amountDiff !== undefined && item.assetSlug
+        ? { assetSlug: item.assetSlug, diff: item.amountDiff }
+        : moneyDiff),
     last
   };
 
   const slugs = getAssetsFromOperations(originalHistoryItem);
   const tokensMetadata = useMultipleAssetsMetadata(slugs);
+
+  if (item.movementKind && (isTiny || item.type !== HistoryItemOpTypeEnum.Interaction)) {
+    return item.movementKind === 'mint' ? (
+      <Component
+        {...componentBaseProps}
+        titleNode={HistoryItemOpTypeTexts[HistoryItemOpTypeEnum.Interaction]}
+        argsNode={
+          <StackItemArgs
+            i18nKey="interactionOnContract"
+            args={[<span className="text-accent-blue">mint</span>, item.contractAddress ?? '']}
+          />
+        }
+      />
+    ) : (
+      <Component {...componentBaseProps} titleNode="Burned" />
+    );
+  }
 
   switch (item.type) {
     case HistoryItemOpTypeEnum.Staking:
@@ -78,7 +106,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
             titleNode={isDelegatorLeft ? 'Delegator' : 'New delegator'}
             argsNode={
               <StackItemArgs
-                args={[getPredefinedBakerName(sourceAddress) ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
+                args={[getPredefinedBakerProperty(sourceAddress) ?? 'unknown', isDelegatorLeft ? <> left</> : '']}
               />
             }
           />
@@ -95,11 +123,11 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
               args={
                 isPrevDelegate
                   ? [
-                      getPredefinedBakerName(opDelegate.prevDelegate?.address) ?? 'unknown',
+                      getPredefinedBakerProperty(opDelegate.prevDelegate?.address) ?? 'unknown',
                       <> and re-delegate to </>,
-                      getPredefinedBakerName(opDelegate.newDelegate?.address)
+                      getPredefinedBakerProperty(opDelegate.newDelegate?.address)
                     ]
-                  : [getPredefinedBakerName(opDelegate.newDelegate?.address)]
+                  : [getPredefinedBakerProperty(opDelegate.newDelegate?.address)]
               }
             />
           }
@@ -123,40 +151,48 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
     case HistoryItemOpTypeEnum.Interaction:
       const opInteract = item as HistoryItemTransactionOp;
+      const interactionAddress = getHistoryOperationAddress(opInteract, originalHistoryItem);
 
-      if (!opInteract.entrypoint) {
-        console.log(opInteract, 'opInteract');
-      }
-
-      return (
+      // Without an entrypoint "Called <entrypoint> on <contract>" would read "Called  on <contract>"
+      return opInteract.entrypoint ? (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
           argsNode={
             <StackItemArgs
               i18nKey="interactionOnContract"
-              args={[
-                <span className="text-accent-blue">{opInteract.entrypoint}</span>,
-                (opInteract.destination?.address ?? opInteract.source?.address) || opInteract.hash
-              ]}
+              args={[<span className="text-accent-blue">{opInteract.entrypoint}</span>, interactionAddress]}
             />
           }
+        />
+      ) : (
+        <Component
+          {...componentBaseProps}
+          titleNode="Interaction"
+          argsNode={<StackItemArgs i18nKey="interactionWithContract" args={[interactionAddress]} />}
         />
       );
     case HistoryItemOpTypeEnum.Multiple:
       const opMultiple = item as HistoryItemTransactionOp;
+      const { contractAddress, countLabel, entrypoint } = getMultipleInteractionMessageData(
+        opMultiple,
+        originalHistoryItem
+      );
+      const contractLabel = entrypoint ? (
+        <StackItemArgs
+          i18nKey="interactionOnContract"
+          args={[<span className="text-accent-blue">{entrypoint}</span>, contractAddress]}
+        />
+      ) : (
+        contractAddress
+      );
+
       return (
         <Component
           {...componentBaseProps}
           titleNode={'Called'}
           argsNode={
-            <StackItemArgs
-              i18nKey="multipleInteractionOnContract"
-              args={[
-                opMultiple.destination.address,
-                <span>{originalHistoryItem ? originalHistoryItem?.operations.length - 1 : 1} more</span>
-              ]}
-            />
+            <StackItemArgs i18nKey="multipleInteractionOnContract" args={[contractLabel, <span>{countLabel}</span>]} />
           }
         />
       );
@@ -181,30 +217,37 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
 
     case HistoryItemOpTypeEnum.TransferFrom:
       const opFrom = item as HistoryItemTransactionOp;
+      const transferFromAddress = getHistoryOperationAddress(opFrom, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferFromSmb" args={[opFrom.source.address]} />}
+          argsNode={
+            transferFromAddress ? <StackItemArgs i18nKey="transferFromSmb" args={[transferFromAddress]} /> : undefined
+          }
         />
       );
 
     case HistoryItemOpTypeEnum.TransferTo:
       const opTo = item as HistoryItemTransactionOp;
+      const transferToAddress = getHistoryOperationAddress(opTo, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="transferToSmb" args={[opTo.destination?.address ?? 'unkwonn']} />}
+          argsNode={
+            transferToAddress ? <StackItemArgs i18nKey="transferToSmb" args={[transferToAddress]} /> : undefined
+          }
         />
       );
     case HistoryItemOpTypeEnum.Reveal:
       const opReveal = item as HistoryItemTransactionOp;
+      const revealAddress = getHistoryOperationAddress(opReveal, originalHistoryItem);
       return (
         <Component
           {...componentBaseProps}
           titleNode={HistoryItemOpTypeTexts[item.type]}
-          argsNode={<StackItemArgs i18nKey="revealOperationType" args={[opReveal.source.address]} />}
+          argsNode={<StackItemArgs i18nKey="revealOperationType" args={[revealAddress]} />}
         />
       );
     // Other
@@ -229,7 +272,7 @@ export const OpertionStackItem = memo<Props>(({ item, isTiny, moneyDiff, origina
             <StackItemArgs
               // using reveal i18n to get empty string
               i18nKey="revealOperationType"
-              args={[opOther.destination?.address || opOther.source.address || opOther.hash]}
+              args={[getHistoryOperationAddress(opOther, originalHistoryItem)]}
             />
           }
         />
@@ -258,11 +301,13 @@ const StackItemBase: React.FC<StackItemBaseProps> = ({ titleNode, argsNode }) =>
 };
 
 const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, moneyDiff, status, last = false }) => {
+  const isMoneyDiffVisible = Boolean(moneyDiff && isVisibleMoneyDiff(moneyDiff));
+
   return (
     <div
       className={clsx(
         'flex items-start justify-between text-white text-xs py-2',
-        moneyDiff && !isZero(moneyDiff.diff) ? 'h-12' : 'h-9',
+        isMoneyDiffVisible ? 'h-12' : 'h-9',
         !last ? 'border-b border-divider' : 'h-auto'
       )}
     >
@@ -272,10 +317,15 @@ const StackItemBaseTiny: React.FC<StackItemBaseProps> = ({ titleNode, argsNode, 
         {argsNode}
       </div>
 
-      {moneyDiff && !isZero(moneyDiff.diff) && (
+      {moneyDiff && isMoneyDiffVisible && (
         <MoneyDiffView
           assetId={moneyDiff.assetSlug}
           diff={moneyDiff.diff}
+          symbol={moneyDiff.symbol}
+          usdAmount={moneyDiff.usdAmount}
+          isNeutral={moneyDiff.isNeutral}
+          isNegative={moneyDiff.isNegative}
+          isAmountUnavailable={moneyDiff.isAmountUnavailable}
           pending={status === 'pending'}
           className="flex flex-col -mt-2px"
           moneyClassname="text-sm"

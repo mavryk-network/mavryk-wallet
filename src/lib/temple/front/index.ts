@@ -1,6 +1,6 @@
 export { useStorage } from './storage';
 
-export { useTempleClient, request, assertResponse } from './client';
+export { useTempleClient, request, assertResponse, takeAppliedOperationFeeMumav } from './client';
 
 export {
   ReactiveTezosToolkit,
@@ -24,6 +24,7 @@ export { validateDerivationPath, validateContractAddress } from './helpers';
 export { useBlockTriggers, useOnBlock } from './chain';
 
 export { useContactsActions, searchContacts } from './address-book';
+export { getContactsUnavailableMessage } from './contacts-availability';
 
 export { useTezosDomainsClient, isDomainNameValid } from './tzdns';
 
@@ -45,6 +46,7 @@ export { validateDelegate } from './validate-delegate';
 export { validateRecipient } from './validate-recipient';
 
 export { useFilteredContacts } from './use-filtered-contacts.hook';
+export { canAccountUseContacts } from './contacts-settings';
 
 export { decryptKukaiSeedPhrase } from './kukai';
 

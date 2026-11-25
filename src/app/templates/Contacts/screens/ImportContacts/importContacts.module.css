@@ -1,0 +1,20 @@
+.progressBar {
+  position: relative;
+  height: 4px;
+  border-radius: 4px;
+  background: #333;
+  width: 100%;
+
+  transition: all 200ms linear;
+}
+
+.progressBar::after {
+  content: '';
+  background-color: #f86412;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: var(--file-percentage);
+}

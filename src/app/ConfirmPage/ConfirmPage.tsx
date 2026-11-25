@@ -1,4 +1,4 @@
-import React, { FC, Fragment, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { FC, Fragment, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -19,7 +19,14 @@ import { CustomRpcContext } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useRetryableSWR } from 'lib/swr';
 import { useTempleClient, useAccount, useRelevantAccounts, useChainIdValue } from 'lib/temple/front';
-import { TempleAccountType, TempleDAppPayload, TempleChainId } from 'lib/temple/types';
+import { intercom } from 'lib/temple/front/client';
+import {
+  TempleAccountType,
+  TempleDAppPayload,
+  TempleChainId,
+  TempleMessageType,
+  TempleNotification
+} from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
 import { Link, useLocation } from 'lib/woozie';
@@ -29,6 +36,7 @@ import { ButtonRounded } from '../molecules/ButtonRounded';
 
 import { AccountDropdown } from './components/AccountDropdown';
 import { ConfirmPageSelectors } from './ConfirmPage.selectors';
+import { useConfirmArmDelay } from './hooks/use-confirm-arm-delay';
 
 const APP_POPUP_LIMIT = 604;
 const APP_POPUP_WIDTH_LIMIT = 400;
@@ -70,7 +78,7 @@ interface PayloadContentProps {
   setAccountPkhToConnect: (item: string) => void;
   payload: TempleDAppPayload;
   error?: any;
-  modifyFeeAndLimit: ModifyFeeAndLimit;
+  modifyFeeAndLimit?: ModifyFeeAndLimit;
 }
 
 const PayloadContent: React.FC<PayloadContentProps> = ({
@@ -99,7 +107,7 @@ const PayloadContent: React.FC<PayloadContentProps> = ({
       error={error}
       networkRpc={payload.networkRpc}
       mainnet={mainnet}
-      modifyFeeAndLimit={modifyFeeAndLimit}
+      modifyFeeAndLimit={payload.type === 'confirm_operations' ? modifyFeeAndLimit : undefined}
     />
   );
 };
@@ -116,24 +124,33 @@ const ConfirmDAppForm: FC = () => {
   const [accountPkhToConnect, setAccountPkhToConnect] = useState(account.publicKeyHash);
 
   const loc = useLocation();
-  const id = useMemo(() => {
+  const { id, token } = useMemo(() => {
     const usp = new URLSearchParams(loc.search);
     const pageId = usp.get('id');
-    if (!pageId) {
+    const pageToken = usp.get('token');
+
+    if (!pageId || !pageToken) {
       throw new Error(t('notIdentified'));
     }
-    return pageId;
+
+    return { id: pageId, token: pageToken };
   }, [loc.search]);
 
-  const { data } = useRetryableSWR<TempleDAppPayload, unknown, string>(id, getDAppPayload, {
-    suspense: true,
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data } = useRetryableSWR<TempleDAppPayload, unknown, [string, string]>(
+    [id, token],
+    ([payloadId, payloadToken]) => getDAppPayload(payloadId, payloadToken),
+    {
+      suspense: true,
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   const payload = data!;
   const payloadError = data!.error;
+  // Without the locally forged operation the preview cannot be trusted to match what would be signed.
+  const unverifiedOperation = payload.type === 'confirm_operations' && !payload.rawToSign;
 
   const connectedAccount = useMemo(
     () =>
@@ -160,6 +177,18 @@ const ConfirmDAppForm: FC = () => {
   const [error, setError] = useSafeState<any>(null);
   const [confirming, setConfirming] = useSafeState(false);
   const [declining, setDeclining] = useSafeState(false);
+  // Set while the background checks the operation's branch before signing, which can take about one block.
+  const [verifying, setVerifying] = useSafeState(false);
+
+  useEffect(
+    () =>
+      intercom.subscribe((msg: TempleNotification) => {
+        if (msg?.type === TempleMessageType.DAppOpsVerifying && msg.id === id) {
+          setVerifying(msg.verifying);
+        }
+      }),
+    [id, setVerifying]
+  );
 
   const revealFee = useMemo(() => {
     if (
@@ -199,13 +228,15 @@ const ConfirmDAppForm: FC = () => {
     [onConfirm, setError, modifiedTotalFeeValue, modifiedStorageLimitValue, revealFee]
   );
 
+  const isConfirmArmed = useConfirmArmDelay();
+
   const handleConfirmClick = useCallback(async () => {
-    if (confirming || declining) return;
+    if (confirming || declining || !isConfirmArmed) return;
 
     setConfirming(true);
     await confirm(true);
     setConfirming(false);
-  }, [confirming, declining, setConfirming, confirm]);
+  }, [confirming, declining, isConfirmArmed, setConfirming, confirm]);
 
   const handleDeclineClick = useCallback(async () => {
     if (confirming || declining) return;
@@ -348,7 +379,7 @@ const ConfirmDAppForm: FC = () => {
           ) : (
             <>
               <Divider color="bg-divider" className="mb-4" />
-              <NetworkBanner rpc={payload.networkRpc} />
+              <NetworkBanner rpc={payload.networkRpc} chainId={payload.chainId} />
               {payload.type !== 'connect' && connectedAccount && (
                 <>
                   <div className="w-full bg-primary-card rounded-lg px-4 py-3">
@@ -367,6 +398,10 @@ const ConfirmDAppForm: FC = () => {
                 </>
               )}
 
+              {unverifiedOperation && !payloadError && (
+                <Alert type="error" title={t('error')} description={t('operationCannotBeVerified')} className="mb-4" />
+              )}
+
               {payloadError && (
                 <AlertWithCollapse
                   wrapperClassName="w-full mb-4 mt-0"
@@ -377,7 +412,7 @@ const ConfirmDAppForm: FC = () => {
                   }
                   description={
                     <span>
-                      <T id="txIsLikelyToFail" />
+                      <T id={unverifiedOperation ? 'operationCannotBeVerified' : 'txIsLikelyToFail'} />
                     </span>
                   }
                 >
@@ -419,6 +454,7 @@ const ConfirmDAppForm: FC = () => {
               type="button"
               className="justify-center w-full"
               loading={confirming}
+              disabled={unverifiedOperation || !isConfirmArmed}
               onClick={handleConfirmClick}
               testID={content.confirmActionTestID}
               testIDProperties={{ operationType: payload.type }}
@@ -427,7 +463,20 @@ const ConfirmDAppForm: FC = () => {
             </FormSubmitButton>
           </div>
         </div>
-        <ConfirmLedgerOverlay displayed={confirming && connectedAccount?.type === TempleAccountType.Ledger} />
+        {verifying && (
+          <div
+            role="status"
+            className="absolute inset-0 p-8 flex flex-col items-center justify-center bg-primary-bg text-secondary-white"
+          >
+            <Spinner theme="primary" className="w-20" />
+            <p className="mt-6 text-base text-center">
+              <T id="verifyingOperation" />
+            </p>
+          </div>
+        )}
+        <ConfirmLedgerOverlay
+          displayed={confirming && !verifying && connectedAccount?.type === TempleAccountType.Ledger}
+        />
       </div>
     </CustomRpcContext.Provider>
   );

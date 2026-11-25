@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { FormSubmitButton } from 'app/atoms';
 import AssetField from 'app/atoms/AssetField';
 import { MaxButton } from 'app/atoms/MaxButton';
+import { FeeValueParams, STAKE_MODE, useMavStakeFeeValue } from 'app/hooks/useFeeValue/use-fee-value';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { InfoTooltip } from 'app/molecules/InfoTooltip';
 import { useBakingHistory } from 'app/pages/Stake/hooks/use-baking-history';
@@ -14,16 +15,16 @@ import OperationStatus from 'app/templates/OperationStatus';
 import { useFormAnalytics } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
-import { RECOMMENDED_ADD_FEE } from 'lib/constants';
 import { T, t, toLocalFixed } from 'lib/i18n';
 import { MAVEN_METADATA, useAssetMetadata } from 'lib/metadata';
-import { useAccount, useTezos } from 'lib/temple/front';
+import { useAccount, useChainId, useTezos } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 import { atomsToTokens } from 'lib/temple/helpers';
+import { buildPendingOperationObject, putOperationIntoStorage } from 'lib/temple/history/utils';
 import { TempleAccountType } from 'lib/temple/types';
 import { useSafeState } from 'lib/ui/hooks';
 import { delay } from 'lib/utils';
-import { getMaxAmountToken } from 'lib/utils/amounts';
+import { getMaxStakeAmount } from 'lib/utils/amounts';
 import { ZERO } from 'lib/utils/numbers';
 import { goBack, navigate, useLocation } from 'lib/woozie';
 
@@ -40,7 +41,10 @@ export const IncreaseStake = () => {
   const { historyPosition } = useLocation();
   const { unfamiliarWithDelegation } = useBakingHistory();
   const account = useAccount();
-  const { myBakerPkh, canCostake, stakedBalance } = useAccountDelegatePeriodStats(account.publicKeyHash);
+  const chainId = useChainId();
+  const {
+    data: { myBakerPkh, canCostake, stakedBalance }
+  } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const amountFieldRef = React.useRef<HTMLInputElement>(null);
   const { value: balanceData = ZERO } = useBalance(MAV_TOKEN_SLUG, account.publicKeyHash);
@@ -50,17 +54,19 @@ export const IncreaseStake = () => {
 
   const formAnalytics = useFormAnalytics('CoStakeForm');
 
-  useEffect(() => {
-    if (!canCostake) {
-      navigate('stake');
-    }
-  });
-
   const { watch, handleSubmit, errors, control, formState, setValue, triggerValidation } = useForm<FormData>({
     mode: 'onChange'
   });
   const [submitError, setSubmitError] = useSafeState<any>(null);
   const [operation, setOperation] = useSafeState<any>(null, tezos.checksum);
+
+  const amountValue = watch('amount');
+
+  const mavFeeProps: FeeValueParams = useMemo(
+    () => ({ balance, acc: account, tezos, mode: STAKE_MODE, amount: amountValue ? new BigNumber(amountValue) : ZERO }),
+    [account, amountValue, balance, tezos]
+  );
+  const { estimation, baseFee, safeFeeValue, feeError, estimationError } = useMavStakeFeeValue(mavFeeProps);
 
   useEffect(() => {
     if (account.type === TempleAccountType.WatchOnly) {
@@ -70,24 +76,43 @@ export const IncreaseStake = () => {
     }
   }, [unfamiliarWithDelegation, account.publicKeyHash, account.type]);
 
+  // Navigates once an increase-stake operation resolves; no cleanup is needed for this one-shot navigation side effect.
   useEffect(() => {
-    if (operation && (!operation._operationResult.hasError || !operation._operationResult.isStopped)) {
+    if (operation && (!operation._operationResult?.hasError || !operation._operationResult?.isStopped)) {
+      const hash = operation.hash || operation.opHash;
       navigate<SuccessStateType>('/success', undefined, {
         pageTitle: 'coStake',
-        description: 'coStakeDesriptionSuccessMsg',
-        btnText: 'goToMain',
-        subHeader: 'coStakeSubHeaderSuccessMsg'
+        btnText: 'viewHistoryTab',
+        btnLink: '?tab=history',
+        contentId: 'DelegationOperation',
+        contentIdFnProps: {
+          hash,
+          assetSlug: MAV_TOKEN_SLUG,
+          amount: amountValue,
+          validatorAddress: myBakerPkh,
+          type: 'stake'
+        }
       });
     }
-  }, [operation]);
+  }, [amountValue, myBakerPkh, operation]);
 
-  const amountValue = watch('amount');
-  const baseFee = useMemo(() => new BigNumber(RECOMMENDED_ADD_FEE), []);
+  useEffect(() => {
+    const error = feeError ?? estimationError;
+    if (error) {
+      setSubmitError(error);
+    }
+  }, [estimationError, feeError, setSubmitError]);
 
-  const maxAmount = useMemo(
-    () => getMaxAmountToken(account, balance, baseFee, RECOMMENDED_ADD_FEE),
-    [account, balance, baseFee]
+  const safeFeeBN = useMemo(() => new BigNumber(safeFeeValue), [safeFeeValue]);
+  const totalFeeBN = useMemo(
+    () => (baseFee instanceof BigNumber ? baseFee.plus(safeFeeBN) : undefined),
+    [baseFee, safeFeeBN]
   );
+
+  const maxAmount = useMemo(() => {
+    if (!totalFeeBN) return undefined;
+    return getMaxStakeAmount(balance, totalFeeBN, assetMetadata?.decimals ?? 6);
+  }, [balance, totalFeeBN, assetMetadata?.decimals]);
 
   const stakedAmount = useMemo(
     () => atomsToTokens(stakedBalance, assetMetadata?.decimals ?? MAVEN_METADATA.decimals),
@@ -98,11 +123,12 @@ export const IncreaseStake = () => {
     (v?: number) => {
       if (v === undefined) return t('required');
 
-      if (!maxAmount) return true;
+      if (!balance) return true;
       const vBN = new BigNumber(v);
-      return vBN.isLessThanOrEqualTo(maxAmount) || t('maximalAmount', toLocalFixed(maxAmount));
+
+      return vBN.isLessThanOrEqualTo(balance) || t('maximalAmount', toLocalFixed(balance));
     },
-    [maxAmount]
+    [balance]
   );
 
   const handleSetMaxAmount = useCallback(() => {
@@ -119,16 +145,37 @@ export const IncreaseStake = () => {
 
   const onSubmit = useCallback(
     async ({ amount }: FormData) => {
-      if (formState.isSubmitting || !myBakerPkh) return;
+      if (formState.isSubmitting || !myBakerPkh || !canCostake) return;
       formAnalytics.trackSubmit({ amount });
+      const amtBN = new BigNumber(amount).decimalPlaces(6, BigNumber.ROUND_FLOOR);
+
+      console.log({
+        amountStr: amount,
+        amtFixed: amtBN.toFixed(6),
+        amtNumber: amtBN.toNumber()
+      });
+
       try {
         if (!assetMetadata) throw new Error('Metadata not found');
 
         const op = await tezos.wallet
+          // eslint-disable-next-line no-type-assertion/no-type-assertion
           .stake({
-            amount: Number(amount)
-          })
+            amount: new BigNumber(amount).toNumber()
+          } as any)
           .send();
+
+        // create pending delegate operation
+        const pendingOpObject = await buildPendingOperationObject({
+          operation: op,
+          type: 'staking',
+          sender: account.publicKeyHash,
+          amount: amtBN.toNumber(),
+          estimation: estimation,
+          baker: myBakerPkh,
+          kind: 'stake'
+        });
+        if (pendingOpObject) await putOperationIntoStorage(chainId, account.publicKeyHash, pendingOpObject);
 
         setOperation(op);
         formAnalytics.trackSubmitSuccess({
@@ -144,7 +191,19 @@ export const IncreaseStake = () => {
         setSubmitError(err);
       }
     },
-    [assetMetadata, formAnalytics, formState.isSubmitting, myBakerPkh, setOperation, setSubmitError, tezos.wallet]
+    [
+      formState.isSubmitting,
+      myBakerPkh,
+      canCostake,
+      formAnalytics,
+      assetMetadata,
+      tezos.wallet,
+      account.publicKeyHash,
+      chainId,
+      setOperation,
+      setSubmitError,
+      estimation
+    ]
   );
 
   const balancesData: ManagStakeBalancetype[] = useMemo(() => {
@@ -215,7 +274,12 @@ export const IncreaseStake = () => {
         <FormSubmitButton
           loading={formState.isSubmitting}
           disabled={Boolean(
-            formState.isSubmitting || errors.amount || !formState.isValid || !amountValue || amountValue === '0'
+            formState.isSubmitting ||
+              errors.amount ||
+              !formState.isValid ||
+              !amountValue ||
+              amountValue === '0' ||
+              !canCostake
           )}
         >
           <T id="increase" />

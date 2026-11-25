@@ -3,7 +3,7 @@ import React, { memo, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 
 import Money from 'app/atoms/Money';
-import { useSelector } from 'app/store';
+import { useExchangeRates } from 'app/hooks/use-exchange-rates.query';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { useBalance } from 'lib/balances';
 import { useGasTokenMetadata } from 'lib/metadata';
@@ -18,7 +18,7 @@ interface Props {
 
 export const BalanceGas = memo<Props>(({ totalBalanceInDollar, currency, accountPkh }) => {
   const { decimals } = useGasTokenMetadata();
-  const tezosToUsdRate = useSelector(state => state.currency.usdToTokenRates.data[MAV_TOKEN_SLUG]);
+  const tezosToUsdRate = useExchangeRates().usdToTokenRates[MAV_TOKEN_SLUG];
   const { value: gasBalance } = useBalance(MAV_TOKEN_SLUG, accountPkh);
 
   const volume = useMemo(() => {

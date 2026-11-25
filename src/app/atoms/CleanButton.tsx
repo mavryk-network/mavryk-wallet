@@ -42,7 +42,7 @@ const CleanButton: FC<CleanButtonProps> = ({
       className={classNames(
         'absolute',
         'rounded-full',
-        'bg-gray-910',
+        'bg-gray-50',
         'p-px',
         'flex items-center',
         'text-xs text-white',

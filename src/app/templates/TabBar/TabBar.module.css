@@ -69,11 +69,6 @@ nav.tabsNav {
     box-shadow: none;
   }
 
-  a:focus-visible {
-    text-decoration: underline;
-    text-decoration-color: #5f58ff;
-  }
-
   a:hover,
   a.active {
     color: #fff;

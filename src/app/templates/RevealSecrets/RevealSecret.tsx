@@ -27,9 +27,10 @@ type RevealSecretProps = {
 };
 
 const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
-  const { revealPrivateKey, revealMnemonic } = useTempleClient();
+  const { revealPrivateKey, revealMnemonic, walletsSpecs } = useTempleClient();
   const account = useAccount();
   const { popup } = useAppEnv();
+  const walletId = account.type === TempleAccountType.HD ? account.walletId : Object.keys(walletsSpecs)[0];
 
   const { register, handleSubmit, errors, setError, clearError, formState, watch } = useForm<FormData>();
   const submitting = formState.isSubmitting;
@@ -69,7 +70,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
             break;
 
           case 'seed-phrase':
-            scrt = await revealMnemonic(password);
+            scrt = await revealMnemonic(walletId, password);
             break;
         }
 
@@ -84,6 +85,7 @@ const RevealSecret: FC<RevealSecretProps> = ({ reveal }) => {
       }
     },
     [
+      walletId,
       reveal,
       submitting,
       clearError,

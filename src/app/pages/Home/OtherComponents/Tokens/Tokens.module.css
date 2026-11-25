@@ -48,8 +48,6 @@
   overflow: hidden;
   width: 100%;
   max-width: 100%;
-
-  @apply bg-primary-bg;
 }
 
 .searchWrapper.closed {

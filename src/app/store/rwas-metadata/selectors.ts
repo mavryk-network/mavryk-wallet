@@ -1,7 +1,13 @@
-import { useSelector } from '../root-state.selector';
+import { useMemo } from 'react';
 
-export const useAllRwasMetadataSelector = () => useSelector(({ rwasMetadata }) => rwasMetadata.records);
+import { useMetadataFetching } from 'lib/metadata/use-metadata-query';
+import { useOwnedMetadata } from 'lib/metadata/use-owned-metadata';
 
-export const useRwaMetadataSelector = (slug: string) => useSelector(state => state.rwasMetadata.records.get(slug));
+export const useRwaMetadataSelector = (slug: string) => useOwnedMetadata('rwas')[slug];
 
-export const useRwasMetadataLoadingSelector = () => useSelector(({ rwasMetadata }) => rwasMetadata.isLoading);
+export const useAllRwasMetadataSelector = () => {
+  const records = useOwnedMetadata('rwas');
+  return useMemo(() => new Map(Object.entries(records)), [records]);
+};
+
+export const useRwasMetadataLoadingSelector = () => useMetadataFetching('rwas');

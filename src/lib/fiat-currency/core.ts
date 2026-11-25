@@ -1,19 +1,19 @@
 import { useMemo } from 'react';
 
 import { isDefined } from '@rnw-community/shared';
-import axios from 'axios';
 import { BigNumber } from 'bignumber.js';
 
-import { useSelector } from 'app/store/root-state.selector';
+import { useExchangeRates } from 'app/hooks/use-exchange-rates.query';
+import { COINGECKO_MVRK_ID, fetchCoingeckoRates } from 'lib/apis/temple';
 import { useStorage } from 'lib/temple/front';
 import { isTruthy } from 'lib/utils';
 
 import { FIAT_CURRENCIES } from './consts';
-import type { FiatCurrencyOption, CoingeckoFiatInterface } from './types';
+import type { FiatCurrencyOption } from './types';
 
 const FIAT_CURRENCY_STORAGE_KEY = 'fiat_currency';
 
-export const useUsdToTokenRates = () => useSelector(state => state.currency.usdToTokenRates.data);
+export const useUsdToTokenRates = () => useExchangeRates().usdToTokenRates;
 
 function useAssetUSDPrice(slug: string) {
   const usdToTokenRates = useUsdToTokenRates();
@@ -52,7 +52,7 @@ export function useAssetFiatCurrencyPrice(slug: string): BigNumber {
 }
 
 export const useFiatCurrency = () => {
-  const { data } = useSelector(state => state.currency.fiatToTezosRates);
+  const { fiatToTezosRates: data } = useExchangeRates();
 
   const [selectedFiatCurrency, setSelectedFiatCurrency] = useStorage<FiatCurrencyOption>(
     FIAT_CURRENCY_STORAGE_KEY,
@@ -66,20 +66,8 @@ export const useFiatCurrency = () => {
   };
 };
 
-const coingeckoApi = axios.create({ baseURL: 'https://api.coingecko.com/api/v3/' });
-
 export const fetchFiatToTezosRates = () =>
-  coingeckoApi
-    .get<CoingeckoFiatInterface>(
-      `/simple/price?ids=tezos&vs_currencies=${FIAT_CURRENCIES.map(({ apiLabel }) => apiLabel).join(',')}`
-    )
-    .then(({ data }) => {
-      const mappedRates: Record<string, number> = {};
-      const tezosData = Object.keys(data.tezos);
-
-      for (const quote of tezosData) {
-        mappedRates[quote] = data.tezos[quote];
-      }
-
-      return mappedRates;
-    });
+  fetchCoingeckoRates(
+    COINGECKO_MVRK_ID,
+    FIAT_CURRENCIES.map(({ apiLabel }) => apiLabel)
+  );

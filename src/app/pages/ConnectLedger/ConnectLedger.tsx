@@ -1,39 +1,39 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { DerivationType } from '@mavrykdynamics/taquito-ledger-signer';
+import { DerivationType } from '@mavrykdynamics/webmavryk-ledger-signer';
 import clsx from 'clsx';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Alert, FormField, FormSubmitButton } from 'app/atoms';
 import ConfirmLedgerOverlay from 'app/atoms/ConfirmLedgerOverlay';
-import { DEFAULT_DERIVATION_PATH } from 'app/defaults';
+import { DEFAULT_LEDGER_DERIVATION_PATH } from 'app/defaults';
 import { useAppEnv } from 'app/env';
+import PageLayout from 'app/layouts/PageLayout';
 import { DerivationTypeFieldSelect } from 'app/templates/DerivationTypeFieldSelect';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { getLedgerTransportType } from 'lib/ledger/helpers';
-import {
-  useAllAccounts,
-  useChainId,
-  useSetAccountPkh,
-  useTempleClient,
-  validateDerivationPath
-} from 'lib/temple/front';
+import { useAllAccounts, useSetAccountPkh, useTempleClient } from 'lib/temple/front';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
-import { navigate } from 'lib/woozie';
+import { navigate, useLocation } from 'lib/woozie';
 
+import {
+  LedgerDerivationPathType,
+  buildLedgerAccountPayload,
+  resolveLedgerDerivationPath,
+  validateLedgerDerivationPath
+} from './connect-ledger.helpers';
 import { ConnectLedgerSelectors } from './ConnectLedger.selectors';
 
 export type FormData = {
   name: string;
   customDerivationPath: string;
   derivationType?: DerivationType;
-  derivationPath?: string;
-  accountNumber?: number;
+  derivationPath: LedgerDerivationPathType;
 };
 
-const DERIVATION_PATHS = [
+const DERIVATION_PATHS: { type: LedgerDerivationPathType; name: string }[] = [
   {
     type: 'default',
     name: t('defaultAccount')
@@ -66,18 +66,22 @@ const DERIVATION_TYPES = [
 const LEDGER_USB_VENDOR_ID = '0x2c97';
 
 const ConnectLedger: FC = () => {
-  const { createLedgerAccount } = useTempleClient();
+  const { createLedgerAccount, getLedgerTezosPk } = useTempleClient();
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('ConnectLedger');
   const { popup } = useAppEnv();
-  const chainId = useChainId();
+  const { pathname } = useLocation();
 
   const allLedgers = useMemo(() => allAccounts.filter(acc => acc.type === TempleAccountType.Ledger), [allAccounts]);
+  const isStandalonePage = pathname === '/connect-ledger';
 
   const defaultName = useMemo(() => t('defaultLedgerName', String(allLedgers.length + 1)), [allLedgers.length]);
 
   const prevAccLengthRef = useRef(allAccounts.length);
+
+  // Select the newly added Ledger account and redirect after the account list changes.
+  // No cleanup is needed because this only syncs local selection and navigation state.
   useEffect(() => {
     const accLength = allAccounts.length;
     if (prevAccLengthRef.current < accLength) {
@@ -90,8 +94,7 @@ const ConnectLedger: FC = () => {
   const { control, register, handleSubmit, errors, formState, watch } = useForm<FormData>({
     defaultValues: {
       name: defaultName,
-      customDerivationPath: DEFAULT_DERIVATION_PATH,
-      accountNumber: 1,
+      customDerivationPath: DEFAULT_LEDGER_DERIVATION_PATH,
       derivationType: DerivationType.ED25519,
       derivationPath: DERIVATION_PATHS[0].type
     }
@@ -102,7 +105,7 @@ const ConnectLedger: FC = () => {
   const [error, setError] = useState<ReactNode>(null);
 
   const onSubmit = useCallback(
-    async ({ name, accountNumber, customDerivationPath, derivationType }: FormData) => {
+    async ({ name, customDerivationPath, derivationType, derivationPath: derivationPathType }: FormData) => {
       if (submitting) return;
 
       setError(null);
@@ -133,14 +136,21 @@ const ConnectLedger: FC = () => {
         // Human delay.
         await delay();
         setError(err.message);
+        return;
       }
 
       try {
+        const derivationPath = resolveLedgerDerivationPath(derivationPathType, customDerivationPath);
+        const publicKey = await getLedgerTezosPk(derivationType, derivationPath);
+
         await createLedgerAccount(
-          name,
-          chainId!,
-          derivationType,
-          customDerivationPath ?? (accountNumber && `m/44'/1729'/${accountNumber - 1}'/0'`)
+          buildLedgerAccountPayload({
+            name,
+            defaultName,
+            publicKey,
+            derivationType,
+            derivationPath
+          })
         );
 
         formAnalytics.trackSubmitSuccess();
@@ -154,21 +164,25 @@ const ConnectLedger: FC = () => {
         setError(err.message);
       }
     },
-    [submitting, formAnalytics, createLedgerAccount, chainId]
+    [submitting, formAnalytics, getLedgerTezosPk, createLedgerAccount, defaultName]
   );
 
-  return (
-    <div className="relative w-full h-full flex-1 flex flex-col">
-      <div className={clsx('w-full h-full flex-1 flex flex-col', popup && 'max-w-sm mx-auto')}>
-        <form
-          className={clsx('flex-grow flex flex-col justify-between', popup && 'pb-8')}
-          onSubmit={handleSubmit(onSubmit)}
-        >
+  const content = (
+    <section className="relative h-full flex flex-1 flex-col">
+      <div
+        className={clsx(
+          'w-full mx-auto h-full flex flex-1 flex-col justify-start',
+          popup ? 'max-w-sm pb-8' : 'max-w-screen-xxs'
+        )}
+      >
+        <form className="flex h-full flex-1 flex-col justify-between" onSubmit={handleSubmit(onSubmit)}>
           <div>
             {error && <Alert type="error" title={t('error')} autoFocus description={error} className="mb-6" />}
-            <div className="text-sm text-secondary-white mb-4">
+
+            <p className="mb-4 text-sm text-cleanWhite leading-none">
               <T id="connectLedgerDesc" />
-            </div>
+            </p>
+
             <FormField
               ref={register({
                 pattern: {
@@ -177,77 +191,76 @@ const ConnectLedger: FC = () => {
                 }
               })}
               label={t('accountName')}
-              // labelDescription={t('ledgerNameInputDescription')}
+              labelDescription={t('ledgerNameInputDescription')}
               id="create-ledger-name"
               type="text"
               name="name"
               placeholder={defaultName}
               errorCaption={errors.name?.message}
-              containerClassName="mb-2"
+              containerClassName="mb-4"
               testID={ConnectLedgerSelectors.accountNameInput}
             />
 
-            <div className="flex flex-col">
-              <Controller
-                as={DerivationTypeFieldSelect}
-                control={control}
-                name="derivationType"
-                options={DERIVATION_TYPES}
-                i18nKey={t('derivationType')}
-              />
-            </div>
+            <Controller
+              as={DerivationTypeFieldSelect}
+              control={control}
+              name="derivationType"
+              options={DERIVATION_TYPES}
+              i18nKey={t('derivationType')}
+            />
 
-            <div className="flex flex-col">
-              <Controller
-                as={DerivationTypeFieldSelect}
-                control={control}
-                name="derivationPath"
-                options={DERIVATION_PATHS}
-                i18nKey={t('derivationPath')}
-              />
-            </div>
-
-            {derivationPathType === 'another' && (
-              <FormField
-                ref={register({
-                  min: { value: 1, message: t('positiveIntMessage') },
-                  required: t('required')
-                })}
-                min={0}
-                type="number"
-                name="accountNumber"
-                id="importacc-acc-number"
-                label={t('accountNumber')}
-                placeholder="1"
-                errorCaption={errors.accountNumber?.message}
-              />
-            )}
+            <Controller
+              as={DerivationTypeFieldSelect}
+              control={control}
+              name="derivationPath"
+              options={DERIVATION_PATHS}
+              i18nKey={t('derivationPath')}
+            />
 
             {derivationPathType === 'custom' && (
               <FormField
                 ref={register({
                   required: t('required'),
-                  validate: validateDerivationPath
+                  validate: validateLedgerDerivationPath
                 })}
                 name="customDerivationPath"
                 id="importacc-cdp"
                 label={t('customDerivationPath')}
                 placeholder={t('derivationPathExample2')}
                 errorCaption={errors.customDerivationPath?.message}
-                containerClassName="mb-6"
+                containerClassName="mb-4"
                 testID={ConnectLedgerSelectors.customDerivationPathInput}
               />
             )}
           </div>
 
-          <FormSubmitButton loading={submitting} testID={ConnectLedgerSelectors.addLedgerAccountButton}>
+          <FormSubmitButton
+            className="capitalize"
+            loading={submitting}
+            testID={ConnectLedgerSelectors.addLedgerAccountButton}
+          >
             <T id="connectLedger" />
           </FormSubmitButton>
         </form>
       </div>
 
       <ConfirmLedgerOverlay displayed={submitting} />
-    </div>
+    </section>
+  );
+
+  return isStandalonePage ? (
+    <PageLayout
+      pageTitle={
+        <span className="capitalize">
+          <T id="connectLedger" />
+        </span>
+      }
+      isTopbarVisible={false}
+    >
+      {content}
+    </PageLayout>
+  ) : (
+    content
   );
 };
 

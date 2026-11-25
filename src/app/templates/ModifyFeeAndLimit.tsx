@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Estimate } from '@mavrykdynamics/taquito';
+import { Estimate } from '@mavrykdynamics/webmavryk';
 import { Modifier } from '@popperjs/core';
 import BigNumber from 'bignumber.js';
 import classNames from 'clsx';
@@ -198,7 +198,7 @@ export const ModifyFeeAndLimitComponent: FC<ModifyFeeAndLimitProps> = ({
                         poperModifiers={poperModifiers}
                         name={name}
                         id={id}
-                        defaultOption={gasOptions[1].amount}
+                        defaultOption={gasOptions[0].amount}
                         valueToShow={value.toFixed()}
                         onChangeValueToShow={val => {
                           onChange?.(tzToMumav(val ?? defaultGasFee).toNumber());

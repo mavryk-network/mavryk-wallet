@@ -1,4 +1,4 @@
-import { ContractMethod, ContractProvider, MavrykToolkit, TransferParams, Wallet } from '@mavrykdynamics/taquito';
+import { ContractMethod, ContractProvider, MavrykToolkit, TransferParams, Wallet } from '@mavrykdynamics/webmavryk';
 import { BigNumber } from 'bignumber.js';
 
 import { Route3Token } from 'lib/apis/route3/fetch-route3-tokens';

@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Subscription, TezosToolkit } from '@mavrykdynamics/taquito';
+import { Subscription, MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { useQueryClient } from '@tanstack/react-query';
 import constate from 'constate';
 import { useSWRConfig } from 'swr';
 
+import { refreshBalances } from 'lib/balances/balance-query';
 import { getBalanceSWRKey } from 'lib/balances/utils';
+import { useMetadataScope } from 'lib/metadata/use-metadata-scope';
 import { confirmOperation } from 'lib/temple/operation';
 import { useUpdatableRef } from 'lib/ui/hooks';
 
@@ -16,13 +19,16 @@ function useNewBlockTriggers() {
   const { mutate } = useSWRConfig();
   const tezos = useTezos();
   const allAccounts = useRelevantAccounts();
+  const queryClient = useQueryClient();
+  const scope = useMetadataScope();
 
   const triggerNewBlock = useCallback(() => {
     for (const acc of allAccounts) {
+      void refreshBalances(queryClient, { ...scope, account: acc.publicKeyHash });
       mutate(getBalanceSWRKey(tezos, 'mav', acc.publicKeyHash));
       mutate(['delegate', tezos.checksum, acc.publicKeyHash]);
     }
-  }, [allAccounts, mutate, tezos]);
+  }, [allAccounts, mutate, tezos, queryClient, scope]);
 
   useOnBlock(triggerNewBlock);
 
@@ -41,22 +47,66 @@ function useNewBlockTriggers() {
   };
 }
 
-export function useOnBlock(callback: (blockHash: string) => void, altTezos?: TezosToolkit, pause = false) {
+export function useOnBlock(callback: (blockHash: string) => void, altTezos?: MavrykToolkit, pause = false) {
   const currentTezos = useTezos();
   const blockHashRef = useRef<string>();
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const callbackRef = useUpdatableRef(callback);
 
   const tezos = altTezos || currentTezos;
 
+  // Keep a head-block subscription alive for the active RPC.
+  // Cleanup closes the current subscription and cancels pending retries on network changes or unmount.
   useEffect(() => {
-    if (pause) return;
+    if (pause) {
+      setIsSubscribed(false);
+      return;
+    }
 
-    let sub: Subscription<string>;
+    let sub: Subscription<string> | null = null;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
     spawnSub();
-    return () => sub.close();
+    return () => {
+      cancelled = true;
+
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
+
+      sub?.close();
+    };
+
+    function scheduleRespawn() {
+      if (cancelled || retryTimeout) {
+        return;
+      }
+
+      retryTimeout = setTimeout(() => {
+        retryTimeout = null;
+        spawnSub();
+      }, 1000);
+    }
 
     function spawnSub() {
-      sub = tezos.stream.subscribe('head');
+      if (cancelled) {
+        return;
+      }
+
+      try {
+        sub = tezos.stream.subscribe('head');
+        if (!cancelled) {
+          setIsSubscribed(true);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
+        scheduleRespawn();
+        return;
+      }
 
       sub.on('data', hash => {
         if (blockHashRef.current && blockHashRef.current !== hash) {
@@ -66,9 +116,14 @@ export function useOnBlock(callback: (blockHash: string) => void, altTezos?: Tez
       });
       sub.on('error', err => {
         console.error(err);
-        sub.close();
-        spawnSub();
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
+        sub?.close();
+        scheduleRespawn();
       });
     }
-  }, [pause, tezos]);
+  }, [callbackRef, pause, tezos]);
+
+  return isSubscribed;
 }

@@ -38,9 +38,9 @@ git clone https://github.com/mavryk-network/mavryk-wallet && cd mavryk-wallet
 yarn
 ```
 
-### 3) Create `.env` file
+### 3) Create a `.env.local` file and copy the contents of `.env.dist` into it
 
-Make copy of `.env.dist` and do changes if needed.
+> You can still build the extension without filling in all the environment variables, but it won’t work properly.
 
 ### 4) Build
 
@@ -81,10 +81,12 @@ It's recommended to use Chrome for developing.
 
 ### Debugging
 
-To enable Redux DevTools during development, specify some port in the `.env` file before running `yarn start` like so:
+To enable Redux DevTools during development, opt in from the `.env` file before running `yarn start`:
 
 ```toml
-REDUX_DEVTOOLS_PORT=8000
+ENABLE_REDUX_DEVTOOLS=true
+# Optional. Defaults to 8000.
+# REDUX_DEVTOOLS_PORT=8000
 ```
 
 Install [`@redux-devtools/cli`](https://github.com/reduxjs/redux-devtools) globally:
@@ -93,7 +95,7 @@ Install [`@redux-devtools/cli`](https://github.com/reduxjs/redux-devtools) globa
 yarn global add @redux-devtools/cli
 ```
 
-Then open an explorer at previously specified port:
+Then open an explorer at the configured port:
 
 ```bash
 redux-devtools --open --port=8000
@@ -102,3 +104,8 @@ redux-devtools --open --port=8000
 > Other UI options like `--open=browser` are available.
 
 Go to settings to specify port one more time.
+
+## Ledger Runtime Notes
+
+- Ledger transport is reused as a singleton across operations instead of reopening the device per signer instance.
+- Passive state changes such as network switching do not trigger Ledger signing prompts. Ledger interaction is limited to explicit Ledger actions like connect, sign, and send.

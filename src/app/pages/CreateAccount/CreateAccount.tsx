@@ -10,6 +10,7 @@ import PageLayout from 'app/layouts/PageLayout';
 import { useFormAnalytics } from 'lib/analytics';
 import { T, t } from 'lib/i18n';
 import { useTempleClient, useAllAccounts, useSetAccountPkh } from 'lib/temple/front';
+import { useAccount } from 'lib/temple/front/ready';
 import { TempleAccountType } from 'lib/temple/types';
 import { delay } from 'lib/utils';
 import { navigate } from 'lib/woozie';
@@ -25,12 +26,19 @@ type FormData = {
 const SUBMIT_ERROR_TYPE = 'submit-error';
 
 const CreateAccount: FC = () => {
-  const { createAccount } = useTempleClient();
+  const { createAccount, walletsSpecs } = useTempleClient();
   const { popup } = useAppEnv();
+  const account = useAccount();
+  const walletId = account.type === TempleAccountType.HD ? account.walletId : undefined;
 
   const allAccounts = useAllAccounts();
   const setAccountPkh = useSetAccountPkh();
   const formAnalytics = useFormAnalytics('CreateAccount');
+
+  const currentWalletId = useMemo(
+    () => Object.keys(walletsSpecs).find(id => id === walletId) ?? Object.keys(walletsSpecs)[0],
+    [walletId, walletsSpecs]
+  );
 
   const allHDOrImported = useMemo(
     () => allAccounts.filter(acc => [TempleAccountType.HD, TempleAccountType.Imported].includes(acc.type)),
@@ -70,7 +78,7 @@ const CreateAccount: FC = () => {
 
       formAnalytics.trackSubmit();
       try {
-        await createAccount(name);
+        await createAccount(currentWalletId, name);
 
         formAnalytics.trackSubmitSuccess();
       } catch (err: any) {
@@ -83,7 +91,7 @@ const CreateAccount: FC = () => {
         setError('name', SUBMIT_ERROR_TYPE, err.message);
       }
     },
-    [submitting, clearError, setError, createAccount, formAnalytics]
+    [submitting, clearError, formAnalytics, createAccount, currentWalletId, setError]
   );
 
   return (

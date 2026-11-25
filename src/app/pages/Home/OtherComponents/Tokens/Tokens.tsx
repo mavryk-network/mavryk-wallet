@@ -1,14 +1,19 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ChainIds } from '@mavrykdynamics/taquito';
+import { ChainIds } from '@mavrykdynamics/webmavryk';
 import clsx from 'clsx';
 
-import { SyncSpinner } from 'app/atoms';
+import { Alert, SyncSpinner } from 'app/atoms';
+import { AssetsLoadErrorAlert } from 'app/atoms/AssetsLoadErrorAlert';
 import { useAppEnv } from 'app/env';
 import { useLoadPartnersPromo } from 'app/hooks/use-load-partners-promo';
 import { useTokensListingLogic } from 'app/hooks/use-tokens-listing-logic';
 import { ManageAssetsButton } from 'app/pages/ManageAssets/ManageAssetsButton';
-import { useAreAssetsLoading, useMainnetTokensScamlistSelector } from 'app/store/assets/selectors';
+import {
+  useAreAssetsLoading,
+  useHasAssetsLoadFailed,
+  useMainnetTokensScamlistSelector
+} from 'app/store/assets/selectors';
 import {
   SearchExplorerClosed,
   SearchExplorerOpened,
@@ -26,6 +31,7 @@ import { SortOptions, useSortededAssetsSlugs } from 'lib/assets/use-sorted';
 import { useCurrentAccountBalances } from 'lib/balances';
 import { T } from 'lib/i18n';
 import { useAccount, useChainId } from 'lib/temple/front';
+import { TempleAccountType } from 'lib/temple/types';
 import { useLocalStorage } from 'lib/ui/local-storage';
 import { navigate } from 'lib/woozie';
 
@@ -44,9 +50,10 @@ export const TokensTab: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const chainId = useChainId(true)!;
   const balances = useCurrentAccountBalances();
-  const { publicKeyHash } = useAccount();
+  const { publicKeyHash, type } = useAccount();
 
   const isSyncing = useAreAssetsLoading('tokens');
+  const hasLoadFailed = useHasAssetsLoadFailed('tokens');
   const { popup } = useAppEnv();
 
   const slugs = useEnabledAccountTokensSlugs(true);
@@ -122,7 +129,7 @@ export const TokensTab: FC = () => {
         key={assetSlug}
         publicKeyHash={publicKeyHash}
         assetSlug={assetSlug}
-        scam={mainnetTokensScamSlugsRecord[assetSlug]}
+        scam={mainnetTokensScamSlugsRecord?.[assetSlug]}
         active={activeAssetSlug ? assetSlug === activeAssetSlug : false}
         onClick={handleAssetOpen}
       />
@@ -136,7 +143,15 @@ export const TokensTab: FC = () => {
 
     return tokensJsx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedSlugs, activeAssetSlug, balances, sortOption]);
+  }, [
+    sortedSlugs,
+    activeAssetSlug,
+    balances,
+    sortOption,
+    mainnetTokensScamSlugsRecord,
+    publicKeyHash,
+    handleAssetOpen
+  ]);
 
   useLoadPartnersPromo(OptimalPromoVariantEnum.Token);
 
@@ -178,6 +193,9 @@ export const TokensTab: FC = () => {
 
   return (
     <div className={clsx('w-full mx-auto relative', popup ? 'max-w-sm' : 'max-w-screen-xxs')}>
+      {mainnetTokensScamSlugsRecord === null && (
+        <Alert type="warning" description={<T id="assetSecurityUnavailable" />} />
+      )}
       <div className={clsx('mt-3 w-full flex justify-end')}>
         <SearchExplorer>
           <>
@@ -221,11 +239,14 @@ export const TokensTab: FC = () => {
           </>
         </SearchExplorer>
       </div>
-
       {/* {isEnabledAdsBanner && <AcceptAdsBanner />} */}
-      <div className={clsx('mb-4', popup && 'px-4')}>
-        <StakeTezosTag />
-      </div>
+      {type !== TempleAccountType.WatchOnly && (
+        <div className={clsx('mb-4', popup && 'px-4')}>
+          <StakeTezosTag />
+        </div>
+      )}
+
+      {hasLoadFailed && !isSyncing && <AssetsLoadErrorAlert className={clsx('mb-4', popup && 'mx-4')} />}
 
       {sortedSlugs.length === 0 ? (
         <div className="pt-20 pb-8 flex flex-col items-center justify-center text-white">
@@ -246,7 +267,6 @@ export const TokensTab: FC = () => {
           />
         </div>
       )}
-
       {isSyncing && <SyncSpinner className="mt-4" />}
     </div>
   );

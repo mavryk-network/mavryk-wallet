@@ -1,13 +1,17 @@
-/*
-  Package `three` must also be installed - it is a peer dep for `@google/model-viewer`
-*/
+import React, { FC, useEffect, useRef, useState } from 'react';
 
-import React, { FC, useEffect, useRef } from 'react';
-
-import '@google/model-viewer';
 import ModelViewerElementBase from '@google/model-viewer/lib/model-viewer-base';
 import { emptyFn } from '@rnw-community/shared';
 import clsx from 'clsx';
+
+function isWebGLSupported() {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+  } catch {
+    return false;
+  }
+}
 
 declare global {
   namespace JSX {
@@ -29,6 +33,13 @@ interface Props {
 
 export const Model3DViewer: FC<Props> = ({ uri, alt, className, onError = emptyFn }) => {
   const modelViewerRef = useRef<ModelViewerElementBase>(null);
+  const [canRender, setCanRender] = useState(false);
+
+  useEffect(() => {
+    if (isWebGLSupported()) {
+      import('@google/model-viewer').then(() => setCanRender(true));
+    }
+  }, []);
 
   useEffect(() => {
     const modelViewer = modelViewerRef.current;
@@ -42,6 +53,8 @@ export const Model3DViewer: FC<Props> = ({ uri, alt, className, onError = emptyF
     return undefined;
   }, [onError]);
 
+  if (!canRender) return null;
+
   return (
     <model-viewer
       ref={modelViewerRef}
@@ -53,6 +66,6 @@ export const Model3DViewer: FC<Props> = ({ uri, alt, className, onError = emptyF
       shadow-intensity="1"
       // @ts-expect-error
       class={clsx('w-full h-full', className)}
-    ></model-viewer>
+    />
   );
 };

@@ -1,0 +1,327 @@
+import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axios, { type AxiosRequestConfig } from 'axios';
+
+import { AuthRefreshResponseSchema } from './auth.schema';
+import { isTerminalMavrykAuthError } from './errors';
+import { isJwtExpiringSoon } from './jwt';
+import {
+  clearAllAuthTokensFromStorage,
+  clearAuthTokensFromStorage,
+  getAuthTokensFromStorage,
+  getCurrentAuthStorageContext,
+  setAuthTokensToStorage,
+  waitForStoredAccessToken,
+  DEFAULT_NETWORK_ID,
+  type MavrykAuthStorageContext,
+  type ResolvedMavrykAuthStorageContext
+} from './storage';
+import { getMavrykApiUrl, MAINNET_MAVRYK_API_URL } from './urls';
+
+export { getMavrykApiUrl, MAVRYK_API_URLS } from './urls';
+
+const MAVRYK_API_BASE_PATHNAME = '/api/v1';
+const AUTH_ENDPOINTS_WITHOUT_REFRESH = ['/auth/challenge', '/auth/verify', '/auth/refresh', '/auth/logout'] as const;
+const AUTH_PATHNAMES_WITHOUT_REFRESH = new Set<string>(
+  AUTH_ENDPOINTS_WITHOUT_REFRESH.reduce<string[]>((pathnames, endpoint) => {
+    pathnames.push(endpoint, `${MAVRYK_API_BASE_PATHNAME}${endpoint}`);
+    return pathnames;
+  }, [])
+);
+const ACCESS_TOKEN_REFRESH_THRESHOLD_MS = 60_000;
+/** How long a token-less read that raced the first sign-in waits for it (challenge + signature + verify). */
+const PENDING_SIGN_IN_WAIT_TIMEOUT_MS = 10_000;
+export type MavrykApiRequestConfig = AxiosRequestConfig & {
+  _authContext?: ResolvedMavrykAuthStorageContext;
+  _retry?: boolean;
+  skipAuthRefresh?: boolean;
+  /**
+   * Unauthenticated public read (Watch only routes) against the given API network. Skips auth-context
+   * resolution, never attaches or refreshes tokens, and never clears stored sessions on failure.
+   */
+  publicRead?: { networkId: string };
+};
+
+export const getMavrykApiBaseUrl = (networkId?: string | null) =>
+  new URL(MAVRYK_API_BASE_PATHNAME, getMavrykApiUrl(networkId)).href;
+
+export const mavrykApi = axios.create({
+  baseURL: getMavrykApiBaseUrl(DEFAULT_NETWORK_ID),
+  adapter: axiosFetchAdapter
+});
+
+type FreshAuthTokens = {
+  accessToken: string;
+  refreshToken?: string | null;
+};
+
+type RefreshStoredAuthTokensOptions = {
+  context?: MavrykAuthStorageContext;
+  forceRefresh?: boolean;
+  refreshToken?: string;
+  staleAccessToken?: string | null;
+};
+
+type WebLockManager = {
+  request<T>(name: string, callback: () => Promise<T>): Promise<T>;
+};
+
+const refreshAuthTokensPromises = new Map<string, Promise<FreshAuthTokens>>();
+
+const getRequestPathname = (url?: string) => {
+  if (!url) return undefined;
+
+  try {
+    return new URL(url, `${MAINNET_MAVRYK_API_URL}${MAVRYK_API_BASE_PATHNAME}/`).pathname;
+  } catch {
+    return undefined;
+  }
+};
+
+const isAuthRefreshCandidate = (url?: string) => {
+  const pathname = getRequestPathname(url);
+
+  return !pathname || !AUTH_PATHNAMES_WITHOUT_REFRESH.has(pathname);
+};
+
+/** Whether `/auth/refresh` itself answered with an auth rejection (as opposed to never being sent or failing). */
+const isRejectedRefreshError = (error: unknown) =>
+  axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403);
+
+const isMavrykApiRequestConfig = (config: unknown): config is MavrykApiRequestConfig =>
+  Boolean(config && typeof config === 'object');
+
+const getAuthRefreshKey = (context: ResolvedMavrykAuthStorageContext) =>
+  [context.walletAddress ?? '', context.networkId].join('::');
+
+const getWebLocks = () =>
+  typeof navigator === 'undefined' ? undefined : (navigator as unknown as { locks?: WebLockManager }).locks;
+
+const withAuthRefreshLock = <T>(refreshKey: string, task: () => Promise<T>) => {
+  const locks = getWebLocks();
+
+  return locks ? locks.request(`mavryk-api-auth-refresh:${refreshKey}`, task) : task();
+};
+
+function getFreshStoredAuthTokens(
+  tokens: Awaited<ReturnType<typeof getAuthTokensFromStorage>>,
+  options: RefreshStoredAuthTokensOptions
+): FreshAuthTokens | null {
+  if (!tokens.accessToken || isJwtExpiringSoon(tokens.accessToken, ACCESS_TOKEN_REFRESH_THRESHOLD_MS)) {
+    return null;
+  }
+
+  // `null` means the rejected request carried no token (e.g. it started before sign-in finished): a token stored
+  // since then was never rejected and is used as is. `undefined` (no stale token given) always forces a refresh.
+  const isStoredTokenRejected =
+    options.staleAccessToken === undefined || tokens.accessToken === options.staleAccessToken;
+
+  if (options.forceRefresh && isStoredTokenRejected) {
+    return null;
+  }
+
+  return {
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken
+  };
+}
+
+async function refreshStoredAuthTokensOnce(
+  authContext: ResolvedMavrykAuthStorageContext,
+  options: RefreshStoredAuthTokensOptions
+) {
+  const storedTokens = await getAuthTokensFromStorage(authContext);
+  const freshStoredTokens = getFreshStoredAuthTokens(storedTokens, options);
+
+  if (freshStoredTokens) {
+    return freshStoredTokens;
+  }
+
+  const refreshToken = options.refreshToken ?? storedTokens.refreshToken;
+  if (!refreshToken) throw new Error('No refresh token in storage');
+
+  const refreshRequestConfig: MavrykApiRequestConfig = {
+    url: '/auth/refresh',
+    method: 'POST',
+    data: { refreshToken },
+    _authContext: authContext,
+    skipAuthRefresh: true
+  };
+
+  try {
+    const { data } = await mavrykApi.request(refreshRequestConfig);
+    const parsed = AuthRefreshResponseSchema.parse(data);
+
+    await setAuthTokensToStorage(parsed, authContext);
+
+    return parsed;
+  } catch (error) {
+    if (isTerminalMavrykAuthError(error)) {
+      await clearAllAuthTokensFromStorage(authContext);
+    }
+
+    throw error;
+  }
+}
+
+export async function refreshStoredAuthTokensOrThrow(options: RefreshStoredAuthTokensOptions = {}) {
+  const authContext = await getCurrentAuthStorageContext(options.context);
+  if (!authContext.walletAddress) throw new Error('No auth wallet address in storage');
+
+  const storedTokens = await getAuthTokensFromStorage(authContext);
+  const freshStoredTokens = getFreshStoredAuthTokens(storedTokens, options);
+
+  if (freshStoredTokens) {
+    return freshStoredTokens;
+  }
+
+  const refreshKey = getAuthRefreshKey(authContext);
+  const currentRefreshPromise = refreshAuthTokensPromises.get(refreshKey);
+
+  if (currentRefreshPromise) {
+    return currentRefreshPromise;
+  }
+
+  const refreshPromise = withAuthRefreshLock(refreshKey, () =>
+    refreshStoredAuthTokensOnce(authContext, options)
+  ).finally(() => {
+    refreshAuthTokensPromises.delete(refreshKey);
+  });
+
+  refreshAuthTokensPromises.set(refreshKey, refreshPromise);
+
+  return refreshPromise;
+}
+
+function getAuthorizationAccessToken(headers: AxiosRequestConfig['headers']) {
+  if (!headers || typeof headers !== 'object') {
+    return null;
+  }
+
+  const record = headers as Record<string, unknown>;
+  const authorization = record.Authorization ?? record.authorization;
+
+  return typeof authorization === 'string' && authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : null;
+}
+
+/**
+ * Whether a request resolves to the origin of the auth context's wallet API. An absolute or protocol-relative `url`
+ * overrides `baseURL` in axios, so the access token is attached only after checking the final origin.
+ */
+function isRequestToApiOrigin(config: AxiosRequestConfig, apiBaseUrl: string) {
+  try {
+    const expected = new URL(apiBaseUrl).origin;
+    const base = config.baseURL ?? apiBaseUrl;
+    return new URL(config.url ?? '', base.endsWith('/') ? base : `${base}/`).origin === expected;
+  } catch {
+    return false;
+  }
+}
+
+mavrykApi.interceptors.request.use(async rawConfig => {
+  const config: MavrykApiRequestConfig = rawConfig;
+
+  if (config.publicRead) {
+    if (!config.baseURL || config.baseURL === mavrykApi.defaults.baseURL) {
+      config.baseURL = getMavrykApiBaseUrl(config.publicRead.networkId);
+    }
+    if (config.headers) {
+      delete (config.headers as Record<string, unknown>).Authorization;
+      delete (config.headers as Record<string, unknown>).authorization;
+    }
+
+    return rawConfig;
+  }
+
+  const authContext = config._authContext ?? (await getCurrentAuthStorageContext());
+  const { accessToken } = await getAuthTokensFromStorage(authContext);
+  const instanceBaseUrl = mavrykApi.defaults.baseURL;
+  const networkBaseUrl = getMavrykApiBaseUrl(authContext.networkId);
+
+  if (!config.baseURL || config.baseURL === instanceBaseUrl) {
+    config.baseURL = networkBaseUrl;
+  }
+  config._authContext = authContext;
+
+  if (accessToken && isAuthRefreshCandidate(config.url) && isRequestToApiOrigin(config, networkBaseUrl)) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${accessToken}`
+    };
+  }
+
+  return rawConfig;
+});
+
+mavrykApi.interceptors.response.use(
+  response => response,
+  async error => {
+    const status = error.response?.status;
+    const requestConfig = isMavrykApiRequestConfig(error.config) ? error.config : undefined;
+
+    if (
+      status !== 401 ||
+      !requestConfig ||
+      requestConfig._retry ||
+      requestConfig.skipAuthRefresh ||
+      requestConfig.publicRead ||
+      !isAuthRefreshCandidate(requestConfig.url)
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (isTerminalMavrykAuthError(error)) {
+      await clearAllAuthTokensFromStorage(requestConfig._authContext);
+
+      return Promise.reject(error);
+    }
+
+    requestConfig._retry = true;
+    const staleAccessToken = getAuthorizationAccessToken(requestConfig.headers);
+
+    try {
+      const { accessToken } = await refreshStoredAuthTokensOrThrow({
+        context: requestConfig._authContext,
+        forceRefresh: true,
+        staleAccessToken
+      });
+
+      requestConfig.headers = {
+        ...requestConfig.headers,
+        Authorization: `Bearer ${accessToken}`
+      };
+
+      return mavrykApi.request(requestConfig);
+    } catch (refreshError) {
+      // Only a refresh the server rejected proves the stored session is dead. A missing refresh token or a
+      // transport failure must not clear storage: sign-in may be saving fresh tokens for this wallet right now.
+      if (isRejectedRefreshError(refreshError)) {
+        await clearAuthTokensFromStorage(requestConfig._authContext);
+
+        return Promise.reject(refreshError);
+      }
+
+      // A read sent before this wallet/network's first sign-in finished carries no token, and there is no refresh
+      // token to recover with yet (first visit to a network, or a just-selected account). Wait for the background
+      // sign-in to store one and retry once instead of failing the read; `_retry` keeps it to a single retry.
+      if (staleAccessToken === null && requestConfig._authContext) {
+        const signedInAccessToken = await waitForStoredAccessToken(
+          requestConfig._authContext,
+          PENDING_SIGN_IN_WAIT_TIMEOUT_MS
+        );
+
+        if (signedInAccessToken) {
+          requestConfig.headers = {
+            ...requestConfig.headers,
+            Authorization: `Bearer ${signedInAccessToken}`
+          };
+
+          return mavrykApi.request(requestConfig);
+        }
+      }
+
+      return Promise.reject(refreshError);
+    }
+  }
+);

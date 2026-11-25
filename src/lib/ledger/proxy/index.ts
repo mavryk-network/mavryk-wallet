@@ -15,7 +15,7 @@ export const createLedgerSignerProxy = async (
   ...[derivationPath, derivationType, publicKey, publicKeyHash]: CreatorArgumentsTuple
 ) => {
   const signer = new TempleLedgerSignerProxy({ derivationPath, derivationType, publicKey, publicKeyHash });
-  const cleanup = () => {};
+  const cleanup = () => signer.cleanup();
 
   return { signer, cleanup };
 };

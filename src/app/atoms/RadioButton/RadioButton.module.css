@@ -31,7 +31,7 @@
   width: 16px;
   height: 16px;
   border: 1px solid #666666;
-  background-color: #010101;
+  background-color: var(--bg);
   border-radius: 50%;
   display: inline-block;
   position: relative;

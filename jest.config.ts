@@ -7,9 +7,12 @@ const config = {
   coverageProvider: 'v8',
   moduleNameMapper: {
     '^app/(.*)$': '<rootDir>/src/app/$1',
-    '^lib/(.*)$': '<rootDir>/src/lib/$1'
+    '^lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^mavryk/(.*)$': '<rootDir>/src/mavryk/$1'
   },
   testEnvironment: 'jsdom',
+  // `.claude/` holds local agent-tooling tests (gitignored); some never exit and would hang the suite
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/.claude/'],
   transform: {
     '.+\\.ts$': 'ts-jest',
     '.+\\.tsx$': 'ts-jest'

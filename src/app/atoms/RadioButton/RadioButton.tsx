@@ -13,6 +13,7 @@ export type RadioButtonProps = {
   label?: string | ReactNode;
   disabled?: boolean;
   shouldUseChangeHandler?: boolean;
+  bg?: string;
 };
 
 export const RadioButton: FC<RadioButtonProps> = ({
@@ -23,10 +24,15 @@ export const RadioButton: FC<RadioButtonProps> = ({
   checked,
   label,
   disabled,
-  shouldUseChangeHandler = false
+  shouldUseChangeHandler = false,
+  bg = '#010101'
 }) => {
   return (
-    <label htmlFor={id} className={classNames(styles.radioLabel, disabled && styles.disabled)}>
+    <label
+      htmlFor={id}
+      className={classNames(styles.radioLabel, disabled && styles.disabled)}
+      style={{ '--bg': bg } as React.CSSProperties}
+    >
       <input
         className={styles.radioInput}
         type="radio"

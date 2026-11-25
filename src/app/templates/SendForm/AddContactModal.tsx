@@ -7,7 +7,7 @@ import HashShortView from 'app/atoms/HashShortView';
 import Identicon from 'app/atoms/Identicon';
 import { ButtonRounded } from 'app/molecules/ButtonRounded';
 import { T, t } from 'lib/i18n';
-import { useContactsActions } from 'lib/temple/front';
+import { getContactsUnavailableMessage, useContactsActions, useFilteredContacts } from 'lib/temple/front';
 import { delay } from 'lib/utils';
 
 import { PopupModalWithTitle } from '../PopupModalWithTitle';
@@ -19,6 +19,9 @@ type AddContactModalProps = {
 
 const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
   const { addContact } = useContactsActions();
+  const { availability, canMutateContacts } = useFilteredContacts();
+  const unavailableMessage =
+    availability.status === 'unavailable' ? getContactsUnavailableMessage(availability.reason) : null;
 
   const {
     register,
@@ -36,6 +39,10 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
       if (submitting) return;
 
       try {
+        if (unavailableMessage) {
+          throw new Error(unavailableMessage);
+        }
+
         clearError();
 
         await addContact({
@@ -50,10 +57,10 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
 
         await delay();
 
-        setError('address', 'submit-error', err.message);
+        setError('name', 'submit-error', err.message);
       }
     },
-    [submitting, clearError, addContact, address, resetForm, onClose, setError]
+    [submitting, unavailableMessage, clearError, addContact, address, resetForm, onClose, setError]
   );
 
   return (
@@ -99,6 +106,7 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
             containerClassName="mb-6"
             maxLength={50}
           />
+          {unavailableMessage && <p className="text-sm text-secondary-white text-center">{unavailableMessage}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-3 w-full">
@@ -106,7 +114,7 @@ const AddContactModal: FC<AddContactModalProps> = ({ address, onClose }) => {
             <T id="cancel" />
           </ButtonRounded>
 
-          <FormSubmitButton small loading={submitting}>
+          <FormSubmitButton small loading={submitting} disabled={!canMutateContacts}>
             <T id="addContact" />
           </FormSubmitButton>
         </div>

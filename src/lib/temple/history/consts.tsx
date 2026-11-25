@@ -1,3 +1,5 @@
+export const MVRK_HISTORY_TOKEN_ADDRESS = 'mv2ZZZZZZZZZZZZZZZZZZZZZZZZZZZDXMF2d';
+
 export const HistoryItemOpTypeTexts = {
   0: 'Sent',
   1: 'Received',
@@ -23,3 +25,5 @@ export const HistoryItemTypeLabels = {
   8: 'Interaction with',
   9: 'Staking'
 };
+
+export const safetyMultiplier = 1.4;

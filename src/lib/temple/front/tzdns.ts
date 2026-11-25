@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import { DomainNameValidationResult, isMavrykDomainsSupportedNetwork } from '@mavrykdynamics/mavryk-domains-core';
 import { TaquitoMavrykDomainsClient } from '@mavrykdynamics/mavryk-domains-taquito-client';
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 
 import { useTypedSWR } from 'lib/swr';
 import { NETWORK_IDS } from 'lib/temple/networks';

@@ -6,6 +6,7 @@ import type { UserHistoryItem } from 'lib/temple/history';
 import { useAssetMetadata } from '../../metadata';
 
 import {
+  HistoryDisplayMoneyDiff,
   HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
   HistoryItemOperationBase,
@@ -39,9 +40,14 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   for (const oper of historyitem.operations) {
     const basicFields: HistoryItemOperationBase = {
       contractAddress: oper.contractAddress,
+      calledContract: oper.calledContract,
+      movementKind: oper.movementKind,
+      displayMoneyDiff: oper.displayMoneyDiff,
       source: oper.source,
       status: oper.status,
       amountSigned: oper.amountSigned,
+      atomicAmount: oper.atomicAmount,
+      isAmountUnavailable: oper.isAmountUnavailable,
       addedAt: oper.addedAt,
       isHighlighted: oper.isHighlighted,
       opIndex: oper.opIndex,
@@ -54,7 +60,8 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
       bakerFee: oper.bakerFee,
       storageFee: oper.storageFee,
       gasUsed: oper.gasUsed,
-      storageUsed: oper.storageUsed ?? 0
+      storageUsed: oper.storageUsed ?? 0,
+      networkFees: oper.networkFees
     };
 
     switch (oper.type) {
@@ -155,17 +162,26 @@ export function buildHistoryOperStack(historyitem: UserHistoryItem) {
   return opStack;
 }
 
-export interface MoneyDiff {
-  assetSlug: string;
-  diff: string;
-}
+export type MoneyDiff = HistoryDisplayMoneyDiff;
 
 export function buildHistoryMoneyDiffs(historyItem: UserHistoryItem | null, allowZero = false) {
+  if (!historyItem) return [];
+
+  if (historyItem.displayMoneyDiffs) {
+    return allowZero
+      ? historyItem.displayMoneyDiffs
+      : historyItem.displayMoneyDiffs.filter(({ diff }) => !isZero(diff));
+  }
+
   const diffs: MoneyDiff[] = [];
 
-  if (!historyItem) return diffs;
-
   for (const oper of historyItem.operations) {
+    // A reveal moves no funds; its zero diff would otherwise take the single preview slot of a reveal+transfer group
+    if (oper.type === HistoryItemOpTypeEnum.Reveal) continue;
+    if (oper.displayMoneyDiff) {
+      diffs.push(oper.displayMoneyDiff);
+      continue;
+    }
     // TODO check why Origination type returns another token diff when called with Interaction or Multiple op
     if (isZero(oper.amountSigned) && !allowZero) continue;
 

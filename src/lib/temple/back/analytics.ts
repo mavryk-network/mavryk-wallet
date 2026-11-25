@@ -1,60 +1,11 @@
-import { jitsuClient } from '@jitsu/sdk-js/packages/javascript-sdk';
-
-import { EnvVars } from 'lib/env';
+import { getReadyAnalyticsIdentity } from 'lib/store/zustand/ui-owner';
 import { TempleSendPageEventRequest, TempleSendTrackEventRequest } from 'lib/temple/analytics-types';
-import { loadChainId } from 'lib/temple/helpers';
 
-const { TEMPLE_WALLET_JITSU_WRITE_KEY: WRITE_KEY, TEMPLE_WALLET_JITSU_TRACKING_HOST: TRACKING_HOST } = EnvVars;
-
-export const client = jitsuClient({
-  key: WRITE_KEY,
-  tracking_host: TRACKING_HOST
-});
-
-export const trackEvent = async ({
-  userId,
-  rpc,
-  event,
-  category,
-  properties
-}: Omit<TempleSendTrackEventRequest, 'type'>) => {
-  const chainId = rpc && (await loadChainId(rpc));
-
-  client.track(`${category} ${event}`, {
-    userId,
-    event: `${category} ${event}`,
-    timestamp: new Date(),
-    properties: {
-      ...properties,
-      event,
-      category,
-      chainId
-    }
-  });
+// Transport remains disabled. All entry points enforce restored identity/consent before any future transport call.
+export const trackEvent = async (_request: Omit<TempleSendTrackEventRequest, 'type'>) => {
+  if (!getReadyAnalyticsIdentity()) return;
 };
 
-export const pageEvent = async ({
-  userId,
-  rpc,
-  path,
-  search,
-  additionalProperties
-}: Omit<TempleSendPageEventRequest, 'type'>) => {
-  const url = `${path}${search}`;
-  const chainId = rpc && (await loadChainId(rpc));
-
-  client.track('AnalyticsEventCategory.PageOpened', {
-    userId,
-    name: path,
-    timestamp: new Date(),
-    category: 'AnalyticsEventCategory.PageOpened',
-    properties: {
-      url,
-      path: search,
-      referrer: path,
-      category: 'AnalyticsEventCategory.PageOpened',
-      chainId,
-      ...additionalProperties
-    }
-  });
+export const pageEvent = async (_request: Omit<TempleSendPageEventRequest, 'type'>) => {
+  if (!getReadyAnalyticsIdentity()) return;
 };

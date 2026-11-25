@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 
-import { MavrykToolkit } from '@mavrykdynamics/taquito';
-import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
-import { Tzip16Module } from '@mavrykdynamics/taquito-tzip16';
+import { MavrykToolkit } from '@mavrykdynamics/webmavryk';
+import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
+import { Tzip16Module } from '@mavrykdynamics/webmavryk-tzip16';
 import constate from 'constate';
 
 import { getKYCStatus } from 'lib/apis/tzkt/api';
@@ -10,6 +10,7 @@ import { ACCOUNT_PKH_STORAGE_KEY } from 'lib/constants';
 import { IS_DEV_ENV } from 'lib/env';
 import { useRetryableSWR } from 'lib/swr';
 import { loadChainId, michelEncoder, loadFastRpcClient } from 'lib/temple/helpers';
+import { migrateLegacyAtlasnetStorage, NETWORK_ID_STORAGE_KEY, normalizeNetworkId } from 'lib/temple/network-storage';
 import {
   ReadyTempleState,
   TempleAccountType,
@@ -21,6 +22,7 @@ import {
 
 import { intercom, useTempleClient } from './client';
 import { usePassiveStorage } from './storage';
+import { useContactsSync } from './use-contacts-sync.hook';
 
 export const [
   ReadyTempleProvider,
@@ -32,6 +34,7 @@ export const [
   useAccount,
   useAccountPkh,
   useSettings,
+  useHDGroups,
   useTezos
 ] = constate(
   useReadyTemple,
@@ -43,6 +46,7 @@ export const [
   v => v.account,
   v => v.accountPkh,
   v => v.settings,
+  v => v.hdGroups,
   v => v.tezos
 );
 
@@ -54,9 +58,20 @@ function useReadyTemple() {
     networks: allNetworks,
     accounts: allAccounts,
     settings,
+    walletsSpecs,
+    ensureAuthorized,
+    updateAccountKYCStatus,
     createTaquitoSigner,
     createTaquitoWallet
   } = templeFront;
+
+  const hdGroups = useMemo(
+    () =>
+      Object.entries(walletsSpecs)
+        .sort(([, { createdAt: aCreatedAt }], [, { createdAt: bCreatedAt }]) => aCreatedAt - bCreatedAt)
+        .map(([id, { name }]) => ({ id, name })),
+    [walletsSpecs]
+  );
 
   /**
    * Networks
@@ -64,8 +79,17 @@ function useReadyTemple() {
 
   const defaultNet = allNetworks[0];
 
-  const [networkId, setNetworkId] = usePassiveStorage('network_id', defaultNet.id);
+  const [storedNetworkId, setNetworkId] = usePassiveStorage(NETWORK_ID_STORAGE_KEY, defaultNet.id);
+  const networkId = normalizeNetworkId(storedNetworkId);
 
+  // Migrates legacy network-scoped browser storage before fallback logic can reset the selected network.
+  // No cleanup is needed because this is a one-shot idempotent storage migration.
+  useEffect(() => {
+    void migrateLegacyAtlasnetStorage();
+  }, []);
+
+  // Keep the selected network valid after network list changes.
+  // No cleanup is needed because this only reconciles browser storage state.
   useEffect(() => {
     if (allNetworks.every(a => a.id !== networkId)) {
       setNetworkId(defaultNet.id);
@@ -105,6 +129,14 @@ function useReadyTemple() {
     [allAccounts, accountPkh, defaultAcc]
   );
 
+  // Ensure the selected account/network has a valid auth token before protected Mavryk API reads run.
+  // No cleanup is needed because this is an idempotent one-shot sync with background auth state.
+  useLayoutEffect(() => {
+    ensureAuthorized(account.publicKeyHash, network.id, false).catch(error => console.error(error));
+  }, [account.publicKeyHash, ensureAuthorized, network.id]);
+
+  useContactsSync(account, allAccounts, network.id, settings);
+
   /**
    * Error boundary reset
    */
@@ -139,9 +171,9 @@ function useReadyTemple() {
       const chainId = await loadChainId(rpcUrl).catch(() => null);
       const isKYC = await getKYCStatus(account.publicKeyHash, chainId);
 
-      await templeFront.updateAccountKYCStatus(account.publicKeyHash, isKYC);
+      await updateAccountKYCStatus(account.publicKeyHash, isKYC);
     })();
-  }, [account.publicKeyHash, tezos?.rpc]);
+  }, [account.publicKeyHash, tezos?.rpc, updateAccountKYCStatus]);
 
   useEffect(() => {
     if (IS_DEV_ENV) {
@@ -161,6 +193,7 @@ function useReadyTemple() {
     setAccountPkh,
 
     settings,
+    hdGroups,
     tezos
   };
 }

@@ -9,6 +9,7 @@ import { TempleClientProvider, useTempleClient } from './client';
 import { ReadyTempleProvider, useNetwork } from './ready';
 
 export const TempleProvider: FC<PropsWithChildren> = ({ children }) => {
+  // Not in use
   usePushNotifications();
 
   return (

@@ -1,0 +1,7 @@
+# Internal docs, left out of `git archive` (the Firefox AMO source package, see webpack/firefox-source-script.ts)
+/docs export-ignore
+/.github export-ignore
+/AGENTS.md export-ignore
+/finalize.md export-ignore
+/pr-30-remediation-plan.md export-ignore
+/pr-30-remediation-implementation-plan.md export-ignore

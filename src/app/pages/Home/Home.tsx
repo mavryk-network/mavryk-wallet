@@ -1,4 +1,4 @@
-import React, { FC, FunctionComponent, SVGProps, useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { FC, FunctionComponent, SVGProps, useEffect, useMemo } from 'react';
 
 import classNames from 'clsx';
 import { useDispatch } from 'react-redux';
@@ -6,22 +6,21 @@ import { Props as TippyProps } from 'tippy.js';
 
 import { Anchor, Divider } from 'app/atoms';
 import { useAppEnv } from 'app/env';
-import { ReactComponent as BuyIcon } from 'app/icons/buy.svg';
 import { ReactComponent as ReceiveIcon } from 'app/icons/m_receive.svg';
 import { ReactComponent as SendIcon } from 'app/icons/m_send.svg';
 import { ReactComponent as SwapIcon } from 'app/icons/m_swap.svg';
-import { ReactComponent as WithdrawIcon } from 'app/icons/m_withdraw.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { useShouldShowPartnersPromoSelector } from 'app/store/partners-promotion/selectors';
 import { setAnotherSelector, setTestID, TestIDProps } from 'lib/analytics';
 import { MAV_TOKEN_SLUG } from 'lib/assets';
 import { T, t } from 'lib/i18n';
+import { useLoadPerfMark } from 'lib/load-perf';
 import { useAssetMetadata, getAssetSymbol } from 'lib/metadata';
-import { useAccount, useNetwork } from 'lib/temple/front';
+import { useAccount } from 'lib/temple/front';
 import { TempleAccountType, TempleNetworkType } from 'lib/temple/types';
 import useTippy from 'lib/ui/useTippy';
 import * as Woozie from 'lib/woozie';
-import { createUrl, HistoryAction, Link, navigate, To, useLocation } from 'lib/woozie';
+import { createUrl, Link, To } from 'lib/woozie';
 import { createLocationState } from 'lib/woozie/location';
 
 import { togglePartnersPromotionAction } from '../../store/partners-promotion/actions';
@@ -47,27 +46,16 @@ export const tippyPropsMock = {
 export const NETWORK_TYPES_WITH_BUY_BUTTON: TempleNetworkType[] = ['main', 'dcp'];
 
 const Home: FC<ExploreProps> = ({ assetSlug }) => {
-  const { fullPage, registerBackHandler } = useAppEnv();
+  const { fullPage } = useAppEnv();
+  useLoadPerfMark('home-painted');
   const { onboardingCompleted } = useOnboardingProgress();
   const account = useAccount();
-  const { search } = useLocation();
-  const network = useNetwork();
   const dispatch = useDispatch();
 
   const shouldShowPartnersPromo = useShouldShowPartnersPromoSelector();
 
   const assetMetadata = useAssetMetadata(assetSlug || MAV_TOKEN_SLUG);
   const assetSymbol = getAssetSymbol(assetMetadata);
-
-  useLayoutEffect(() => {
-    const usp = new URLSearchParams(search);
-    if (assetSlug && usp.get('after_token_added') === 'true') {
-      return registerBackHandler(() => {
-        navigate('/', HistoryAction.Replace);
-      });
-    }
-    return undefined;
-  }, [registerBackHandler, assetSlug, search]);
 
   useEffect(() => {
     if (shouldShowPartnersPromo) {
@@ -102,7 +90,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
       <div className={classNames(styles.wrapper, 'flex flex-col items-center')}>
         <MainBanner accountPkh={accountPkh} assetSlug={assetSlug} />
 
-        <div className={classNames('flex justify-between mx-auto w-full pb-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
+        <div className={classNames('flex justify-center mx-auto w-full pb-4 gap-4', !fullPage ? 'max-w-sm' : 'px-4.5')}>
           <ActionButton
             label={<T id="receive" />}
             Icon={ReceiveIcon}
@@ -110,7 +98,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             testID={HomeSelectors.receiveButton}
           />
 
-          <ActionButton
+          {/* <ActionButton
             label={<T id="buyButton" />}
             Icon={BuyIcon}
             to={network.type === 'dcp' ? 'https://buy.chainbits.com' : '/buy'}
@@ -118,7 +106,7 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             // disabled={!NETWORK_TYPES_WITH_BUY_BUTTON.includes(network.type)}
             disabled
             testID={HomeSelectors.buyButton}
-          />
+          /> */}
           <ActionButton
             label={<T id="swap" />}
             Icon={SwapIcon}
@@ -130,14 +118,14 @@ const Home: FC<ExploreProps> = ({ assetSlug }) => {
             disabled
             testID={HomeSelectors.swapButton}
           />
-          <ActionButton
+          {/* <ActionButton
             label={<T id="withdraw" />}
             Icon={WithdrawIcon}
             to="/withdraw"
             // disabled={!canSend || network.type !== 'main'}
             disabled
             testID={HomeSelectors.withdrawButton}
-          />
+          /> */}
           <ActionButton
             label={<T id="send" />}
             Icon={SendIcon}

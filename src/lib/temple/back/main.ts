@@ -1,28 +1,45 @@
 import browser, { Runtime } from 'webextension-polyfill';
 
-import { updateRulesStorage } from 'lib/ads/update-rules-storage';
-import { ACCOUNT_PKH_STORAGE_KEY, ANALYTICS_USER_ID_STORAGE_KEY, ContentScriptType } from 'lib/constants';
-import { E2eMessageType } from 'lib/e2e/types';
 import { BACKGROUND_IS_WORKER } from 'lib/env';
+import type { IntercomPortInfo } from 'lib/intercom';
+import { startUIOwner } from 'lib/store/zustand/ui-owner';
+import { UI_OWNER_CHANNEL } from 'lib/store/zustand/ui-owner.contract';
 import { encodeMessage, encryptMessage, getSenderId, MessageType, Response } from 'lib/temple/beacon';
-import { clearAsyncStorages } from 'lib/temple/reset';
+import { buildAuthWalletAddressesMap } from 'lib/temple/helpers';
 import { TempleMessageType, TempleRequest, TempleResponse } from 'lib/temple/types';
-import { getTrackedCashbackServiceDomain, getTrackedUrl } from 'lib/utils/url-track/url-track.utils';
-
-import { AnalyticsEventCategory } from '../analytics-types';
+import { toSafeLogError } from 'mavryk/api/errors';
+import { migrateAuthTokensToSessionStorage, setAuthWalletAddressesMapToStorage } from 'mavryk/api/storage';
 
 import * as Actions from './actions';
 import * as Analytics from './analytics';
+import { getBeaconMessage, processBeacon } from './beacon-dapp';
 import { intercom } from './defaults';
+import { handleE2eResetMessage } from './e2e-reset-listener';
+import { assertTempleRequestAllowedForPortInfo } from './intercom-permissions';
+import { startPagePresenceTracking } from './page-presence';
 import { store, toFront } from './store';
 
 const frontStore = store.map(toFront);
+const isE2eResetEnabled = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
 export const start = async () => {
+  startUIOwner();
+  startPagePresenceTracking(Actions.enforceAutolock, Actions.enforceAutolockOnPageOpen);
   intercom.onRequest(processRequestWithErrorsLogged);
   await Actions.init();
+  await migrateAuthTokensToSessionStorage().catch(error => console.error(toSafeLogError(error)));
 
   if (BACKGROUND_IS_WORKER) await Actions.unlockFromSession().catch(e => console.error(e));
+  await Actions.clearAuthTokensIfStartedLocked().catch(error => console.error(toSafeLogError(error)));
+
+  const syncAuthWalletAddresses = (accounts = store.getState().accounts) => {
+    setAuthWalletAddressesMapToStorage(buildAuthWalletAddressesMap(accounts)).catch(error => console.error(error));
+  };
+
+  syncAuthWalletAddresses();
+  store.watch(state => {
+    syncAuthWalletAddresses(state.accounts);
+  });
 
   frontStore.watch(() => {
     intercom.broadcast({ type: TempleMessageType.StateUpdated });
@@ -31,11 +48,19 @@ export const start = async () => {
 
 const processRequestWithErrorsLogged = (...args: Parameters<typeof processRequest>) =>
   processRequest(...args).catch(error => {
-    console.error(error);
+    console.error(toSafeLogError(error));
     throw error;
   });
 
-const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<TempleResponse | void> => {
+const processRequest = async (
+  req: TempleRequest,
+  port: Runtime.Port,
+  portInfo: IntercomPortInfo
+): Promise<TempleResponse | void> => {
+  if (!req?.type) throw new Error('Invalid intercom request');
+
+  assertTempleRequestAllowedForPortInfo(req, portInfo);
+
   switch (req?.type) {
     case TempleMessageType.SendTrackEventRequest:
       await Analytics.trackEvent(req);
@@ -60,12 +85,23 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       await Actions.unlock(req.password);
       return { type: TempleMessageType.UnlockResponse };
 
+    case TempleMessageType.EnsureAuthorizedRequest:
+      await Actions.ensureAuthorized(req.accountPublicKeyHash, req.networkId, req.interactive, req.authWalletAddress);
+      return { type: TempleMessageType.EnsureAuthorizedResponse };
+
     case TempleMessageType.LockRequest:
       await Actions.lock();
       return { type: TempleMessageType.LockResponse };
 
+    case TempleMessageType.FindFreeHDAccountIndexRequest:
+      const responsePayload = await Actions.findFreeHDAccountIndex(req.walletId);
+      return {
+        type: TempleMessageType.FindFreeHDAccountIndexResponse,
+        ...responsePayload
+      };
+
     case TempleMessageType.CreateAccountRequest:
-      await Actions.createHDAccount(req.name);
+      await Actions.createHDAccount(req.walletId, req.name, req.hdIndex);
       return { type: TempleMessageType.CreateAccountResponse };
 
     case TempleMessageType.RevealPublicKeyRequest:
@@ -73,6 +109,12 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       return {
         type: TempleMessageType.RevealPublicKeyResponse,
         publicKey
+      };
+
+    case TempleMessageType.DeriveContactsKeyRequest:
+      return {
+        type: TempleMessageType.DeriveContactsKeyResponse,
+        result: await Actions.deriveContactsKey(req.accountPublicKeyHash)
       };
 
     case TempleMessageType.RevealPrivateKeyRequest:
@@ -83,12 +125,11 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.RevealMnemonicRequest:
-      const mnemonic = await Actions.revealMnemonic(req.password);
+      const mnemonic = await Actions.revealMnemonic(req.walletId, req.password);
       return {
         type: TempleMessageType.RevealMnemonicResponse,
         mnemonic
       };
-
     case TempleMessageType.GenerateSyncPayloadRequest:
       const payload = await Actions.generateSyncPayload(req.password);
       return {
@@ -115,7 +156,7 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.ImportAccountRequest:
-      await Actions.importAccount(req.privateKey, req.chainId, req.encPassword);
+      await Actions.importAccount(req.chainId, req.chain, req.privateKey, req.encPassword);
       return {
         type: TempleMessageType.ImportAccountResponse
       };
@@ -139,13 +180,19 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.ImportWatchOnlyAccountRequest:
-      await Actions.importWatchOnlyAccount(req.address, req.chainId, req.accName);
+      await Actions.importWatchOnlyAccount(req.address, req.chain, req.chainId, req.name);
       return {
         type: TempleMessageType.ImportWatchOnlyAccountResponse
       };
 
+    case TempleMessageType.GetLedgerTezosPkRequest:
+      return {
+        type: TempleMessageType.GetLedgerTezosPkResponse,
+        publicKey: await Actions.getLedgerTezosPk(req.derivationPath, req.derivationType)
+      };
+
     case TempleMessageType.CreateLedgerAccountRequest:
-      await Actions.createLedgerAccount(req.name, req.chainId, req.derivationPath, req.derivationType);
+      await Actions.createLedgerAccount(req.input);
       return {
         type: TempleMessageType.CreateLedgerAccountResponse
       };
@@ -156,11 +203,36 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
         type: TempleMessageType.UpdateSettingsResponse
       };
 
+    case TempleMessageType.RemoveHdWalletRequest:
+      await Actions.removeHdWallet(req.id, req.password);
+      return {
+        type: TempleMessageType.RemoveHdWalletResponse
+      };
+
+    case TempleMessageType.RemoveAccountsByTypeRequest:
+      await Actions.removeAccountsByType(req.accountsType, req.password);
+      return {
+        type: TempleMessageType.RemoveAccountsByTypeResponse
+      };
+
+    case TempleMessageType.CreateOrImportWalletRequest:
+      await Actions.createOrImportWallet(req.mnemonic);
+      return {
+        type: TempleMessageType.CreateOrImportWalletResponse
+      };
+
     case TempleMessageType.OperationsRequest:
-      const { opHash } = await Actions.sendOperations(port, req.id, req.sourcePkh, req.networkRpc, req.opParams);
+      const { opHash, feeMumav } = await Actions.sendOperations(
+        port,
+        req.id,
+        req.sourcePkh,
+        req.networkRpc,
+        req.opParams
+      );
       return {
         type: TempleMessageType.OperationsResponse,
-        opHash
+        opHash,
+        feeMumav
       };
 
     case TempleMessageType.SignRequest:
@@ -192,16 +264,13 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
       };
 
     case TempleMessageType.Acknowledge: {
-      if (req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
-        const {
-          req: res,
-          recipientPubKey,
-          payload
-        } = await Actions.getBeaconMessage(req.origin, req.payload, req.encrypted);
+      const dAppEnabled = await Actions.isDAppEnabled();
+      if (dAppEnabled && req.payload !== 'PING' && req.payload !== 'ping' && req.beacon) {
+        const { req: res, recipientPubKey, payload } = await getBeaconMessage(req.origin, req.payload, req.encrypted);
         if (payload) {
           return;
         }
-        if (!req) {
+        if (!res) {
           return;
         }
 
@@ -212,14 +281,14 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
           senderId: string;
         } = {
           version: '2',
-          senderId: await getSenderId(),
+          senderId: await getSenderId(req.origin),
           id: res?.id ?? '',
           type: MessageType.Acknowledge
         };
 
         return {
           type: TempleMessageType.Acknowledge,
-          payload: await encryptMessage(encodeMessage<Response>(response), recipientPubKey ?? ''),
+          payload: await encryptMessage(req.origin, encodeMessage<Response>(response), recipientPubKey ?? ''),
           encrypted: true
         };
       }
@@ -242,13 +311,13 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
         }
 
         if (!req.beacon) {
-          const resPayload = await Actions.processDApp(req.origin, req.payload);
+          const resPayload = await Actions.processDApp(req.origin, req.payload, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: resPayload ?? null
           };
         } else {
-          const res = await Actions.processBeacon(req.origin, req.payload, req.encrypted);
+          const res = await processBeacon(req.origin, req.payload, req.encrypted, port);
           return {
             type: TempleMessageType.PageResponse,
             payload: res?.payload ?? null,
@@ -260,65 +329,8 @@ const processRequest = async (req: TempleRequest, port: Runtime.Port): Promise<T
   }
 };
 
-const getCurrentAccountPkh = async (): Promise<string | undefined> => {
-  const { [ACCOUNT_PKH_STORAGE_KEY]: accountPkhFromStorage } = await browser.storage.local.get(ACCOUNT_PKH_STORAGE_KEY);
-
-  if (accountPkhFromStorage) {
-    return accountPkhFromStorage;
-  }
-
-  const frontState = await Actions.getFrontState();
-
-  return frontState.accounts[0]?.publicKeyHash;
-};
-
-const getAnalyticsUserId = async (): Promise<string | undefined> => {
-  const { [ANALYTICS_USER_ID_STORAGE_KEY]: userId } = await browser.storage.local.get(ANALYTICS_USER_ID_STORAGE_KEY);
-
-  return userId;
-};
-
-browser.runtime.onMessage.addListener(async msg => {
-  try {
-    switch (msg?.type) {
-      case ContentScriptType.UpdateAdsRules:
-        await updateRulesStorage();
-        return;
-      case E2eMessageType.ResetRequest:
-        return clearAsyncStorages().then(() => ({ type: E2eMessageType.ResetResponse }));
-    }
-
-    const accountPkh = await getCurrentAccountPkh();
-
-    switch (msg?.type) {
-      case ContentScriptType.ExternalLinksActivity:
-        const trackedCashbackServiceDomain = getTrackedCashbackServiceDomain(msg.url);
-
-        if (trackedCashbackServiceDomain) {
-          await Analytics.client.track('External Cashback Links Activity', { domain: trackedCashbackServiceDomain });
-        }
-
-        const trackedUrl = getTrackedUrl(msg.url);
-
-        if (trackedUrl) {
-          await Analytics.client.track('External links activity', { url: trackedUrl, accountPkh });
-        }
-
-        break;
-      case ContentScriptType.ExternalAdsActivity:
-        const userId = await getAnalyticsUserId();
-        await Analytics.trackEvent({
-          category: AnalyticsEventCategory.General,
-          userId: userId ?? '',
-          event: 'External Ads Activity',
-          properties: { domain: new URL(msg.url).hostname, accountPkh, provider: msg.provider },
-          rpc: undefined
-        });
-        break;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-
-  return;
+browser.runtime.onMessage.addListener(msg => {
+  // An async catch-all listener would claim the owner's response channel before migration finishes.
+  if (msg?.channel === UI_OWNER_CHANNEL) return;
+  return handleE2eResetMessage(msg, isE2eResetEnabled);
 });

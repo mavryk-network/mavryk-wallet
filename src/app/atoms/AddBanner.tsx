@@ -7,6 +7,8 @@ import { T, TID } from 'lib/i18n';
 import { useAccount } from 'lib/temple/front';
 import { useAccountDelegatePeriodStats } from 'lib/temple/front/baking';
 
+import Spinner from './Spinner/Spinner';
+
 export const AddBanner: FC<{ text: TID }> = ({ text }) => (
   <div className={'font-normal text-xs px-2 py-1 bg-indigo-add text-white ml-2 rounded'}>
     <T id={text} />
@@ -16,13 +18,16 @@ export const AddBanner: FC<{ text: TID }> = ({ text }) => (
 export const DelegatePeriodBanner = () => {
   const account = useAccount();
   const {
-    isInDelegationPeriod,
-    isInUnlockPeriod,
-    hasUnlockPeriodPassed,
-    unlockWaitTime,
-    delegationWaitTime,
-    isInCostakePeriod,
-    costakeWaitTime
+    data: {
+      isInDelegationPeriod,
+      isInUnlockPeriod,
+      hasUnlockPeriodPassed,
+      unlockWaitTime,
+      delegationWaitTime,
+      isInCostakePeriod,
+      costakeWaitTime
+    },
+    isLoading
   } = useAccountDelegatePeriodStats(account.publicKeyHash);
 
   const labelInfo = useMemo(() => {
@@ -40,7 +45,11 @@ export const DelegatePeriodBanner = () => {
       return {
         text: (
           <div className="flex items-center">
-            <T id="unlockingPeriod" substitutions={[<SmallClockIcon />, unlockWaitTime]} />
+            {unlockWaitTime === 'pending' ? (
+              <T id="unlocking" />
+            ) : (
+              <T id="unlockingPeriod" substitutions={[<SmallClockIcon />, unlockWaitTime]} />
+            )}
           </div>
         ),
         color: 'bg-orange-add'
@@ -82,7 +91,13 @@ export const DelegatePeriodBanner = () => {
       style={{ paddingBottom: 2, lineHeight: '18px' }}
       className={clsx('font-normal text-xs px-2 text-white ml-2 rounded capitalize', labelInfo.color)}
     >
-      {labelInfo.text}
+      {!isLoading ? (
+        labelInfo.text
+      ) : (
+        <div style={{ height: 18 }} className="flex items-center">
+          <Spinner theme="white" className="w-4" />
+        </div>
+      )}
     </div>
   );
 };

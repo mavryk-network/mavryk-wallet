@@ -36,9 +36,7 @@ const DEST_RELATIVE_PATHS = {
 };
 
 /** Mapping entries' names to source paths */
-const IFRAMES = {
-  'persona-ad': path.join(PATH_SOURCE, 'content-scripts/replace-ads/persona-ad.iframe.ts')
-};
+const IFRAMES = {};
 
 const PATHS = {
   CWD: PATH_CWD,

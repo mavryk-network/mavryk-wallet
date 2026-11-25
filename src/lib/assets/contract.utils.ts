@@ -1,4 +1,4 @@
-import { OpKind, MavrykToolkit } from '@mavrykdynamics/taquito';
+import { OpKind, MavrykToolkit } from '@mavrykdynamics/webmavryk';
 import BigNumber from 'bignumber.js';
 
 import type { AssetMetadataBase } from 'lib/metadata';

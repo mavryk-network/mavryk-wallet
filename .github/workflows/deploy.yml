@@ -1,0 +1,66 @@
+name: Deploy to Chrome Web Store
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Gates nothing until a repo admin configures it in GitHub: create `chrome-web-store` with required reviewers,
+    # limit deployment refs to tags matching `v*`, move the four CHROME_* secrets into it as environment secrets,
+    # then delete the repo-level copies.
+    environment: chrome-web-store
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.11.0
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Create .env for build
+        run: |
+          cat << 'EOF' > .env.local
+          TEMPLE_WALLET_API_URL=${{ secrets.TEMPLE_WALLET_API_URL }}
+          NODES_URL=${{ secrets.NODES_URL }}
+          EXTERNAL_API=${{ secrets.EXTERNAL_API }}
+          REDUX_DEVTOOLS_PORT=${{ secrets.REDUX_DEVTOOLS_PORT }}
+          KYC_CONTRACT=${{ secrets.KYC_CONTRACT }}
+          TESTNET_KYC_SIGNER_PRIVATE_KEY=${{ secrets.TESTNET_KYC_SIGNER_PRIVATE_KEY }}
+          COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
+          COINGECKO_API=${{ secrets.COINGECKO_API }}
+          EOF
+
+      - name: Build extension
+        run: yarn build
+
+      - name: Debug dist
+        run: |
+          pwd
+          ls -la
+          ls -la dist || true
+
+      - name: Check zip has manifest at root
+        run: |
+          unzip -l dist/chrome.zip | head -n 40
+          unzip -p dist/chrome.zip manifest.json | head -n 20
+
+      - name: Deploy to Chrome Web Store
+        uses: trmcnvn/chrome-addon@7fc5a5ad3ff597dc64d6a13de7dcaa8515328be7 # v2
+        with:
+          extension: ${{ secrets.CHROME_EXTENSION_ID }}
+          zip: dist/chrome.zip
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}

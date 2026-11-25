@@ -1,13 +1,13 @@
 import { MavrykWalletPageMessage, MavrykWalletPageMessageType } from '@mavrykdynamics/mavryk-wallet-dapp/dist/types';
-import browser from 'webextension-polyfill';
 
-import { ContentScriptType, WEBSITES_ANALYTICS_ENABLED } from 'lib/constants';
+import { PUBLIC_EXTENSION_ID } from 'lib/extension-id';
 import { serealizeError } from 'lib/intercom/helpers';
+import { isBeaconPayloadWithinLimit } from 'lib/temple/beacon-payload';
+import { getTempleRequestTimeoutMs } from 'lib/temple/request-timeouts';
 import { TempleMessageType, TempleResponse } from 'lib/temple/types';
 
+import { isProcessablePageMessage } from './content-scripts/page-message.helpers';
 import { getIntercom } from './intercom-client';
-
-const TRACK_URL_CHANGE_INTERVAL = 5000;
 
 enum BeaconMessageTarget {
   Page = 'toPage',
@@ -37,68 +37,51 @@ type BeaconMessage =
     };
 type BeaconPageMessage = BeaconMessage | { message: BeaconMessage; sender: { id: string } };
 
-// Prevents the script from running in an Iframe
-if (window.frameElement === null) {
-  browser.storage.local.get(WEBSITES_ANALYTICS_ENABLED).then(storage => {
-    if (storage[WEBSITES_ANALYTICS_ENABLED]) {
-      let oldHref = '';
-
-      const trackUrlChange = () => {
-        const newHref = window.parent.location.href;
-        if (oldHref !== newHref) {
-          oldHref = newHref;
-
-          browser.runtime.sendMessage({
-            type: ContentScriptType.ExternalLinksActivity,
-            url: newHref
-          });
-        }
-      };
-
-      trackUrlChange();
-
-      // Track url changes without page reload
-      setInterval(trackUrlChange, TRACK_URL_CHANGE_INTERVAL);
-    }
-  });
-}
+const isTopFrame = () => window.top === window;
 
 const SENDER = {
-  id: browser.runtime.id,
+  id: PUBLIC_EXTENSION_ID,
   name: 'Mavryk Wallet',
   iconUrl: 'https://mavryk.org/logo.png'
 };
 
-window.addEventListener(
-  'message',
-  evt => {
-    if (evt.source !== window) return;
+if (isTopFrame()) {
+  window.addEventListener(
+    'message',
+    evt => {
+      if (!isProcessablePageMessage(evt, window)) return;
 
-    const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
-    const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;
-    const isBeaconRequest =
-      evt.data?.target === BeaconMessageTarget.Extension && (evt.data?.targetId === SENDER.id || !evt.data?.targetId);
+      const legacyRequest = evt.data?.type === LegacyPageMessageType.Request;
+      const isTempleRequest = evt.data?.type === MavrykWalletPageMessageType.Request || legacyRequest;
+      const isBeaconRequest =
+        evt.data?.target === BeaconMessageTarget.Extension && (evt.data?.targetId === SENDER.id || !evt.data?.targetId);
 
-    if (isTempleRequest) {
-      templeRequest(evt, legacyRequest);
-    } else if (isBeaconRequest) {
-      beaconRequest(evt);
-    } else {
-      return;
-    }
-  },
-  false
-);
+      if (isTempleRequest) {
+        templeRequest(evt, legacyRequest);
+      } else if (isBeaconRequest) {
+        beaconRequest(evt);
+      } else {
+        return;
+      }
+    },
+    false
+  );
+}
 
 function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
   const { payload, reqId } = evt.data as MavrykWalletPageMessage;
 
   getIntercom()
-    .request({
-      type: TempleMessageType.PageRequest,
-      origin: evt.origin,
-      payload
-    })
+    .request(
+      {
+        type: TempleMessageType.PageRequest,
+        origin: evt.origin,
+        payload
+      },
+      {
+        timeoutMs: getTempleRequestTimeoutMs(TempleMessageType.PageRequest)
+      }
+    )
     .then((res: TempleResponse) => {
       if (res?.type === TempleMessageType.PageResponse) {
         send(
@@ -126,14 +109,22 @@ function templeRequest(evt: MessageEvent, isLegacyRequest: boolean) {
 function beaconRequest(evt: MessageEvent) {
   const { origin, data } = evt;
   const encrypted = Boolean(data.encryptedPayload);
+  const payload = data.encryptedPayload ?? data.payload;
+  if (!isBeaconPayloadWithinLimit(payload)) return;
+
   getIntercom()
-    .request({
-      type: TempleMessageType.PageRequest,
-      origin: origin,
-      payload: data.encryptedPayload ?? data.payload,
-      beacon: true,
-      encrypted: Boolean(data.encryptedPayload)
-    })
+    .request(
+      {
+        type: TempleMessageType.PageRequest,
+        origin: origin,
+        payload,
+        beacon: true,
+        encrypted: Boolean(data.encryptedPayload)
+      },
+      {
+        timeoutMs: getTempleRequestTimeoutMs(TempleMessageType.PageRequest)
+      }
+    )
     .then((res: TempleResponse) => {
       if (res?.type === TempleMessageType.PageResponse && res.payload) {
         const message = {
@@ -157,7 +148,7 @@ function beaconRequest(evt: MessageEvent) {
     .request({
       type: TempleMessageType.Acknowledge,
       origin: origin,
-      payload: data.encryptedPayload ?? data.payload,
+      payload,
       beacon: true,
       encrypted: encrypted
     })

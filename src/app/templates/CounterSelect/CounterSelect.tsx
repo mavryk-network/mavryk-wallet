@@ -45,7 +45,7 @@ export const CounterSelect: FC<CounterSelectProps> = ({ selectedCount, unselectA
         opened={opened}
       />
       {opened && (
-        <div className="absolute top-12 z-10" style={{ minWidth: 'fit-content' }}>
+        <div className="absolute top-full mt-2 z-10 w-full" style={{ minWidth: 'fit-content' }}>
           <CounterSelectContent options={options} />
         </div>
       )}
@@ -74,8 +74,8 @@ const CounterSelectOptionFace: FC<CounterSelectOptionFaceProps> = ({ count, unse
     <section
       className={clsx(
         'p-2 flex items-center gap-2 bg-primary-card rounded-md max-h-8',
-        'transition ease-in-out duration-200 border border-transparent',
-        opened && 'border border-accent-blue'
+        'transition ease-in-out duration-200 border',
+        opened ? 'border-accent-blue' : 'border-transparent'
       )}
       style={{ minWidth: 141 }}
     >

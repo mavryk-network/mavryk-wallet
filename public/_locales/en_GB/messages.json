@@ -914,6 +914,12 @@
   "revealSeedPhrase": {
     "message": "Reveal Seed Phrase"
   },
+  "proceedToReveal": {
+    "message": "Proceed To Reveal"
+  },
+  "proceedToRevealMsg": {
+    "message": "You can view the seed phrase only for wallets created in the app. For security reasons, seed phrases for imported wallets aren’t available."
+  },
   "revealSeedPhraseDescription": {
     "message": "Also known as \"Export Wallet\", you may need this seed phrase to access your wallet and accounts on other devices."
   },
@@ -958,6 +964,9 @@
   },
   "unlockPasswordErrorDelay": {
     "message": "You have entered the wrong password three times. Your wallet is being blocked for"
+  },
+  "unlockInterruptedByLock": {
+    "message": "The wallet was locked while it was unlocking. Please enter your password again."
   },
   "unlock": {
     "message": "Unlock"
@@ -1347,6 +1356,12 @@
   "unknownNetwork": {
     "message": "Unknown:"
   },
+  "unknownNetworkChainId": {
+    "message": "Chain ID:"
+  },
+  "verifyingOperation": {
+    "message": "Verifying operation..."
+  },
   "backupNewSeedPhrase": {
     "message": "Backup new Seed Phrase"
   },
@@ -1404,6 +1419,9 @@
   },
   "import": {
     "message": "Import"
+  },
+  "export": {
+    "message": "Export"
   },
   "revealNewSeedPhrase": {
     "message": "<b>Click on</b> area below to reveal your new Seed Phrase. Then, write down this phrase and store in a secure location."
@@ -1548,6 +1566,12 @@
   },
   "tryingToTransferToContract": {
     "message": "You're trying to transfer funds to contract.\nPlease, ensure that it's exactly what you want."
+  },
+  "rwaSenderMustBeProToSend": {
+    "message": "You must upgrade to a Pro account before you can send RWA tokens to other accounts."
+  },
+  "rwaRecipientMustBeProToReceive": {
+    "message": "This recipient is not a Pro account. RWA tokens can only be sent between Pro accounts."
   },
   "amount": {
     "message": "Amount"
@@ -1783,6 +1807,9 @@
   },
   "noAssetsFound": {
     "message": "No assets found"
+  },
+  "assetsLoadError": {
+    "message": "Couldn't load this list. It will retry automatically."
   },
   "tokenNotFound": {
     "message": "Token not found..."
@@ -2108,6 +2135,12 @@
   "errorChangingAccountName": {
     "message": "An error occurred while changing account name"
   },
+  "errorAddingContacts": {
+    "message": "An error occurred while importing contacts"
+  },
+  "errorChangingWalletName": {
+    "message": "An error occurred while changing wallet name"
+  },
   "ok": {
     "message": "OK"
   },
@@ -2277,6 +2310,14 @@
     "message": "Blockchain Explorer"
   },
   "viewOnBlockExplorer": { "message": "View On Block Explorer" },
+  "viewOnBlockExplorerName": {
+    "message": "View On $name$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
   "specifyTokenId": {
     "message": "Specify token ID"
   },
@@ -2514,6 +2555,9 @@
   "txIsLikelyToFail": {
     "message": "Warning! Transaction is likely to fail."
   },
+  "operationCannotBeVerified": {
+    "message": "This operation could not be simulated on the network, so the wallet cannot verify what you would sign. It cannot be confirmed. Cancel it and try again later."
+  },
   "copyErrorLogs": {
     "message": "Copy Error Logs"
   },
@@ -2544,6 +2588,9 @@
   "recentDestinations": {
     "message": "Recent destinations"
   },
+  "recentTransfers": {
+    "message": "Recent Transfers"
+  },
   "unknownAccount": {
     "message": "Unknown account"
   },
@@ -2563,6 +2610,12 @@
   },
   "addressBook": {
     "message": "Address Book"
+  },
+  "contacts": {
+    "message": "Contacts"
+  },
+  "contactInfo": {
+    "message": "Contact Info"
   },
   "addressBookDescription": {
     "message": "Add, remove and manage your contacts."
@@ -2602,7 +2655,7 @@
     "message": "To update an existing contact, just remove it\nand add a new one."
   },
   "deleteContactConfirm": {
-    "message": "Are you sure you want to delete this contact?"
+    "message": "Are you sure you want to delete this contact? This will remove them from your contact list."
   },
   "closePartnersPromoConfirm": {
     "message": "Pay attention: you can receive cashback in USDt tokens for enabling advertisement in our wallet. If you turned off ADS, you can always activate it in the settings."
@@ -3383,13 +3436,31 @@
     "message": "Connect your ledger device to access your funds from this wallet application."
   },
   "noContacts": {
-    "message": "No Contacts"
+    "message": "No Contacts yet"
   },
   "addAddress": {
     "message": "Add Address"
   },
   "addAddresesDesc": {
-    "message": "Contacts & accounts you’ve added will appear here."
+    "message": "Add your first one to get started!"
+  },
+  "contactsUnavailable": {
+    "message": "Contacts unavailable"
+  },
+  "contactsUnavailableLedger": {
+    "message": "Encrypted contacts are not available for Ledger accounts."
+  },
+  "contactsUnavailableWatchOnly": {
+    "message": "Encrypted contacts are not available for watch-only accounts."
+  },
+  "contactsUnavailableAccount": {
+    "message": "Contacts are unavailable because the book account cannot be resolved."
+  },
+  "contactsDecryptFailed": {
+    "message": "Contacts cannot be decrypted. Existing remote data was not overwritten."
+  },
+  "contactsAuthUnavailable": {
+    "message": "Contacts are temporarily unavailable until this account is authorized."
   },
   "goToAddressBook": {
     "message": "Go to Address Book"
@@ -3539,7 +3610,7 @@
     "message": "Add or Import Account"
   },
   "addOrImportAccountDescfiption": {
-    "message": " Here you can create a brand new account, import an old account you currently use on a different platform or restore an account you no longer have access to but have kept the seed phrase or keystore file."
+    "message": "Choose how you'd like to set up your account. You can create a new one, bring in an existing account, or recover one you've lost access to."
   },
   "addNewAccount": {
     "message": "Add New Account"
@@ -3589,7 +3660,7 @@
     "message": "Your asset was successfully added"
   },
   "editAccount": {
-    "message": "Edit Your Account"
+    "message": "Edit Account"
   },
   "editContact": {
     "message": "Edit Contact"
@@ -3900,6 +3971,9 @@
       }
     }
   },
+  "unlocking": {
+    "message": "Unlocking"
+  },
   "unlocked": {
     "message": "unlocked"
   },
@@ -3937,7 +4011,10 @@
     "message": "You can choose to unlock a portion of your co-staked MVRK, or all of it."
   },
   "unlockYourStakeFirstDesc": {
-    "message": "Before re-delegating, you need to unlock your assets first. After the X-day unlock period, you can choose a new validator."
+    "message": "Before re-delegating, you need to unlock your assets first. After the $1-day unlock period, you can choose a new validator.",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
   },
   "finalizeUnstake": {
     "message": "Finalize unstake"
@@ -3964,6 +4041,115 @@
     "message": "Decrease Co-Stake"
   },
   "decreaseCostakeDesc": {
-    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 4 cycles (~12 days) for your funds to fully unlock, after which they will become liquid for use."
+    "message": "Decreasing your co-stake begins the unstaking process. \nNote: It will take 3 cycles (~9 days) for your funds to fully unlock, after which they will become liquid for use."
+  },
+  "default": {
+    "message": "Default"
+  },
+  "viewHistoryTab": {
+    "message": "View History Tab"
+  },
+  "manageAccounts": {
+    "message": "Manage Accounts"
+  },
+  "finalizeUnlock": {
+    "message": "Finalize Unlock"
+  },
+  "editName": {
+    "message": "Edit Name"
+  },
+  "deleteAccount": {
+    "message": "Delete Account"
+  },
+  "pleaseNote": {
+    "message": "Please Note"
+  },
+  "hdWalletDefaultName": {
+    "message": "Wallet $groupLetter$",
+    "placeholders": {
+      "groupLetter": {
+        "content": "$1"
+      }
+    }
+  },
+  "importedGroupLabel": {
+    "message": "Imported"
+  },
+  "ledgerGroupLabel": {
+    "message": "Hardware"
+  },
+  "renameWallet": {
+    "message": "Rename Wallet"
+  },
+  "addAccount": {
+    "message": "Add account"
+  },
+  "accountAlreadyExistsWarning": {
+    "message": "Please note that some accounts from $walletName$ already exist as $oldAccountGroupName$. The next accounts in this group will be added while considering the existing ones.",
+    "placeholders": {
+      "walletName": {
+        "content": "$1"
+      },
+      "oldAccountGroupName": {
+        "content": "$2"
+      }
+    }
+  },
+  "chooseFileType": {
+    "message": "Choose File Type"
+  },
+  "importContacts": {
+    "message": "Import Contacts"
+  },
+  "exportContacts": {
+    "message": "Export Contacts"
+  },
+  "fileImportDescr": {
+    "message": "Please submit a JSON or .csv  file with the following format:"
+  },
+  "submitFileTitle": {
+    "message": "Please submit a JSON or .csv file"
+  },
+  "fileImportLimitationDescr": {
+    "message": "JSON or .csv file format,  size no more than 1MB"
+  },
+  "selectFIleOrDrag": {
+    "message": "Select a file or drag and drop here"
+  },
+  "csvFileImportDescr": {
+    "message": "When importing a .csv file, please ensure that there are 2 columns, address and name. All other info on the .csv will be ignored. You will be able to download a .csv with that info and the others available on our bookmark page."
+  },
+  "importFileSubmitSuccess": {
+    "message": "Import File submitted"
+  },
+  "json": {
+    "message": "JSON"
+  },
+  "csv": {
+    "message": ".csv"
+  },
+  "noNewContactsToAdd": {
+    "message": "Not new Contacts to add"
+  },
+  "importFileSubmitted": {
+    "message": "Import file Submitted"
+  },
+  "contactsImportSuccessMsg": {
+    "message": "Contacts successfully imported"
+  },
+  "openContacts": {
+    "message": "Open Contacts"
+  },
+  "active_in_days": {
+    "message": "Activates in $1",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "active_for_days": {
+    "message": "Active for another $1",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
   }
 }

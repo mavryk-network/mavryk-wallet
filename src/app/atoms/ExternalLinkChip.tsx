@@ -16,6 +16,7 @@ export interface ExternalLinkChipProps extends TestIDProps {
   alternativeDesign?: boolean;
   arrowIcon?: boolean;
   small?: boolean;
+  iconColor?: string;
 }
 
 export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
@@ -25,6 +26,7 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
   arrowIcon,
   small,
   alternativeDesign,
+  iconColor = 'text-blue-200',
   testID,
   testIDProperties
 }) => {
@@ -64,7 +66,7 @@ export const ExternalLinkChip: FC<ExternalLinkChipProps> = ({
       testIDProperties={testIDProperties}
     >
       <SvgIcon
-        className={clsx('text-blue-200 ', arrowIcon ? 'stroke-current' : 'fill-current', small ? 'h-3 w-3' : 'h-4 w-4')}
+        className={clsx(iconColor, arrowIcon ? 'stroke-current' : 'fill-current', small ? 'h-3 w-3' : 'h-4 w-4')}
       />
     </Anchor>
   );

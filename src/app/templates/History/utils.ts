@@ -2,26 +2,69 @@ import BigNumber from 'bignumber.js';
 
 import { MAV_TOKEN_SLUG, isMavSlug, toTokenSlug } from 'lib/assets';
 import { t } from 'lib/i18n';
-import { getPredefinedBakerName } from 'lib/temple/front/baking/utils';
+import { getPredefinedBakerProperty } from 'lib/temple/front/baking/utils';
 import { isZero, MoneyDiff } from 'lib/temple/history/helpers';
 import {
+  HistoryItemDelegationOp,
   HistoryItemOpTypeEnum,
+  HistoryItemOriginationOp,
+  HistoryItemOtherOp,
   HistoryItemStatus,
+  HistoryItemStakingOp,
   HistoryItemTransactionOp,
   StakingActions,
+  IndividualHistoryItem,
   UserHistoryItem
 } from 'lib/temple/history/types';
 
-export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
-  if (!historyItem || historyItem.operations[0].contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
+export const getMainHistoryOperation = (historyItem: UserHistoryItem | null | undefined) =>
+  historyItem?.mainOperation ?? historyItem?.operations[0];
 
-  return slug || !historyItem.operations[0]?.contractAddress
+/**
+ * The sender pays the network fees of a transfer, so an incoming transfer shows none as the viewed account's cost.
+ *
+ * @returns false only for incoming transfers sent by someone other than `address`
+ */
+export const isNetworkFeePaidByAccount = (historyItem: UserHistoryItem | null | undefined, address: string) =>
+  historyItem?.type !== HistoryItemOpTypeEnum.TransferFrom ||
+  getMainHistoryOperation(historyItem)?.source.address === address;
+
+export const toHistoryTokenSlug = (historyItem: UserHistoryItem | null | undefined, slug?: string) => {
+  const mainOperation = getMainHistoryOperation(historyItem);
+
+  if (historyItem?.displayMoneyDiffs?.length) {
+    return slug ?? historyItem.displayMoneyDiffs[0].assetSlug;
+  }
+
+  if (mainOperation?.displayMoneyDiff) return slug ?? mainOperation.displayMoneyDiff.assetSlug;
+
+  if (!historyItem || mainOperation?.contractAddress === MAV_TOKEN_SLUG) return MAV_TOKEN_SLUG;
+
+  return slug || !mainOperation?.contractAddress
     ? MAV_TOKEN_SLUG
     : toTokenSlug(
-        historyItem.operations[0].contractAddress ?? '',
-        (historyItem.operations[0] as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
+        mainOperation.contractAddress ?? '',
+        (mainOperation as HistoryItemTransactionOp)?.tokenTransfers?.tokenId
       );
 };
+
+export const buildHistoryPreviewOperations = (
+  historyItem: UserHistoryItem,
+  operStack: IndividualHistoryItem[],
+  previewSize: number
+) => {
+  if (!historyItem.mainOperation) {
+    return operStack.filter((_, i) => i < previewSize).map(op => ({ ...op, type: historyItem.type }));
+  }
+
+  const mainOperation = getMainHistoryOperation(historyItem);
+  if (!mainOperation) return [];
+
+  return [{ ...mainOperation, type: historyItem.type }, ...operStack.slice(0, Math.max(previewSize - 1, 0))];
+};
+
+export const getHistoryPreviewStackOffset = (historyItem: UserHistoryItem, previewSize: number) =>
+  historyItem.mainOperation ? Math.max(previewSize - 1, 0) : previewSize;
 
 export const alterIpfsUrl = (url?: string) => {
   if (!url || url?.split('//')?.shift() !== 'ipfs:') return url;
@@ -52,9 +95,24 @@ export const getOperationTypeI18nKeyVerb = (type: HistoryItemOpTypeEnum) => {
 };
 
 export function getAssetsFromOperations(item: UserHistoryItem | null | undefined) {
-  if (!item || item.operations.length === 1) return [toHistoryTokenSlug(item)];
+  if (item?.displayMoneyDiffs?.length) {
+    return [
+      ...new Set(
+        [
+          ...item.displayMoneyDiffs.map(({ assetSlug }) => assetSlug),
+          ...item.operations
+            .filter(operation => operation.atomicAmount !== undefined)
+            .map(operation => operation.assetSlug ?? '')
+        ].filter(Boolean)
+      )
+    ];
+  }
+
+  if (!item || item.operations.length <= 1) return [toHistoryTokenSlug(item)];
 
   const slugs = item.operations.reduce<string[]>((acc, op) => {
+    if (op.assetSlug && (op.atomicAmount !== undefined || op.displayMoneyDiff))
+      return [...new Set([...acc, op.assetSlug])];
     const tokenId = (op as HistoryItemTransactionOp).tokenTransfers?.tokenId ?? 0;
 
     let assetSlug: string = '';
@@ -74,6 +132,91 @@ export function getAssetsFromOperations(item: UserHistoryItem | null | undefined
 
   return slugs;
 }
+
+const getTransactionTargetAddress = (operation?: Partial<HistoryItemTransactionOp>) =>
+  operation?.destination?.address ?? operation?.tokenTransfers?.recipients?.[0]?.to.address;
+
+export const getHistoryOperationAddress = (
+  item: IndividualHistoryItem | null | undefined,
+  originalHistoryItem?: UserHistoryItem
+): string => {
+  if (!item) return '';
+  if (item.type === HistoryItemOpTypeEnum.Interaction && item.calledContract) return item.calledContract;
+  if (item.entrypoint === 'mint' && item.atomicAmount !== undefined) return item.contractAddress ?? '';
+
+  switch (item.type) {
+    case HistoryItemOpTypeEnum.Delegation: {
+      const delegationOp = item as HistoryItemDelegationOp;
+
+      return (
+        delegationOp.newDelegate?.address ??
+        delegationOp.prevDelegate?.address ??
+        delegationOp.source.address ??
+        delegationOp.hash
+      );
+    }
+
+    case HistoryItemOpTypeEnum.Staking: {
+      const stakingOp = item as HistoryItemStakingOp;
+
+      return stakingOp.baker?.address ?? stakingOp.sender?.address ?? stakingOp.source.address ?? stakingOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Origination: {
+      const originationOp = item as HistoryItemOriginationOp;
+
+      return originationOp.originatedContract?.address ?? originationOp.source.address ?? originationOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.TransferFrom:
+      return item.source.address ?? getTransactionTargetAddress(item as HistoryItemTransactionOp) ?? item.hash;
+
+    case HistoryItemOpTypeEnum.TransferTo:
+    case HistoryItemOpTypeEnum.Interaction:
+    case HistoryItemOpTypeEnum.Swap: {
+      const txOp = item as HistoryItemTransactionOp;
+
+      return getTransactionTargetAddress(txOp) ?? txOp.source.address ?? txOp.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Multiple: {
+      const groupedOperation =
+        getMainHistoryOperation(originalHistoryItem) ??
+        originalHistoryItem?.operations.find(operation =>
+          getTransactionTargetAddress(operation as HistoryItemTransactionOp)
+        ) ??
+        originalHistoryItem?.operations[0];
+
+      return getHistoryOperationAddress(groupedOperation, undefined) || item.source.address || item.hash;
+    }
+
+    case HistoryItemOpTypeEnum.Reveal:
+      return item.source.address ?? item.hash;
+
+    case HistoryItemOpTypeEnum.Other:
+    default: {
+      const otherOp = item as HistoryItemOtherOp;
+
+      return otherOp.destination?.address ?? otherOp.source.address ?? otherOp.hash;
+    }
+  }
+};
+
+export const getMultipleInteractionMessageData = (
+  item: HistoryItemTransactionOp,
+  originalHistoryItem?: UserHistoryItem
+) => {
+  const entrypoint = item.entrypoint?.trim() || undefined;
+
+  return {
+    entrypoint,
+    contractAddress: getHistoryOperationAddress(item, originalHistoryItem),
+    countLabel: `${originalHistoryItem ? originalHistoryItem.operations.length - 1 : 1} more`
+  } as const;
+};
+
+/** Zero amounts are hidden; unavailable amounts stay visible as "—". */
+export const isVisibleMoneyDiff = (moneyDiff: MoneyDiff) => moneyDiff.isAmountUnavailable || !isZero(moneyDiff.diff);
 
 export function getMoneyDiffsForSwap(moneyDiffs: MoneyDiff[]) {
   const diff = [...moneyDiffs.filter(m => !new BigNumber(m.diff).isZero())];
@@ -142,7 +285,7 @@ export function getStakingMessage(
   bakerAddress?: string
 ): StakingMessage {
   const sender = senderAddress ?? 'unknown';
-  const baker = getPredefinedBakerName(bakerAddress) ?? 'unknown';
+  const baker = getPredefinedBakerProperty(bakerAddress) ?? 'unknown';
 
   switch (updateType) {
     case StakingActions.stake:

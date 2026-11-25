@@ -1,4 +1,4 @@
-import type { MavrykToolkit } from '@mavrykdynamics/taquito';
+import type { MavrykToolkit } from '@mavrykdynamics/webmavryk';
 
 import { BLOCK_DURATION } from 'lib/fixed-times';
 

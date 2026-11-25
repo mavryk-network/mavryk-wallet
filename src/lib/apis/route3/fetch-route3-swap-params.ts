@@ -1,5 +1,4 @@
 import { THREE_ROUTE_SIRS_TOKEN } from 'lib/assets/three-route-tokens';
-import { EnvVars } from 'lib/env';
 import {
   Route3LiquidityBakingParamsResponse,
   Route3SwapParamsRequest,
@@ -20,11 +19,7 @@ const fetchRoute3TraditionalSwapParams = ({
   amount,
   chainsLimit = 2
 }: Route3SwapParamsRequest): Promise<Route3TraditionalSwapParamsResponse> =>
-  fetch(`https://temple.3route.io/v3/swap/${fromSymbol}/${toSymbol}/${amount}?chainsLimit=${chainsLimit}`, {
-    headers: {
-      Authorization: EnvVars.TEMPLE_WALLET_ROUTE3_AUTH_TOKEN
-    }
-  })
+  fetch(`https://temple.3route.io/v3/swap/${fromSymbol}/${toSymbol}/${amount}?chainsLimit=${chainsLimit}`)
     .then(res => res.text())
     .then(res => parser(res));
 
@@ -34,11 +29,7 @@ const fetchRoute3LiquidityBakingParams = ({
   amount,
   chainsLimit = 2
 }: Route3SwapParamsRequest): Promise<Route3LiquidityBakingParamsResponse> =>
-  fetch(`https://temple.3route.io/v3/swap-sirs/${fromSymbol}/${toSymbol}/${amount}?chainsLimit=${chainsLimit}`, {
-    headers: {
-      Authorization: EnvVars.TEMPLE_WALLET_ROUTE3_AUTH_TOKEN
-    }
-  })
+  fetch(`https://temple.3route.io/v3/swap-sirs/${fromSymbol}/${toSymbol}/${amount}?chainsLimit=${chainsLimit}`)
     .then(res => res.text())
     .then(res => parser(res));
 

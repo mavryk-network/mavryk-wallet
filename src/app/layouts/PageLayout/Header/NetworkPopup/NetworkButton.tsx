@@ -19,7 +19,14 @@ export const NetworkButton: FC<HTMLAttributes<HTMLDivElement>> = ({ onClick, cla
       onClick={onClick}
     >
       <div className="flex gap-1">
-        <NetworkIcon className="w-4 h-4" />
+        {NetworkIcon ? (
+          <NetworkIcon className="w-4 h-4" />
+        ) : (
+          <span
+            className="w-4 h-4 rounded-full border border-primary-white"
+            style={{ backgroundColor: currentNetwork.color }}
+          />
+        )}
         <ArrowIcon className="w-4 h-4 stroke-2" />
       </div>
     </section>

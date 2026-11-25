@@ -32,3 +32,8 @@ export const getMaxAmountToken = (acc: TempleAccount, balance: BigNumber, baseFe
           .minus(PENNY),
     0
   );
+
+export const getMaxStakeAmount = (balance: BigNumber, totalFee: BigNumber, decimals = 6) => {
+  const max = balance.minus(totalFee).minus(PENNY);
+  return max.isGreaterThan(0) ? max.decimalPlaces(decimals, BigNumber.ROUND_FLOOR) : new BigNumber(0);
+};

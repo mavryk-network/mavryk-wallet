@@ -181,6 +181,7 @@ module.exports = {
         'orange-add': '#F8641280',
         'primary-link': baseColors.teal[200],
         'primary-card': baseColors.gray[900],
+        'tertiary-card': '#282828',
         'primary-card-hover': baseColors.gray[890],
         'secondary-card': baseColors.gray[910],
         'primary-bg': baseColors.gray[920],

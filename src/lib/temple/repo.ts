@@ -1,4 +1,4 @@
-import { OperationContentsAndResult } from '@mavrykdynamics/taquito-rpc';
+import { OperationContentsAndResult } from '@mavrykdynamics/webmavryk-rpc';
 import Dexie from 'dexie';
 
 import { TzktOperation, TzktTokenTransfer } from 'lib/apis/tzkt';

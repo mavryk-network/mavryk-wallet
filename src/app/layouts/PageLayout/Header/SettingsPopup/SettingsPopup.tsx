@@ -5,16 +5,18 @@ import clsx from 'clsx';
 import { Anchor } from 'app/atoms';
 import { ListItemDivider } from 'app/atoms/Divider';
 import { openInFullPage, useAppEnv } from 'app/env';
+import { ReactComponent as ContactsIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as BlocksSvgIcon } from 'app/icons/blocks.svg';
 import { ReactComponent as ExitSvgIcon } from 'app/icons/exit.svg';
 import { ReactComponent as ExtendSvgIcon } from 'app/icons/extend.svg';
 import { ReactComponent as LinkSvgIcon } from 'app/icons/external-link.svg';
 import { ReactComponent as SettingsScgIcon } from 'app/icons/settings.svg';
 import { ReactComponent as SupportSvgIcon } from 'app/icons/support.svg';
+import { ReactComponent as UserGearIcon } from 'app/icons/user-gear.svg';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import { DropdownSelect } from 'app/templates/DropdownSelect/DropdownSelect';
 import { T } from 'lib/i18n';
-import { useAccount, useTempleClient } from 'lib/temple/front';
+import { canAccountUseContacts, useAccount, useTempleClient } from 'lib/temple/front';
 import { translateYModifiers } from 'lib/ui/general-modifiers';
 import { Link } from 'lib/woozie';
 
@@ -28,8 +30,9 @@ type SettingsPopupProps = {
 
 export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
   const appEnv = useAppEnv();
-  const { publicKeyHash } = useAccount();
+  const account = useAccount();
   const { lock } = useTempleClient();
+  const canUseContacts = canAccountUseContacts(account);
 
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
@@ -61,10 +64,25 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
       },
       {
         key: 'viewOnBlockExplorer',
-        linkTo: `https://nexus.mavryk.org/explorer/account/${publicKeyHash}`,
+        linkTo: `https://nexus.mavryk.org/explorer/account/${account.publicKeyHash}`,
         hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer',
+        onClick: closePopup
+      },
+      {
+        key: 'manageAccounts',
+        linkTo: `/manage-accounts`,
+        Icon: UserGearIcon,
+        i18nKey: 'manageAccounts',
+        onClick: closePopup
+      },
+      {
+        key: 'contacts',
+        linkTo: `/settings/contacts`,
+        Icon: ContactsIcon,
+        i18nKey: 'contacts',
+        disabled: !canUseContacts,
         onClick: closePopup
       },
       {
@@ -97,7 +115,7 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
         showDivider: false
       }
     ],
-    [closePopup, handleLogoutClick, handleMaximiseViewClick, publicKeyHash, toggleAccountPopup]
+    [account.publicKeyHash, canUseContacts, closePopup, handleLogoutClick, handleMaximiseViewClick, toggleAccountPopup]
   );
   return (
     <div className="text-white mt-6 flex flex-col">
@@ -115,8 +133,9 @@ export const SettingsPopup: FC<SettingsPopupProps> = ({ closePopup }) => {
 
 export const SettingsDropdown: FC = () => {
   const appEnv = useAppEnv();
-  const { publicKeyHash } = useAccount();
+  const account = useAccount();
   const { lock } = useTempleClient();
+  const canUseContacts = canAccountUseContacts(account);
 
   const [showAccountsPopup, setShowAccountsPopup] = useState(false);
 
@@ -148,11 +167,24 @@ export const SettingsDropdown: FC = () => {
       },
       {
         key: 'viewOnBlockExplorer',
-        linkTo: `https://nexus.mavryk.org/explorer/account/${publicKeyHash}`,
+        linkTo: `https://nexus.mavryk.org/explorer/account/${account.publicKeyHash}`,
         hasExternalLink: true,
         Icon: LinkSvgIcon,
         i18nKey: 'viewOnBlockExplorer'
         // onClick: closePopup
+      },
+      {
+        key: 'manageAccounts',
+        linkTo: `/manage-accounts`,
+        Icon: UserGearIcon,
+        i18nKey: 'manageAccounts'
+      },
+      {
+        key: 'contacts',
+        linkTo: `/settings/contacts`,
+        Icon: ContactsIcon,
+        i18nKey: 'contacts',
+        disabled: !canUseContacts
       },
       {
         key: 'expandView',
@@ -184,7 +216,7 @@ export const SettingsDropdown: FC = () => {
         showDivider: false
       }
     ],
-    [handleLogoutClick, handleMaximiseViewClick, publicKeyHash, toggleAccountPopup]
+    [account.publicKeyHash, canUseContacts, handleLogoutClick, handleMaximiseViewClick, toggleAccountPopup]
   );
 
   return (
@@ -203,7 +235,11 @@ export const SettingsDropdown: FC = () => {
           getKey: option => option.i18nKey,
           noItemsText: 'No Items',
           renderOptionContent: option => renderOptionContent(option, option.i18nKey === 'logout'),
-          onOptionChange: option => option.onClick?.()
+          onOptionChange: option => {
+            if (!option.disabled) {
+              option.onClick?.();
+            }
+          }
         }}
       />
 
@@ -212,7 +248,10 @@ export const SettingsDropdown: FC = () => {
   );
 };
 
-const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListItemWithNavigateprops, last: boolean) => {
+const renderOptionContent = (
+  { Icon, i18nKey, linkTo, hasExternalLink, disabled }: ListItemWithNavigateprops,
+  last: boolean
+) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => {
@@ -227,7 +266,8 @@ const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListIte
     className: clsx(
       'relative p-4 hover:bg-primary-card-hover text-base-plus text-white text-left w-full',
       'bg-primary-card flex',
-      styles.outlineHover
+      styles.outlineHover,
+      disabled && 'opacity-50 pointer-events-none'
     ),
     onMouseEnter: handleMouseEnter,
     onMouseLeave: handleMouseLeave,
@@ -248,5 +288,5 @@ const renderOptionContent = ({ Icon, i18nKey, linkTo, hasExternalLink }: ListIte
     return <Anchor href={linkTo} {...itemProps} />;
   }
 
-  return linkTo ? <Link to={linkTo} {...itemProps} /> : <div {...itemProps} />;
+  return linkTo && !disabled ? <Link to={linkTo} {...itemProps} /> : <div {...itemProps} />;
 };

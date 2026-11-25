@@ -10,3 +10,11 @@
 .verifyAddress ol li::before {
   content: counter(list-counter) '. ';
 }
+
+/* utility classes */
+
+.breakHash {
+  text-align: end;
+  word-break: break-all;
+  max-width: 209px;
+}

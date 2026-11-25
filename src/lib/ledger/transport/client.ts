@@ -4,6 +4,8 @@ import Transport from '@ledgerhq/hw-transport';
 import type { TransportBridge } from './bridge';
 import { BridgeExchangeRequest, TransportType } from './types';
 
+const LEDGER_EXCHANGE_TIMEOUT = 40_000;
+
 export class TempleLedgerTransport extends Transport {
   static async isSupported() {
     return true;
@@ -28,6 +30,7 @@ export class TempleLedgerTransport extends Transport {
   constructor(transportType: TransportType = TransportType.U2F) {
     super();
     this.transportType = transportType;
+    this.setExchangeTimeout(LEDGER_EXCHANGE_TIMEOUT);
   }
 
   async exchange(apdu: Buffer) {

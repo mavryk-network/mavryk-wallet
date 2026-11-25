@@ -11,110 +11,11 @@ import { T, toLocalFormat } from 'lib/i18n';
 import { RECOMMENDED_BAKER_ADDRESS } from 'lib/known-bakers';
 import { MAVEN_METADATA } from 'lib/metadata';
 import { useRelevantAccounts, useAccount, useNetwork, useKnownBaker } from 'lib/temple/front';
+import { calculateCapacities } from 'lib/temple/front/baking/utils';
 import { atomsToTokens } from 'lib/temple/helpers';
 import { TempleAccount } from 'lib/temple/types';
 
 import { OpenInExplorerChip } from './OpenInExplorerChip';
-
-// const mockedBaker: any = {
-//   address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//   name: 'Everstake',
-//   logo: 'https://services.tzkt.io/v1/avatars/tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//   balance: 12923.010257,
-//   stakingBalance: 113315.976957,
-//   stakingCapacity: 114000,
-//   maxStakingBalance: 114000,
-//   freeSpace: 684.0230429999938,
-//   fee: 0.04,
-//   minDelegation: 5,
-//   payoutDelay: 6,
-//   payoutPeriod: 1,
-//   openForDelegation: true,
-//   estimatedRoi: 0.06024,
-//   serviceType: 'tezos_only',
-//   serviceHealth: 'active',
-//   payoutTiming: 'suspicious',
-//   payoutAccuracy: 'inaccurate',
-//   audit: '64e7621dd0970a602a90d4b1',
-//   insuranceCoverage: 0,
-//   config: {
-//     address: 'tz1fXRwGcgoz81Fsksx9L2rVD5wE6CpTMkLz',
-//     fee: [
-//       {
-//         cycle: 586,
-//         value: 0.04
-//       },
-//       {
-//         cycle: 0,
-//         value: 0.15
-//       }
-//     ],
-//     minDelegation: [
-//       {
-//         cycle: 586,
-//         value: 5
-//       },
-//       {
-//         cycle: 0,
-//         value: 50
-//       }
-//     ],
-//     payoutFee: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ],
-//     payoutDelay: [
-//       {
-//         cycle: 0,
-//         value: 6
-//       }
-//     ],
-//     payoutPeriod: [
-//       {
-//         cycle: 0,
-//         value: 1
-//       }
-//     ],
-//     minPayout: [
-//       {
-//         cycle: 0,
-//         value: 0
-//       }
-//     ],
-//     rewardStruct: [
-//       {
-//         cycle: 0,
-//         value: 21
-//       }
-//     ],
-//     payoutRatio: [
-//       {
-//         cycle: 0,
-//         value: 666
-//       }
-//     ],
-//     maxStakingThreshold: [
-//       {
-//         cycle: 0,
-//         value: 1
-//       }
-//     ],
-//     openForDelegation: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ],
-//     allocationFee: [
-//       {
-//         cycle: 0,
-//         value: true
-//       }
-//     ]
-//   }
-// };
 
 type BakerBannerProps = HTMLAttributes<HTMLDivElement> & {
   bakerPkh: string;
@@ -141,6 +42,15 @@ const BakerBanner = memo<BakerBannerProps>(
     const allAccounts = useRelevantAccounts();
     const account = useAccount();
     const { data: baker } = useKnownBaker(bakerPkh);
+
+    const { delegatedFreeSpace } = useMemo(() => {
+      const { stakedBalance, delegatedBalance, externalStakedBalance } = baker ?? {
+        stakedBalance: 0,
+        delegatedBalance: 0,
+        externalStakedBalance: 0
+      };
+      return calculateCapacities({ stakedBalance, delegatedBalance, externalStakedBalance });
+    }, [baker]);
 
     const bakerAcc = useMemo(
       () => allAccounts.find(acc => acc.publicKeyHash === bakerPkh) ?? null,
@@ -205,31 +115,31 @@ const BakerBanner = memo<BakerBannerProps>(
                 }
               ]
             : [
-                {
-                  i18nKey: 'upTime',
-                  child: (
-                    <>
-                      {/* {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
-                        decimalPlaces: 2
-                      })} */}
-                      NA
-                    </>
-                  )
-                },
+                // {
+                //   i18nKey: 'upTime',
+                //   child: (
+                //     <>
+                //       {/* {toLocalFormat(new BigNumber(baker.estimatedRoi ?? 0).times(100), {
+                //         decimalPlaces: 2
+                //       })} */}
+                //       NA
+                //     </>
+                //   )
+                // },
                 { ...feeTableItem },
                 {
                   i18nKey: 'space',
                   child: (
-                    <>
+                    <div className={classNames(delegatedFreeSpace < 0 && 'text-primary-error')}>
                       <Money smallFractionFont={false} shortened>
                         {bakerSpace}
                       </Money>
-                    </>
+                    </div>
                   )
                 }
               ]
           : [],
-      [alternativeTableData, baker, feeTableItem]
+      [alternativeTableData, baker, feeTableItem, bakerSpace, delegatedFreeSpace]
     );
 
     return (
@@ -250,13 +160,13 @@ const BakerBanner = memo<BakerBannerProps>(
                       <img
                         src={baker.logo}
                         alt={baker.address}
-                        className="flex-shrink-0 bg-white rounded-full"
+                        className="flex-shrink-0 bg-transparent rounded-full"
                         style={{ minHeight: '2rem', width: 59, height: 59 }}
                       />
                     ) : (
                       // @ts-expect-error // hardcoded svg logos for the time being
                       <baker.logo
-                        className="flex-shrink-0 bg-white rounded-full"
+                        className="flex-shrink-0 bg-transparent rounded-full"
                         style={{ minHeight: '2rem', width: 59, height: 59 }}
                       />
                     )}
@@ -353,6 +263,15 @@ const BakerBanner = memo<BakerBannerProps>(
 export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
   const { data: baker } = useKnownBaker(bakerPkh);
 
+  const { delegatedFreeSpace } = useMemo(() => {
+    const { stakedBalance, delegatedBalance, externalStakedBalance } = baker ?? {
+      stakedBalance: 0,
+      delegatedBalance: 0,
+      externalStakedBalance: 0
+    };
+    return calculateCapacities({ stakedBalance, delegatedBalance, externalStakedBalance });
+  }, [baker]);
+
   const isRecommendedBaker = bakerPkh === RECOMMENDED_BAKER_ADDRESS;
   const bakerSpace = useMemo(() => atomsToTokens(baker?.freeSpace ?? 0, MAVEN_METADATA.decimals), [baker?.freeSpace]);
 
@@ -361,12 +280,11 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
       <div className="flex items-center gap-2 mb-4">
         <Identicon type="bottts" hash={baker.address} size={32} className="shadow-xs rounded-full flex-shrink-0" />
 
-        <div className="flex flex-col items-start flex-1 relative gap-1">
+        <div className="flex flex-col items-start flex-1 relative gap-1 min-w-0">
           <Name
-            style={{
-              maxWidth: '8rem'
-            }}
-            className="text-base-plus text-white"
+            style={{ maxWidth: '100%' }}
+            className="text-base-plus text-white truncate"
+            title={baker.name || baker.address}
             testID={BakingSectionSelectors.delegatedBakerName}
           >
             {baker.name || baker.address}
@@ -388,7 +306,7 @@ export const CoStakeBakerBanner: FC<{ bakerPkh: string }> = ({ bakerPkh }) => {
         <span>
           <T id="bakerFreeSpace" />
         </span>
-        <div className="flex items-center gap-1">
+        <div className={classNames('flex items-center gap-1', delegatedFreeSpace < 0 && 'text-primary-error')}>
           <Money smallFractionFont={false}>{bakerSpace}</Money>
           <span>{MAVEN_METADATA.symbol}</span>
         </div>

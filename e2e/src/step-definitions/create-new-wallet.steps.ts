@@ -14,3 +14,7 @@ Given(/I save my mnemonic/, { timeout: MEDIUM_TIMEOUT }, async () => {
 Given(/I verify my mnemonic/, async () => {
   await Pages.VerifyMnemonic.enterSeedPhraseVerification();
 });
+
+Given(/I accept beta agreement on the Register Form page/, { timeout: MEDIUM_TIMEOUT }, async () => {
+  await Pages.SetWallet.betaAgreement.click();
+});

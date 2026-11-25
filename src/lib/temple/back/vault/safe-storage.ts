@@ -140,3 +140,18 @@ export async function encryptAndSaveManyLegacy(items: [string, any][], passKey: 
 
   await saveEncrypted(encItems);
 }
+
+/**
+ * @deprecated
+ */
+export async function getPlainLegacy<T>(key: string): Promise<T | undefined> {
+  const items = await browser.storage.local.get([key]);
+  return items[key];
+}
+
+/**
+ * @deprecated
+ */
+export function savePlainLegacy<T>(key: string, value: T) {
+  return browser.storage.local.set({ [key]: value });
+}

@@ -1,7 +1,8 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import clsx from 'clsx';
 
+import { FileTransferProvider } from 'app/compound/FileTransfer';
 import { useAppEnv } from 'app/env';
 import { ReactComponent as AddressBookIcon } from 'app/icons/addressBook.svg';
 import { ReactComponent as AppsIcon } from 'app/icons/apps.svg';
@@ -13,20 +14,21 @@ import { ReactComponent as RoundedMinusIcon } from 'app/icons/rounded-minus.svg'
 import { ReactComponent as RoundedPlusIcon } from 'app/icons/rounded-plus.svg';
 import { ReactComponent as SettingsIcon } from 'app/icons/settings.svg';
 import { ReactComponent as StickerIcon } from 'app/icons/sticker.svg';
-import { ReactComponent as SyncIcon } from 'app/icons/sync.svg';
 import PageLayout from 'app/layouts/PageLayout';
 import { ListItemWithNavigate, ListItemWithNavigateprops } from 'app/molecules/ListItemWithNavigate';
 import About from 'app/templates/About/About';
 import ActivateAccount from 'app/templates/ActivateAccount/ActivateAccount';
-import { AddContact } from 'app/templates/AddressBook/AddContact';
-import { AddressBook } from 'app/templates/AddressBook/AddressBook';
+import { Contacts } from 'app/templates/Contacts/Contacts';
+import { AddContact } from 'app/templates/Contacts/screens/AddContact';
+import { ImportContacts } from 'app/templates/Contacts/screens/ImportContacts/ImportContacts';
 import DAppSettings from 'app/templates/DAppSettings/DAppSettings';
 // import HelpAndCommunity from 'app/templates/HelpAndCommunity';
 import RemoveAccount from 'app/templates/RemoveAccount/RemoveAccount';
 import RevealSecret from 'app/templates/RevealSecrets/RevealSecret';
 import GeneralSettings from 'app/templates/SettingsGeneral';
-import SyncSettings from 'app/templates/Synchronization/SyncSettings';
 import { T } from 'lib/i18n';
+import { canAccountUseContacts, useAccount } from 'lib/temple/front';
+import { navigate } from 'lib/woozie';
 
 import ConnectLedger from '../ConnectLedger/ConnectLedger';
 
@@ -44,6 +46,7 @@ export type TabComponentProps = {
 
 const RevealPrivateKey: FC = () => <RevealSecret reveal="private-key" />;
 const RevealSeedPhrase: FC = () => <RevealSecret reveal="seed-phrase" />;
+const CONTACTS_TAB_LINKS = new Set(['contacts', 'add-contact', 'import-contacts']);
 
 type Tab = ListItemWithNavigateprops & {
   Component: React.FC<TabComponentProps>;
@@ -61,10 +64,10 @@ const TABS: Tab[] = [
     fillIcon: false
   },
   {
-    linkTo: 'address-book',
-    i18nKey: 'addressBook',
+    linkTo: 'contacts',
+    i18nKey: 'contacts',
     Icon: AddressBookIcon,
-    Component: AddressBook,
+    Component: Contacts,
     testID: SettingsSelectors.addressBookButton,
     fillIcon: false
   },
@@ -75,6 +78,14 @@ const TABS: Tab[] = [
     Component: AddContact,
     hidden: true,
     testID: SettingsSelectors.addContactButton
+  },
+  {
+    linkTo: 'import-contacts',
+    i18nKey: 'importContacts',
+    Icon: null,
+    Component: ImportContacts,
+    hidden: true,
+    testID: SettingsSelectors.importContactsButton
   },
   {
     linkTo: 'dapps',
@@ -151,8 +162,27 @@ const TABS: Tab[] = [
 
 const Settings: FC<SettingsProps> = ({ tabSlug }) => {
   const { popup } = useAppEnv();
-  const activeTab = useMemo(() => TABS.find(t => t.linkTo === tabSlug) || null, [tabSlug]);
+  const account = useAccount();
+  const canUseContacts = canAccountUseContacts(account);
+  const isContactsRoute = tabSlug ? CONTACTS_TAB_LINKS.has(tabSlug) : false;
+  const activeTab = useMemo(() => {
+    const tab = TABS.find(t => t.linkTo === tabSlug) || null;
+
+    if (tab?.linkTo && CONTACTS_TAB_LINKS.has(tab.linkTo) && !canUseContacts) {
+      return null;
+    }
+
+    return tab;
+  }, [canUseContacts, tabSlug]);
   const [toolbarRightSidedComponent, setToolbarRightSidedComponent] = useState<JSX.Element | null>(null);
+
+  // Redirect watch-only accounts away from contacts routes because they cannot own encrypted contacts.
+  // This manages in-app navigation only; no cleanup is needed because navigation is a one-shot side effect.
+  useEffect(() => {
+    if (isContactsRoute && !canUseContacts) {
+      navigate('/settings');
+    }
+  }, [canUseContacts, isContactsRoute]);
 
   let tId = activeTab?.i18nKey ?? 'settings';
   tId = activeTab?.i18nKey === 'connectWithLedger' ? 'connectLedger' : tId;
@@ -170,18 +200,25 @@ const Settings: FC<SettingsProps> = ({ tabSlug }) => {
     >
       <div className="h-full flex-1 flex flex-col">
         <div className="h-full flex-1 flex flex-col">
-          {activeTab ? (
-            <activeTab.Component
-              setToolbarRightSidedComponent={setToolbarRightSidedComponent}
-              toolbarRightSidedComponent={toolbarRightSidedComponent}
-            />
-          ) : (
-            <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
-              {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
-                <ListItemWithNavigate key={linkTo} {...tab} linkTo={'/settings/'.concat(linkTo ?? '')} />
-              ))}
-            </ul>
-          )}
+          <FileTransferProvider>
+            {activeTab ? (
+              <activeTab.Component
+                setToolbarRightSidedComponent={setToolbarRightSidedComponent}
+                toolbarRightSidedComponent={toolbarRightSidedComponent}
+              />
+            ) : (
+              <ul className={clsx('flex flex-col pb-8', !popup && 'px-12')}>
+                {TABS.filter(tab => !tab.hidden).map(({ linkTo, ...tab }) => (
+                  <ListItemWithNavigate
+                    key={linkTo}
+                    {...tab}
+                    linkTo={'/settings/'.concat(linkTo ?? '')}
+                    disabled={linkTo === 'contacts' && !canUseContacts}
+                  />
+                ))}
+              </ul>
+            )}
+          </FileTransferProvider>
         </div>
       </div>
     </PageLayout>

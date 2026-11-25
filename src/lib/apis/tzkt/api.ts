@@ -1,6 +1,7 @@
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HttpTransportType } from '@microsoft/signalr';
 import retry from 'async-retry';
 import axios, { AxiosError } from 'axios';
+import { z } from 'zod';
 
 import { toTokenSlug } from 'lib/assets';
 import { KYC_CONTRACTS } from 'lib/route3/constants';
@@ -26,8 +27,7 @@ import { calcTzktAccountSpendableTezBalance } from './utils';
 
 export const TZKT_API_BASE_URLS = {
   [TempleChainId.Mainnet]: 'https://api.mavryk.network/v1',
-  [TempleChainId.Atlas]: 'https://atlasnet.api.mavryk.network/v1',
-  [TempleChainId.Basenet]: 'https://api.mavryk.network/basenet/v1',
+  [TempleChainId.Basenet]: 'https://basenet.api.mavryk.network/v1',
   [TempleChainId.Weekly]: 'https://api.mavryk.network/weeklynet/v1'
 };
 
@@ -41,7 +41,13 @@ export function isKnownChainId(chainId?: string | null): chainId is TzktApiChain
 
 export const createWsConnection = (chainId: string): TzktHubConnection | undefined => {
   if (isKnownChainId(chainId)) {
-    return new HubConnectionBuilder().withUrl(`${TZKT_API_BASE_URLS[chainId]}/ws`).build();
+    // Mavryk hubs accept direct WebSockets; the negotiated connection-token path returns transport 404s.
+    return new HubConnectionBuilder()
+      .withUrl(`${TZKT_API_BASE_URLS[chainId]}/ws`, {
+        skipNegotiation: true,
+        transport: HttpTransportType.WebSockets
+      })
+      .build();
   }
 
   return undefined;
@@ -58,10 +64,16 @@ api.interceptors.response.use(
   }
 );
 
-async function fetchGet<R>(chainId: TzktApiChainId, endpoint: string, params?: Record<string, unknown>) {
+async function fetchGet<R>(
+  chainId: TzktApiChainId,
+  endpoint: string,
+  params?: Record<string, unknown>,
+  headers?: Record<string, string>
+) {
   const { data } = await api.get<R>(endpoint, {
     baseURL: TZKT_API_BASE_URLS[chainId],
-    params
+    params,
+    headers
   });
 
   return data;
@@ -86,7 +98,7 @@ type GetOperationsBaseParams = {
 
 export const fetchGetAccountOperationByHash = async (
   chainId: TzktApiChainId,
-  accountAddress: string,
+  _accountAddress: string,
   hash: string | undefined
 ) => {
   try {
@@ -135,14 +147,15 @@ export type GetOperationsTransactionsParams = GetOperationsBaseParams & {
   [key in `parameter.${'to' | 'in' | '[*].in' | '[*].txs.[*].to_'}`]?: string;
 } & {
   [key in `sort${'' | '.desc'}`]?: 'id' | 'level';
-} & { type?: TzktOperationType };
-
-export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+} & {
   type?: TzktOperationType;
   hasInternals?: boolean;
-  entrypoint?: string;
   'entrypoint.null'?: boolean;
   'entrypoint.ne'?: string;
+};
+
+export type ExtendedGetOperationsTransactionsParams = Omit<GetOperationsTransactionsParams, 'entrypoint'> & {
+  entrypoint?: string;
   'parameter.originatedContract.null'?: boolean;
   'sender.eq'?: string;
   'target.eq'?: string;
@@ -181,6 +194,7 @@ export function fetchTzktAccountAssets(account: string, chainId: string, fungibl
 
   const recurse = async (accum: TzktAccountAsset[], offset: number): Promise<TzktAccountAsset[]> => {
     const data = await fetchTzktAccountAssetsPage(account, chainId, offset, fungible);
+    if (!Array.isArray(data)) throw new Error('Invalid account assets page');
     if (!data.length) return accum;
 
     if (data.length === TZKT_MAX_QUERY_ITEMS_LIMIT)
@@ -300,14 +314,22 @@ export async function refetchOnce429<R>(fetcher: () => Promise<R>, delayAroundIn
   }
 }
 
+/**
+ * Fresh spendable native balance. Bypasses the HTTP cache: Chrome otherwise holds this request behind an identical
+ * in-flight `/accounts/{address}` request (the delegate lookup on Home) until that response arrives.
+ */
 export const fetchTezosBalanceFromTzkt = async (account: string, chainId: TzktApiChainId) =>
-  getAccountStatsFromTzkt(account, chainId).then(calcTzktAccountSpendableTezBalance);
+  fetchGet<TzktAccount>(chainId, `/accounts/${account}`, undefined, { 'Cache-Control': 'no-cache' }).then(
+    calcTzktAccountSpendableTezBalance
+  );
 
 export const fetchAllAssetsBalancesFromTzkt = async (account: string, chainId: TzktApiChainId) => {
   const balances: StringRecord = {};
 
   await (async function recourse(offset: number) {
-    const data = await fetchAssetsBalancesFromTzktOnce(account, chainId, offset);
+    const data = z
+      .array(z.tuple([z.string().min(1), z.string().regex(/^\d+$/), z.string().regex(/^\d+$/)]))
+      .parse(await fetchAssetsBalancesFromTzktOnce(account, chainId, offset));
 
     for (const [address, tokenId, balance] of data) {
       const slug = toTokenSlug(address, tokenId);
@@ -335,26 +357,34 @@ const fetchAssetsBalancesFromTzktOnce = (account: string, chainId: TzktApiChainI
 export const getAccountStatsFromTzkt = async (account: string, chainId: TzktApiChainId) =>
   fetchGet<TzktAccount>(chainId, `/accounts/${account}`);
 
+type KYCContractStorage = {
+  memberRegistrarLedger?: number;
+  memberKycLedger?: number;
+};
+
 export const getKYCStatus = async (pkh: string, chainId: TzktApiChainId | string | null | undefined) => {
   try {
     if (chainId && isKnownChainId(chainId)) {
-      const kycAdress = KYC_CONTRACTS.get(chainId);
-      const storageRes = await fetchGet<any>(chainId, `/contracts/${kycAdress}/storage/`);
-      const bigMapId = storageRes.memberLedger;
+      const kycAddress = KYC_CONTRACTS.get(chainId);
 
-      const contractData = await fetchGet<any>(chainId, `/bigmaps/${bigMapId}/keys/${pkh}`);
+      if (!kycAddress) return false;
+      const storageRes = await fetchGet<KYCContractStorage>(chainId, `/contracts/${kycAddress}/storage/`);
+      // memberLedger is keyed by (registrar, member); this index is keyed by member address.
+      const memberRegistrarLedgerBigMapId = storageRes.memberRegistrarLedger;
+      const memberKycLedgerBigMapId = storageRes.memberKycLedger;
 
-      // if no data than no KYCed user
-      if (!contractData) return false;
+      if (!memberRegistrarLedgerBigMapId || !memberKycLedgerBigMapId) return false;
 
-      const isKYCAddress = contractData;
+      const [memberData, memberKycData] = await Promise.all([
+        fetchGet<unknown>(chainId, `/bigmaps/${memberRegistrarLedgerBigMapId}/keys/${pkh}`),
+        fetchGet<unknown>(chainId, `/bigmaps/${memberKycLedgerBigMapId}/keys/${pkh}`)
+      ]);
 
-      return Boolean(isKYCAddress);
+      return Boolean(memberData && memberKycData);
     }
 
     return false;
-  } catch (e) {
-    console.log(e);
+  } catch {
     return false;
   }
 };

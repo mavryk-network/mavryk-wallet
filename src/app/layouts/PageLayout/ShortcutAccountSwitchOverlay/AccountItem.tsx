@@ -4,7 +4,7 @@ import { emptyFn, isDefined } from '@rnw-community/shared';
 import classNames from 'clsx';
 
 import { Name, Button, HashShortView, Money, Identicon } from 'app/atoms';
-import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
+// import AccountTypeBadge from 'app/atoms/AccountTypeBadge';
 import Balance from 'app/templates/Balance';
 import { setAnotherSelector, setTestID } from 'lib/analytics';
 import { TempleAccount } from 'lib/temple/types';
@@ -88,7 +88,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({
             )}
           </Balance>
 
-          <AccountTypeBadge account={account} />
+          {/* <AccountTypeBadge account={account} /> */}
         </div>
       </div>
     </Button>

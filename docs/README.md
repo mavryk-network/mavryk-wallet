@@ -2,6 +2,10 @@
 
 This doc describes how Mavryk Wallet works internally.
 
+## Feature Reports
+
+- [Contacts v3 architecture](contacts-v3.md)
+
 ## Architecture
 
 The application consists of three main parts: UI scripts, one Background script, and the Content script that is injected on every page.
@@ -19,6 +23,7 @@ All the communications in the application work through the internal `Intercom` m
 
 - Top-level function set.
 - Work with Store, browser API and can call the methods of the current Vault instance.
+- New-wallet bootstrap authenticates the spawned account before broadcasting `unlocked`; the regular unlock path still broadcasts first and refreshes auth in the background on a best-effort basis.
 
 ### Store
 
@@ -38,6 +43,18 @@ All the communications in the application work through the internal `Intercom` m
 ## DApps
 
 To communicate with DApps, the wallet inherits the behavior of the [tzip10](https://gitlab.com/tzip/tzip/-/blob/master/proposals/tzip-10/tzip-10.md) standard: first - permissions, then - transaction requests.
+
+### Custom RPC networks
+
+A DApp may request a custom network (`{ name, rpc }`) instead of a built-in network id. The wallet accepts it only when:
+
+- The URL is `https:`. Plain `http:` is accepted only for `localhost`, `127.0.0.1` and `[::1]`.
+- The URL has no query string (`?`), fragment (`#`) or credentials (`user:password@`). Provider API keys must not be passed in the URL.
+- The RPC answers with a chain id when the user opens the connect prompt.
+
+Otherwise the permission request fails with `INVALID_PARAMS`. The session is bound to that chain id: an operation or broadcast fails with `INVALID_PARAMS` once the RPC reports a different chain, and the DApp must reconnect. Sessions with a custom RPC saved before this rule existed are treated as not connected.
+
+If the RPC reports the chain of the user's selected network or of a built-in network, the wallet uses its own RPC for that chain. For any other chain, before signing, the wallet checks that the operation's branch is unknown to the built-in Mavryk networks, and refuses to sign when a built-in network knows the branch or cannot be reached. This check usually takes one RPC round trip. It takes about one block longer when a built-in node may be behind the head, and signing is refused if that node has still not caught up. To sign for a local node without this check, select that node as the wallet network.
 
 ## Transaction flow
 

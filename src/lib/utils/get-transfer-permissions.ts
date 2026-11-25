@@ -1,4 +1,4 @@
-import { MavrykToolkit, TransferParams } from '@mavrykdynamics/taquito';
+import { MavrykToolkit, TransferParams } from '@mavrykdynamics/webmavryk';
 import { BigNumber } from 'bignumber.js';
 
 import { ZERO } from 'lib/utils/numbers';

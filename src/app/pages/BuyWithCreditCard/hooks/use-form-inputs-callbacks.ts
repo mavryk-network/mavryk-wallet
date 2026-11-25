@@ -3,9 +3,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { isDefined } from '@rnw-community/shared';
 import BigNumber from 'bignumber.js';
 import debounce from 'debounce-promise';
-import { useDispatch } from 'react-redux';
 
-import { loadAllCurrenciesActions, updatePairLimitsActions } from 'app/store/buy-with-credit-card/actions';
 import { useAllPairsLimitsSelector } from 'app/store/buy-with-credit-card/selectors';
 import { mergeProvidersLimits } from 'lib/buy-with-credit-card/merge-limits';
 import { TopUpProviderId } from 'lib/buy-with-credit-card/top-up-provider-id.enum';
@@ -14,6 +12,7 @@ import {
   TopUpInputInterface,
   TopUpOutputInterface
 } from 'lib/buy-with-credit-card/topup.interface';
+import { useRefreshCardData } from 'lib/buy-with-credit-card/use-buy-with-credit-card.query';
 
 import { useBuyWithCreditCardForm } from './use-buy-with-credit-card-form';
 import { usePaymentProviders } from './use-payment-providers';
@@ -28,7 +27,7 @@ export const useFormInputsCallbacks = (
   const { inputAmount, inputCurrency, outputToken, topUpProvider } = formValues;
   const outputCalculationDataRef = useRef({ inputAmount, inputCurrency, outputToken });
   const manuallySelectedProviderIdRef = useRef<TopUpProviderId>();
-  const dispatch = useDispatch();
+  const refreshCardData = useRefreshCardData();
   const allPairsLimits = useAllPairsLimitsSelector();
 
   const setPaymentProvider = useCallback(
@@ -116,14 +115,13 @@ export const useFormInputsCallbacks = (
   );
 
   const refreshForm = useCallback(() => {
-    dispatch(loadAllCurrenciesActions.submit());
-    dispatch(updatePairLimitsActions.submit({ fiatSymbol: inputCurrency.code, cryptoSymbol: outputToken.code }));
+    void refreshCardData(inputCurrency.code, outputToken.code);
     if (!formIsLoading) {
       outputCalculationDataRef.current = { inputAmount, inputCurrency, outputToken };
       setFormIsLoading(true);
       updateOutput(inputAmount, inputCurrency, outputToken);
     }
-  }, [dispatch, inputCurrency, outputToken, updateOutput, formIsLoading, inputAmount]);
+  }, [refreshCardData, inputCurrency, outputToken, updateOutput, formIsLoading, inputAmount]);
 
   return {
     handleInputAssetChange,

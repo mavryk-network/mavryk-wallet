@@ -1,5 +1,5 @@
 import retry from 'async-retry';
-import { AddressBookSelectors } from 'src/app/templates/AddressBook/AddressBook.selectors';
+import { AddressBookSelectors } from 'src/app/templates/Contacts/Contacts.selectors';
 
 import { Page } from 'e2e/src/classes/page.class';
 import { createPageElement, findElement } from 'e2e/src/utils/search.utils';

@@ -1,7 +1,7 @@
 /* eslint-disable no-type-assertion/no-type-assertion */
 import { useState, useRef, useEffect } from 'react';
 
-import { RpcClientInterface } from '@mavrykdynamics/taquito-rpc';
+import { RpcClientInterface } from '@mavrykdynamics/webmavryk-rpc';
 
 import { useTezos } from 'lib/temple/front';
 

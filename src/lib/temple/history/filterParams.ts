@@ -1,4 +1,5 @@
 import { ExtendedGetOperationsTransactionsParams, GetOperationsTransactionsParams } from 'lib/apis/tzkt/api';
+import { WalletHistoryFilter } from 'mavryk/api/history';
 
 import { HistoryItemOpTypeEnum } from './types';
 
@@ -63,10 +64,13 @@ export const mergeOpParams = (
   }
 
   // Merge all other parameters except `type`
-  const keys = new Set([...Object.keys(prevParams), ...Object.keys(params)]);
+  const keys = new Set([
+    ...Object.keys(prevParams),
+    ...Object.keys(params)
+  ] as (keyof ExtendedGetOperationsTransactionsParams)[]);
   keys.delete('type');
 
-  keys.forEach(key => {
+  keys.forEach(<K extends keyof ExtendedGetOperationsTransactionsParams>(key: K) => {
     const prevValue = prevParams[key];
     const newValue = params[key];
 
@@ -171,7 +175,6 @@ const getReturnedTransactionParams = (
   let internalOperationParams = { ...operationParams };
   const hasTarget = Boolean(internalOperationParams.target);
   const hasSender = Boolean(internalOperationParams.sender);
-  console.log(internalOperationParams, 'internalOperationParams');
 
   // params for received transactions
   if (internalOperationParams['target'] === accountAddress) {
@@ -226,4 +229,56 @@ const createQuery = (accountAddress: string, tokenId: number, isFrom: boolean | 
   return {
     'parameter.[*].in': filter
   };
+};
+
+export const getHistoryItemTypesFromParams = (
+  accountAddress: string,
+  operationParams?: GetOperationsTransactionsParams
+): HistoryItemOpTypeEnum[] => {
+  if (!operationParams || !Object.keys(operationParams).length) return [];
+
+  const types = new Set<HistoryItemOpTypeEnum>();
+  const operationType = operationParams.type;
+
+  if (operationType?.includes('delegation')) types.add(HistoryItemOpTypeEnum.Delegation);
+  if (operationType?.includes('staking')) types.add(HistoryItemOpTypeEnum.Staking);
+  if (operationType?.includes('origination')) types.add(HistoryItemOpTypeEnum.Origination);
+  if (operationType?.includes('reveal')) types.add(HistoryItemOpTypeEnum.Reveal);
+  if (operationType?.includes('other')) types.add(HistoryItemOpTypeEnum.Other);
+
+  if (operationParams.entrypoint === 'swap') types.add(HistoryItemOpTypeEnum.Swap);
+  if (operationParams['entrypoint.ne'] === 'transfer' || operationParams['entrypoint.null'] === false) {
+    types.add(HistoryItemOpTypeEnum.Interaction);
+  }
+
+  if (operationParams.sender === accountAddress) types.add(HistoryItemOpTypeEnum.TransferTo);
+  if (operationParams.target === accountAddress) types.add(HistoryItemOpTypeEnum.TransferFrom);
+
+  return Array.from(types);
+};
+
+export const getBackendHistoryFilters = (
+  accountAddress: string,
+  operationParams?: GetOperationsTransactionsParams
+): WalletHistoryFilter | undefined => {
+  if (!operationParams || !Object.keys(operationParams).length) return undefined;
+
+  if (operationParams.sender === accountAddress) return 'sent';
+  if (operationParams.target === accountAddress) return 'received';
+  if (operationParams.type?.includes('delegation')) return 'delegation';
+  if (operationParams.type?.includes('staking')) return 'staking';
+  if (operationParams.type?.includes('origination')) return 'origination';
+  if (operationParams.type?.includes('reveal')) return 'reveal';
+  if (operationParams.entrypoint === 'swap') return 'interaction';
+  if (operationParams['entrypoint.ne'] === 'transfer' || operationParams['entrypoint.null'] === false) {
+    return 'interaction';
+  }
+
+  return undefined;
+};
+
+export const shouldApplyLocalTypeFilter = (operationParams?: GetOperationsTransactionsParams) => {
+  if (!operationParams || !Object.keys(operationParams).length) return false;
+
+  return operationParams.entrypoint === 'swap' || operationParams.type?.includes('other') === true;
 };

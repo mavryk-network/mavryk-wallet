@@ -1,4 +1,4 @@
-import { ContractAbstraction, ContractProvider, ContractMethod } from '@mavrykdynamics/taquito';
+import { ContractAbstraction, ContractProvider, ContractMethod } from '@mavrykdynamics/webmavryk';
 interface Name {
   name: string;
 }

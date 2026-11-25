@@ -20,7 +20,6 @@ import { TzktConnectionProvider } from 'lib/temple/front/tzkt-connection';
 import { DialogsProvider } from 'lib/ui/dialog';
 import * as Woozie from 'lib/woozie';
 
-// import { LoadHypelabScript } from './load-hypelab-script';
 import { StoreProvider } from './store/provider';
 
 interface Props extends React.PropsWithChildren {

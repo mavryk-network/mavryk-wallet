@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import { EnvVars } from 'lib/env';
-
 export enum CurrencyType {
   Fiat = 'fiat',
   Crypto = 'crypto'
@@ -54,16 +52,11 @@ interface QuoteResponse {
 
 export const MOONPAY_DOMAIN = 'https://buy.moonpay.com';
 export const MOONPAY_ASSETS_BASE_URL = 'https://static.moonpay.com';
-export const MOONPAY_API_KEY = EnvVars.TEMPLE_WALLET_MOONPAY_API_KEY;
 
 const moonPayApi = axios.create({ baseURL: 'https://api.moonpay.com' });
 
 export async function getMoonPayCurrencies() {
-  const result = await moonPayApi.get<Currency[]>('/v3/currencies', {
-    params: {
-      apiKey: MOONPAY_API_KEY
-    }
-  });
+  const result = await moonPayApi.get<Currency[]>('/v3/currencies');
 
   return result.data;
 }
@@ -87,7 +80,6 @@ export async function getMoonPayBuyQuote(
 ) {
   const result = await moonPayApi.get<QuoteResponse>(`/v3/currencies/${cryptoSymbol}/buy_quote`, {
     params: {
-      apiKey: MOONPAY_API_KEY,
       baseCurrencyAmount,
       quoteCurrencyAmount,
       baseCurrencyCode,
